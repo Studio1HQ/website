@@ -3,6 +3,7 @@ title: "What is Jev? In 5 minutes"
 description: "Learn how TypeSafe’s decision model works, how it compares with LLMs, and when to use it for fast, structured decisions in 5 minutes."
 date: "2026-09-25"
 tags: ["engineering", "llm", "agent", "ai"]
+image: "/blog/jev1.png"
 ---
 
 TypeSafe AI released a new model called Jev on September 15, 2026, and it works differently from most AI models you've probably used.
@@ -13,7 +14,7 @@ Most of the time when software uses AI to make a decision, like sorting a suppor
 
 But an LLM throws a full paragraph and then you have to write code to pull out the actual decision. But Jev skips all of that and gives you the decision directly. 
 
-![What is Jev](https://github.com/Studio1HQ/website/blob/main/public/blog/jev1.png)
+![What is Jev](/blog/jev1.png)
 
 ### TL;DR
 
@@ -51,7 +52,7 @@ TypeSafe's own number is 193x faster and 444x cheaper on their internal benchmar
 
 One more practical detail: it can only read text, so no images or audio, and it can handle roughly 32,000 tokens per question, or about 64,000 tokens total once you count the input plus the question itself.
 
-![LLM vs Jev](https://github.com/Studio1HQ/website/blob/main/public/blog/jev2.png)
+![LLM vs Jev](/blog/jev2.png)
 
 ## The pattern: Claude thinks, Jev decides
 
@@ -61,18 +62,18 @@ A task comes in. Claude or GPT reads it and works out what needs to happen, mayb
 
 The rule that falls out of this is simple: if you're making a model write out a full explanation just to arrive at one of three or four possible outcomes, you're paying for an essay when all you needed was a checkbox.
 
-![Jev usecase](https://github.com/Studio1HQ/website/blob/main/public/blog/jev3.png)
+![Jev usecase](/blog/jev3.png)
 
 ## Usecase
 
 Here are a few usecases that fit this shape well, the kind you'd normally build by prompting a chat model and parsing its reply.
 
-- Sorting leads.** Feed it a form submission or a call summary, and let it sort into hot, warm, or cold. Nobody has to read through every lead by hand, and the hot ones get called first.
-- Routing support messages.** Give it an incoming email or chat message, and have it decide whether it goes to billing, technical, refunds, or gets flagged urgent. The right team sees it immediately instead of after someone manually sorts the queue.
-- Flagging invoices for review.** Pass in the invoice details and let it mark each one clean, suspicious, or needs review. Your team only has to actually look at the handful that came back flagged.
-- Triaging incoming customer messages.** For a business getting messages through chat or WhatsApp, sort each one into booking, pricing question, complaint, or spam, so replies go out to the ones that matter first.
-- Choosing which model an agent should use.** Instead of burning tokens on a big model deciding whether to search, calculate, query a database, or hand off to a human, let Jev make that pick and save the expensive model for the actual task.
-- Tagging comments and content.** Sort incoming comments or reviews into positive, negative, question, or needs a reply, so nothing important gets buried in a pile you were never going to read in full anyway.
+- **Sorting leads.** Feed it a form submission or a call summary, and let it sort into hot, warm, or cold. Nobody has to read through every lead by hand, and the hot ones get called first.
+- **Routing support messages.** Give it an incoming email or chat message, and have it decide whether it goes to billing, technical, refunds, or gets flagged urgent. The right team sees it immediately instead of after someone manually sorts the queue.
+- **Flagging invoices for review.** Pass in the invoice details and let it mark each one clean, suspicious, or needs review. Your team only has to actually look at the handful that came back flagged.
+- **Triaging incoming customer messages.** For a business getting messages through chat or WhatsApp, sort each one into booking, pricing question, complaint, or spam, so replies go out to the ones that matter first.
+- **Choosing which model an agent should use.** Instead of burning tokens on a big model deciding whether to search, calculate, query a database, or hand off to a human, let Jev make that pick and save the expensive model for the actual task.
+- **Tagging comments and content.** Sort incoming comments or reviews into positive, negative, question, or needs a reply, so nothing important gets buried in a pile you were never going to read in full anyway.
 
 A quick way to check if your use-case need Jev : Can the answer be one item picked from a short list? If yes, it fits. If the answer actually needs a sentence or two of explanation, that's still a job for LLM. 
 
@@ -93,10 +94,10 @@ For reference you can check what people are already building using Jev here.
 
 A few situations where you still have to use LLM:
 
-- You need actual text back.** Emails, summaries, explanations, and other generated content are still better suited to LLMs.
-- You can't define the possible outputs.** Jev works with predefined decisions such as yes/no, choices, or scores, so the decision needs to be structured ahead of time.
-- The decision is genuinely high stakes.** For money, health, or legal outcomes, use Jev to sort, score, or prioritize, but keep a person involved in the final decision.
-- You haven't tested it on your own data.** Before relying on Jev in production, test it against real examples from your use case and see where it gets decisions right or wrong.
+- **You need actual text back.** Emails, summaries, explanations, and other generated content are still better suited to LLMs.
+- **You can't define the possible outputs.** Jev works with predefined decisions such as yes/no, choices, or scores, so the decision needs to be structured ahead of time.
+- **The decision is genuinely high stakes.** For money, health, or legal outcomes, use Jev to sort, score, or prioritize, but keep a person involved in the final decision.
+- **You haven't tested it on your own data.** Before relying on Jev in production, test it against real examples from your use case and see where it gets decisions right or wrong.
 
 ## Conclusion
 
@@ -105,5 +106,4 @@ Jev isn't trying to replace GPT or Claude. LLMs are still the better fit when yo
 Jev targets a different problem: **decisions that software needs to make repeatedly.** For true/false checks, classification, routing, scoring, and verification, returning a typed decision and confidence score can be more useful than generating text that your code then has to parse.
 
 It won't outperform LLMs at every decision task, but its combination of structured outputs, speed, cost, and calibrated confidence makes it an interesting new primitive for building AI-powered software.
-
 
