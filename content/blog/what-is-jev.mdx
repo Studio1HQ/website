@@ -1,0 +1,109 @@
+---
+title: "What is Jev? In 5 minutes"
+description: "Learn how TypeSafe’s decision model works, how it compares with LLMs, and when to use it for fast, structured decisions in 5 minutes."
+date: "2026-09-25"
+tags: ["engineering", "llm", "agent", "ai"]
+---
+
+TypeSafe AI released a new model called Jev on September 15, 2026, and it works differently from most AI models you've probably used.
+
+Instead of writing you an answer, it picks one from a list you give it, and tells you how sure it is about that pick. TypeSafe has named it System One model.
+
+Most of the time when software uses AI to make a decision, like sorting a support ticket or flagging a transaction, it doesn't actually need a written answer, it need few outcomes.
+
+But an LLM throws a full paragraph and then you have to write code to pull out the actual decision. But Jev skips all of that and gives you the decision directly. 
+
+!image
+
+### TL;DR
+
+- Jev takes a piece of text (`state`) plus one or more typed questions, and returns a typed answer with calibrated probabilities. Never free-form text.
+- Three answer types: **Choice** (pick one of N options), **Score** (rate on an ordered scale), **Noul** (probability that a yes/no statement is true).
+- It's fast (well under a second in most cases) and cheaper $0.042 per million input tokens, output is free.
+
+## What exactly is Jev?
+
+Jev is built by TypeSafe AI, started by Diogo Almeida, the person who worked on ChatGPT and RLHF at OpenAI, along with Erik Gafni and Sasha Sheng.
+
+The way it works is pretty simple once you see it. You give it a piece of text, called the state, and then you ask it a question that has a fixed set of possible answers. It reads the text and answers the question, along with a number that says how confident it is. It gives a answer in 70 to 500 milliseconds. 
+
+There are three kinds of questions it can answer. You can ask it to pick one option out of a list, give a score on a scale, or answer yes or no as a probability. And you can send it several questions about the same piece of text, and it answers all of them together in one go.
+
+A real example: asking it whether a support ticket needs a refund on a short message cost about $0.00002. Run that on a million similar tickets, and the total comes to around $19. 
+
+## How Jev Is different
+
+Jev doesn’t replace them. They do different jobs. Here is a quick comparison between Jev and standard LLM
+
+|  | GPT / Claude | Jev |
+| --- | --- | --- |
+| What it gives you | Written text | A picked answer with a confidence score |
+| How fast | A few seconds | Under a second |
+| Input cost | Around $10 per million tokens | $0.042 per million tokens |
+| Output cost | You pay for every word | Free |
+| Can it write essays or code | Yes | No |
+| Can it have a conversation | Yes | No |
+| Can it be wrong | Yes | Yes, but it can never give an answer outside the options you gave it |
+
+That last row is worth pausing on. Jev being unable to go outside the list of answers you gave it doesn't mean it's always right, it just means it can't get creative in a way that breaks your code. If you told it the answer has to be low, medium, or high, it will never hand you back something else, but it can still confidently pick medium when the real answer was low.
+
+TypeSafe's own number is 193x faster and 444x cheaper on their internal benchmark, self-run and openly flagged as the high end. 
+
+One more practical detail: it can only read text, so no images or audio, and it can handle roughly 32,000 tokens per question, or about 64,000 tokens total once you count the input plus the question itself.
+
+!image.png
+
+## The pattern: Claude thinks, Jev decides
+
+Once you actually sit with how Jev is meant to be used, a pattern shows up everywhere. You keep a model like Claude or GPT around for the parts that need thinking or writing, and you hand Jev the small decision sitting in between.
+
+A task comes in. Claude or GPT reads it and works out what needs to happen, maybe drafts a reply, maybe explains something. Jev sits next to that, and every time there's a small decision in the road, which row is urgent, whether to brake, whether a tool call is even needed, Jev picks the answer in a fraction of a second, and the app acts on it.
+
+The rule that falls out of this is simple: if you're making a model write out a full explanation just to arrive at one of three or four possible outcomes, you're paying for an essay when all you needed was a checkbox.
+
+!image.png
+
+## Usecase
+
+Here are a few usecases that fit this shape well, the kind you'd normally build by prompting a chat model and parsing its reply.
+
+- Sorting leads.** Feed it a form submission or a call summary, and let it sort into hot, warm, or cold. Nobody has to read through every lead by hand, and the hot ones get called first.
+- Routing support messages.** Give it an incoming email or chat message, and have it decide whether it goes to billing, technical, refunds, or gets flagged urgent. The right team sees it immediately instead of after someone manually sorts the queue.
+- Flagging invoices for review.** Pass in the invoice details and let it mark each one clean, suspicious, or needs review. Your team only has to actually look at the handful that came back flagged.
+- Triaging incoming customer messages.** For a business getting messages through chat or WhatsApp, sort each one into booking, pricing question, complaint, or spam, so replies go out to the ones that matter first.
+- Choosing which model an agent should use.** Instead of burning tokens on a big model deciding whether to search, calculate, query a database, or hand off to a human, let Jev make that pick and save the expensive model for the actual task.
+- Tagging comments and content.** Sort incoming comments or reviews into positive, negative, question, or needs a reply, so nothing important gets buried in a pile you were never going to read in full anyway.
+
+A quick way to check if your use-case need Jev : Can the answer be one item picked from a short list? If yes, it fits. If the answer actually needs a sentence or two of explanation, that's still a job for LLM. 
+
+## How to start?
+
+If you want to actually try it, the path is short:
+
+1. Try Jev at typesafe.ai
+2. Try it in the playground first, give it a situation and three or four options, and see what it picks
+3. Move to the API once you've seen one decision work the way you expect
+4. Start with something small and repetitive, not your hardest decision. Pick the boring one you make fifty times a day
+
+At $0.042 per million input tokens with free output, testing this costs close to nothing.
+
+For reference you can check what people are already building using Jev here. 
+
+## When not to use Jev?
+
+A few situations where you still have to use LLM:
+
+- You need actual text back.** Emails, summaries, explanations, and other generated content are still better suited to LLMs.
+- You can't define the possible outputs.** Jev works with predefined decisions such as yes/no, choices, or scores, so the decision needs to be structured ahead of time.
+- The decision is genuinely high stakes.** For money, health, or legal outcomes, use Jev to sort, score, or prioritize, but keep a person involved in the final decision.
+- You haven't tested it on your own data.** Before relying on Jev in production, test it against real examples from your use case and see where it gets decisions right or wrong.
+
+## Conclusion
+
+Jev isn't trying to replace GPT or Claude. LLMs are still the better fit when you need writing, explanation, or open-ended reasoning.
+
+Jev targets a different problem: **decisions that software needs to make repeatedly.** For true/false checks, classification, routing, scoring, and verification, returning a typed decision and confidence score can be more useful than generating text that your code then has to parse.
+
+It won't outperform LLMs at every decision task, but its combination of structured outputs, speed, cost, and calibrated confidence makes it an interesting new primitive for building AI-powered software.
+
+
