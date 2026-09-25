@@ -1,0 +1,111 @@
+backend:
+  name: github
+  repo: Studio1HQ/website
+  branch: main
+  base_url: https://studio1hq.com
+  auth_endpoint: /api/cms/auth
+
+local_backend: true
+publish_mode: editorial_workflow
+show_preview_links: true
+
+site_url: https://studio1hq.com
+display_url: https://studio1hq.com
+logo_url: /assets/logo.webp
+
+media_folder: public/blog/uploads
+public_folder: /blog/uploads
+
+slug:
+  encoding: ascii
+  clean_accents: true
+  sanitize_replacement: "-"
+
+collections:
+  - name: blog
+    label: Blog
+    label_singular: Blog Post
+    folder: content/blog
+    create: true
+    delete: false
+    extension: mdx
+    format: frontmatter
+    slug: "{{fields.slug}}"
+    summary: "{{title}} — {{date}}"
+    preview_path: "blog/{{slug}}"
+    editor:
+      preview: true
+    fields:
+      - { name: title, label: Title, widget: string }
+      - {
+          name: slug,
+          label: URL Slug,
+          widget: string,
+          required: true,
+          pattern: ["^[a-z0-9]+(?:-[a-z0-9]+)*$", "Use lowercase letters, numbers, and hyphens only."],
+          hint: "URL path after /blog/. For existing posts, keep this matched to the file name unless you intentionally rename the post file too.",
+        }
+      - {
+          name: description,
+          label: SEO Description,
+          widget: text,
+          hint: "One concise answer-style summary for search, AI answers, and cards.",
+        }
+      - { name: date, label: Published Date, widget: datetime, format: "YYYY-MM-DD", date_format: "YYYY-MM-DD", time_format: false }
+      - {
+          name: updatedDate,
+          label: Updated Date,
+          widget: datetime,
+          format: "YYYY-MM-DD",
+          date_format: "YYYY-MM-DD",
+          time_format: false,
+          required: false,
+        }
+      - {
+          name: draft,
+          label: Draft / Hide from Public Blog,
+          widget: boolean,
+          required: false,
+          default: false,
+          hint: "Turn this on to save the file without showing it on /blog, RSS, sitemap, or its public article URL.",
+        }
+      - {
+          name: authors,
+          label: Authors,
+          widget: list,
+          default: ["Studio1 Team"],
+          field:
+            {
+              name: author,
+              label: Author,
+              widget: string,
+              hint: "Examples: Studio1 Team, Amitesh Anand, Arindam Majumder",
+            },
+        }
+      - {
+          name: tags,
+          label: Tags,
+          widget: list,
+          hint: "Use 3-6 topical tags for SEO/GEO and article grouping.",
+          field: { name: tag, label: Tag, widget: string },
+        }
+      - {
+          name: bannerImage,
+          label: Optional Social Share Image,
+          widget: image,
+          required: false,
+          hint: "Optional. Used for this blog card and LinkedIn/Twitter preview. Leave empty to use the default Studio1 image.",
+        }
+      - {
+          name: bannerImageAlt,
+          label: Social Share Image Alt Text,
+          widget: string,
+          required: false,
+          hint: "Optional. Only needed when a custom social share image is uploaded.",
+        }
+      - {
+          name: body,
+          label: Body,
+          widget: markdown,
+          hint: "Use ## FAQ with a markdown table to generate FAQ schema.",
+        }

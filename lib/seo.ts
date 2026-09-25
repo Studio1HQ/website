@@ -51,6 +51,7 @@ type PageMetadataOptions = {
   locale?: Locale;
   keywords?: string[];
   type?: "website" | "article";
+  rssPath?: string;
 };
 
 export function pageMetadata({
@@ -60,6 +61,7 @@ export function pageMetadata({
   locale = DEFAULT_LOCALE,
   keywords,
   type = "website",
+  rssPath,
 }: PageMetadataOptions): Metadata {
   const url = localizedUrl(path, locale, baseUrl);
   const brandedTitle = `${title} | Studio1`;
@@ -72,6 +74,9 @@ export function pageMetadata({
       canonical: url,
       ...(hasLocalizedAlternates(path)
         ? { languages: languageAlternates(path, baseUrl) }
+        : {}),
+      ...(rssPath
+        ? { types: { "application/rss+xml": pageUrl(rssPath) } }
         : {}),
     },
     openGraph: {
@@ -146,6 +151,9 @@ export function articlePageMetadata({
   image,
   imageAlt,
   publishedTime,
+  modifiedTime,
+  author,
+  authors,
   tags,
 }: {
   title: string;
@@ -156,12 +164,16 @@ export function articlePageMetadata({
   image?: string;
   imageAlt?: string;
   publishedTime?: string;
+  modifiedTime?: string;
+  author?: string;
+  authors?: string[];
   tags?: string[];
 }): Metadata {
   const url = localizedUrl(path, locale, baseUrl);
   const ogImage = absoluteImageUrl(image);
   const ogImageAlt = imageAlt?.trim() || title;
   const brandedTitle = `${title} | Studio1`;
+  const authorList = authors?.length ? authors : author ? [author] : [];
 
   return {
     title,
@@ -177,6 +189,8 @@ export function articlePageMetadata({
       siteName: "Studio1",
       type: "article",
       ...(publishedTime ? { publishedTime } : {}),
+      ...(modifiedTime ? { modifiedTime } : {}),
+      ...(authorList.length ? { authors: authorList } : {}),
       ...(tags?.length ? { tags } : {}),
       images: [{ url: ogImage, width: 1200, height: 630, alt: ogImageAlt }],
     },
@@ -199,6 +213,21 @@ export function breadcrumbJsonLd(items: { name: string; path: string }[]) {
       position: index + 1,
       name: item.name,
       item: pageUrl(item.path),
+    })),
+  };
+}
+
+export function faqPageJsonLd(faqs: { question: string; answer: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
     })),
   };
 }

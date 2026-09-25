@@ -3,10 +3,11 @@ import { PageSideBeamGlows } from "@/components/shared/page-side-beam-glows";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Developer Marketing & DevRel Blog",
+  title: "Developer Marketing & Tech Blog",
   description:
-    "Practical guides on developer marketing, technical content, DevRel, documentation, and growth for SaaS, AI, and devtool teams.",
+    "Practical guides on developer marketing, technical content, documentation, and growth for SaaS, AI, and devtool teams.",
   path: "/blog",
+  rssPath: "/feed.xml",
   keywords: [
     "technical content",
     "developer relations",
