@@ -3,7 +3,6 @@ title: "What is Jev? In 5 minutes"
 description: "Learn how TypeSafe’s decision model works, how it compares with LLMs, and when to use it for fast, structured decisions in 5 minutes."
 date: "2026-09-25"
 tags: ["engineering", "llm", "agent", "ai"]
-image: "/blog/jev1.png"
 ---
 
 TypeSafe AI released a new model called Jev on September 15, 2026, and it works differently from most AI models you've probably used.
@@ -62,7 +61,11 @@ A task comes in. Claude or GPT reads it and works out what needs to happen, mayb
 
 The rule that falls out of this is simple: if you're making a model write out a full explanation just to arrive at one of three or four possible outcomes, you're paying for an essay when all you needed was a checkbox.
 
-![Jev usecase](/blog/jev3.png)
+<img
+  src="/blog/jev3.png"
+  alt="Jev usecase"
+  style={{ display: "block", margin: "0 auto" }}
+/>
 
 ## Usecase
 
@@ -106,4 +109,3 @@ Jev isn't trying to replace GPT or Claude. LLMs are still the better fit when yo
 Jev targets a different problem: **decisions that software needs to make repeatedly.** For true/false checks, classification, routing, scoring, and verification, returning a typed decision and confidence score can be more useful than generating text that your code then has to parse.
 
 It won't outperform LLMs at every decision task, but its combination of structured outputs, speed, cost, and calibrated confidence makes it an interesting new primitive for building AI-powered software.
-
