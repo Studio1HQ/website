@@ -2,15 +2,15 @@ backend:
   name: github
   repo: Studio1HQ/website
   branch: main
-  base_url: https://studio1hq.com
+  base_url: https://www.studio1hq.com
   auth_endpoint: /api/cms/auth
 
 local_backend: true
 publish_mode: editorial_workflow
 show_preview_links: true
 
-site_url: https://studio1hq.com
-display_url: https://studio1hq.com
+site_url: https://www.studio1hq.com
+display_url: https://www.studio1hq.com
 logo_url: /assets/logo.webp
 
 media_folder: public/blog/uploads

@@ -86,7 +86,7 @@ export async function GET() {
     })),
     ...getAllPosts().map((post) => ({
       path: `/blog/${post.slug}`,
-      lastModified: post.date,
+      lastModified: post.updatedDate,
       priority: 0.7,
     })),
   ];
