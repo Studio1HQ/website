@@ -1,0 +1,51 @@
+---
+title: 10 Projects You Should Build with Jev
+slug: 10-projects-you-should-build-with-jev
+description: Explore 10 practical projects you can build with Jev, TypeSafe AI’s
+  fast decision-making model, and learn how to use it in real developer
+  workflows.
+date: 2026-09-28
+draft: true
+authors:
+  - Studio1 Team
+bannerImage: /blog/uploads/chatgpt-image-sep-28-2026-06_55_59-pm.png
+---
+JEV is getting a lot of attention right now. 
+
+People are excited about it, and developers are already experimenting with ways to use it inside real applications.But there is a common mistake when trying a new AI model like JEV: treating it like another general-purpose LLM.
+
+JEV becomes much more interesting when you use it for decisions rather than generation. Instead of asking it to write an email or generate a long answer, you give it some context, define the decisions it can make, and let your application act on the result.For example, a support system could use JEV to decide whether a ticket belongs to billing, engineering, or sales. A browser agent could use it to choose which button to click next. An AI application could use it to decide which model should handle a particular request.The model makes the decision, while your code handles the action.That simple pattern opens up a lot of interesting use cases. Here are 10 projects worth building with JEV.
+
+> You can watch the Video Version 
+>
+> [here](https://www.youtube.com/watch?v=SY86kReNaoQ)
+>
+>
+
+## 1. Build a smart support ticket router
+
+
+
+
+![Alt text: Jev workflow diagram showing how a new ticket is analyzed, classified by owner, urgency, frustration, and refund signals, then routed through policy to the appropriate action.](/blog/uploads/4bf33853-cc1a-4fac-89b8-de2f0bd41267.png "Jev Workflow: From Ticket to Automated Triage")
+
+Support teams spend a lot of time reading incoming tickets and deciding where each one should go. A ticket might be a billing question, a technical issue, a feature request, or an urgent complaint from an unhappy customer.JEV can handle the first layer of that workflow.You can give it the ticket and ask which team should handle it, how urgent the issue is, whether the customer appears frustrated, and whether the ticket needs immediate human attention. Your application can then use those decisions to route the ticket automatically.A technical issue can go to engineering, a refund request can go to billing, and an urgent issue can be moved to the top of the queue.The important part is that JEV does not need to write the customer response. A generative model can handle that later if needed. JEV only needs to make the decision that determines what happens next.
+
+## 2. Build an inbound lead scorer
+
+![Jev lead-scoring workflow showing form submission and company enrichment flowing into Jev, which evaluates ICP fit, buyer relevance, pain probability, and intent probability before routing leads to sales, nurture, or research queues.](/blog/uploads/chatgpt-image-sep-28-2026-06_59_33-pm.png "Jev Lead Scoring Workflow: From Form Submission to Lead Routing")
+
+The same approach works well for sales.A typical website can receive a mix of serious prospects, students, competitors, and people who are simply exploring a product. Sales teams often have to spend time sorting through these submissions before deciding which ones deserve attention.You can use JEV to score each lead based on information such as the person's job title, company, form submission, and other available context.The model can determine whether the lead fits your ideal customer profile, whether they appear ready to buy, whether they are likely to be a decision-maker, and how the lead should be prioritized.Your application can then route high-priority leads directly to sales while sending lower-priority leads into other workflows.This turns JEV into a lightweight decision layer for your sales pipeline.
+
+## 3. Build a comment moderation system
+
+![](/blog/uploads/chatgpt-image-sep-28-2026-07_02_11-pm.png)
+
+Moderation is another problem that can be expressed as a set of decisions.For a community, social platform, or Discord server, you can give JEV a comment and ask whether it is spam, harassment, unsafe content, or something that requires human review.Your application can then use those results to decide what happens to the comment. Clearly safe content can be published automatically, while potentially harmful or uncertain content can be sent to a moderator.You can also introduce confidence thresholds so that the system only automates decisions when JEV is sufficiently confident.This creates a useful balance between automation and human review instead of assuming that every AI decision should be acted on automatically.
+
+## 4. Build an AI citation checker
+
+
+
+
+![](/blog/uploads/chatgpt-image-sep-28-2026-07_02_11-pm.png)
