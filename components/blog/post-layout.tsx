@@ -1,33 +1,44 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { PostShare } from "@/components/blog/post-share";
 import { TableOfContents } from "@/components/case-studies/table-of-contents";
 import { Num } from "@/components/ui/num";
+import type { BlogPostNavigation } from "@/lib/blog";
 
 type PostLayoutProps = {
   title: string;
+  description: string;
   date: string;
+  updatedDate?: string;
   author: string;
+  authors?: string[];
   tags: string[];
-  coverImage?: string;
   readingTimeMinutes?: number;
   shareUrl: string;
+  keyTakeaways?: string[];
+  navigation?: BlogPostNavigation;
   children: ReactNode;
 };
 
 export function PostLayout({
   title,
+  description,
   date,
+  updatedDate,
   author,
+  authors,
   tags,
-  coverImage,
   readingTimeMinutes,
   shareUrl,
+  keyTakeaways = [],
+  navigation = { previous: null, next: null },
   children,
 }: PostLayoutProps) {
+  const showUpdatedDate = updatedDate && updatedDate !== date;
+  const byline = authors?.length ? authors.join(", ") : author;
+
   return (
     <article className="relative mx-auto max-w-7xl px-4 py-12 md:py-20">
       <Link
@@ -51,11 +62,19 @@ export function PostLayout({
                   </span>
                 </>
               ) : null}
+              {showUpdatedDate ? (
+                <>
+                  <span aria-hidden>·</span>
+                  <span>
+                    Updated <time dateTime={updatedDate}>{updatedDate}</time>
+                  </span>
+                </>
+              ) : null}
             </div>
-            <h1 className="font-inter text-3xl md:text-4xl font-bold tracking-tight mb-4">
+            <h1 className="mb-4 font-inter text-3xl font-normal leading-[1.15] tracking-tight md:text-4xl lg:text-5xl">
               {title}
             </h1>
-            <p className="text-muted-foreground text-sm mb-4">By {author}</p>
+            <p className="text-muted-foreground text-sm mb-4">By {byline}</p>
             <div className="flex flex-wrap gap-2">
               {tags.map((tag) => (
                 <Badge key={tag} variant="secondary">
@@ -65,16 +84,27 @@ export function PostLayout({
             </div>
           </header>
 
-          <div className="relative mb-10 aspect-[16/9] w-full overflow-hidden rounded-xl border bg-muted">
-            <Image
-              src={coverImage ?? "/opengraph-image.png"}
-              alt={title}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 56rem"
-              priority
-            />
-          </div>
+          <section
+            aria-label="Article summary"
+            className="not-prose mb-10 rounded-lg border border-border/70 bg-muted/35 p-5"
+          >
+            <h2 className="mb-3 font-inter text-base font-semibold text-foreground">
+              Quick Answer
+            </h2>
+            <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
+              {description}
+            </p>
+            {keyTakeaways.length ? (
+              <ul className="space-y-2 text-sm leading-relaxed text-foreground">
+                {keyTakeaways.map((takeaway) => (
+                  <li key={takeaway} className="flex gap-2">
+                    <span aria-hidden className="mt-2 size-1.5 rounded-full bg-primary" />
+                    <span>{takeaway}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </section>
 
           <div
             data-mdx-content
@@ -86,6 +116,47 @@ export function PostLayout({
           <div className="xl:hidden">
             <PostShare url={shareUrl} title={title} />
           </div>
+
+          {(navigation.previous || navigation.next) ? (
+            <nav
+              aria-label="Article navigation"
+              className="not-prose mt-14 grid gap-4 border-t border-border pt-10 md:grid-cols-2"
+            >
+              {navigation.previous ? (
+                <Link
+                  href={`/blog/${navigation.previous.slug}`}
+                  className="group rounded-lg border border-border/80 bg-background/80 p-4 transition-colors hover:border-primary"
+                >
+                  <p className="mb-2 inline-flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    <ArrowLeft className="size-3.5 transition-transform group-hover:-translate-x-0.5" />
+                    Previous
+                  </p>
+                  <h2 className="font-inter text-sm font-semibold leading-snug">
+                    {navigation.previous.title}
+                  </h2>
+                </Link>
+              ) : (
+                <span />
+              )}
+              {navigation.next ? (
+                <Link
+                  href={`/blog/${navigation.next.slug}`}
+                  className="group rounded-lg border border-border/80 bg-background/80 p-4 text-right transition-colors hover:border-primary"
+                >
+                  <p className="mb-2 inline-flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Next
+                    <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+                  </p>
+                  <h2 className="font-inter text-sm font-semibold leading-snug">
+                    {navigation.next.title}
+                  </h2>
+                </Link>
+              ) : (
+                <span />
+              )}
+            </nav>
+          ) : null}
+
         </div>
 
         <aside className="hidden xl:block">
