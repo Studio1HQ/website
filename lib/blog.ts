@@ -39,8 +39,8 @@ type Frontmatter = {
   slug?: string;
   title?: string;
   description?: string;
-  date?: string;
-  updatedDate?: string;
+  date?: Date | string;
+  updatedDate?: Date | string;
   draft?: boolean;
   author?: string;
   authors?: string[];
@@ -190,7 +190,7 @@ function postMetaFromFile(fileName: string): BlogPostMeta {
   const d = data as Frontmatter;
   const slug = normalizeSlug(d.slug) ?? fileSlug;
   const title = d.title ?? "Untitled";
-  const date = d.date ?? new Date().toISOString().split("T")[0];
+  const date = normalizeDate(d.date, new Date().toISOString().split("T")[0]);
   const authors = normalizeAuthors(d.authors, d.author);
   const image = d.image ?? DEFAULT_POST_IMAGE;
   const bannerImage = d.bannerImage?.trim() || undefined;
@@ -202,7 +202,7 @@ function postMetaFromFile(fileName: string): BlogPostMeta {
     title,
     description,
     date,
-    updatedDate: d.updatedDate ?? date,
+    updatedDate: normalizeDate(d.updatedDate, date),
     draft,
     author: authors.join(", "),
     authors,
@@ -233,6 +233,18 @@ function normalizeSlug(slug?: string): string | undefined {
   return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(trimmed ?? "")
     ? trimmed
     : undefined;
+}
+
+function normalizeDate(value: Date | string | undefined, fallback: string) {
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value.toISOString().split("T")[0];
+  }
+
+  if (typeof value === "string" && value.trim()) {
+    return value.trim().split("T")[0];
+  }
+
+  return fallback;
 }
 
 function isDraft(data: Frontmatter): boolean {
@@ -294,7 +306,7 @@ export function getPostBySlug(slug: string): BlogPost | null {
   if (isDraft(d)) return null;
 
   const title = d.title ?? "Untitled";
-  const date = d.date ?? "";
+  const date = normalizeDate(d.date, "");
   const tags = Array.isArray(d.tags) ? d.tags : [];
   const description = d.description ?? "";
   const authors = normalizeAuthors(d.authors, d.author);
@@ -308,7 +320,7 @@ export function getPostBySlug(slug: string): BlogPost | null {
     title,
     description,
     date,
-    updatedDate: d.updatedDate ?? date,
+    updatedDate: normalizeDate(d.updatedDate, date),
     draft: false,
     author: authors.join(", "),
     authors,

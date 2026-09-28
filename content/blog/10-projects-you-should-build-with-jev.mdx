@@ -8,7 +8,7 @@ date: 2026-09-28
 draft: false
 authors:
   - Studio1 Team
-bannerImage: /blog/uploads/chatgpt-image-sep-28-2026-06_55_59-pm.png
+bannerImage: /blog/uploads/10-projects-you-should-build-with-jev/banner.png
 ---
 JEV is getting a lot of attention right now. 
 
@@ -16,45 +16,51 @@ People are excited about it, and developers are already experimenting with ways 
 
 JEV becomes much more interesting when you use it for decisions rather than generation. Instead of asking it to write an email or generate a long answer, you give it some context, define the decisions it can make, and let your application act on the result.For example, a support system could use JEV to decide whether a ticket belongs to billing, engineering, or sales. A browser agent could use it to choose which button to click next. An AI application could use it to decide which model should handle a particular request.The model makes the decision, while your code handles the action.That simple pattern opens up a lot of interesting use cases. Here are 10 projects worth building with JEV
 
+## TL;DR
+
+- Jev works best as a decision layer for software workflows, not as another general-purpose chatbot.
+- Strong Jev projects turn repeated choices into structured decisions your application can act on.
+- Useful projects include support routing, lead scoring, moderation, RAG filtering, model routing, agent safety, and game AI.
+
 ## 1. Build a smart support ticket router
 
-![Alt text: Jev workflow diagram showing how a new ticket is analyzed, classified by owner, urgency, frustration, and refund signals, then routed through policy to the appropriate action.](/blog/uploads/4bf33853-cc1a-4fac-89b8-de2f0bd41267.png "Jev Workflow: From Ticket to Automated Triage")
+![Alt text: Jev workflow diagram showing how a new ticket is analyzed, classified by owner, urgency, frustration, and refund signals, then routed through policy to the appropriate action.](/blog/uploads/10-projects-you-should-build-with-jev/usecase-1.png "Jev Workflow: From Ticket to Automated Triage")
 
 Support teams spend a lot of time reading incoming tickets and deciding where each one should go. A ticket might be a billing question, a technical issue, a feature request, or an urgent complaint from an unhappy customer.JEV can handle the first layer of that workflow.You can give it the ticket and ask which team should handle it, how urgent the issue is, whether the customer appears frustrated, and whether the ticket needs immediate human attention. Your application can then use those decisions to route the ticket automatically.A technical issue can go to engineering, a refund request can go to billing, and an urgent issue can be moved to the top of the queue.The important part is that JEV does not need to write the customer response. A generative model can handle that later if needed. JEV only needs to make the decision that determines what happens next.
 
 ## 2. Build an inbound lead scorer
 
-![Jev lead-scoring workflow showing form submission and company enrichment flowing into Jev, which evaluates ICP fit, buyer relevance, pain probability, and intent probability before routing leads to sales, nurture, or research queues.](/blog/uploads/chatgpt-image-sep-28-2026-06_59_33-pm.png "Jev Lead Scoring Workflow: From Form Submission to Lead Routing")
+![Jev lead-scoring workflow showing form submission and company enrichment flowing into Jev, which evaluates ICP fit, buyer relevance, pain probability, and intent probability before routing leads to sales, nurture, or research queues.](/blog/uploads/10-projects-you-should-build-with-jev/usecase-2.png "Jev Lead Scoring Workflow: From Form Submission to Lead Routing")
 
 The same approach works well for sales.A typical website can receive a mix of serious prospects, students, competitors, and people who are simply exploring a product. Sales teams often have to spend time sorting through these submissions before deciding which ones deserve attention.You can use JEV to score each lead based on information such as the person's job title, company, form submission, and other available context.The model can determine whether the lead fits your ideal customer profile, whether they appear ready to buy, whether they are likely to be a decision-maker, and how the lead should be prioritized.Your application can then route high-priority leads directly to sales while sending lower-priority leads into other workflows.This turns JEV into a lightweight decision layer for your sales pipeline.
 
 ## 3. Build a comment moderation system
 
-![](/blog/uploads/chatgpt-image-sep-28-2026-07_02_11-pm.png)
+![](/blog/uploads/10-projects-you-should-build-with-jev/usecase-3.png)
 
 Moderation is another problem that can be expressed as a set of decisions.For a community, social platform, or Discord server, you can give JEV a comment and ask whether it is spam, harassment, unsafe content, or something that requires human review.Your application can then use those results to decide what happens to the comment. Clearly safe content can be published automatically, while potentially harmful or uncertain content can be sent to a moderator.You can also introduce confidence thresholds so that the system only automates decisions when JEV is sufficiently confident.This creates a useful balance between automation and human review instead of assuming that every AI decision should be acted on automatically.
 
 ## 4. Build an AI citation checker
 
-![](/blog/uploads/chatgpt-image-sep-28-2026-07_07_45-pm.png)
+![](/blog/uploads/10-projects-you-should-build-with-jev/usecase-4.png)
 
 AI-generated content often includes claims that sound convincing but are not actually supported by their sources.A simple JEV application could check whether a specific source supports a specific claim.Give the model the claim and the relevant source, then ask whether the source supports the claim, contradicts it, or does not contain enough information to determine the answer.For example, if an AI-generated report says that a company grew its revenue by 40% while the cited source says it grew by 12%, the application can flag the mismatch before the report reaches the user.This could be useful for research tools, education platforms, content workflows, and AI agents that work with external sources.The key is to keep the question narrow. You are not asking JEV to research the entire internet. You are asking it to make one specific judgment about a piece of evidence.
 
 ## 5. Build a smarter RAG context picker
 
-![](/blog/uploads/chatgpt-image-sep-28-2026-07_08_32-pm.png)
+![](/blog/uploads/10-projects-you-should-build-with-jev/usecase-5.png)
 
 RAG systems often retrieve several documents and pass them directly into the context of a larger language model. The problem is that not every retrieved document is useful.Some documents may be irrelevant, outdated, contradictory, or contain instructions that should not be passed into the final context.JEV can sit between retrieval and generation as a filtering layer.For example, your search system could retrieve 20 documents and JEV could decide which ones are relevant to the user's question, which ones are outdated, whether any documents conflict with each other, and whether a document should be included in the final context.The main LLM can then focus on generating the answer using a cleaner set of information.In this architecture, the LLM handles generation while JEV helps decide what information the LLM should see.
 
 ## 6. Build a semantic code review bot
 
-![](/blog/uploads/chatgpt-image-sep-28-2026-07_10_54-pm.png)
+![](/blog/uploads/10-projects-you-should-build-with-jev/usecase-6.png)
 
 Traditional linters are good at catching problems that can be expressed as explicit rules, such as formatting issues, type errors, and missing imports.Engineering teams also have rules that are much harder to express through traditional static analysis.For example, does a new API expose private customer information? Does a pull request bypass an important approval step? Does a change introduce a risky pattern? Did the developer add tests for the new behavior?These are questions that can be handled by a decision model.You can give JEV the changed code along with the relevant project rules and ask it to evaluate a small set of specific conditions. When it identifies a likely problem with high confidence, your GitHub workflow can flag the pull request or request human review.This does not replace human code review. Instead, it adds another layer that can catch potential issues before an engineer spends time reviewing the entire change.
 
 ## 7. Build an AI model router
 
-![](/blog/uploads/chatgpt-image-sep-28-2026-07_13_13-pm.png)
+![](/blog/uploads/10-projects-you-should-build-with-jev/usecase-7.png)
 
 Modern AI applications often have access to several models, and sending every request to the most expensive model is rarely necessary.A simple question might be handled by a small model, while a complex coding task could require a more capable model. Some requests may need retrieval, a tool, a business workflow, or even a human instead of another model.\
 \
@@ -62,19 +68,17 @@ Give it the user's request and ask it to classify the task based on the characte
 
 ## 8. Build an AI agent safety firewall
 
-![](/blog/uploads/chatgpt-image-sep-28-2026-07_14_35-pm.png)
+![](/blog/uploads/10-projects-you-should-build-with-jev/usecase-8.png)
 
 AI agents can now browse websites, send emails, modify records, call APIs, and perform other actions on behalf of users. That makes it important to evaluate an action before allowing an agent to execute it.Imagine an agent wants to delete hundreds of customer records. Before executing the action, you could use JEV to evaluate whether the action is irreversible, whether it involves sensitive information, whether it matches the user's request, and whether it should be allowed, confirmed by the user, or blocked.Your application can then enforce that decision.Low-risk actions can proceed automatically, medium-risk actions can require confirmation, and high-risk actions can be blocked.JEV should not be treated as a replacement for permissions, access controls, validation, or other security measures. It can instead provide an additional semantic layer between an AI agent and the actions it wants to perform.
 
 ## 9. Build a browser agent reflex layer
 
-![](/blog/uploads/chatgpt-image-sep-28-2026-07_16_30-pm.png)
+![](/blog/uploads/10-projects-you-should-build-with-jev/usecase-9.png)
 
 Browser agents spend much of their time making small decisions. They need to decide which button to click, which search result to open, whether to scroll, whether to go back, or which tab to select.These decisions do not always require a large generative model.You can give JEV a compact representation of the current browser state along with a limited set of possible actions. It can then choose the action that best moves the agent toward its goal.Your browser automation system executes that action, the page changes, and JEV makes the next decision.A larger model can still handle tasks that require generation or more complex planning, such as writing an email or filling out a long form.This creates a clean architecture where a larger model handles planning, JEV handles fast decisions, and your automation code handles execution.
 
 ## 10. Build a real-time game AI
-
-![](/blog/uploads/chatgpt-image-sep-28-2026-07_17_18-pm.png)
 
 One of the most interesting ways to experiment with JEV is to use it as the decision-maker for a small game.Instead of giving the model a huge screenshot and asking it to play the entire game, represent the game state in a compact format. You might tell it that an enemy is nearby, the player's health is low, an obstacle is ahead, and the available actions are attack, jump, retreat, heal, or block. JEV chooses an action, the game executes it, and the updated state is sent back for the next decision.This creates a simple loop where the application provides the state, JEV selects an action, and the game executes it.The same architecture can work for a platformer, driving game, tower defense game, or almost any environment with a relatively small action space.
 
