@@ -85,11 +85,11 @@ export function PostLayout({
           </header>
 
           <section
-            aria-label="Article summary"
+            aria-label="Article TL;DR"
             className="not-prose mb-10 rounded-lg border border-border/70 bg-muted/35 p-5"
           >
             <h2 className="mb-3 font-inter text-base font-semibold text-foreground">
-              Quick Answer
+              TL;DR
             </h2>
             <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
               {description}

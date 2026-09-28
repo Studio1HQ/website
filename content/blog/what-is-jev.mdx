@@ -9,9 +9,9 @@ bannerImage: "/blog/uploads/jev-blog-banner.png"
 bannerImageAlt: "What is Jev? In 5 minutes"
 ---
 
-TypeSafe AI released a new model called Jev on September 15, 2026, and it works differently from most AI models you've probably used.
+[TypeSafe](https://typesafe.ai/) AI released a new model called Jev on [September 15, 2026](https://typesafe.ai/blog/introducing-system-one-models-and-jev), and it works differently from most AI models you've probably used.
 
-Instead of writing you an answer, it picks one from a list you give it, and tells you how sure it is about that pick. TypeSafe has named it System One model.
+Instead of writing you an answer, it picks one from a list you give it, and tells you how sure it is about that pick. TypeSafe has named it [System One](https://docs.typesafe.ai/concepts/system-one) model.
 
 Most of the time when software uses AI to make a decision, like sorting a support ticket or flagging a transaction, it doesn't actually need a written answer, it need few outcomes.
 
@@ -27,11 +27,11 @@ But an LLM throws a full paragraph and then you have to write code to pull out t
 
 ## What exactly is Jev?
 
-Jev is built by TypeSafe AI, started by Diogo Almeida, the person who worked on ChatGPT and RLHF at OpenAI, along with Erik Gafni and Sasha Sheng.
+Jev is built by [TypeSafe](https://typesafe.ai/) AI, started by [Diogo Almeida](https://x.com/CompleteSkeptic/status/2099925682726002904?s=20), the person who worked on ChatGPT and RLHF at OpenAI, along with Erik Gafni and Sasha Sheng.
 
 The way it works is pretty simple once you see it. You give it a piece of text, called the state, and then you ask it a question that has a fixed set of possible answers. It reads the text and answers the question, along with a number that says how confident it is. It gives a answer in 70 to 500 milliseconds. 
 
-There are three kinds of questions it can answer. You can ask it to pick one option out of a list, give a score on a scale, or answer yes or no as a probability. And you can send it several questions about the same piece of text, and it answers all of them together in one go.
+There are three [kinds of questions it can answer](https://docs.typesafe.ai/primitives). You can ask it to pick one option out of a list, give a score on a scale, or answer yes or no as a probability. And you can send it several questions about the same piece of text, and it answers all of them together in one go.
 
 A real example: asking it whether a support ticket needs a refund on a short message cost about $0.00002. Run that on a million similar tickets, and the total comes to around $19. 
 
@@ -59,7 +59,7 @@ One more practical detail: it can only read text, so no images or audio, and it 
 
 ## The pattern: Claude thinks, Jev decides
 
-Once you actually sit with how Jev is meant to be used, a pattern shows up everywhere. You keep a model like Claude or GPT around for the parts that need thinking or writing, and you hand Jev the small decision sitting in between.
+Once you actually sit with how Jev is [meant to be used](https://forkast.news/typesafe-ais-jev-is-not-an-llm-and-that-may-be-the-point/), a pattern shows up everywhere. You keep a model like Claude or GPT around for the parts that need thinking or writing, and you hand Jev the small decision sitting in between.
 
 A task comes in. Claude or GPT reads it and works out what needs to happen, maybe drafts a reply, maybe explains something. Jev sits next to that, and every time there's a small decision in the road, which row is urgent, whether to brake, whether a tool call is even needed, Jev picks the answer in a fraction of a second, and the app acts on it.
 
@@ -69,7 +69,7 @@ The rule that falls out of this is simple: if you're making a model write out a 
 
 ## Usecase
 
-Here are a few usecases that fit this shape well, the kind you'd normally build by prompting a chat model and parsing its reply.
+Here are a [few usecases](https://docs.typesafe.ai/concepts/use-case-map) that fit this shape well, the kind you'd normally build by prompting a chat model and parsing its reply.
 
 - **Sorting leads.** Feed it a form submission or a call summary, and let it sort into hot, warm, or cold. Nobody has to read through every lead by hand, and the hot ones get called first.
 - **Routing support messages.** Give it an incoming email or chat message, and have it decide whether it goes to billing, technical, refunds, or gets flagged urgent. The right team sees it immediately instead of after someone manually sorts the queue.
@@ -84,14 +84,14 @@ A quick way to check if your use-case need Jev : Can the answer be one item pick
 
 If you want to actually try it, the path is short:
 
-1. Try Jev at typesafe.ai
+1. Try Jev at [typesafe.ai](https://typesafe.ai/)
 2. Try it in the playground first, give it a situation and three or four options, and see what it picks
 3. Move to the API once you've seen one decision work the way you expect
 4. Start with something small and repetitive, not your hardest decision. Pick the boring one you make fifty times a day
 
 At $0.042 per million input tokens with free output, testing this costs close to nothing.
 
-For reference you can check what people are already building using Jev here. 
+For reference you can check what people are already building using Jev [here](https://madewithjev.com/).
 
 ## When not to use Jev?
 

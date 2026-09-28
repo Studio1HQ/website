@@ -118,6 +118,38 @@ export function extractKeyTakeaways(
   return [description, ...sentences].filter(Boolean).slice(0, 3);
 }
 
+export function removeTldrSection(content: string): string {
+  const lines = content.split("\n");
+  const tldrIndex = lines.findIndex((line) =>
+    /^#{2,3}\s+tl;?dr\s*$/i.test(line.trim()),
+  );
+
+  if (tldrIndex < 0) return content;
+
+  let sectionEnd = lines.length;
+  for (let index = tldrIndex + 1; index < lines.length; index += 1) {
+    if (/^#{2,3}\s+/.test(lines[index].trim())) {
+      sectionEnd = index;
+      break;
+    }
+  }
+
+  return [...lines.slice(0, tldrIndex), ...lines.slice(sectionEnd)]
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function visibleReadingContent(
+  content: string,
+  description: string,
+  takeaways = extractKeyTakeaways(content, description),
+) {
+  return [description, ...takeaways, removeTldrSection(content)]
+    .filter(Boolean)
+    .join("\n");
+}
+
 export function extractFaqs(content: string): BlogFaq[] {
   const lines = content.split("\n");
   const faqIndex = lines.findIndex((line) =>
@@ -163,11 +195,12 @@ function postMetaFromFile(fileName: string): BlogPostMeta {
   const image = d.image ?? DEFAULT_POST_IMAGE;
   const bannerImage = d.bannerImage?.trim() || undefined;
   const draft = isDraft(d);
+  const description = d.description ?? "";
 
   return {
     slug,
     title,
-    description: d.description ?? "",
+    description,
     date,
     updatedDate: d.updatedDate ?? date,
     draft,
@@ -179,7 +212,9 @@ function postMetaFromFile(fileName: string): BlogPostMeta {
     bannerImage,
     bannerImageAlt: d.bannerImageAlt ?? d.imageAlt ?? title,
     socialImage: bannerImage ?? DEFAULT_POST_IMAGE,
-    readingTimeMinutes: estimateReadingMinutes(content),
+    readingTimeMinutes: estimateReadingMinutes(
+      visibleReadingContent(content, description),
+    ),
   };
 }
 
@@ -265,9 +300,11 @@ export function getPostBySlug(slug: string): BlogPost | null {
   const authors = normalizeAuthors(d.authors, d.author);
   const image = d.image ?? DEFAULT_POST_IMAGE;
   const bannerImage = d.bannerImage?.trim() || undefined;
+  const keyTakeaways = extractKeyTakeaways(content, description);
+  const bodyContent = removeTldrSection(content);
   return {
     slug,
-    content,
+    content: bodyContent,
     title,
     description,
     date,
@@ -281,12 +318,14 @@ export function getPostBySlug(slug: string): BlogPost | null {
     bannerImage,
     bannerImageAlt: d.bannerImageAlt ?? d.imageAlt ?? title,
     socialImage: bannerImage ?? DEFAULT_POST_IMAGE,
-    readingTimeMinutes: estimateReadingMinutes(content),
-    keyTakeaways: extractKeyTakeaways(content, description),
+    readingTimeMinutes: estimateReadingMinutes(
+      visibleReadingContent(content, description, keyTakeaways),
+    ),
+    keyTakeaways,
     faqs: extractFaqs(content),
     latestPosts: getLatestPosts(slug),
     navigation: getPostNavigation(slug),
-    plainText: stripBlogMarkdown(content),
+    plainText: stripBlogMarkdown(bodyContent),
   };
 }
 
