@@ -14,11 +14,7 @@ JEV is getting a lot of attention right now.
 
 People are excited about it, and developers are already experimenting with ways to use it inside real applications.But there is a common mistake when trying a new AI model like JEV: treating it like another general-purpose LLM.
 
-JEV becomes much more interesting when you use it for decisions rather than generation. Instead of asking it to write an email or generate a long answer, you give it some context, define the decisions it can make, and let your application act on the result.For example, a support system could use JEV to decide whether a ticket belongs to billing, engineering, or sales. A browser agent could use it to choose which button to click next. An AI application could use it to decide which model should handle a particular request.The model makes the decision, while your code handles the action.That simple pattern opens up a lot of interesting use cases. Here are 10 projects worth building with JEV.
-
-> You can watch the Video Version 
->
-> [here](https://www.youtube.com/watch?v=SY86kReNaoQ)
+JEV becomes much more interesting when you use it for decisions rather than generation. Instead of asking it to write an email or generate a long answer, you give it some context, define the decisions it can make, and let your application act on the result.For example, a support system could use JEV to decide whether a ticket belongs to billing, engineering, or sales. A browser agent could use it to choose which button to click next. An AI application could use it to decide which model should handle a particular request.The model makes the decision, while your code handles the action.That simple pattern opens up a lot of interesting use cases. Here are 10 projects worth building with JEV
 
 ## 1. Build a smart support ticket router
 
@@ -57,7 +53,6 @@ RAG systems often retrieve several documents and pass them directly into the con
 Traditional linters are good at catching problems that can be expressed as explicit rules, such as formatting issues, type errors, and missing imports.Engineering teams also have rules that are much harder to express through traditional static analysis.For example, does a new API expose private customer information? Does a pull request bypass an important approval step? Does a change introduce a risky pattern? Did the developer add tests for the new behavior?These are questions that can be handled by a decision model.You can give JEV the changed code along with the relevant project rules and ask it to evaluate a small set of specific conditions. When it identifies a likely problem with high confidence, your GitHub workflow can flag the pull request or request human review.This does not replace human code review. Instead, it adds another layer that can catch potential issues before an engineer spends time reviewing the entire change.
 
 ## 7. Build an AI model router
-
 
 ![](/blog/uploads/chatgpt-image-sep-28-2026-07_13_13-pm.png)
 
