@@ -384,7 +384,7 @@ export function getPostNavigation(slug: string): BlogPostNavigation {
   }
 
   return {
-    previous: posts[index + 1] ?? null,
-    next: posts[index - 1] ?? null,
+    previous: posts[index - 1] ?? null,
+    next: posts[index + 1] ?? null,
   };
 }
