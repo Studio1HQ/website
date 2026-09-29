@@ -25,6 +25,7 @@ collections:
   - name: blog
     label: Blog
     label_singular: Blog Post
+    description: "Use the CMS workflow buttons for Draft, Review, and Publish. The site visibility flag is managed automatically."
     folder: content/blog
     create: true
     delete: false
@@ -65,11 +66,9 @@ collections:
         }
       - {
           name: draft,
-          label: Draft / Hide from Public Blog,
-          widget: boolean,
+          widget: hidden,
           required: false,
           default: false,
-          hint: "Turn this on to save the file without showing it on /blog, RSS, sitemap, or its public article URL.",
         }
       - {
           name: authors,
@@ -109,5 +108,6 @@ collections:
           name: body,
           label: Body,
           widget: markdown,
-          hint: "Use ## FAQ with a markdown table to generate FAQ schema.",
+          modes: [raw],
+          hint: "Raw Markdown only, to prevent the rich editor from rewriting or dropping article content. Use ## TL;DR for the summary card and ## FAQ with a markdown table to generate FAQ schema.",
         }
