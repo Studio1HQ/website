@@ -109,5 +109,5 @@ collections:
           label: Body,
           widget: markdown,
           modes: [raw],
-          hint: "Raw Markdown only, to prevent the rich editor from rewriting or dropping article content. Use ## TL;DR for the summary card and ## FAQ with a markdown table to generate FAQ schema.",
+          hint: "Raw Markdown only, to prevent the rich editor from rewriting or dropping article content. Paste a YouTube URL on its own line to embed the video. Use ## TL;DR for the summary card and ## FAQ with a markdown table to generate FAQ schema.",
         }

@@ -3,6 +3,49 @@ import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { mdxComponents } from "@/mdx-components";
 import { CodeBlock } from "@/components/blog/code-block";
 
+const youtubeLinePattern =
+  /^(\s*)(?:(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)\/[^\s<>]+)|::youtube\[([^\]]+)\])\s*$/gm;
+
+function getYouTubeVideoId(value: string): string | null {
+  try {
+    const url = new URL(value.trim());
+    const host = url.hostname.replace(/^www\./, "");
+
+    if (host === "youtu.be") {
+      return url.pathname.split("/").filter(Boolean)[0] ?? null;
+    }
+
+    if (host !== "youtube.com" && host !== "m.youtube.com") return null;
+
+    if (url.pathname === "/watch") {
+      return url.searchParams.get("v");
+    }
+
+    const [kind, id] = url.pathname.split("/").filter(Boolean);
+    if (["embed", "shorts", "live"].includes(kind)) return id ?? null;
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+function getYouTubeEmbedUrl(value: string): string | null {
+  const videoId = getYouTubeVideoId(value);
+  if (!videoId || !/^[A-Za-z0-9_-]{6,}$/.test(videoId)) return null;
+  return `https://www.youtube.com/embed/${videoId}`;
+}
+
+export function transformBlogMdxContent(content: string): string {
+  return content.replace(youtubeLinePattern, (match, indent, url, shortcodeUrl) => {
+    const source = (url || shortcodeUrl || "").trim();
+    const embedUrl = getYouTubeEmbedUrl(source);
+    if (!embedUrl) return match;
+
+    return `${indent}<YouTubeEmbed url={${JSON.stringify(embedUrl)}} />`;
+  });
+}
+
 function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -141,6 +184,24 @@ function BlogPre({ children }: ComponentPropsWithoutRef<"pre">) {
   return <CodeBlock code={code} language={language} />;
 }
 
+function YouTubeEmbed({ url }: { url: string }) {
+  return (
+    <figure className="not-prose mx-auto my-10 w-full overflow-hidden rounded-xl border border-border/70 bg-background shadow-[0_18px_52px_-36px_rgba(0,0,0,0.55)] dark:border-white/[0.08]">
+      <div className="aspect-video w-full bg-muted">
+        <iframe
+          src={url}
+          title="YouTube video player"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerPolicy="strict-origin-when-cross-origin"
+          allowFullScreen
+          className="h-full w-full"
+        />
+      </div>
+    </figure>
+  );
+}
+
 export const blogMdxComponents = {
   ...mdxComponents,
   h2: BlogH2,
@@ -149,4 +210,5 @@ export const blogMdxComponents = {
   img: BlogImage,
   code: BlogCode,
   pre: BlogPre,
+  YouTubeEmbed,
 };

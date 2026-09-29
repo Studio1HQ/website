@@ -4,7 +4,7 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
 import { getPostBySlug, getPostSlugs } from "@/lib/blog";
 import { PostLayout } from "@/components/blog/post-layout";
-import { blogMdxComponents } from "@/components/blog/mdx";
+import { blogMdxComponents, transformBlogMdxContent } from "@/components/blog/mdx";
 import {
   absoluteImageUrl,
   articlePageMetadata,
@@ -127,7 +127,7 @@ export default async function BlogPostPage({ params }: Props) {
         navigation={post.navigation}
       >
         <MDXRemote
-          source={post.content}
+          source={transformBlogMdxContent(post.content)}
           components={blogMdxComponents}
           options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
         />
