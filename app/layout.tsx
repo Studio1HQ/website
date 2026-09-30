@@ -1,52 +1,9 @@
 import type { Metadata } from "next";
-import {
-  DM_Sans,
-  Instrument_Serif,
-  Inter,
-  Space_Grotesk,
-  Syne,
-} from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { baseUrl } from "@/lib/site";
 import Script from "next/script";
 import { cn } from "@/lib/utils";
-
-const syne = Syne({
-  subsets: ["latin"],
-  variable: "--font-syne",
-  display: "swap",
-  weight: ["400", "500", "600"],
-});
-
-const dmSans = DM_Sans({
-  subsets: ["latin"],
-  variable: "--font-dm-sans",
-  display: "swap",
-  weight: ["300", "400", "500"],
-});
-
-const instrumentSerif = Instrument_Serif({
-  subsets: ["latin"],
-  variable: "--font-instrument-serif",
-  weight: "400",
-  style: ["normal", "italic"],
-  display: "swap",
-});
-
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-numeric",
-  display: "swap",
-  weight: ["500", "600"],
-});
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-  weight: ["400", "500", "600"],
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
@@ -122,11 +79,6 @@ export default async function RootLayout({
     >
       <body
         className={cn(
-          syne.variable,
-          dmSans.variable,
-          instrumentSerif.variable,
-          spaceGrotesk.variable,
-          inter.variable,
           "antialiased font-secondary",
         )}
         suppressHydrationWarning

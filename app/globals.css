@@ -4,6 +4,15 @@
 
 @layer base {
   :root {
+    --font-syne: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    --font-dm-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    --font-instrument-serif: Georgia, "Times New Roman", serif;
+    --font-numeric: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
+    --font-inter: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif;
     --background: 0 0% 100%;
     --foreground: 20 14.3% 4.1%;
     --primary1: 23 100% 65%;
