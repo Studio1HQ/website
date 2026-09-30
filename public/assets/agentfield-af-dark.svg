@@ -1,0 +1,15 @@
+<svg width="64" height="40" viewBox="0 0 64 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g transform="translate(8, 8)">
+    <circle cx="4" cy="12" r="4" fill="#d4a24a" />
+    <text
+      x="16"
+      y="17"
+      font-family="ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+      font-size="16"
+      font-weight="600"
+      fill="#f5f0eb"
+    >
+      af
+    </text>
+  </g>
+</svg>

@@ -108,6 +108,6 @@ collections:
           name: body,
           label: Body,
           widget: markdown,
-          modes: [raw],
-          hint: "Raw Markdown only, to prevent the rich editor from rewriting or dropping article content. Paste a YouTube URL on its own line to embed the video. Use ## TL;DR for the summary card and ## FAQ with a markdown table to generate FAQ schema.",
+          modes: [rich_text, raw],
+          hint: "Use rich text for normal writing and image uploads. Switch to raw Markdown for YouTube embeds, TL;DR, FAQ tables, or precise formatting. Paste a YouTube URL on its own line to embed the video.",
         }

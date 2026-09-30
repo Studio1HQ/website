@@ -47,6 +47,8 @@ import InteractAiMark from "@/public/assets/interact-ai-mark.webp";
 import Corsair from "@/public/assets/corsair.webp";
 import SearchApi from "@/public/assets/searchapi.webp";
 import BrowserAct from "@/public/assets/browseract.png";
+import AgentFieldAfDark from "@/public/assets/agentfield-af-dark.svg";
+import AgentFieldAfLight from "@/public/assets/agentfield-af-light.svg";
 import MaximAi from "@/public/assets/maxim-ai.webp";
 import PuckMark from "@/public/assets/puck.webp";
 import Kombai from "@/public/assets/kombai.webp";
@@ -164,6 +166,8 @@ export {
   Corsair,
   SearchApi,
   BrowserAct,
+  AgentFieldAfDark,
+  AgentFieldAfLight,
   MaximAi,
   PuckMark,
   Kombai,
