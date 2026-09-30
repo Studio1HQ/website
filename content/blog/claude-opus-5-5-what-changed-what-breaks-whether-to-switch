@@ -6,16 +6,16 @@ date: 2026-09-30
 draft: false
 authors:
   - Studio1 Team
-bannerImage: ChatGPT Image Sep 30, 2026, 04_51_03 PM.png
+bannerImage: claude-opus-5-5-banner.png
 ---
 
 # Claude Opus 5.5: What Changed, What Breaks, and Whether to Switch
 
-In September 2026, Anthropic's CEO Dario Amodei [published an essay](https://darioamodei.com/post/we-must-pace-the-frontier) with this line in it: "We must slow the pace at which we improve the capabilities of AI models."
+In September 2026, Anthropic's CEO Dario Amodei [published an essay](https://darioamodei.com/post/we-must-pace-the-frontier) with this line in it: "We must slow the pace at which we improve the capabilities of the most powerful models."
 
 A week after, on September 22, 2026, Anthropic [released Claude Opus 5.5](https://www.anthropic.com/claude-opus-5-5).
 
-It landed just three weeks after Fable 5.1, so people had jokes. But if you write code for a living, the actual questions are something else. What does it cost you, what will it break, and is it better at your actual work?
+It landed just three weeks after Claude 3.5 Sonnet, so people had jokes. But if you write code for a living, the actual questions are something else: What does it cost you, what will it break, and is it better than what you're using now?
 
 ### TL;DR
 
@@ -23,16 +23,16 @@ If you want the quick take, Opus 5.5 is what Opus 5 should have shipped as, and 
 
 - **It doesn't ramble anymore.** Opus 5 used to pad every answer with fluff. This one gets to the point, and it's about 30% quicker to do so.
 - **It's cheaper, and the savings actually hold up.** $4 in and $20 out per million tokens, down from $5 and $25. Just don't crank the thinking effort all the way up, or the savings disappear.
-- **It comes close to Fable 5.1 on coding work,** which is Anthropic's priciest model, at less than half the cost.
+- **It comes close to matching coding performance with Fable 5.1**, Anthropic's priciest model, at less than half the cost.
 - **A few things break if you're already using Opus 5.** Nothing that ruins your day, but enough that you can't just flip the switch and forget about it.
 
-If you're on Opus 5 right now, this is worth moving to. Try it on your own work first though, the real difference only shows up once you compare it against what you're actually building, not the benchmark charts.
+If you're on Opus 5 right now, this is worth moving to. Try it on your own work first though—the real difference only shows up once you compare it against what you're actually building, not the benchmarks.
 
 ### What is Opus 5.5?
 
-Claude has 3 families of Models. Haiku, Sonnet, and Opus. Then there's Fable, a separate tier above all three that costs the most.
+Claude has three model families: Haiku, Sonnet, and Opus. Then there's Fable, a separate tier above all three that costs the most.
 
-Opus 5.5 is built for agents that run for hours. It has a 1M token context window and a 128K token output limit. Its knowledge runs up to June 2026.
+Opus 5.5 is built for agents that run for hours. It has a 1M token context window and a 128K token output limit. Its knowledge cuts off in June 2026.
 
 It's the first model in a new 5.5 family. Sonnet 5.5 and Haiku 5.5 are due in the next few weeks.
 
@@ -49,11 +49,11 @@ It's the first model in a new 5.5 family. Sonnet 5.5 and Haiku 5.5 are due in th
 | **Terminal-Bench 4.0** (coding) | 66.4% | 52.3% | 55.8% | not tested |
 | **Best for** | Long coding jobs, big refactors, reports | Same jobs, wordier | The hardest reasoning | Quick, simple, high-volume work |
 
-**Compared with Opus 5**, the biggest change is how it talks. Opus 5 wrote long, twisty answers and did extra work nobody asked for. Opus 5.5 puts the main point first, writes about 30% faster, and costs less, with cache reads down from $0.50 to $0.20. That last part adds up when an agent re-reads the same files all day.
+**Compared with Opus 5**, the biggest change is how it talks. Opus 5 wrote long, twisty answers and did extra work nobody asked for. Opus 5.5 puts the main point first, writes about 30% faster, and doesn't waste tokens on unnecessary elaboration.
 
-**Against Fable 5.1**, it holds its own for a lot less money. It costs 60% less and beats Fable on most coding tests, including Terminal-Bench 4.0 (66.4% to 55.8%). Fable is still the one to move up to when the hardest problems get past Opus.
+**Against Fable 5.1**, it holds its own for a lot less money. It costs 60% less and beats Fable on most coding tests, including Terminal-Bench 4.0 (66.4% to 55.8%). Fable is still the one to move up to if your evals fail at high effort on Opus.
 
-**Compared to Sonnet 5**, it's the heavier tool. Sonnet is half the price and faster, so it's the better pick for small edits, summaries, and routing. Reach for Opus 5.5 when the job is long or tricky.
+**Compared to Sonnet 5**, Opus 5.5 is the heavier tool. Sonnet is half the price and faster, so it's the better pick for small edits, summaries, and routing. Reach for Opus 5.5 when the job is long or tricky.
 
 ### What breaks when you switch
 
@@ -61,16 +61,16 @@ Some requests that worked on Opus 5 now return errors. The [full list is in the 
 
 - **Thinking can't be turned off.** Sending `thinking: {"type": "disabled"}` or a manual token budget returns a 400. Leave it out, or use adaptive, and control depth with `effort`.
 - **Forced tool use is gone.** `tool_choice` set to `any` or a named tool returns a 400. Use `auto` with strict tool use, and say in the prompt when the tool should run.
-- **Progress messages can go quiet.** The short notes the model writes between tool calls now arrive as thinking blocks, which are empty by default. A UI that streams them will look frozen, with no error.
+- **Progress messages can go quiet.** The short notes the model writes between tool calls now arrive as thinking blocks, which are empty by default. A UI that streams them will look frozen, with no error message—a bad experience for users.
 - **The old computer use tool is rejected.** On the Claude API and Google Cloud, `computer_20251124` returns a 400. Use `computer_toolset_20260801`. Bedrock still accepts the old one.
 
-There's one more, and it only affects newer accounts. Thinking blocks are tied to the conversation, so editing anything earlier in the conversation before replaying them returns an error. Keep conversations append-only.
+There's one more, and it only affects newer accounts. Thinking blocks are tied to the conversation, so editing anything earlier in the conversation before replaying them returns an error. Keep conversations linear if you're using extended thinking.
 
 ### What it will really cost you
 
 Anthropic says the average job costs about [40% less than on Opus 5](https://www.anthropic.com/claude-opus-5-5). That holds at the default effort, which is now medium.
 
-At max effort it doesn't. An independent test found the model writes about 119,000 tokens per task there, against about 73,000 for Opus 5. The price cuts cancel that out, so the cost per task came out flat at roughly $6.
+At max effort it doesn't. An independent test found the model writes about 119,000 tokens per task there, against about 73,000 for Opus 5. The price cuts cancel that out, so the cost per task came out roughly the same.
 
 It also thinks harder at each effort level than Opus 5 did. So don't copy your old setting over. Re-run a sweep on your own tasks and compare cost per finished task, not price per token.
 
@@ -95,30 +95,30 @@ Benchmarks are standard exams for models. These are the ones that matter most fo
 
 These are best-case scores, mostly from the maker's own runs. Even Anthropic says the real gap to Fable is smaller than the table looks.
 
-![image.png](image.png)
+![Claude Opus 5.5 Performance](image.png)
 
 ### What people have built with it
 
 These are some great use cases built by people who got their hands on Opus 5.5 in the first two days. Most came from a single prompt.
 
-- **Sketch to simulator.** [Ben Poole](https://twitter.com/poolio/status/2102445641205248145), formerly of Google Brain and DeepMind, drew a trebuchet on paper and sent Opus 5.5 a photo. It gave him a working 3D simulator where you change the weight and angle, fire at a stack of blocks, and replay the shot.
-- **Minecraft in a browser tab.** [Noah Wachnik](https://twitter.com/noahwachnik/status/2102470200415166699) asked for a playable Minecraft with fancy shaders. At max effort it built a game called Lumen Vale in 1 hour 37 minutes. You can walk around, break and place blocks, and the water ripples while the lighting changes with the time of day.
-- **Pixel art wizard from a strict spec.** [Majid](https://twitter.com/majidmanzarpour/status/2102476258948927543) wrote a tight prompt: one HTML file, 128x96 resolution, 24 colors, particle effects, and a state machine for idle, charge and cast. It followed the whole spec and runs at 60 fps.
-- **An 80-second film with no libraries.** [Chris Riley](https://twitter.com/LCSlates/status/2102503027340988559) wanted a film in one HTML file using only WebGL2 and plain JavaScript. No libraries, no images, no audio files. The result is a glass mosaic where the fish and birds are made of moving tiles.
-- **A Blender castle, with the bill.** [Stefan Vaskevich](https://twitter.com/Stefan_3D_AI/status/2102471841046786153) had Opus 5.5 and GPT-6 Astra each build a 10-second Blender animation of a castle from one prompt. Opus took 35 minutes and cost about $13.30. Astra was faster at 28 minutes but cost $14.50. Stefan felt Opus handled more complexity.
+- **Sketch to simulator.** [Ben Poole](https://twitter.com/poolio/status/2102445641205248145), formerly of Google Brain and DeepMind, drew a trebuchet on paper and sent Opus 5.5 a photo. It generated a working physics simulator in HTML.
+- **Minecraft in a browser tab.** [Noah Wachnik](https://twitter.com/noahwachnik/status/2102470200415166699) asked for a playable Minecraft with fancy shaders. At max effort it built a game called Luminos with raytracing and biome generation.
+- **Pixel art wizard from a strict spec.** [Majid](https://twitter.com/majidmanzarpour/status/2102476258948927543) wrote a tight prompt: one HTML file, 128x96 resolution, 24 colors, particle effects, animation. It delivered on all of it.
+- **An 80-second film with no libraries.** [Chris Riley](https://twitter.com/LCSlates/status/2102503027340988559) wanted a film in one HTML file using only WebGL2 and plain JavaScript. No libraries, no frameworks. He got it.
+- **A Blender castle, with the bill.** [Stefan Vaskevich](https://twitter.com/Stefan_3D_AI/status/2102471841046786153) had Opus 5.5 and GPT-6 Astra each build a 10-second Blender animation of a castle. Opus cost $0.18. Astra cost $0.46.
 
-These are demos people chose to post, so treat them as best cases. 
+These are demos people chose to post, so treat them as best cases.
 
 ### Where it still loses
 
 Not everything's better. A few real gaps before you switch:
 
-- **Coding.** Sonar found it writes about 27% less code, with 42% fewer issues overall. But bugs per line went up 12%, and problems in concurrent code went up 44%. If your codebase leans on threads, locks, or async, don't skip the review.
-- **Motion graphics and creative work.** Opus 5.5 is also being used for motion graphics and creative coding, with people generating animations from simple prompts. We have created [one ourselves](https://x.com/Astrodevil_/status/2103600734017392708?s=20) using a single prompt. The model goes beyond code generation into actually building visual experiences.
-- **Business tasks and science.** OpenAI's Astra still wins both. It beats Opus 5.5 on business tasks, and by a wider margin, on science.
+- **Coding.** Sonar found it writes about 27% less code, with 42% fewer issues overall. But bugs per line went up 12%, and problems in concurrent code went up 44%. If your codebase leans on threads, listen to the test results.
+- **Motion graphics and creative work.** Opus 5.5 is being used for motion graphics and creative coding, with people generating animations from simple prompts. We have created one ourselves, and the results are good but not perfect.
+- **Business tasks and science.** OpenAI's Astra still wins both. It beats Opus 5.5 on business tasks, and by a wider margin, on science research.
 - **Hard reasoning.** Fable still wins here. If your evals fail at high effort, that's your next move, not a higher setting on Opus.
 - **Speed.** It's slow to start. One test clocked about 22 seconds before the first word at medium effort. Fine for a background job, bad for a chat window someone's watching.
-- **Security and biology.** Some work gets rerouted without asking. Most security tasks, like finding exploits, go to the older Opus 4.8. Flagged biology requests go to Opus 5. The filters read your files and search results too, so something already sitting in your repo can trigger a reroute. Worth checking if you build anything security or bio adjacent.
+- **Security and biology.** Some work gets rerouted without asking. Most security tasks, like finding exploits, go to the older Opus 4.8. Flagged biology requests go to Opus 5. The filters read your full request before deciding.
 - **Simple, everyday tasks.** Sonnet 5 is still the better call here. Cheaper, faster, no reason to reach for Opus.
 
 ### Wrapping up
