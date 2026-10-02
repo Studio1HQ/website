@@ -140,6 +140,35 @@ export function removeTldrSection(content: string): string {
     .trim();
 }
 
+function normalizeHeadingText(value: string): string {
+  return stripInlineMarkdown(value)
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export function removeLeadingDuplicateTitle(
+  content: string,
+  title: string,
+): string {
+  const lines = content.split("\n");
+  const firstContentIndex = lines.findIndex((line) => line.trim());
+  if (firstContentIndex < 0) return content;
+
+  const match = lines[firstContentIndex].trim().match(/^#\s+(.+)$/);
+  if (!match?.[1]) return content;
+
+  if (normalizeHeadingText(match[1]) !== normalizeHeadingText(title)) {
+    return content;
+  }
+
+  return [...lines.slice(0, firstContentIndex), ...lines.slice(firstContentIndex + 1)]
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 function visibleReadingContent(
   content: string,
   description: string,
@@ -196,6 +225,7 @@ function postMetaFromFile(fileName: string): BlogPostMeta {
   const bannerImage = d.bannerImage?.trim() || undefined;
   const draft = isDraft(d);
   const description = d.description ?? "";
+  const bodySource = removeLeadingDuplicateTitle(content, title);
 
   return {
     slug,
@@ -213,7 +243,7 @@ function postMetaFromFile(fileName: string): BlogPostMeta {
     bannerImageAlt: d.bannerImageAlt ?? d.imageAlt ?? title,
     socialImage: bannerImage ?? DEFAULT_POST_IMAGE,
     readingTimeMinutes: estimateReadingMinutes(
-      visibleReadingContent(content, description),
+      visibleReadingContent(bodySource, description),
     ),
   };
 }
@@ -312,8 +342,9 @@ export function getPostBySlug(slug: string): BlogPost | null {
   const authors = normalizeAuthors(d.authors, d.author);
   const image = d.image ?? DEFAULT_POST_IMAGE;
   const bannerImage = d.bannerImage?.trim() || undefined;
-  const keyTakeaways = extractKeyTakeaways(content, description);
-  const bodyContent = removeTldrSection(content);
+  const bodySource = removeLeadingDuplicateTitle(content, title);
+  const keyTakeaways = extractKeyTakeaways(bodySource, description);
+  const bodyContent = removeTldrSection(bodySource);
   return {
     slug,
     content: bodyContent,

@@ -32,7 +32,7 @@ collections:
     extension: mdx
     format: frontmatter
     slug: "{{fields.slug}}"
-    media_folder: /public/blog/uploads/{{slug}}
+    media_folder: public/blog/uploads/{{slug}}
     public_folder: /blog/uploads/{{slug}}
     summary: "{{title}} — {{date}}"
     preview_path: "blog/{{slug}}"
@@ -108,6 +108,6 @@ collections:
           name: body,
           label: Body,
           widget: markdown,
-          modes: [rich_text, raw],
-          hint: "Use rich text for normal writing and image uploads. Switch to raw Markdown for YouTube embeds, TL;DR, FAQ tables, or precise formatting. Paste a YouTube URL on its own line to embed the video.",
+          modes: [raw, rich_text],
+          hint: "Default is Markdown for reliable Notion paste, links, TL;DR, FAQ tables, and YouTube embeds. Switch to rich text only when you need the visual toolbar.",
         }
