@@ -14,6 +14,7 @@ export function BlogCard({ post }: { post: BlogPostMeta }) {
   const label = post.tags[0] ?? "Article";
   const cardImage = post.bannerImage ?? "/opengraph-image.png";
   const cardImageAlt = post.bannerImage ? post.bannerImageAlt : "Studio1 technical blog";
+  const hasUploadedBanner = Boolean(post.bannerImage);
 
   return (
     <Link
@@ -31,14 +32,17 @@ export function BlogCard({ post }: { post: BlogPostMeta }) {
       <div className="relative z-[1] w-full">
         <div
           data-blog-card-media
-          className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-[linear-gradient(135deg,hsl(var(--muted)/0.62),hsl(var(--background)),hsl(var(--primary)/0.08))] p-2 ring-1 ring-inset ring-foreground/[0.07] dark:bg-[linear-gradient(135deg,hsl(var(--muted)/0.22),hsl(var(--background)),hsl(var(--primary)/0.1))] dark:ring-white/[0.07]"
+          className="relative aspect-[16/9] w-full overflow-hidden rounded-xl bg-[linear-gradient(135deg,hsl(var(--muted)/0.62),hsl(var(--background)),hsl(var(--primary)/0.08))] p-2 ring-1 ring-inset ring-foreground/[0.07] dark:bg-[linear-gradient(135deg,hsl(var(--muted)/0.22),hsl(var(--background)),hsl(var(--primary)/0.1))] dark:ring-white/[0.07]"
         >
-          <div className="relative h-full w-full overflow-hidden rounded-lg bg-background/70 shadow-[0_16px_40px_-24px_rgba(0,0,0,0.45)] ring-1 ring-black/5 dark:bg-background/45 dark:ring-white/10">
+          <div className="relative h-full w-full overflow-hidden rounded-lg bg-black shadow-[0_16px_40px_-24px_rgba(0,0,0,0.45)] ring-1 ring-black/5 dark:ring-white/10">
             <Image
               src={cardImage}
               alt={cardImageAlt}
               fill
-              className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+              className={cn(
+                "transition-transform duration-500 group-hover:scale-[1.03]",
+                hasUploadedBanner ? "object-contain" : "object-cover",
+              )}
               sizes="(max-width: 768px) 100vw, 32rem"
             />
           </div>
