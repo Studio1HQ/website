@@ -1,0 +1,222 @@
+---
+title: "How to Get Your Tool Recommended by ChatGPT, Perplexity, and Google"
+slug: "how-to-get-your-tool-recommended-by-chatgpt-perplexity-google"
+description: "Learn how to make your developer tool more likely to be recommended by ChatGPT, Perplexity, and Google through AI visibility, technical content, authority, and discoverability."
+tldrSummary: "Getting your tool recommended by AI search isn't just about traditional SEO. You need to build the signals that ChatGPT, Perplexity, and Google use to understand, trust, and surface your product."
+tldrBullets:
+  - "AI recommendations depend on more than keywords. Clear positioning, authoritative content, technical depth, and consistent mentions all matter."
+  - "Your documentation and technical content need to answer the exact questions developers are asking before they ever reach your website."
+  - "Being mentioned across trusted websites, communities, GitHub, Reddit, and developer publications can strengthen your product's discoverability."
+  - "The goal isn't to game AI search. It's to make your tool genuinely useful, easy to understand, and easy for AI systems to discover and cite."
+date: 2026-10-03
+draft: false
+authors:
+  - "Studio1 Team"
+bannerImage: "/blog/how-to-get-your-tool-recommended-by-chatgpt-perplexity-google.png"
+bannerImageAlt: "How to Get Your Tool Recommended by ChatGPT, Perplexity, and Google blog banner"
+---
+
+A lot of developers nowadays ask ChatGPT before they ask Google. In [Stack Overflow's 2025 survey](https://survey.stackoverflow.co/2025/ai), 47.1% said they use AI tools every day, and another 17.7% use them every week. That adds up to about 65%. And when someone asks which tool to use, they don't get ten blue links. They get a short list of names, with a line or two on each.
+
+So the question for any developer tool is how to land on that list. Ranking well on Google used to be most of the answer. It covers less now: [Ahrefs found](https://ahrefs.com/blog/ai-overview-citations-top-10/) that 76% of AI Overview citations came from pages in Google's top 10 in July 2025, and by January 2026 only 38% did. [Google says](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide) this is still SEO at heart. But studies of what AI tools cite, like [this one from Peec AI](https://searchengineland.com/ai-search-engines-cite-reddit-youtube-and-linkedin-most-study-473138), show that being talked about on Reddit, YouTube, and review sites matters too. This guide covers both sides.
+
+## TL;DR
+
+1. Let the AI search crawlers read your site: OAI-SearchBot for ChatGPT, PerplexityBot for Perplexity, and Googlebot for Google.
+2. Open every page with a direct answer to the question it exists for.
+3. Publish fair comparison pages and docs that answer the questions developers really ask.
+4. Get your product discussed honestly where these tools already look, like Reddit, GitHub, YouTube, and review sites.
+5. Ask the same 20 questions every month and write down who gets named.
+
+## What is answer engine optimization (AEO)?
+
+Answer engine optimization, or AEO, is the work of making your product easy for AI tools to find, understand, and name when someone asks a question. You will also see it called GEO (generative engine optimization) or LLM SEO. These all mean roughly the same thing.
+
+The goal is different from classic SEO. SEO tries to get your link ranked on a results page. AEO tries to get your product's name inside the answer itself.
+
+Google sees it a little differently. Its own [guide to generative AI search](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide) says that optimizing for these features is still SEO, because AI Overviews and AI Mode are built on its normal ranking and quality systems. When a question comes in, those features can run several related searches at once, which Google calls query fan-out, and then pull from the pages they find.
+
+Two things follow from that. First, basic SEO still matters, because the AI has to find your page before it can use it. Second, ranking is not the whole story. In an [Ahrefs study of the 1,000 pages ChatGPT cited most in September 2025](https://ahrefs.com/blog/chatgpts-most-cited-pages/), 28% had no organic search keywords at all. A page can be quoted by an AI tool without ranking anywhere in Google.
+
+## How do ChatGPT, Perplexity, and Google AI Overviews choose what to recommend?
+
+Each one finds pages in its own way, so your first move is a little different for each.
+
+| Engine | How it finds your pages | What studies say it leans on | Your first move |
+| --- | --- | --- | --- |
+| ChatGPT | Its own search crawler, OAI-SearchBot | Wikipedia, Reddit, and editorial sites like Forbes | Allow OAI-SearchBot, and make your homepage say plainly what the product does |
+| Perplexity | PerplexityBot, plus Perplexity-User when a person asks a question | Reddit, LinkedIn, and G2 for business software questions | Allow PerplexityBot, and earn real reviews and discussions |
+| Google AI Overviews and AI Mode | Google's normal search index | Pages that are indexed and can show a snippet. Google lists no extra requirements | Get basic SEO right, and watch the AI report in Search Console |
+
+Sources for the table: [OpenAI's crawler page](https://developers.openai.com/api/docs/bots), [Perplexity's crawler page](https://docs.perplexity.ai/docs/resources/perplexity-crawlers), [Google's AI features page](https://developers.google.com/search/docs/appearance/ai-features), and the [Peec AI study of 30 million cited sources](https://searchengineland.com/ai-search-engines-cite-reddit-youtube-and-linkedin-most-study-473138) as reported by Search Engine Land.
+
+Two patterns show up across the studies.
+
+**Community sites carry a lot of weight.** Peec AI's analysis found Reddit was the most cited domain across ChatGPT, Google AI Mode, Gemini, Perplexity, and AI Overviews. YouTube, LinkedIn, Wikipedia, and Forbes also made the top five. Review sites like G2 and Yelp appeared often when people asked for recommendations.
+
+**Most of what ChatGPT cites is not yours to edit.** In the Ahrefs look at ChatGPT's top 1,000 cited pages, Wikipedia made up 29.7%, homepages and landing pages 23.8%, and how-to and explainer pages 19.4%. Ahrefs counted only 32.3% as pages a company could realistically get into: explainers, reviews, news, and blog posts. Ahrefs says its sorting of page types is a rough guide, so treat the exact split loosely. The useful part is the homepage number. You cannot pitch your way onto someone else's homepage, but your own is a page you fully control.
+
+## How to get your product recommended by AI: an 8 step playbook for developers
+
+Work through these in order. The first four are about your own site. The next four are about the rest of the web.
+
+### 1. Let the right crawlers in
+
+If a crawler cannot read your site, nothing else in this guide matters. OpenAI says that to appear in ChatGPT search results you should [allow OAI-SearchBot](https://help.openai.com/en/articles/12627856-publishers-and-developers-faq). Perplexity says the same about [PerplexityBot](https://docs.perplexity.ai/docs/resources/perplexity-crawlers). Google's [AI features page](https://developers.google.com/search/docs/appearance/ai-features) says crawling has to be allowed in robots.txt and by any CDN or hosting setup you use.
+
+A simple robots.txt that allows all three looks like this:
+
+```
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+```
+
+Four details trip up a lot of teams:
+
+- GPTBot is a separate bot. OpenAI treats it as its own setting, used for training. You can block GPTBot and still allow OAI-SearchBot, so blocking one does not have to hide you from ChatGPT search.
+- Your firewall can block them even when robots.txt says yes. Perplexity asks you to allow its published IP ranges and walks through the setup for Cloudflare and AWS.
+- Changes are not instant. Perplexity says it can take up to 24 hours for a robots.txt change to show up.
+- Docs that only appear after JavaScript runs, or that live inside images or videos, are easy to miss. Google says important content should be available as text. A quick test: open your docs with JavaScript turned off and see what is left.
+
+### 2. Put the answer in the first few lines
+
+Start every page with a plain answer to the question it exists for. Search Engine Land [reported a study](https://searchengineland.com/chatgpt-citations-content-study-469483) finding that 44% of ChatGPT citations come from the first third of a page's content. If your best sentence is in paragraph six, it may never get used.
+
+Here is the difference. A weak opening spends three paragraphs on how fast software is changing. A strong one looks like this (ExampleDB is made up for this guide):
+
+*ExampleDB is a hosted Postgres database for small teams. It costs $15 a month, works with Prisma and Drizzle, and takes about five minutes to set up.*
+
+Then write your headings as the questions people really type. "How do I connect ExampleDB to Next.js?" beats "Connecting". Keep paragraphs short, and put the answer first before the explanation.
+
+### 3. Publish the comparison pages people ask for
+
+Recommendation questions are comparison questions: "best tool for X", "X vs Y", "alternatives to Y". If you do not have a page for those, someone else writes it, and AI tools quote them instead.
+
+Write these pages yourself, and write them fairly. Put pricing in a table. Name the limits. Say who each tool suits, and where the other tool wins. A fair page is more useful to readers and easier to quote. If you run benchmarks, say how: the machine, the version, the date, and the code.
+
+[Google's guide to generative AI search](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide) describes the content that holds up best as non-commodity: material built on first-hand experience that goes beyond what anyone could copy from other pages. Your own tests and your own numbers are exactly that.
+
+### 4. Make your docs the best answer on the web
+
+For developer tools, docs do the job that blog posts do for other products. Developers ask "how do I add X to Next.js" or paste an error message straight into a chat. Cover those questions:
+
+- A quickstart that works when copied, with version numbers.
+- One page per common error, with the exact error text in the heading, the cause, and the fix.
+- Migration guides from the tools people are leaving for yours.
+- Pricing, limits, and supported languages written out as text, not tucked into an image or a pricing widget.
+- Everything public. Docs behind a login cannot be read by a crawler.
+
+### 5. Get talked about where AI tools already look
+
+This is the step most teams skip, and the data says it matters most. [Ahrefs studied 75,000 brands](https://ahrefs.com/blog/ai-overview-brand-correlation/) and found that how often a brand is mentioned across the web had the strongest link to showing up in Google's AI Overviews. It scored 0.664, on a scale where 1 would be a perfect match. Backlinks scored 0.218. Brands in the top quarter for web mentions averaged 169 AI Overview mentions, against 14 for the next quarter down. Brands in the bottom half barely appeared at all.
+
+Two cautions. This is correlation, and Ahrefs says so itself. It also covered established brands (domain rating above 40), so for a new tool it shows direction, not a target.
+
+What to do about it:
+
+- Answer questions on Reddit and Stack Overflow when your tool is a fair answer. Say that you work on it.
+- Make your GitHub README clear enough to quote: what it is, the install command, and a minimal example.
+- Record tutorial videos with real transcripts. YouTube was in the top five most cited domains in the Peec AI data.
+- Get into roundups, newsletters, and community lists that cover your category.
+- Ask happy users for honest reviews on sites like G2, which showed up often for recommendation questions.
+
+Do not fake any of it. [Google's guide](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide) says chasing inauthentic mentions is not as helpful as it looks, and that its systems are built to catch spam.
+
+### 6. Say the same thing everywhere
+
+Use the same product name, one-line description, price, and supported languages on your site, your GitHub page, your package pages (npm, PyPI, and so on), LinkedIn, and your docs. This one comes from common sense, not a study. If an AI tool reads three different prices, it may quote the wrong one or skip you.
+
+A short facts page helps: name, what it does, pricing, languages, license, and a last updated date. Every other page can then match it.
+
+### 7. Keep key pages fresh, and be honest about dates
+
+AI tools lean toward newer pages. In the same [Ahrefs look at ChatGPT's top 1,000 cited pages](https://ahrefs.com/blog/chatgpts-most-cited-pages/), Ahrefs could find an update date for just over half. About 90% of those had been updated in 2025, and with Wikipedia removed it was still about 82%. The sample is small, but the direction is clear.
+
+So update pricing, version numbers, and screenshots when they change, and show a real last updated date. Change that date only when you changed the page.
+
+### 8. **Schema markup and llms.txt: nice to have, not a fix**
+
+[Google says](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide) there is no special markup you need for AI Overviews, and that structured data should match the text people can see on the page. If your site setup makes FAQ or software markup easy, add it. Do not spend a sprint on it.
+
+The same goes for llms.txt. Google says its search [ignores those files](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide), so they neither help nor hurt you there. It also says it is fine to keep one for other services that use them. Treat it as optional, not a fix.
+
+## Can programmatic pages help your product get recommended by AI?
+
+Yes, but only when every page carries real information. Programmatic SEO means building many pages from one template and a set of data. For developer tools that can be a very good fit, because so many developer questions follow a pattern: "X with Next.js", "X vs Y", "error 502 in X".
+
+The risk is real, though. Google's guide warns that making separate pages for every variation of a question, mainly to manipulate rankings or AI answers, [violates its scaled content abuse policy](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide). It also says a high number of pages does not make a site better. A template with the product name swapped in is the exact thing it describes.
+
+Here are page types that work, and the real data each one needs:
+
+| Page type | Question it answers | Real data every page needs |
+| --- | --- | --- |
+| Integration pages ("X with Next.js") | How do I use X with this tool? | Code you have tested, version numbers, known issues |
+| Comparison pages ("X vs Y") | Which one should I pick? | Pricing, limits, benchmarks with the method shown, where the other tool wins |
+| Error pages | What does this error mean in X? | The exact error text, the cause, a fix that works |
+| Use case pages ("X for job queues") | Is X good for my situation? | A real example project or customer story |
+| Language pages ("X in Go") | How do I use X in my language? | SDK version, a working snippet, language specific limits |
+
+A simple rule: start with 10 to 20 pages you would be proud to show a customer, not 10,000. Before you publish a page, check four things. Does it answer a question someone really asks? Does it have code or numbers you verified yourself? Does it say something the other pages on the web do not? Would a developer who lands on it leave with what they came for? If any answer is no, fix the data first. Do not publish the page yet.
+
+## How do you know if AI tools are recommending your product?
+
+You can check this by hand in under an hour a month. Here is a simple routine:
+
+1. Write down 20 questions real developers ask about your category. Pull them from support tickets, Reddit threads, and your Search Console queries.
+2. Once a month, ask each question in ChatGPT, Perplexity, and Google (including AI Mode). Use the same wording every time. Answers can change from one ask to the next, so ask the important ones a few times.
+3. For each answer, record four things: were you named, were you linked, which competitors were named, and which sites were cited.
+4. Look at the cited sites. Those are the pages shaping answers in your category, and they are your outreach list for step 5.
+
+Then add the numbers your tools already give you:
+
+- **ChatGPT referrals.** OpenAI says ChatGPT adds `utm_source=chatgpt.com` to links, so you can [filter for it in Google Analytics](https://help.openai.com/en/articles/12627856-publishers-and-developers-faq).
+- **Perplexity referrals.** Look for perplexity.ai in your referrer reports.
+- **Google.** Search Console has a [Generative AI performance report](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide). Google also warns that no outside tool has access to its internal ranking or AI systems, so be careful with tools that claim otherwise.
+- **A free check.** Ahrefs offers a [free AI Overviews tracker](https://ahrefs.com/ai-overviews-tracker) that shows how often AI Overviews mention your brand and which sites they cite.
+
+Expect slow movement. Crawler access can change within a day or so. Mentions across the web take much longer to build, so judge your progress by the quarter, not the week.
+
+## What mistakes keep developer products out of AI answers?
+
+- **Blocking every AI bot.** Many teams block all of them to stop training and end up hiding from search too. Keep OAI-SearchBot and PerplexityBot allowed even if you block GPTBot.
+- **Publishing hundreds of thin pages.** Google treats this as spam, and volume does not make a site better.
+- **Buying or faking mentions and reviews.** Google says it is not as helpful as it seems, and fake reviews can hurt real trust.
+- **Hiding docs.** Login walls, JavaScript only pages, and text inside images all make your best material hard to read.
+- **Rewriting everything for robots.** Google says you do not need to chop content into tiny pieces or write in a special style for AI. Write for the developer reading it.
+- **Judging by one test.** One answer on one day tells you very little. Track a fixed set of questions over months.
+
+## Frequently asked questions
+
+### How do I get my product recommended by ChatGPT?
+
+Allow OAI-SearchBot in your robots.txt, put a clear answer at the top of your homepage and docs, and get your product mentioned on sites AI tools trust, like Reddit and review platforms. [OpenAI says](https://developers.openai.com/api/docs/bots) sites that opt out of OAI-SearchBot will not be shown in ChatGPT search answers, so access is the first thing to check.
+
+### How long does it take to show up in AI answers?
+
+Nobody can promise a date. [Perplexity says](https://docs.perplexity.ai/docs/resources/perplexity-crawlers) a robots.txt change can take up to 24 hours to show up, but building mentions across the web is slow. Plan in quarters, not weeks.
+
+### Do backlinks still matter for AI visibility?
+
+They help, but less than mentions in the [Ahrefs study of 75,000 brands](https://ahrefs.com/blog/ai-overview-brand-correlation/): 0.218 for backlinks against 0.664 for brand mentions in AI Overviews. In [Ahrefs' look at ChatGPT's most cited pages](https://ahrefs.com/blog/chatgpts-most-cited-pages/), the ones that did rank mostly sat on strong sites, with 65.3% on domains rated 81 or higher. Both findings are correlations, so read them as hints.
+
+### Do I need an llms.txt file?
+
+Not for Google, which [says its search ignores those files](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide). Adding one will not hurt, and other services may use it, but it should not come before the basics in this guide.
+
+### Do I need schema markup?
+
+[Google says](https://developers.google.com/search/docs/appearance/ai-features) no special markup is required for AI Overviews or AI Mode. If it is easy to add, keep it matched to the visible text on the page. Do not expect it to decide your results.
+
+### Should I block GPTBot?
+
+That is your call. [OpenAI treats](https://developers.openai.com/api/docs/bots) GPTBot, used for training, and OAI-SearchBot, used for search, as separate settings. You can block the first and still allow the second.
+
+### Is AEO different from SEO?
+
+Mostly it overlaps. [Google calls](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide) optimizing for generative AI search a form of SEO. The extra work is off your site: getting discussed in trusted places, and making each page answer its question clearly in the first few lines.
