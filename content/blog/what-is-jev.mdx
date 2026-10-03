@@ -2,6 +2,11 @@
 title: "What is Jev? In 5 minutes"
 slug: "what-is-jev"
 description: "Learn how TypeSafe’s decision model works, how it compares with LLMs, and when to use it for fast, structured decisions in 5 minutes."
+tldrSummary: "Learn how TypeSafe’s decision model works, how it compares with LLMs, and when to use it for fast, structured decisions in 5 minutes."
+tldrBullets:
+  - "Jev takes a piece of text (`state`) plus one or more typed questions, and returns a typed answer with calibrated probabilities. Never free-form text."
+  - "Three answer types: **Choice** (pick one of N options), **Score** (rate on an ordered scale), **Noul** (probability that a yes/no statement is true)."
+  - "It's fast (well under a second in most cases) and cheaper $0.042 per million input tokens, output is free."
 date: "2026-09-25"
 authors: ["Studio1 Team"]
 tags: ["engineering", "llm", "agent", "ai"]
@@ -18,12 +23,6 @@ Most of the time when software uses AI to make a decision, like sorting a suppor
 But an LLM throws a full paragraph and then you have to write code to pull out the actual decision. But Jev skips all of that and gives you the decision directly. 
 
 ![What is Jev](/blog/jev1.png)
-
-### TL;DR
-
-- Jev takes a piece of text (`state`) plus one or more typed questions, and returns a typed answer with calibrated probabilities. Never free-form text.
-- Three answer types: **Choice** (pick one of N options), **Score** (rate on an ordered scale), **Noul** (probability that a yes/no statement is true).
-- It's fast (well under a second in most cases) and cheaper $0.042 per million input tokens, output is free.
 
 ## What exactly is Jev?
 

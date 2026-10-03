@@ -123,6 +123,7 @@ export default async function BlogPostPage({ params }: Props) {
         tags={post.tags}
         readingTimeMinutes={post.readingTimeMinutes}
         shareUrl={`${baseUrl}/blog/${slug}`}
+        tldrSummary={post.tldrSummary}
         keyTakeaways={post.keyTakeaways}
         navigation={post.navigation}
       >

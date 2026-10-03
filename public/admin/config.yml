@@ -52,7 +52,24 @@ collections:
           name: description,
           label: SEO Description,
           widget: text,
-          hint: "One concise answer-style summary for search, AI answers, and cards.",
+          hint: "Suggested: 140-160 characters. Used for Google snippets, social cards, AI answers, and blog cards.",
+        }
+      - {
+          name: tldrSummary,
+          label: TL;DR Summary,
+          widget: text,
+          required: false,
+          hint: "Optional. One short line for the TL;DR card. If empty, the SEO Description is used.",
+        }
+      - {
+          name: tldrBullets,
+          label: TL;DR Bullets,
+          widget: list,
+          required: false,
+          min: 0,
+          max: 4,
+          hint: "Optional. Add 3-4 short bullets for the article TL;DR card. Do not repeat these in the Body.",
+          field: { name: bullet, label: Bullet, widget: string },
         }
       - { name: date, label: Published Date, widget: datetime, format: "YYYY-MM-DD", date_format: "YYYY-MM-DD", time_format: false }
       - {
@@ -109,5 +126,5 @@ collections:
           label: Body,
           widget: markdown,
           modes: [raw, rich_text],
-          hint: "Default is Markdown for reliable Notion paste, links, TL;DR, FAQ tables, and YouTube embeds. Switch to rich text only when you need the visual toolbar.",
+          hint: "Default is Markdown for reliable Notion paste, links, FAQ tables, and YouTube embeds. Use the TL;DR fields above for the article summary card.",
         }

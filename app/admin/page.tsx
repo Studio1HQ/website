@@ -104,6 +104,13 @@ const adminCss = `
     outline: none !important;
   }
 
+  #nc-root textarea[id^="description-field"],
+  #nc-root textarea[id^="tldrSummary-field"] {
+    min-height: 4.75rem !important;
+    max-height: 12rem !important;
+    resize: vertical !important;
+  }
+
   #nc-root button {
     border-radius: 8px !important;
   }
@@ -527,15 +534,22 @@ const adminCss = `
   }
 `;
 
+const cmsAssetVersion = "2026-10-03-tldr-fields-v4";
+
 export default function AdminPage() {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: adminCss }} />
       <Script id="decap-base-path" strategy="beforeInteractive">
-        {`document.head.insertAdjacentHTML("afterbegin", '<base href="/admin/">');`}
+        {`
+          document.head.insertAdjacentHTML(
+            "afterbegin",
+            '<base href="/admin/"><link href="/admin/config.yml?v=${cmsAssetVersion}" type="text/yaml" rel="cms-config-url">'
+          );
+        `}
       </Script>
       <Script
-        src="/admin/notion-paste-helper.js?v=2026-10-03-cms-sync-v1"
+        src={`/admin/notion-paste-helper.js?v=${cmsAssetVersion}`}
         strategy="beforeInteractive"
       />
       <Script
@@ -547,7 +561,7 @@ export default function AdminPage() {
         strategy="afterInteractive"
       />
       <Script
-        src="/admin/blog-preview.js?v=2026-10-03-cms-sync-v1"
+        src={`/admin/blog-preview.js?v=${cmsAssetVersion}`}
         strategy="afterInteractive"
       />
     </>

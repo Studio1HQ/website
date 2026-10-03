@@ -17,6 +17,7 @@ type PostLayoutProps = {
   tags: string[];
   readingTimeMinutes?: number;
   shareUrl: string;
+  tldrSummary?: string;
   keyTakeaways?: string[];
   navigation?: BlogPostNavigation;
   children: ReactNode;
@@ -32,6 +33,7 @@ export function PostLayout({
   tags,
   readingTimeMinutes,
   shareUrl,
+  tldrSummary,
   keyTakeaways = [],
   navigation = { previous: null, next: null },
   children,
@@ -92,7 +94,7 @@ export function PostLayout({
               TL;DR
             </h2>
             <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
-              {description}
+              {tldrSummary || description}
             </p>
             {keyTakeaways.length ? (
               <ul className="space-y-2 text-sm leading-relaxed text-foreground">

@@ -116,10 +116,35 @@
     }
 
     .studio1-preview-description {
-      margin: 0;
+      margin: 0 0 16px;
       color: #5f5b54;
       font-size: 15px;
       line-height: 1.7;
+    }
+
+    .studio1-preview-takeaways {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      color: #171717;
+      font-size: 15px;
+      line-height: 1.65;
+    }
+
+    .studio1-preview-takeaways li {
+      display: flex;
+      gap: 9px;
+      margin: 9px 0 0;
+    }
+
+    .studio1-preview-takeaways li::before {
+      content: "";
+      flex: 0 0 auto;
+      width: 6px;
+      height: 6px;
+      margin-top: 0.68em;
+      border-radius: 999px;
+      background: #17a8b8;
     }
 
     .studio1-preview-body {
@@ -295,8 +320,130 @@
     }
   }
 
+  function getYouTubeVideoId(value) {
+    try {
+      const url = new URL(String(value || "").trim());
+      const host = url.hostname.replace(/^www\./, "");
+
+      if (host === "youtu.be") {
+        return url.pathname.split("/").filter(Boolean)[0] || "";
+      }
+
+      if (host !== "youtube.com" && host !== "m.youtube.com") return "";
+
+      if (url.pathname === "/watch") {
+        return url.searchParams.get("v") || "";
+      }
+
+      const parts = url.pathname.split("/").filter(Boolean);
+      return ["embed", "shorts", "live"].includes(parts[0]) ? parts[1] || "" : "";
+    } catch {
+      return "";
+    }
+  }
+
+  function getYouTubeEmbedUrl(value) {
+    const videoId = getYouTubeVideoId(value);
+    return /^[A-Za-z0-9_-]{6,}$/.test(videoId)
+      ? `https://www.youtube.com/embed/${videoId}`
+      : "";
+  }
+
+  function registerYouTubeEditorComponent() {
+    if (window.__studio1YouTubeEditorRegistered) return;
+    window.__studio1YouTubeEditorRegistered = true;
+
+    window.CMS.registerEditorComponent({
+      id: "youtube",
+      label: "YouTube Embed",
+      fields: [
+        {
+          name: "url",
+          label: "YouTube URL",
+          widget: "string",
+          hint: "Paste a youtube.com or youtu.be link. The published blog will render it as a responsive video embed.",
+        },
+      ],
+      pattern: /^::youtube\[([^\]]+)\]$/,
+      fromBlock(match) {
+        return { url: match?.[1] || "" };
+      },
+      toBlock(data) {
+        return `::youtube[${data.url || ""}]`;
+      },
+      toPreview(data) {
+        const embedUrl = getYouTubeEmbedUrl(data.url);
+        if (!embedUrl) {
+          return `<p style="color:#8a4b00;">Paste a valid YouTube URL.</p>`;
+        }
+
+        return `
+          <figure style="margin: 32px auto; overflow: hidden; border-radius: 12px; border: 1px solid rgba(23,23,23,.12); background: #111;">
+            <div style="position: relative; width: 100%; padding-top: 56.25%;">
+              <iframe
+                src="${embedUrl}"
+                title="YouTube video player"
+                loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen
+                style="position:absolute; inset:0; width:100%; height:100%; border:0;"
+              ></iframe>
+            </div>
+          </figure>
+        `;
+      },
+    });
+  }
+
+  function stripInlineMarkdown(value) {
+    return String(value || "")
+      .replace(/!\[([^\]]*)\]\([^)]+\)/g, "$1")
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+      .replace(/`([^`]+)`/g, "$1")
+      .replace(/\*\*([^*]+)\*\*/g, "$1")
+      .replace(/\*([^*]+)\*/g, "$1")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/&nbsp;/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function extractTldrTakeaways(markdown) {
+    const lines = String(markdown || "").split("\n");
+    const tldrIndex = lines.findIndex((line) =>
+      /^#{2,3}\s+tl;?dr\s*$/i.test(line.trim()),
+    );
+    if (tldrIndex < 0) return [];
+
+    const takeaways = [];
+    for (const line of lines.slice(tldrIndex + 1)) {
+      const trimmed = line.trim();
+      if (/^#{2,3}\s+/.test(trimmed)) break;
+      const match = trimmed.match(/^[-*]\s+(.+)/);
+      if (match?.[1]) takeaways.push(stripInlineMarkdown(match[1]));
+    }
+    return takeaways.slice(0, 4);
+  }
+
+  function hideDuplicateRenderedTldr() {
+    window.requestAnimationFrame(() => {
+      document.querySelectorAll(".studio1-preview-body h2, .studio1-preview-body h3").forEach((heading) => {
+        if (!/^tl;?dr$/i.test((heading.textContent || "").trim())) return;
+
+        let next = heading.nextElementSibling;
+        heading.style.display = "none";
+        while (next && !/^H[23]$/.test(next.tagName)) {
+          const current = next;
+          next = next.nextElementSibling;
+          current.style.display = "none";
+        }
+      });
+    });
+  }
+
   function waitForCms() {
     if (window.CMS && window.createClass && window.h) {
+      registerYouTubeEditorComponent();
       registerBlogPreview();
       return;
     }
@@ -310,11 +457,18 @@
     window.CMS.registerPreviewStyle(previewCss, { raw: true });
 
     const BlogPreview = window.createClass({
+      componentDidMount() {
+        hideDuplicateRenderedTldr();
+      },
+      componentDidUpdate() {
+        hideDuplicateRenderedTldr();
+      },
       render() {
         const entry = this.props.entry;
         const getAsset = this.props.getAsset;
         const title = asText(entry.getIn(["data", "title"]), "Untitled blog post");
         const description = asText(entry.getIn(["data", "description"]));
+        const tldrSummary = asText(entry.getIn(["data", "tldrSummary"])) || description;
         const date = asText(entry.getIn(["data", "date"]));
         const updatedDate = asText(entry.getIn(["data", "updatedDate"]));
         const bannerImage = asText(entry.getIn(["data", "bannerImage"]));
@@ -323,6 +477,13 @@
         const tags = asArray(entry.getIn(["data", "tags"])).filter(Boolean);
         const authorText = authors.length ? authors.join(", ") : "Studio1 Team";
         const bannerSrc = safeAsset(getAsset, bannerImage);
+        const bodyMarkdown = asText(entry.getIn(["data", "body"]));
+        const configuredTakeaways = asArray(entry.getIn(["data", "tldrBullets"]))
+          .map(stripInlineMarkdown)
+          .filter(Boolean);
+        const keyTakeaways = configuredTakeaways.length
+          ? configuredTakeaways.slice(0, 4)
+          : extractTldrTakeaways(bodyMarkdown);
         const bodyPreview = this.props.widgetFor("body");
         const metaItems = [date, updatedDate && updatedDate !== date ? `Updated ${updatedDate}` : ""].filter(Boolean);
 
@@ -355,12 +516,21 @@
                   )
                 : null,
             ),
-            description
+            tldrSummary || keyTakeaways.length
               ? window.h(
                   "section",
                   { className: "studio1-preview-tldr", "aria-label": "Article TL;DR" },
                   window.h("h2", {}, "TL;DR"),
-                  window.h("p", { className: "studio1-preview-description" }, description),
+                  tldrSummary
+                    ? window.h("p", { className: "studio1-preview-description" }, tldrSummary)
+                    : null,
+                  keyTakeaways.length
+                    ? window.h(
+                        "ul",
+                        { className: "studio1-preview-takeaways" },
+                        keyTakeaways.map((takeaway) => window.h("li", { key: takeaway }, window.h("span", {}, takeaway))),
+                      )
+                    : null,
                 )
               : null,
             window.h(

@@ -33,6 +33,7 @@ export type BlogPostMeta = {
   bannerImageAlt: string;
   socialImage: string;
   readingTimeMinutes: number;
+  tldrSummary: string;
 };
 
 type Frontmatter = {
@@ -49,6 +50,8 @@ type Frontmatter = {
   imageAlt?: string;
   bannerImage?: string;
   bannerImageAlt?: string;
+  tldrSummary?: string;
+  tldrBullets?: string[];
 };
 
 export type BlogPostNavigation = {
@@ -92,7 +95,11 @@ export function stripBlogMarkdown(content: string): string {
 export function extractKeyTakeaways(
   content: string,
   description: string,
+  configuredTakeaways?: string[],
 ): string[] {
+  const configured = normalizeStringList(configuredTakeaways);
+  if (configured.length) return configured.slice(0, 4);
+
   const lines = content.split("\n");
   const tldrIndex = lines.findIndex((line) =>
     /^#{2,3}\s+tl;?dr\s*$/i.test(line.trim()),
@@ -173,8 +180,9 @@ function visibleReadingContent(
   content: string,
   description: string,
   takeaways = extractKeyTakeaways(content, description),
+  tldrSummary = description,
 ) {
-  return [description, ...takeaways, removeTldrSection(content)]
+  return [tldrSummary || description, ...takeaways, removeTldrSection(content)]
     .filter(Boolean)
     .join("\n");
 }
@@ -226,6 +234,12 @@ function postMetaFromFile(fileName: string): BlogPostMeta {
   const draft = isDraft(d);
   const description = d.description ?? "";
   const bodySource = removeLeadingDuplicateTitle(content, title);
+  const tldrSummary = d.tldrSummary?.trim() || description;
+  const keyTakeaways = extractKeyTakeaways(
+    bodySource,
+    description,
+    d.tldrBullets,
+  );
 
   return {
     slug,
@@ -242,10 +256,20 @@ function postMetaFromFile(fileName: string): BlogPostMeta {
     bannerImage,
     bannerImageAlt: d.bannerImageAlt ?? d.imageAlt ?? title,
     socialImage: bannerImage ?? DEFAULT_POST_IMAGE,
+    tldrSummary,
     readingTimeMinutes: estimateReadingMinutes(
-      visibleReadingContent(bodySource, description),
+      visibleReadingContent(bodySource, description, keyTakeaways, tldrSummary),
     ),
   };
+}
+
+function normalizeStringList(value?: string[]): string[] {
+  return Array.isArray(value)
+    ? value
+        .filter((item): item is string => typeof item === "string")
+        .map((item) => stripInlineMarkdown(item))
+        .filter(Boolean)
+    : [];
 }
 
 function normalizeAuthors(authors?: string[], author?: string): string[] {
@@ -309,6 +333,7 @@ export type BlogPost = {
   bannerImageAlt: string;
   socialImage: string;
   readingTimeMinutes: number;
+  tldrSummary: string;
   keyTakeaways: string[];
   faqs: BlogFaq[];
   latestPosts: BlogPostMeta[];
@@ -343,7 +368,12 @@ export function getPostBySlug(slug: string): BlogPost | null {
   const image = d.image ?? DEFAULT_POST_IMAGE;
   const bannerImage = d.bannerImage?.trim() || undefined;
   const bodySource = removeLeadingDuplicateTitle(content, title);
-  const keyTakeaways = extractKeyTakeaways(bodySource, description);
+  const tldrSummary = d.tldrSummary?.trim() || description;
+  const keyTakeaways = extractKeyTakeaways(
+    bodySource,
+    description,
+    d.tldrBullets,
+  );
   const bodyContent = removeTldrSection(bodySource);
   return {
     slug,
@@ -361,8 +391,9 @@ export function getPostBySlug(slug: string): BlogPost | null {
     bannerImage,
     bannerImageAlt: d.bannerImageAlt ?? d.imageAlt ?? title,
     socialImage: bannerImage ?? DEFAULT_POST_IMAGE,
+    tldrSummary,
     readingTimeMinutes: estimateReadingMinutes(
-      visibleReadingContent(content, description, keyTakeaways),
+      visibleReadingContent(content, description, keyTakeaways, tldrSummary),
     ),
     keyTakeaways,
     faqs: extractFaqs(content),
