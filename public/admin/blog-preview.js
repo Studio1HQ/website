@@ -47,6 +47,18 @@
       object-fit: contain;
     }
 
+    .studio1-preview-banner-missing {
+      display: flex;
+      min-height: 100%;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
     .studio1-preview-meta {
       display: flex;
       flex-wrap: wrap;
@@ -120,6 +132,14 @@
       color: #5f5b54;
       font-size: 15px;
       line-height: 1.7;
+    }
+
+    .studio1-preview-note {
+      margin: 0;
+      color: #747067;
+      font-size: 14px;
+      font-style: italic;
+      line-height: 1.6;
     }
 
     .studio1-preview-takeaways {
@@ -457,10 +477,18 @@
     window.CMS.registerPreviewStyle(previewCss, { raw: true });
 
     const BlogPreview = window.createClass({
+      getInitialState() {
+        return { failedBanner: "" };
+      },
       componentDidMount() {
         hideDuplicateRenderedTldr();
       },
-      componentDidUpdate() {
+      componentDidUpdate(prevProps) {
+        const previousBanner = asText(prevProps?.entry?.getIn(["data", "bannerImage"]));
+        const nextBanner = asText(this.props.entry?.getIn(["data", "bannerImage"]));
+        if (previousBanner !== nextBanner && this.state.failedBanner) {
+          this.setState({ failedBanner: "" });
+        }
         hideDuplicateRenderedTldr();
       },
       render() {
@@ -468,7 +496,7 @@
         const getAsset = this.props.getAsset;
         const title = asText(entry.getIn(["data", "title"]), "Untitled blog post");
         const description = asText(entry.getIn(["data", "description"]));
-        const tldrSummary = asText(entry.getIn(["data", "tldrSummary"])) || description;
+        const tldrSummary = asText(entry.getIn(["data", "tldrSummary"]));
         const date = asText(entry.getIn(["data", "date"]));
         const updatedDate = asText(entry.getIn(["data", "updatedDate"]));
         const bannerImage = asText(entry.getIn(["data", "bannerImage"]));
@@ -477,6 +505,7 @@
         const tags = asArray(entry.getIn(["data", "tags"])).filter(Boolean);
         const authorText = authors.length ? authors.join(", ") : "Studio1 Team";
         const bannerSrc = safeAsset(getAsset, bannerImage);
+        const bannerFailed = this.state.failedBanner === bannerSrc;
         const bodyMarkdown = asText(entry.getIn(["data", "body"]));
         const configuredTakeaways = asArray(entry.getIn(["data", "tldrBullets"]))
           .map(stripInlineMarkdown)
@@ -496,7 +525,17 @@
             window.h(
               "div",
               { className: "studio1-preview-banner" },
-              window.h("img", { src: bannerSrc, alt: bannerAlt }),
+              bannerFailed
+                ? window.h(
+                    "div",
+                    { className: "studio1-preview-banner-missing" },
+                    "Banner file was not found locally. Upload after the slug is set, or use a saved file under /public/blog/uploads/[slug]/.",
+                  )
+                : window.h("img", {
+                    src: bannerSrc,
+                    alt: bannerAlt,
+                    onError: () => this.setState({ failedBanner: bannerSrc }),
+                  }),
             ),
             window.h(
               "header",
@@ -523,7 +562,13 @@
                   window.h("h2", {}, "TL;DR"),
                   tldrSummary
                     ? window.h("p", { className: "studio1-preview-description" }, tldrSummary)
-                    : null,
+                    : description
+                      ? window.h(
+                          "p",
+                          { className: "studio1-preview-note" },
+                          "TL;DR Summary is empty. The published page will reuse SEO Description here.",
+                        )
+                      : null,
                   keyTakeaways.length
                     ? window.h(
                         "ul",

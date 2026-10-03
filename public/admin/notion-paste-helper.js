@@ -206,7 +206,7 @@
 
   function ensureEntrySyncAction() {
     const root = document.getElementById("nc-root");
-    if (!root || !/#\/collections\/blog\/entries\//.test(window.location.hash)) return;
+    if (!root || !/#\/collections\/blog\/(?:entries\/|new(?:$|[/?#]))/.test(window.location.hash)) return;
     if (root.querySelector(".studio1-cms-sync-action")) return;
 
     const controlPane =
@@ -218,10 +218,10 @@
     wrapper.className = "studio1-cms-sync-action";
     wrapper.innerHTML = `
       <p>
-        <strong>Seeing old CMS content?</strong>
-        Reload from the saved repo file before editing so the form matches the published blog.
+        <strong>CMS stuck or showing old fields?</strong>
+        Hard refresh the CMS shell after config changes or browser cache issues.
       </p>
-      <button type="button">Reload from saved file</button>
+      <button type="button">Hard refresh CMS</button>
     `;
 
     const button = wrapper.querySelector("button");

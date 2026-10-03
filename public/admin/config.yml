@@ -112,7 +112,8 @@ collections:
           label: Optional Social Share Image,
           widget: image,
           required: false,
-          hint: "Optional. Used for this blog card and LinkedIn/Twitter preview. Leave empty to use the default Studio1 image.",
+          choose_url: false,
+          hint: "Optional. Set the URL Slug first, then upload. Used for this blog card and LinkedIn/Twitter preview. Leave empty to use the default Studio1 image.",
         }
       - {
           name: bannerImageAlt,
