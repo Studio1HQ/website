@@ -45,6 +45,12 @@ const nextConfig: NextConfig = {
         destination: "/sitemap.xml",
         permanent: true,
       },
+      {
+        source:
+          "/blog/claude-opus-5-5-what-changed-what-breaks-whether-to-switch",
+        destination: "/blog/claude-opus-5-5-review-motion-videos",
+        permanent: true,
+      },
       ...["/work", "/fr/work", "/es/work", "/hi/work", "/zh/work"].map(
         (source) => ({
           source,

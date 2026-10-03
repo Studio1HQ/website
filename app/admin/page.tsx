@@ -148,12 +148,200 @@ const adminCss = `
     background: #f4f1eb !important;
   }
 
+  #nc-root button[title="Sync scrolling"] {
+    display: none !important;
+  }
+
+  #nc-root .studio1-cms-sync-action {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 0.75rem !important;
+    margin: 0 0 1rem !important;
+    padding: 0.85rem 1rem !important;
+    border: 1px solid rgba(23, 168, 184, 0.28) !important;
+    border-radius: 10px !important;
+    background: rgba(23, 168, 184, 0.08) !important;
+    color: var(--studio1-cms-text) !important;
+  }
+
+  #nc-root .studio1-cms-sync-action p {
+    margin: 0 !important;
+    color: var(--studio1-cms-muted) !important;
+    font-size: 13px !important;
+    line-height: 1.45 !important;
+  }
+
+  #nc-root .studio1-cms-sync-action strong {
+    display: block !important;
+    margin-bottom: 0.15rem !important;
+    color: var(--studio1-cms-text) !important;
+    font-size: 13px !important;
+  }
+
+  #nc-root .studio1-cms-sync-action button {
+    flex: 0 0 auto !important;
+    border: 1px solid rgba(23, 168, 184, 0.42) !important;
+    background: #ffffff !important;
+    color: #0b6f7d !important;
+    padding: 0.55rem 0.75rem !important;
+    font-size: 13px !important;
+    font-weight: 650 !important;
+  }
+
+  #nc-root .studio1-cms-card-with-banner {
+    min-height: 15rem !important;
+    overflow: hidden !important;
+  }
+
+  #nc-root .studio1-cms-card-banner {
+    display: block !important;
+    width: calc(100% + 2px) !important;
+    height: 8.75rem !important;
+    margin: -1px -1px 1rem !important;
+    border-radius: 10px 10px 0 0 !important;
+    background: #050505 !important;
+    object-fit: contain !important;
+    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.08) !important;
+  }
+
+  #nc-root .studio1-cms-card-no-banner {
+    min-height: 11rem !important;
+  }
+
+  #nc-root .studio1-cms-blog-search {
+    margin: 1rem 0 1.25rem !important;
+    padding: 1rem !important;
+    border: 1px solid var(--studio1-cms-border) !important;
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, 0.82) !important;
+    box-shadow: 0 14px 44px -34px rgba(0, 0, 0, 0.35) !important;
+  }
+
+  #nc-root .studio1-cms-blog-search-label {
+    display: inline-flex !important;
+    width: auto !important;
+    margin-bottom: 0.65rem !important;
+    padding: 0.25rem 0.45rem !important;
+  }
+
+  #nc-root .studio1-cms-blog-search-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.8rem !important;
+  }
+
+  #nc-root .studio1-cms-blog-search-input {
+    width: min(34rem, 100%) !important;
+    min-height: 2.75rem !important;
+    padding: 0 0.9rem !important;
+  }
+
+  #nc-root .studio1-cms-blog-search-status {
+    color: var(--studio1-cms-muted) !important;
+    font-size: 13px !important;
+    white-space: nowrap !important;
+  }
+
+  @media (max-width: 700px) {
+    #nc-root .studio1-cms-blog-search-row {
+      align-items: stretch !important;
+      flex-direction: column !important;
+      gap: 0.5rem !important;
+    }
+
+    #nc-root .studio1-cms-blog-search-status {
+      white-space: normal !important;
+    }
+  }
+
   #nc-root.studio1-cms-wide .SplitPane > .Pane1 {
+    position: static !important;
     width: min(58%, 980px) !important;
+    min-width: min(52vw, 760px) !important;
+    max-width: 980px !important;
+    flex: 0 0 min(58%, 980px) !important;
+    overflow: auto !important;
+  }
+
+  #nc-root.studio1-cms-wide .SplitPane {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: stretch !important;
+    overflow: hidden !important;
   }
 
   #nc-root.studio1-cms-wide .SplitPane > .Pane2 {
+    position: static !important;
+    display: block !important;
+    width: auto !important;
     min-width: 520px !important;
+    max-width: none !important;
+    flex: 1 1 0 !important;
+    overflow: auto !important;
+  }
+
+  #nc-root.studio1-cms-wide .SplitPane > .Resizer {
+    display: none !important;
+  }
+
+  #nc-root.studio1-cms-wide iframe#preview-pane {
+    display: block !important;
+    width: 100% !important;
+    min-height: 100% !important;
+  }
+
+  #nc-root.studio1-cms-preview-layout .SplitPane {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow: hidden !important;
+  }
+
+  #nc-root.studio1-cms-preview-layout .SplitPane > .Pane1,
+  #nc-root.studio1-cms-preview-layout .SplitPane > .Pane2 {
+    position: static !important;
+    display: block !important;
+    width: 50% !important;
+    min-width: 0 !important;
+    max-width: 50% !important;
+    flex: 0 0 50% !important;
+    overflow: auto !important;
+  }
+
+  #nc-root.studio1-cms-preview-layout .SplitPane > .Pane2 {
+    border-left: 1px solid var(--studio1-cms-border) !important;
+    background: #fffdf9 !important;
+  }
+
+  #nc-root.studio1-cms-preview-layout [class*="ControlPaneContainer"] {
+    max-width: none !important;
+  }
+
+  #nc-root.studio1-cms-preview-layout [class*="PreviewPaneContainer"] {
+    min-height: 100% !important;
+    background: #fffdf9 !important;
+  }
+
+  #nc-root.studio1-cms-preview-layout iframe#preview-pane {
+    display: block !important;
+    width: 100% !important;
+    min-height: 100% !important;
+    border: 0 !important;
+    background: #fffdf9 !important;
+  }
+
+  @media (min-width: 781px) and (max-width: 1120px) {
+    #nc-root.studio1-cms-preview-layout [class*="ControlPaneContainer"] {
+      padding: 16px !important;
+    }
+
+    #nc-root.studio1-cms-preview-layout .studio1-cms-blog-search {
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+    }
   }
 
   input,
@@ -186,13 +374,6 @@ const adminCss = `
       box-sizing: border-box !important;
     }
 
-    #nc-root [class*="Preview"],
-    #nc-root [class*="preview"],
-    #nc-root [class*="PreviewPane"],
-    #nc-root iframe#preview-pane {
-      display: none !important;
-    }
-
     #nc-root [class*="EditorContainer"] {
       min-width: 0 !important;
       width: 100% !important;
@@ -215,9 +396,29 @@ const adminCss = `
       flex: none !important;
     }
 
-    #nc-root .SplitPane > .Pane2,
+    #nc-root .SplitPane > .Pane2 {
+      position: static !important;
+      display: block !important;
+      width: 100% !important;
+      max-width: 100vw !important;
+      min-width: 0 !important;
+      flex: none !important;
+      margin-top: 1rem !important;
+    }
+
     #nc-root .SplitPane > .Resizer {
       display: none !important;
+    }
+
+    #nc-root [class*="PreviewPaneContainer"] {
+      min-height: 72vh !important;
+      border-top: 1px solid var(--studio1-cms-border) !important;
+    }
+
+    #nc-root iframe#preview-pane {
+      display: block !important;
+      width: 100% !important;
+      min-height: 72vh !important;
     }
 
     [class*="AppMain"],
@@ -270,11 +471,6 @@ const adminCss = `
     overflow-x: hidden !important;
   }
 
-  #nc-root.studio1-cms-phone [class*="Preview"],
-  #nc-root.studio1-cms-phone [class*="preview"],
-  #nc-root.studio1-cms-phone [class*="PreviewPane"],
-  #nc-root.studio1-cms-phone iframe#preview-pane,
-  #nc-root.studio1-cms-phone .SplitPane > .Pane2,
   #nc-root.studio1-cms-phone .SplitPane > .Resizer {
     display: none !important;
   }
@@ -282,6 +478,7 @@ const adminCss = `
   #nc-root.studio1-cms-phone [class*="EditorContainer"],
   #nc-root.studio1-cms-phone .SplitPane,
   #nc-root.studio1-cms-phone .SplitPane > .Pane1,
+  #nc-root.studio1-cms-phone .SplitPane > .Pane2,
   #nc-root.studio1-cms-phone [class*="AppMainContainer"] {
     position: static !important;
     width: 100% !important;
@@ -291,6 +488,19 @@ const adminCss = `
     margin-left: 0 !important;
     margin-right: 0 !important;
     overflow: visible !important;
+  }
+
+  #nc-root.studio1-cms-phone .SplitPane > .Pane2 {
+    display: block !important;
+    margin-top: 1rem !important;
+  }
+
+  #nc-root.studio1-cms-phone [class*="PreviewPaneContainer"],
+  #nc-root.studio1-cms-phone iframe#preview-pane {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    min-height: 72vh !important;
   }
 
   @media (max-width: 520px) {
@@ -325,7 +535,7 @@ export default function AdminPage() {
         {`document.head.insertAdjacentHTML("afterbegin", '<base href="/admin/">');`}
       </Script>
       <Script
-        src="/admin/notion-paste-helper.js?v=2026-10-02-cms-polish"
+        src="/admin/notion-paste-helper.js?v=2026-10-03-cms-sync-v1"
         strategy="beforeInteractive"
       />
       <Script
@@ -334,6 +544,10 @@ export default function AdminPage() {
       />
       <Script
         src="https://unpkg.com/decap-cms@^3.8.0/dist/decap-cms.js"
+        strategy="afterInteractive"
+      />
+      <Script
+        src="/admin/blog-preview.js?v=2026-10-03-cms-sync-v1"
         strategy="afterInteractive"
       />
     </>

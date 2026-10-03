@@ -1,12 +1,12 @@
 ---
-title: "Claude Opus 5.5: What Changed, What Breaks, and Whether to Switch"
-slug: "claude-opus-5-5-what-changed-what-breaks-whether-to-switch"
-description: "Claude Opus 5.5 review: explore what changed, coding performance, reasoning, speed, security, creative use cases, and whether you should switch."
+title: "Claude Opus 5.5 Review: Motion Videos, Coding Tests, and What Breaks"
+slug: "claude-opus-5-5-review-motion-videos"
+description: "Claude Opus 5.5 review covering motion video generation, coding benchmarks, pricing, breaking changes, and whether teams should switch."
 date: 2026-09-30
 draft: false
 authors:
   - "Studio1 Team"
-bannerImage: "/blog/uploads/claude-opus-5-5-what-changed-what-breaks-whether-to-switch/banner.png"
+bannerImage: "/blog/uploads/claude-opus-5-5-review-motion-videos/banner.png"
 bannerImageAlt: "Claude Opus 5.5 blog banner"
 ---
 In September 2026, Anthropic's CEO Dario Amodei [published an essay](https://darioamodei.com/post/we-must-pace-the-frontier) with this line in it: "We must slow the pace at which we improve the capabilities of AI models."
@@ -93,7 +93,7 @@ Benchmarks are standard exams for models. These are the ones that matter most fo
 
 These are best-case scores, mostly from the maker's own runs. Even Anthropic says the real gap to Fable is smaller than the table looks.
 
-![Claude Opus 5.5 comparison](/blog/uploads/claude-opus-5-5-what-changed-what-breaks-whether-to-switch/comparison.png)
+![Claude Opus 5.5 comparison](/blog/uploads/claude-opus-5-5-review-motion-videos/comparison.png)
 
 ### What people have built with it
 
@@ -104,6 +104,7 @@ These are some great use cases built by people who got their hands on Opus 5.5 i
 - **Pixel art wizard from a strict spec.** [Majid](https://twitter.com/majidmanzarpour/status/2102476258948927543) wrote a tight prompt: one HTML file, 128x96 resolution, 24 colors, particle effects, and a state machine for idle, charge and cast. It followed the whole spec and runs at 60 fps.
 - **An 80-second film with no libraries.** [Chris Riley](https://twitter.com/LCSlates/status/2102503027340988559) wanted a film in one HTML file using only WebGL2 and plain JavaScript. No libraries, no images, no audio files. The result is a glass mosaic where the fish and birds are made of moving tiles.
 - **A Blender castle, with the bill.** [Stefan Vaskevich](https://twitter.com/Stefan_3D_AI/status/2102471841046786153) had Opus 5.5 and GPT-6 Astra each build a 10-second Blender animation of a castle from one prompt. Opus took 35 minutes and cost about $13.30. Astra was faster at 28 minutes but cost $14.50. Stefan felt Opus handled more complexity.
+- **Motion graphics and creative work.** Opus 5.5 is also being used for motion graphics and creative coding, with people generating animations from simple prompts. We created [one ourselves](https://x.com/Astrodevil_/status/2103600734017392708?s=20) using a single prompt, and the model goes beyond code generation into actually building visual experiences.
 
 These are demos people chose to post, so treat them as best cases. 
 
@@ -112,7 +113,6 @@ These are demos people chose to post, so treat them as best cases.
 Not everything's better. A few real gaps before you switch:
 
 - **Coding.** Sonar found it writes about 27% less code, with 42% fewer issues overall. But bugs per line went up 12%, and problems in concurrent code went up 44%. If your codebase leans on threads, locks, or async, don't skip the review.
-- **Motion graphics and creative work.** Opus 5.5 is also being used for motion graphics and creative coding, with people generating animations from simple prompts. We have created [one ourselves](https://x.com/Astrodevil_/status/2103600734017392708?s=20) using a single prompt. The model goes beyond code generation into actually building visual experiences.
 - **Business tasks and science.** OpenAI's Astra still wins both. It beats Opus 5.5 on business tasks, and by a wider margin, on science.
 - **Hard reasoning.** Fable still wins here. If your evals fail at high effort, that's your next move, not a higher setting on Opus.
 - **Speed.** It's slow to start. One test clocked about 22 seconds before the first word at medium effort. Fine for a background job, bad for a chat window someone's watching.

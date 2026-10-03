@@ -8,6 +8,7 @@
   "packageManager": "pnpm@9.15.9",
   "scripts": {
     "dev": "next dev --webpack",
+    "cms:local": "npx -y decap-server@3.11.3",
     "build": "next build",
     "start": "next start",
     "format": "prettier --write .",

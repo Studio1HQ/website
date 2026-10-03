@@ -13,9 +13,11 @@
 
     const isPhone = currentViewportWidth() <= 780;
     const isWide = currentViewportWidth() >= 1280;
+    const useSplitPreview = !isPhone;
 
     root.classList.toggle("studio1-cms-phone", isPhone);
     root.classList.toggle("studio1-cms-wide", isWide);
+    root.classList.toggle("studio1-cms-preview-layout", useSplitPreview);
 
     root.querySelectorAll(".SplitPane").forEach((splitPane) => {
       if (!(splitPane instanceof HTMLElement)) return;
@@ -32,10 +34,25 @@
       pane.style.width = isPhone ? "100%" : "";
       pane.style.maxWidth = isPhone ? "100vw" : "";
       pane.style.minWidth = isPhone ? "0" : "";
+      pane.style.marginLeft = "";
+      pane.style.marginRight = "";
       pane.style.flex = isPhone ? "none" : "";
     });
 
-    root.querySelectorAll(".SplitPane > .Pane2, .SplitPane > .Resizer").forEach((pane) => {
+    root.querySelectorAll(".SplitPane > .Pane2").forEach((pane) => {
+      if (!(pane instanceof HTMLElement)) return;
+      pane.style.display = "";
+      pane.style.position = isPhone ? "static" : "";
+      pane.style.width = isPhone ? "100%" : "";
+      pane.style.maxWidth = isPhone ? "100vw" : "";
+      pane.style.minWidth = isPhone ? "0" : "";
+      pane.style.marginLeft = "";
+      pane.style.marginRight = "";
+      pane.style.flex = isPhone ? "none" : "";
+      pane.style.overflow = isPhone ? "visible" : "";
+    });
+
+    root.querySelectorAll(".SplitPane > .Resizer").forEach((pane) => {
       if (!(pane instanceof HTMLElement)) return;
       pane.style.display = isPhone ? "none" : "";
     });
@@ -49,13 +66,200 @@
     });
   }
 
+  function entrySlugFromUrl(value) {
+    const match = value?.match(/#\/collections\/blog\/entries\/([^/?#]+)/);
+    return match ? decodeURIComponent(match[1]) : "";
+  }
+
+  function enhanceBlogCards() {
+    const root = document.getElementById("nc-root");
+    if (!root || !/#\/collections\/blog(?:$|[/?#])/.test(window.location.hash)) return;
+
+    root.querySelectorAll('a[href*="#/collections/blog/entries/"]').forEach((link) => {
+      if (!(link instanceof HTMLAnchorElement)) return;
+      const slug = entrySlugFromUrl(link.getAttribute("href") || "");
+      if (
+        !slug ||
+        link.classList.contains("studio1-cms-card-no-banner") ||
+        link.querySelector(".studio1-cms-card-banner")
+      ) {
+        return;
+      }
+
+      const banner = document.createElement("img");
+      banner.className = "studio1-cms-card-banner";
+      banner.src = `/blog/uploads/${slug}/banner.png`;
+      banner.alt = "";
+      banner.loading = "lazy";
+      banner.decoding = "async";
+      banner.onerror = () => {
+        banner.remove();
+        link.classList.add("studio1-cms-card-no-banner");
+      };
+
+      link.classList.add("studio1-cms-card-with-banner");
+      link.prepend(banner);
+    });
+  }
+
+  function blogCollectionCards() {
+    const root = document.getElementById("nc-root");
+    if (!root) return [];
+    return Array.from(root.querySelectorAll('a[href*="#/collections/blog/entries/"]')).filter(
+      (link) => link instanceof HTMLAnchorElement,
+    );
+  }
+
+  function applyBlogCardFilter() {
+    const input = document.querySelector(".studio1-cms-blog-search-input");
+    const query = input instanceof HTMLInputElement ? input.value.trim().toLowerCase() : "";
+    let visibleCount = 0;
+
+    blogCollectionCards().forEach((card) => {
+      const text = `${card.textContent || ""} ${entrySlugFromUrl(card.getAttribute("href") || "")}`.toLowerCase();
+      const visible = !query || text.includes(query);
+      card.style.display = visible ? "" : "none";
+      if (visible) visibleCount += 1;
+    });
+
+    const status = document.querySelector(".studio1-cms-blog-search-status");
+    if (status instanceof HTMLElement) {
+      status.textContent = query
+        ? `${visibleCount} matching post${visibleCount === 1 ? "" : "s"}`
+        : "Search by blog title, slug, or date";
+    }
+  }
+
+  function ensureBlogSearch() {
+    const root = document.getElementById("nc-root");
+    if (!root || !/#\/collections\/blog(?:$|[/?#])/.test(window.location.hash)) return;
+    if (window.location.hash.includes("/entries/") || window.location.hash.includes("/new")) return;
+    if (root.querySelector(".studio1-cms-blog-search")) {
+      applyBlogCardFilter();
+      return;
+    }
+
+    const firstCard = blogCollectionCards()[0];
+    const cardGrid = firstCard?.parentElement;
+    if (!cardGrid) return;
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "studio1-cms-blog-search";
+    wrapper.innerHTML = `
+      <label class="studio1-cms-blog-search-label" for="studio1-cms-blog-search-input">Search blog posts</label>
+      <div class="studio1-cms-blog-search-row">
+        <input
+          id="studio1-cms-blog-search-input"
+          class="studio1-cms-blog-search-input"
+          type="search"
+          placeholder="Search by title, slug, date..."
+          autocomplete="off"
+        />
+        <span class="studio1-cms-blog-search-status">Search by blog title, slug, or date</span>
+      </div>
+    `;
+
+    cardGrid.parentElement?.insertBefore(wrapper, cardGrid);
+    const input = wrapper.querySelector(".studio1-cms-blog-search-input");
+    if (input instanceof HTMLInputElement) {
+      input.value = sessionStorage.getItem("studio1-cms-blog-search") || "";
+      input.addEventListener("input", () => {
+        sessionStorage.setItem("studio1-cms-blog-search", input.value);
+        applyBlogCardFilter();
+      });
+    }
+    applyBlogCardFilter();
+  }
+
+  async function clearCmsBrowserState() {
+    try {
+      window.localStorage?.clear();
+    } catch {}
+
+    try {
+      window.sessionStorage?.clear();
+    } catch {}
+
+    try {
+      const cacheNames = await window.caches?.keys?.();
+      await Promise.all((cacheNames || []).map((cacheName) => window.caches.delete(cacheName)));
+    } catch {}
+
+    try {
+      if (window.indexedDB?.databases) {
+        const databases = await window.indexedDB.databases();
+        await Promise.all(
+          databases
+            .map((database) => database.name)
+            .filter(Boolean)
+            .map(
+              (databaseName) =>
+                new Promise((resolve) => {
+                  const request = window.indexedDB.deleteDatabase(databaseName);
+                  request.onsuccess = request.onerror = request.onblocked = resolve;
+                }),
+            ),
+        );
+      }
+    } catch {}
+  }
+
+  function ensureEntrySyncAction() {
+    const root = document.getElementById("nc-root");
+    if (!root || !/#\/collections\/blog\/entries\//.test(window.location.hash)) return;
+    if (root.querySelector(".studio1-cms-sync-action")) return;
+
+    const controlPane =
+      root.querySelector('[class*="ControlPaneContainer"]') ||
+      root.querySelector(".SplitPane > .Pane1");
+    if (!(controlPane instanceof HTMLElement)) return;
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "studio1-cms-sync-action";
+    wrapper.innerHTML = `
+      <p>
+        <strong>Seeing old CMS content?</strong>
+        Reload from the saved repo file before editing so the form matches the published blog.
+      </p>
+      <button type="button">Reload from saved file</button>
+    `;
+
+    const button = wrapper.querySelector("button");
+    button?.addEventListener("click", async () => {
+      button.disabled = true;
+      button.textContent = "Reloading...";
+      await clearCmsBrowserState();
+      const hash = window.location.hash;
+      window.location.href = `${window.location.pathname}?cms_config_bust=${Date.now()}${hash}`;
+    });
+
+    controlPane.prepend(wrapper);
+  }
+
   function watchCmsLayout() {
-    applyCmsLayout();
+    let scheduled = false;
+    const runEnhancements = () => {
+      scheduled = false;
+      applyCmsLayout();
+      enhanceBlogCards();
+      ensureBlogSearch();
+      ensureEntrySyncAction();
+    };
+    const scheduleEnhancements = () => {
+      if (scheduled) return;
+      scheduled = true;
+      window.requestAnimationFrame(runEnhancements);
+    };
+
+    runEnhancements();
     window.addEventListener("resize", applyCmsLayout);
+    window.addEventListener("hashchange", () => {
+      scheduleEnhancements();
+    });
     window.visualViewport?.addEventListener("resize", applyCmsLayout);
     window.visualViewport?.addEventListener("scroll", applyCmsLayout);
 
-    const observer = new MutationObserver(() => applyCmsLayout());
+    const observer = new MutationObserver(scheduleEnhancements);
     observer.observe(document.documentElement, { childList: true, subtree: true });
   }
 
