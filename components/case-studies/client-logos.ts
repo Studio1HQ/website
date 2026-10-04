@@ -1,5 +1,6 @@
 import type { StaticImageData } from "next/image";
 import {
+  Brightdata,
   Enteligence,
   EntelligenceFull,
   Ittybit,
@@ -28,6 +29,7 @@ export type ClientLogo = {
 
 /** Case-study slug → local client logo assets. */
 export const clientLogos: Record<string, ClientLogo> = {
+  brightdata: { icon: Brightdata },
   "entelligence-ai": { icon: Enteligence, full: EntelligenceFull },
   ittybit: { icon: Ittybit, full: IttybitFull },
   jozu: { icon: Jozu, full: JozuFull },
