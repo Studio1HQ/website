@@ -18,6 +18,7 @@ import {
   Webcrumbs,
   WebcrumbsFull,
 } from "@/constants/image";
+import Corsair from "@/public/case-studies/corsair/corsair-logo.webp";
 import Tensorlake from "@/public/case-studies/tensorlake/tensorlake-logo.webp";
 
 export type ClientLogo = {
@@ -30,6 +31,7 @@ export type ClientLogo = {
 /** Case-study slug → local client logo assets. */
 export const clientLogos: Record<string, ClientLogo> = {
   brightdata: { icon: Brightdata },
+  corsair: { icon: Corsair },
   "entelligence-ai": { icon: Enteligence, full: EntelligenceFull },
   ittybit: { icon: Ittybit, full: IttybitFull },
   jozu: { icon: Jozu, full: JozuFull },
