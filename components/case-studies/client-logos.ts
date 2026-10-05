@@ -12,6 +12,7 @@ import {
   Memori,
   MemoriFull,
   Nebius,
+  NebiusFull,
   Permit,
   PermitFull,
   ScrapeGraph,
@@ -37,6 +38,7 @@ export const clientLogos: Record<string, ClientLogo> = {
   jozu: { icon: Jozu, full: JozuFull },
   litellm: { icon: LiteLLM, full: LiteLLMFull },
   memori: { icon: Memori, full: MemoriFull },
+  nebius: { icon: Nebius, full: NebiusFull },
   permit: { icon: Permit, full: PermitFull },
   scrapegraph: { icon: ScrapeGraph },
   tensorlake: { icon: Tensorlake },
@@ -53,5 +55,4 @@ export const trustedClientMarks: {
   href: string;
   icon: StaticImageData;
 }[] = [
-  { name: "Nebius", href: "https://nebius.com/", icon: Nebius },
 ];

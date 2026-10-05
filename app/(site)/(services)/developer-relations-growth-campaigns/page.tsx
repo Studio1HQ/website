@@ -156,6 +156,21 @@ const memoriProof = {
   ],
 };
 
+const nebiusProof = {
+  company: "Nebius",
+  category: "Developer Events & Community Distribution",
+  href: "/case-studies/nebius",
+  heroValue: "630K+",
+  heroLabel: "views across Reddit posts",
+  proof:
+    "Studio1 maintains an open-source library of 130+ agent examples on Nebius models, got Nebius into 29 developer frameworks, ran workshops with the product inside the exercise, and adapted technical posts for the communities where each topic was already being discussed.",
+  stats: [
+    { value: "300+", label: "deliverables" },
+    { value: "90+", label: "product activations" },
+    { value: "16K+", label: "GitHub stars on examples repo" },
+  ],
+};
+
 export default function DevRel() {
   const serviceSchema = {
     "@context": "https://schema.org",
@@ -207,6 +222,11 @@ export default function DevRel() {
         title="Open-source growth through validation, demos, and meaningful collaborations"
         description="Memori combined early product validation, demo agents, community education, feedback loops, and relevant developer collaborations."
         study={memoriProof}
+      />
+      <ServiceProofSection
+        title="Workshops and community distribution that lead to product usage"
+        description="Nebius paired hands-on workshops, conference talks, and Reddit distribution so every event and post ended with developers using the product."
+        study={nebiusProof}
       />
       <FAQ
         subtitle="Common questions about our developer relations and growth campaign services."
