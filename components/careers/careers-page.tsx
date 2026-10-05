@@ -217,12 +217,18 @@ export function CareersPage({ jobOpenings }: CareersPageProps) {
 
   const filteredJobs = jobOpenings
     .filter((job) => {
-      if (selectedFilter === "All") return true;
+      const { isClosed } = getJobAvailability(job.status);
+
+      if (selectedFilter === "All") return !isClosed;
       if (selectedFilter === "Other") {
-        return !["Engineering", "Marketing", "Growth", "Founder's Office"].includes(
-          job.department,
+        return (
+          isClosed ||
+          !["Engineering", "Marketing", "Growth", "Founder's Office"].includes(
+            job.department,
+          )
         );
       }
+      if (isClosed) return false;
       if (selectedFilter === "Growth") {
         return (
           job.department === "Growth" || job.department === "Founder's Office"
