@@ -340,6 +340,80 @@
     }
   }
 
+  function escapeHtml(value) {
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function registerImageEditorComponent() {
+    if (window.__studio1ImageEditorRegistered) return;
+    window.__studio1ImageEditorRegistered = true;
+
+    window.CMS.registerEditorComponent({
+      id: "image",
+      label: "Image",
+      fields: [
+        {
+          name: "image",
+          label: "Image",
+          widget: "image",
+          choose_url: false,
+        },
+        {
+          name: "alt",
+          label: "Alt Text",
+          widget: "string",
+          required: false,
+        },
+        {
+          name: "title",
+          label: "Title",
+          widget: "string",
+          required: false,
+        },
+      ],
+      pattern: /^!\[([^\]]*)\]\((\S+?)(?:\s+"([^"]*)")?\)$/,
+      fromBlock(match) {
+        return {
+          alt: match?.[1] || "",
+          image: match?.[2] || "",
+          title: match?.[3] || "",
+        };
+      },
+      toBlock(data) {
+        const alt = data.alt || "";
+        const image = data.image || "";
+        const title = data.title ? ` "${data.title}"` : "";
+        return `![${alt}](${image}${title})`;
+      },
+      toPreview(data, getAsset) {
+        const src = safeAsset(getAsset, data.image);
+        const alt = data.alt || "";
+        const title = data.title || "";
+        const titleAttr = title ? ` title="${escapeHtml(title)}"` : "";
+
+        if (!src) {
+          return `<p style="color:#8a4b00;">Choose an image to preview it here.</p>`;
+        }
+
+        return `
+          <figure style="margin: 28px auto;">
+            <img
+              src="${escapeHtml(src)}"
+              alt="${escapeHtml(alt)}"
+              ${titleAttr}
+              style="display:block; max-width:100%; height:auto; margin:0 auto; border-radius:12px; border:8px solid #f4efe6; outline:1px solid rgba(23,23,23,.10); background:#f4efe6;"
+            />
+          </figure>
+        `;
+      },
+    });
+  }
+
   function getYouTubeVideoId(value) {
     try {
       const url = new URL(String(value || "").trim());
@@ -463,6 +537,7 @@
 
   function waitForCms() {
     if (window.CMS && window.createClass && window.h) {
+      registerImageEditorComponent();
       registerYouTubeEditorComponent();
       registerBlogPreview();
       return;
