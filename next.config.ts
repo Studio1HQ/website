@@ -51,6 +51,11 @@ const nextConfig: NextConfig = {
         destination: "/blog/claude-opus-5-5-review-motion-videos",
         permanent: true,
       },
+      {
+        source: "/blog/gemini-4-argon-review",
+        destination: "/blog/gemini-4-argon-benchmarks-pricing-access",
+        permanent: true,
+      },
       ...["/work", "/fr/work", "/es/work", "/hi/work", "/zh/work"].map(
         (source) => ({
           source,

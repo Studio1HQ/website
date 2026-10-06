@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { PostShare } from "@/components/blog/post-share";
@@ -15,6 +16,8 @@ type PostLayoutProps = {
   author: string;
   authors?: string[];
   tags: string[];
+  bannerImage?: string;
+  bannerImageAlt?: string;
   readingTimeMinutes?: number;
   shareUrl: string;
   tldrSummary?: string;
@@ -31,6 +34,8 @@ export function PostLayout({
   author,
   authors,
   tags,
+  bannerImage,
+  bannerImageAlt,
   readingTimeMinutes,
   shareUrl,
   tldrSummary,
@@ -85,6 +90,21 @@ export function PostLayout({
               ))}
             </div>
           </header>
+
+          {bannerImage ? (
+            <figure className="not-prose mb-10 overflow-hidden rounded-2xl border border-border/70 bg-[linear-gradient(135deg,hsl(var(--muted)/0.5),hsl(var(--background)),hsl(var(--primary)/0.06))] p-2 shadow-[0_18px_52px_-36px_rgba(0,0,0,0.55)] dark:border-white/[0.08] dark:bg-[linear-gradient(135deg,hsl(var(--muted)/0.18),hsl(var(--background)),hsl(var(--primary)/0.08))]">
+              <div className="relative aspect-[16/9] overflow-hidden rounded-xl bg-black ring-1 ring-black/5 dark:ring-white/10">
+                <Image
+                  src={bannerImage}
+                  alt={bannerImageAlt || title}
+                  fill
+                  priority
+                  className="object-contain"
+                  sizes="(max-width: 1024px) 100vw, 56rem"
+                />
+              </div>
+            </figure>
+          ) : null}
 
           <section
             aria-label="Article TL;DR"
