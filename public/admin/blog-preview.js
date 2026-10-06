@@ -328,10 +328,15 @@
     return [];
   }
 
-  const localPreviewAssets = new Map();
+  const draftPreviewAssets = new Map();
 
-  function isLocalCms() {
-    return /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname);
+  function isCmsEditor() {
+    return window.location.pathname.replace(/\/+$/, "") === "/admin";
+  }
+
+  function currentEntrySlug() {
+    const match = window.location.hash.match(/\/entries\/([^/?#]+)/);
+    return match ? decodeURIComponent(match[1]) : "";
   }
 
   function toAssetFilename(value) {
@@ -358,69 +363,107 @@
     return `${basename || "image"}${extension}`;
   }
 
-  function localPreviewAsset(value) {
-    if (!isLocalCms()) return "";
+  function publicBlogAsset(value) {
+    const rawValue = String(value || "").trim();
+    if (!rawValue || /^(?:https?:|blob:|data:)/.test(rawValue)) return rawValue;
+    if (rawValue.startsWith("/blog/uploads/")) return rawValue;
+    if (rawValue.startsWith("blog/uploads/")) return `/${rawValue}`;
+    if (rawValue.startsWith("/admin/blog/uploads/")) return rawValue.replace(/^\/admin/, "");
+
+    const filename = toAssetFilename(rawValue);
+    const slug = currentEntrySlug();
+    return filename && slug ? `/blog/uploads/${slug}/${filename}` : rawValue;
+  }
+
+  function draftPreviewAsset(value) {
+    if (!isCmsEditor()) return "";
     const filename = toAssetFilename(value);
-    return filename ? localPreviewAssets.get(filename) || "" : "";
+    return filename ? draftPreviewAssets.get(filename) || "" : "";
   }
 
   function rememberLocalUpload(file) {
     if (!file || !file.type?.startsWith("image/")) return;
     const filename = toDecapFilename(file.name);
-    const previous = localPreviewAssets.get(filename);
+    const originalFilename = toAssetFilename(file.name);
+    const previous = draftPreviewAssets.get(filename);
     if (previous) URL.revokeObjectURL(previous);
-    localPreviewAssets.set(filename, URL.createObjectURL(file));
+    const previewUrl = URL.createObjectURL(file);
+    draftPreviewAssets.set(filename, previewUrl);
+    if (originalFilename && originalFilename !== filename) {
+      draftPreviewAssets.set(originalFilename, previewUrl);
+    }
   }
 
-  function hydrateLocalImagePreviews(root = document) {
-    if (!isLocalCms()) return;
-    root.querySelectorAll?.('img[src*="/blog/uploads/"]').forEach((image) => {
-      const previewSrc = localPreviewAsset(image.getAttribute("src"));
-      if (previewSrc && image.getAttribute("src") !== previewSrc) {
-        image.setAttribute("data-studio1-public-src", image.getAttribute("src") || "");
-        image.setAttribute("src", previewSrc);
+  function hydrateDraftImagePreviews(root = document) {
+    if (!isCmsEditor()) return;
+    root.querySelectorAll?.("img").forEach((image) => {
+      const currentSrc = image.getAttribute("src") || "";
+      const publicSrc = publicBlogAsset(currentSrc || image.getAttribute("alt") || "");
+      const previewSrc = draftPreviewAsset(currentSrc) || draftPreviewAsset(publicSrc);
+      const nextSrc =
+        previewSrc ||
+        (publicSrc &&
+        publicSrc.startsWith("/blog/uploads/") &&
+        (currentSrc.startsWith("/admin/") || !currentSrc.includes("/"))
+          ? publicSrc
+          : "");
+
+      if (nextSrc && currentSrc !== nextSrc) {
+        image.setAttribute("data-studio1-public-src", publicSrc || currentSrc);
+        image.setAttribute("src", nextSrc);
       }
     });
   }
 
-  function startLocalDraftImagePreviews() {
-    if (window.__studio1LocalDraftImagePreviewsStarted) return;
+  function startDraftImagePreviews() {
+    if (window.__studio1DraftImagePreviewsStarted) return;
     const observerRoot = document.documentElement || document.body;
     if (!observerRoot) {
-      window.setTimeout(startLocalDraftImagePreviews, 80);
+      window.setTimeout(startDraftImagePreviews, 80);
       return;
     }
 
-    window.__studio1LocalDraftImagePreviewsStarted = true;
+    window.__studio1DraftImagePreviewsStarted = true;
     document.addEventListener(
       "change",
       (event) => {
         const input = event.target;
         if (!(input instanceof HTMLInputElement) || input.type !== "file") return;
         Array.from(input.files || []).forEach(rememberLocalUpload);
-        window.setTimeout(() => hydrateLocalImagePreviews(), 150);
-        window.setTimeout(() => hydrateLocalImagePreviews(), 1000);
+        window.setTimeout(() => hydrateDraftImagePreviews(), 150);
+        window.setTimeout(() => hydrateDraftImagePreviews(), 1000);
       },
       true,
     );
 
-    const previewObserver = new MutationObserver(() => hydrateLocalImagePreviews());
+    const previewObserver = new MutationObserver(() => hydrateDraftImagePreviews());
     previewObserver.observe(observerRoot, { childList: true, subtree: true });
-    hydrateLocalImagePreviews();
+    hydrateDraftImagePreviews();
   }
 
   function safeAsset(getAsset, value, field) {
     if (!value) return "/opengraph-image.png";
-    const localAsset = localPreviewAsset(value);
-    if (localAsset) return localAsset;
+    const draftAsset = draftPreviewAsset(value);
+    if (draftAsset) return draftAsset;
+
+    const publicAsset = publicBlogAsset(value);
     try {
       const asset = getAsset ? getAsset(value, field) : value;
-      return asset && typeof asset.toString === "function"
-        ? asset.toString()
-        : String(asset || value);
+      const assetValue =
+        asset && typeof asset.toString === "function" ? asset.toString() : String(asset || "");
+      const filenameOnly = toAssetFilename(value);
+      const resolvedFilenameOnly = assetValue && assetValue === filenameOnly;
+      if (
+        assetValue &&
+        !assetValue.startsWith("/admin/") &&
+        !(publicAsset.startsWith("/blog/uploads/") && resolvedFilenameOnly)
+      ) {
+        return assetValue;
+      }
     } catch {
-      return value;
+      return publicAsset;
     }
+    return publicAsset || value;
   }
 
   function escapeHtml(value) {
@@ -758,10 +801,10 @@
 
   function waitForCms() {
     if (window.CMS && window.createClass && window.h) {
-      startLocalDraftImagePreviews();
+      startDraftImagePreviews();
       registerYouTubeEditorComponent();
       registerBlogPreview();
-      hydrateLocalImagePreviews();
+      hydrateDraftImagePreviews();
       return;
     }
     window.setTimeout(waitForCms, 80);
