@@ -328,10 +328,10 @@
     return [];
   }
 
-  function safeAsset(getAsset, value) {
+  function safeAsset(getAsset, value, field) {
     if (!value) return "/opengraph-image.png";
     try {
-      const asset = getAsset ? getAsset(value) : value;
+      const asset = getAsset ? getAsset(value, field) : value;
       return asset && typeof asset.toString === "function"
         ? asset.toString()
         : String(asset || value);
@@ -362,6 +362,9 @@
           label: "Image",
           widget: "image",
           choose_url: false,
+          media_library: {
+            allow_multiple: false,
+          },
         },
         {
           name: "alt",
@@ -376,22 +379,27 @@
           required: false,
         },
       ],
-      pattern: /^!\[([^\]]*)\]\((\S+?)(?:\s+"([^"]*)")?\)$/,
+      pattern: /^!\[(.*)\]\((.*?)(\s"(.*)")?\)$/,
       fromBlock(match) {
         return {
           alt: match?.[1] || "",
           image: match?.[2] || "",
-          title: match?.[3] || "",
+          title: match?.[4] || "",
         };
       },
       toBlock(data) {
         const alt = data.alt || "";
         const image = data.image || "";
-        const title = data.title ? ` "${data.title}"` : "";
+        const title = data.title ? ` "${data.title.replace(/"/g, '\\"')}"` : "";
         return `![${alt}](${image}${title})`;
       },
-      toPreview(data, getAsset) {
-        const src = safeAsset(getAsset, data.image);
+      toPreview(data, getAsset, fields) {
+        const imageField = fields?.find((field) => {
+          const widget =
+            field && typeof field.get === "function" ? field.get("widget") : field?.widget;
+          return widget === "image";
+        });
+        const src = safeAsset(getAsset, data.image, imageField);
         const alt = data.alt || "";
         const title = data.title || "";
         const titleAttr = title ? ` title="${escapeHtml(title)}"` : "";
@@ -519,6 +527,209 @@
     return takeaways.slice(0, 4);
   }
 
+  function renderInlineMarkdown(value) {
+    const nodes = [];
+    const pattern = /\[([^\]]+)\]\(([^)]+)\)/g;
+    let lastIndex = 0;
+    let match;
+
+    for (match = pattern.exec(value); match; match = pattern.exec(value)) {
+      if (match.index > lastIndex) {
+        nodes.push(value.slice(lastIndex, match.index));
+      }
+
+      nodes.push(
+        window.h(
+          "a",
+          {
+            key: `${match[2]}-${match.index}`,
+            href: match[2],
+            target: "_blank",
+            rel: "noopener noreferrer",
+          },
+          match[1],
+        ),
+      );
+      lastIndex = match.index + match[0].length;
+    }
+
+    if (lastIndex < value.length) nodes.push(value.slice(lastIndex));
+
+    return nodes.length
+      ? nodes
+      : value
+          .replace(/\*\*([^*]+)\*\*/g, "$1")
+          .replace(/\*([^*]+)\*/g, "$1")
+          .replace(/`([^`]+)`/g, "$1");
+  }
+
+  function renderMarkdownPreview(markdown, getAsset) {
+    const lines = String(markdown || "").split("\n");
+    const nodes = [];
+    const imageField = {
+      get(name) {
+        if (name === "widget") return "image";
+        if (name === "media_library") return { allow_multiple: false };
+        return undefined;
+      },
+    };
+
+    function flushParagraph(paragraphLines) {
+      if (!paragraphLines.length) return;
+      const text = paragraphLines.join(" ").trim();
+      if (text) {
+        nodes.push(window.h("p", { key: `p-${nodes.length}` }, renderInlineMarkdown(text)));
+      }
+      paragraphLines.length = 0;
+    }
+
+    function renderTable(tableLines) {
+      const rows = tableLines
+        .map((line) =>
+          line
+            .trim()
+            .replace(/^\|/, "")
+            .replace(/\|$/, "")
+            .split("|")
+            .map((cell) => cell.trim()),
+        )
+        .filter((row) => row.some(Boolean));
+      const bodyRows = rows.filter((row) => !row.every((cell) => /^:?-{3,}:?$/.test(cell)));
+      if (!bodyRows.length) return;
+
+      nodes.push(
+        window.h(
+          "table",
+          { key: `table-${nodes.length}` },
+          window.h(
+            "tbody",
+            {},
+            bodyRows.map((row, rowIndex) =>
+              window.h(
+                "tr",
+                { key: `tr-${rowIndex}` },
+                row.map((cell, cellIndex) =>
+                  window.h(
+                    rowIndex === 0 ? "th" : "td",
+                    { key: `cell-${rowIndex}-${cellIndex}` },
+                    renderInlineMarkdown(cell),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    for (let index = 0; index < lines.length; index += 1) {
+      const paragraphLines = [];
+
+      while (index < lines.length) {
+        const line = lines[index];
+        const trimmed = line.trim();
+
+        if (!trimmed) {
+          flushParagraph(paragraphLines);
+          index += 1;
+          continue;
+        }
+
+        const heading = trimmed.match(/^(#{2,4})\s+(.+)$/);
+        if (heading) {
+          flushParagraph(paragraphLines);
+          nodes.push(
+            window.h(
+              `h${heading[1].length}`,
+              { key: `h-${nodes.length}` },
+              renderInlineMarkdown(heading[2]),
+            ),
+          );
+          index += 1;
+          continue;
+        }
+
+        const image = trimmed.match(/^!\[(.*)\]\((.*?)(\s"(.*)")?\)$/);
+        if (image) {
+          flushParagraph(paragraphLines);
+          const src = safeAsset(getAsset, image[2], imageField);
+          nodes.push(
+            window.h("img", {
+              key: `img-${nodes.length}`,
+              src,
+              alt: image[1] || "",
+              title: image[4] || "",
+            }),
+          );
+          index += 1;
+          continue;
+        }
+
+        const youtube = trimmed.match(/^::youtube\[([^\]]+)\]$/);
+        if (youtube) {
+          flushParagraph(paragraphLines);
+          const embedUrl = getYouTubeEmbedUrl(youtube[1]);
+          nodes.push(
+            embedUrl
+              ? window.h("iframe", {
+                  key: `youtube-${nodes.length}`,
+                  src: embedUrl,
+                  title: "YouTube video player",
+                  loading: "lazy",
+                  allow:
+                    "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
+                  allowFullScreen: true,
+                })
+              : window.h("p", { key: `youtube-${nodes.length}` }, "Paste a valid YouTube URL."),
+          );
+          index += 1;
+          continue;
+        }
+
+        if (/^\|.*\|$/.test(trimmed)) {
+          flushParagraph(paragraphLines);
+          const tableLines = [];
+          while (index < lines.length && /^\|.*\|$/.test(lines[index].trim())) {
+            tableLines.push(lines[index]);
+            index += 1;
+          }
+          renderTable(tableLines);
+          continue;
+        }
+
+        if (/^[-*]\s+/.test(trimmed)) {
+          flushParagraph(paragraphLines);
+          const items = [];
+          while (index < lines.length) {
+            const item = lines[index].trim().match(/^[-*]\s+(.+)$/);
+            if (!item) break;
+            items.push(item[1]);
+            index += 1;
+          }
+          nodes.push(
+            window.h(
+              "ul",
+              { key: `ul-${nodes.length}` },
+              items.map((item, itemIndex) =>
+                window.h("li", { key: `li-${itemIndex}` }, renderInlineMarkdown(item)),
+              ),
+            ),
+          );
+          continue;
+        }
+
+        paragraphLines.push(trimmed);
+        index += 1;
+      }
+
+      flushParagraph(paragraphLines);
+    }
+
+    return nodes.length
+      ? nodes
+      : window.h("div", { className: "studio1-preview-empty" }, "Start writing in Body to preview the article here.");
+  }
+
   function hideDuplicateRenderedTldr() {
     window.requestAnimationFrame(() => {
       document.querySelectorAll(".studio1-preview-body h2, .studio1-preview-body h3").forEach((heading) => {
@@ -588,7 +799,6 @@
         const keyTakeaways = configuredTakeaways.length
           ? configuredTakeaways.slice(0, 4)
           : extractTldrTakeaways(bodyMarkdown);
-        const bodyPreview = this.props.widgetFor("body");
         const metaItems = [date, updatedDate && updatedDate !== date ? `Updated ${updatedDate}` : ""].filter(Boolean);
 
         return window.h(
@@ -656,7 +866,7 @@
             window.h(
               "div",
               { className: "studio1-preview-body" },
-              bodyPreview || window.h("div", { className: "studio1-preview-empty" }, "Start writing in Body to preview the article here."),
+              renderMarkdownPreview(bodyMarkdown, getAsset),
             ),
           ),
         );
