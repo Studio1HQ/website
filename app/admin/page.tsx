@@ -534,7 +534,7 @@ const adminCss = `
   }
 `;
 
-const cmsAssetVersion = "2026-10-06-latest-image-block-v4";
+const cmsAssetVersion = "2026-10-06-latest-image-block-v5";
 const decapCmsVersion = "3.16.3";
 
 export default function AdminPage() {

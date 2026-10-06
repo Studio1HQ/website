@@ -362,6 +362,8 @@
           label: "Image",
           widget: "image",
           choose_url: false,
+          media_folder: "/public/blog/uploads/{{fields.slug}}",
+          public_folder: "/blog/uploads/{{fields.slug}}",
           media_library: {
             allow_multiple: false,
           },
