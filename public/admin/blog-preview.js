@@ -328,8 +328,91 @@
     return [];
   }
 
+  const localPreviewAssets = new Map();
+
+  function isLocalCms() {
+    return /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname);
+  }
+
+  function toAssetFilename(value) {
+    return String(value || "")
+      .split("?")[0]
+      .split("#")[0]
+      .split("/")
+      .filter(Boolean)
+      .pop();
+  }
+
+  function toDecapFilename(filename) {
+    const parts = String(filename || "").split(".");
+    const extension = parts.length > 1 ? `.${parts.pop().toLowerCase()}` : "";
+    const basename = parts
+      .join(".")
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+
+    return `${basename || "image"}${extension}`;
+  }
+
+  function localPreviewAsset(value) {
+    if (!isLocalCms()) return "";
+    const filename = toAssetFilename(value);
+    return filename ? localPreviewAssets.get(filename) || "" : "";
+  }
+
+  function rememberLocalUpload(file) {
+    if (!file || !file.type?.startsWith("image/")) return;
+    const filename = toDecapFilename(file.name);
+    const previous = localPreviewAssets.get(filename);
+    if (previous) URL.revokeObjectURL(previous);
+    localPreviewAssets.set(filename, URL.createObjectURL(file));
+  }
+
+  function hydrateLocalImagePreviews(root = document) {
+    if (!isLocalCms()) return;
+    root.querySelectorAll?.('img[src*="/blog/uploads/"]').forEach((image) => {
+      const previewSrc = localPreviewAsset(image.getAttribute("src"));
+      if (previewSrc && image.getAttribute("src") !== previewSrc) {
+        image.setAttribute("data-studio1-public-src", image.getAttribute("src") || "");
+        image.setAttribute("src", previewSrc);
+      }
+    });
+  }
+
+  function startLocalDraftImagePreviews() {
+    if (window.__studio1LocalDraftImagePreviewsStarted) return;
+    const observerRoot = document.documentElement || document.body;
+    if (!observerRoot) {
+      window.setTimeout(startLocalDraftImagePreviews, 80);
+      return;
+    }
+
+    window.__studio1LocalDraftImagePreviewsStarted = true;
+    document.addEventListener(
+      "change",
+      (event) => {
+        const input = event.target;
+        if (!(input instanceof HTMLInputElement) || input.type !== "file") return;
+        Array.from(input.files || []).forEach(rememberLocalUpload);
+        window.setTimeout(() => hydrateLocalImagePreviews(), 150);
+        window.setTimeout(() => hydrateLocalImagePreviews(), 1000);
+      },
+      true,
+    );
+
+    const previewObserver = new MutationObserver(() => hydrateLocalImagePreviews());
+    previewObserver.observe(observerRoot, { childList: true, subtree: true });
+    hydrateLocalImagePreviews();
+  }
+
   function safeAsset(getAsset, value, field) {
     if (!value) return "/opengraph-image.png";
+    const localAsset = localPreviewAsset(value);
+    if (localAsset) return localAsset;
     try {
       const asset = getAsset ? getAsset(value, field) : value;
       return asset && typeof asset.toString === "function"
@@ -347,81 +430,6 @@
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#39;");
-  }
-
-  function registerImageEditorComponent() {
-    if (window.__studio1ImageEditorRegistered) return;
-    window.__studio1ImageEditorRegistered = true;
-
-    window.CMS.registerEditorComponent({
-      id: "image",
-      label: "Image",
-      fields: [
-        {
-          name: "image",
-          label: "Image",
-          widget: "image",
-          choose_url: false,
-          media_folder: "/public/blog/uploads/{{fields.slug}}",
-          public_folder: "/blog/uploads/{{fields.slug}}",
-          media_library: {
-            allow_multiple: false,
-          },
-        },
-        {
-          name: "alt",
-          label: "Alt Text",
-          widget: "string",
-          required: false,
-        },
-        {
-          name: "title",
-          label: "Title",
-          widget: "string",
-          required: false,
-        },
-      ],
-      pattern: /^!\[(.*)\]\((.*?)(\s"(.*)")?\)$/,
-      fromBlock(match) {
-        return {
-          alt: match?.[1] || "",
-          image: match?.[2] || "",
-          title: match?.[4] || "",
-        };
-      },
-      toBlock(data) {
-        const alt = data.alt || "";
-        const image = data.image || "";
-        const title = data.title ? ` "${data.title.replace(/"/g, '\\"')}"` : "";
-        return `![${alt}](${image}${title})`;
-      },
-      toPreview(data, getAsset, fields) {
-        const imageField = fields?.find((field) => {
-          const widget =
-            field && typeof field.get === "function" ? field.get("widget") : field?.widget;
-          return widget === "image";
-        });
-        const src = safeAsset(getAsset, data.image, imageField);
-        const alt = data.alt || "";
-        const title = data.title || "";
-        const titleAttr = title ? ` title="${escapeHtml(title)}"` : "";
-
-        if (!src) {
-          return `<p style="color:#8a4b00;">Choose an image to preview it here.</p>`;
-        }
-
-        return `
-          <figure style="margin: 28px auto;">
-            <img
-              src="${escapeHtml(src)}"
-              alt="${escapeHtml(alt)}"
-              ${titleAttr}
-              style="display:block; max-width:100%; height:auto; margin:0 auto; border-radius:12px; border:8px solid #f4efe6; outline:1px solid rgba(23,23,23,.10); background:#f4efe6;"
-            />
-          </figure>
-        `;
-      },
-    });
   }
 
   function getYouTubeVideoId(value) {
@@ -750,9 +758,10 @@
 
   function waitForCms() {
     if (window.CMS && window.createClass && window.h) {
-      registerImageEditorComponent();
+      startLocalDraftImagePreviews();
       registerYouTubeEditorComponent();
       registerBlogPreview();
+      hydrateLocalImagePreviews();
       return;
     }
     window.setTimeout(waitForCms, 80);

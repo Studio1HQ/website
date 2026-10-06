@@ -259,8 +259,11 @@
     window.visualViewport?.addEventListener("resize", applyCmsLayout);
     window.visualViewport?.addEventListener("scroll", applyCmsLayout);
 
-    const observer = new MutationObserver(scheduleEnhancements);
-    observer.observe(document.documentElement, { childList: true, subtree: true });
+    const root = document.documentElement || document.body;
+    if (root) {
+      const observer = new MutationObserver(scheduleEnhancements);
+      observer.observe(root, { childList: true, subtree: true });
+    }
   }
 
   function textContent(node) {
