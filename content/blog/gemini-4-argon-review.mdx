@@ -1,32 +1,40 @@
 ---
 title: "Gemini 4 Argon: What's New, What It Costs, and Whether to Switch"
 slug: gemini-4-argon-review
-description: "Gemini 4 Argon is Google's new flagship model for long-context work, software engineering, and cybersecurity. Here's what's new, how it compares with GPT-6 Astra and Claude Opus 5.5, what it costs, and what to check before switching."
-tldrSummary: "Gemini 4 Argon pushes Gemini into long-context software engineering, knowledge work, and cybersecurity with a 1M-token output limit. Here's how it compares with GPT-6 Astra and Claude Opus 5.5, what it costs, and where it still falls short."
+description: Gemini 4 Argon is Google's new flagship model for long-context
+  work, software engineering, and cybersecurity. Here's what's new, how it
+  compares with GPT-6 Astra and Claude Opus 5.5, what it costs, and what to
+  check before switching.
+tldrSummary: Gemini 4 Argon pushes Gemini into long-context software
+  engineering, knowledge work, and cybersecurity with a 1M-token output limit.
+  Here's how it compares with GPT-6 Astra and Claude Opus 5.5, what it costs,
+  and where it still falls short.
 tldrBullets:
-  - "Argon wins or ties 13 of 18 benchmarks in Google's comparison, leading mainly on knowledge work, long context, and DeepSWE."
-  - "Its output limit jumps from 64K to 1M tokens, but independent testing shows Argon can use significantly more tokens per task than competing models."
-  - "Launch pricing is $2 per million input tokens and $10 per million output tokens, increasing to $4 and $20 after the introductory period."
+  - Argon wins or ties 13 of 18 benchmarks in Google's comparison, leading
+    mainly on knowledge work, long context, and DeepSWE.
+  - Its output limit jumps from 64K to 1M tokens, but independent testing shows
+    Argon can use significantly more tokens per task than competing models.
+  - Launch pricing is $2 per million input tokens and $10 per million output
+    tokens, increasing to $4 and $20 after the introductory period.
 date: 2026-10-06
 draft: false
 authors:
   - Studio1 Team
-bannerImage: /blog/uploads/gemini-4-argon-review/banner.png
+bannerImage: /blog/uploads/gemini-4-argon-whats-new-what-it-costs-and-whether-to-switch/whatsapp-image-2026-10-06-at-8.12.16-pm.jpeg
 ---
-
 Google DeepMind recently launched Gemini 4 Argon, with a big benchmark table and a small guest list. Google's own numbers have it winning or tying 13 of 18 tests against Opus 5.5, Fable 5.1 and GPT-6 Astra. But for now it's only open to a group of cyber defenders.
 
 So the useful question isn't whether it's the best model. It's what you should check before you switch, and what it'll cost you when you do. Here's what we know so far.
 
 ## TL;DR
 
-- Argon wins or ties 13 of 18 benchmarks in Google's table, mostly knowledge work, long context, and DeepSWE. It loses on FrontierSWE and Terminal-bench.
-- The output limit jumps from 64K to 1M tokens. It also writes a lot: 62k tokens per task against 27k for GPT-6 Astra in one independent test.
-- Launch price is $2 per million input tokens and $10 per million output. It doubles to $4 and $20 later.
+* Argon wins or ties 13 of 18 benchmarks in Google's table, mostly knowledge work, long context, and DeepSWE. It loses on FrontierSWE and Terminal-bench.
+* The output limit jumps from 64K to 1M tokens. It also writes a lot: 62k tokens per task against 27k for GPT-6 Astra in one independent test.
+* Launch price is $2 per million input tokens and $10 per million output. It doubles to $4 and $20 later.
 
 ## What is Gemini 4 Argon?
 
-![image.png](image.png)
+![image.png](/blog/uploads/gemini-4-argon-whats-new-what-it-costs-and-whether-to-switch/image.png)
 
 Argon is Google's new flagship model. It's the first Gemini above the Flash tier in more than seven months, and it quietly replaces the Gemini 3.5 Pro that Google teased at I/O in May and never shipped.
 
@@ -40,12 +48,12 @@ As compared to the previous versions, the big change is the 1M-token output limi
 
 Against the rest of the field, the pattern in Google's own table is easy to read. Argon leads on knowledge work, long context, and DeepSWE. The other models keep the shell-and-terminal benchmarks.
 
-| Model | Leads on (in Google's table) | Reading |
-| --- | --- | --- |
-| Gemini 4 Argon | Vals Index, AutomationBench, Vals Finance Agent v2, Harvey's Legal Agent, DeepSWE, Vibe Code Bench, RiemannBench, both GraphWalks tests, Agent's Last Exam, Chartography, LVBench | Best on document-heavy and long-context work |
-| GPT-6 Astra | FrontierSWE v2, Terminal-Bench Science 0.1, OSWorld-2.0 | Best on harder agentic and computer-use tasks |
-| Claude Opus 5.5 | Terminal-bench 4.0, PostTrainBench | Best on shell agents and ML engineering |
-| Claude Fable 5.1 | None | Never first in the table |
+| Model            | Leads on (in Google's table)                                                                                                                                                      | Reading                                       |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| Gemini 4 Argon   | Vals Index, AutomationBench, Vals Finance Agent v2, Harvey's Legal Agent, DeepSWE, Vibe Code Bench, RiemannBench, both GraphWalks tests, Agent's Last Exam, Chartography, LVBench | Best on document-heavy and long-context work  |
+| GPT-6 Astra      | FrontierSWE v2, Terminal-Bench Science 0.1, OSWorld-2.0                                                                                                                           | Best on harder agentic and computer-use tasks |
+| Claude Opus 5.5  | Terminal-bench 4.0, PostTrainBench                                                                                                                                                | Best on shell agents and ML engineering       |
+| Claude Fable 5.1 | None                                                                                                                                                                              | Never first in the table                      |
 
 On cybersecurity, Argon and GPT-6 Astra tie at 68% on CWE-bench v1.
 
@@ -55,7 +63,7 @@ For a neutral check, Artificial Analysis says Argon matches GPT-6 Astra on its I
 
 Treat these as best cases. They're Google's chosen benchmarks, mostly from its own runs, as tabulated by [The New Stack](https://thenewstack.io/google-gemini-4-argon/).
 
-![image.png](image%201.png)
+![image.png](/blog/uploads/gemini-4-argon-whats-new-what-it-costs-and-whether-to-switch/image-1.png)
 
 Three caveats on reading it.
 
@@ -69,11 +77,11 @@ Third, the biggest gaps are in knowledge work and long context. The legal result
 
 Price per token is the wrong number to compare. Artificial Analysis measures cost per task, and that's where Argon's chattiness shows up.
 
-| Scenario | Cost per Intelligence Index task |
-| --- | --- |
-| Gemini 4 Argon, launch price ($2 in, $10 out) | $1.99 |
-| Gemini 4 Argon, full price ($4 in, $20 out), my estimate | about $3.98 |
-| GPT-6 Astra, max effort | $3.26 |
+| Scenario                                                 | Cost per Intelligence Index task |
+| -------------------------------------------------------- | -------------------------------- |
+| Gemini 4 Argon, launch price ($2 in, $10 out)            | $1.99                            |
+| Gemini 4 Argon, full price ($4 in, $20 out), my estimate | about $3.98                      |
+| GPT-6 Astra, max effort                                  | $3.26                            |
 
 The first and last rows are Artificial Analysis's figures. The middle row is mine. The launch discount is a 50% promotion, so if Argon keeps using the same number of tokens, doubling the price doubles the cost. Astra's price could change too, so treat that row as a rough guide, not a forecast.
 
@@ -83,20 +91,20 @@ A few other anchors. Opus 5.5 charges $20 per million output tokens, the same as
 
 I didn't find any migration notes in Google's announcement or the coverage, so this isn't a changelog of breaking changes. It's a checklist of what the launch details imply.
 
-- **You can't switch yet.** Access is gated, and the model ships without cyber guardrails only for Fairwind participants and Google's own teams. Google is still tuning the safeguards before a wider release, so security-heavy prompts may behave differently once you get access.
-- **Revisit your output settings.** The limit went from 64K to 1M tokens. If you cap max output, set timeouts, or stream into something with size limits, those choices were made for 64K. Raise the ceiling on purpose, not by default.
-- **Expect a chattier model.** Artificial Analysis measured 62 K output tokens per task for Argon against 27 K for GPT-6 Astra at max effort. Watch latency and bills, not just quality.
-- **Plan for the price change.** $2 and $10 per million tokens is an introductory rate. It becomes $4 and $20.
+* **You can't switch yet.** Access is gated, and the model ships without cyber guardrails only for Fairwind participants and Google's own teams. Google is still tuning the safeguards before a wider release, so security-heavy prompts may behave differently once you get access.
+* **Revisit your output settings.** The limit went from 64K to 1M tokens. If you cap max output, set timeouts, or stream into something with size limits, those choices were made for 64K. Raise the ceiling on purpose, not by default.
+* **Expect a chattier model.** Artificial Analysis measured 62 K output tokens per task for Argon against 27 K for GPT-6 Astra at max effort. Watch latency and bills, not just quality.
+* **Plan for the price change.** $2 and $10 per million tokens is an introductory rate. It becomes $4 and $20.
 
 ## What Google has built with it
 
 Everything below comes from [Google's own announcement](https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-4-argon/) and describes internal use. Read it as a demo reel, not a benchmark.
 
-- **C/C++ to Rust migrations.** Argon agents are porting code across Google, from tens of thousands of lines in libraries like re2 and libgav1 up to 800K+ lines for the Fuchsia Zircon kernel. Google says these rewrites are still going through automated and manual audits, emulation testing, and review before production.
-- **libgav1.** Starting from an existing Rust port, agents replaced 32K lines of SIMD code with safe Rust that the compiler vectorizes on its own. Google reports a memory-safe video decoder that runs 2.7x faster than the port, with identical video output.
-- **Data center memory.** A team of agents analyzed fleet-wide profiling data and applied memory optimizations, freeing over 300 TiB once rolled out. Google estimates 500 TiB to 1 PiB in total.
-- **Quantum.** Argon beat a published baseline by 40% on the qubits-times-gates cost of one subroutine, in a matter of minutes.
-- **Security.** Wiz, which Google acquired in March, is using Argon in its Scan for Good program. Google says it found a critical flaw in healthcare software used by hospitals worldwide that earlier frontier models missed.
+* **C/C++ to Rust migrations.** Argon agents are porting code across Google, from tens of thousands of lines in libraries like re2 and libgav1 up to 800K+ lines for the Fuchsia Zircon kernel. Google says these rewrites are still going through automated and manual audits, emulation testing, and review before production.
+* **libgav1.** Starting from an existing Rust port, agents replaced 32K lines of SIMD code with safe Rust that the compiler vectorizes on its own. Google reports a memory-safe video decoder that runs 2.7x faster than the port, with identical video output.
+* **Data center memory.** A team of agents analyzed fleet-wide profiling data and applied memory optimizations, freeing over 300 TiB once rolled out. Google estimates 500 TiB to 1 PiB in total.
+* **Quantum.** Argon beat a published baseline by 40% on the qubits-times-gates cost of one subroutine, in a matter of minutes.
+* **Security.** Wiz, which Google acquired in March, is using Argon in its Scan for Good program. Google says it found a critical flaw in healthcare software used by hospitals worldwide that earlier frontier models missed.
 
 The libgav1 story is the one worth stealing. The loop is profile, run an experiment, read what the compiler produced, repeat for many rounds. You can run that loop with any capable model today. Google's claim is that Argon stays on it without losing the thread.
 
@@ -104,12 +112,12 @@ The libgav1 story is the one worth stealing. The loop is profile, run an experim
 
 This is the part the launch post skips.
 
-- **FrontierSWE v2.** Argon scores 55.0% to GPT-6 Astra's 65.5%, and it's last of the four models.
-- **Terminal-bench 4.0.** Opus 5.5 leads with 66.4% against Argon's 57.4%, a nine-point gap.
-- **Other agentic and science tests.** Astra beats it on Terminal-Bench Science 0.1 (68.1% to 57.6%) and OSWorld-2.0 (72.6% to 69.2%). Opus 5.5 beats it on PostTrainBench (49.3% to 45.3%).
-- **Cyber comparisons.** Google compares its security results only with its own Gemini 3.8 Flash Cyber: 85.8% against 71.0% on its internal vulnerability benchmark, and 70.9% against 58.2% on Wiz's penetration testing benchmark. That shows progress, not rank.
-- **Independent testing.** Very few people outside Google have had hands-on time. Bloomberg reported before launch that some people inside Google worry Argon isn't as strong as the Anthropic and OpenAI models. Google disputes that and says employees have been testing versions for weeks.
-- **Cost per task.** Once the launch discount ends, Argon may not be the cheap option (see above).
+* **FrontierSWE v2.** Argon scores 55.0% to GPT-6 Astra's 65.5%, and it's last of the four models.
+* **Terminal-bench 4.0.** Opus 5.5 leads with 66.4% against Argon's 57.4%, a nine-point gap.
+* **Other agentic and science tests.** Astra beats it on Terminal-Bench Science 0.1 (68.1% to 57.6%) and OSWorld-2.0 (72.6% to 69.2%). Opus 5.5 beats it on PostTrainBench (49.3% to 45.3%).
+* **Cyber comparisons.** Google compares its security results only with its own Gemini 3.8 Flash Cyber: 85.8% against 71.0% on its internal vulnerability benchmark, and 70.9% against 58.2% on Wiz's penetration testing benchmark. That shows progress, not rank.
+* **Independent testing.** Very few people outside Google have had hands-on time. Bloomberg reported before launch that some people inside Google worry Argon isn't as strong as the Anthropic and OpenAI models. Google disputes that and says employees have been testing versions for weeks.
+* **Cost per task.** Once the launch discount ends, Argon may not be the cheap option (see above).
 
 One more loose end. Google's post doesn't state a context window, and one outlet reports 2M tokens. I'd wait for the docs.
 
