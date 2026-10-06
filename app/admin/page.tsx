@@ -534,7 +534,8 @@ const adminCss = `
   }
 `;
 
-const cmsAssetVersion = "2026-10-06-field-slug-media-v1";
+const cmsAssetVersion = "2026-10-06-decap-3-8-0-v1";
+const decapCmsVersion = "3.8.0";
 
 export default function AdminPage() {
   return (
@@ -557,7 +558,7 @@ export default function AdminPage() {
         strategy="beforeInteractive"
       />
       <Script
-        src="https://unpkg.com/decap-cms@^3.8.0/dist/decap-cms.js"
+        src={`https://unpkg.com/decap-cms@${decapCmsVersion}/dist/decap-cms.js`}
         strategy="afterInteractive"
       />
       <Script

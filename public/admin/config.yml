@@ -32,7 +32,7 @@ collections:
     extension: mdx
     format: frontmatter
     slug: "{{fields.slug}}"
-    media_folder: ../../public/blog/uploads/{{fields.slug}}
+    media_folder: /public/blog/uploads/{{fields.slug}}
     public_folder: /blog/uploads/{{fields.slug}}
     summary: "{{title}} — {{date}}"
     preview_path: "blog/{{fields.slug}}"
