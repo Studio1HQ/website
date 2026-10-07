@@ -126,6 +126,6 @@ collections:
           name: body,
           label: Body,
           widget: markdown,
-          modes: [raw, rich_text],
-          hint: "Default is Markdown for reliable Notion paste, links, FAQ tables, and YouTube embeds. Use the TL;DR fields above for the article summary card.",
+          modes: [rich_text, raw],
+          hint: "Paste from Notion in Rich Text mode to preserve links, then switch to Markdown when you need to edit the raw source. Use the TL;DR fields above for the article summary card.",
         }

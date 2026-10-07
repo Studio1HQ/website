@@ -297,11 +297,28 @@
     return target.closest?.('[contenteditable="true"], textarea, input[type="text"], input[type="search"]') || null;
   }
 
+  function isDecapRichTextEditor(target) {
+    if (!(target instanceof HTMLElement)) return false;
+    return Boolean(target.closest('[data-slate-editor="true"]'));
+  }
+
+  function isMarkdownSourceEditor(target) {
+    if (!target) return false;
+    if (target instanceof HTMLTextAreaElement) {
+      return !target.id || /^body-field-|^markdown-|^raw-|^content-field-/.test(target.id);
+    }
+
+    if (!(target instanceof HTMLElement)) return false;
+    if (!target.isContentEditable) return false;
+    if (isDecapRichTextEditor(target)) return false;
+    return true;
+  }
+
   function tableToMarkdown(node) {
     const rows = Array.from(node.querySelectorAll("tr"))
       .map((row) =>
         Array.from(row.querySelectorAll("th,td")).map((cell) =>
-          compact(textContent(cell)).replace(/\n+/g, " ").trim(),
+          compact(childrenToMarkdown(cell)).replace(/\n+/g, " ").trim(),
         ),
       )
       .filter((row) => row.length);
@@ -319,10 +336,14 @@
       .filter((child) => child.tagName && child.tagName.toLowerCase() === "li")
       .map((child, index) => {
         const marker = ordered ? `${index + 1}. ` : "- ";
-        const body = compact(textContent(child)).trim().replace(/\n/g, "\n  ");
+        const body = compact(childrenToMarkdown(child)).trim().replace(/\n/g, "\n  ");
         return marker + body;
       })
       .join("\n") + "\n\n";
+  }
+
+  function childrenToMarkdown(node) {
+    return Array.from(node.childNodes || []).map(toMarkdown).join("");
   }
 
   function toMarkdown(node) {
@@ -330,7 +351,7 @@
     if (node.nodeType !== Node.ELEMENT_NODE) return "";
 
     const tag = node.tagName.toLowerCase();
-    const content = textContent(node);
+    const content = childrenToMarkdown(node);
 
     if (tag === "br") return "\n";
     if (tag === "strong" || tag === "b") return `**${content}**`;
@@ -367,7 +388,18 @@
 
   function htmlToMarkdown(html) {
     const doc = new DOMParser().parseFromString(html, "text/html");
-    return compact(textContent(doc.body)).trim();
+    return Array.from(doc.body.childNodes)
+      .map(toMarkdown)
+      .join("")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
+  }
+
+  function normalizeMarkdownPaste(value) {
+    return String(value || "")
+      .replace(/\uFEFF/g, "")
+      .replace(/\r\n?/g, "\n")
+      .replace(/[ \t]+\n/g, "\n");
   }
 
   function insertIntoTextarea(textarea, value) {
@@ -425,15 +457,18 @@
 
       const target = getEditableElement(event.target);
       if (!target) return;
+      if (!isMarkdownSourceEditor(target)) return;
 
       const html = event.clipboardData?.getData("text/html");
-      if (!html || !/<[a-z][\s\S]*>/i.test(html)) return;
-
-      const markdown = htmlToMarkdown(html);
+      const plainText = event.clipboardData?.getData("text/plain");
+      const markdown =
+        html && /<[a-z][\s\S]*>/i.test(html)
+          ? htmlToMarkdown(html)
+          : normalizeMarkdownPaste(plainText);
       if (!markdown) return;
 
       event.preventDefault();
-      insertMarkdown(target, markdown);
+      insertMarkdown(target, normalizeMarkdownPaste(markdown));
     },
     true,
   );

@@ -318,6 +318,13 @@
     return String(value);
   }
 
+  function normalizeMarkdown(value) {
+    return String(value || "")
+      .replace(/\uFEFF/g, "")
+      .replace(/\r\n?/g, "\n")
+      .replace(/[ \t]+\n/g, "\n");
+  }
+
   function asArray(value) {
     if (!value) return [];
     if (Array.isArray(value)) return value;
@@ -564,7 +571,7 @@
   }
 
   function extractTldrTakeaways(markdown) {
-    const lines = String(markdown || "").split("\n");
+    const lines = normalizeMarkdown(markdown).split("\n");
     const tldrIndex = lines.findIndex((line) =>
       /^#{2,3}\s+tl;?dr\s*$/i.test(line.trim()),
     );
@@ -582,7 +589,7 @@
 
   function renderInlineMarkdown(value) {
     const nodes = [];
-    const pattern = /\[([^\]]+)\]\(([^)]+)\)/g;
+    const pattern = /(`([^`]+)`)|(\*\*([^*]+)\*\*)|(\*([^*]+)\*)|(\[([^\]]+)\]\(([^)]+)\))/g;
     let lastIndex = 0;
     let match;
 
@@ -591,33 +598,36 @@
         nodes.push(value.slice(lastIndex, match.index));
       }
 
-      nodes.push(
-        window.h(
-          "a",
-          {
-            key: `${match[2]}-${match.index}`,
-            href: match[2],
-            target: "_blank",
-            rel: "noopener noreferrer",
-          },
-          match[1],
-        ),
-      );
+      const key = `inline-${match.index}-${nodes.length}`;
+      if (match[2]) {
+        nodes.push(window.h("code", { key }, match[2]));
+      } else if (match[4]) {
+        nodes.push(window.h("strong", { key }, match[4]));
+      } else if (match[6]) {
+        nodes.push(window.h("em", { key }, match[6]));
+      } else if (match[8] && match[9]) {
+        nodes.push(
+          window.h(
+            "a",
+            {
+              key,
+              href: match[9],
+              target: "_blank",
+              rel: "noopener noreferrer",
+            },
+            renderInlineMarkdown(match[8]),
+          ),
+        );
+      }
       lastIndex = match.index + match[0].length;
     }
 
     if (lastIndex < value.length) nodes.push(value.slice(lastIndex));
-
-    return nodes.length
-      ? nodes
-      : value
-          .replace(/\*\*([^*]+)\*\*/g, "$1")
-          .replace(/\*([^*]+)\*/g, "$1")
-          .replace(/`([^`]+)`/g, "$1");
+    return nodes.length ? nodes : value;
   }
 
   function renderMarkdownPreview(markdown, getAsset) {
-    const lines = String(markdown || "").split("\n");
+    const lines = normalizeMarkdown(markdown).split("\n");
     const nodes = [];
     const imageField = {
       get(name) {
@@ -688,7 +698,7 @@
           continue;
         }
 
-        const heading = trimmed.match(/^(#{2,4})\s+(.+)$/);
+        const heading = trimmed.match(/^(#{1,4})\s+(.+)$/);
         if (heading) {
           flushParagraph(paragraphLines);
           nodes.push(
@@ -698,6 +708,26 @@
               renderInlineMarkdown(heading[2]),
             ),
           );
+          index += 1;
+          continue;
+        }
+
+        if (/^```/.test(trimmed)) {
+          flushParagraph(paragraphLines);
+          const codeLines = [];
+          index += 1;
+          while (index < lines.length && !/^```/.test(lines[index].trim())) {
+            codeLines.push(lines[index]);
+            index += 1;
+          }
+          if (index < lines.length) index += 1;
+          nodes.push(window.h("pre", { key: `pre-${nodes.length}` }, window.h("code", {}, codeLines.join("\n"))));
+          continue;
+        }
+
+        if (/^---+$/.test(trimmed)) {
+          flushParagraph(paragraphLines);
+          nodes.push(window.h("hr", { key: `hr-${nodes.length}` }));
           index += 1;
           continue;
         }
@@ -739,6 +769,27 @@
           continue;
         }
 
+        if (/^>\s?/.test(trimmed)) {
+          flushParagraph(paragraphLines);
+          const quoteLines = [];
+          while (index < lines.length) {
+            const quote = lines[index].trim().match(/^>\s?(.*)$/);
+            if (!quote) break;
+            quoteLines.push(quote[1]);
+            index += 1;
+          }
+          nodes.push(
+            window.h(
+              "blockquote",
+              { key: `quote-${nodes.length}` },
+              quoteLines.map((line, lineIndex) =>
+                window.h("p", { key: `quote-line-${lineIndex}` }, renderInlineMarkdown(line)),
+              ),
+            ),
+          );
+          continue;
+        }
+
         if (/^\|.*\|$/.test(trimmed)) {
           flushParagraph(paragraphLines);
           const tableLines = [];
@@ -750,11 +801,11 @@
           continue;
         }
 
-        if (/^[-*]\s+/.test(trimmed)) {
+        if (/^[-*+]\s+/.test(trimmed)) {
           flushParagraph(paragraphLines);
           const items = [];
           while (index < lines.length) {
-            const item = lines[index].trim().match(/^[-*]\s+(.+)$/);
+            const item = lines[index].trim().match(/^[-*+]\s+(.+)$/);
             if (!item) break;
             items.push(item[1]);
             index += 1;
@@ -765,6 +816,27 @@
               { key: `ul-${nodes.length}` },
               items.map((item, itemIndex) =>
                 window.h("li", { key: `li-${itemIndex}` }, renderInlineMarkdown(item)),
+              ),
+            ),
+          );
+          continue;
+        }
+
+        if (/^\d+\.\s+/.test(trimmed)) {
+          flushParagraph(paragraphLines);
+          const items = [];
+          while (index < lines.length) {
+            const item = lines[index].trim().match(/^\d+\.\s+(.+)$/);
+            if (!item) break;
+            items.push(item[1]);
+            index += 1;
+          }
+          nodes.push(
+            window.h(
+              "ol",
+              { key: `ol-${nodes.length}` },
+              items.map((item, itemIndex) =>
+                window.h("li", { key: `oli-${itemIndex}` }, renderInlineMarkdown(item)),
               ),
             ),
           );
