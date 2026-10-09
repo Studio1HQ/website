@@ -1,4 +1,6 @@
 (() => {
+  let replayingMarkdownPaste = false;
+
   function currentViewportWidth() {
     return Math.min(
       window.innerWidth || Infinity,
@@ -260,7 +262,7 @@
     window.visualViewport?.addEventListener("scroll", applyCmsLayout);
 
     const root = document.documentElement || document.body;
-    if (root) {
+    if (root instanceof Node) {
       const observer = new MutationObserver(scheduleEnhancements);
       observer.observe(root, { childList: true, subtree: true });
     }
@@ -299,7 +301,10 @@
 
   function isDecapRichTextEditor(target) {
     if (!(target instanceof HTMLElement)) return false;
-    return Boolean(target.closest('[data-slate-editor="true"]'));
+    return Boolean(
+      target.closest('[data-slate-editor="true"]') &&
+        !target.closest('[class*="RawEditorContainer"], .cms-editor-raw'),
+    );
   }
 
   function isMarkdownSourceEditor(target) {
@@ -416,7 +421,6 @@
     if (document.queryCommandSupported?.("insertText")) {
       const inserted = document.execCommand("insertText", false, value);
       if (inserted) {
-        element.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: value }));
         return;
       }
     }
@@ -450,14 +454,32 @@
     }
   }
 
+  function replayMarkdownPaste(target, value) {
+    if (typeof DataTransfer === "undefined" || typeof ClipboardEvent === "undefined") return false;
+
+    const data = new DataTransfer();
+    data.setData("text/plain", value);
+
+    replayingMarkdownPaste = true;
+    target.dispatchEvent(
+      new ClipboardEvent("paste", {
+        bubbles: true,
+        cancelable: true,
+        clipboardData: data,
+      }),
+    );
+    replayingMarkdownPaste = false;
+    return true;
+  }
+
   document.addEventListener(
     "paste",
     (event) => {
+      if (replayingMarkdownPaste) return;
       if (!isEditableTarget(event.target)) return;
 
       const target = getEditableElement(event.target);
       if (!target) return;
-      if (!isMarkdownSourceEditor(target)) return;
 
       const html = event.clipboardData?.getData("text/html");
       const plainText = event.clipboardData?.getData("text/plain");
@@ -467,7 +489,15 @@
           : normalizeMarkdownPaste(plainText);
       if (!markdown) return;
 
+      if (isDecapRichTextEditor(target)) return;
+      if (!isMarkdownSourceEditor(target)) return;
+
       event.preventDefault();
+      event.stopImmediatePropagation();
+      if (target instanceof HTMLElement && target.isContentEditable && replayMarkdownPaste(target, normalizeMarkdownPaste(markdown))) {
+        return;
+      }
+
       insertMarkdown(target, normalizeMarkdownPaste(markdown));
     },
     true,
