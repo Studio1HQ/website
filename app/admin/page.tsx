@@ -534,7 +534,7 @@ const adminCss = `
   }
 `;
 
-const cmsAssetVersion = "2026-10-09-body-editor-v7";
+const cmsAssetVersion = "2026-10-10-image-selection-v11";
 const decapCmsVersion = "3.16.3";
 
 export default function AdminPage() {

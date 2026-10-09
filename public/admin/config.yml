@@ -32,8 +32,6 @@ collections:
     extension: mdx
     format: frontmatter
     slug: "{{fields.slug}}"
-    media_folder: ../../public/blog/uploads/{{fields.slug}}
-    public_folder: /blog/uploads/{{fields.slug}}
     summary: "{{title}} — {{date}}"
     preview_path: "blog/{{fields.slug}}"
     editor:
@@ -113,7 +111,7 @@ collections:
           widget: image,
           required: false,
           choose_url: false,
-          hint: "Optional. Set the URL Slug first, then upload. Used for this blog card and LinkedIn/Twitter preview. Leave empty to use the default Studio1 image.",
+          hint: "Optional. Used for this blog card and LinkedIn/Twitter preview. Leave empty to use the default Studio1 image.",
         }
       - {
           name: bannerImageAlt,
@@ -125,7 +123,7 @@ collections:
       - {
           name: body,
           label: Body,
-          widget: markdown,
+          widget: richtext,
           modes: [raw, rich_text],
-          hint: "Paste from Notion in Markdown mode to preserve links and formatting. Switch to Rich Text when useful; the live preview shows the rendered article.",
+          hint: "Paste from Notion in Markdown mode to preserve links and formatting. For images, use the Image block: Upload, then Choose selected. Pasted Notion attachment: URLs are not uploaded files.",
         }

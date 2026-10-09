@@ -227,6 +227,17 @@
       box-shadow: 0 18px 44px -34px rgba(0, 0, 0, 0.45);
     }
 
+    .studio1-preview-image-missing {
+      margin: 1.75rem 0;
+      padding: 1rem 1.25rem;
+      border: 1px solid #d8c7a5;
+      border-radius: 8px;
+      background: #fff8e9;
+      color: #594323;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
     .studio1-preview-body pre {
       overflow-x: auto;
       padding: 1.1rem;
@@ -626,6 +637,8 @@
     return nodes.length ? nodes : value;
   }
 
+  let BodyImagePreview;
+
   function renderMarkdownPreview(markdown, getAsset) {
     const lines = normalizeMarkdown(markdown).split("\n");
     const nodes = [];
@@ -737,9 +750,10 @@
           flushParagraph(paragraphLines);
           const src = safeAsset(getAsset, image[2], imageField);
           nodes.push(
-            window.h("img", {
+            window.h(BodyImagePreview, {
               key: `img-${nodes.length}`,
               src,
+              originalSrc: image[2],
               alt: image[1] || "",
               title: image[4] || "",
             }),
@@ -888,6 +902,35 @@
 
     window.CMS.registerPreviewStyle(previewCss, { raw: true });
 
+    BodyImagePreview = window.createClass({
+      getInitialState() {
+        return { failedSrc: "" };
+      },
+      render() {
+        const { src, originalSrc, alt, title } = this.props;
+        const notionAttachment = originalSrc.startsWith("attachment:");
+        if (notionAttachment || this.state.failedSrc === src) {
+          return window.h(
+            "div",
+            { className: "studio1-preview-image-missing", role: "status" },
+            notionAttachment
+              ? `Image${alt ? ` "${alt}"` : ""} still points to a Notion attachment. In the Image block, upload the file and click "Choose selected" in the media gallery.`
+              : [
+                  `Image${alt ? ` "${alt}"` : ""} cannot load from `,
+                  window.h("code", { key: "src" }, src),
+                  `. Re-select the file in the Image block and click "Choose selected" before publishing.`,
+                ],
+          );
+        }
+        return window.h("img", {
+          src,
+          alt,
+          title,
+          onError: () => this.setState({ failedSrc: src }),
+        });
+      },
+    });
+
     const BlogPreview = window.createClass({
       getInitialState() {
         return { failedBanner: "" };
@@ -940,7 +983,7 @@
                 ? window.h(
                     "div",
                     { className: "studio1-preview-banner-missing" },
-                    "Banner file was not found locally. Upload after the slug is set, or use a saved file under /public/blog/uploads/[slug]/.",
+                    "Banner file could not load. Choose the image again in the CMS before publishing.",
                   )
                 : window.h("img", {
                     src: bannerSrc,
