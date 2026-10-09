@@ -1,6 +1,5 @@
 ---
-title: "Developer Docs as Your Best AEO Asset: How to Get AI Assistants to Cite
-  Your Content"
+title: "Developer Docs as Your Best AEO Asset: How to Get AI to Cite Your Content"
 slug: developer-docs-as-aeo-asset
 description: Learn how to structure developer documentation for AEO so AI
   assistants can discover, understand, trust, and cite your docs in their
@@ -17,7 +16,7 @@ tldrBullets:
     dates beat special files and extra markup.
   - Authority from outside your site still decides who wins, so earn links and
     real mentions.
-date: 2026-10-09
+date: 2026-10-10
 draft: false
 authors:
   - Studio1 Team
@@ -26,8 +25,240 @@ tags:
   - geo
   - documentation
   - ai
-bannerImage: /blog/uploads/developer-docs-as-aeo-asset/developer-docs_-your-best-aeo-asset.png
+bannerImage: /blog/uploads/developer-docs_-your-best-aeo-asset.png
 bannerImageAlt: "Developer Docs as Your Best AEO Asset: How to Get AI Assistants
   to Cite Your Content"
 ---
-efgdgdfgdf
+A lot of developers now ask an assistant before they search Google. In the [2025 Stack Overflow Developer Survey](https://survey.stackoverflow.co/2025/ai), 50.6% of professional developers said they use AI tools every day, and another 17.4% use them weekly.
+
+That changes what your docs are for. They are no longer only a place people visit. They are the source an assistant reads, quotes, and cites when someone asks how to use your product.
+
+This guide shows how to structure developer documentation so assistants find it, trust it, and cite it. Every number below links to its source.
+
+![agents-vs-human-traffic.webp](/blog/uploads/agents-vs-human-traffic.webp)
+
+## What is answer engine optimization (AEO) for developer docs?
+
+Answer engine optimization is the work of making your content easy for AI tools to retrieve, quote, and credit. For docs, that means writing pages so an assistant can pull out one correct, complete answer.
+
+It builds on normal SEO. The difference is the unit of competition. In classic search, the page ranks. In AI answers, a single passage gets picked. A clear section can win even when the page around it is average.
+
+Some people call this GEO, short for generative engine optimization. The tasks are the same.
+
+## How do AI assistants decide which docs to cite?
+
+There are two kinds of readers hitting your docs, and they behave differently.
+
+|                    | Search style assistants                                             | Coding assistants                                       |
+| ------------------ | ------------------------------------------------------------------- | ------------------------------------------------------- |
+| Examples           | ChatGPT search, Google AI Overviews and AI Mode, Gemini, Perplexity | Cursor, Claude Code                                     |
+| What they do       | Answer a question and attach links                                  | Fetch docs in the middle of a task so the code is right |
+| Who sees your page | Sometimes a person who clicks                                       | Often nobody                                            |
+| What helps most    | Authority, clear passages, fresh pages                              | Clean text, working code, easy to find pages            |
+
+Both follow a similar path. [SE Ranking describes four steps](https://visible.seranking.com/blog/answer-engine-optimization/): the system finds candidate pages, breaks each page into passages, picks the passages that answer most directly, and credits some of them.
+
+The data on what gets cited is useful. SE Ranking studied more than 2 million pages. These are links between traits and citations, not proof of cause, so read them as strong hints.
+
+| What they measured   | What they found                                                                                               |
+| -------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Page depth (ChatGPT) | Pages over 2,900 words averaged 5.1 citations. Pages under 800 words averaged 3.2.                            |
+| Freshness (ChatGPT)  | Pages updated in the last three months averaged 6 citations. Older pages averaged 3.6.                        |
+| Section size         | About 120 to 180 words between headings beat very short sections.                                             |
+| Authority (ChatGPT)  | Sites with over 32,000 referring domains were 3.5 times more likely to be cited than sites with 200 or fewer. |
+| Google overlap       | 92.36% of AI Overviews linked to at least one domain already in Google's top 10.                              |
+
+[Ahrefs adds](https://ahrefs.com/blog/answer-engine-optimization/) that 44.2% of citations came from the first 30% of a page.
+
+Google says the same thing in plain terms. Its [guide to AI features in Search](https://developers.google.com/search/docs/appearance/ai-features) says there are no extra requirements to appear in AI Overviews or AI Mode, and no new machine readable files or special markup are needed. A page just has to be indexed and eligible to show with a snippet.
+
+## How to structure developer docs so AI assistants cite them: an 8 step playbook
+
+### 1. Let the right crawlers in
+
+You cannot write your way out of a page the crawler can't see. Start with access.
+
+Here is a simple robots.txt that allows the bots that fetch pages to answer questions, and leaves the choice on training bots to you:
+
+```
+# Bots that fetch pages to answer live questions
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+# Bots that collect data for training (your call)
+# User-agent: GPTBot
+# Disallow: /
+# User-agent: ClaudeBot
+# Disallow: /
+```
+
+Four details trip up a lot of teams:
+
+* **Render on the server.** [Vercel and MERJ found](https://vercel.com/blog/the-rise-of-the-ai-crawler) that none of the major AI crawlers they measured ran JavaScript. Gemini is the exception because it uses Google's crawling setup. That study is from December 2024, so check your own logs, but build as if it still holds.
+* **Check your firewall and CDN.** Many sites block AI bots by accident with a security rule.
+* **Do not hide public docs behind a login or cookie wall.** A crawler will not sign in.
+* **Keep code samples and tables in the HTML.** Do not load them with a script after the page opens.
+
+A [September 2026 sample of 95 sites](https://tryhoverify.com/blog/generative-engine-optimization-statistics/) found training crawlers get blocked about twice as often as retrieval crawlers. If you want citations, block training bots by name if you wish, and keep the fetching bots allowed.
+
+![image.png](/blog/uploads/docs2.png)
+
+### 2. Put the answer in the first two sentences
+
+Give every page one question and answer it straight away. Name the page after the task, in the words a developer would type.
+
+Here is the difference.
+
+A weak opening: *Webhooks are a way for our platform to notify your application when events happen. Our system sends HTTP POST requests to a URL you configure. For security reasons, it is important to make sure requests are genuine.*
+
+A strong one: *To verify a webhook, compute an HMAC SHA-256 hash of the raw request body with your signing secret, then compare it to the value in the X-Signature header. If they match, the request is genuine. The full code is below in Node.js, Python, and Go.*
+
+The strong version can be lifted out of the page and still be a correct answer. That is what an assistant looks for.
+
+Then write the page in this order: the answer, the working steps or code, the edge cases, and two or three links to the next likely questions. Title it "How to verify webhook signatures in Node.js," not "Webhooks."
+
+### 3. Make every section stand on its own
+
+An assistant does not read your page top to bottom. It pulls out one section. If that section says "as mentioned above," it falls apart when copied.
+
+* **Name the thing.** Write "the Acme Payments API," not "it."
+* **Repeat key facts where they matter.** If a rate limit applies to three endpoints, say it on all three pages.
+* **Link for more, but do not link for meaning.** The section should make sense without a click.
+* **Use question style headings.** "What happens when a request is rate limited?" matches how people prompt.
+
+Do not chop everything into tiny pieces. SE Ranking's data favored roughly 120 to 180 words between headings over very short fragments. Short paragraphs help readers, but a section still needs enough context to be understood alone.
+
+### 4. Show code that works the first time
+
+A good code block is often the most citable part of a docs page. Make it complete, with imports, setup, and the call. No "..." in the middle.
+
+Then add four things:
+
+* The **language and the SDK or API version** it works with.
+* The **expected output**, so the reader can confirm it worked.
+* The **exact text of the common error**, right under the example. People paste error messages straight into assistants, and exact text is a strong match.
+* The same example in **each language your users use**, as separate labeled blocks.
+
+A table of error codes is one of the best things you can publish. It is dense, exact, and easy to quote.
+
+### 5. Offer a clean text version of every page
+
+A page full of menus, banners and scripts is noisy. A plain text version is cheaper for an assistant to read and easier to quote correctly.
+
+Several developer companies already do this. Stripe lets you [add `.md` to a docs URL](https://ravichaganti.com/blog/documentation-stack-for-ai-agents/) to get a markdown version. [Vercel's guide](https://vercel.com/kb/guide/make-your-documentation-readable-by-ai-agents) covers serving markdown through the `Accept: text/markdown` header and a link tag in the page head. Fastly [serves markdown automatically](https://www.fastly.com/documentation/reference/markdown/) to known AI user agents.
+
+Now the honest part about `llms.txt`the proposed file that lists your key pages for AI tools:
+
+* **For search citations, no evidence it helps.** SE Ranking checked about 300,000 domains. Only 10.13% had the file, and it found no link to citation counts.
+* **Few files get read.** Ahrefs studied 137,000 domains and found that [28% published the file and 97% of those got zero requests in May 2026](https://ppc.land/llms-txt-adoption-rises-8-8x-but-97-of-files-get-zero-ai-requests/).
+* **For coding assistants, it can help.** Mintlify ran [2,400 test runs across 20 docs sites](https://www.mintlify.com/blog/state-of-docs-traffic) and found that one link to llms.txt removed most of the 404 errors agents hit while guessing page addresses.
+
+Treat llms.txt as a helper for coding tools, not a ranking trick. It costs almost nothing, so if your docs platform makes it for you, leave it on.
+
+![url-errors-benchmark.webp](/blog/uploads/url-errors-benchmark.webp)
+
+### 6. Show versions and update dates
+
+Fresh pages get cited more. In SE Ranking's data, pages updated in the last three months averaged 6 ChatGPT citations against 3.6 for older ones. Ahrefs reports that AI-cited URLs are on average 25.7% fresher than normal search results.
+
+For docs, freshness is also about being right. An answer that uses a retired endpoint hurts the developer and then hurts you.
+
+* Show **"Last updated"** and the **API or SDK version** at the top of each page.
+* Keep **old version pages**, clearly marked, with a link to the current one.
+* Set **redirects** when a page moves.
+* Publish a **dated changelog**. It answers "what changed in version 3?"
+* Review your **top 20 pages** every quarter, and only change the date when you really changed the page.
+
+### 7. Publish comparison and migration pages
+
+Developers ask assistants to compare options and plan moves. "Acme vs Provider X for webhooks." "How to migrate from Provider X to Acme."
+
+Write these pages in the open. State what each option does well, show real numbers, and say who each one fits. Pages that read as an honest guide get used. Pages that read as an ad get skipped.
+
+If you want the broader playbook for getting any developer product recommended, Studio1 covers it in [How to Get Your Tool Recommended by ChatGPT, Perplexity, and Google](https://www.studio1hq.com/blog/how-to-get-your-tool-recommended-by-chatgpt-perplexity-google).
+
+### 8. Earn mentions outside your docs
+
+On page work gets you into the race. Authority decides who wins it. In SE Ranking's study, referring domains were the strongest signal for ChatGPT citations. For Google AI Mode, domains with over 24,000 referring domains averaged 6.8 citations against 2.5 for sites with fewer than 300.
+
+The same study found domains with a strong presence on Reddit and Quora had roughly four times the citations of domains with little. That is a correlation, since bigger brands get mentioned everywhere. Still, developers trade answers in communities, and assistants read those places too.
+
+* **Publish original data.** Benchmarks and usage numbers give others a reason to link to you.
+* **Answer questions in public.** Stack Overflow, GitHub discussions and forums, with honest answers that link to the exact docs page when it helps.
+* **Get listed where developers look.** Package registries, integration directories and "awesome" lists on GitHub.
+* **Make your docs easy to link to.** Stable URLs and heading anchors let people point at the exact section.
+
+## Can templated pages help your docs get cited?
+
+Yes, if each page has real data behind it. Docs are well suited to programmatic SEO, which means building many pages from one template and a set of real facts. You probably have hundreds of items that each deserve a page.
+
+| Page type              | Question it answers                           | Data you need                                    |
+| ---------------------- | --------------------------------------------- | ------------------------------------------------ |
+| Error code             | What does error 429 mean and how do I fix it? | Exact message, causes, fix, working code         |
+| Endpoint or SDK method | How do I call this and what comes back?       | Parameters, example request and response, limits |
+| Integration            | How do I use Acme with Next.js?               | Setup steps, tested code, known issues           |
+| Migration              | How do I move from Provider X to Acme?        | Concept mapping, code before and after           |
+| Comparison             | Acme vs Provider X for webhooks?              | Real limits, pricing, and honest trade offs      |
+
+A simple rule: do not publish a templated page until you can answer four questions with facts unique to that page. What exactly goes wrong or is needed? Why does it happen? What is the working fix or example? Which real numbers apply?
+
+If a page would read the same with one word swapped, search engines and assistants will skip it.
+
+## How do you know if AI assistants are citing your docs?
+
+Normal analytics miss most of this. Mintlify notes that coding agents [rarely show up in Google Analytics](https://www.mintlify.com/library/how-to-track-ai-traffic-to-your-documentation) because they fetch pages without running the tracking script. Use three checks instead.
+
+* **Read your server logs.** Filter by user agent: GPTBot, OAI-SearchBot, ChatGPT-User, ClaudeBot, PerplexityBot, Googlebot. You will see which pages they fetch and which they miss.
+* **Run a fixed prompt test.** Write 20 real questions your users ask. Ask each in ChatGPT, Gemini, Perplexity, Claude, and one coding assistant. Record whether your docs are cited, whether a competitor is, and whether the answer is correct. Repeat monthly with the same list.
+* **Watch search and referrals.** Search Console includes AI features in its reports. Track AI referral visits as their own group. SE Ranking found these visitors [spent 68% more time on site](https://visible.seranking.com/blog/answer-engine-optimization/) than organic search visitors.
+
+Read the answers, not only the links. Being cited is not the same as being recommended.
+
+## What mistakes keep developer docs out of AI answers?
+
+* **Docs that only render in the browser.** The crawler sees an empty page.
+* **A long warm up before the answer.** The useful part sits too far down.
+* **Sections that depend on other sections.** They fall apart when quoted.
+* **Code with gaps.** Snippets with "..." and no output cannot be trusted or copied.
+* **Old versions with no label.** Assistants repeat outdated answers, and developers blame you.
+* **Betting on special files.** FAQ schema showed no lift in SE Ranking's data: pages with it averaged 3.6 citations, pages without averaged 4.2.
+* **Thin templated pages.** Same text, one word changed.
+* **No presence outside your own site.** Authority is still the biggest signal.
+
+## Frequently asked questions
+
+### Does llms.txt help my docs get cited by ChatGPT or Google?
+
+Not according to current data. SE Ranking found no link between llms.txt and citation counts across about 300,000 domains, and Ahrefs found 97% of the files in its 137,000 domain study got no requests in May 2026. It may help coding assistants find your pages, so it is fine to publish. Just do not count on it for citations.
+
+### Do I need FAQ schema or special markup?
+
+No. Google says no special schema or markup is required for AI Overviews and AI Mode. A visible FAQ section can still help readers, and pages with FAQ content averaged slightly more citations in AI Mode (4.9 against 4.4), but the markup itself did not matter.
+
+### How long should a developer docs page be?
+
+Long enough to fully answer the task. In SE Ranking's ChatGPT data, pages above 2,900 words averaged more citations than pages under 800 words. Do not pad to hit a number. Cover prerequisites, steps, code, output, errors, and limits, and stop there.
+
+### Will AI assistants read docs that rely on JavaScript?
+
+Often not. Vercel and MERJ found that major AI crawlers such as GPTBot and ClaudeBot did not run JavaScript in their study. Render your docs on the server so the full text is in the HTML.
+
+### How often should I update my docs?
+
+Review your most important pages at least every three months. Pages updated in that window averaged 6 ChatGPT citations in SE Ranking's data against 3.6 for older pages. Update when facts change, and show the date.
+
+### Is AEO different from SEO?
+
+It is the same foundation applied to a new place. Crawlability, authority, helpful content, and freshness matter for both. The change is writing so single passages can be quoted, and measuring citations and mentions alongside clicks.
