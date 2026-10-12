@@ -1,0 +1,360 @@
+---
+title: "llms.txt Explained: What It Is, Whether Developer Tools Need One, and a
+  Template"
+slug: llms-txt-explained-developer-tools-guide
+description: Learn what llms.txt is, whether it improves AI visibility or SEO,
+  and how to create an llms.txt file for developer tools with a practical
+  template.
+tldrSummary: llms.txt helps AI coding assistants navigate developer
+  documentation, but it does not reliably improve search rankings or AI
+  citations. Here's when to use it and how to set it up.
+tldrBullets:
+  - llms.txt is a community-proposed Markdown file that guides AI tools to
+    important documentation and resources.
+  - Research shows no measurable SEO or AI citation benefit, and most AI
+    crawlers rarely request the file
+  - Developer tools can still benefit from llms.txt by making documentation
+    easier for coding assistants to access.
+date: 2026-10-12
+updatedDate: 2026-10-12
+draft: false
+authors:
+  - Studio1 Team
+bannerImage: /blog/uploads/whatsapp-image-2026-10-12-at-5.34.22-pm.jpeg
+---
+# llms.txt Explained: What It Is, Whether Developer Tools Need One, and a Template
+
+## TL;DR
+
+* llms.txt is a plain Markdown file that tells AI tools what to do and which pages matter most. Jeremy Howard proposed it in September 2024. It's a community proposal, not an official standard.
+* It won't get you recommended. Google says its search ignores it, a study of about 300,000 domains found no link to AI citations, and Ahrefs found 97% of files got zero requests in May 2026.
+* Developer tools should still add one to their docs. It takes about an hour; developers do point coding assistants at these files, and Chrome's Lighthouse now checks for one.
+
+A developer pastes your docs link into a coding assistant and says, "set this up for me." The assistant has to dig the useful text out of menus, scripts, and banners. Sometimes it grabs an old page and writes code for a version you retired two years ago. llms.txt tries to fix that.
+
+It's cheap, it's useful in one specific place, and it won't do what most blog posts promise. For the bigger picture, see our guide on [how to get your tool recommended by ChatGPT, Perplexity, and Google](https://www.studio1hq.com/blog/how-to-get-your-tool-recommended-by-chatgpt-perplexity-google). This post goes deep on one file.
+
+## What is llms.txt?
+
+llms.txt is a Markdown file at `/llms.txt` on your website. It gives AI tools a short description of your product and a hand-picked list of links, each with a one-line note. Think of it as a table of contents written for software.
+
+[Jeremy Howard](https://llmstxt.org/), co-founder of Answer.AI and fast.ai, proposed it on September 3, 2024, and published a rewrite (v2) in August 2026. The AI labs use it too: the spec points to llms.txt files for the developer docs of [OpenAI](https://developers.openai.com/llms.txt), [Anthropic](https://docs.anthropic.com/llms.txt), and [Gemini](https://ai.google.dev/gemini-api/docs/llms.txt).
+
+Why it exists: web pages are built for people, so an AI tool gets the content plus a pile of layout code. A short index with links to clean pages saves it time.
+
+Version 2 [changed three things](https://llmstxt.org/changes.html):
+
+1. **Links should point to Markdown pages.** A page at `/docs/api` can have a plain-text twin at `/docs/api.md` (or `page.html.md`).
+2. **Pages can point to their llms.txt.** Use link tags or an HTTP header: `rel="alternate" type="text/markdown"` for the Markdown copy, `rel="describedby"` for the llms.txt.
+3. **A file can live in a subfolder.** `/docs/llms.txt` covers everything under `/docs/`, and the most specific file wins.
+
+## What does an llms.txt file look like?
+
+According to the [spec](https://llmstxt.org/), a file has these parts, in this order:
+
+1. An H1 with your project or site name. **The only required part.**
+2. A blockquote with a short summary of the key facts.
+3. Optional paragraphs or lists (no headings) with extra detail.
+4. Optional H2 sections, each a list of links: `[Name](url): short note`.
+
+By convention, a section called `Optional` holds links a tool can skip when short on room. The smallest useful version:
+
+```
+# ExampleDB
+
+> ExampleDB is a hosted Postgres database for small teams.
+
+## Docs
+
+- [Quickstart](https://docs.exampledb.com/quickstart.md): Create a project and run a first query.
+```
+
+No special syntax, nothing to install.
+
+## llms.txt vs robots.txt vs sitemap.xml: what's the difference?
+
+They do different jobs. llms.txt replaces neither of the others.
+
+\| File | What it does | Who reads it | Can it block anyone? |
+
+\| --- | --- | --- | --- |
+
+\| robots.txt | Says which bots may visit which pages | Search and AI crawlers | Yes, if the bot follows the rules |
+
+\| sitemap.xml | Lists every page you want indexed | Search engines | No |
+
+\| llms.txt | A short, curated guide to your best pages | AI tools and coding assistants, when they choose to fetch it | No |
+
+A sitemap lists everything and is usually too big for an AI tool to read in one go. The spec calls [llms.txt a curated overview](https://llmstxt.org/). To keep a bot out, use robots.txt.
+
+## Does AI actually read llms.txt? What the data says
+
+Mostly no, and several independent looks agree.
+
+\| Study | What they looked at | What they found |
+
+\| --- | --- | --- |
+
+\| [Ahrefs](https://ahrefs.com/blog/llmstxt-study/), May 2026 | 137,210 domains | 28% published a valid file. 97% of those got zero requests all month. About 96% of requests that did arrive came from bots. |
+
+\| [SE Ranking](https://seranking.com/blog/llms-txt/) | About 300,000 domains | 10.13% had the file. No measurable link to how often a domain was cited by AI tools. |
+
+\| [EZY Research](https://somethinginc.com/blog/llms-txt-ai-crawlers-fetch-data/), 12 weeks | The same valid file on 83 sites | OpenAI's crawler fetched llms.txt 7 times vs 3,990 for robots.txt. ClaudeBot: 9 vs 3,120. PerplexityBot: 0 vs 775. Meta's crawler: 193 vs 172. |
+
+\| [Dejan.ai](https://dejan.ai/blog/crawler-census-robots-llms-okf/), 27 July to 15 August 2026 | One site's server logs | Google, Anthropic, and OpenAI crawlers fetched robots.txt 1,150 times and llms.txt 4 times. |
+
+\| [ProGEO.ai](https://ppc.land/only-7-4-of-fortune-500-have-an-llms-txt-file-study-finds/), March 2026 | The Fortune 500 | 37 of 500 (7.4%) had an llms.txt. 92.8% had a robots.txt. |
+
+What stands out:
+
+* **Adoption numbers differ because samples differ.** Ahrefs measured sites using its analytics, which skew technical. Don't quote one number as "the" rate.
+* **Busy crawlers mostly skip the file.** In the EZY test, big crawlers read robots.txt thousands of times and llms.txt almost never. Meta's crawler was the lone exception.
+* **AI bots don't go hunting for it.** Requests for llms.txt files that didn't exist drew no AI bot traffic. Of requests to real files, about 19.5% came from named AI tools and 12% from tools that scan or audit these files.
+* **Google is clear about search.** Its [generative AI search guide](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide) (updated July 10, 2026) lists llms.txt as something you can ignore. Keeping one neither helps nor hurts. John Mueller has [compared it to the old keywords meta tag](https://www.searchenginejournal.com/googles-mueller-llms-txt-is-comparable-to-the-keywords-meta-tag/544804/).
+* **Yet Google built a check for it.** On May 5, 2026, Chrome added an llms.txt audit to [Lighthouse](https://developer.chrome.com/docs/lighthouse/agentic-browsing/llms-txt) under "Agentic browsing audits." It only fails if your server errors on the request. No file means "Not Applicable." Search ranking is one job. Helping an AI agent browse for a user is another.
+* **One caution.** Per [Search Engine Journal's summary](https://searchenginejournal.com/97-of-llms-txt-files-got-no-requests-ahrefs-data-shows/579478), Ahrefs saw a research crawler studying llms.txt as a way to slip instructions to AI tools. Stick to your own plain facts and links.
+
+![image.png](/blog/uploads/image.png)
+
+## Do developer tools need an llms.txt file?
+
+Need? No. Should you make one? For your docs, yes.
+
+**It won't help you rank or get cited.** If someone says a 30-minute llms.txt will get you into ChatGPT's answers, ask for their data. What moves the needle is in our [AEO playbook for developer tools](https://www.studio1hq.com/blog/how-to-get-your-tool-recommended-by-chatgpt-perplexity-google).
+
+**It does help people using coding assistants.** Developers already point their tools at these files:
+
+* Google's Agent Development Kit docs [show how to point Gemini CLI, Claude Code, and Cursor at their llms.txt](https://google.github.io/adk-docs/tutorials/coding-with-ai).
+* Bright Data's docs tell developers to [save its llms.txt into their project](https://docs.brightdata.com/quickstart-coding-agent.md), in a Cursor rules file or an `AGENTS.md`.
+* Vercel publishes [an llms.txt and an llms-full.txt](https://vercel.com/docs/agent-resources) and explains how to use them with Claude Code.
+
+Howard says in v2 that coding assistants now use these files reliably. That's a smaller audience than "all of AI search," but it's the one a developer tool cares about.
+
+**It costs almost nothing.** An hour of work, plus keeping it current.
+
+Put it where your docs live. A file at `docs.yourtool.com/llms.txt` or `yourtool.com/docs/llms.txt` can cover just the docs, and a second one at the root can cover the marketing site.
+
+![image.png](/blog/uploads/image-1.png)
+
+## A worked example: the llms.txt file we use at Studio1
+
+Here is [our own file](https://www.studio1hq.com/llms.txt), trimmed to show the shape (first item kept in each section).
+
+```
+# Studio1
+
+> Technical content and developer growth partner for devtool, SaaS, and AI teams.
+
+Studio1 helps developer-focused companies grow adoption through technical content
+
+marketing, developer documentation and DX audits, developer video production, and
+
+developer relations growth campaigns. [...]
+
+## Services
+
+- [Technical Content Marketing](https://studio1hq.com/technical-content-marketing): Developer tutorials, integration guides, SEO articles, and code-rich content written by engineers.
+
+- [...]
+
+## Key Pages
+
+- [Homepage](https://studio1hq.com/)
+
+- [Client Work](https://studio1hq.com/work): Tutorials, guides, and developer content Studio1 creates for client teams.
+
+- [...]
+
+## Products
+
+- [Raah](https://raah.dev): Web analytics and real-user observability for developers and SaaS teams.
+
+- [...]
+
+## Blog
+
+- [How to Get Your Tool Recommended by ChatGPT, Perplexity, and Google](https://studio1hq.com/blog/how-to-get-your-tool-recommended-by-chatgpt-perplexity-google): AEO, GEO, LLM SEO, crawler access, documentation strategy, comparison pages, community mentions, schema, and llms.txt guidance for developer tools.
+
+- [...]
+
+## Team
+
+- **Arindam Majumder**: Co-founder and Content Lead. [...]
+
+## Contact
+
+- Email: contact@studio1hq.com
+
+- [...]
+```
+
+What it gets right:
+
+* **The H1 and quote answer "who is this?" in one sentence.**
+* **Every link has a note** saying what's behind it, so a tool can pick the right page.
+* **The order follows what people ask:** services, then proof, then the blog.
+* **It's short.** One or two screens.
+
+What we'd tighten (use it as a checklist for your own file):
+
+1. **Point links at Markdown pages.** Ours link to HTML pages. We tested one post URL with `.md` added and it returns a 404, so the Markdown twins don't exist yet. This is the biggest gap.
+2. **Use one hostname.** The file is served from `www.studio1hq.com`, the links use `studio1hq.com`. It redirects, so nothing breaks, but one hostname is cleaner.
+3. **Move low-value links under `Optional`.** Terms, Privacy, and Careers don't belong in Key Pages.
+4. **Keep list sections as links.** Our Team and Contact bullets are plain text. Make them links or fold them into the intro.
+5. **Add new posts as you publish.** Our Blog section is hand-picked, which is fine if someone owns it. A stale file sends tools to pages that moved.
+
+## An llms.txt template for developer tools
+
+Copy this and swap in your details. "ExampleDB" and "RivalDB" are made up.
+
+```
+# ExampleDB
+
+> ExampleDB is a hosted Postgres database for small teams. It works with Prisma and Drizzle, and a new project takes about five minutes to set up.
+
+Things to know before answering questions about ExampleDB:
+
+- It runs Postgres 16. Standard Postgres SQL works.
+
+- The free plan pauses a project after 7 days with no activity. Paid plans never pause.
+
+- The Node package is `@exampledb/client`. Older tutorials that use `exampledb-js` are out of date.
+
+- ExampleDB does not support MySQL.
+
+## Start here
+
+- [Quickstart](https://docs.exampledb.com/quickstart.md): Create a project and run your first query.
+
+- [Connect with Prisma](https://docs.exampledb.com/guides/prisma.md): Connection string, pooling, and migrations.
+
+- [Connect with Drizzle](https://docs.exampledb.com/guides/drizzle.md): Setup and a working schema example.
+
+## API reference
+
+- [REST API](https://docs.exampledb.com/api.md): Every endpoint with request and response examples.
+
+- [Node SDK](https://docs.exampledb.com/sdk/node.md): Install, auth, and common calls.
+
+- [Error codes](https://docs.exampledb.com/errors.md): Each error with its cause and fix.
+
+## Guides
+
+- [Migrate from RivalDB](https://docs.exampledb.com/migrate/rivaldb.md): Export, import, and what changes.
+
+- [Backups and restore](https://docs.exampledb.com/backups.md): Schedules, retention, and point-in-time restore.
+
+## Pricing and comparisons
+
+- [Pricing](https://exampledb.com/pricing.md): Plans, limits, and what counts as usage.
+
+- [ExampleDB vs RivalDB](https://exampledb.com/compare/rivaldb.md): Features, pricing, and where RivalDB is the better fit.
+
+## Optional
+
+- [Changelog](https://docs.exampledb.com/changelog.md): Release notes by version.
+
+- [Status page](https://status.exampledb.com): Current uptime and incidents.
+
+- [Privacy policy](https://exampledb.com/privacy.md)
+```
+
+How to fill it in:
+
+* **Write the quote like an answer** to "what is ExampleDB?"
+* **Add a "things to know" list.** The most useful part for developer tools. Include renamed packages, retired versions, limits, and what you don't support. The spec's own FastHTML example does this.
+* **Write each note as the question the page answers.** "Connection string, pooling, and migrations" beats "Prisma guide."
+* **Link to Markdown pages where you can.** If not yet, link to normal pages and add Markdown copies to your to-do list.
+* **Put legal links in Optional.** Keep pricing and comparisons near the top.
+* **Test it.** Per the spec, give an assistant only your llms.txt and ask it five real questions. If it can't answer, the file is missing something.
+
+## Do you need llms-full.txt too?
+
+Probably not at first. llms.txt is the table of contents. llms-full.txt is the whole book in one Markdown file.
+
+Bright Data's docs give a sensible rule: for a live assistant session, [load llms.txt first and fetch single pages as needed](https://docs.brightdata.com/quickstart-coding-agent.md). Use the full file for pipelines and tools that need everything at once. It can be very large. Suppose your docs platform generates both; great. If you write by hand, start with llms.txt.
+
+## How to add llms.txt to your site
+
+\| Your setup | Easiest way |
+
+\| --- | --- |
+
+\| Mintlify docs | [Generated automatically](https://www.mintlify.com/docs/ai/llmstxt), along with Markdown versions of every page |
+
+\| GitBook | [Serves one for published docs](https://www.gitbook.com/blog/what-is-llms-txt) |
+
+\| Docusaurus | The [docusaurus-plugin-llms](https://github.com/rachfop/docusaurus-plugin-llms) plugin |
+
+\| VitePress | The [vitepress-plugin-llms](https://github.com/okineadev/vitepress-plugin-llms) plugin |
+
+\| WordPress | [Yoast SEO](https://yoast.com/features/llms-txt/) or [AIOSEO](https://aioseo.com/features/llms-txt/) generate and update it |
+
+\| Wix | [Generated for every site](https://support.wix.com/en/article/understanding-your-sites-llmstxt-file) |
+
+\| Drupal 10.3 and up | The [LLM Support recipe](https://www.drupal.org/project/llm_support) |
+
+\| Next.js, Astro, or any static site | Write it by hand and drop it in your public folder so it serves at `/llms.txt` |
+
+If you write it by hand, serve it as plain text with a 200. Lighthouse only complains about server errors.
+
+## How to check if anyone is reading your llms.txt
+
+Normal analytics won't show it, because AI tools fetch files without running your scripts. Use server logs:
+
+```
+grep -i "llms.txt" /var/log/nginx/access.log | grep -iE "gptbot|oai-searchbot|chatgpt-user|claudebot|claude-user|perplexitybot"
+```
+
+* **Expect very little.** A handful of hits a month is normal. Zero is common.
+* **Check the status code.** 200 means served. 404 or 500 means something's broken.
+* **Check robots.txt first.** If it blocks a crawler, that crawler never reaches your llms.txt. Our [AEO guide](https://www.studio1hq.com/blog/how-to-get-your-tool-recommended-by-chatgpt-perplexity-google) covers which bots to allow.
+
+The bigger win is the manual test: give an assistant your llms.txt and a docs question, and see if the answer is right.
+
+## Common llms.txt mistakes
+
+* **Dumping every URL into it.** That's a sitemap's job. Pick pages you'd show a new customer.
+* **Setting it up once and forgetting it.** Update it with your changelog.
+* **Linking to pages behind a login.** Tools can't read them.
+* **Using it to block bots.** It can't. Use robots.txt.
+* **Expecting traffic.** Judge it by whether assistants answer your docs questions correctly.
+* **Skipping the "things to know" list.** It stops tools from repeating old, wrong advice about your product.
+
+## FAQ
+
+### What is llms.txt in simple terms?
+
+A plain text file at the root of your site with a short summary of your product and links to your best pages. It's Markdown, so people and software can both read it.
+
+### Is llms.txt an official standard?
+
+No. It's a community proposal from Jeremy Howard (September 2024, v2 in August 2026). No standards body has adopted it, and the big AI companies haven't publicly confirmed that their search tools rely on it.
+
+### Does llms.txt help SEO?
+
+No. Google says its search ignores it, and a study of about 300,000 domains found no link between having one and being cited by AI tools.
+
+### Does ChatGPT or Claude read llms.txt?
+
+Not reliably, per the logs. In a 12-week test on 83 sites, OpenAI's crawler read it 7 times, and Anthropic's 9, against thousands of robots.txt reads. Coding assistants do read it when a developer points them at it.
+
+### What's the difference between llms.txt and llms-full.txt?
+
+llms.txt is a short index of links with notes. llms-full.txt is the full text of your docs in one Markdown file. Use the index for live questions and the full file for tools that need everything.
+
+### Where do I put llms.txt?
+
+At your site root, such as `https://example.com/llms.txt`. Under v2, you can also add one in a subfolder like `/docs/llms.txt`, covering pages under that path.
+
+### Can llms.txt block AI crawlers?
+
+No. It can't allow or deny anything. Use robots.txt.
+
+### How often should I update llms.txt?
+
+Whenever key pages change: a new doc section, a renamed package, a new pricing page.
+
+### Should I use a generator or write it by hand?
+
+If your docs platform makes one (Mintlify, GitBook, and others), use it and edit the intro. Otherwise, use the template above. Read the result once, since generated files often list too many pages.
