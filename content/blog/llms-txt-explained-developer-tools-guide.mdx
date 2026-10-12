@@ -75,15 +75,11 @@ No special syntax, nothing to install.
 
 They do different jobs. llms.txt replaces neither of the others.
 
-\| File | What it does | Who reads it | Can it block anyone? |
-
-\| --- | --- | --- | --- |
-
-\| robots.txt | Says which bots may visit which pages | Search and AI crawlers | Yes, if the bot follows the rules |
-
-\| sitemap.xml | Lists every page you want indexed | Search engines | No |
-
-\| llms.txt | A short, curated guide to your best pages | AI tools and coding assistants, when they choose to fetch it | No |
+| File        | What it does                              | Who reads it                                                 | Can it block anyone?              |
+| ----------- | ----------------------------------------- | ------------------------------------------------------------ | --------------------------------- |
+| robots.txt  | Says which bots may visit which pages     | Search and AI crawlers                                       | Yes, if the bot follows the rules |
+| sitemap.xml | Lists every page you want indexed         | Search engines                                               | No                                |
+| llms.txt    | A short, curated guide to your best pages | AI tools and coding assistants, when they choose to fetch it | No                                |
 
 A sitemap lists everything and is usually too big for an AI tool to read in one go. The spec calls [llms.txt a curated overview](https://llmstxt.org/). To keep a bot out, use robots.txt.
 
@@ -91,19 +87,13 @@ A sitemap lists everything and is usually too big for an AI tool to read in one 
 
 Mostly no, and several independent looks agree.
 
-\| Study | What they looked at | What they found |
-
-\| --- | --- | --- |
-
-\| [Ahrefs](https://ahrefs.com/blog/llmstxt-study/), May 2026 | 137,210 domains | 28% published a valid file. 97% of those got zero requests all month. About 96% of requests that did arrive came from bots. |
-
-\| [SE Ranking](https://seranking.com/blog/llms-txt/) | About 300,000 domains | 10.13% had the file. No measurable link to how often a domain was cited by AI tools. |
-
-\| [EZY Research](https://somethinginc.com/blog/llms-txt-ai-crawlers-fetch-data/), 12 weeks | The same valid file on 83 sites | OpenAI's crawler fetched llms.txt 7 times vs 3,990 for robots.txt. ClaudeBot: 9 vs 3,120. PerplexityBot: 0 vs 775. Meta's crawler: 193 vs 172. |
-
-\| [Dejan.ai](https://dejan.ai/blog/crawler-census-robots-llms-okf/), 27 July to 15 August 2026 | One site's server logs | Google, Anthropic, and OpenAI crawlers fetched robots.txt 1,150 times and llms.txt 4 times. |
-
-\| [ProGEO.ai](https://ppc.land/only-7-4-of-fortune-500-have-an-llms-txt-file-study-finds/), March 2026 | The Fortune 500 | 37 of 500 (7.4%) had an llms.txt. 92.8% had a robots.txt. |
+| Study                                                                                                | What they looked at             | What they found                                                                                                                                |
+| ---------------------------------------------------------------------------------------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Ahrefs](https://ahrefs.com/blog/llmstxt-study/), May 2026                                           | 137,210 domains                 | 28% published a valid file. 97% of those got zero requests all month. About 96% of requests that did arrive came from bots.                    |
+| [SE Ranking](https://seranking.com/blog/llms-txt/)                                                   | About 300,000 domains           | 10.13% had the file. No measurable link to how often a domain was cited by AI tools.                                                           |
+| [EZY Research](https://somethinginc.com/blog/llms-txt-ai-crawlers-fetch-data/), 12 weeks             | The same valid file on 83 sites | OpenAI's crawler fetched llms.txt 7 times vs 3,990 for robots.txt. ClaudeBot: 9 vs 3,120. PerplexityBot: 0 vs 775. Meta's crawler: 193 vs 172. |
+| [Dejan.ai](https://dejan.ai/blog/crawler-census-robots-llms-okf/), 27 July to 15 August 2026         | One site's server logs          | Google, Anthropic, and OpenAI crawlers fetched robots.txt 1,150 times and llms.txt 4 times.                                                    |
+| [ProGEO.ai](https://ppc.land/only-7-4-of-fortune-500-have-an-llms-txt-file-study-finds/), March 2026 | The Fortune 500                 | 37 of 500 (7.4%) had an llms.txt. 92.8% had a robots.txt.                                                                                      |
 
 What stands out:
 
@@ -276,25 +266,16 @@ Bright Data's docs give a sensible rule: for a live assistant session, [load llm
 
 ## How to add llms.txt to your site
 
-\| Your setup | Easiest way |
-
-\| --- | --- |
-
-\| Mintlify docs | [Generated automatically](https://www.mintlify.com/docs/ai/llmstxt), along with Markdown versions of every page |
-
-\| GitBook | [Serves one for published docs](https://www.gitbook.com/blog/what-is-llms-txt) |
-
-\| Docusaurus | The [docusaurus-plugin-llms](https://github.com/rachfop/docusaurus-plugin-llms) plugin |
-
-\| VitePress | The [vitepress-plugin-llms](https://github.com/okineadev/vitepress-plugin-llms) plugin |
-
-\| WordPress | [Yoast SEO](https://yoast.com/features/llms-txt/) or [AIOSEO](https://aioseo.com/features/llms-txt/) generate and update it |
-
-\| Wix | [Generated for every site](https://support.wix.com/en/article/understanding-your-sites-llmstxt-file) |
-
-\| Drupal 10.3 and up | The [LLM Support recipe](https://www.drupal.org/project/llm_support) |
-
-\| Next.js, Astro, or any static site | Write it by hand and drop it in your public folder so it serves at `/llms.txt` |
+| Your setup                         | Easiest way                                                                                                                 |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Mintlify docs                      | [Generated automatically](https://www.mintlify.com/docs/ai/llmstxt), along with Markdown versions of every page             |
+| GitBook                            | [Serves one for published docs](https://www.gitbook.com/blog/what-is-llms-txt)                                              |
+| Docusaurus                         | The [docusaurus-plugin-llms](https://github.com/rachfop/docusaurus-plugin-llms) plugin                                      |
+| VitePress                          | The [vitepress-plugin-llms](https://github.com/okineadev/vitepress-plugin-llms) plugin                                      |
+| WordPress                          | [Yoast SEO](https://yoast.com/features/llms-txt/) or [AIOSEO](https://aioseo.com/features/llms-txt/) generate and update it |
+| Wix                                | [Generated for every site](https://support.wix.com/en/article/understanding-your-sites-llmstxt-file)                        |
+| Drupal 10.3 and up                 | The [LLM Support recipe](https://www.drupal.org/project/llm_support)                                                        |
+| Next.js, Astro, or any static site | Write it by hand and drop it in your public folder so it serves at `/llms.txt`                                              |
 
 If you write it by hand, serve it as plain text with a 200. Lighthouse only complains about server errors.
 
