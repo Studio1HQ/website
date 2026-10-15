@@ -1,0 +1,239 @@
+---
+title: How to Measure Your Devtool's Visibility in AI Answers
+slug: how-to-measure-devtool-visibility-in-ai-answers
+description: Run a free, two-hour spreadsheet audit to measure how often AI
+  tools mention, recommend, link to, and accurately describe your devtool.
+tldrSummary: Measure your devtool’s visibility across three AI tools using 12
+  developer questions and 108 answers. Track five metrics in spreadsheet,
+  without paid software or code.
+tldrBullets:
+  - Ask 12 realistic developer questions three times in each of three AI tools
+    to collect 108 answers.
+  - Track mention rate, top-three inclusion, share of brand mentions, link rate,
+    and factual error rate.
+  - Avoid treating exact list position as a reliable metric because AI answers
+    vary between runs.Avoid treating exact list position as a reliable metric
+    because AI answers vary between runs.
+date: 2026-10-16
+updatedDate: 2026-10-16
+draft: false
+authors:
+  - Studio1 Team
+---
+## TL;DR
+
+You can find out how often AI tools recommend your devtool with a free spreadsheet audit that takes about two hours. You don't need paid software or code.
+
+* Write 12 questions a developer would really ask about your category, then ask each one three times in three AI tools. That gives you 108 answers to count.
+* Count five things: how often you're named, how often you're in the first three, your share of all brand mentions, how often you're linked, and how often the AI gets you wrong.
+* Ignore your exact position in the list. AI tools almost never give the same list twice, so position is mostly noise.
+* Fix your biggest gap first, then run the same audit again next month.
+
+A lot of developers now ask an AI before they ask Google. JetBrains surveyed more than 10,000 professional developers in January 2026 and found that [90% regularly used at least one AI tool at work](https://blog.jetbrains.com/research/2026/04/which-ai-coding-tools-do-developers-actually-use-at-work/). Stack Overflow's 2026 survey, with more than 30,000 responses from 169 countries, found that [only 17.2% of developers don't use AI tools](https://itbrief.co.uk/story/stack-overflow-survey-shows-developers-trust-ai-with-caveats). Its own history shows how fast that happened: [44% used AI tools in 2023, 62% in 2024, and 79% in 2025](https://stackoverflow.blog/2026/10/01/a-look-back-before-we-look-forward-a-developer-survey-retrospective/).
+
+When one of those developers asks which tool to use, they don't get ten blue links. They get a short list of names. If yours isn't on it, they never see your docs, your pricing page or your launch post. And once the answer is on the page, fewer people click through. Pew Research tracked 900 US adults and found that in regular Google search, users clicked a result link in [8% of visits when an AI summary appeared, versus 15% when it didn't](https://www.pewresearch.org/short-reads/2025/07/22/google-users-are-less-likely-to-click-on-links-when-an-ai-summary-appears-in-the-results/). That's general search, not developer search, but the direction is clear.
+
+![](/blog/uploads/image-3-.png)
+
+Most devtool teams have no idea whether this is happening to them. Dashboards show traffic, GitHub stars, and signups. None of them show what an AI says when someone asks about your category. This guide gives you a simple way to find out.
+
+## What is AEO for developers?
+
+Answer engine optimization, or AEO, is the work of making your product easy for AI tools like ChatGPT, Claude, Gemini, Perplexity, and Google's AI Overviews to find, understand, and name when someone asks a question. You'll also see it called GEO or LLM SEO. They all mean roughly the same thing.
+
+For devtools, that mostly means clear docs, honest comparison pages, consistent facts and a real presence in the places developers talk. But you can't fix what you haven't looked at, so measuring comes first. That's what this guide covers.
+
+If you want the full fix list after your audit, Studio1 has a separate guide on [how to get your tool recommended by ChatGPT, Perplexity, and Google](https://www.studio1hq.com/blog/how-to-get-your-tool-recommended-by-chatgpt-perplexity-google).
+
+## Why can't you check AI answers just once?
+
+You might be tempted to ask ChatGPT one question, see your name, and call it a day. Don't.
+
+SparkToro and [Gumshoe.ai](http://Gumshoe.ai) had 600 volunteers run 12 prompts through ChatGPT, Claude, and Google's AI nearly 3,000 times. The odds of getting the same list of brands twice were [under 1 in 100, and the odds of the same order were closer to 1 in 1,000](https://searchengineland.com/ai-recommendation-lists-rarely-repeat-study-468076). Two fair warnings: [the study wasn't peer-reviewed, and Gumshoe sells AI tracking](https://www.warc.com/content/feed/llms-produce-random-results-when-listing-brand-recommendations/en-GB/11352). Still, it matches what you'll see yourself in ten minutes of testing.
+
+The useful part is what stayed steady. The three most mentioned brands in each category [showed up in about 64% of ChatGPT answers, 73% of Claude answers, and 68% of Google AI answers](https://communicateonline.me/news/ai-brand-recommendations-vary-marketers-warned-on-tracking-tools/). The order bounces around, but the same names keep coming back. That gives us the rule for this whole audit: **count how often you appear, not where you appear.**
+
+The tools also disagree with each other. Ahrefs found that [Google's AI Mode and AI Overviews cite different sources 87% of the time for the same query](https://www.searchenginejournal.com/ai-recommendations-change-with-nearly-every-query-sparktoro/566242). A BrightEdge analysis found the overlap between the sources two engines cite [can be as low as 16%](https://frase.io/blog/which-ai-engines-cite-which-sources). So a good score in one tool tells you very little about another. Test each one on its own.
+
+They also read different places. Profound looked at 30 million citations between August 2024 and June 2025:
+
+| Engine              | What it leaned on most                                               |
+| ------------------- | -------------------------------------------------------------------- |
+| ChatGPT             | Wikipedia, at nearly 48% of its top citations                        |
+| Perplexity          | Reddit, at almost half of its citations                              |
+| Google AI Overviews | Reddit (21%), then YouTube (18.8%), Quora (14.3%) and LinkedIn (13%) |
+
+Source: [Profound study, as reported by The Daily Star](https://online.thedailystar.net/node/3956806). That data is more than a year old, so don't treat the exact percentages as current. The pattern is the point: your docs are not the only thing these tools read about you.
+
+## How to audit your devtool's AI visibility: a 5 step playbook
+
+Here's what you need before you start:
+
+* A spreadsheet.
+* Free or paid access to ChatGPT, Gemini, and Perplexity. Add Claude if you want a fourth. Free tiers are fine, but note which plan you used, since answers can differ.
+* About two hours. That's my estimate for 108 answers at roughly a minute each.
+* Optional: a teammate who runs the same list, so you can compare notes.
+
+Set up each tool the same way. Open a fresh chat for every prompt. If the tool has a memory or personalization setting, turn it off so your past chats about your own product don't tilt the answer. If web search is optional, turn it on, because that's how most people get current answers. Write down the date and the tool name in your sheet.
+
+### 1. Write 12 prompts developers would actually type
+
+Sort them into four buckets, three prompts each. This follows the [category, comparison, validation, and branded split that audit teams like Percepture use](https://percepture.com/geo-insights/ai-visibility-audit/).
+
+| Bucket   | Template                                                        | Example for a job queue library                                    |
+| -------- | --------------------------------------------------------------- | ------------------------------------------------------------------ |
+| Discover | What's the best \[category] for \[language or framework]?       | What's the best job queue for Node.js?                             |
+| Discover | Which \[category] should a small team use for \[use case]?      | Which job queue should a small team use for email sending?         |
+| Discover | I need to \[job to be done]. What tools can I use?              | I need to retry failed background tasks. What tools can I use?     |
+| Compare  | \[Your tool] vs \[competitor]: which is better for \[use case]? | Acme Queue vs BullMQ: which is better for scheduled jobs?          |
+| Compare  | What are good alternatives to \[competitor]?                    | What are good alternatives to BullMQ?                              |
+| Compare  | \[Category] tools compared: pros and cons                       | Node.js job queues compared: pros and cons                         |
+| How-to   | How do I \[task] with \[framework]?                             | How do I retry failed jobs with Express?                           |
+| How-to   | What's the easiest way to \[task] without \[pain]?              | What's the easiest way to run cron jobs without a separate server? |
+| How-to   | Show me an example of \[task] in \[language]                    | Show me an example of a delayed job in TypeScript                  |
+| Check    | Is \[your tool] good for \[use case]?                           | Is Acme Queue good for high volume?                                |
+| Check    | What are the downsides of \[your tool]?                         | What are the downsides of Acme Queue?                              |
+| Check    | How much does \[your tool] cost, and is there a free plan?      | How much does Acme Queue cost?                                     |
+
+A few tips:
+
+* **Write like a person talks.** Pew found that [longer searches and searches phrased as questions or full sentences trigger AI summaries more often](https://www.pewresearch.org/short-reads/2025/07/22/google-users-are-less-likely-to-click-on-links-when-an-ai-summary-appears-in-the-results/).
+* **Spend your effort on Discover and How-to.** That's where someone hasn't picked a tool yet. Check prompts mostly test whether the AI describes you correctly.
+* **Swap the placeholders for your real category, languages, and rivals.** The same template works for any devtool, and it makes it easy to repeat the audit for each language or framework you support.
+
+![](/blog/uploads/image-4-.png)
+
+### 2. Run every prompt three times in three tools
+
+That's 12 prompts × 3 tools × 3 runs = 108 answers. Set up one row per answer with these columns:
+
+* Date
+* Tool
+* Prompt and bucket
+* Run number (1, 2, or 3)
+* Mentioned? (yes or no)
+* In the first three names? (yes or no)
+* Linked to your site, docs, or repo? (yes or no)
+* Competitors named
+* Anything wrong? (pricing, features, versions, supported languages)
+* Notes
+
+Why three runs? The SparkToro team ran each prompt 60 to 100 times, and they said it's still an open question [how many runs are enough to get reliable data](https://www.searchenginejournal.com/ai-recommendations-change-with-nearly-every-query-sparktoro/566242). Three is a floor, not a science. If you have the energy for five, do five. They also left open whether results from an API match what you see in the chat window, so run these by hand in the apps your customers use.
+
+Paste each answer into a second tab as you go. You'll want to reread a few of them later.
+
+### 3. Score the answers
+
+You only need five numbers.
+
+1. **Mention rate.** Answers that name you, divided by all answers.
+2. **Top-three rate.** Answers where you're among the first three names, divided by all answers. [HubSpot's guide calls this recommendation rate](https://www.searchenginejournal.com/measure-brand-ai-visibility-hubspot-spa/588040/).
+3. **Share of voice.** Your mentions divided by every brand mention in all the answers, yours and your rivals combined. [Triple Whale gives the same formula](https://www.triplewhale.com/blog/audit-brand-ai-visibility): your mentions ÷ total category mentions. Think of it as your slice of the pie.
+4. **Link rate.** Answers that link to your own site, docs, or repo, divided by all answers. This matters because [78.7% of developers say source attribution matters](https://itbrief.co.uk/story/stack-overflow-survey-finds-developers-wary-of-ai-tools) when they judge an AI answer, and only 6.6% would trust AI with an important decision.
+5. **Accuracy.** How many of the answers that name you get something wrong?
+
+Calculate each one per tool and per bucket, not just overall. The overall number hides the useful stuff.
+
+A note on position: skip it. If you came here wanting to know whether you're “number two” in ChatGPT, the research says that number is close to meaningless, because the order shuffles on almost every run.
+
+**A worked example with made-up numbers.** Here's what a finished audit might look like for Acme Queue, a pretend job queue library. These numbers are invented to show the math.
+
+| Tool       | Answers | Mentioned | Mention rate |
+| ---------- | ------- | --------- | ------------ |
+| ChatGPT    | 36      | 12        | 33%          |
+| Perplexity | 36      | 9         | 25%          |
+| Gemini     | 36      | 6         | 17%          |
+| All three  | 108     | 27        | 25%          |
+
+Acme Queue was in the first three names in 14 answers (13%), linked in 9 (8%), and got something wrong in 4 of the 27 answers that named it (15%). Across all 108 answers, there were 270 brand mentions in total, so its share of voice was 27 ÷ 270 = 10%.
+
+Now split it into buckets. Each bucket has 27 answers.
+
+| Bucket   | Mentioned | Mention rate |
+| -------- | --------- | ------------ |
+| Discover | 3         | 11%          |
+| Compare  | 8         | 30%          |
+| How-to   | 4         | 15%          |
+| Check    | 12        | 44%          |
+
+That's a very common shape. People who already know the product get a decent answer. People who don't know it basically never meet it. The fix for that is different from the fix for wrong facts, which is why the bucket split matters.
+
+### 4. Read the results
+
+| What you see                                          | What it probably means                                 | Your first move                                                                           |
+| ----------------------------------------------------- | ------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| Rarely named, even in Check prompts                   | The AI barely knows you exist                          | Get your product described in more places: your docs, comparison pages, community threads |
+| Named when asked by name, missing in Discover prompts | People who know you find you, strangers don't          | Publish pages that match category questions, and earn mentions on third-party sites       |
+| Named, but details are wrong                          | Old or conflicting info is out there                   | Fix your docs, pricing page and changelog first, then the outdated third-party posts      |
+| Rivals win the Compare prompts                        | Nobody has written your side of the comparison         | Publish an honest comparison page and join the comparison threads                         |
+| Named, but the link goes to a forum or blog, not you  | The AI trusts other people's write-ups more than yours | Put a clear, direct answer at the top of the matching docs page                           |
+| Strong in one tool, weak in another                   | Normal, because they read different sources            | Look at what the strong tool cites and learn from it                                      |
+
+When a tool shows its sources, click through them. That list is a to-do list. It tells you which pages the AI trusts on your topic, and whether you're on them.
+
+### 5. Fix the biggest gap first
+
+Pick one gap and work on it for a month. Here's the short version of what to do next.
+
+**Let the right bots in.** AI tools can only use what their crawlers (the bots that read websites) can reach. OpenAI says its [OAI-SearchBot is for search and isn't used to train its models, while GPTBot is used for training, and each is controlled separately in robots.txt](https://developers.openai.com/docs/gptbot). OpenAI recommends allowing OAI-SearchBot if you want to appear in ChatGPT search, and says changes can take about 24 hours to show up. Your robots.txt file is a small text file at the root of your site. A simple version looks like this:
+
+```
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+```
+
+Whether to allow training crawlers like GPTBot is a separate decision, and it's yours. Other companies publish their own bot names too, and they change, so check each one's docs. [This crawler guide](https://superblog.ai/blog/ai-crawlers-guide/) is a decent starting list. Also check your hosting firewall or bot protection, since those can block unfamiliar bots even when robots.txt says yes.
+
+**Answer the question in the first lines of the page.** If someone asks, “How do I retry failed jobs in Express?”, your docs page should open with that answer and a short code sample, before any backstory. One analysis of Perplexity found that for technical questions, [its citations lean toward official documentation, GitHub issue threads, and posts from the engineers behind the tools](https://freelanceseo.sg/blog/perplexity-citation-patterns/). That's one source, so treat it as a hint, but it fits the Profound data above.
+
+**Publish an honest comparison page.** Say who your tool is great for and who should pick something else. Pages like that are easy for an AI to quote and easy for a developer to trust.
+
+**Show up where developers already talk.** Given how much Reddit, YouTube, and community content the tools lean on, a helpful answer in a real thread can matter more than another blog post. Be honest about who you are, and answer the actual question.
+
+**Keep your facts consistent and dated.** Pricing, versions, supported languages, and limits should match on your site, your docs, your repo README and your changelog.
+
+**Re-run the audit every month.** Same prompts, same sheet. Because answers shift from run to run, a change of a few points is probably noise. Look for movement that holds for two or three months. That last bit is my advice, not a research finding.
+
+For the full playbook on each of these, read Studio1's guide on [getting your tool recommended by ChatGPT, Perplexity, and Google](https://www.studio1hq.com/blog/how-to-get-your-tool-recommended-by-chatgpt-perplexity-google).
+
+## What mistakes ruin an AI visibility audit?
+
+* **Only testing prompts with your name in them.** You'll feel great and learn nothing.
+* **Running each prompt once.** One answer is a coin flip.
+* **Using your logged-in chat with years of history.** Your past conversations can tilt the answer.
+* **Blending all tools into one number.** Keep a score for each tool.
+* **Chasing position.** Count appearances instead.
+* **Ignoring accuracy.** Being named with the wrong price or an old API is sometimes worse than not being named.
+
+## Frequently asked questions
+
+### What is AEO for developers?
+
+AEO, short for answer engine optimization, is the work of making sure AI tools like ChatGPT, Claude, Gemini, and Perplexity find, understand, and recommend your developer product. For devtools, that mostly means clear docs, honest comparisons, consistent facts, and a real presence in the communities developers use.
+
+### How do I check whether ChatGPT recommends my devtool?
+
+Write 12 questions a developer would ask about your category, ask each one three times in a fresh chat, and count how often you're named. The playbook above walks through it, and the whole thing takes about two hours.
+
+### How many times should I run each prompt?
+
+At least three. Researchers who ran prompts 60 to 100 times saw almost no two answers match, and nobody has settled on how many runs are enough. More runs give you steadier numbers.
+
+### Should I track my position in the list?
+
+No. In SparkToro's study, the same list in the same order came up closer to 1 time in 1,000. Track how often you appear instead.
+
+### Do I need a paid AI visibility tool?
+
+Not to start. A spreadsheet is enough for a first baseline. Paid tools save time later by running prompts on a schedule, but ask any vendor how many times they run each prompt before they report a number.
+
+### How often should I re-run the audit?
+
+Monthly works well for most small teams. Keep the prompts the same so the numbers are comparable.
+
+### Should I block GPTBot?
+
+That's a separate choice from showing up in ChatGPT search. Per OpenAI's docs, GPTBot is used for training, and OAI-SearchBot is used for search, and you can allow one and block the other.
