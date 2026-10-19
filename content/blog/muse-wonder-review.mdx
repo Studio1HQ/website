@@ -1,0 +1,217 @@
+---
+title: "Muse Wonder Review: Benchmarks, Pricing, and Access"
+slug: muse-wonder-review
+description: Explore Muse Wonder and Wonder Full benchmarks, pricing, API
+  access, and privacy settings, plus comparisons with Claude Opus 5.5 and GPT-6
+  Astra.
+tldrSummary: A breakdown of Muse Wonder and Muse Wonder Full, covering benchmark
+  results, costs, access options, privacy settings, and trade-offs for
+  developers.
+tldrBullets:
+  - Understand the differences between Muse Wonder and Muse Wonder Full.
+  - Compare independent benchmarks with Meta's reported results.
+  - Review API pricing, subscription access, and data-training settings.
+  - Evaluate cost per task, response speed, and performance on your own
+    workflows.
+date: 2026-10-19
+updatedDate: 2026-10-19
+draft: false
+authors:
+  - Studio1 Team
+tags:
+  - AI
+  - Meta
+bannerImage: /blog/uploads/electric-blue-meta-infinity-banner.png
+---
+## TL;DR
+
+Meta just released Muse Wonder and Muse Wonder Full, its first top-tier AI models. This post covers what they score, what they cost, who can use each one, and where Claude Opus 5.5 and GPT-6 Astra still come out ahead.
+
+* On the independent Artificial Analysis index, Muse Wonder Full scores 56, and Muse Wonder scores 52. Claude Opus 5.5 scores 58, and GPT-6 Astra scores 53.
+* Muse Wonder costs $4 per million input tokens and $20 per million output tokens on the API. Muse Wonder Full is not on the API at all. You only get it inside Muse Code plans that cost $50 or $200 a month.
+* Meta's own table shows the models leading on long coding projects, legal tasks, and memory. They trail on terminal work and from-scratch programming.
+
+Meta spent most of 2026 shipping small, cheap models. On October 12, it changed lanes. [Muse Wonder and Muse Wonder Full](https://research.meta.ai/blog/muse-wonder) are bigger, pricier, and aimed straight at OpenAI and Anthropic.
+
+Meta's scoreboard says they win a lot. The independent scoreboard says they get close. Both can be true, and the gap between the two is the part worth reading. Both models are also only a day old, so very few people outside Meta have used them for real work.
+
+## What is Muse Wonder?
+
+Muse Wonder is a pair of AI models from Meta Superintelligence Labs, released on October 12, 2026. They are built to handle long, multi-step jobs for you, like fixing a big codebase, drafting a legal document, or planning something across several apps. Meta calls them its [most capable models so far](https://about.fb.com/news/2026/10/introducing-muse-wonder-models/).
+
+Here is what Meta says is new:
+
+* **Active Memory.** The model carries what matters about you from one chat to the next and brings it back when it is relevant to the task.
+* **Active Focus.** When a job gets hard, the model tries a different approach, recovers from mistakes, asks you a question if it is stuck, and checks in before doing anything important.
+* **Wide input, text output.** According to the [model card](https://research.meta.ai/static/muse-wonder-model-card), it accepts text, images, video, and audio, and replies in text.
+* **Big memory per request.** It can read up to 1 million tokens at once. That is roughly 750,000 words.
+* **Closed weights.** You cannot download either model, [VentureBeat reports](https://venturebeat.com/technology/metas-new-muse-wonder-and-muse-wonder-full-models-achieve-frontier-performance-but-only-the-weaker-one-is-available-via-api). Meta has not said whether it will open any Wonder model, [per Axios](https://www.axios.com/2026/10/12/meta-new-ai-models-anthropic-openai). Its smaller Muse Glimmer model is open.
+
+The models were trained at Meta's Prometheus data center in Ohio, [according to TechCrunch](https://techcrunch.com/2026/10/12/meta-releases-its-first-frontier-model-muse-wonder/). Axios adds that they went by the code name Watermelon before launch.
+
+![](/blog/uploads/image-8-.png)
+
+## What is the difference between Muse Wonder and Muse Wonder Full?
+
+Muse Wonder is the one you can build with today. Muse Wonder Full is the stronger one, but Meta only sells it through its coding app, Muse Code.
+
+|                                        | Muse Wonder                           | Muse Wonder Full                      |
+| -------------------------------------- | ------------------------------------- | ------------------------------------- |
+| Where you can use it                   | Meta Model API and Muse Code          | Muse Code only                        |
+| Price                                  | $4 input and $20 output per 1M tokens | Included in $50 or $200 monthly plans |
+| Pay-as-you-go API                      | Yes (model ID: muse-wonder-1.0)       | No                                    |
+| Context size                           | 1M tokens                             | 1M tokens                             |
+| Artificial Analysis score              | 52                                    | 56                                    |
+| Used to train Meta's models by default | No on the API, yes in Muse Code       | Yes, until you switch it off          |
+
+Meta also says Wonder will soon power more of the Muse chat app, rolling out [first to paying subscribers](https://about.fb.com/news/2026/10/introducing-muse-wonder-models/).
+
+## How does Muse Wonder score on benchmarks?
+
+A benchmark is a standard test. Every model takes the same exam, and a higher score is better. Because Meta wrote the launch table itself, we will start with the independent numbers and then look at Meta's.
+
+### What do outside testers say?
+
+[Artificial Analysis](https://artificialanalysis.ai/models/muse-wonder-full) ran both models through its Intelligence Index, a mix of ten tests covering reasoning, knowledge, coding, and office-style tasks. The scores below are from [VentureBeat's report](https://venturebeat.com/technology/metas-new-muse-wonder-and-muse-wonder-full-models-achieve-frontier-performance-but-only-the-weaker-one-is-available-via-api).
+
+| Model             | Artificial Analysis score |
+| ----------------- | ------------------------- |
+| Claude Opus 5.5   | 58                        |
+| Claude Sonnet 5.5 | 56                        |
+| Muse Wonder Full  | 56                        |
+| GPT-6 Astra       | 53                        |
+| Gemini 4 Argon    | 53                        |
+| Claude Fable 5.1  | 53                        |
+| Muse Wonder       | 52                        |
+
+So Wonder Full lands in a tie for second. Plain Wonder, the one on the API, sits one point under GPT-6 Astra and six points under Opus 5.5.
+
+### What does Meta's own table say?
+
+Meta compared both models with Claude Fable 5.1, GPT-6 Astra, and Claude Opus 5.5, all set to their highest effort. These are the rows that matter most, taken from Meta's [model card and launch page](https://dev.meta.ai/models/muse-wonder).
+
+![](/blog/uploads/image-9-.png)
+
+By our count of Meta's full 14-row table, a Muse model holds the top score on 7 rows, Opus 5.5 on 6, and GPT-6 Astra on 1. Some of those wins are razor thin. JobBench is a 0.1-point loss for Wonder Full, and its Vals Finance Agent lead over Fable 5.1 is 0.2 points.
+
+### How much should you trust the table?
+
+Three things to know before you quote it:
+
+1. **Meta picked the tests.** Its model card says some competitor results were [run by Meta itself on a best-effort basis](https://research.meta.ai/static/muse-wonder-model-card), so the settings may not suit the other models.
+2. **Some tests cannot be rerun.** Three of the scores come from Meta's internal tests (the Personal Superintelligence Index, MemoryBench, and FocusBench), according to [Maccus](https://maccus.fr/en/meta-muse-wonder/). Nobody outside Meta can check them.
+3. **Not every row uses the same setup.** On SWE-Marathon, the card says GPT-6 Astra and Fable 5.1 ran through their own coding tools, so it is not a fair side-by-side.
+
+Meta also has history here. For Muse Spark 1.1, it reported 80 on Terminal-Bench 2.1, and an [independent check came back at 76.2](https://codersera.com/blog/muse-spark-1-2-benchmarks-vs-claude-opus-5-2026/). Scores in a launch post tend to be the best case.
+
+Even the strongest legal score needs context. Harvey LAB-AA counts a task as passed only when the result meets every requirement and has no made-up facts. A score of 13.1 means roughly one task in eight clears that bar. It is the best in the table, and it is still low.
+
+## How much does Muse Wonder cost?
+
+Muse Wonder costs $4 per million input tokens and $20 per million output tokens on the Meta Model API. Cached input, which means text you send again and again, costs $0.20 per million. Those are the rates on [Meta's own page](https://dev.meta.ai/models/muse-wonder).
+
+A token is a small chunk of text, a bit shorter than a word. Input is what you send in. Output is what the model writes back.
+
+| Model                         | Input per 1M tokens | Output per 1M tokens |
+| ----------------------------- | ------------------- | -------------------- |
+| Muse Spark 1.3                | $1.25               | $4.25                |
+| Gemini 4 Argon (launch price) | $2                  | $10                  |
+| Claude Sonnet 5.5             | $2                  | $10                  |
+| **Muse Wonder**               | **$4**              | **$20**              |
+| Claude Opus 5.5               | $4                  | $20                  |
+| GPT-6 Astra                   | $10                 | $50                  |
+| Claude Fable 5.1              | $10                 | $50                  |
+
+Prices are from [VentureBeat's comparison](https://venturebeat.com/technology/metas-new-muse-wonder-and-muse-wonder-full-models-achieve-frontier-performance-but-only-the-weaker-one-is-available-via-api). Argon's price goes to $4 and $20 after its launch period. Our [Gemini 4 Argon review](https://www.studio1hq.com/blog/gemini-4-argon-benchmarks-pricing-access) covers that in detail.
+
+Two extra costs to know about. Web search through the API is $2.50 per 1,000 searches. And Meta caps each team at 3,000 requests and 4 million tokens a minute.
+
+### What does it cost per task?
+
+The price per token does not tell you the bill. What matters is how many tokens a model uses to finish a job. Artificial Analysis measured the cost of its average test task:
+
+* Muse Wonder: $4.52
+* Claude Opus 5.5: $5.98
+* GPT-6 Astra: $3.26
+
+Wonder is cheaper than Opus 5.5 here because it writes less. [One report on Artificial Analysis data](https://www.beri.net/article/meta-muse-wonder-full-pricing-benchmarks-vs-opus-5-5-gpt-6-astra-api-only-standard-muse-code-contributor-mode-training) puts it at about 130 million output tokens for Wonder against 260 million for Opus 5.5. The same report says Wonder takes 19.27 seconds to start answering, compared with a 5.52 second median. That makes it a poor fit for anything where a person is waiting on screen.
+
+## How do you get access to Muse Wonder?
+
+There are three ways in right now.
+
+1. **The Meta Model API.** Sign up at [dev.meta.ai](https://dev.meta.ai/models/muse-wonder) and call muse-wonder-1.0. Meta says you can point an existing OpenAI-style client at it, so testing it in an app you already have should be quick.
+2. **Muse Code.** This is Meta's coding assistant for the terminal. The Power Usage plan is $50 a month and gives 20 times the usage of the Everyday plan. The Maximum Usage plan is $200 a month and gives 80 times. Both include Muse Wonder Full.
+3. **The Muse app.** Meta says Wonder is coming to it soon, starting with paid subscribers.
+
+There is no free tier for Wonder Full, and there are no downloadable weights for either model.
+
+## Does Meta train on your data?
+
+It depends on where you use the model. This is the part of the launch that is easiest to miss.
+
+On the API, Muse Wonder runs in Standard mode, where Meta says your content is not used for training. Muse Code subscriptions default to Contributor mode instead. In that mode, Meta can use your prompts, code, files, and the replies to train future models. You can switch it off, but only for what you send afterward. The details are in [VentureBeat's report](https://venturebeat.com/technology/metas-new-muse-wonder-and-muse-wonder-full-models-achieve-frontier-performance-but-only-the-weaker-one-is-available-via-api) and Meta's own subscription terms.
+
+If you work with client code, check that setting before you paste in a single file. Companies with strict rules can also ask Meta about zero data retention. It comes with trade-offs, like no file uploads and no built-in web search.
+
+## Where does Muse Wonder still fall short?
+
+* **Terminal work.** On Terminal-Bench 4.0-AA, Wonder Full scores 57.1 against 59.6 for Opus 5.5 and 59.1 for GPT-6 Astra. Plain Wonder scores 52.0.
+* **Building from scratch.** On ProgramBench, Opus 5.5 scores 70.5. Wonder Full scores 59.0.
+* **Health questions.** Opus 5.5 and GPT-6 Astra both beat Wonder Full on HealthBench Pro.
+* **Facts from memory.** On Artificial Analysis's AA-Omniscience test, [reported by IJR](https://ijr.com/discover/tech-2026-10-12-meta-releases-muse-wonder-claims-ai-benchmark-gains-d73b5e62), Wonder Full scores 30 and Wonder scores 25. Opus 5.5 scores 46, GPT-6 Astra 43, and Gemini 4 Argon 42.
+* **Speed to first word.** Covered above. It is slow to start.
+* **Known weak spots.** Meta's model card says 3D and spatial reasoning is still a limit. It also says the models can slip on multi-step jobs in unfamiliar situations, and that they are not meant for anyone under 18.
+* **Safety report.** Meta says a full safety report is coming "soon." The model card says that without extra safeguards, Meta cannot rule out the model reaching its high-risk level for chemical and biological topics. So safeguards are switched on, and they may refuse some legitimate science requests.
+
+## What should you check before you switch?
+
+Do not switch on a headline number. Here is a short checklist:
+
+* **Test on your own work.** Pull 20 real tasks from your own repo, docs, or inbox. Run them through your current model and through Muse Wonder.
+* **Log the cost per task.** The token price is the same as Opus 5.5, so the saving only shows up if Wonder really writes less on your work.
+* **Time the first answer.** If a person waits on the result, 19 seconds is a long wait.
+* **Pick the right door.** Use the API for work code. Only use Muse Code with Contributor mode off, or for code you do not mind sharing.
+* **Wait if you are regulated.** If you work in health, law, or finance, hold off for the full safety report.
+
+## Which should you pick: Muse Wonder, Claude Opus 5.5, or GPT-6 Astra?
+
+There is no single winner. The independent scores point to this split:
+
+* **Pick Muse Wonder** if you run very long coding jobs or legal-style drafts, and you want Opus-level token prices with fewer tokens used. Our [Claude Opus 5.5 review](https://www.studio1hq.com/blog/claude-opus-5-5-review-motion-videos) has the other side of that comparison.
+* **Pick Claude Opus 5.5** if you want the highest overall score, strong from-scratch programming, and faster first answers.
+* **Pick GPT-6 Astra** if cost per task and terminal work matter most, and you can live with a higher token price.
+
+## Frequently asked questions
+
+### What is Muse Wonder?
+
+Muse Wonder is Meta's new AI model for long, multi-step work such as coding, legal drafting, and personal planning. It launched on October 12, 2026, alongside a stronger version called Muse Wonder Full.
+
+### Is Muse Wonder free?
+
+No. The API costs $4 per million input tokens and $20 per million output tokens. Muse Wonder Full needs a Muse Code plan at $50 or $200 a month. Meta says the Muse app will get Wonder first for paying subscribers.
+
+### Is Muse Wonder open source?
+
+No. Neither Wonder model has downloadable weights. Meta has not said whether it will open any of them. Its smaller Muse Glimmer model is open.
+
+### Is Muse Wonder better than Claude Opus 5.5?
+
+Not overall. Artificial Analysis scores Opus 5.5 at 58, Muse Wonder Full at 56, and Muse Wonder at 52. Meta's table shows Wonder ahead on long coding and legal tests, and Opus 5.5 ahead on terminal work and building programs from scratch.
+
+### Can I use Muse Wonder Full through the API?
+
+No. Muse Wonder Full is only available inside Muse Code on the $50 and $200 plans. The API serves plain Muse Wonder.
+
+### How big is the context window?
+
+Both models can read up to 1 million tokens in one request, which is roughly 750,000 words.
+
+### Can Muse Wonder handle images, audio, and video?
+
+Yes for input. It accepts text, images, audio, and video. It only replies in text.
+
+### Does Meta use my data to train Muse Wonder?
+
+Not on the API, where Standard mode applies. Muse Code defaults to Contributor mode, which lets Meta train on what you submit. You can switch it off for future messages.
