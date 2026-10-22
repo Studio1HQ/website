@@ -38,7 +38,7 @@ import { useLocale, useTranslations } from "next-intl";
 
 /** Glass pill on the night header. */
 const capsuleClassName =
-  "inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-3.5 py-1.5 text-[13px] font-medium text-white/80 backdrop-blur-md";
+  "inline-flex items-center gap-2 rounded-full border border-white/20 bg-[linear-gradient(160deg,rgba(255,255,255,0.16),rgba(255,255,255,0.04))] px-4 py-2 text-[13px] font-medium text-white/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_10px_24px_-14px_rgba(0,0,0,0.8)] backdrop-blur-xl";
 
 /** Glass control surface for the toolbar (search + filters). */
 const controlClassName =
