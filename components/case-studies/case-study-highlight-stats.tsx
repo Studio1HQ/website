@@ -69,7 +69,7 @@ export function CaseStudyHighlightStats({
           <dd>
             <StatValue
               metric={headline}
-              className="font-numeric text-4xl font-bold leading-none tracking-tight tabular-nums text-primary sm:text-5xl md:text-6xl"
+              className="font-numeric text-4xl font-medium leading-none tracking-tight tabular-nums text-primary sm:text-5xl md:text-6xl"
             />
           </dd>
           <p className="mt-2.5 max-w-[14rem] text-xs leading-snug text-muted-foreground md:max-w-none">

@@ -10,12 +10,6 @@ import {
 } from "motion/react";
 import { Check } from "@phosphor-icons/react";
 import { Num } from "../ui/num";
-import { CanvasRevealEffect } from "@/components/ui/canvas-reveal-effect";
-import {
-  elevatedCardShadow,
-  glassCardEdgeHighlight,
-  serviceCardHoverGlow,
-} from "@/lib/shadows";
 import { cn } from "@/lib/utils";
 
 export interface ProcessStep {
@@ -52,57 +46,8 @@ const pad2 = (value: number) => String(value).padStart(2, "0");
 type TimelineNode =
   { type: "main"; index: number } | { type: "sub"; index: number };
 
-const processCardSurface = cn(
-  "group relative min-h-[22rem] overflow-hidden rounded-2xl border-2 border-border/80 dark:border",
-  "bg-background/80 backdrop-blur-md",
-  "transition-[border-color,box-shadow,transform] duration-500 ease-out",
-  "hover:-translate-y-1 hover:border-primary/35 dark:hover:border-white/15",
-  "motion-reduce:transition-none motion-reduce:hover:translate-y-0",
-  elevatedCardShadow,
-);
-
-function ProcessCardHoverEffects({ active }: { active: boolean }) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    if (active) {
-      setMounted(true);
-      return;
-    }
-
-    const timeout = window.setTimeout(() => setMounted(false), 450);
-    return () => window.clearTimeout(timeout);
-  }, [active]);
-
-  return (
-    <>
-      <div aria-hidden className={serviceCardHoverGlow} />
-      <div
-        aria-hidden
-        className={cn(
-          "pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-2xl opacity-0 transition-opacity duration-500 ease-out motion-reduce:transition-none",
-          active && "opacity-100",
-        )}
-      >
-        {mounted ? (
-          <CanvasRevealEffect
-            animationSpeed={3}
-            containerClassName="bg-transparent"
-            colors={[
-              [234, 88, 12],
-              [249, 115, 22],
-            ]}
-            dotSize={2}
-            showGradient={false}
-          />
-        ) : null}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/75 to-background/35" />
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.08] via-transparent to-transparent" />
-      </div>
-      <div aria-hidden className={glassCardEdgeHighlight} />
-    </>
-  );
-}
+const processCardSurface =
+  "s1-glass-card s1-glass-raised group relative min-h-[22rem] overflow-hidden rounded-[24px]";
 
 function ProcessDeckCard({
   step,
@@ -115,47 +60,38 @@ function ProcessDeckCard({
   index: number;
   count: number;
 }) {
-  const [hovered, setHovered] = useState(false);
-
   return (
-    <div
-      className={processCardSurface}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onFocusCapture={() => setHovered(true)}
-      onBlurCapture={() => setHovered(false)}
-    >
-      <ProcessCardHoverEffects active={hovered} />
+    <div className={processCardSurface}>
 
-      <div className="relative z-[1] flex h-full flex-col p-7 xl:p-8">
+      <div className="deck-content relative z-[1] flex h-full flex-col p-7 transition-opacity duration-500 xl:p-8">
         <div className="flex items-center justify-between">
           <span className="font-numeric text-[11px] font-semibold uppercase tracking-[0.28em] text-primary">
             {stepLabel} <Num>{pad2(index + 1)}</Num>{" "}
-            <span className="text-muted-foreground/50">
+            <span className="text-[var(--home-ink-soft)]/50">
               / <Num>{pad2(count)}</Num>
             </span>
           </span>
-          <step.icon className="size-[18px] text-muted-foreground/60 transition-colors duration-500 group-hover:text-primary" />
+          <step.icon className="size-[18px] text-[var(--home-ink-soft)]/60 transition-colors duration-500 group-hover:text-primary" />
         </div>
 
-        <h3 className="mt-3 font-inter text-3xl font-semibold tracking-tight text-foreground">
+        <h3 className="mt-3 text-[32px] font-medium tracking-[-0.04em] text-[var(--home-ink)]">
           {step.name}
         </h3>
-        <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
+        <p className="mt-3 text-[15px] leading-relaxed text-[var(--home-ink-soft)]">
           {step.description}
         </p>
 
-        <ul className="mt-6 border-t border-border/60 dark:border-white/[0.06]">
+        <ul className="mt-6 border-t border-[var(--home-line)]">
           {step.details.map((detail, detailIndex) => (
             <li
               key={detailIndex}
-              className="flex items-start gap-3 border-b border-border/40 py-3 last:border-b-0 dark:border-white/[0.04]"
+              className="flex items-start gap-3 border-b border-[var(--home-line)] py-3 last:border-b-0"
             >
               <Check
                 weight="bold"
                 className="mt-[3px] size-4 shrink-0 text-primary"
               />
-              <div className="text-[14px] font-medium leading-snug text-foreground/85">
+              <div className="text-[14px] font-medium leading-snug text-[var(--home-ink)]">
                 {detail}
               </div>
             </li>
@@ -170,11 +106,9 @@ function ProcessDeckCard({
 /* Desktop: scroll-driven card deck with timeline rail                 */
 /* ------------------------------------------------------------------ */
 
-const deckSpring = {
-  type: "spring" as const,
-  stiffness: 250,
-  damping: 26,
-  mass: 0.8,
+const deckTween = {
+  duration: 0.75,
+  ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
 };
 
 const ProcessDeck: React.FC<{
@@ -264,27 +198,32 @@ const ProcessDeck: React.FC<{
 
           <div className="mt-5 flex w-full max-w-4xl items-center justify-center gap-10 xl:mt-6 xl:gap-14">
             {/* Card deck */}
-            <div
-              className="relative flex h-[26rem] min-w-0 flex-1 items-center justify-center"
-              style={{ perspective: "1000px" }}
-            >
+            {/* Horizontal deck: upcoming steps peek out to the right; on each
+                step the front card glides off to the left and the next one
+                slides forward into its place. */}
+            <div className="relative flex h-[26rem] min-w-0 flex-1 items-center justify-center">
               {steps.map((step, index) => {
                 const offset = index - active;
                 const isPast = index < active;
+                const visibleBehind = offset <= 2;
                 return (
                   <motion.div
                     key={step.name}
                     aria-hidden={index !== active}
-                    className="absolute w-[30rem] max-w-full xl:w-[33rem]"
+                    className={cn(
+                      "absolute w-[30rem] max-w-full xl:w-[33rem]",
+                      // Cards waiting behind show only their glass, never text
+                      // bleeding through the front card.
+                      index !== active && "[&_.deck-content]:opacity-0",
+                    )}
                     initial={false}
                     animate={{
-                      z: isPast ? 220 : offset * -70,
-                      y: isPast ? 260 : offset * -16,
-                      rotateX: isPast ? -18 : offset * 2,
-                      scale: isPast ? 1.15 : 1,
-                      opacity: isPast ? 0 : 1 - offset * 0.18,
+                      x: isPast ? "-62%" : offset * 34,
+                      scale: isPast ? 0.94 : 1 - offset * 0.05,
+                      opacity: isPast ? 0 : visibleBehind ? 1 - offset * 0.32 : 0,
+                      filter: isPast ? "blur(10px)" : `blur(${offset > 0 ? 1.5 : 0}px)`,
                     }}
-                    transition={deckSpring}
+                    transition={deckTween}
                     style={{
                       zIndex: count - index,
                       pointerEvents: index === active ? "auto" : "none",
@@ -332,7 +271,7 @@ const ProcessDeck: React.FC<{
                             initial={{ opacity: 0, x: 5 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.18, ease: EASE_OUT }}
-                            className="block whitespace-nowrap text-[11px] font-medium text-muted-foreground"
+                            className="block whitespace-nowrap text-[11px] font-medium text-[var(--home-ink-soft)]"
                           >
                             {steps[index].name}
                           </motion.span>
@@ -391,7 +330,7 @@ const ProcessStack: React.FC<{
   stepLabel: string;
   animate: boolean;
 }> = ({ steps, stepLabel, animate }) => (
-  <ol className="mx-auto w-full max-w-2xl list-none divide-y divide-border/60">
+  <ol className="mx-auto w-full max-w-2xl list-none divide-y divide-[var(--home-line)]">
     {steps.map((step, index) => (
       <motion.li
         key={step.name}
@@ -404,10 +343,10 @@ const ProcessStack: React.FC<{
         <span className="font-numeric text-[11px] font-semibold uppercase tracking-[0.28em] text-primary">
           {stepLabel} <Num>{pad2(index + 1)}</Num>
         </span>
-        <h3 className="mt-2.5 font-inter text-2xl font-semibold tracking-tight text-foreground">
+        <h3 className="mt-2.5 text-[26px] font-medium tracking-[-0.035em] text-[var(--home-ink)]">
           {step.name}
         </h3>
-        <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
+        <p className="mt-3 text-[15px] leading-relaxed text-[var(--home-ink-soft)]">
           {step.description}
         </p>
 
@@ -422,7 +361,7 @@ const ProcessStack: React.FC<{
                 weight="bold"
                 className="mt-[3px] size-4 shrink-0 text-primary"
               />
-              <div className="text-[14px] font-medium leading-snug text-foreground/85">
+              <div className="text-[14px] font-medium leading-snug text-[var(--home-ink)]">
                 {detail}
               </div>
             </motion.li>

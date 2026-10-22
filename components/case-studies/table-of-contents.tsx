@@ -144,7 +144,7 @@ export function TableOfContents({
         On this page
       </p>
 
-      <div className="relative max-h-[60vh] overflow-y-auto">
+      <div data-lenis-prevent className="relative max-h-[60vh] overflow-y-auto">
         {indicator ? (
           <span
             aria-hidden

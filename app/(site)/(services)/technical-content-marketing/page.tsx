@@ -9,6 +9,7 @@ import {
 } from "@/components/pages/shared/service-detail-sections";
 import { getTranslations } from "next-intl/server";
 import { DEFAULT_LOCALE } from "@/lib/i18n";
+import { Container, SectionIntro } from "@/components/home/ui";
 import {
   CaseStudyResult,
   type CaseStudyResultData,
@@ -178,21 +179,15 @@ function TechnicalContentProofGrid() {
   const [featuredStudy, ...supportingStudies] = contentCaseStudyProofs;
 
   return (
-    <section id="proof" className="relative scroll-mt-28 px-4 py-20 md:py-24">
-      <div className="mx-auto max-w-7xl">
-        <div className="mx-auto mb-10 max-w-3xl text-center">
-          <p className="font-secondary text-sm font-medium tracking-wide text-primary">
-            Proof
-          </p>
-          <h2 className="mt-4 text-balance font-inter text-4xl font-normal leading-tight tracking-tight text-foreground md:text-5xl">
-            Case studies from technical content work
-          </h2>
-          <p className="mx-auto mt-5 max-w-xl text-sm leading-relaxed text-muted-foreground md:text-base">
-            Blogs, guides, deep dives, and developer education shaped around real technical topics.
-          </p>
-        </div>
+    <section id="proof" className="relative scroll-mt-28 py-24 md:py-32">
+      <Container className="max-w-[1180px]">
+        <SectionIntro
+          eyebrow="Proof"
+          title="Case studies from technical content work"
+          description="Blogs, guides, deep dives, and developer education shaped around real technical topics."
+        />
 
-        <div className="mx-auto grid max-w-5xl gap-6">
+        <div className="mt-14 grid gap-5 md:mt-16">
           {featuredStudy ? (
             <CaseStudyResult
               study={featuredStudy}
@@ -201,13 +196,13 @@ function TechnicalContentProofGrid() {
             />
           ) : null}
 
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-5 md:grid-cols-2">
             {supportingStudies.map((study) => (
               <CaseStudyResult key={study.href} study={study} />
             ))}
           </div>
         </div>
-      </div>
+      </Container>
     </section>
   );
 }

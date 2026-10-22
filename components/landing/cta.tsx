@@ -1,177 +1,206 @@
-"use client"
-import React, { useEffect, useRef, useState } from "react"
-import dynamic from "next/dynamic"
-import { IconPhoneFilled } from "@tabler/icons-react"
-import { Button } from "../ui/button"
-import { CTA_GLOBE_MARKERS } from "./globe-markers"
-import { motion } from "motion/react"
-import { containerVariants, cardVariants } from "@/lib/animations"
+"use client";
+
+import { useRef, type PointerEvent } from "react";
+import Image from "next/image";
 import {
-  ctaCornerGlowLeft,
-  ctaCornerGlowRight,
-  elevatedCardShadow,
-} from "@/lib/shadows"
-import { cn } from "@/lib/utils"
-import { useTranslations } from "next-intl"
+  motion,
+  useReducedMotion,
+  animate,
+  useMotionValue,
+  useScroll,
+  useTime,
+  useTransform,
+} from "motion/react";
+import { Check } from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
+import { Container, EASE, PillLink } from "@/components/home/ui";
 
-const GlobePulse = dynamic(
-  () => import("./globe-pulse").then((module) => module.GlobePulse),
-  { ssr: false },
-)
+const BULLET_KEYS = ["savings", "lockIn", "content", "turnaround"] as const;
 
-function StaticGlobeFallback() {
-  return (
-    <div className="relative aspect-square w-full overflow-hidden rounded-full border border-primary/15 bg-[radial-gradient(circle_at_45%_38%,hsl(var(--primary)/0.24),hsl(var(--primary)/0.1)_36%,transparent_68%)] dark:border-white/10 dark:bg-[radial-gradient(circle_at_45%_38%,hsl(var(--primary)/0.2),hsl(var(--primary)/0.08)_36%,transparent_68%)]">
-      <div
-        aria-hidden
-        className="absolute inset-[12%] rounded-full border border-primary/20 dark:border-white/10"
-      />
-      <div
-        aria-hidden
-        className="absolute left-[20%] top-[30%] size-2 rounded-full bg-primary shadow-[0_0_18px_hsl(var(--primary)/0.7)]"
-      />
-      <div
-        aria-hidden
-        className="absolute right-[22%] top-[42%] size-2 rounded-full bg-primary shadow-[0_0_18px_hsl(var(--primary)/0.7)]"
-      />
-      <div
-        aria-hidden
-        className="absolute bottom-[24%] left-[46%] size-2 rounded-full bg-primary shadow-[0_0_18px_hsl(var(--primary)/0.7)]"
-      />
-    </div>
-  )
-}
+/** Real Studio1 work, set around a ring that frames the call to action. */
+const RING_SHOTS = [
+  "/case-studies/jozu/devfest-pune-2025.webp",
+  "/case-studies/corsair/slideflow-demo.webp",
+  "/case-studies/jozu/kubecon-jozu-booth.webp",
+  "/case-studies/tensorlake/Toon-blog.webp",
+  "/case-studies/brightdata/brightdata-homepage.webp",
+  "/case-studies/nebius/workshop-dublin-poster.webp",
+  "/case-studies/corsair/corsair-homepage.webp",
+  "/case-studies/tensorlake/tensorlake-home.webp",
+  "/case-studies/nebius/token-factory.webp",
+  "/case-studies/jozu/jozu-platform-overview.webp",
+  "/case-studies/entelligence-ai/entelligence-homepage.webp",
+  "/case-studies/tensorlake/Claude-Cowork-dev.webp",
+  "/case-studies/nebius/workshop-dublin-recap.webp",
+  "/case-studies/brightdata/docs-deep-research-architecture.webp",
+];
+
+/**
+ * Full ring at the original card spacing (~19deg apart), so the arc looks as
+ * before but continues all the way round and can loop forever.
+ */
+const RING_COUNT = 19;
+const RING = Array.from(
+  { length: RING_COUNT },
+  (_, index) => RING_SHOTS[index % RING_SHOTS.length],
+);
 
 export default function CTA() {
-  const t = useTranslations("CTA")
-  const globeRef = useRef<HTMLDivElement | null>(null)
-  const [shouldLoadGlobe, setShouldLoadGlobe] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
+  const t = useTranslations("CTA");
+  const reduceMotion = useReducedMotion();
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  });
+  // The ring turns gently while the section scrolls past.
+  const scrollRotate = useTransform(scrollYProgress, [0, 1], [8, -8]);
 
-  useEffect(() => {
-    const mobileQuery = window.matchMedia("(max-width: 767px)")
-    const updateMobile = () => setIsMobile(mobileQuery.matches)
-    updateMobile()
+  // Drag (mouse or finger, horizontally) to spin the ring; it glides to a
+  // stop with momentum. Vertical swipes still scroll the page.
+  const dragRotate = useMotionValue(0);
+  // Continuous loop: the ring slowly circles on its own (paused for
+  // reduced-motion users), on top of scroll and drag.
+  const time = useTime();
+  const autoRotate = useTransform(time, (ms) => (reduceMotion ? 0 : ms * -0.004));
+  const rotate = useTransform(
+    [scrollRotate, dragRotate, autoRotate],
+    ([s, d, a]: number[]) => s + d + a,
+  );
+  const drag = useRef<{ x: number; t: number; v: number } | null>(null);
 
-    if (typeof mobileQuery.addEventListener === "function") {
-      mobileQuery.addEventListener("change", updateMobile)
-    } else {
-      mobileQuery.addListener(updateMobile)
+  const onPointerDown = (event: PointerEvent<HTMLElement>) => {
+    if ((event.target as HTMLElement).closest("a, button")) return;
+    dragRotate.stop();
+    drag.current = { x: event.clientX, t: performance.now(), v: 0 };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+  const onPointerMove = (event: PointerEvent<HTMLElement>) => {
+    const state = drag.current;
+    if (!state) return;
+    const now = performance.now();
+    const dx = event.clientX - state.x;
+    const deg = dx * 0.12;
+    dragRotate.set(dragRotate.get() + deg);
+    state.v = deg / Math.max(1, now - state.t); // deg per ms
+    state.x = event.clientX;
+    state.t = now;
+  };
+  const onPointerUp = (event: PointerEvent<HTMLElement>) => {
+    const state = drag.current;
+    drag.current = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
     }
+    if (!state || reduceMotion) return;
+    animate(dragRotate, dragRotate.get() + state.v * 420, {
+      duration: 1.2,
+      ease: [0.16, 1, 0.3, 1],
+    });
+  };
 
-    return () => {
-      if (typeof mobileQuery.removeEventListener === "function") {
-        mobileQuery.removeEventListener("change", updateMobile)
-      } else {
-        mobileQuery.removeListener(updateMobile)
-      }
-    }
-  }, [])
-
-  useEffect(() => {
-    const target = globeRef.current
-    if (!target || shouldLoadGlobe) return
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) {
-          setShouldLoadGlobe(true)
-          observer.disconnect()
-        }
-      },
-      { rootMargin: isMobile ? "260px 0px" : "700px 0px" },
-    )
-
-    observer.observe(target)
-
-    return () => observer.disconnect()
-  }, [isMobile, shouldLoadGlobe])
+  const step = 360 / RING_COUNT;
 
   return (
-    <motion.div
-      className="px-4 relative mt-10"
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.2 }}
-      variants={containerVariants}
+    <section
+      ref={sectionRef}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerUp}
+      className="relative cursor-grab touch-pan-y select-none overflow-hidden text-[var(--home-ink)] active:cursor-grabbing [--ring-r:430px] [--card-w:150px] sm:[--ring-r:560px] sm:[--card-w:200px] lg:[--ring-r:720px] lg:[--card-w:250px]"
+      style={{
+        background:
+          "linear-gradient(180deg, var(--home-cream) 0%, var(--home-peach) 22%, var(--home-cream) 62%)",
+      }}
     >
+      {/* Ring of project shots, centred on the headline block */}
       <motion.div
-        className={cn(
-          "border bg-background max-w-7xl z-[101] mx-auto relative overflow-hidden rounded-3xl",
-          "grid grid-cols-1 md:grid-cols-2 items-center gap-10 md:gap-12",
-          "px-6 py-14 sm:px-10 md:px-12 md:py-16 lg:px-16",
-          elevatedCardShadow,
-        )}
-        variants={cardVariants}
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 top-[calc(var(--ring-r)+80px)]"
+        style={{ width: 0, height: 0, rotate: reduceMotion ? 0 : rotate }}
       >
-        <div aria-hidden className={ctaCornerGlowRight} />
-        <div aria-hidden className={ctaCornerGlowLeft} />
-
-        {/* Previous CTA copy: left on desktop, first on mobile */}
-        <div className="relative z-20 flex min-w-0 flex-col items-center text-center md:items-start md:text-left">
-          <div className="text-3xl md:text-5xl font-medium tracking-tight text-foreground">
-            {t("titleLine1")} <br /> {t("titleLine2")}
-          </div>
-          <div className="text-sm md:text-base w-[85%] md:w-full max-w-lg text-muted-foreground leading-tight mb-8 mt-4">
-            {t("descriptionLine1")}{" "}
-            <br className="hidden md:block" /> {t("descriptionLine2")}
-          </div>
-
-          <Button variant="gradient" size="cta" className="min-w-32" asChild>
-            <a
-              href="https://cal.com/studio1/collab"
-              target="_blank"
-              rel="noopener noreferrer"
+        {RING.map((src, index) => {
+          const angle = index * step;
+          return (
+            <div
+              key={index}
+              className="absolute left-0 top-0"
+              style={{
+                transform: `rotate(${angle}deg) translateY(calc(var(--ring-r) * -1))`,
+                transformOrigin: "0 0",
+              }}
             >
-              {t("button")} <IconPhoneFilled />
-            </a>
-          </Button>
-
-          <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-5 gap-y-2 mt-8 text-xs text-muted-foreground">
-            <span>{t("bullets.savings")}</span>
-            <span aria-hidden className="hidden sm:inline text-border">
-              ·
-            </span>
-            <span>{t("bullets.lockIn")}</span>
-            <span aria-hidden className="hidden sm:inline text-border">
-              ·
-            </span>
-            <span>{t("bullets.content")}</span>
-            <span aria-hidden className="hidden sm:inline text-border">
-              ·
-            </span>
-            <span>{t("bullets.turnaround")}</span>
-          </div>
-        </div>
-
-        {/* Globe: right on desktop, below on mobile */}
-        <div className="relative z-10 flex items-center justify-center md:justify-end">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 m-auto size-[75%] bg-[radial-gradient(circle_at_center,hsl(var(--primary)_/_0.1)_0%,transparent_62%)] dark:bg-[radial-gradient(circle_at_center,hsl(var(--primary)_/_0.08)_0%,transparent_58%)]"
-          />
-          <div
-            ref={globeRef}
-            className={cn(
-              "relative w-[min(18rem,78vw)] sm:w-[20rem] md:w-[22rem] lg:w-[26rem]",
-              isMobile ? "touch-pan-y" : "touch-none",
-            )}
-          >
-            {shouldLoadGlobe ? (
-              <GlobePulse
-                markers={CTA_GLOBE_MARKERS}
-                speed={0.0025}
-                mapSamples={isMobile ? 8000 : 16000}
-                pixelRatioLimit={isMobile ? 1.25 : 2}
-                interactive={!isMobile}
-                className="h-full w-full"
-              />
-            ) : (
-              <StaticGlobeFallback />
-            )}
-          </div>
-        </div>
+              <motion.div
+                className="relative aspect-[16/10] w-[var(--card-w)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl bg-white shadow-[0_30px_60px_-24px_rgba(60,20,0,0.45)] ring-1 ring-black/5 dark:ring-white/10"
+                initial={reduceMotion ? false : { opacity: 0, scale: 0.85 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{
+                  duration: 0.9,
+                  ease: EASE,
+                  delay: 0.03 * Math.min(index, RING_COUNT - index),
+                }}
+              >
+                <Image
+                  src={src}
+                  alt=""
+                  fill
+                  sizes="250px"
+                  className="object-cover"
+                />
+              </motion.div>
+            </div>
+          );
+        })}
       </motion.div>
-    </motion.div>
-  )
+
+      <Container className="relative flex min-h-[760px] flex-col items-center justify-center pb-40 pt-56 text-center sm:min-h-[860px] lg:min-h-[960px] lg:pt-64">
+        <motion.div
+          initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.9, ease: EASE }}
+          className="flex max-w-[640px] flex-col items-center"
+        >
+          <h2 className="text-[36px] font-medium leading-[1.04] tracking-[-0.05em] sm:text-[52px] lg:text-[64px]">
+            {t("titleLine1")}
+            <br />
+            <span className="font-editorial text-primary">
+              {t("titleLine2")}
+            </span>
+          </h2>
+          <p className="mt-6 max-w-[480px] text-[16px] leading-[1.6] text-[var(--home-ink-soft)] sm:text-[17px]">
+            {t("descriptionLine1")} {t("descriptionLine2")}
+          </p>
+          <PillLink
+            href="https://cal.com/studio1/collab"
+            tone="brand"
+            external
+            className="mt-10"
+          >
+            {t("button")}
+          </PillLink>
+
+          <ul
+            role="list"
+            className="mt-9 flex flex-col items-center gap-2.5 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-6"
+          >
+            {BULLET_KEYS.map((key) => (
+              <li
+                key={key}
+                className="flex items-center gap-2 text-[13px] text-[var(--home-ink-soft)] sm:text-[14px]"
+              >
+                <Check
+                  weight="bold"
+                  className="size-3.5 shrink-0 text-primary"
+                />
+                {t(`bullets.${key}`)}
+              </li>
+            ))}
+          </ul>
+        </motion.div>
+      </Container>
+    </section>
+  );
 }

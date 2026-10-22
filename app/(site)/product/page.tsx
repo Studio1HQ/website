@@ -42,7 +42,7 @@ export default function ProductPage() {
     );
 
   return (
-    <main className="relative overflow-x-hidden">
+    <main className="relative overflow-x-clip bg-[var(--home-cream)] text-[var(--home-ink)]">
       {productSchemas.map((schema) => (
         <script
           key={schema.name as string}
@@ -52,8 +52,8 @@ export default function ProductPage() {
       ))}
       <ProductHero />
 
-      <section className="relative overflow-x-hidden px-4 pb-20 sm:px-6 sm:pb-24 md:pb-32 lg:px-8">
-        <div className="mx-auto max-w-7xl">
+      <section className="relative px-4 pb-24 sm:px-6 md:pb-32 lg:px-8">
+        <div className="mx-auto -mt-16 max-w-[1300px] md:-mt-20">
           <ProductList products={shipped} />
           <div className="mt-5 sm:mt-6 md:mt-8">
             <ProductPipelineCard />

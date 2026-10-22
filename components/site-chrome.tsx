@@ -7,8 +7,10 @@ import BottomNavbar from "@/components/bottom-navbar";
 import CTA from "@/components/landing/cta";
 import Footer from "@/components/landing/footer";
 import Navbar from "@/components/landing/navbar";
+import { Preloader } from "@/components/preloader";
 import { LocalizedLinkRuntime } from "@/components/localization/localized-link-runtime";
 import ScrollToTopButton from "@/components/scroll-to-top-button";
+import { SmoothScroll } from "@/components/smooth-scroll";
 import { DEFAULT_LOCALE, localeMeta, type Locale } from "@/lib/i18n";
 
 export function SiteChrome({ children }: { children: React.ReactNode }) {
@@ -27,6 +29,8 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
 
   return (
     <>
+      <SmoothScroll />
+      <Preloader />
       <Suspense fallback={null}>
         <Navbar />
       </Suspense>

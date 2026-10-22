@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { SectionIntro } from "@/components/home/ui";
 import { ProcessScroller } from "@/components/sections/process-scroller";
 import { blogAsServiceProcess } from "@/data/service-processes";
 import {
@@ -19,18 +20,11 @@ export default function Process() {
         <ProcessScroller
           steps={blogAsServiceProcess}
           heading={
-            <div className="w-full text-center">
-              <h2 className="text-4xl text-foreground font-normal mb-3 md:text-5xl lg:text-6xl">
-                How We Deliver <br />
-                <span className="serif-accent font-accent font-normal italic text-transparent bg-clip-text bg-gradient-to-br from-primary via-primary1 to-primary">
-                  Developer-First Content
-                </span>
-              </h2>
-              <p className="text-muted-foreground text-sm md:text-base max-w-2xl mx-auto">
-                A transparent, collaborative content process
-                <br /> built for fast-moving SaaS and devtool teams.
-              </p>
-            </div>
+            <SectionIntro
+              title="How We Deliver"
+              accent="Developer-First Content"
+              description="A transparent, collaborative content process built for fast-moving SaaS and devtool teams."
+            />
           }
         />
       </div>

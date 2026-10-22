@@ -14,6 +14,7 @@ const config: Config = {
     "./app/**/*.{ts,tsx}",
     "./src/**/*.{ts,tsx}",
     "./lib/**/*.{ts,tsx}",
+    "./mdx-components.tsx",
   ],
   prefix: "",
   theme: {
@@ -31,8 +32,54 @@ const config: Config = {
         accent: ["var(--font-instrument-serif)", "serif"],
         numeric: ["var(--font-numeric)", "sans-serif"],
         inter: ["var(--font-inter)", "sans-serif"],
+        // Accent role; set in Studio1 Sans (no italic/serif per brand direction)
+        editorial: ["var(--font-studio1-sans)", "Inter", "Arial", "sans-serif"],
+      },
+      // Studio1 Sans ships Regular (400) and Medium (500) only.
+      fontWeight: {
+        thin: "400",
+        extralight: "400",
+        light: "400",
+        semibold: "500",
+        bold: "500",
+        extrabold: "500",
+        black: "500",
+      },
+      fontSize: {
+        // Landing type scale
+        "s1-caption": ["12px", { lineHeight: "1.3", letterSpacing: "-0.03em" }],
+        "s1-label": ["12px", { lineHeight: "1.3", letterSpacing: "0.06em" }],
+        "s1-body": ["14px", { lineHeight: "1.5", letterSpacing: "-0.03em" }],
+        "s1-body-lg": ["16px", { lineHeight: "1.55", letterSpacing: "-0.03em" }],
+        "s1-subhead": ["18px", { lineHeight: "1.3", letterSpacing: "-0.03em" }],
+        "s1-heading": ["24px", { lineHeight: "1.3", letterSpacing: "-0.03em" }],
+        "s1-title": ["32px", { lineHeight: "1.1", letterSpacing: "-0.04em" }],
+        "s1-display": ["48px", { lineHeight: "1.1", letterSpacing: "-0.04em" }],
+        "s1-hero": ["64px", { lineHeight: "1.05", letterSpacing: "-0.04em" }],
+      },
+      transitionTimingFunction: {
+        s1: "cubic-bezier(0.16, 1, 0.3, 1)",
+      },
+      boxShadow: {
+        "s1-raised": "0 2px 8px rgba(0, 0, 0, 0.04)",
+        "s1-overlay": "0 8px 32px rgba(0, 0, 0, 0.08)",
       },
       colors: {
+        // Landing palette aliases over the site theme (see globals.css)
+        "s1-bg": "var(--s1-bg)",
+        "s1-subtle": "var(--s1-subtle)",
+        "s1-surface": "var(--s1-surface)",
+        "s1-line": "var(--s1-line)",
+        "s1-line-strong": "var(--s1-line-strong)",
+        "s1-ink": "var(--s1-ink)",
+        "s1-gray": "var(--s1-gray)",
+        "s1-muted": "var(--s1-muted)",
+        "s1-tint": "var(--s1-tint)",
+        "s1-link": "var(--s1-link)",
+        "s1-panel": "var(--s1-panel)",
+        "s1-panel-line": "var(--s1-panel-line)",
+        "s1-on-panel": "var(--s1-on-panel)",
+        "s1-on-panel-gray": "var(--s1-on-panel-gray)",
         border: "hsl(var(--border))",
         primary1: "hsl(var(--primary1))",
         primarySurface: "hsl(var(--primary-surface))",

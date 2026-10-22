@@ -6,7 +6,7 @@ import type { ProductMedia as ProductMediaType } from "@/constants/products";
 import { cn } from "@/lib/utils";
 
 const mediaFrameClassName = cn(
-  "relative w-full min-w-0 overflow-hidden rounded-lg border border-border/60 bg-muted/20",
+  "relative w-full min-w-0 overflow-hidden rounded-[18px] bg-black ring-1 ring-black/5 dark:ring-white/10",
   "aspect-video sm:aspect-[16/9] lg:aspect-[16/10]",
 );
 

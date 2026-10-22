@@ -4,6 +4,7 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
 import { getPostBySlug, getPostSlugs } from "@/lib/blog";
 import { PostLayout } from "@/components/blog/post-layout";
+import { postMarkdownUrl } from "@/lib/blog-markdown";
 import { blogMdxComponents, transformBlogMdxContent } from "@/components/blog/mdx";
 import {
   absoluteImageUrl,
@@ -26,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: "Not found" };
   }
 
-  return articlePageMetadata({
+  const metadata = articlePageMetadata({
     title: post.title,
     description: post.description,
     path: `/blog/${slug}`,
@@ -38,6 +39,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     authors: post.authors,
     tags: post.tags,
   });
+
+  // Advertise the Markdown version for LLMs and AI tools.
+  return {
+    ...metadata,
+    alternates: {
+      ...metadata.alternates,
+      types: { "text/markdown": postMarkdownUrl(slug) },
+    },
+  };
 }
 
 export default async function BlogPostPage({ params }: Props) {
@@ -125,6 +135,7 @@ export default async function BlogPostPage({ params }: Props) {
         bannerImageAlt={post.bannerImageAlt}
         readingTimeMinutes={post.readingTimeMinutes}
         shareUrl={`${baseUrl}/blog/${slug}`}
+        markdownUrl={postMarkdownUrl(slug)}
         tldrSummary={post.tldrSummary}
         keyTakeaways={post.keyTakeaways}
         navigation={post.navigation}

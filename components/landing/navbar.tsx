@@ -2,13 +2,13 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Button } from "../ui/button";
-import { SelectTheme } from "../theme-toggler";
 import { IconChevronDown, IconMenu2 } from "@tabler/icons-react";
 import { navItems } from "@/constants/data";
 import { cn } from "@/lib/utils";
 import Logo from "../ui/svgs/logo";
-import { EnvelopeOpen } from "@phosphor-icons/react";
+import { MailIcon } from "@/components/ui/mail-icon";
 import { LanguageSwitcher } from "@/components/localization/language-switcher";
 import { useTranslations } from "next-intl";
 
@@ -55,6 +55,54 @@ export default function Navbar() {
   const headerRef = useRef<HTMLElement | null>(null);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname() || "/";
+  const isHome =
+    (pathname.replace(/^\/(fr|es|hi|zh)(?=\/|$)/, "") || "/") === "/";
+  const isBlogPost = /^\/blog\/(?!page\/)[^/]+/.test(
+    pathname.replace(/^\/(fr|es|hi|zh)(?=\/|$)/, ""),
+  );
+  const [hasHero, setHasHero] = useState(isHome);
+  const [pastHero, setPastHero] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [scrollingDown, setScrollingDown] = useState(false);
+
+  // Over a dark hero the bar floats transparently. On the homepage it turns
+  // glass once the night-sky hero is passed; on inner pages (NightHeader) it
+  // turns glass the moment you start scrolling. Past the hero it tucks away
+  // while scrolling down and returns when scrolling up.
+  useEffect(() => {
+    // Blog posts are docs-style reading pages: the bar stays solid glass there.
+    const hero = isHome || isBlogPost ? null : document.querySelector<HTMLElement>(".s1-night");
+    const heroActive = isHome || Boolean(hero);
+    setHasHero(heroActive);
+    if (!heroActive) {
+      setPastHero(false);
+      return;
+    }
+    let lastY = window.scrollY;
+    const update = () => {
+      const y = window.scrollY;
+      const threshold = hero
+        ? hero.getBoundingClientRect().bottom + y - 80
+        : window.innerHeight * 0.8;
+      setPastHero(y > threshold);
+      setScrolled(y > 8);
+      if (Math.abs(y - lastY) > 6) {
+        setScrollingDown(y > lastY);
+        lastY = y;
+      }
+    };
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [isHome, isBlogPost, pathname]);
+
+  const overHero = hasHero && !(isHome ? pastHero : scrolled) && !isMenuOpen;
+  const tuckedAway = hasHero && pastHero && scrollingDown && !isMenuOpen;
 
   useEffect(() => {
     if (!isMenuOpen) return;
@@ -93,10 +141,24 @@ export default function Navbar() {
       <header
         ref={headerRef}
         className={cn(
-          "fixed left-0 right-0 top-0 z-[550] border-b border-border/50 bg-background/40 py-2 backdrop-blur-2xl",
+          "fixed left-0 right-0 top-0 z-[550] border-b py-2 transition-[background-color,border-color,transform] duration-500",
+          tuckedAway && "-translate-y-full",
+          overHero
+            ? "dark border-transparent bg-transparent text-white"
+            : cn(
+                "border-border/50 backdrop-blur-2xl",
+                "bg-background/80",
+              ),
         )}
       >
-        <nav className="flex z-20 max-w-7xl mx-auto h-16 px-4 rounded-2xl justify-between items-center">
+        <nav
+          className={cn(
+            "z-20 mx-auto flex h-16 items-center justify-between rounded-2xl px-4",
+            // Blog posts use a wider docs layout: match its side columns so the
+            // logo and Contact button line up with the left and right rails.
+            isBlogPost ? "max-w-[1680px] xl:px-7" : "max-w-7xl",
+          )}
+        >
           <Link href={"/"} className="flex justify-between gap-2 items-center">
             <Logo className="size-8" />
             <span className="text-2xl font-medium">Studio1</span>
@@ -178,19 +240,15 @@ export default function Navbar() {
           </div>
 
           <div className="hidden items-center justify-between gap-3 lg:flex">
-            <SelectTheme />
             <LanguageSwitcher compact />
-            <Button variant="gradient" asChild>
+            <Button asChild className="group s1-glass-btn h-10 rounded-full border-0 px-5 font-medium text-white hover:bg-transparent">
               <a href="mailto:contact@studio1hq.com">
-                {t("contact")} <EnvelopeOpen className="ml-2" />
+                {t("contact")} <MailIcon className="ml-1" />
               </a>
             </Button>
           </div>
 
           <div className="flex items-center gap-2 lg:hidden">
-            <div className="flex size-10 items-center justify-center rounded-md hover:bg-accent">
-              <SelectTheme />
-            </div>
             <button
               type="button"
               aria-label={isMenuOpen ? "Close menu" : "Open menu"}
@@ -205,6 +263,7 @@ export default function Navbar() {
 
         {/* Mobile Navigation */}
         <div
+          data-lenis-prevent
           className={cn(
             "border bg-background pb-6 shadow-2xl transition-all duration-300 lg:hidden",
             isMenuOpen
@@ -276,9 +335,9 @@ export default function Navbar() {
               <LanguageSwitcher inline />
             </div>
             <div className="mt-4 flex items-center justify-end gap-2 rounded-3xl bg-accent/50 p-2">
-              <Button variant="gradient" asChild>
+              <Button asChild className="group s1-glass-btn h-10 rounded-full border-0 px-5 font-medium text-white hover:bg-transparent">
                 <a href="mailto:contact@studio1hq.com" onClick={closeMobileMenu}>
-                  {t("contact")} <EnvelopeOpen className="ml-2" />
+                  {t("contact")} <MailIcon className="ml-1" />
                 </a>
               </Button>
             </div>

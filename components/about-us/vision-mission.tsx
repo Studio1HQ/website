@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Icon } from "@phosphor-icons/react";
 import {
   ChartBar,
@@ -15,13 +14,7 @@ import {
   HandHeart,
 } from "@phosphor-icons/react/dist/ssr";
 import { motion } from "motion/react";
-import { CanvasRevealEffect } from "@/components/ui/canvas-reveal-effect";
-import {
-  elevatedCardShadow,
-  serviceCardHoverGlow,
-  sideBeamGlowLeftTall,
-  sideBeamGlowRightTall,
-} from "@/lib/shadows";
+import { Rise, SectionIntro } from "@/components/home/ui";
 import { cn } from "@/lib/utils";
 
 const contentData = {
@@ -79,56 +72,8 @@ const contentData = {
   },
 };
 
-const cardSurface = cn(
-  "group relative flex h-full flex-col gap-7 overflow-hidden rounded-xl border-2 border-border/80 p-6 sm:p-8 dark:border",
-  "bg-accent dark:bg-muted-foreground/5",
-  "transition-[border-color,box-shadow,transform] duration-500 ease-out",
-  "hover:-translate-y-1 hover:border-primary/35 dark:hover:border-white/15",
-  "motion-reduce:transition-none motion-reduce:hover:translate-y-0",
-  elevatedCardShadow
-);
-
-function VisionMissionCardEffects({ active }: { active: boolean }) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    if (active) {
-      setMounted(true);
-      return;
-    }
-
-    const timeout = window.setTimeout(() => setMounted(false), 450);
-    return () => window.clearTimeout(timeout);
-  }, [active]);
-
-  return (
-    <>
-      <div aria-hidden className={serviceCardHoverGlow} />
-      <div
-        aria-hidden
-        className={cn(
-          "pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-xl opacity-0 transition-opacity duration-500 ease-out motion-reduce:transition-none",
-          active && "opacity-100"
-        )}
-      >
-        {mounted ? (
-          <CanvasRevealEffect
-            animationSpeed={3}
-            containerClassName="bg-transparent"
-            colors={[
-              [234, 88, 12],
-              [249, 115, 22],
-            ]}
-            dotSize={2}
-            showGradient={false}
-          />
-        ) : null}
-        <div className="absolute inset-0 bg-gradient-to-t from-accent via-accent/80 to-accent/40 dark:from-background dark:via-background/75 dark:to-background/35" />
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.08] via-transparent to-transparent" />
-      </div>
-    </>
-  );
-}
+const cardSurface =
+  "s1-glass-card group relative h-full rounded-[24px] p-7 md:p-9";
 
 const ContentBlock = ({
   data,
@@ -145,7 +90,6 @@ const ContentBlock = ({
   index: number;
 }) => {
   const HeaderIcon = data.icon;
-  const [hovered, setHovered] = useState(false);
 
   return (
     <motion.article
@@ -154,20 +98,14 @@ const ContentBlock = ({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.55, delay: 0.08 * index, ease: "easeOut" }}
-      onHoverStart={() => setHovered(true)}
-      onHoverEnd={() => setHovered(false)}
-      onFocus={() => setHovered(true)}
-      onBlur={() => setHovered(false)}
     >
-      <VisionMissionCardEffects active={hovered} />
 
       <div className="relative z-[1] flex h-full flex-col gap-7">
         <header className="flex items-center gap-3.5">
           <span
             className={cn(
               "flex size-12 shrink-0 items-center justify-center rounded-lg",
-              "bg-background text-foreground",
-              "dark:bg-background/80",
+              "s1-glass-dark rounded-2xl text-white",
               "transition-transform duration-500 ease-out group-hover:scale-110",
               "motion-reduce:transition-none motion-reduce:group-hover:scale-100"
             )}
@@ -175,12 +113,12 @@ const ContentBlock = ({
           >
             <HeaderIcon weight="regular" className="size-6" />
           </span>
-          <h3 className="font-primary text-2xl font-semibold tracking-tight text-foreground sm:text-[1.65rem]">
+          <h3 className="text-[26px] font-medium tracking-[-0.035em] text-[var(--home-ink)]">
             {data.title}
           </h3>
         </header>
 
-        <div className="h-px w-full bg-border/80" />
+        <div className="h-px w-full bg-[var(--home-line)]" />
 
         <ul className="flex flex-col gap-4">
           {data.points.map((point, pointIndex) => {
@@ -203,7 +141,7 @@ const ContentBlock = ({
                   className="mt-0.5 size-[1.125rem] shrink-0 text-primary"
                   aria-hidden
                 />
-                <p className="font-secondary text-[0.9375rem] leading-relaxed text-foreground/80">
+                <p className="text-[15px] leading-relaxed text-[var(--home-ink-soft)]">
                   {point.text}
                 </p>
               </motion.li>
@@ -217,34 +155,19 @@ const ContentBlock = ({
 
 export const VisionMission = () => {
   return (
-    <div className="relative mx-auto mt-44 w-full px-4 py-8">
-      <div className={sideBeamGlowLeftTall}></div>
-      <div className={sideBeamGlowRightTall}></div>
+    <section className="relative py-24 md:py-32">
+      <Rise>
+        <SectionIntro
+          title="What"
+          accent="Fuels Us?"
+          description="We help SaaS teams build developer trust through high-impact content and DevRel strategy that scales with their product."
+        />
+      </Rise>
 
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-        className="mb-14 text-center md:mb-16"
-      >
-        <h2 className="mb-4 font-primary text-4xl font-normal tracking-tight md:text-5xl">
-          What{" "}
-          <span className="serif-accent bg-gradient-to-br from-primary via-primary1 to-primary bg-clip-text font-accent italic font-normal text-transparent">
-            Fuels
-          </span>{" "}
-          Us?
-        </h2>
-        <p className="text-muted-foreground">
-          We help SaaS teams build developer trust through <br /> high-impact
-          content and DevRel strategy that scales with their product.
-        </p>
-      </motion.div>
-
-      <div className="mx-auto grid max-w-5xl grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="mx-auto mt-14 grid max-w-[1100px] grid-cols-1 gap-5 md:mt-16 md:grid-cols-2">
         <ContentBlock data={contentData.vision} index={0} />
         <ContentBlock data={contentData.mission} index={1} />
       </div>
-    </div>
+    </section>
   );
 };

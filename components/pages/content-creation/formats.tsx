@@ -1,7 +1,6 @@
 "use client";
 
-import { fadeInUp, staggerChildren } from "@/lib/animations";
-import { motion } from "motion/react";
+import { Container, Rise, SectionIntro } from "@/components/home/ui";
 
 const formats = [
   {
@@ -36,74 +35,45 @@ const formats = [
 
 export default function Formats() {
   return (
-    <section id="formats" className="relative scroll-mt-28 py-28 md:py-36">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-border"
-      />
+    <section id="formats" className="relative scroll-mt-28 py-24 md:py-32">
+      <Container>
+        <Rise>
+          <SectionIntro
+            eyebrow="Formats"
+            title="The videos we make most often"
+            description="Pick what fits your product and audience. We can support scripting, editing, packaging, and upload-ready assets."
+          />
+        </Rise>
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <motion.div
-          variants={staggerChildren}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-          className="max-w-2xl"
-        >
-          <motion.p
-            variants={fadeInUp}
-            className="font-secondary text-sm font-medium tracking-wide text-primary"
-          >
-            Formats
-          </motion.p>
-          <motion.h2
-            variants={fadeInUp}
-            className="mt-4 font-inter text-4xl font-normal tracking-tight md:text-5xl"
-          >
-            The videos we make most often
-          </motion.h2>
-          <motion.p
-            variants={fadeInUp}
-            className="mt-6 text-base text-muted-foreground"
-          >
-            Pick what fits your product and audience. We can support scripting,
-            editing, packaging, and upload-ready assets.
-          </motion.p>
-        </motion.div>
-
-        <motion.ul
-          variants={staggerChildren}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.15 }}
+        <ul
           role="list"
           aria-label="Video formats"
-          className="mt-16 grid gap-10 sm:grid-cols-2 md:mt-20 md:gap-x-14 md:gap-y-14"
+          className="mt-14 grid gap-5 sm:grid-cols-2 md:mt-16"
         >
-          {formats.map((format) => (
-            <motion.li
-              key={format.title}
-              variants={fadeInUp}
-              className="min-w-0 border-l-2 border-primary/40 pl-6 md:pl-8"
-            >
-              <div className="flex items-baseline gap-3">
-                <span className="font-secondary text-sm font-semibold tabular-nums tracking-widest text-primary">
-                  {format.number}
-                </span>
-                <span className="font-secondary text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  {format.meta}
-                </span>
-              </div>
-              <h3 className="mt-3 font-inter text-2xl font-medium tracking-tight md:text-3xl">
-                {format.title}
-              </h3>
-              <p className="mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground md:text-base">
-                {format.detail}
-              </p>
-            </motion.li>
+          {formats.map((format, index) => (
+            <li key={format.title} className="min-w-0">
+              <Rise delay={index * 0.06} className="h-full">
+                <div className="s1-glass-card flex h-full flex-col rounded-[24px] p-7">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-numeric text-[44px] font-medium leading-none tracking-[-0.04em] text-primary tabular-nums">
+                      {format.number}
+                    </span>
+                    <span className="rounded-full border border-[var(--home-line)] px-2.5 py-0.5 text-[12px] font-medium text-[var(--home-ink-soft)]">
+                      {format.meta}
+                    </span>
+                  </div>
+                  <h3 className="mt-10 text-[22px] font-medium tracking-[-0.03em] text-[var(--home-ink)]">
+                    {format.title}
+                  </h3>
+                  <p className="mt-3 text-[15px] leading-[1.6] text-[var(--home-ink-soft)]">
+                    {format.detail}
+                  </p>
+                </div>
+              </Rise>
+            </li>
           ))}
-        </motion.ul>
-      </div>
+        </ul>
+      </Container>
     </section>
   );
 }

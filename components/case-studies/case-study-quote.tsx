@@ -84,7 +84,7 @@ export function CaseStudyQuote({
                 isPull ? "text-base md:text-[1.0625rem]" : "text-[0.9375rem]",
               )}
             >
-              <span className="serif-accent font-accent italic text-foreground/75">
+              <span className="serif-accent font-accent text-foreground/75">
                 {role}
               </span>
             </span>
