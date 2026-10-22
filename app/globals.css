@@ -990,45 +990,44 @@ html.theme-switching *::after {
 
 /* Frosted glass cards over the orange gradients */
 .s1-glass-card {
+  /* Clear, untinted glass: mostly see-through, defined by its lit edges. */
   background: linear-gradient(
     145deg,
-    rgba(255, 255, 255, 0.72),
-    rgba(255, 255, 255, 0.42)
+    rgba(255, 255, 255, 0.42),
+    rgba(255, 255, 255, 0.16)
   );
-  backdrop-filter: blur(22px) saturate(1.5);
-  -webkit-backdrop-filter: blur(22px) saturate(1.5);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.55),
-    0 30px 70px -35px rgba(90, 30, 0, 0.55);
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5),
+    0 24px 60px -32px rgba(0, 0, 0, 0.22);
 }
 
 .dark .s1-glass-card {
   background: linear-gradient(
     145deg,
-    rgba(255, 255, 255, 0.09),
-    rgba(255, 255, 255, 0.03)
+    rgba(255, 255, 255, 0.07),
+    rgba(255, 255, 255, 0.02)
   );
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.14),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
-    0 30px 70px -35px rgba(0, 0, 0, 0.8);
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.09),
+    0 24px 60px -32px rgba(0, 0, 0, 0.7);
 }
 
 /* Denser glass for cards pulled up over a night header, so the dark band
    behind them doesn't haze through the top edge. */
 .s1-glass-card.s1-glass-raised {
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.88));
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.8));
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
 }
 
 .dark .s1-glass-card.s1-glass-raised {
-  background: linear-gradient(145deg, rgba(38, 30, 26, 0.96), rgba(24, 19, 17, 0.94));
-}
-
-/* Accent words inside the orange night header: warm cream instead of orange,
-   so they stay legible on the glow. */
-.s1-night .s1-accent-text {
-  background-image: linear-gradient(180deg, #fff7ef 0%, #ffd2ad 100%);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
 }
 
 /* Night header light: one wide, soft gradient (no shapes) whose warm band

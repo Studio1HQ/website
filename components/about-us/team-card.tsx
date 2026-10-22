@@ -7,7 +7,6 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
-import { DitherField } from "@/components/home/dither-field";
 import { useEffect, useRef, type MouseEvent } from "react";
 
 const socialLinks = (member: {
@@ -106,13 +105,6 @@ export const TeamCard = ({
           <div
             aria-hidden
             className="absolute inset-0 bg-gradient-to-b from-[var(--home-paper)] to-[var(--home-cream)] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.22),inset_0_-1px_0_0_rgba(0,0,0,0.12)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),inset_0_-1px_0_0_rgba(0,0,0,0.2)]"
-          />
-          {/* Small orange squares behind the portrait, fading out from the head */}
-          <DitherField
-            fade="center"
-            still
-            seed={member.name.length}
-            className="absolute inset-0 h-full w-full opacity-90"
           />
           {typeof member.image === "string" ? (
             <Image

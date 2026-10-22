@@ -21,6 +21,10 @@ export function DitherField({
   seed = 0,
   fade = "left",
   still = false,
+  cell = CELL,
+  size = SIZE,
+  strength = 1,
+  pattern = "dither",
 }: {
   className?: string;
   seed?: number;
@@ -28,6 +32,13 @@ export function DitherField({
   fade?: "left" | "center";
   /** Draw once and never animate. */
   still?: boolean;
+  /** Grid pitch and square size in css px. */
+  cell?: number;
+  size?: number;
+  /** Opacity multiplier for the squares. */
+  strength?: number;
+  /** "dither": scattered ordered-dither squares. "halftone": a clean grid that shrinks and fades. */
+  pattern?: "dither" | "halftone";
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const reduceMotion = useReducedMotion();
@@ -49,8 +60,8 @@ export function DitherField({
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      cols = Math.ceil(width / CELL);
-      rows = Math.ceil(height / CELL);
+      cols = Math.ceil(width / cell);
+      rows = Math.ceil(height / cell);
     };
 
     const draw = (time: number) => {
@@ -76,12 +87,23 @@ export function DitherField({
                 ) ** 1.6
               : Math.pow(u, 2.2) *
                 Math.sin(Math.PI * Math.min(1, Math.max(0, v))) ** 0.6;
+          if (pattern === "halftone") {
+            // Orderly halftone: every cell on the grid, squares shrink and
+            // fade smoothly with distance; no dither gaps.
+            if (edge < 0.04) continue;
+            const side = Math.max(1, size * Math.sqrt(edge));
+            const offset = (cell - side) / 2;
+            ctx.globalAlpha = Math.min(1, edge * 0.55 * strength);
+            ctx.fillStyle = "#f97316";
+            ctx.fillRect(x * cell + offset, y * cell + offset, side, side);
+            continue;
+          }
           const value =
             wave * edge * (0.75 + 0.25 * Math.sin(t * 0.7 + v * 4 + seed));
           if (value > BAYER[(y % 4) * 4 + (x % 4)]) {
-            ctx.globalAlpha = 0.12 + value * 0.3;
+            ctx.globalAlpha = Math.min(1, (0.12 + value * 0.3) * strength);
             ctx.fillStyle = value > 0.75 ? "#fdba74" : "#f97316";
-            ctx.fillRect(x * CELL, y * CELL, SIZE, SIZE);
+            ctx.fillRect(x * cell, y * cell, size, size);
           }
         }
       }
@@ -113,7 +135,7 @@ export function DitherField({
       observer.disconnect();
       resizeObserver.disconnect();
     };
-  }, [reduceMotion, seed, fade, still]);
+  }, [reduceMotion, seed, fade, still, cell, size, strength, pattern]);
 
   return (
     <canvas
