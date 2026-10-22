@@ -18,9 +18,8 @@ export function NightHeader({
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
         {/* One calm key light: ember at the top falling off to black */}
         <div className="absolute inset-0 bg-[linear-gradient(180deg,#9a3412_0%,#6b2210_26%,#2b0e07_56%,#0a0605_82%)]" />
-        {/* Two soft light sources drifting slowly in opposite directions */}
-        <div className="s1-night-drift-a absolute -inset-x-[20%] inset-y-0 bg-[radial-gradient(ellipse_38%_48%_at_50%_0%,rgba(251,146,60,0.5),transparent_72%)]" />
-        <div className="s1-night-drift-b absolute -inset-x-[20%] inset-y-0 bg-[radial-gradient(ellipse_30%_40%_at_50%_4%,rgba(255,190,140,0.3),transparent_70%)]" />
+        {/* One continuous gradient whose colours flow slowly across the top */}
+        <div className="s1-night-flow absolute inset-0" />
         {/* Edge falloff keeps the eye in the middle */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_75%_90%_at_50%_10%,transparent_45%,rgba(10,6,5,0.7)_100%)]" />
         {/* Hairline at the top edge, like light catching glass */}

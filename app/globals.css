@@ -1031,34 +1031,37 @@ html.theme-switching *::after {
   background-image: linear-gradient(180deg, #fff7ef 0%, #ffd2ad 100%);
 }
 
-/* Night header light: two sources drifting slowly in opposite directions,
-   breathing a little, on long eased loops. */
-.s1-night-drift-a {
-  animation: s1-night-drift-a 16s ease-in-out infinite alternate;
-  will-change: transform, opacity;
+/* Night header light: one wide, soft gradient (no shapes) whose warm band
+   slowly flows left and right across the top, fading out downward. */
+.s1-night-flow {
+  background-image: linear-gradient(
+    100deg,
+    rgba(234, 88, 12, 0) 0%,
+    rgba(234, 88, 12, 0.32) 18%,
+    rgba(251, 146, 60, 0.5) 32%,
+    rgba(255, 196, 140, 0.32) 42%,
+    rgba(234, 88, 12, 0.28) 56%,
+    rgba(194, 65, 12, 0.4) 70%,
+    rgba(251, 146, 60, 0.3) 84%,
+    rgba(234, 88, 12, 0) 100%
+  );
+  background-size: 260% 100%;
+  background-position: 0% 0%;
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, rgba(0, 0, 0, 0.6) 35%, transparent 75%);
+  mask-image: linear-gradient(to bottom, black 0%, rgba(0, 0, 0, 0.6) 35%, transparent 75%);
+  animation: s1-night-flow 22s ease-in-out infinite alternate;
 }
 
-.s1-night-drift-b {
-  animation: s1-night-drift-b 21s ease-in-out infinite alternate;
-  will-change: transform, opacity;
-}
-
-@keyframes s1-night-drift-a {
-  0% { transform: translate3d(-12%, 0, 0) scale(1); opacity: 0.85; }
-  50% { transform: translate3d(2%, 3%, 0) scale(1.08); opacity: 1; }
-  100% { transform: translate3d(12%, 0, 0) scale(1); opacity: 0.9; }
-}
-
-@keyframes s1-night-drift-b {
-  0% { transform: translate3d(14%, 2%, 0) scale(1.05); opacity: 0.7; }
-  50% { transform: translate3d(-4%, 0, 0) scale(0.95); opacity: 1; }
-  100% { transform: translate3d(-14%, 3%, 0) scale(1.05); opacity: 0.75; }
+@keyframes s1-night-flow {
+  to {
+    background-position: 100% 0%;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .s1-night-drift-a,
-  .s1-night-drift-b {
+  .s1-night-flow {
     animation: none;
+    background-position: 50% 0%;
   }
 }
 
