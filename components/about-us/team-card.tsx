@@ -1,16 +1,36 @@
 "use client";
 
-import { GlobeSimple, LinkedinLogo, XLogo } from "@phosphor-icons/react/dist/ssr";
+import {
+  GlobeSimple,
+  LinkedinLogo,
+  XLogo,
+} from "@phosphor-icons/react/dist/ssr";
 import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
+import { DitherField } from "@/components/home/dither-field";
 import { useEffect, useRef, type MouseEvent } from "react";
 
 const socialLinks = (member: {
   social: { twitter: string; linkedin: string; website: string };
 }) => [
-  { href: member.social.twitter, label: "X (Twitter)", Icon: XLogo, weight: "bold" as const },
-  { href: member.social.linkedin, label: "LinkedIn", Icon: LinkedinLogo, weight: "fill" as const },
-  { href: member.social.website, label: "Website", Icon: GlobeSimple, weight: "bold" as const },
+  {
+    href: member.social.twitter,
+    label: "X (Twitter)",
+    Icon: XLogo,
+    weight: "bold" as const,
+  },
+  {
+    href: member.social.linkedin,
+    label: "LinkedIn",
+    Icon: LinkedinLogo,
+    weight: "fill" as const,
+  },
+  {
+    href: member.social.website,
+    label: "Website",
+    Icon: GlobeSimple,
+    weight: "bold" as const,
+  },
 ];
 
 export const TeamCard = ({
@@ -31,10 +51,7 @@ export const TeamCard = ({
   const tileRef = useRef<HTMLDivElement>(null);
   const glow = useRef({ x: 0, y: 0, tx: 0, ty: 0, raf: 0 });
 
-  useEffect(
-    () => () => cancelAnimationFrame(glow.current.raf),
-    [],
-  );
+  useEffect(() => () => cancelAnimationFrame(glow.current.raf), []);
 
   const animate = () => {
     const g = glow.current;
@@ -82,16 +99,22 @@ export const TeamCard = ({
           className="pointer-events-none absolute inset-0 rounded-[18px] opacity-0 transition-opacity duration-500 ease-out group-hover/tile:opacity-100 [background:radial-gradient(200px_circle_at_var(--mouse-x,50%)_var(--mouse-y,50%),hsl(var(--primary))_0%,hsl(var(--primary)/0.4)_40%,transparent_75%)]"
         />
         <div className="relative aspect-[9/10] overflow-hidden rounded-[16px]">
-          <div aria-hidden className="absolute inset-0 bg-[var(--home-cream)]" />
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-[var(--home-cream)]"
+          />
           <div
             aria-hidden
             className="absolute inset-0 bg-gradient-to-b from-[var(--home-paper)] to-[var(--home-cream)] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.22),inset_0_-1px_0_0_rgba(0,0,0,0.12)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),inset_0_-1px_0_0_rgba(0,0,0,0.2)]"
           />
-          {/* Square grid behind the portrait, fading out toward the edges */}
-          <div
-            aria-hidden
-            className="absolute inset-0 [background-image:linear-gradient(to_right,rgba(28,18,12,0.09)_1px,transparent_1px),linear-gradient(to_bottom,rgba(28,18,12,0.09)_1px,transparent_1px)] [background-position:center_center] [background-size:28px_28px] [mask-image:radial-gradient(ellipse_75%_70%_at_50%_42%,black_30%,transparent_85%)] dark:[background-image:linear-gradient(to_right,rgba(255,255,255,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.07)_1px,transparent_1px)]"
-          />          {typeof member.image === "string" ? (
+          {/* Small orange squares behind the portrait, fading out from the head */}
+          <DitherField
+            fade="center"
+            still
+            seed={member.name.length}
+            className="absolute inset-0 h-full w-full opacity-90"
+          />
+          {typeof member.image === "string" ? (
             <Image
               src={member.image}
               alt={member.name}
