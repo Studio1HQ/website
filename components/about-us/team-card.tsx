@@ -87,7 +87,11 @@ export const TeamCard = ({
             aria-hidden
             className="absolute inset-0 bg-gradient-to-b from-[var(--home-paper)] to-[var(--home-cream)] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.22),inset_0_-1px_0_0_rgba(0,0,0,0.12)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),inset_0_-1px_0_0_rgba(0,0,0,0.2)]"
           />
-          {typeof member.image === "string" ? (
+          {/* Square grid behind the portrait, fading out toward the edges */}
+          <div
+            aria-hidden
+            className="absolute inset-0 [background-image:linear-gradient(to_right,rgba(28,18,12,0.09)_1px,transparent_1px),linear-gradient(to_bottom,rgba(28,18,12,0.09)_1px,transparent_1px)] [background-position:center_center] [background-size:28px_28px] [mask-image:radial-gradient(ellipse_75%_70%_at_50%_42%,black_30%,transparent_85%)] dark:[background-image:linear-gradient(to_right,rgba(255,255,255,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.07)_1px,transparent_1px)]"
+          />          {typeof member.image === "string" ? (
             <Image
               src={member.image}
               alt={member.name}
