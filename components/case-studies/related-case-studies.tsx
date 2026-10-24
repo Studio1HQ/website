@@ -11,9 +11,9 @@ export function RelatedCaseStudies({ studies }: RelatedCaseStudiesProps) {
 
   return (
     <section className="mt-16 max-w-4xl">
-      <h2 className="font-inter text-2xl font-normal tracking-tight">
+      <h2 className="text-[28px] font-medium tracking-[-0.04em]">
         More{" "}
-        <span className="serif-accent bg-gradient-to-br from-primary via-primary1 to-primary bg-clip-text font-accent font-normal italic text-transparent">
+        <span className="s1-accent-text">
           case studies
         </span>
       </h2>

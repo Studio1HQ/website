@@ -3,12 +3,8 @@ import { companies } from "@/data/companies";
 import Image from "next/image";
 import { motion } from "motion/react";
 import Link from "next/link";
-import { sideBeamGlowLeftMuted, sideBeamGlowRightMuted } from "@/lib/shadows";
+import { SectionIntro } from "@/components/home/ui";
 import { cn } from "@/lib/utils";
-
-/** Studio1 inset edge highlight, same values as button / floating-tile inset pair. */
-const companyCardInsetShadow =
-  "shadow-[inset_0_1px_0_0_rgba(255,255,255,0.22),inset_0_-1px_0_0_rgba(0,0,0,0.12)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),inset_0_-1px_0_0_rgba(0,0,0,0.2)]";
 
 export const Companies = () => {
   return (
@@ -19,23 +15,15 @@ export const Companies = () => {
       transition={{ duration: 0.35 }}
       className="relative"
     >
-      <div className={sideBeamGlowLeftMuted}></div>
-      <div className={sideBeamGlowRightMuted}></div>
-      <div className="mb-12">
-        <div className="text-center mb-10">
-          <h2 className="mb-3 font-primary text-4xl font-normal tracking-tight md:text-5xl">
-            Partnered{" "}
-            <span className="serif-accent font-accent italic font-normal text-transparent bg-clip-text bg-gradient-to-br from-primary via-primary1 to-primary">
-              Companies
-            </span>{" "}
-          </h2>
-          <p className="text-muted-foreground text-sm md:text-base max-w-xl mx-auto">
-            We empower tech brands to build thriving developer communities
-            through DevRel and high-impact content.
-          </p>
-        </div>
+      <div className="pb-24 pt-8 md:pb-32">
+        <SectionIntro
+          className="mb-14 md:mb-16"
+          title="Partnered"
+          accent="Companies"
+          description="We empower tech brands to build thriving developer communities through DevRel and high-impact content."
+        />
 
-        <div className="grid max-w-5xl z-20 mx-auto grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+        <div className="mx-auto grid max-w-[1100px] grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
           {companies.map((item, index) => {
             const logoVariant =
               "logoVariant" in item ? item.logoVariant : undefined;
@@ -59,7 +47,7 @@ export const Companies = () => {
                 className="group"
               >
                 <div
-                  className={`border-2 bg-accent z-20 backdrop-blur-2xl dark:bg-muted-foreground/5 w-full h-full rounded-xl flex flex-col items-center justify-center gap-2.5 px-3 py-5 sm:py-6 cursor-pointer transition-transform duration-300 group-hover:-translate-y-1 ${companyCardInsetShadow}`}
+                  className="s1-glass-card flex h-full w-full cursor-pointer flex-col items-center justify-center gap-2.5 rounded-[18px] px-3 py-5 transition-transform duration-300 group-hover:-translate-y-1 sm:py-6"
                 >
                   <div
                     className={
@@ -95,7 +83,7 @@ export const Companies = () => {
                       />
                     )}
                   </div>
-                  <div className="text-center text-sm font-semibold leading-snug line-clamp-2">
+                  <div className="line-clamp-2 text-center text-sm font-medium leading-snug text-[var(--home-ink)]">
                     {item.name}
                   </div>
                 </div>

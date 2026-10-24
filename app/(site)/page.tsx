@@ -1,11 +1,12 @@
-import Hero from "@/components/landing/hero";
-import Trustedby from "@/components/landing/trustedby";
-import TechnicalDomains from "@/components/landing/domains";
-import Features from "@/components/landing/features";
-import Testimonials from "@/components/landing/testimonials";
-import GlobalReach from "@/components/landing/global-reach";
-import DeveloperJourney from "@/components/landing/developer-journey";
-import CaseStudyCards from "@/components/landing/case-study-cards";
+import NightHero from "@/components/home/night-hero";
+import Showreel from "@/components/home/showreel";
+import Positioning from "@/components/home/positioning";
+import ServicesColumns from "@/components/home/services-columns";
+import CaseSlides from "@/components/home/case-slides";
+import Reasons from "@/components/home/reasons";
+import TestimonialLetter from "@/components/home/testimonial-letter";
+import ReachBand from "@/components/home/reach-band";
+import Process from "@/components/home/process";
 import { homePageMetadata, websiteJsonLd } from "@/lib/seo";
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
@@ -92,15 +93,16 @@ export default function Home() {
           </li>
         </ul>
       </section>
-      <div className="overflow-x-hidden h-fit !max-h-fit">
-        <Hero />
-        <Trustedby />
-        <TechnicalDomains />
-        <Features />
-        <Testimonials />
-        <GlobalReach />
-        <DeveloperJourney />
-        <CaseStudyCards />
+      <div className="overflow-x-clip">
+        <NightHero />
+        <Showreel />
+        <Positioning />
+        <ServicesColumns />
+        <CaseSlides />
+        <Reasons />
+        <TestimonialLetter />
+        <ReachBand />
+        <Process />
       </div>
     </>
   );

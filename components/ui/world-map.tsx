@@ -2,10 +2,14 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import DottedMap from "dotted-map";
+import DottedMap from "dotted-map/without-countries";
+// Grid precomputed with getMapJSON({ height: 100, grid: "diagonal" });
+// generating it in the browser blocks the main thread for ~2s on phones.
+import worldGrid from "@/data/world-dotted-map.json";
 import Image from "next/image";
 import { useTheme } from "@wrksz/themes/client";
 import { cn } from "@/lib/utils";
+import { MAP_FLAGS } from "@/components/ui/map-flags";
 
 type WorldMapLocation = {
   lat: number;
@@ -28,7 +32,48 @@ type WorldMapProps = {
   animationDuration?: number;
   loop?: boolean;
   className?: string;
+  /** "dark" forces the dark rendering regardless of the site theme. */
+  tone?: "auto" | "dark";
+  /** Label of a location to emphasise (e.g. hovered in a list elsewhere). */
+  activeLabel?: string | null;
+  onLocationHover?: (label: string | null) => void;
+  /** Draw round country flags (Studio1 mark for India) instead of dots. */
+  showFlags?: boolean;
 };
+
+const STUDIO1_MARK =
+  "M0 35C0 16.6807 14.0744 1.64844 32 0.126953V141H51.0523C52.4308 137.344 54.7446 133.689 57.9938 130.033C61.1446 126.508 64.6892 123.44 68.6277 120.829C72.5662 118.349 76.3569 116.782 80 116.129V86.7544C75.4708 87.9292 71.3846 89.6919 67.7415 92.0415C64 94.5225 60.7508 97.46 57.9938 100.854C56.5345 102.72 55.2545 104.659 54.1539 106.671V0H125C144.33 0 160 15.6699 160 35V125C160 144.33 144.33 160 125 160H124V18H104.948C103.569 21.6816 101.255 25.3628 98.0062 29.0444C94.8554 32.5942 91.3108 35.6841 87.3723 38.314C83.4338 40.812 79.6431 42.3896 76 43.0474V72.6304C80.5292 71.4473 84.6154 69.6724 88.2585 67.3057C92 64.8076 95.2492 61.8491 98.0062 58.4307C99.4655 56.5513 100.745 54.5986 101.846 52.5723V160H35C15.67 160 0 144.33 0 125V35Z";
+
+/** Round flag badge (r = 1.35 map units), white ring; India shows the Studio1 mark. */
+function FlagMarker({ x, y, label, index }: { x: number; y: number; label: string; index: number }) {
+  const r = 1.35;
+  const clipId = `flag-clip-${index}`;
+  return (
+    <g>
+      <defs>
+        <clipPath id={clipId}>
+          <circle cx={x} cy={y} r={r} />
+        </clipPath>
+      </defs>
+      <g clipPath={`url(#${clipId})`}>
+        {label === "India" ? (
+          <>
+            <circle cx={x} cy={y} r={r} fill="#0b0807" />
+            <path
+              d={STUDIO1_MARK}
+              fill="url(#flag-mark-grad)"
+              fillRule="evenodd"
+              transform={`translate(${x - r * 0.62} ${y - r * 0.62}) scale(${(r * 1.24) / 160})`}
+            />
+          </>
+        ) : (
+          <g transform={`translate(${x - r} ${y - r}) scale(${(r * 2) / 10})`}>{MAP_FLAGS[label]}</g>
+        )}
+      </g>
+      <circle cx={x} cy={y} r={r} fill="none" stroke="#fff" strokeOpacity="0.9" strokeWidth="0.22" />
+    </g>
+  );
+}
 
 type Point = { x: number; y: number };
 
@@ -47,11 +92,15 @@ function pointKey(lat: number, lng: number) {
 
 export function WorldMap({
   dots = [],
-  lineColor = "#f97316",
+  lineColor = "currentColor",
   showLabels = true,
   animationDuration = 2,
   loop = true,
   className,
+  tone = "auto",
+  activeLabel = null,
+  onLocationHover,
+  showFlags = false,
 }: WorldMapProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [mounted, setMounted] = useState(false);
@@ -59,8 +108,9 @@ export function WorldMap({
   const [reduceMotion, setReduceMotion] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { resolvedTheme } = useTheme();
-  const isDark = mounted && resolvedTheme === "dark";
-  const shouldLoop = loop && !reduceMotion && !isMobile;
+  const isDark = tone === "dark" || (mounted && resolvedTheme === "dark");
+  // Loops on phones too; the grid is precomputed, so this is cheap.
+  const shouldLoop = loop && !reduceMotion;
 
   useEffect(() => {
     setMounted(true);
@@ -95,7 +145,8 @@ export function WorldMap({
   }, []);
 
   const map = useMemo(
-    () => new DottedMap({ height: 100, grid: "diagonal" }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    () => new DottedMap({ map: worldGrid as any }),
     [],
   );
 
@@ -103,10 +154,8 @@ export function WorldMap({
     () =>
       map.getSVG({
         radius: isDark ? 0.22 : 0.25,
-        // Primary-tinted land dots; higher contrast in light mode for readable continents
-        color: isDark
-          ? "hsla(24, 40%, 76%, 0.34)"
-          : "hsla(24, 52%, 14%, 0.74)",
+        // Neutral land dots (Studio1 ink / gray scale)
+        color: isDark ? "rgba(242, 242, 242, 0.26)" : "rgba(10, 10, 10, 0.42)",
         shape: "circle",
         backgroundColor: "transparent",
       }),
@@ -153,14 +202,10 @@ export function WorldMap({
   return (
     <div
       className={cn(
-        "relative aspect-[2/1] w-full overflow-hidden rounded-lg bg-primary/[0.05] font-secondary dark:bg-transparent md:aspect-[2.5/1] lg:aspect-[2/1]",
+        "relative aspect-[2/1] w-full overflow-hidden rounded-[10px] font-secondary md:aspect-[2.5/1] lg:aspect-[2/1]",
         className,
       )}
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.2)_0%,transparent_62%)] dark:bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.14)_0%,transparent_70%)]"
-      />
       <Image
         src={`data:image/svg+xml;utf8,${encodeURIComponent(svgMap)}`}
         className="pointer-events-none h-full w-full select-none object-fill [mask-image:radial-gradient(ellipse_at_center,black_58%,transparent_74%)] dark:opacity-80 dark:[mask-image:radial-gradient(ellipse_at_center,black_48%,transparent_82%)]"
@@ -185,6 +230,10 @@ export function WorldMap({
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
+          <linearGradient id="flag-mark-grad" x1="0" y1="80" x2="160" y2="80" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#FE3C34" />
+            <stop offset="1" stopColor="#FE8B4B" />
+          </linearGradient>
         </defs>
 
         {dots.map((dot, i) => {
@@ -270,20 +319,44 @@ export function WorldMap({
           return (
             <g key={`point-${pointKey(point.lat, point.lng)}`}>
               <motion.g
-                onHoverStart={() => setHoveredLocation(label)}
-                onHoverEnd={() => setHoveredLocation(null)}
+                onHoverStart={() => {
+                  setHoveredLocation(label);
+                  onLocationHover?.(label);
+                }}
+                onHoverEnd={() => {
+                  setHoveredLocation(null);
+                  onLocationHover?.(null);
+                }}
                 className="cursor-pointer"
                 whileHover={isMobile ? undefined : { scale: 1.25 }}
                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
               >
+                {showFlags && (label === "India" || MAP_FLAGS[label]) ? (
+                  <FlagMarker x={projected.x} y={projected.y} label={label} index={i} />
+                ) : (
+                  <circle
+                    cx={projected.x}
+                    cy={projected.y}
+                    r={isDark ? "0.9" : "1.05"}
+                    fill={lineColor}
+                    filter="url(#glow)"
+                  />
+                )}
+                {showFlags ? null : (
                 <circle
                   cx={projected.x}
                   cy={projected.y}
-                  r={isDark ? "0.9" : "1.05"}
-                  fill={lineColor}
-                  filter="url(#glow)"
+                  r="2.6"
+                  fill="none"
+                  stroke={lineColor}
+                  strokeWidth="0.3"
+                  style={{
+                    opacity: activeLabel === label || hoveredLocation === label ? 1 : 0,
+                    transition: "opacity 250ms ease",
+                  }}
                 />
-                {shouldLoop ? (
+                )}
+                {shouldLoop && !showFlags ? (
                   <circle
                     cx={projected.x}
                     cy={projected.y}
@@ -319,22 +392,35 @@ export function WorldMap({
                   className="pointer-events-none"
                 >
                   <rect
-                    x={labelX - point.label.length * 0.65 - 1.4}
-                    y={labelY - 2.3}
-                    width={point.label.length * 1.3 + 2.8}
-                    height="4.6"
-                    rx="0.6"
-                    ry="0.6"
-                    className="fill-background stroke-border/70"
-                    strokeWidth="0.15"
+                    x={labelX - point.label.length * 0.56 - 1.6}
+                    y={labelY - 2}
+                    width={point.label.length * 1.12 + 3.2}
+                    height="4"
+                    rx="2"
+                    ry="2"
+                    className={
+                      activeLabel === label || hoveredLocation === label
+                        ? "fill-primary stroke-primary"
+                        : tone === "dark"
+                          ? "fill-[rgba(18,13,11,0.82)] stroke-[rgba(255,255,255,0.16)]"
+                          : "fill-s1-bg stroke-s1-line-strong"
+                    }
+                    style={{ transition: "fill 250ms ease" }}
+                    strokeWidth="0.12"
                   />
                   <text
                     x={labelX}
-                    y={labelY}
+                    y={labelY + 0.1}
                     textAnchor="middle"
                     dominantBaseline="middle"
-                    className="fill-foreground"
-                    style={{ fontSize: "2.5px", fontWeight: 600 }}
+                    className={
+                      activeLabel === label || hoveredLocation === label
+                        ? "fill-white"
+                        : tone === "dark"
+                          ? "fill-[rgba(255,255,255,0.88)]"
+                          : "fill-s1-ink"
+                    }
+                    style={{ fontSize: "2.15px", fontWeight: 500, letterSpacing: "0.01em" }}
                   >
                     {point.label}
                   </text>
@@ -351,7 +437,7 @@ export function WorldMap({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="absolute bottom-4 left-4 rounded-lg border border-border/60 bg-background/90 px-3 py-2 text-sm font-medium text-foreground backdrop-blur-sm sm:hidden"
+            className="absolute bottom-4 left-4 rounded-[6px] border border-s1-line bg-s1-bg px-3 py-2 text-sm font-medium text-s1-ink shadow-s1-overlay sm:hidden"
           >
             {hoveredLocation}
           </motion.div>

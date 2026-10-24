@@ -19,6 +19,7 @@ Studio1 helps developer-focused companies grow adoption through technical conten
 - [Products](https://studio1hq.com/product): Studio1-built tools including Raah, AssetSnip, and selected Studio1 products.
 - [Our Blog](https://studio1hq.com/blog): Articles and insights from the Studio1 team.
 - [RSS Feed](https://studio1hq.com/feed.xml): Machine-readable feed of Studio1 blog posts.
+- Blog posts as Markdown: every post at https://studio1hq.com/blog/<slug> is also available as clean Markdown at https://studio1hq.com/blog/<slug>.md (front matter, TL;DR, full article).
 - [About Us](https://studio1hq.com/about-us)
 - [Careers](https://studio1hq.com/careers)
 - [Terms of Use](https://studio1hq.com/terms)

@@ -4,7 +4,8 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import type { MouseEvent } from "react";
 import { useState } from "react";
-import { Globe } from "@phosphor-icons/react";
+import { CaretDown, Globe } from "@phosphor-icons/react";
+import { LocaleFlag } from "@/components/localization/locale-flag";
 import {
   DEFAULT_LOCALE,
   LOCALES,
@@ -70,13 +71,20 @@ export function LanguageSwitcher({
     window.location.assign(href);
   };
 
+  // The paper design preview gets a square white menu with ink text.
+  const isPaper = pathname.replace(/^\/(fr|es|hi|zh)(?=\/|$)/, "") === "/paper";
+
   const optionClassName = (isActive: boolean) =>
-    cn(
-      "group/item flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-all duration-200",
-      "text-muted-foreground hover:bg-primary/10 hover:text-foreground dark:hover:bg-primary/20",
-      isActive &&
-        "bg-primary/10 text-foreground dark:bg-primary/15 hover:bg-primary/15 dark:hover:bg-primary/25",
-    );
+    isPaper
+      ? cn(
+          "group/item flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium text-[#141414] transition-colors duration-200 hover:bg-[#f4efe7]",
+          isActive && "bg-[#f4efe7]",
+        )
+      : cn(
+          "group/item flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
+          "text-[var(--home-ink-soft)] hover:bg-primary/10 hover:text-[var(--home-ink)]",
+          isActive && "bg-primary/10 text-[var(--home-ink)] hover:bg-primary/15",
+        );
 
   const options = LOCALES.map((locale) => {
     const meta = localeMeta[locale];
@@ -99,9 +107,10 @@ export function LanguageSwitcher({
         onFocus={() => prefetchLocalePage(href)}
         onPointerEnter={() => prefetchLocalePage(href)}
       >
-        <span className="text-base leading-none transition-transform duration-200 group-hover/item:scale-110">
-          {meta.flag}
-        </span>
+        <LocaleFlag
+          locale={locale}
+          className="transition-transform duration-200 group-hover/item:scale-110"
+        />
         <span>{isPending ? t("switching") : t(translationKeys[locale])}</span>
       </a>
     );
@@ -125,15 +134,22 @@ export function LanguageSwitcher({
         type="button"
         aria-label={t("label")}
         className={cn(
-          "inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-border/70 bg-background/70 px-3 text-sm font-medium text-foreground shadow-sm backdrop-blur transition-colors hover:border-primary/40 hover:text-primary",
-          compact && "h-9 px-2.5",
+          "inline-flex h-10 items-center justify-center gap-2 rounded-full border border-black/10 bg-black/[0.03] dark:border-white/15 dark:bg-white/[0.06] pl-1.5 pr-3 text-[13px] font-medium text-current backdrop-blur-md transition-colors hover:border-primary/40",
+          "shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]",
+          compact && "h-10",
         )}
       >
-        <Globe className="size-4" weight="duotone" />
-        <span className="text-base leading-none">{activeMeta.flag}</span>
+        <span className="flex size-7 items-center justify-center rounded-full bg-black/[0.05] dark:bg-white/10">
+          <LocaleFlag locale={activeLocale} className="size-[18px]" />
+        </span>
+        <span className="uppercase tracking-[0.06em]">{activeLocale}</span>
         {!compact ? (
           <span className="hidden lg:inline">{activeMeta.nativeName}</span>
         ) : null}
+        <CaretDown
+          weight="bold"
+          className="size-3 opacity-60 transition-transform duration-300 group-hover/lang:rotate-180"
+        />
       </button>
 
       <div
@@ -145,7 +161,13 @@ export function LanguageSwitcher({
           "group-focus-within/lang:opacity-100 group-focus-within/lang:translate-y-0 group-focus-within/lang:scale-100 group-focus-within/lang:pointer-events-auto",
         )}
       >
-        <div className="min-w-[17rem] space-y-0.5 rounded-lg border bg-background px-1 py-1.5 shadow-lg backdrop-blur-xl">
+        <div
+          className={
+            isPaper
+              ? "min-w-[15rem] space-y-0.5 bg-white p-1.5 shadow-[0_24px_50px_-28px_rgba(20,20,20,0.35)] ring-1 ring-[#141414]/10"
+              : "s1-glass-card s1-glass-raised min-w-[15rem] space-y-0.5 rounded-2xl p-1.5"
+          }
+        >
           {options}
         </div>
       </div>

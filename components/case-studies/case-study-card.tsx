@@ -4,11 +4,6 @@ import { ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
 import { NumericText } from "@/components/ui/num";
 import { getClientLogo } from "@/components/case-studies/client-logos";
 import { CaseStudyCoverArt } from "@/components/case-studies/case-study-cover-art";
-import {
-  glassCardEdgeHighlight,
-  glassCardFrame,
-  glassCardHoverWash,
-} from "@/lib/shadows";
 import { cn } from "@/lib/utils";
 import type { CaseStudyMeta } from "@/lib/case-studies";
 
@@ -30,9 +25,8 @@ export type CardVariant = "featured" | "default" | "compact";
 /** Shared frame: theme glass surface + one hover language across all sizes. */
 export function cardFrame(extra?: string) {
   return cn(
-    "group relative flex min-w-0 overflow-hidden rounded-2xl",
-    glassCardFrame,
-    "transition-all duration-500 ease-out hover:-translate-y-1 motion-reduce:transform-none motion-reduce:transition-none",
+    "s1-glass-card group relative flex min-w-0 overflow-hidden rounded-[22px]",
+    "transition-transform duration-500 ease-out hover:-translate-y-1 motion-reduce:transform-none motion-reduce:transition-none",
     extra,
   );
 }
@@ -127,9 +121,6 @@ export function CaseStudyCard({
       href={`/case-studies/${study.slug}`}
       className={cardFrame("flex-col items-stretch p-3")}
     >
-      <div aria-hidden className={glassCardEdgeHighlight} />
-      <div aria-hidden className={glassCardHoverWash} />
-
       <CardMedia study={study} variant={variant} />
 
       <div className="relative z-[1] flex min-w-0 flex-1 items-start justify-between gap-4 p-4 pt-5">
@@ -137,14 +128,14 @@ export function CaseStudyCard({
           <span className="text-[11px] font-medium uppercase tracking-wider text-primary">
             {study.category}
           </span>
-          <h3 className="mt-2 line-clamp-2 font-inter text-base font-semibold leading-snug tracking-tight md:text-lg">
+          <h3 className="mt-2 line-clamp-2 text-[18px] font-medium leading-snug tracking-[-0.025em] text-[var(--home-ink)] transition-colors group-hover:text-primary md:text-[19px]">
             <NumericText>{study.title}</NumericText>
           </h3>
         </div>
 
         <ArrowUpRight
           weight="bold"
-          className="mt-6 size-4 shrink-0 text-muted-foreground transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 dark:group-hover:text-primary motion-reduce:transform-none"
+          className="mt-6 size-4 shrink-0 text-[var(--home-ink-soft)] group-hover:text-primary transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 dark:group-hover:text-primary motion-reduce:transform-none"
         />
       </div>
     </Link>
@@ -158,16 +149,13 @@ export function CaseStudyCardCompact({ study }: { study: CaseStudyMeta }) {
       href={`/case-studies/${study.slug}`}
       className={cardFrame("flex-col items-stretch p-2.5")}
     >
-      <div aria-hidden className={glassCardEdgeHighlight} />
-      <div aria-hidden className={glassCardHoverWash} />
-
       <CardMedia study={study} variant="compact" />
 
       <div className="relative z-[1] flex min-w-0 flex-1 flex-col p-3 pt-4">
         <span className="text-[11px] font-medium uppercase tracking-wider text-primary">
           {study.category}
         </span>
-        <h3 className="mt-1.5 line-clamp-2 font-inter text-sm font-semibold leading-snug">
+        <h3 className="mt-1.5 line-clamp-2 text-[15px] font-medium leading-snug tracking-[-0.02em] text-[var(--home-ink)]">
           <NumericText>{study.title}</NumericText>
         </h3>
       </div>

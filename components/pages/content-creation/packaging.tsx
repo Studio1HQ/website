@@ -1,13 +1,12 @@
 "use client";
 
-import { fadeInUp, staggerChildren } from "@/lib/animations";
+import { Container, Eyebrow, Rise } from "@/components/home/ui";
 import {
   IconClick,
   IconPhoto,
   IconSearch,
   IconDeviceMobile,
 } from "@tabler/icons-react";
-import { motion } from "motion/react";
 
 const layers = [
   {
@@ -34,57 +33,41 @@ const layers = [
 
 export default function Packaging() {
   return (
-    <section className="relative py-28 md:py-36">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <motion.div
-          variants={staggerChildren}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-          className="grid gap-14 lg:grid-cols-[0.85fr_1.15fr] lg:gap-24"
-        >
-          <motion.div
-            variants={fadeInUp}
-            className="lg:sticky lg:top-28 lg:self-start"
-          >
-            <p className="font-secondary text-sm font-medium tracking-wide text-primary">
-              The packaging layer
-            </p>
-            <h2 className="mt-4 max-w-md font-inter text-4xl font-normal tracking-tight md:text-5xl">
-              Make the technical idea clear before{" "}
-              <span className="serif-accent bg-gradient-to-br from-primary via-primary1 to-primary bg-clip-text font-accent font-normal italic text-transparent">
-                play
-              </span>
+    <section className="relative py-24 md:py-32">
+      <Container>
+        <div className="grid gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:gap-20">
+          <Rise className="lg:sticky lg:top-28 lg:self-start">
+            <Eyebrow>The packaging layer</Eyebrow>
+            <h2 className="mt-5 max-w-md text-[34px] font-medium leading-[1.06] tracking-[-0.045em] text-[var(--home-ink)] sm:text-[48px]">
+              Make the technical idea clear before <span className="s1-accent-text">play</span>
             </h2>
-            <p className="mt-6 max-w-md text-base text-muted-foreground">
+            <p className="mt-6 max-w-md text-[16px] leading-[1.6] text-[var(--home-ink-soft)]">
               We support the practical details around a video: title, thumbnail,
               description, chapters, clips, and upload-ready assets when needed.
             </p>
-          </motion.div>
+          </Rise>
 
-          <div className="divide-y border-y">
-            {layers.map((layer) => (
-              <motion.div
-                key={layer.title}
-                variants={fadeInUp}
-                className="grid gap-4 py-10 sm:grid-cols-[auto_1fr] sm:gap-6 md:py-12"
-              >
-                <div className="flex size-11 items-center justify-center rounded-lg border bg-muted/50">
-                  <layer.icon className="size-5 text-primary" aria-hidden="true" />
+          <div className="grid gap-4">
+            {layers.map((layer, index) => (
+              <Rise key={layer.title} delay={index * 0.06}>
+                <div className="s1-glass-card grid gap-5 rounded-[24px] p-6 sm:grid-cols-[auto_1fr] sm:gap-6 md:p-8">
+                  <span className="s1-glass-dark flex size-12 items-center justify-center rounded-2xl text-white">
+                    <layer.icon className="size-6" stroke={1.6} aria-hidden="true" />
+                  </span>
+                  <div>
+                    <h3 className="text-[20px] font-medium tracking-[-0.025em] text-[var(--home-ink)] md:text-[22px]">
+                      {layer.title}
+                    </h3>
+                    <p className="mt-2.5 max-w-xl text-[15px] leading-[1.6] text-[var(--home-ink-soft)]">
+                      {layer.body}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-inter text-xl font-medium tracking-tight md:text-2xl">
-                    {layer.title}
-                  </h3>
-                  <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground md:text-base">
-                    {layer.body}
-                  </p>
-                </div>
-              </motion.div>
+              </Rise>
             ))}
           </div>
-        </motion.div>
-      </div>
+        </div>
+      </Container>
     </section>
   );
 }

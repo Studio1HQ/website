@@ -116,7 +116,7 @@ function LinkedInIcon({ className, ...props }: IconProps) {
 }
 
 const iconClass = "size-6 shrink-0";
-const sidebarIconClass = "size-5 shrink-0";
+const sidebarIconClass = "size-4 shrink-0";
 
 export function PostShare({ url, title, variant = "default" }: PostShareProps) {
   const isSidebar = variant === "sidebar";
@@ -169,17 +169,17 @@ export function PostShare({ url, title, variant = "default" }: PostShareProps) {
     <section
       className={
         isSidebar
-          ? "not-prose border-t border-border pt-8"
+          ? "not-prose"
           : "not-prose mt-12 border-t border-border pt-8"
       }
       aria-labelledby="post-share-heading"
     >
-      <div className={isSidebar ? "mb-4" : "mb-5"}>
+      <div className={isSidebar ? "mb-3" : "mb-5"}>
         <h2
           id="post-share-heading"
           className={
             isSidebar
-              ? "text-sm font-semibold text-foreground"
+              ? "text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--home-ink-soft)]"
               : "text-base font-semibold text-foreground"
           }
         >
@@ -195,7 +195,7 @@ export function PostShare({ url, title, variant = "default" }: PostShareProps) {
       <div
         className={
           isSidebar
-            ? "grid w-full grid-cols-4 gap-1.5"
+            ? "flex gap-1.5"
             : "flex flex-wrap gap-2"
         }
       >
@@ -209,7 +209,7 @@ export function PostShare({ url, title, variant = "default" }: PostShareProps) {
             title={link.label}
             className={
               isSidebar
-                ? `group inline-flex aspect-square w-full items-center justify-center rounded-lg border border-border/50 bg-background transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm ${link.hoverClassName}`
+                ? `group inline-flex size-9 items-center justify-center rounded-full border border-[var(--home-line)] bg-white/70 transition-all duration-200 hover:-translate-y-0.5 dark:bg-white/[0.05] ${link.hoverClassName}`
                 : `inline-flex h-11 items-center gap-2.5 rounded-lg border border-border bg-muted/40 px-3.5 text-sm font-medium transition-colors hover:bg-muted sm:px-4 ${link.hoverClassName}`
             }
           >

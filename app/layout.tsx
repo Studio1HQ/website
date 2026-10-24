@@ -4,6 +4,17 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { baseUrl } from "@/lib/site";
 import Script from "next/script";
 import { cn } from "@/lib/utils";
+import localFont from "next/font/local";
+
+const studio1Sans = localFont({
+  src: [
+    { path: "./fonts/Studio1Sans-Regular.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/Studio1Sans-Medium.woff2", weight: "500", style: "normal" },
+  ],
+  variable: "--font-studio1-sans",
+  display: "swap",
+  fallback: ["Inter", "Arial", "sans-serif"],
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
@@ -74,6 +85,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
+      className={studio1Sans.variable}
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
@@ -87,6 +99,9 @@ export default async function RootLayout({
           attribute="class"
           defaultTheme="system"
           enableSystem
+          // No theme switch on the site: always follow the system theme and
+          // ignore any choice saved by the old switch under the default key.
+          storageKey="s1-theme-system"
           disableTransitionOnChange
         >
           {children}
