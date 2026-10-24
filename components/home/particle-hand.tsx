@@ -40,6 +40,7 @@ export function ParticleHand({
   height,
   progress,
   fingerAt,
+  color,
 }: {
   src: string;
   width: number;
@@ -47,6 +48,8 @@ export function ParticleHand({
   progress: MotionValue<number>;
   /** Which side the fingertip is on, so it assembles last. */
   fingerAt: "left" | "right";
+  /** Fixed particle colour as "r,g,b"; defaults to the site theme. */
+  color?: string;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -114,7 +117,7 @@ export function ParticleHand({
       const p = progress.get();
       const time = performance.now() / 1000;
       const dark = document.documentElement.classList.contains("dark");
-      const rgb = dark ? "255,255,255" : "20,14,10";
+      const rgb = color ?? (dark ? "255,255,255" : "20,14,10");
       ctx.clearRect(-PAD, -PAD, width + PAD * 2, height + PAD * 2);
       for (const pt of points) {
         const local = Math.min(1, Math.max(0, (p - pt.delay) / (1 - 0.45)));
@@ -133,7 +136,9 @@ export function ParticleHand({
           Math.sin(time * 1.4 + pt.along * 3 + 1.2) * 2.2 * sway +
           Math.sin(time * 1.2 + pt.phase) * 0.12 * e;
         const size = pt.size + (DOT - pt.size) * e;
-        ctx.fillStyle = `rgba(${rgb},${(pt.shade * (0.25 + 0.75 * e)).toFixed(3)})`;
+        // A fixed colour (light paper backgrounds) is printed denser to stay legible.
+        const alpha = pt.shade * (0.25 + 0.75 * e) * (color ? 1.7 : 1);
+        ctx.fillStyle = `rgba(${rgb},${Math.min(1, alpha).toFixed(3)})`;
         ctx.fillRect(x, y, size, size);
       }
     };
@@ -156,7 +161,7 @@ export function ParticleHand({
       observer.disconnect();
       cancelAnimationFrame(frame);
     };
-  }, [src, width, height, progress, fingerAt]);
+  }, [src, width, height, progress, fingerAt, color]);
 
   return (
     <canvas

@@ -25,6 +25,7 @@ export function DitherField({
   size = SIZE,
   strength = 1,
   pattern = "dither",
+  colors = ["#f97316", "#fdba74"],
 }: {
   className?: string;
   seed?: number;
@@ -39,7 +40,10 @@ export function DitherField({
   strength?: number;
   /** "dither": scattered ordered-dither squares. "halftone": a clean grid that shrinks and fades. */
   pattern?: "dither" | "halftone";
+  /** Square colours: [base, highlight]. */
+  colors?: [string, string];
 }) {
+  const [base, glow] = colors;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const reduceMotion = useReducedMotion();
 
@@ -94,7 +98,7 @@ export function DitherField({
             const side = Math.max(1, size * Math.sqrt(edge));
             const offset = (cell - side) / 2;
             ctx.globalAlpha = Math.min(1, edge * 0.55 * strength);
-            ctx.fillStyle = "#f97316";
+            ctx.fillStyle = base;
             ctx.fillRect(x * cell + offset, y * cell + offset, side, side);
             continue;
           }
@@ -102,7 +106,7 @@ export function DitherField({
             wave * edge * (0.75 + 0.25 * Math.sin(t * 0.7 + v * 4 + seed));
           if (value > BAYER[(y % 4) * 4 + (x % 4)]) {
             ctx.globalAlpha = Math.min(1, (0.12 + value * 0.3) * strength);
-            ctx.fillStyle = value > 0.75 ? "#fdba74" : "#f97316";
+            ctx.fillStyle = value > 0.75 ? glow : base;
             ctx.fillRect(x * cell, y * cell, size, size);
           }
         }
@@ -135,7 +139,18 @@ export function DitherField({
       observer.disconnect();
       resizeObserver.disconnect();
     };
-  }, [reduceMotion, seed, fade, still, cell, size, strength, pattern]);
+  }, [
+    reduceMotion,
+    seed,
+    fade,
+    still,
+    cell,
+    size,
+    strength,
+    pattern,
+    base,
+    glow,
+  ]);
 
   return (
     <canvas

@@ -71,12 +71,20 @@ export function LanguageSwitcher({
     window.location.assign(href);
   };
 
+  // The paper design preview gets a square white menu with ink text.
+  const isPaper = pathname.replace(/^\/(fr|es|hi|zh)(?=\/|$)/, "") === "/paper";
+
   const optionClassName = (isActive: boolean) =>
-    cn(
-      "group/item flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
-      "text-[var(--home-ink-soft)] hover:bg-primary/10 hover:text-[var(--home-ink)]",
-      isActive && "bg-primary/10 text-[var(--home-ink)] hover:bg-primary/15",
-    );
+    isPaper
+      ? cn(
+          "group/item flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium text-[#141414] transition-colors duration-200 hover:bg-[#f4efe7]",
+          isActive && "bg-[#f4efe7]",
+        )
+      : cn(
+          "group/item flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
+          "text-[var(--home-ink-soft)] hover:bg-primary/10 hover:text-[var(--home-ink)]",
+          isActive && "bg-primary/10 text-[var(--home-ink)] hover:bg-primary/15",
+        );
 
   const options = LOCALES.map((locale) => {
     const meta = localeMeta[locale];
@@ -153,7 +161,13 @@ export function LanguageSwitcher({
           "group-focus-within/lang:opacity-100 group-focus-within/lang:translate-y-0 group-focus-within/lang:scale-100 group-focus-within/lang:pointer-events-auto",
         )}
       >
-        <div className="s1-glass-card s1-glass-raised min-w-[15rem] space-y-0.5 rounded-2xl p-1.5">
+        <div
+          className={
+            isPaper
+              ? "min-w-[15rem] space-y-0.5 bg-white p-1.5 shadow-[0_24px_50px_-28px_rgba(20,20,20,0.35)] ring-1 ring-[#141414]/10"
+              : "s1-glass-card s1-glass-raised min-w-[15rem] space-y-0.5 rounded-2xl p-1.5"
+          }
+        >
           {options}
         </div>
       </div>

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "../ui/button";
-import { IconChevronDown, IconMenu2 } from "@tabler/icons-react";
+import { IconArrowUpRight, IconChevronDown, IconMenu2 } from "@tabler/icons-react";
 import { navItems } from "@/constants/data";
 import { cn } from "@/lib/utils";
 import Logo from "../ui/svgs/logo";
@@ -58,6 +58,8 @@ export default function Navbar() {
   const pathname = usePathname() || "/";
   const isHome =
     (pathname.replace(/^\/(fr|es|hi|zh)(?=\/|$)/, "") || "/") === "/";
+  const isPaper =
+    pathname.replace(/^\/(fr|es|hi|zh)(?=\/|$)/, "") === "/paper";
   const isBlogPost = /^\/blog\/(?!page\/)[^/]+/.test(
     pathname.replace(/^\/(fr|es|hi|zh)(?=\/|$)/, ""),
   );
@@ -73,7 +75,7 @@ export default function Navbar() {
   useEffect(() => {
     // Blog posts are docs-style reading pages: the bar stays solid glass there.
     const hero = isHome || isBlogPost ? null : document.querySelector<HTMLElement>(".s1-night");
-    const heroActive = isHome || Boolean(hero);
+    const heroActive = isHome || isPaper || Boolean(hero);
     setHasHero(heroActive);
     if (!heroActive) {
       setPastHero(false);
@@ -99,7 +101,7 @@ export default function Navbar() {
       window.removeEventListener("scroll", update);
       window.removeEventListener("resize", update);
     };
-  }, [isHome, isBlogPost, pathname]);
+  }, [isHome, isBlogPost, isPaper, pathname]);
 
   const overHero = hasHero && !(isHome ? pastHero : scrolled) && !isMenuOpen;
   const tuckedAway = hasHero && pastHero && scrollingDown && !isMenuOpen;
@@ -144,11 +146,17 @@ export default function Navbar() {
           "fixed left-0 right-0 top-0 z-[550] border-b py-2 transition-[background-color,border-color,transform] duration-500",
           tuckedAway && "-translate-y-full",
           overHero
-            ? "dark border-transparent bg-transparent text-white"
-            : cn(
-                "border-border/50 backdrop-blur-2xl",
-                "bg-background/80",
-              ),
+            ? isPaper
+              ? // Paper design preview: ink text over the light canvas.
+                "border-transparent bg-transparent text-[#1b1714]"
+              : "dark border-transparent bg-transparent text-white"
+            : isPaper
+              ? // Paper bar: same sheet as the page, ruled bottom edge, ink text.
+                "border-[#1b1714]/15 bg-[#f4efe7]/90 text-[#1b1714] backdrop-blur-xl"
+              : cn(
+                  "border-border/50 backdrop-blur-2xl",
+                  "bg-background/80",
+                ),
         )}
       >
         <nav
@@ -201,7 +209,10 @@ export default function Navbar() {
                   >
                     <div
                       className={cn(
-                        "rounded-lg border bg-background/95 px-1 py-1.5 shadow-lg backdrop-blur-xl",
+                        isPaper
+                          ? // Paper menu: the hero's white card, square, hairline ring.
+                            "bg-white p-1.5 text-[#141414] shadow-[0_24px_50px_-28px_rgba(20,20,20,0.35)] ring-1 ring-[#141414]/10"
+                          : "rounded-lg border bg-background/95 px-1 py-1.5 shadow-lg backdrop-blur-xl",
                         item.children.some(
                           (child) =>
                             "description" in child && Boolean(child.description),
@@ -210,26 +221,54 @@ export default function Navbar() {
                           : "min-w-[17rem]",
                       )}
                     >
+                      {isPaper ? (
+                        <p className="px-3 pb-1.5 pt-2 text-[11px] font-medium uppercase tracking-[0.14em] text-[#141414]/45">
+                          {translatedNavTitle(item.title, t)}
+                        </p>
+                      ) : null}
                       {item.children.map((child) => (
                         <Link
                           key={child.title}
                           href={child.path}
-                          className="group/item flex w-full items-start gap-2.5 px-3 py-2.5 text-muted-foreground transition-colors duration-200 hover:text-foreground"
+                          className={cn(
+                            "group/item flex w-full items-start gap-2.5 px-3 py-2.5 transition-colors duration-200",
+                            isPaper && "min-w-[19rem]",
+                            isPaper
+                              ? "items-center gap-3 py-2 text-[14px] text-[#141414] hover:bg-[#f4efe7]/60"
+                              : "text-muted-foreground hover:text-foreground",
+                          )}
                         >
-                          <child.icon
-                            weight="duotone"
-                            className="mt-0.5 size-5 shrink-0 transition-colors duration-200 group-hover/item:text-primary"
-                          />
+                          {isPaper ? (
+                            <span className="flex size-7 shrink-0 items-center justify-center bg-[#f4efe7] text-[#141414] transition-colors duration-200 group-hover/item:bg-[#f97316] group-hover/item:text-white">
+                              <child.icon weight="regular" className="size-3.5" />
+                            </span>
+                          ) : (
+                            <child.icon
+                              weight="duotone"
+                              className="mt-0.5 size-5 shrink-0 transition-colors duration-200 group-hover/item:text-primary"
+                            />
+                          )}
                           <span className="flex min-w-0 flex-col gap-0.5">
                             <span className="whitespace-nowrap text-sm font-medium">
                               {translatedNavTitle(child.title, t)}
                             </span>
                             {"description" in child && child.description ? (
-                              <span className="whitespace-nowrap text-xs leading-snug text-muted-foreground/80">
+                              <span
+                                className={cn(
+                                  "whitespace-nowrap text-xs leading-snug",
+                                  isPaper ? "text-[#141414]/55" : "text-muted-foreground/80",
+                                )}
+                              >
                                 {translatedNavDescription(child.description, t)}
                               </span>
                             ) : null}
                           </span>
+                          {isPaper ? (
+                            <IconArrowUpRight
+                              aria-hidden
+                              className="ml-auto size-3.5 shrink-0 text-[#141414]/40 opacity-0 transition-all duration-200 group-hover/item:translate-x-0.5 group-hover/item:opacity-100"
+                            />
+                          ) : null}
                         </Link>
                       ))}
                     </div>
@@ -241,7 +280,15 @@ export default function Navbar() {
 
           <div className="hidden items-center justify-between gap-3 lg:flex">
             <LanguageSwitcher compact />
-            <Button asChild className="group s1-glass-btn h-10 rounded-full border-0 px-5 font-medium text-white hover:bg-transparent">
+            <Button
+              asChild
+              className={cn(
+                "group h-10 rounded-full border-0 px-5 font-medium text-white",
+                isPaper
+                  ? "bg-[#1b1714] text-[#f4efe7] hover:bg-[#f97316]"
+                  : "s1-glass-btn hover:bg-transparent",
+              )}
+            >
               <a href="mailto:contact@studio1hq.com">
                 {t("contact")} <MailIcon className="ml-1" />
               </a>

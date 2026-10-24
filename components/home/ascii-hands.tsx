@@ -37,8 +37,19 @@ function useHandWidth() {
  * (wrist first, pointing finger last) while the hand reaches and turns toward
  * the logo, as if handing it over. Scrolling away (or back up) scatters them.
  */
-function Hand({ side, width }: { side: "left" | "right"; width: number }) {
-  const reduceMotion = useReducedMotion();
+function Hand({
+  side,
+  width,
+  color,
+  still: forceStill = false,
+}: {
+  side: "left" | "right";
+  width: number;
+  color?: string;
+  /** Fully formed and motionless, regardless of scroll. */
+  still?: boolean;
+}) {
+  const reduceMotion = useReducedMotion() || forceStill;
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -97,18 +108,22 @@ function Hand({ side, width }: { side: "left" | "right"; width: number }) {
           height={height}
           progress={reduceMotion ? still : assembled}
           fingerAt={side === "left" ? "right" : "left"}
+          color={color}
         />
       </motion.div>
     </div>
   );
 }
 
-export default function AsciiHands() {
+export default function AsciiHands({
+  color,
+  still,
+}: { color?: string; still?: boolean } = {}) {
   const width = useHandWidth();
   return (
     <div aria-hidden className="contents">
-      <Hand side="left" width={width} />
-      <Hand side="right" width={width} />
+      <Hand side="left" width={width} color={color} still={still} />
+      <Hand side="right" width={width} color={color} still={still} />
     </div>
   );
 }
