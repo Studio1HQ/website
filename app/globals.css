@@ -1271,3 +1271,24 @@ html.s1-pre-paper .s1-pre-glow {
 html.s1-pre-paper .s1-pre-word {
   color: #141414;
 }
+
+/* Blog posts number their chapters, matching the "01 — Section" index bars. */
+[data-mdx-content] {
+  counter-reset: s1-chapter s1-table;
+}
+[data-mdx-content] h2,
+[data-mdx-content]:not(:has(h2)) h3 {
+  counter-increment: s1-chapter;
+}
+[data-mdx-content] h2::before,
+[data-mdx-content]:not(:has(h2)) h3::before {
+  content: counter(s1-chapter, decimal-leading-zero) " · ";
+  color: #f97316;
+}
+/* Tables carry a printed "Table 01" tab, like the selection-frame labels. */
+[data-mdx-content] [data-blog-table] {
+  counter-increment: s1-table;
+}
+[data-mdx-content] [data-blog-table]::before {
+  content: "Table " counter(s1-table, decimal-leading-zero);
+}

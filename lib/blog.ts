@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
+import { blogCoverUrl } from "@/lib/blog-cover";
 
 const DEFAULT_AUTHOR = "Amitesh Anand";
 const DEFAULT_POST_IMAGE = "/opengraph-image.png";
@@ -8,13 +9,17 @@ const postsDirectory = path.join(process.cwd(), "content/blog");
 
 const WORDS_PER_MINUTE = 350;
 
-/** Reading-time estimate from rendered prose, excluding markdown structure. */
-export function estimateReadingMinutes(content: string): number {
-  const words = stripBlogMarkdown(content)
+/** Words of rendered prose, excluding markdown structure. */
+export function countBlogWords(content: string): number {
+  return stripBlogMarkdown(content)
     .trim()
     .split(/\s+/)
     .filter(Boolean).length;
-  return Math.max(1, Math.ceil(words / WORDS_PER_MINUTE));
+}
+
+/** Reading-time estimate from rendered prose, excluding markdown structure. */
+export function estimateReadingMinutes(content: string): number {
+  return Math.max(1, Math.ceil(countBlogWords(content) / WORDS_PER_MINUTE));
 }
 
 export type BlogPostMeta = {
@@ -255,7 +260,7 @@ function postMetaFromFile(fileName: string): BlogPostMeta {
     imageAlt: d.imageAlt ?? title,
     bannerImage,
     bannerImageAlt: d.bannerImageAlt ?? d.imageAlt ?? title,
-    socialImage: bannerImage ?? DEFAULT_POST_IMAGE,
+    socialImage: blogCoverUrl(slug, normalizeDate(d.updatedDate, date)),
     tldrSummary,
     readingTimeMinutes: estimateReadingMinutes(
       visibleReadingContent(bodySource, description, keyTakeaways, tldrSummary),
@@ -390,7 +395,7 @@ export function getPostBySlug(slug: string): BlogPost | null {
     imageAlt: d.imageAlt ?? title,
     bannerImage,
     bannerImageAlt: d.bannerImageAlt ?? d.imageAlt ?? title,
-    socialImage: bannerImage ?? DEFAULT_POST_IMAGE,
+    socialImage: blogCoverUrl(slug, normalizeDate(d.updatedDate, date)),
     tldrSummary,
     readingTimeMinutes: estimateReadingMinutes(
       visibleReadingContent(content, description, keyTakeaways, tldrSummary),

@@ -11,6 +11,7 @@ import {
 } from "@tabler/icons-react";
 import { navItems } from "@/constants/data";
 import { cn } from "@/lib/utils";
+import { isPaperPath } from "@/lib/paper";
 import Logo from "../ui/svgs/logo";
 import { MailIcon } from "@/components/ui/mail-icon";
 import { LanguageSwitcher } from "@/components/localization/language-switcher";
@@ -65,8 +66,7 @@ export default function Navbar() {
   const pathname = usePathname() || "/";
   const isHome =
     (pathname.replace(/^\/(fr|es|hi|zh)(?=\/|$)/, "") || "/") === "/";
-  const isPaper =
-    (pathname.replace(/^\/(fr|es|hi|zh)(?=\/|$)/, "") || "/") === "/";
+  const isPaper = isPaperPath(pathname);
   const isBlogPost = /^\/blog\/(?!page\/)[^/]+/.test(
     pathname.replace(/^\/(fr|es|hi|zh)(?=\/|$)/, ""),
   );
@@ -85,7 +85,7 @@ export default function Navbar() {
       isHome || isBlogPost
         ? null
         : document.querySelector<HTMLElement>(".s1-night");
-    const heroActive = isHome || isPaper || Boolean(hero);
+    const heroActive = isHome || (isPaper && !isBlogPost) || Boolean(hero);
     setHasHero(heroActive);
     if (!heroActive) {
       setPastHero(false);
@@ -168,10 +168,7 @@ export default function Navbar() {
       >
         <nav
           className={cn(
-            "z-20 mx-auto flex h-16 items-center justify-between rounded-2xl px-4",
-            // Blog posts use a wider docs layout: match its side columns so the
-            // logo and Contact button line up with the left and right rails.
-            isBlogPost ? "max-w-[1680px] xl:px-7" : "max-w-7xl",
+            "z-20 mx-auto flex h-16 max-w-7xl items-center justify-between rounded-2xl px-4",
           )}
         >
           <Link href={"/"} className="flex justify-between gap-2 items-center">

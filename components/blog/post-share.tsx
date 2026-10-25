@@ -209,7 +209,7 @@ export function PostShare({ url, title, variant = "default" }: PostShareProps) {
             title={link.label}
             className={
               isSidebar
-                ? `group inline-flex size-9 items-center justify-center rounded-full border border-[var(--home-line)] bg-white/70 transition-all duration-200 hover:-translate-y-0.5 dark:bg-white/[0.05] ${link.hoverClassName}`
+                ? `group inline-flex size-9 items-center justify-center rounded-full border border-[var(--home-line)] bg-white/70 transition-all duration-200 hover:-translate-y-0.5 ${link.hoverClassName}`
                 : `inline-flex h-11 items-center gap-2.5 rounded-lg border border-border bg-muted/40 px-3.5 text-sm font-medium transition-colors hover:bg-muted sm:px-4 ${link.hoverClassName}`
             }
           >

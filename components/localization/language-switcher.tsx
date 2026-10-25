@@ -15,6 +15,7 @@ import {
   type Locale,
 } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { isPaperPath } from "@/lib/paper";
 
 const translationKeys: Record<
   Locale,
@@ -74,9 +75,8 @@ export function LanguageSwitcher({
     window.location.assign(href);
   };
 
-  // The paper home page gets a square white menu with ink text.
-  const isPaper =
-    (pathname.replace(/^\/(fr|es|hi|zh)(?=\/|$)/, "") || "/") === "/";
+  // Paper pages get a square white menu with ink text.
+  const isPaper = isPaperPath(pathname);
 
   const optionClassName = (isActive: boolean) =>
     isPaper

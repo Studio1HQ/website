@@ -2,6 +2,7 @@ import { isValidElement } from "react";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { mdxComponents } from "@/mdx-components";
 import { CodeBlock } from "@/components/blog/code-block";
+import { withNumericText } from "@/components/ui/num";
 
 const youtubeLinePattern =
   /^(\s*)(?:(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)\/[^\s<>]+)|::youtube\[([^\]]+)\])\s*$/gm;
@@ -103,14 +104,14 @@ function BlogImage({
 
   return (
     <figure
-      className="not-prose mx-auto my-10 w-fit max-w-full overflow-hidden rounded-xl border border-border/70 bg-[linear-gradient(135deg,hsl(var(--muted)/0.5),hsl(var(--background)),hsl(var(--primary)/0.06))] p-2 shadow-[0_18px_52px_-36px_rgba(0,0,0,0.55)] dark:border-white/[0.08] dark:bg-[linear-gradient(135deg,hsl(var(--muted)/0.18),hsl(var(--background)),hsl(var(--primary)/0.08))]"
+      className="not-prose mx-auto my-10 w-fit max-w-full overflow-hidden rounded-xl border border-border/70 bg-[linear-gradient(135deg,hsl(var(--muted)/0.5),hsl(var(--background)),hsl(var(--primary)/0.06))] p-2 shadow-[0_18px_52px_-36px_rgba(0,0,0,0.55)]"
     >
       <div className="mb-2 flex items-center gap-1.5 px-1">
         <span className="size-2 rounded-full bg-primary/70" />
         <span className="size-2 rounded-full bg-primary/35" />
         <span className="size-2 rounded-full bg-muted-foreground/25" />
       </div>
-      <div className="w-fit max-w-full overflow-hidden rounded-lg border border-border/60 bg-background/80 dark:border-white/[0.08] dark:bg-background/45">
+      <div className="w-fit max-w-full overflow-hidden rounded-lg border border-border/60 bg-background/80">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           {...props}
@@ -186,7 +187,7 @@ function BlogPre({ children }: ComponentPropsWithoutRef<"pre">) {
 
 function YouTubeEmbed({ url }: { url: string }) {
   return (
-    <figure className="not-prose mx-auto my-10 w-full overflow-hidden rounded-xl border border-border/70 bg-background shadow-[0_18px_52px_-36px_rgba(0,0,0,0.55)] dark:border-white/[0.08]">
+    <figure className="not-prose mx-auto my-10 w-full overflow-hidden rounded-xl border border-border/70 bg-background shadow-[0_18px_52px_-36px_rgba(0,0,0,0.55)]">
       <div className="aspect-video w-full bg-muted">
         <iframe
           src={url}
@@ -202,6 +203,61 @@ function YouTubeEmbed({ url }: { url: string }) {
   );
 }
 
+/* Tables print like a spec sheet on the paper page: white sheet, cream header
+   ruled off in ink, hairline columns, and a first column that stays put while
+   wide tables scroll sideways. */
+function BlogTable(props: ComponentPropsWithoutRef<"table">) {
+  return (
+    <figure
+      data-blog-table
+      className="not-prose relative my-12 before:absolute before:-top-[22px] before:left-0 before:bg-[#f97316] before:px-1.5 before:py-[3px] before:text-[11px] before:font-medium before:leading-none before:text-white"
+    >
+      <div
+        data-lenis-prevent
+        className="overflow-x-auto bg-white ring-1 ring-inset ring-[#141414]/10"
+      >
+        <table
+          className="w-full min-w-[560px] border-collapse text-left text-[14px] leading-[1.55] text-[#141414]"
+          {...props}
+        />
+      </div>
+    </figure>
+  );
+}
+
+function BlogTableHead(props: ComponentPropsWithoutRef<"thead">) {
+  return <thead className="border-b-[1.5px] border-[#141414] bg-[#f4efe7]" {...props} />;
+}
+
+function BlogTableRow(props: ComponentPropsWithoutRef<"tr">) {
+  return (
+    <tr
+      className="group/row border-b border-[#141414]/10 last:border-b-0 [&>*:first-child]:sticky [&>*:first-child]:left-0 [&>*:first-child]:z-[1]"
+      {...props}
+    />
+  );
+}
+
+function BlogTableHeader(props: ComponentPropsWithoutRef<"th">) {
+  return (
+    <th
+      className="border-l border-[#141414]/10 bg-[#f4efe7] px-4 py-3 align-bottom text-[11px] font-medium uppercase tracking-[0.12em] text-[#141414]/55 first:border-l-0"
+      {...props}
+    />
+  );
+}
+
+function BlogTableCell(props: ComponentPropsWithoutRef<"td">) {
+  return (
+    <td
+      className="border-l border-[#141414]/10 bg-white px-4 py-3.5 align-top tabular-nums text-[#141414]/70 transition-colors first:border-l-0 first:font-medium first:text-[#141414] group-hover/row:bg-[#fdf6ef] [&_a]:text-primary [&_a]:underline [&_a]:decoration-primary/30 [&_a]:underline-offset-4 [&_code]:whitespace-nowrap [&_code]:bg-[#f4efe7] [&_code]:text-[12.5px] [&_strong]:font-medium [&_strong]:text-[#141414]"
+      {...props}
+    >
+      {withNumericText(props.children)}
+    </td>
+  );
+}
+
 export const blogMdxComponents = {
   ...mdxComponents,
   h2: BlogH2,
@@ -210,5 +266,10 @@ export const blogMdxComponents = {
   img: BlogImage,
   code: BlogCode,
   pre: BlogPre,
+  table: BlogTable,
+  thead: BlogTableHead,
+  tr: BlogTableRow,
+  th: BlogTableHeader,
+  td: BlogTableCell,
   YouTubeEmbed,
 };

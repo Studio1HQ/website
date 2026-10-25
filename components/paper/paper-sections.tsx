@@ -100,17 +100,17 @@ const THEMES: Record<Tone, CSSProperties> = {
   } as CSSProperties,
 };
 
-const FG = "text-[var(--p-fg)]";
-const MUTED = "text-[var(--p-muted)]";
-const FAINT = "text-[var(--p-faint)]";
-const LINE = "border-[var(--p-line)]";
+export const FG = "text-[var(--p-fg)]";
+export const MUTED = "text-[var(--p-muted)]";
+export const FAINT = "text-[var(--p-faint)]";
+export const LINE = "border-[var(--p-line)]";
 /** Hairline grid: outer left/top border, each cell adds right/bottom. */
-const GRID = "grid gap-2";
+export const GRID = "grid gap-2";
 /** The hero's card: white, hairline ring, square corners. */
-const CELL =
+export const CELL =
   "bg-white/80 ring-1 ring-inset ring-[#141414]/10 transition-[transform,box-shadow,background-color] duration-500 ease-out hover:-translate-y-1 hover:bg-white hover:shadow-[0_24px_40px_-28px_rgba(20,20,20,0.45)] motion-reduce:transform-none";
 
-function PaperSection({
+export function PaperSection({
   id,
   tone,
   children,
@@ -155,7 +155,7 @@ function PaperSection({
 }
 
 /** Printed index line at the top of each section: "02 — Services". */
-function IndexBar({
+export function IndexBar({
   index,
   name,
   aside,
@@ -183,7 +183,7 @@ function IndexBar({
 }
 
 /** Headline framed like the hero: selection frame, highlight block, cursor. */
-function SectionHead({
+export function SectionHead({
   title,
   description,
   action,
@@ -222,11 +222,11 @@ function SectionHead({
   );
 }
 
-function Accent({ children }: { children: ReactNode }) {
+export function Accent({ children }: { children: ReactNode }) {
   return <span style={{ color: PRINT }}>{children}</span>;
 }
 
-function OutlineLink({
+export function OutlineLink({
   href,
   children,
 }: {
@@ -248,7 +248,7 @@ function OutlineLink({
 }
 
 /** "Selected in a design tool" overlay for one card in a grid. */
-function Selected({ label }: { label: string }) {
+export function Selected({ label }: { label: string }) {
   return (
     <SelectionFrame
       label={label}
@@ -591,7 +591,13 @@ function AboutMark() {
 }
 
 /** Counts up from zero the first time the number scrolls into view. */
-function CountUp({ value, suffix = "" }: { value: number; suffix?: string }) {
+export function CountUp({
+  value,
+  suffix = "",
+}: {
+  value: number;
+  suffix?: string;
+}) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: "-15% 0px" });
   const reduceMotion = useReducedMotion();
@@ -2051,36 +2057,44 @@ export function PaperReach() {
 /* 09 — Contact (paper)                                                */
 /* ------------------------------------------------------------------ */
 
-export function PaperCta() {
+/** Orange banner with a soft rising horizon, copy centred. */
+export function PrintBanner({ children }: { children: ReactNode }) {
+  return (
+    <div
+      className="relative isolate mt-10 overflow-hidden rounded-[24px] px-6 pb-24 pt-20 text-center text-white md:pb-32 md:pt-24"
+      style={{
+        background:
+          "radial-gradient(60% 70% at 0% 0%, #ff3a00 0%, transparent 70%), radial-gradient(60% 70% at 100% 0%, #ff3a00 0%, transparent 70%), linear-gradient(180deg, #fb8a1e 0%, #f7a54a 38%, #e9b8a6 72%, #f2b38a 100%)",
+      }}
+    >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 opacity-25 mix-blend-multiply"
+        style={{ backgroundImage: GRAIN }}
+      />
+      {/* Horizon: a large glowing arc rising from the bottom edge */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 top-[68%] -z-10 aspect-square w-[150%] -translate-x-1/2 rounded-full md:top-[62%] md:w-[120%]"
+        style={{
+          background:
+            "radial-gradient(closest-side, #fb8a1e 0%, #f9a53f 55%, #f6c78a 92%, rgba(255,240,215,0.9) 97%, transparent 100%)",
+          boxShadow: "0 -20px 60px -10px rgba(255,236,210,0.55)",
+        }}
+      />
+      {children}
+    </div>
+  );
+}
+
+export function PaperCta({ index = 9 }: { index?: number }) {
   const t = useTranslations("CTA");
   const bullets = ["savings", "lockIn", "content", "turnaround"] as const;
   return (
     <PaperSection id="contact" tone="paper">
       <Container>
-        <IndexBar index={9} name="Contact" aside="contact@studio1hq.com" />
-        {/* Orange banner with a soft rising horizon, copy centred */}
-        <div
-          className="relative isolate mt-10 overflow-hidden rounded-[24px] px-6 pb-24 pt-20 text-center text-white md:pb-32 md:pt-24"
-          style={{
-            background:
-              "radial-gradient(60% 70% at 0% 0%, #ff3a00 0%, transparent 70%), radial-gradient(60% 70% at 100% 0%, #ff3a00 0%, transparent 70%), linear-gradient(180deg, #fb8a1e 0%, #f7a54a 38%, #e9b8a6 72%, #f2b38a 100%)",
-          }}
-        >
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-0 -z-10 opacity-25 mix-blend-multiply"
-            style={{ backgroundImage: GRAIN }}
-          />
-          {/* Horizon: a large glowing arc rising from the bottom edge */}
-          <span
-            aria-hidden
-            className="pointer-events-none absolute left-1/2 top-[68%] -z-10 aspect-square w-[150%] -translate-x-1/2 rounded-full md:top-[62%] md:w-[120%]"
-            style={{
-              background:
-                "radial-gradient(closest-side, #fb8a1e 0%, #f9a53f 55%, #f6c78a 92%, rgba(255,240,215,0.9) 97%, transparent 100%)",
-              boxShadow: "0 -20px 60px -10px rgba(255,236,210,0.55)",
-            }}
-          />
+        <IndexBar index={index} name="Contact" aside="contact@studio1hq.com" />
+        <PrintBanner>
           <h2 className="mx-auto max-w-[760px] text-[32px] font-medium leading-[1.15] tracking-[-0.045em] [text-shadow:0_1px_18px_rgba(160,50,0,0.18)] sm:text-[40px] lg:text-[52px]">
             {t("titleLine1")} {t("titleLine2")}
           </h2>
@@ -2102,7 +2116,7 @@ export function PaperCta() {
               <ArrowUpRight weight="bold" className="size-4" />
             </span>
           </a>
-        </div>
+        </PrintBanner>
 
         <div className={cn("mt-2 sm:grid-cols-2 lg:grid-cols-4", GRID)}>
           {bullets.map((key, index) => (

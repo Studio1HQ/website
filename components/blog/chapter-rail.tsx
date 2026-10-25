@@ -25,8 +25,9 @@ function useChapterProgress() {
   useEffect(() => {
     const article = document.querySelector("[data-mdx-content]");
     if (!article) return;
+    // Posts written with only h3s use them as their chapters.
     setChapters(
-      Array.from(article.querySelectorAll("h2"))
+      Array.from(article.querySelectorAll(article.querySelector("h2") ? "h2" : "h3"))
         .filter((el) => el.id)
         .map((el) => ({ id: el.id, title: el.textContent ?? "" })),
     );
@@ -144,7 +145,7 @@ export function ChapterRail({
             {isActive ? (
               <motion.span
                 layoutId={onPick ? "chapter-active-sheet" : "chapter-active"}
-                className="absolute inset-0 rounded-xl bg-white/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_8px_20px_-12px_rgba(90,30,0,0.45)] ring-1 ring-[var(--home-line)] dark:bg-white/[0.07] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]"
+                className="absolute inset-0 rounded-xl bg-white/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_8px_20px_-12px_rgba(90,30,0,0.45)] ring-1 ring-[var(--home-line)]"
                 transition={{ type: "spring", stiffness: 380, damping: 34 }}
               />
             ) : null}
@@ -226,7 +227,7 @@ export function ChapterRail({
       {/* Desktop rail */}
       <nav
         aria-label="Chapters"
-        className={cn("s1-glass-card hidden rounded-[22px] p-5", variant === "full" && "xl:block")}
+        className={cn("hidden bg-white/80 p-5 ring-1 ring-inset ring-[#141414]/10", variant === "full" && "xl:block")}
       >
         {header}
         <div className="mt-4">{totalBar}</div>
@@ -244,7 +245,7 @@ export function ChapterRail({
                 exit={{ opacity: 0, y: 12, scale: 0.98 }}
                 transition={{ duration: 0.3, ease: EASE }}
                 data-lenis-prevent
-                className="s1-glass-card s1-glass-raised mb-2 max-h-[60vh] overflow-y-auto rounded-[22px] p-4"
+                className="bg-white ring-1 ring-inset ring-[#141414]/10 shadow-[0_24px_40px_-28px_rgba(20,20,20,0.45)] mb-2 max-h-[60vh] overflow-y-auto p-4"
               >
                 {header}
                 <div className="mt-3">{totalBar}</div>
@@ -256,7 +257,7 @@ export function ChapterRail({
             type="button"
             onClick={() => setOpen((value) => !value)}
             aria-expanded={open}
-            className="s1-glass-card s1-glass-raised relative flex w-full items-center gap-3 overflow-hidden rounded-full py-2.5 pl-4 pr-3 text-left"
+            className="bg-white ring-1 ring-inset ring-[#141414]/10 shadow-[0_24px_40px_-28px_rgba(20,20,20,0.45)] relative flex w-full items-center gap-3 overflow-hidden rounded-full py-2.5 pl-4 pr-3 text-left"
           >
             <span className="text-[12px] font-medium tabular-nums text-primary">
               <ChapterNumber value={active + 1} />
