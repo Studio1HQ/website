@@ -292,19 +292,42 @@ function StrategyCallButton({ label }: { label: string }) {
       style={{ background: INK }}
     >
       <motion.span
+        className="relative"
         variants={{ rest: { x: 0 }, hover: { x: -4 } }}
         transition={{ duration: 0.5, ease }}
       >
         {label}
       </motion.span>
       <span className="relative flex size-10 items-center justify-center">
+        {/* At rest: a soft "incoming call" ring every few seconds */}
+        {!reduceMotion ? (
+          <motion.span
+            aria-hidden
+            className="absolute inset-0 -z-10 rounded-full"
+            style={{ border: `1.5px solid ${PRINT}` }}
+            variants={{ rest: { opacity: 1 }, hover: { opacity: 0 } }}
+            transition={{ duration: 0.2 }}
+          >
+            <motion.span
+              className="absolute inset-0 rounded-full"
+              style={{ border: `1.5px solid ${PRINT}` }}
+              animate={{ scale: [1, 1.7], opacity: [0.7, 0] }}
+              transition={{
+                duration: 1.6,
+                ease: "easeOut",
+                repeat: Infinity,
+                repeatDelay: 2.4,
+              }}
+            />
+          </motion.span>
+        ) : null}
         {/* The fill: grows from the icon dot to cover the whole button */}
         <motion.span
           aria-hidden
           className="absolute inset-0 -z-10 rounded-full"
           style={{ background: PRINT }}
           variants={{ rest: { scale: 1 }, hover: { scale: 14 } }}
-          transition={{ duration: 0.6, ease }}
+          transition={{ duration: 0.7, ease }}
         />
         {/* Call icon: a handset whose sound waves draw out while hovered */}
         <svg
@@ -323,9 +346,9 @@ function StrategyCallButton({ label }: { label: string }) {
             style={{ transformOrigin: "50% 50%" }}
             variants={{
               rest: { rotate: 0 },
-              hover: { rotate: [0, -12, 10, -6, 0] },
+              hover: { rotate: [0, -10, 8, -4, 0] },
             }}
-            transition={{ duration: 0.7, ease: "easeInOut", delay: 0.25 }}
+            transition={{ duration: 0.6, ease: "easeInOut", delay: 0.35 }}
           />
           {["M14.5 5.5a4.5 4.5 0 0 1 4 4", "M14.5 2a8 8 0 0 1 7.5 7.5"].map(
             (d, wave) => (

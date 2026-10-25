@@ -871,6 +871,7 @@ export function PaperServices() {
 const WORK = [
   {
     client: "Nebius",
+    mark: "every major Token Factory moment",
     logo: "/assets/nebius.webp",
     href: "/case-studies/nebius",
     photo: "/case-studies/nebius/meetup-talk.webp",
@@ -891,6 +892,7 @@ const WORK = [
   },
   {
     client: "OpenLore",
+    mark: "12x GitHub star growth",
     logo: "/case-studies/openlore/openlore-logo.webp",
     logoZoom: 1.45,
     href: "/case-studies/openlore",
@@ -908,6 +910,7 @@ const WORK = [
   },
   {
     client: "Memori",
+    mark: "hands-on demo agents",
     logo: "/assets/memori.webp",
     href: "/case-studies/memori",
     image: "/case-studies/memori/memori-launch-reddit-redacted.png",
@@ -923,6 +926,7 @@ const WORK = [
   },
   {
     client: "Bright Data",
+    mark: "docs architecture for AI engineers",
     logo: "/assets/brightdata.webp",
     href: "/case-studies/brightdata",
     image: "/case-studies/brightdata/brightdata-homepage.webp",
@@ -942,6 +946,7 @@ const WORK = [
   },
   {
     client: "Jozu",
+    mark: "KitOps community support",
     logo: "/assets/jozu.webp",
     href: "/case-studies/jozu",
     photo: "/case-studies/jozu/kubecon-jozu-team.webp",
@@ -966,6 +971,7 @@ const WORK = [
   },
   {
     client: "LiteLLM",
+    mark: "clear SDK and Gateway paths",
     logo: "/assets/litellm.webp",
     logoZoom: 1.3,
     href: "/case-studies/litellm",
@@ -1073,6 +1079,41 @@ function MetricValue({ value }: { value: string }) {
   );
 }
 
+/** Summary text with one key phrase underlined by a hand-drawn orange stroke. */
+function MarkedSummary({ text, mark }: { text: string; mark: string }) {
+  const reduceMotion = useReducedMotion();
+  const at = text.indexOf(mark);
+  if (at < 0) return <>{text}</>;
+  return (
+    <>
+      {text.slice(0, at)}
+      <span className="relative inline">
+        {mark}
+        <svg
+          aria-hidden
+          viewBox="0 0 200 12"
+          preserveAspectRatio="none"
+          className="pointer-events-none absolute -bottom-1.5 left-0 h-[0.45em] w-full overflow-visible"
+        >
+          <motion.path
+            d="M2 8 C 40 3, 90 3, 120 6 S 175 10, 198 4"
+            fill="none"
+            stroke={PRINT}
+            strokeWidth="3"
+            strokeLinecap="round"
+            vectorEffect="non-scaling-stroke"
+            initial={reduceMotion ? false : { pathLength: 0 }}
+            whileInView={{ pathLength: 1 }}
+            viewport={{ once: true, amount: 0.8 }}
+            transition={{ duration: 0.9, ease: [0.65, 0, 0.35, 1], delay: 0.3 }}
+          />
+        </svg>
+      </span>
+      {text.slice(at + mark.length)}
+    </>
+  );
+}
+
 /**
  * One case study. It arrives as a card that zooms open to the full screen,
  * holds while you read, then eases back out as the next one comes in.
@@ -1157,7 +1198,7 @@ function CaseCard({
               className="pointer-events-none absolute inset-0 -z-10 opacity-30 mix-blend-multiply"
               style={{ backgroundImage: GRAIN }}
             />
-            <div className="mx-auto flex w-full max-w-[540px] flex-col gap-8">
+            <div className="m-auto flex w-full max-w-[540px] flex-col gap-7">
               <div className="flex items-center justify-between gap-4 text-[13px] font-medium">
                 <Link
                   href={work.href}
@@ -1171,12 +1212,16 @@ function CaseCard({
                     <ArrowUpRight weight="bold" className="size-3" />
                   </span>
                 </Link>
-                <span className={cn("shrink-0 tabular-nums", FAINT)}>
-                  {pad} / {String(total).padStart(2, "0")}
+                <span className="shrink-0 text-[15px] font-semibold tabular-nums tracking-[-0.02em]">
+                  <span style={{ color: PRINT }}>{pad}</span>
+                  <span className="text-[#141414]/35">
+                    {" "}
+                    / {String(total).padStart(2, "0")}
+                  </span>
                 </span>
               </div>
 
-              <div className="my-auto">
+              <div>
                 {/* Client lockup: logo tile, then the name */}
                 <div className="flex items-center gap-3.5">
                   <span className="relative size-12 shrink-0 overflow-hidden rounded-[13px] bg-white shadow-[0_10px_24px_-14px_rgba(20,20,20,0.45)] ring-1 ring-[#141414]/10 md:size-14 md:rounded-[14px]">
@@ -1198,7 +1243,7 @@ function CaseCard({
                   </h3>
                 </div>
                 <p className="mt-5 text-[16px] leading-[1.6] tracking-[-0.01em] md:text-[17px] xl:text-[18px]">
-                  {work.summary}
+                  <MarkedSummary text={work.summary} mark={work.mark} />
                 </p>
                 <ul role="list" className="mt-4 flex flex-wrap gap-2">
                   {work.tags.map((tag) => (
@@ -1217,8 +1262,16 @@ function CaseCard({
                     ([MetricIcon, value, label], position) => (
                       <div
                         key={label}
-                        className="flex min-w-0 flex-col rounded-[16px] bg-white/85 p-4 shadow-[inset_0_1px_0_#fff,0_14px_30px_-22px_rgba(20,20,20,0.35)] ring-1 ring-inset ring-[#141414]/[0.07]"
+                        className="relative isolate flex min-w-0 flex-col overflow-hidden rounded-[16px] bg-white/85 p-4 shadow-[inset_0_1px_0_#fff,0_14px_30px_-22px_rgba(20,20,20,0.35)] ring-1 ring-inset ring-[#141414]/[0.07] [&>*:not(canvas)]:relative"
                       >
+                        {/* Small animated squares, kept to the empty top-right corner */}
+                        <DitherField
+                          cell={6}
+                          size={2}
+                          strength={2.2}
+                          seed={index * 3.1 + position * 1.3}
+                          className="pointer-events-none absolute right-0 top-0 -z-10 h-[62%] w-[58%] [mask-image:radial-gradient(ellipse_at_top_right,black_20%,transparent_70%)]"
+                        />
                         <dt className="sr-only">{label}</dt>
                         <dd>
                           <MetricIcon
@@ -1305,7 +1358,7 @@ function CaseCard({
                     className="absolute inset-0 opacity-30 mix-blend-multiply"
                     style={{ backgroundImage: GRAIN }}
                   />
-                  <div className="absolute inset-0 flex items-center justify-center p-6 md:p-12">
+                  <div className="absolute inset-0 flex items-end justify-end pl-6 pt-10 md:pl-14 md:pt-20">
                     <Image
                       src={work.image}
                       alt={`${work.client} case study`}
@@ -1313,7 +1366,7 @@ function CaseCard({
                       height={Math.round(1200 / work.ratio)}
                       sizes="(min-width:1024px) 45vw, 90vw"
                       priority={index === 0}
-                      className="h-auto max-h-full w-auto max-w-full rounded-[14px] object-contain shadow-[0_40px_80px_-30px_rgba(80,20,0,0.65)] ring-[6px] ring-white/25"
+                      className="h-auto max-h-full w-auto max-w-full rounded-tl-[16px] border-l-[6px] border-t-[6px] border-white/30 object-contain shadow-[-30px_-30px_80px_-40px_rgba(80,20,0,0.6)]"
                     />
                   </div>
                 </>
