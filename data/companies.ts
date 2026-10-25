@@ -1,3 +1,4 @@
+import OpenLore from "@/public/case-studies/openlore/openlore-logo.webp";
 import Tensorlake from "@/public/case-studies/tensorlake/tensorlake-logo.webp";
 import {
   Permit,
@@ -125,6 +126,14 @@ export const companies = [
       image: Tensorlake,
       href: "https://www.tensorlake.ai/",
       description: "Composable infrastructure for AI agents.",
+    },
+    {
+      id: 55,
+      name: "OpenLore",
+      designation: "AI Coding Agents",
+      image: OpenLore,
+      href: "https://openlore.sh/",
+      description: "Shared docs server for coding agents.",
     },
     {
       id: 11,
