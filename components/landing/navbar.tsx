@@ -161,8 +161,8 @@ export default function Navbar() {
                 "border-transparent bg-transparent text-[#1b1714]"
               : "dark border-transparent bg-transparent text-white"
             : isPaper
-              ? // Paper bar: same sheet as the page, ruled bottom edge, ink text.
-                "border-[#1b1714]/15 bg-[#f4efe7]/90 text-[#1b1714] backdrop-blur-xl"
+              ? // Paper bar: same sheet as the page, no bottom rule, ink text.
+                "border-transparent bg-[#f4efe7]/90 text-[#1b1714] backdrop-blur-xl"
               : cn("border-border/50 backdrop-blur-2xl", "bg-background/80"),
         )}
       >
