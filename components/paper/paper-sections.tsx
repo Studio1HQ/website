@@ -9,6 +9,7 @@ import {
 } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   ArrowRight,
@@ -871,6 +872,19 @@ export function PaperServices() {
 const WORK = [
   {
     client: "Nebius",
+    situation:
+      "Token Factory competes for developers who choose by building, so Nebius needed the product inside the frameworks, examples and events developers already use.",
+    changed:
+      "We worked as an extension of the team: articles, video and demos, 29 framework and gateway integrations, an open-source library of agent apps, workshops, and launch coverage.",
+    result:
+      "300+ deliverables in under two years, 16K+ GitHub stars on the examples library, and day-one support for every major launch.",
+    quote: {
+      text: "Studio1 has been an exceptional partner: fast-moving, creative, and highly aligned with our goals.",
+      author: "Dylan Bristot",
+      role: "Lead AI Product Marketing Manager, Nebius AI",
+      avatar: "/assets/Dylan.webp",
+    },
+    headline: "16K+ GitHub stars and 29 integrations around Token Factory",
     mark: "every major Token Factory moment",
     logo: "/assets/nebius.webp",
     href: "/case-studies/nebius",
@@ -892,6 +906,7 @@ const WORK = [
   },
   {
     client: "OpenLore",
+    headline: "12x GitHub star growth in a single month",
     mark: "12x GitHub star growth",
     logo: "/case-studies/openlore/openlore-logo.webp",
     logoZoom: 1.45,
@@ -910,6 +925,15 @@ const WORK = [
   },
   {
     client: "Memori",
+    proof:
+      "100+ detailed developer comments from the launch shaped Memori's onboarding, docs, and v2 roadmap.",
+    situation:
+      "Memori needed to introduce an early open-source project to the right developers and build trust through technical storytelling, not promotion.",
+    changed:
+      "We ran open-source launch support, thought-leadership content, hands-on demo agents and live talks, and fed community feedback back into the product.",
+    result:
+      "0 to 12,000+ GitHub stars, 50K+ impressions on the Reddit launch post, and 100+ developer comments that shaped onboarding and docs.",
+    headline: "From launch to 12,000+ GitHub stars in the open",
     mark: "hands-on demo agents",
     logo: "/assets/memori.webp",
     href: "/case-studies/memori",
@@ -926,6 +950,15 @@ const WORK = [
   },
   {
     client: "Bright Data",
+    proof:
+      "12 of 30 developer queries we checked returned a Studio1 post in Google's top five, 8 of them in the top three.",
+    situation:
+      "Bright Data needed a steady stream of developer-grade content across blog, docs and partner channels, faster than an in-house team could ship it.",
+    changed:
+      "We ran topic strategy with their SEO team, wrote and published tutorials and comparisons, designed docs architecture for AI engineers, and reviewed partner drafts.",
+    result:
+      "50+ live posts in a year, with six first-place Google results on high-intent comparison and integration queries.",
+    headline: "Page-one Google rankings from 50+ technical articles",
     mark: "docs architecture for AI engineers",
     logo: "/assets/brightdata.webp",
     href: "/case-studies/brightdata",
@@ -946,6 +979,7 @@ const WORK = [
   },
   {
     client: "Jozu",
+    headline: "Developer advocacy across KubeCon and DevFest",
     mark: "KitOps community support",
     logo: "/assets/jozu.webp",
     href: "/case-studies/jozu",
@@ -971,6 +1005,19 @@ const WORK = [
   },
   {
     client: "LiteLLM",
+    situation:
+      "LiteLLM was growing fast, and new users needed a clearer path to their first request and to choosing between the SDK and the Gateway.",
+    changed:
+      "We acted as the embedded docs and DX team: documentation strategy, restructured information architecture, new quickstarts and guides, and community support.",
+    result:
+      "One clear starting point, the SDK-or-Gateway choice made in minutes, and a public CEO endorsement of the revamped docs.",
+    quote: {
+      text: "Thrilled to announce a revamped docs experience. Developers can now find their path faster, whether they need the SDK or the Gateway.",
+      author: "Krish D.",
+      role: "CEO, LiteLLM",
+      avatar: "/assets/krish-dholakia.webp",
+    },
+    headline: "A docs revamp publicly endorsed by LiteLLM's CEO",
     mark: "clear SDK and Gateway paths",
     logo: "/assets/litellm.webp",
     logoZoom: 1.3,
@@ -995,57 +1042,6 @@ const WORK = [
       "A ground-up docs revamp with clear SDK and Gateway paths and restructured integrations.",
   },
 ];
-
-/** White "Read case study" bubble that trails the cursor over the preview. */
-function useCaseBubble() {
-  const reduceMotion = useReducedMotion();
-  const [visible, setVisible] = useState(false);
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const sx = useSpring(x, { stiffness: 380, damping: 32, mass: 0.5 });
-  const sy = useSpring(y, { stiffness: 380, damping: 32, mass: 0.5 });
-
-  const onPointerMove = (event: React.PointerEvent<HTMLElement>) => {
-    if (event.pointerType !== "mouse") return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    const px = event.clientX - rect.left;
-    const py = event.clientY - rect.top;
-    if (!visible) {
-      sx.jump(px);
-      sy.jump(py);
-    }
-    x.set(px);
-    y.set(py);
-    setVisible(true);
-  };
-
-  return {
-    handlers: { onPointerMove, onPointerLeave: () => setVisible(false) },
-    bubble: (
-      <AnimatePresence>
-        {visible ? (
-          <motion.span
-            aria-hidden
-            className="pointer-events-none absolute left-0 top-0 z-30 hidden items-center gap-2.5 whitespace-nowrap rounded-full bg-[#141414]/45 py-2 pl-5 pr-2 text-[12px] font-medium uppercase tracking-[0.08em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_18px_40px_-16px_rgba(20,20,20,0.5)] ring-1 ring-white/25 backdrop-blur-xl lg:inline-flex"
-            style={{ x: sx, y: sy, translateX: "-50%", translateY: "-50%" }}
-            initial={{ opacity: 0, scale: reduceMotion ? 1 : 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: reduceMotion ? 1 : 0.5 }}
-            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-          >
-            Open case study
-            <span
-              className="flex size-8 items-center justify-center rounded-full text-white"
-              style={{ background: PRINT }}
-            >
-              <ArrowUpRight weight="bold" className="size-3.5" />
-            </span>
-          </motion.span>
-        ) : null}
-      </AnimatePresence>
-    ),
-  };
-}
 
 /** Counts a metric like "16K+" or "12,000+" up from zero; words stay as they are. */
 function MetricValue({ value }: { value: string }) {
@@ -1114,306 +1110,403 @@ function MarkedSummary({ text, mark }: { text: string; mark: string }) {
   );
 }
 
-/**
- * One case study. It arrives as a card that zooms open to the full screen,
- * holds while you read, then eases back out as the next one comes in.
- * Split in two: the story on paper on the left, the work on the right
- * (event photos edge to edge, product screens on the brand orange).
- */
-function CaseCard({
+/** The case studies featured on the home page; the rest live on /case-studies. */
+const FEATURED = ["Nebius", "Bright Data", "Memori", "LiteLLM"];
+
+/** One featured case study: the situation, what changed, what they got. */
+function FeaturedCase({
   work,
   index,
-  total,
 }: {
   work: (typeof WORK)[number];
   index: number;
-  total: number;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
-  const { handlers, bubble } = useCaseBubble();
-  const [wide, setWide] = useState(false);
-  useEffect(() => {
-    const query = window.matchMedia("(min-width: 1024px)");
-    const update = () => setWide(query.matches);
-    update();
-    query.addEventListener("change", update);
-    return () => query.removeEventListener("change", update);
-  }, []);
-  const still = reduceMotion || !wide;
+  // Hovering the card raises the work itself, with a "View case study" bubble.
+  const [preview, setPreview] = useState(false);
 
-  // In: card -> full screen. Out: eases back and fades as the next arrives.
-  const { scrollYProgress: inP } = useScroll({
-    target: ref,
-    offset: ["start end", "start start"],
-  });
-  const { scrollYProgress: outP } = useScroll({
-    target: ref,
-    offset: ["end end", "end start"],
-  });
-  const clipPath = useTransform(
-    inP,
-    [0, 0.25, 1],
-    still
-      ? [
-          "inset(0% 0% 0% 0% round 0px)",
-          "inset(0% 0% 0% 0% round 0px)",
-          "inset(0% 0% 0% 0% round 0px)",
-        ]
-      : [
-          "inset(16% 14% 8% 14% round 28px)",
-          "inset(12% 10% 6% 10% round 26px)",
-          "inset(0% 0% 0% 0% round 0px)",
-        ],
-  );
-  const contentScale = useTransform(inP, [0, 1], still ? [1, 1] : [1.08, 1]);
-  const outScale = useTransform(outP, [0, 1], still ? [1, 1] : [1, 0.9]);
-  const outOpacity = useTransform(outP, [0, 0.9], still ? [1, 1] : [1, 0.15]);
-
-  const photo = "photo" in work ? work.photo : undefined;
-  const pad = String(index + 1).padStart(2, "0");
+  const story: [string, string][] = [
+    ["The situation", work.situation ?? ""],
+    ["What changed", work.changed ?? ""],
+    ["What they got", work.result ?? ""],
+  ];
+  const quote = "quote" in work ? work.quote : undefined;
 
   return (
-    <div
-      ref={ref}
-      className={cn(
-        "relative",
-        index < total - 1 ? "lg:h-[200svh]" : "lg:h-[150svh]",
-      )}
+    // Nine rows on a shared subgrid, so every section lines up across the cards in a row.
+    <article
+      onPointerEnter={() => setPreview(true)}
+      onPointerLeave={() => setPreview(false)}
+      className="group relative isolate grid rounded-[24px] bg-white/80 p-6 shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08] transition-shadow duration-500 hover:z-10 hover:shadow-[inset_0_1px_0_#fff,0_30px_60px_-34px_rgba(249,115,22,0.45)] md:row-span-9 md:grid-rows-[subgrid] md:p-9"
     >
-      <div className="lg:sticky lg:top-0 lg:h-svh">
-        <motion.article
-          className="relative isolate grid h-full overflow-hidden text-[#141414] lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] xl:grid-cols-2"
-          style={{
-            clipPath,
-            scale: outScale,
-            opacity: outOpacity,
-            background: PAPER,
-          }}
+      {/* Still orange halftone, fading out from the top-right corner */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-[24px]"
+      >
+        <DitherField
+          still
+          pattern="halftone"
+          fade="left"
+          cell={8}
+          size={3}
+          strength={1.6}
+          className="absolute right-0 top-0 h-[150px] w-[220px] [mask-image:radial-gradient(ellipse_at_top_right,black_10%,transparent_70%)]"
+        />
+      </span>
+      {/* Orange hairline along the top edge */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-8 top-0 h-px"
+        style={{
+          background: `linear-gradient(90deg, transparent, ${PRINT}, transparent)`,
+        }}
+      />
+
+      {/* 1. Client */}
+      <div className="flex items-center gap-3">
+        <span className="relative size-10 shrink-0 overflow-hidden rounded-[11px] bg-white ring-1 ring-[#141414]/10">
+          <Image
+            src={work.logo}
+            alt=""
+            fill
+            sizes="40px"
+            className="object-cover"
+            style={
+              "logoZoom" in work
+                ? { transform: `scale(${work.logoZoom})` }
+                : undefined
+            }
+          />
+        </span>
+        <span className="text-[15px] font-semibold tracking-[-0.01em]">
+          {work.client}
+        </span>
+        <span aria-hidden className="h-px flex-1 bg-[#141414]/12" />
+        <span className="relative rounded-[10px] bg-[#fbfaf7] px-2 py-1 text-[28px] font-medium leading-none tabular-nums tracking-[-0.05em] text-[#141414]/30 shadow-[0_0_0_6px_#fbfaf7] md:text-[34px]">
+          {String(index + 1).padStart(2, "0")}
+        </span>
+      </div>
+
+      {/* 2. Headline */}
+      <h3 className="mt-6 text-[24px] font-medium leading-[1.2] tracking-[-0.035em] md:text-[28px]">
+        <Link
+          href={work.href}
+          className="bg-[linear-gradient(currentColor,currentColor)] bg-[length:0%_1.5px] bg-left-bottom bg-no-repeat transition-[background-size] duration-500 hover:bg-[length:100%_1.5px]"
         >
-          {/* Left half: the story, centred in its half */}
-          <div className="relative flex px-5 py-10 sm:px-10 lg:px-[clamp(28px,5vw,80px)] lg:pb-12 lg:pt-24">
-            <span
-              aria-hidden
-              className="pointer-events-none absolute inset-0 -z-10 opacity-30 mix-blend-multiply"
-              style={{ backgroundImage: GRAIN }}
-            />
-            <div className="m-auto flex w-full max-w-[540px] flex-col gap-7">
-              <div className="flex items-center justify-between gap-4 text-[13px] font-medium">
-                <Link
-                  href={work.href}
-                  className="group relative z-[2] inline-flex min-w-0 items-center gap-2 rounded-full bg-white/70 py-1.5 pl-3.5 pr-1.5 ring-1 ring-inset ring-[#141414]/10 transition-colors hover:bg-white"
-                >
-                  <span className="truncate">{work.href.slice(1)}</span>
-                  <span
-                    className="flex size-6 shrink-0 items-center justify-center rounded-full text-white transition-transform duration-300 group-hover:rotate-45"
-                    style={{ background: PRINT }}
-                  >
-                    <ArrowUpRight weight="bold" className="size-3" />
-                  </span>
-                </Link>
-                <span className="shrink-0 text-[15px] font-semibold tabular-nums tracking-[-0.02em]">
-                  <span style={{ color: PRINT }}>{pad}</span>
-                  <span className="text-[#141414]/35">
-                    {" "}
-                    / {String(total).padStart(2, "0")}
-                  </span>
-                </span>
-              </div>
+          {work.headline}
+        </Link>
+      </h3>
 
-              <div>
-                {/* Client lockup: logo tile, then the name */}
-                <div className="flex items-center gap-3.5">
-                  <span className="relative size-12 shrink-0 overflow-hidden rounded-[13px] bg-white shadow-[0_10px_24px_-14px_rgba(20,20,20,0.45)] ring-1 ring-[#141414]/10 md:size-14 md:rounded-[14px]">
-                    <Image
-                      src={work.logo}
-                      alt=""
-                      fill
-                      sizes="56px"
-                      className="object-cover"
-                      style={
-                        "logoZoom" in work
-                          ? { transform: `scale(${work.logoZoom})` }
-                          : undefined
-                      }
-                    />
-                  </span>
-                  <h3 className="text-[34px] font-medium leading-none tracking-[-0.05em] md:text-[44px] xl:text-[52px]">
-                    {work.client}
-                  </h3>
-                </div>
-                <p className="mt-5 text-[16px] leading-[1.6] tracking-[-0.01em] md:text-[17px] xl:text-[18px]">
-                  <MarkedSummary text={work.summary} mark={work.mark} />
-                </p>
-                <ul role="list" className="mt-4 flex flex-wrap gap-2">
-                  {work.tags.map((tag) => (
-                    <li
-                      key={tag}
-                      className="rounded-full bg-white/70 px-3 py-1 text-[12px] font-medium ring-1 ring-inset ring-[#141414]/10"
-                    >
-                      {tag}
-                    </li>
-                  ))}
-                </ul>
+      {/* 3. Sub-point, key phrase underlined */}
+      <p className={cn("mt-3 text-[15px] leading-[1.6]", MUTED)}>
+        <MarkedSummary text={work.summary} mark={work.mark} />
+      </p>
 
-                {/* Results: three white boxes, one shared baseline */}
-                <dl className="mt-8 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-                  {(work.metrics as [Icon, string, string][]).map(
-                    ([MetricIcon, value, label], position) => (
-                      <div
-                        key={label}
-                        className="relative isolate flex min-w-0 flex-col overflow-hidden rounded-[16px] bg-white/85 p-4 shadow-[inset_0_1px_0_#fff,0_14px_30px_-22px_rgba(20,20,20,0.35)] ring-1 ring-inset ring-[#141414]/[0.07] [&>*:not(canvas)]:relative"
-                      >
-                        {/* Small animated squares, kept to the empty top-right corner */}
-                        <DitherField
-                          cell={6}
-                          size={2}
-                          strength={2.2}
-                          seed={index * 3.1 + position * 1.3}
-                          className="pointer-events-none absolute right-0 top-0 -z-10 h-[62%] w-[58%] [mask-image:radial-gradient(ellipse_at_top_right,black_20%,transparent_70%)]"
-                        />
-                        <dt className="sr-only">{label}</dt>
-                        <dd>
-                          <MetricIcon
-                            aria-hidden
-                            weight="duotone"
-                            className="size-[18px]"
-                            style={{ color: PRINT }}
-                          />
-                          {/* A fixed-size strut sets one shared baseline, so numbers and words line up */}
-                          <p className="mt-3 flex items-baseline whitespace-nowrap font-medium leading-none tracking-[-0.045em]">
-                            <span
-                              aria-hidden
-                              className="invisible w-0 text-[22px] xl:text-[24px]"
-                            >
-                              0
-                            </span>
-                            <span
-                              className={
-                                /^[#\d]/.test(value)
-                                  ? "text-[22px] xl:text-[24px]"
-                                  : "text-[16px] xl:text-[17px]"
-                              }
-                              style={
-                                position === 0 ? { color: PRINT } : undefined
-                              }
-                            >
-                              <MetricValue value={value} />
-                            </span>
-                          </p>
-                          <p
-                            className={cn(
-                              "mt-2 text-[12px] leading-snug",
-                              MUTED,
-                            )}
-                          >
-                            {label}
-                          </p>
-                        </dd>
-                      </div>
-                    ),
-                  )}
-                </dl>
-
-                <Link
-                  href={work.href}
-                  className="group relative z-[2] mt-8 inline-flex h-11 w-fit items-center gap-3 rounded-full bg-white pl-5 pr-1.5 text-[14px] font-medium text-[#141414] shadow-[0_12px_28px_-18px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/10 transition-colors hover:bg-[#fbf9f6]"
-                >
-                  Open case study
-                  <span
-                    className="flex size-8 items-center justify-center rounded-full text-white transition-transform duration-300 group-hover:rotate-45"
-                    style={{ background: PRINT }}
-                  >
-                    <ArrowUpRight weight="bold" className="size-3.5" />
-                  </span>
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          {/* Right half: the work, edge to edge */}
-          <Link
-            href={work.href}
-            aria-label={`Open the ${work.client} case study`}
-            className="relative block min-h-[300px] overflow-hidden sm:min-h-[420px] lg:min-h-0 lg:cursor-none"
-            style={ORANGE_PANEL}
-            {...handlers}
-          >
-            <motion.div
-              style={{ scale: contentScale }}
-              className="absolute inset-0"
+      {/* 4-6. The story, stacked: label on top, text below */}
+      {story.map(([title, text], beat) => {
+        const last = beat === story.length - 1;
+        return (
+          <div key={title} className={cn("py-3", beat === 0 && "mt-5")}>
+            <p className="flex items-center gap-2.5 text-[14px] font-semibold tracking-[-0.01em] text-[#141414]">
+              <span
+                aria-hidden
+                className="flex size-5 shrink-0 items-center justify-center rounded-full"
+                style={
+                  last
+                    ? { background: PRINT, color: "#fff" }
+                    : { background: "rgba(20,20,20,0.06)", color: PRINT }
+                }
+              >
+                <ArrowRight weight="bold" className="size-3" />
+              </span>
+              {title}
+            </p>
+            <p
+              className={cn(
+                "mt-1.5 pl-[30px] text-[14.5px] leading-[1.65]",
+                last ? "font-medium text-[#141414]" : MUTED,
+              )}
             >
-              {photo ? (
+              {text}
+            </p>
+          </div>
+        );
+      })}
+
+      {/* 7. Results, engraved into the card */}
+      <dl className="mt-3 grid grid-cols-1 gap-2 min-[480px]:grid-cols-3">
+        {(work.metrics as [Icon, string, string][]).map(
+          ([MetricIcon, value, label], position) => (
+            <div
+              key={label}
+              className="relative isolate min-w-0 overflow-hidden rounded-[14px] bg-[#ece5da] p-3.5 shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10),inset_0_-1px_0_rgba(255,255,255,0.85),0_1px_0_rgba(255,255,255,0.95)] [&>*:not(canvas)]:relative"
+            >
+              <DitherField
+                cell={6}
+                size={2}
+                strength={2}
+                seed={index * 3.1 + position * 1.3}
+                className="pointer-events-none absolute right-0 top-0 -z-10 h-[60%] w-[55%] [mask-image:radial-gradient(ellipse_at_top_right,black_20%,transparent_70%)]"
+              />
+              <dt className="sr-only">{label}</dt>
+              <dd>
+                <MetricIcon
+                  aria-hidden
+                  weight="duotone"
+                  className="size-4"
+                  style={{ color: PRINT }}
+                />
+                <p className="mt-2.5 flex items-baseline whitespace-nowrap font-medium leading-none tracking-[-0.045em]">
+                  <span
+                    aria-hidden
+                    className="invisible w-0 text-[20px] md:text-[22px]"
+                  >
+                    0
+                  </span>
+                  <span
+                    className={
+                      /^[#\d]/.test(value)
+                        ? "text-[20px] md:text-[22px]"
+                        : "text-[14px] md:text-[15px]"
+                    }
+                    style={position === 0 ? { color: PRINT } : undefined}
+                  >
+                    <MetricValue value={value} />
+                  </span>
+                </p>
+                <p className={cn("mt-1.5 text-[11.5px] leading-snug", MUTED)}>
+                  {label}
+                </p>
+              </dd>
+            </div>
+          ),
+        )}
+      </dl>
+
+      {/* 8. Client voice, or a verified result where no quote is published */}
+      <figure className="mt-6 flex flex-col rounded-[18px] bg-[#ece5da] p-5 shadow-[inset_0_3px_8px_rgba(20,20,20,0.10),inset_0_-1px_0_rgba(255,255,255,0.85),0_1px_0_rgba(255,255,255,0.95)] md:p-6">
+        {quote ? (
+          <svg
+            aria-hidden
+            viewBox="0 0 32 24"
+            className="h-5 w-7"
+            style={{ fill: PRINT }}
+          >
+            <path d="M0 24V14.4C0 6.6 4.2 1.8 12.6 0l1.5 3.4C9.6 4.9 7.4 7.6 7.2 11.4h6.1V24H0Zm17.9 0V14.4C17.9 6.6 22.1 1.8 30.5 0L32 3.4c-4.5 1.5-6.7 4.2-6.9 8h6.1V24H17.9Z" />
+          </svg>
+        ) : (
+          <span
+            className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em]"
+            style={{ color: PRINT }}
+          >
+            <SealCheck aria-hidden weight="fill" className="size-4" />
+            Verified result
+          </span>
+        )}
+        <blockquote className="mb-5 mt-3 text-[16px] font-medium leading-[1.55] tracking-[-0.015em] text-[#141414]">
+          {quote ? quote.text : "proof" in work ? work.proof : null}
+        </blockquote>
+        <figcaption className="mt-auto flex items-center gap-3 border-t border-[#141414]/10 pt-4">
+          {quote ? (
+            <>
+              <Image
+                src={quote.avatar}
+                alt=""
+                width={72}
+                height={72}
+                sizes="36px"
+                className="size-9 rounded-full object-cover ring-2 ring-white"
+              />
+              <span className="min-w-0">
+                <span className="flex items-center gap-1.5 text-[14px] font-medium">
+                  {quote.author}
+                  <SealCheck
+                    aria-label="Verified client"
+                    weight="fill"
+                    className="size-4 text-[#1d9bf0]"
+                  />
+                </span>
+                <span className={cn("block text-[12.5px]", FAINT)}>
+                  {quote.role}
+                </span>
+              </span>
+            </>
+          ) : (
+            <span className={cn("text-[12.5px]", FAINT)}>
+              From the {work.client} case study
+            </span>
+          )}
+        </figcaption>
+      </figure>
+
+      {/* 9. Footer */}
+      <div className="flex flex-wrap items-center justify-between gap-4 pt-7">
+        <p className={cn("min-w-0 text-[12px]", FAINT)}>
+          {work.tags.join(" · ")}
+        </p>
+        <Link
+          href={work.href}
+          className="inline-flex shrink-0 items-center gap-2 text-[14px] font-medium transition-colors hover:text-[#f97316]"
+        >
+          Read case study
+          <span
+            className="flex size-7 items-center justify-center rounded-full text-white transition-transform duration-300 group-hover:rotate-45"
+            style={{ background: PRINT }}
+          >
+            <ArrowUpRight weight="bold" className="size-3.5" />
+          </span>
+        </Link>
+      </div>
+
+      {/* Hover: the work rises in at the top-right corner with a "View case study" bubble */}
+      <AnimatePresence>
+        {preview && !reduceMotion ? (
+          <motion.span
+            aria-hidden
+            className="pointer-events-none absolute right-6 top-0 z-30 hidden w-[240px] lg:block xl:w-[270px]"
+            initial={{ opacity: 0, y: "-70%", rotate: 4, scale: 0.92 }}
+            animate={{ opacity: 1, y: "-82%", rotate: 2, scale: 1 }}
+            exit={{ opacity: 0, y: "-70%", rotate: 4, scale: 0.94 }}
+            transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <span className="block overflow-hidden rounded-[16px] bg-white p-1.5 shadow-[0_30px_60px_-24px_rgba(20,20,20,0.5)] ring-1 ring-[#141414]/10">
+              <span
+                className="relative block overflow-hidden rounded-[11px]"
+                style={{ aspectRatio: work.ratio }}
+              >
                 <Image
-                  src={photo}
-                  alt={`${work.client} case study`}
+                  src={work.image}
+                  alt=""
                   fill
-                  sizes="(min-width:1024px) 50vw, 100vw"
-                  priority={index === 0}
+                  sizes="270px"
                   className="object-cover"
                 />
-              ) : (
-                <>
-                  <div
-                    className="absolute inset-0 opacity-30 mix-blend-multiply"
-                    style={{ backgroundImage: GRAIN }}
-                  />
-                  <div className="absolute inset-0 flex items-end justify-end pl-6 pt-10 md:pl-14 md:pt-20">
-                    <Image
-                      src={work.image}
-                      alt={`${work.client} case study`}
-                      width={1200}
-                      height={Math.round(1200 / work.ratio)}
-                      sizes="(min-width:1024px) 45vw, 90vw"
-                      priority={index === 0}
-                      className="h-auto max-h-full w-auto max-w-full rounded-tl-[16px] border-l-[6px] border-t-[6px] border-white/30 object-contain shadow-[-30px_-30px_80px_-40px_rgba(80,20,0,0.6)]"
-                    />
-                  </div>
-                </>
-              )}
+              </span>
+            </span>
+            <span className="absolute -bottom-4 left-1/2 inline-flex -translate-x-1/2 items-center gap-2 whitespace-nowrap rounded-full bg-[#141414] py-1.5 pl-4 pr-1.5 text-[12px] font-medium text-[#f4efe7] shadow-[0_12px_28px_-14px_rgba(20,20,20,0.6)]">
+              View case study
+              <span
+                className="flex size-6 items-center justify-center rounded-full text-white"
+                style={{ background: PRINT }}
+              >
+                <ArrowUpRight weight="bold" className="size-3" />
+              </span>
+            </span>
+          </motion.span>
+        ) : null}
+      </AnimatePresence>
+    </article>
+  );
+}
+
+/**
+ * "Check all case studies": a short branded hand-off before /case-studies.
+ * The page is prefetched on hover; on click a cream screen rises with the
+ * Studio1 mark, then the router moves on.
+ */
+function AllCaseStudiesLink() {
+  const router = useRouter();
+  const reduceMotion = useReducedMotion();
+  const [leaving, setLeaving] = useState(false);
+  const href = "/case-studies";
+
+  const go = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || reduceMotion)
+      return;
+    event.preventDefault();
+    setLeaving(true);
+    window.setTimeout(() => router.push(href), 900);
+  };
+
+  return (
+    <>
+      <Link
+        href={href}
+        onClick={go}
+        onPointerEnter={() => router.prefetch(href)}
+        className="group inline-flex h-12 items-center gap-3 rounded-full pl-6 pr-1.5 text-[15px] font-medium text-[#f4efe7] transition-opacity hover:opacity-90"
+        style={{ background: INK }}
+      >
+        Check all case studies
+        <span
+          className="flex size-9 items-center justify-center rounded-full text-white transition-transform duration-300 group-hover:rotate-45"
+          style={{ background: PRINT }}
+        >
+          <ArrowUpRight weight="bold" className="size-4" />
+        </span>
+      </Link>
+      <AnimatePresence>
+        {leaving ? (
+          <motion.div
+            aria-hidden
+            className="fixed inset-0 z-[9999] flex items-center justify-center"
+            style={{ background: PAPER }}
+            initial={{ clipPath: "inset(100% 0% 0% 0%)" }}
+            animate={{ clipPath: "inset(0% 0% 0% 0%)" }}
+            transition={{ duration: 0.55, ease: [0.65, 0, 0.35, 1] }}
+          >
+            <span
+              className="pointer-events-none absolute inset-0 opacity-30 mix-blend-multiply"
+              style={{ backgroundImage: GRAIN }}
+            />
+            <motion.div
+              className="relative flex items-center gap-4"
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.45,
+                ease: [0.16, 1, 0.3, 1],
+                delay: 0.3,
+              }}
+            >
+              <Logo className="size-12" />
+              <span className="flex flex-col">
+                <span className="text-[30px] font-medium leading-none tracking-[-0.045em] text-[#141414]">
+                  Studio1
+                </span>
+                <span
+                  className="mt-1.5 text-[12px] font-medium uppercase tracking-[0.16em]"
+                  style={{ color: PRINT }}
+                >
+                  Case studies
+                </span>
+              </span>
             </motion.div>
-            {bubble}
-          </Link>
-        </motion.article>
-      </div>
-    </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </>
   );
 }
 
 export function PaperWork() {
+  const featured = FEATURED.map((name) =>
+    WORK.find((work) => work.client === name),
+  ).filter((work): work is (typeof WORK)[number] => Boolean(work));
   return (
     <PaperSection id="results" tone="paper">
       <Container>
-        <IndexBar
-          index={4}
-          name="Campaigns we did"
-          aside={`${WORK.length} featured case studies`}
-        />
+        <IndexBar index={4} name="Case studies" aside="Selected work" />
         <SectionHead
           title={
             <>
               Work that moved <Accent>developer adoption</Accent>
             </>
           }
-          action={
-            <OutlineLink href="/case-studies">
-              View all case studies
-            </OutlineLink>
-          }
+          description="Results from building developer trust at every stage of the journey."
         />
-      </Container>
 
-      {/* Cards stack one after another as the page scrolls */}
-      <div className="relative mt-6 flex flex-col gap-4 lg:gap-0">
-        {WORK.map((work, index) => (
-          <CaseCard
-            key={work.client}
-            work={work}
-            index={index}
-            total={WORK.length}
-          />
-        ))}
-      </div>
+        <div className="mt-10 grid gap-4 md:grid-cols-2 md:gap-x-4 md:gap-y-0 md:[&>article]:mb-4">
+          {featured.map((work, index) => (
+            <FeaturedCase key={work.client} work={work} index={index} />
+          ))}
+        </div>
+
+        <div className="mt-10 flex justify-center">
+          <AllCaseStudiesLink />
+        </div>
+      </Container>
     </PaperSection>
   );
 }
@@ -1702,10 +1795,10 @@ export function PaperTestimonials() {
                       aria-label={`Show testimonial from ${person.name}, ${company}`}
                       aria-pressed={isActive}
                       className={cn(
-                        "flex h-12 w-full items-center gap-3 px-3.5 text-left text-[15px] font-medium tracking-[-0.02em] ring-1 ring-inset ring-[#141414]/10 transition-all duration-300",
+                        "flex h-12 w-full items-center gap-3 rounded-[12px] px-3.5 text-left text-[15px] font-medium tracking-[-0.02em] transition-all duration-300",
                         isActive
-                          ? "bg-white text-[#141414] ring-2 ring-[#f97316]"
-                          : "bg-white/60 text-[#141414]/55 hover:bg-white hover:text-[#141414]",
+                          ? "bg-white text-[#141414] shadow-[0_10px_24px_-16px_rgba(20,20,20,0.45)] ring-2 ring-inset ring-[#f97316]"
+                          : "bg-[#f5f1ea] text-[#141414]/65 shadow-[inset_0_2px_6px_rgba(20,20,20,0.07),inset_0_1px_2px_rgba(20,20,20,0.05),inset_0_-1px_0_rgba(255,255,255,0.85),0_1px_0_rgba(255,255,255,0.95)] hover:text-[#141414]",
                       )}
                     >
                       {/* Logo lockup: mark + name; marks stay mono until selected */}
