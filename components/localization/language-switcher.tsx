@@ -16,7 +16,10 @@ import {
 } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
-const translationKeys: Record<Locale, Parameters<ReturnType<typeof useTranslations>>[0]> = {
+const translationKeys: Record<
+  Locale,
+  Parameters<ReturnType<typeof useTranslations>>[0]
+> = {
   en: "english",
   fr: "french",
   es: "spanish",
@@ -71,8 +74,9 @@ export function LanguageSwitcher({
     window.location.assign(href);
   };
 
-  // The paper design preview gets a square white menu with ink text.
-  const isPaper = pathname.replace(/^\/(fr|es|hi|zh)(?=\/|$)/, "") === "/paper";
+  // The paper home page gets a square white menu with ink text.
+  const isPaper =
+    (pathname.replace(/^\/(fr|es|hi|zh)(?=\/|$)/, "") || "/") === "/";
 
   const optionClassName = (isActive: boolean) =>
     isPaper
@@ -83,7 +87,8 @@ export function LanguageSwitcher({
       : cn(
           "group/item flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
           "text-[var(--home-ink-soft)] hover:bg-primary/10 hover:text-[var(--home-ink)]",
-          isActive && "bg-primary/10 text-[var(--home-ink)] hover:bg-primary/15",
+          isActive &&
+            "bg-primary/10 text-[var(--home-ink)] hover:bg-primary/15",
         );
 
   const options = LOCALES.map((locale) => {

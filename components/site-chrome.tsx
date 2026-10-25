@@ -17,13 +17,10 @@ import { DEFAULT_LOCALE, localeMeta, type Locale } from "@/lib/i18n";
 export function SiteChrome({ children }: { children: React.ReactNode }) {
   const locale = useLocale() as Locale;
   const pathname = usePathname() || "/";
-  const unprefixedPathname = pathname.replace(
-    /^\/(fr|es|hi|zh)(?=\/|$)/,
-    "",
-  );
+  const unprefixedPathname =
+    pathname.replace(/^\/(fr|es|hi|zh)(?=\/|$)/, "") || "/";
   const shouldShowGlobalCta =
-    !unprefixedPathname.startsWith("/careers") &&
-    !unprefixedPathname.startsWith("/paper");
+    !unprefixedPathname.startsWith("/careers") && unprefixedPathname !== "/";
 
   useEffect(() => {
     const meta = localeMeta[locale] ?? localeMeta[DEFAULT_LOCALE];
@@ -39,7 +36,7 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
       </Suspense>
       {children}
       {shouldShowGlobalCta ? <CTA /> : null}
-      {unprefixedPathname.startsWith("/paper") ? <PaperFooter /> : <Footer />}
+      {unprefixedPathname === "/" ? <PaperFooter /> : <Footer />}
       <BottomNavbar />
       <ScrollToTopButton />
       <LocalizedLinkRuntime />

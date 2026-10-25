@@ -1,16 +1,20 @@
-import NightHero from "@/components/home/night-hero";
-import Showreel from "@/components/home/showreel";
-import Positioning from "@/components/home/positioning";
-import ServicesColumns from "@/components/home/services-columns";
-import CaseSlides from "@/components/home/case-slides";
-import Reasons from "@/components/home/reasons";
-import TestimonialLetter from "@/components/home/testimonial-letter";
-import ReachBand from "@/components/home/reach-band";
-import Process from "@/components/home/process";
 import { homePageMetadata, websiteJsonLd } from "@/lib/seo";
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { DEFAULT_LOCALE } from "@/lib/i18n";
+import PaperHero from "@/components/paper/paper-hero";
+import {
+  PaperCreation,
+  PaperCta,
+  PaperLogos,
+  PaperPositioning,
+  PaperProcess,
+  PaperReach,
+  PaperReasons,
+  PaperServices,
+  PaperTestimonials,
+  PaperWork,
+} from "@/components/paper/paper-sections";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations({
@@ -94,15 +98,17 @@ export default function Home() {
         </ul>
       </section>
       <div className="overflow-x-clip">
-        <NightHero />
-        <Showreel />
-        <Positioning />
-        <ServicesColumns />
-        <CaseSlides />
-        <Reasons />
-        <TestimonialLetter />
-        <ReachBand />
-        <Process />
+        <PaperHero />
+        <PaperLogos />
+        <PaperPositioning />
+        <PaperCreation />
+        <PaperServices />
+        <PaperWork />
+        <PaperReasons />
+        <PaperTestimonials />
+        <PaperProcess />
+        <PaperReach />
+        <PaperCta />
       </div>
     </>
   );

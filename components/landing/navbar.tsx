@@ -4,7 +4,11 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "../ui/button";
-import { IconArrowUpRight, IconChevronDown, IconMenu2 } from "@tabler/icons-react";
+import {
+  IconArrowUpRight,
+  IconChevronDown,
+  IconMenu2,
+} from "@tabler/icons-react";
 import { navItems } from "@/constants/data";
 import { cn } from "@/lib/utils";
 import Logo from "../ui/svgs/logo";
@@ -37,7 +41,10 @@ const navDescriptionKeys: Record<string, string> = {
   "Articles and insights from the Studio1 team": "blog",
 };
 
-function translatedNavTitle(title: string, t: ReturnType<typeof useTranslations>) {
+function translatedNavTitle(
+  title: string,
+  t: ReturnType<typeof useTranslations>,
+) {
   const key = navTitleKeys[title];
   return key ? t(`items.${key}`) : title;
 }
@@ -59,7 +66,7 @@ export default function Navbar() {
   const isHome =
     (pathname.replace(/^\/(fr|es|hi|zh)(?=\/|$)/, "") || "/") === "/";
   const isPaper =
-    pathname.replace(/^\/(fr|es|hi|zh)(?=\/|$)/, "") === "/paper";
+    (pathname.replace(/^\/(fr|es|hi|zh)(?=\/|$)/, "") || "/") === "/";
   const isBlogPost = /^\/blog\/(?!page\/)[^/]+/.test(
     pathname.replace(/^\/(fr|es|hi|zh)(?=\/|$)/, ""),
   );
@@ -74,7 +81,10 @@ export default function Navbar() {
   // while scrolling down and returns when scrolling up.
   useEffect(() => {
     // Blog posts are docs-style reading pages: the bar stays solid glass there.
-    const hero = isHome || isBlogPost ? null : document.querySelector<HTMLElement>(".s1-night");
+    const hero =
+      isHome || isBlogPost
+        ? null
+        : document.querySelector<HTMLElement>(".s1-night");
     const heroActive = isHome || isPaper || Boolean(hero);
     setHasHero(heroActive);
     if (!heroActive) {
@@ -153,10 +163,7 @@ export default function Navbar() {
             : isPaper
               ? // Paper bar: same sheet as the page, ruled bottom edge, ink text.
                 "border-[#1b1714]/15 bg-[#f4efe7]/90 text-[#1b1714] backdrop-blur-xl"
-              : cn(
-                  "border-border/50 backdrop-blur-2xl",
-                  "bg-background/80",
-                ),
+              : cn("border-border/50 backdrop-blur-2xl", "bg-background/80"),
         )}
       >
         <nav
@@ -215,7 +222,8 @@ export default function Navbar() {
                           : "rounded-lg border bg-background/95 px-1 py-1.5 shadow-lg backdrop-blur-xl",
                         item.children.some(
                           (child) =>
-                            "description" in child && Boolean(child.description),
+                            "description" in child &&
+                            Boolean(child.description),
                         )
                           ? "w-max min-w-[24rem]"
                           : "min-w-[17rem]",
@@ -240,7 +248,10 @@ export default function Navbar() {
                         >
                           {isPaper ? (
                             <span className="flex size-7 shrink-0 items-center justify-center bg-[#f4efe7] text-[#141414] transition-colors duration-200 group-hover/item:bg-[#f97316] group-hover/item:text-white">
-                              <child.icon weight="regular" className="size-3.5" />
+                              <child.icon
+                                weight="regular"
+                                className="size-3.5"
+                              />
                             </span>
                           ) : (
                             <child.icon
@@ -256,7 +267,9 @@ export default function Navbar() {
                               <span
                                 className={cn(
                                   "whitespace-nowrap text-xs leading-snug",
-                                  isPaper ? "text-[#141414]/55" : "text-muted-foreground/80",
+                                  isPaper
+                                    ? "text-[#141414]/55"
+                                    : "text-muted-foreground/80",
                                 )}
                               >
                                 {translatedNavDescription(child.description, t)}
@@ -280,19 +293,31 @@ export default function Navbar() {
 
           <div className="hidden items-center justify-between gap-3 lg:flex">
             <LanguageSwitcher compact />
-            <Button
-              asChild
-              className={cn(
-                "group h-10 rounded-full border-0 px-5 font-medium text-white",
-                isPaper
-                  ? "bg-[#1b1714] text-[#f4efe7] hover:bg-[#f97316]"
-                  : "s1-glass-btn hover:bg-transparent",
-              )}
-            >
-              <a href="mailto:contact@studio1hq.com">
-                {t("contact")} <MailIcon className="ml-1" />
+            {isPaper ? (
+              // Paper: dark pill that turns orange on hover.
+              <a
+                href="mailto:contact@studio1hq.com"
+                className="group relative isolate inline-flex h-10 overflow-hidden rounded-full"
+              >
+                <span className="relative inline-flex h-full items-center gap-1 overflow-hidden rounded-full bg-[#1b1714] px-5 text-[14px] font-medium text-[#f4efe7] transition-colors duration-300 group-hover:bg-[#f97316]">
+                  {t("contact")} <MailIcon className="ml-1" />
+                </span>
               </a>
-            </Button>
+            ) : (
+              <Button
+                asChild
+                className={cn(
+                  "group h-10 rounded-full border-0 px-5 font-medium text-white",
+                  isPaper
+                    ? "bg-[#1b1714] text-[#f4efe7] hover:bg-[#f97316]"
+                    : "s1-glass-btn hover:bg-transparent",
+                )}
+              >
+                <a href="mailto:contact@studio1hq.com">
+                  {t("contact")} <MailIcon className="ml-1" />
+                </a>
+              </Button>
+            )}
           </div>
 
           <div className="flex items-center gap-2 lg:hidden">
@@ -382,8 +407,14 @@ export default function Navbar() {
               <LanguageSwitcher inline />
             </div>
             <div className="mt-4 flex items-center justify-end gap-2 rounded-3xl bg-accent/50 p-2">
-              <Button asChild className="group s1-glass-btn h-10 rounded-full border-0 px-5 font-medium text-white hover:bg-transparent">
-                <a href="mailto:contact@studio1hq.com" onClick={closeMobileMenu}>
+              <Button
+                asChild
+                className="group s1-glass-btn h-10 rounded-full border-0 px-5 font-medium text-white hover:bg-transparent"
+              >
+                <a
+                  href="mailto:contact@studio1hq.com"
+                  onClick={closeMobileMenu}
+                >
                   {t("contact")} <MailIcon className="ml-1" />
                 </a>
               </Button>

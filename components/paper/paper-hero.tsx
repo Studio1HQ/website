@@ -4,7 +4,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { JesseImg, JuliaImg, MarketaImg, SauravImg } from "@/constants/image";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import {
   ArrowUpRight,
   Books,
@@ -270,6 +270,82 @@ function CyclingLabel({ items }: { items: string[]; offset: number }) {
  * design-file artefacts (selection frames with layer labels, cursors, a
  * swatch strip, a constellation, a construction drawing, block prints).
  */
+/**
+ * Primary CTA. On hover the orange dot behind the arrow grows to flood the
+ * whole pill, the label nudges left and the handset rings once as its sound
+ * waves draw out; it all eases back on leave. A small press-in on click.
+ */
+function StrategyCallButton({ label }: { label: string }) {
+  const reduceMotion = useReducedMotion();
+  const ease = [0.65, 0, 0.35, 1] as const;
+
+  return (
+    <motion.a
+      href="https://cal.com/studio1/collab"
+      target="_blank"
+      rel="noopener noreferrer"
+      initial="rest"
+      animate="rest"
+      whileHover={reduceMotion ? undefined : "hover"}
+      whileTap={reduceMotion ? undefined : { scale: 0.97 }}
+      className="relative isolate inline-flex h-14 items-center gap-4 overflow-hidden rounded-full pl-8 pr-2 text-[16px] font-medium text-[#f4efe7]"
+      style={{ background: INK }}
+    >
+      <motion.span
+        variants={{ rest: { x: 0 }, hover: { x: -4 } }}
+        transition={{ duration: 0.5, ease }}
+      >
+        {label}
+      </motion.span>
+      <span className="relative flex size-10 items-center justify-center">
+        {/* The fill: grows from the icon dot to cover the whole button */}
+        <motion.span
+          aria-hidden
+          className="absolute inset-0 -z-10 rounded-full"
+          style={{ background: PRINT }}
+          variants={{ rest: { scale: 1 }, hover: { scale: 14 } }}
+          transition={{ duration: 0.6, ease }}
+        />
+        {/* Call icon: a handset whose sound waves draw out while hovered */}
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+          className="size-[18px] overflow-visible text-white"
+        >
+          <motion.path
+            d="M6.6 3.5H9l1.4 3.6-1.9 1.3a10.5 10.5 0 0 0 5.6 5.6l1.3-1.9 3.6 1.4v2.4a2 2 0 0 1-2.2 2A15 15 0 0 1 4.6 5.7a2 2 0 0 1 2-2.2Z"
+            fill="currentColor"
+            style={{ transformOrigin: "50% 50%" }}
+            variants={{
+              rest: { rotate: 0 },
+              hover: { rotate: [0, -12, 10, -6, 0] },
+            }}
+            transition={{ duration: 0.7, ease: "easeInOut", delay: 0.25 }}
+          />
+          {["M14.5 5.5a4.5 4.5 0 0 1 4 4", "M14.5 2a8 8 0 0 1 7.5 7.5"].map(
+            (d, wave) => (
+              <motion.path
+                key={d}
+                d={d}
+                variants={{
+                  rest: { pathLength: 0, opacity: 0 },
+                  hover: { pathLength: 1, opacity: 1 },
+                }}
+                transition={{ duration: 0.35, ease, delay: 0.3 + wave * 0.12 }}
+              />
+            ),
+          )}
+        </svg>
+      </span>
+    </motion.a>
+  );
+}
+
 export default function PaperHero() {
   const t = useTranslations("Hero");
   const nav = useTranslations("Nav");
@@ -585,19 +661,7 @@ export default function PaperHero() {
                 labelPosition="top-left"
                 className="p-1.5"
               >
-                <a
-                  href="https://cal.com/studio1/collab"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group inline-flex h-14 items-center gap-3 rounded-full px-8 text-[16px] font-medium text-[#f4efe7] transition-opacity hover:opacity-90"
-                  style={{ background: INK }}
-                >
-                  {t("primaryCta")}
-                  <ArrowUpRight
-                    weight="bold"
-                    className="size-4 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-                  />
-                </a>
+                <StrategyCallButton label={t("primaryCta")} />
               </SelectionFrame>
               <Cursor className="absolute -bottom-8 -right-6 hidden sm:block" />
             </div>

@@ -23,6 +23,17 @@ import {
   TrendUp,
   UsersThree,
   VideoCamera,
+  Star,
+  Stack,
+  PlugsConnected,
+  Eye,
+  Robot,
+  Article,
+  CalendarCheck,
+  Handshake,
+  CheckCircle,
+  Code,
+  Ticket,
   type Icon,
 } from "@phosphor-icons/react";
 import { useTranslations } from "next-intl";
@@ -175,11 +186,14 @@ function SectionHead({
   title,
   description,
   action,
+  actionEnd = false,
 }: {
   title: ReactNode;
   description?: ReactNode;
   action?: ReactNode;
   label?: string;
+  /** Push the action to the right edge (wide sections). */
+  actionEnd?: boolean;
 }) {
   return (
     <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:items-end lg:gap-16">
@@ -189,7 +203,12 @@ function SectionHead({
         </span>
       </h2>
       {description || action ? (
-        <div className="flex flex-col items-start gap-6 lg:pb-2">
+        <div
+          className={cn(
+            "flex flex-col items-start gap-6 lg:pb-2",
+            actionEnd && "lg:items-end",
+          )}
+        >
           {description ? (
             <p className={cn("max-w-[440px] text-[16px] leading-[1.6]", MUTED)}>
               {description}
@@ -246,17 +265,59 @@ function Selected({ label }: { label: string }) {
 
 const LOGO_CELLS = 12;
 
+/**
+ * Rendered height (px) per wordmark, so every logo carries about the same
+ * visual weight. Worked out from each file's trimmed aspect ratio and the
+ * empty space around the mark: wide marks sit lower, compact ones taller.
+ */
+const LOGO_HEIGHT: Record<string, number> = {
+  InsForge: 26.8,
+  Weaviate: 18.8,
+  "Maxim AI": 44,
+  "Interact AI": 22.9,
+  Stream: 21.1,
+  Permit: 32.6,
+  "TestMu AI": 27.5,
+  Memori: 31.6,
+  Motia: 23,
+  Graphite: 24.5,
+  Eachlabs: 19.7,
+  Entelligence: 19.7,
+  Latitude: 20.7,
+  Ragie: 21.7,
+  Encore: 22,
+  ReadySet: 23.1,
+  CopilotKit: 23.3,
+  Crawlee: 40,
+  Tolgee: 29.5,
+  Nitric: 40,
+  WebCrumbs: 21.9,
+  SwytchCode: 26.5,
+  StackQL: 32,
+  Opire: 19,
+  "Novita AI": 22,
+};
+/** Logos drawn on a white square: multiplied onto the card instead of inked. */
+const ON_WHITE = new Set(["LiteLLM", "Jozu"]);
+
 function InkLogo({ item }: { item: (typeof trustedbyLogo)[number] }) {
+  const beside = "showNameBeside" in item && item.showNameBeside;
+  const height = beside ? 26 : (LOGO_HEIGHT[item.name] ?? 24);
   return (
-    <span className="flex items-center gap-2.5">
+    <span className="flex max-w-full items-center justify-center gap-2 [--logo-scale:0.72] sm:[--logo-scale:1]">
       <Image
         src={item.image}
         alt={item.alt ?? item.name}
-        // Printed as solid marks in the section's ink colour.
-        className="h-5 w-auto max-w-[78px] object-contain sm:h-6 sm:max-w-[120px] opacity-85 [filter:grayscale(1)_brightness(0)_invert(var(--p-invert,0))]"
+        style={{ height: `calc(${height}px * var(--logo-scale))` }}
+        className={cn(
+          "w-auto max-w-full shrink-0 object-contain opacity-85",
+          ON_WHITE.has(item.name)
+            ? "mix-blend-multiply [filter:grayscale(1)_contrast(1.4)]"
+            : "[filter:grayscale(1)_brightness(0)_invert(var(--p-invert,0))]",
+        )}
       />
-      {"showNameBeside" in item && item.showNameBeside ? (
-        <span className="whitespace-nowrap text-[13px] font-medium opacity-85 sm:text-[15px]">
+      {beside ? (
+        <span className="whitespace-nowrap text-[13px] font-medium opacity-85 sm:text-[16px]">
           {item.name}
         </span>
       ) : null}
@@ -267,7 +328,10 @@ function InkLogo({ item }: { item: (typeof trustedbyLogo)[number] }) {
 export function PaperLogos() {
   // Logos that print as solid blocks are left out.
   const logos = trustedbyLogo.filter(
-    (item) => !["Nebius", "Velt", "CodeRabbit", "StackQL"].includes(item.name),
+    (item) =>
+      !["Nebius", "Velt", "CodeRabbit", "StackQL", "Ittybit"].includes(
+        item.name,
+      ),
   );
   const cells = Array.from({ length: LOGO_CELLS }, (_, cell) =>
     logos.filter((_, index) => index % LOGO_CELLS === cell),
@@ -282,7 +346,7 @@ export function PaperLogos() {
   }, []);
 
   return (
-    <PaperSection tone="paper">
+    <PaperSection id="trusted" tone="paper">
       <Container>
         <IndexBar
           index={1}
@@ -800,66 +864,129 @@ export function PaperServices() {
 /* 04 — Work (paper)                                                   */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Featured case studies, strongest numbers first. Metrics are copied from
+ * each case study's own frontmatter (content/case-studies/en/*.mdx).
+ */
 const WORK = [
   {
     client: "Nebius",
-    metric: ["16K+", "GitHub stars on the open-source library"],
+    logo: "/assets/nebius.webp",
     href: "/case-studies/nebius",
+    photo: "/case-studies/nebius/meetup-talk.webp",
     image: "/case-studies/nebius/workshop-dublin-recap.webp",
     ratio: 1194 / 1164,
+    metrics: [
+      [Star, "16K+", "GitHub stars on the examples library"],
+      [Stack, "300+", "deliverables over nearly two years"],
+      [PlugsConnected, "29", "framework integrations adding Nebius"],
+    ],
     tags: [
       "Workshops & Live Events",
       "Framework Integrations",
       "Launch Support",
     ],
     summary:
-      "300+ deliverables, 29 framework integrations, an open-source library with 16K+ stars, and launch support across every major Token Factory moment.",
+      "Launch support across every major Token Factory moment, with content, video, integrations, tools and events.",
   },
   {
-    client: "Jozu",
-    href: "/case-studies/jozu",
-    image: "/case-studies/jozu/kubecon-jozu-booth.webp",
-    ratio: 1200 / 900,
-    tags: ["Developer Advocacy", "Event Representation", "Community Support"],
+    client: "OpenLore",
+    logo: "/case-studies/openlore/openlore-logo.webp",
+    logoZoom: 1.45,
+    href: "/case-studies/openlore",
+    photo: "/case-studies/openlore/openlore-hackspire-talk.webp",
+    image: "/case-studies/openlore/openlore-star-history.webp",
+    ratio: 1357 / 896,
+    metrics: [
+      [Star, "1,700+", "GitHub stars in one month, up from ~135"],
+      [Eye, "100K+", "impressions across daily.dev, X, LinkedIn and Reddit"],
+      [TrendUp, "#3", "trending in Go on Trendshift"],
+    ],
+    tags: ["DX Audit", "Positioning & Launch", "Talks & Hackathons"],
     summary:
-      "Developer advocacy, KitOps community support, event representation, blogs, technical talks, and ecosystem collaboration for Jozu and its open-source ecosystem.",
+      "A DX audit, sharper positioning, talks, content and demo projects drove 12x GitHub star growth in one month.",
   },
   {
     client: "Memori",
-    metric: ["12,000+", "GitHub stars for an early OSS project"],
+    logo: "/assets/memori.webp",
     href: "/case-studies/memori",
     image: "/case-studies/memori/memori-launch-reddit-redacted.png",
     ratio: 1488 / 968,
+    metrics: [
+      [Star, "12,000+", "GitHub stars, from launch to today"],
+      [Eye, "50K+", "impressions on the Reddit launch post"],
+      [Robot, "12", "hands-on demo agents shipped"],
+    ],
     tags: ["Community-led Launches", "Demo Content", "Live Events"],
     summary:
-      "Community-led launch support, hands-on demo agents, and developer feedback helped an early OSS project grow to 12,000+ GitHub stars.",
+      "Community-led launch support, hands-on demo agents, and developer feedback for an early open-source project.",
   },
   {
     client: "Bright Data",
-    metric: ["50+", "Live posts, with first-place Google results"],
+    logo: "/assets/brightdata.webp",
     href: "/case-studies/brightdata",
     image: "/case-studies/brightdata/brightdata-homepage.webp",
     ratio: 2000 / 1150,
+    metrics: [
+      [Article, "50+", "articles published on brightdata.com"],
+      [TrendUp, "Page 1", "Google rankings on comparison queries"],
+      [CalendarCheck, "12+ months", "embedded across blog, docs, and SEO"],
+    ],
     tags: [
       "SEO Content Strategy",
       "Technical Tutorials & Comparisons",
       "Documentation Architecture",
     ],
     summary:
-      "50+ live posts, first-place Google results on category comparisons, docs architecture for AI engineers, and SEO review across blog and partner content.",
+      "SEO-led tutorials and comparisons, docs architecture for AI engineers, and review across blog and partner content.",
+  },
+  {
+    client: "Jozu",
+    logo: "/assets/jozu.webp",
+    href: "/case-studies/jozu",
+    photo: "/case-studies/jozu/kubecon-jozu-team.webp",
+    image: "/case-studies/jozu/kubecon-jozu-booth.webp",
+    ratio: 1200 / 900,
+    metrics: [
+      [Ticket, "2", "public events: DevFest Pune, KubeCon India"],
+      [
+        UsersThree,
+        "Champions",
+        "ambassador program and developer education support",
+      ],
+      [
+        Handshake,
+        "Partnerships",
+        "with cloud native and AI infrastructure teams",
+      ],
+    ],
+    tags: ["Developer Advocacy", "Event Representation", "Community Support"],
+    summary:
+      "Developer advocacy, KitOps community support, event representation, and technical talks for Jozu's open-source ecosystem.",
   },
   {
     client: "LiteLLM",
+    logo: "/assets/litellm.webp",
+    logoZoom: 1.3,
     href: "/case-studies/litellm",
     image: "/case-studies/litellm/github-guides-activity.webp",
     ratio: 792 / 619,
+    metrics: [
+      [
+        BookOpenText,
+        "2",
+        "new workflow guides: OpenAI Agents SDK and Retool Assist",
+      ],
+      [Code, "SDK + Gateway", "quickstarts in a new Learn section"],
+      [SealCheck, "CEO", "publicly endorsed the docs revamp"],
+    ],
     tags: [
       "Documentation Strategy",
       "Information Architecture",
       "Technical Writing",
     ],
     summary:
-      "A ground-up docs revamp, new Learn section, SDK and Gateway quickstarts, restructured integrations, publicly endorsed by LiteLLM's CEO.",
+      "A ground-up docs revamp with clear SDK and Gateway paths and restructured integrations.",
   },
 ];
 
@@ -893,14 +1020,14 @@ function useCaseBubble() {
         {visible ? (
           <motion.span
             aria-hidden
-            className="pointer-events-none absolute left-0 top-0 z-30 hidden items-center gap-2.5 whitespace-nowrap rounded-full bg-white py-2 pl-5 pr-2 text-[13px] font-medium text-[#141414] shadow-[0_18px_40px_-16px_rgba(20,20,20,0.5)] ring-1 ring-[#141414]/10 lg:inline-flex"
+            className="pointer-events-none absolute left-0 top-0 z-30 hidden items-center gap-2.5 whitespace-nowrap rounded-full bg-[#141414]/45 py-2 pl-5 pr-2 text-[12px] font-medium uppercase tracking-[0.08em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_18px_40px_-16px_rgba(20,20,20,0.5)] ring-1 ring-white/25 backdrop-blur-xl lg:inline-flex"
             style={{ x: sx, y: sy, translateX: "-50%", translateY: "-50%" }}
             initial={{ opacity: 0, scale: reduceMotion ? 1 : 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: reduceMotion ? 1 : 0.5 }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
           >
-            Read case study
+            Open case study
             <span
               className="flex size-8 items-center justify-center rounded-full text-white"
               style={{ background: PRINT }}
@@ -914,199 +1041,293 @@ function useCaseBubble() {
   };
 }
 
-/** Card top offset while stuck, plus a small step so earlier cards peek out. */
-const STACK_TOP = 112;
-const STACK_STEP = 10;
+/** Counts a metric like "16K+" or "12,000+" up from zero; words stay as they are. */
+function MetricValue({ value }: { value: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-10% 0px" });
+  const reduceMotion = useReducedMotion();
+  const match = value.match(/^([\d,]+)(.*)$/);
+  const target = match ? Number(match[1].replace(/,/g, "")) : 0;
+  const [shown, setShown] = useState(match && !reduceMotion ? 0 : target);
 
+  useEffect(() => {
+    if (!match || !inView || reduceMotion) return;
+    const controls = animate(0, target, {
+      duration: 1.6,
+      ease: [0.16, 1, 0.3, 1],
+      onUpdate: (latest) => setShown(latest),
+    });
+    return () => controls.stop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inView, reduceMotion, target]);
+
+  if (!match) return <span ref={ref}>{value}</span>;
+  const digits = match[1].includes(",")
+    ? Math.round(shown).toLocaleString("en-US")
+    : String(Math.round(shown));
+  return (
+    <span ref={ref} className="tabular-nums">
+      {digits}
+      {match[2]}
+    </span>
+  );
+}
+
+/**
+ * One case study. It arrives as a card that zooms open to the full screen,
+ * holds while you read, then eases back out as the next one comes in.
+ * Split in two: the story on paper on the left, the work on the right
+ * (event photos edge to edge, product screens on the brand orange).
+ */
 function CaseCard({
   work,
   index,
   total,
-  progress,
 }: {
   work: (typeof WORK)[number];
   index: number;
   total: number;
-  progress: MotionValue<number>;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
   const { handlers, bubble } = useCaseBubble();
-  // Cards only stack on wide screens; on phones and tablets they simply list.
-  const [stacked, setStacked] = useState(false);
+  const [wide, setWide] = useState(false);
   useEffect(() => {
     const query = window.matchMedia("(min-width: 1024px)");
-    const update = () => setStacked(query.matches);
+    const update = () => setWide(query.matches);
     update();
     query.addEventListener("change", update);
     return () => query.removeEventListener("change", update);
   }, []);
-  const still = reduceMotion || !stacked;
+  const still = reduceMotion || !wide;
 
-  // Once covered, each card eases back a little per card stacked above it.
-  const start = index / total;
-  const depth = total - 1 - index;
-  const scale = useTransform(
-    progress,
-    [start, 1],
-    [1, still ? 1 : 1 - depth * 0.04],
-  );
-  // The screen settles from a slight zoom as its card rises into place.
-  const { scrollYProgress: enter } = useScroll({
+  // In: card -> full screen. Out: eases back and fades as the next arrives.
+  const { scrollYProgress: inP } = useScroll({
     target: ref,
     offset: ["start end", "start start"],
   });
-  const imageScale = useTransform(
-    enter,
-    [0, 1],
-    reduceMotion ? [1, 1] : [1.14, 1],
+  const { scrollYProgress: outP } = useScroll({
+    target: ref,
+    offset: ["end end", "end start"],
+  });
+  const clipPath = useTransform(
+    inP,
+    [0, 0.25, 1],
+    still
+      ? [
+          "inset(0% 0% 0% 0% round 0px)",
+          "inset(0% 0% 0% 0% round 0px)",
+          "inset(0% 0% 0% 0% round 0px)",
+        ]
+      : [
+          "inset(16% 14% 8% 14% round 28px)",
+          "inset(12% 10% 6% 10% round 26px)",
+          "inset(0% 0% 0% 0% round 0px)",
+        ],
   );
-  // It tips up into place as it arrives, then settles flat.
-  const rotateX = useTransform(enter, [0, 1], still ? [0, 0] : [7, 0]);
-  // Covered cards fade back into the paper instead of greying out.
-  const veil = useTransform(
-    progress,
-    [Math.min(1, start + 1 / total), 1],
-    [0, depth > 0 && !still ? Math.min(0.55, depth * 0.18) : 0],
-  );
+  const contentScale = useTransform(inP, [0, 1], still ? [1, 1] : [1.08, 1]);
+  const outScale = useTransform(outP, [0, 1], still ? [1, 1] : [1, 0.9]);
+  const outOpacity = useTransform(outP, [0, 0.9], still ? [1, 1] : [1, 0.15]);
+
+  const photo = "photo" in work ? work.photo : undefined;
+  const pad = String(index + 1).padStart(2, "0");
 
   return (
     <div
       ref={ref}
-      className="lg:sticky"
-      style={{ top: STACK_TOP + index * STACK_STEP }}
+      className={cn(
+        "relative",
+        index < total - 1 ? "lg:h-[200svh]" : "lg:h-[150svh]",
+      )}
     >
-      <motion.article
-        style={{
-          scale,
-          rotateX,
-          transformPerspective: 1400,
-        }}
-        className="relative isolate grid origin-top bg-white lg:bg-[linear-gradient(100deg,#ffffff_0%,#ffffff_34%,#ffe7d1_44%,#ffb36b_52%,#fe7a12_62%,#fe5200_78%,#fc8c04_100%)] overflow-hidden shadow-[0_-1px_0_rgba(20,20,20,0.06),0_30px_70px_-45px_rgba(20,20,20,0.55)] ring-1 ring-inset ring-[#141414]/10 lg:h-[min(540px,calc(100svh-180px))] lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]"
-      >
-        <div className="relative flex flex-col p-6 md:p-10">
-          <div className="flex items-center justify-between gap-3">
-            <span className="inline-flex items-center gap-2 text-[12px] font-medium uppercase tracking-[0.12em]">
-              <span
-                aria-hidden
-                className="size-2"
-                style={{ background: PRINT }}
-              />
-              Case study
-            </span>
-            <span className={cn("text-[12px] tabular-nums", FAINT)}>
-              {String(index + 1).padStart(2, "0")} /{" "}
-              {String(total).padStart(2, "0")}
-            </span>
-          </div>
-
-          <h3 className="mt-8 text-[34px] font-medium leading-[1.05] tracking-[-0.05em] md:text-[44px]">
-            {work.client}
-          </h3>
-          <p
-            className={cn(
-              "mt-4 max-w-[440px] text-[16px] leading-[1.6]",
-              MUTED,
-            )}
-          >
-            {work.summary}
-          </p>
-
-          {"metric" in work && work.metric ? (
-            <div className="mt-6 flex items-baseline gap-3 border-t border-[#141414]/10 pt-5">
-              <span
-                className="text-[32px] font-medium leading-none tracking-[-0.05em]"
-                style={{ color: PRINT }}
-              >
-                {work.metric[0]}
-              </span>
-              <span className={cn("text-[13px] leading-snug", MUTED)}>
-                {work.metric[1]}
-              </span>
-            </div>
-          ) : null}
-
-          <div className="mt-auto flex flex-wrap items-end justify-between gap-6 pt-8">
-            <ul role="list" className="flex flex-col gap-1.5">
-              {work.tags.map((tag) => (
-                <li
-                  key={tag}
-                  className="flex items-center gap-2 text-[13px] font-medium"
-                >
-                  <span
-                    aria-hidden
-                    className="size-1.5"
-                    style={{ background: PRINT }}
-                  />
-                  {tag}
-                </li>
-              ))}
-            </ul>
-            <Link
-              href={work.href}
-              className="group inline-flex h-11 shrink-0 items-center gap-2 rounded-full pl-5 pr-1.5 text-[14px] font-medium text-[#f4efe7] transition-opacity hover:opacity-90"
-              style={{ background: INK }}
-            >
-              Read case study
-              <span
-                className="flex size-8 items-center justify-center rounded-full text-white transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-                style={{ background: PRINT }}
-              >
-                <ArrowUpRight weight="bold" className="size-3.5" />
-              </span>
-            </Link>
-          </div>
-        </div>
-
-        {/* The whole screen in a glass frame, on the shared orange panel */}
-        <Link
-          href={work.href}
-          aria-label={`${work.client} case study`}
-          className="relative isolate flex aspect-[16/11] items-center justify-center overflow-hidden [container-type:size] max-lg:bg-[linear-gradient(165deg,#fe3200_8%,#fc8c04_70%)] lg:aspect-auto lg:h-full lg:cursor-none"
-          {...handlers}
+      <div className="lg:sticky lg:top-0 lg:h-svh">
+        <motion.article
+          className="relative isolate grid h-full overflow-hidden text-[#141414] lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] xl:grid-cols-2"
+          style={{
+            clipPath,
+            scale: outScale,
+            opacity: outOpacity,
+            background: PAPER,
+          }}
         >
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-0 -z-10 opacity-30 mix-blend-multiply"
-            style={{ backgroundImage: GRAIN }}
-          />
-          <motion.div
-            style={{
-              scale: imageScale,
-              aspectRatio: work.ratio,
-              width: `min(84cqw, calc(80cqh * ${work.ratio}))`,
-            }}
-            className="relative rounded-[18px] bg-white/[0.14] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.5),inset_0_0_0_1px_rgba(255,255,255,0.28),0_30px_60px_-24px_rgba(90,25,0,0.55)] backdrop-blur-xl"
-          >
-            <div className="relative size-full overflow-hidden rounded-[11px] ring-1 ring-black/5">
-              <Image
-                src={work.image}
-                alt=""
-                fill
-                sizes="(min-width:1024px) 50vw, 100vw"
-                className="object-cover"
-              />
+          {/* Left half: the story, centred in its half */}
+          <div className="relative flex px-5 py-10 sm:px-10 lg:px-[clamp(28px,5vw,80px)] lg:pb-12 lg:pt-24">
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 -z-10 opacity-30 mix-blend-multiply"
+              style={{ backgroundImage: GRAIN }}
+            />
+            <div className="mx-auto flex w-full max-w-[540px] flex-col gap-8">
+              <div className="flex items-center justify-between gap-4 text-[13px] font-medium">
+                <Link
+                  href={work.href}
+                  className="group relative z-[2] inline-flex min-w-0 items-center gap-2 rounded-full bg-white/70 py-1.5 pl-3.5 pr-1.5 ring-1 ring-inset ring-[#141414]/10 transition-colors hover:bg-white"
+                >
+                  <span className="truncate">{work.href.slice(1)}</span>
+                  <span
+                    className="flex size-6 shrink-0 items-center justify-center rounded-full text-white transition-transform duration-300 group-hover:rotate-45"
+                    style={{ background: PRINT }}
+                  >
+                    <ArrowUpRight weight="bold" className="size-3" />
+                  </span>
+                </Link>
+                <span className={cn("shrink-0 tabular-nums", FAINT)}>
+                  {pad} / {String(total).padStart(2, "0")}
+                </span>
+              </div>
+
+              <div className="my-auto">
+                {/* Client lockup: logo tile, then the name */}
+                <div className="flex items-center gap-3.5">
+                  <span className="relative size-12 shrink-0 overflow-hidden rounded-[13px] bg-white shadow-[0_10px_24px_-14px_rgba(20,20,20,0.45)] ring-1 ring-[#141414]/10 md:size-14 md:rounded-[14px]">
+                    <Image
+                      src={work.logo}
+                      alt=""
+                      fill
+                      sizes="56px"
+                      className="object-cover"
+                      style={
+                        "logoZoom" in work
+                          ? { transform: `scale(${work.logoZoom})` }
+                          : undefined
+                      }
+                    />
+                  </span>
+                  <h3 className="text-[34px] font-medium leading-none tracking-[-0.05em] md:text-[44px] xl:text-[52px]">
+                    {work.client}
+                  </h3>
+                </div>
+                <p className="mt-5 text-[16px] leading-[1.6] tracking-[-0.01em] md:text-[17px] xl:text-[18px]">
+                  {work.summary}
+                </p>
+                <ul role="list" className="mt-4 flex flex-wrap gap-2">
+                  {work.tags.map((tag) => (
+                    <li
+                      key={tag}
+                      className="rounded-full bg-white/70 px-3 py-1 text-[12px] font-medium ring-1 ring-inset ring-[#141414]/10"
+                    >
+                      {tag}
+                    </li>
+                  ))}
+                </ul>
+
+                {/* Results: three white boxes, one shared baseline */}
+                <dl className="mt-8 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+                  {(work.metrics as [Icon, string, string][]).map(
+                    ([MetricIcon, value, label], position) => (
+                      <div
+                        key={label}
+                        className="flex min-w-0 flex-col rounded-[16px] bg-white/85 p-4 shadow-[inset_0_1px_0_#fff,0_14px_30px_-22px_rgba(20,20,20,0.35)] ring-1 ring-inset ring-[#141414]/[0.07]"
+                      >
+                        <dt className="sr-only">{label}</dt>
+                        <dd>
+                          <MetricIcon
+                            aria-hidden
+                            weight="duotone"
+                            className="size-[18px]"
+                            style={{ color: PRINT }}
+                          />
+                          {/* A fixed-size strut sets one shared baseline, so numbers and words line up */}
+                          <p className="mt-3 flex items-baseline whitespace-nowrap font-medium leading-none tracking-[-0.045em]">
+                            <span
+                              aria-hidden
+                              className="invisible w-0 text-[22px] xl:text-[24px]"
+                            >
+                              0
+                            </span>
+                            <span
+                              className={
+                                /^[#\d]/.test(value)
+                                  ? "text-[22px] xl:text-[24px]"
+                                  : "text-[16px] xl:text-[17px]"
+                              }
+                              style={
+                                position === 0 ? { color: PRINT } : undefined
+                              }
+                            >
+                              <MetricValue value={value} />
+                            </span>
+                          </p>
+                          <p
+                            className={cn(
+                              "mt-2 text-[12px] leading-snug",
+                              MUTED,
+                            )}
+                          >
+                            {label}
+                          </p>
+                        </dd>
+                      </div>
+                    ),
+                  )}
+                </dl>
+
+                <Link
+                  href={work.href}
+                  className="group relative z-[2] mt-8 inline-flex h-11 w-fit items-center gap-3 rounded-full bg-white pl-5 pr-1.5 text-[14px] font-medium text-[#141414] shadow-[0_12px_28px_-18px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/10 transition-colors hover:bg-[#fbf9f6]"
+                >
+                  Open case study
+                  <span
+                    className="flex size-8 items-center justify-center rounded-full text-white transition-transform duration-300 group-hover:rotate-45"
+                    style={{ background: PRINT }}
+                  >
+                    <ArrowUpRight weight="bold" className="size-3.5" />
+                  </span>
+                </Link>
+              </div>
             </div>
-          </motion.div>
-          {bubble}
-        </Link>
-        <motion.div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 z-20 bg-[#f4efe7]"
-          style={{ opacity: veil }}
-        />
-      </motion.article>
+          </div>
+
+          {/* Right half: the work, edge to edge */}
+          <Link
+            href={work.href}
+            aria-label={`Open the ${work.client} case study`}
+            className="relative block min-h-[300px] overflow-hidden sm:min-h-[420px] lg:min-h-0 lg:cursor-none"
+            style={ORANGE_PANEL}
+            {...handlers}
+          >
+            <motion.div
+              style={{ scale: contentScale }}
+              className="absolute inset-0"
+            >
+              {photo ? (
+                <Image
+                  src={photo}
+                  alt={`${work.client} case study`}
+                  fill
+                  sizes="(min-width:1024px) 50vw, 100vw"
+                  priority={index === 0}
+                  className="object-cover"
+                />
+              ) : (
+                <>
+                  <div
+                    className="absolute inset-0 opacity-30 mix-blend-multiply"
+                    style={{ backgroundImage: GRAIN }}
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center p-6 md:p-12">
+                    <Image
+                      src={work.image}
+                      alt={`${work.client} case study`}
+                      width={1200}
+                      height={Math.round(1200 / work.ratio)}
+                      sizes="(min-width:1024px) 45vw, 90vw"
+                      priority={index === 0}
+                      className="h-auto max-h-full w-auto max-w-full rounded-[14px] object-contain shadow-[0_40px_80px_-30px_rgba(80,20,0,0.65)] ring-[6px] ring-white/25"
+                    />
+                  </div>
+                </>
+              )}
+            </motion.div>
+            {bubble}
+          </Link>
+        </motion.article>
+      </div>
     </div>
   );
 }
 
 export function PaperWork() {
-  const stackRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: stackRef,
-    offset: ["start start", "end end"],
-  });
-
   return (
     <PaperSection id="results" tone="paper">
       <Container>
@@ -1127,20 +1348,19 @@ export function PaperWork() {
             </OutlineLink>
           }
         />
-
-        {/* Cards stick and stack one over the next as the page scrolls */}
-        <div ref={stackRef} className="mt-10 flex flex-col gap-4 lg:gap-[18vh]">
-          {WORK.map((work, index) => (
-            <CaseCard
-              key={work.client}
-              work={work}
-              index={index}
-              total={WORK.length}
-              progress={scrollYProgress}
-            />
-          ))}
-        </div>
       </Container>
+
+      {/* Cards stack one after another as the page scrolls */}
+      <div className="relative mt-6 flex flex-col gap-4 lg:gap-0">
+        {WORK.map((work, index) => (
+          <CaseCard
+            key={work.client}
+            work={work}
+            index={index}
+            total={WORK.length}
+          />
+        ))}
+      </div>
     </PaperSection>
   );
 }
@@ -1689,58 +1909,56 @@ export function PaperCta() {
   const t = useTranslations("CTA");
   const bullets = ["savings", "lockIn", "content", "turnaround"] as const;
   return (
-    <PaperSection tone="paper">
+    <PaperSection id="contact" tone="paper">
       <Container>
         <IndexBar index={9} name="Contact" aside="contact@studio1hq.com" />
-        <div className="mt-10 grid gap-14 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:items-end lg:gap-20">
-          <h2 className="text-[32px] font-medium leading-[1.2] tracking-[-0.045em] sm:text-[40px] lg:text-[46px]">
-            <span className="block">
-              <span className="bg-[var(--p-card)] px-[0.14em] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]">
-                {t("titleLine1")}
-              </span>
-            </span>
-            <span className="block">
-              <span
-                className="bg-[var(--p-card)] px-[0.14em] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]"
-                style={{ color: PRINT }}
-              >
-                {t("titleLine2")}
-              </span>
-            </span>
+        {/* Orange banner with a soft rising horizon, copy centred */}
+        <div
+          className="relative isolate mt-10 overflow-hidden rounded-[24px] px-6 pb-24 pt-20 text-center text-white md:pb-32 md:pt-24"
+          style={{
+            background:
+              "radial-gradient(60% 70% at 0% 0%, #ff3a00 0%, transparent 70%), radial-gradient(60% 70% at 100% 0%, #ff3a00 0%, transparent 70%), linear-gradient(180deg, #fb8a1e 0%, #f7a54a 38%, #e9b8a6 72%, #f2b38a 100%)",
+          }}
+        >
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-0 -z-10 opacity-25 mix-blend-multiply"
+            style={{ backgroundImage: GRAIN }}
+          />
+          {/* Horizon: a large glowing arc rising from the bottom edge */}
+          <span
+            aria-hidden
+            className="pointer-events-none absolute left-1/2 top-[68%] -z-10 aspect-square w-[150%] -translate-x-1/2 rounded-full md:top-[62%] md:w-[120%]"
+            style={{
+              background:
+                "radial-gradient(closest-side, #fb8a1e 0%, #f9a53f 55%, #f6c78a 92%, rgba(255,240,215,0.9) 97%, transparent 100%)",
+              boxShadow: "0 -20px 60px -10px rgba(255,236,210,0.55)",
+            }}
+          />
+          <h2 className="mx-auto max-w-[760px] text-[32px] font-medium leading-[1.15] tracking-[-0.045em] [text-shadow:0_1px_18px_rgba(160,50,0,0.18)] sm:text-[40px] lg:text-[52px]">
+            {t("titleLine1")} {t("titleLine2")}
           </h2>
-
-          <div>
-            <p className={cn("max-w-[440px] text-[17px] leading-[1.6]", MUTED)}>
-              {t("descriptionLine1")} {t("descriptionLine2")}
-            </p>
-            <div className="relative mt-9 w-fit">
-              <SelectionFrame
-                label="button-filled-enabled"
-                labelPosition="top-left"
-                className="p-1.5"
-              >
-                <a
-                  href="https://cal.com/studio1/collab"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group inline-flex h-14 items-center gap-3 rounded-full py-2 pl-7 pr-2 text-[16px] font-medium transition-opacity hover:opacity-90"
-                  style={{ background: INK, color: PAPER }}
-                >
-                  {t("button")}
-                  <span
-                    className="flex size-10 items-center justify-center rounded-full text-white transition-transform duration-300 group-hover:rotate-45"
-                    style={{ background: PRINT }}
-                  >
-                    <ArrowUpRight weight="bold" className="size-4" />
-                  </span>
-                </a>
-              </SelectionFrame>
-              <Cursor className="absolute -bottom-8 -right-6" />
-            </div>
-          </div>
+          <p className="mx-auto mt-4 max-w-[480px] text-[16px] leading-[1.6] text-white/85 md:text-[17px]">
+            {t("descriptionLine1")} {t("descriptionLine2")}
+          </p>
+          <a
+            href="https://cal.com/studio1/collab"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group mt-9 inline-flex h-12 items-center gap-3 rounded-full py-1.5 pl-6 pr-1.5 text-[15px] font-medium shadow-[0_14px_30px_-14px_rgba(80,20,0,0.6)] transition-transform duration-300 hover:-translate-y-0.5"
+            style={{ background: INK, color: PAPER }}
+          >
+            {t("button")}
+            <span
+              className="flex size-9 items-center justify-center rounded-full text-white transition-transform duration-300 group-hover:rotate-45"
+              style={{ background: PRINT }}
+            >
+              <ArrowUpRight weight="bold" className="size-4" />
+            </span>
+          </a>
         </div>
 
-        <div className={cn("mt-10 sm:grid-cols-2 lg:grid-cols-4", GRID)}>
+        <div className={cn("mt-2 sm:grid-cols-2 lg:grid-cols-4", GRID)}>
           {bullets.map((key, index) => (
             <div
               key={key}

@@ -1259,3 +1259,15 @@ html::-webkit-scrollbar-thumb:hover {
     rgba(255, 255, 255, 0.08) 100%
   );
 }
+
+/* Paper palette for the home page preloader */
+html.s1-pre-paper .s1-preloader {
+  background-color: #f4efe7;
+  background-image: radial-gradient(60% 50% at 50% 50%, rgba(249, 115, 22, 0.1), transparent 70%);
+}
+html.s1-pre-paper .s1-pre-glow {
+  background: radial-gradient(circle, rgba(249, 115, 22, 0.16), transparent 62%);
+}
+html.s1-pre-paper .s1-pre-word {
+  color: #141414;
+}
