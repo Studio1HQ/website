@@ -20,6 +20,7 @@ import {
   WebcrumbsFull,
 } from "@/constants/image";
 import Corsair from "@/public/case-studies/corsair/corsair-logo.webp";
+import OpenLore from "@/public/case-studies/openlore/openlore-logo.webp";
 import Tensorlake from "@/public/case-studies/tensorlake/tensorlake-logo.webp";
 
 export type ClientLogo = {
@@ -39,6 +40,7 @@ export const clientLogos: Record<string, ClientLogo> = {
   litellm: { icon: LiteLLM, full: LiteLLMFull },
   memori: { icon: Memori, full: MemoriFull },
   nebius: { icon: Nebius, full: NebiusFull },
+  openlore: { icon: OpenLore },
   permit: { icon: Permit, full: PermitFull },
   scrapegraph: { icon: ScrapeGraph },
   tensorlake: { icon: Tensorlake },

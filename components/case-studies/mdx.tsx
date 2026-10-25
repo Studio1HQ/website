@@ -23,7 +23,13 @@ function extractText(children: ReactNode): string {
   return "";
 }
 
-function Frame({ children }: { children: ReactNode }) {
+function Frame({
+  children,
+  caption,
+}: {
+  children: ReactNode;
+  caption?: string;
+}) {
   return (
     <figure className="not-prose my-10 w-fit max-w-full overflow-hidden rounded-xl border border-border/70 bg-[linear-gradient(135deg,hsl(var(--muted)/0.5),hsl(var(--background)),hsl(var(--primary)/0.06))] p-2 shadow-[0_18px_52px_-36px_rgba(0,0,0,0.55)] dark:border-white/[0.08] dark:bg-[linear-gradient(135deg,hsl(var(--muted)/0.18),hsl(var(--background)),hsl(var(--primary)/0.08))]">
       <div className="mb-2 flex items-center gap-1.5 px-1">
@@ -34,7 +40,21 @@ function Frame({ children }: { children: ReactNode }) {
       <div className="w-fit max-w-full overflow-hidden rounded-lg border border-border/60 bg-background/80 dark:border-white/[0.08] dark:bg-background/45">
         {children}
       </div>
+      {caption ? (
+        <figcaption className="px-1 pt-2 text-center text-xs font-medium text-muted-foreground">
+          {caption}
+        </figcaption>
+      ) : null}
     </figure>
+  );
+}
+
+/** Lays out Frames side by side, e.g. a before/after pair. Stacks on mobile. */
+function FrameRow({ children }: { children: ReactNode }) {
+  return (
+    <div className="not-prose my-10 grid items-start gap-4 sm:grid-cols-2 [&>figure]:my-0 [&>figure]:w-full">
+      {children}
+    </div>
   );
 }
 
@@ -127,6 +147,7 @@ export const caseStudyMdxComponents = {
   blockquote: CaseStudyBlockquote,
   PullQuote,
   Frame,
+  FrameRow,
   TweetEmbed,
   img: CaseStudyImage,
 };
