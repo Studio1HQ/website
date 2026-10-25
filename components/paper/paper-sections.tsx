@@ -682,42 +682,31 @@ export function PaperPositioning() {
                 )}
                 style={isPrint ? { background: PRINT } : undefined}
               >
-                {/* Soft glow that slowly drifts along the bottom of the card */}
+                {/* One soft gradient per card, each on its own slow path */}
                 <motion.span
                   aria-hidden
-                  className="pointer-events-none !absolute inset-y-0 -left-1/2 -z-10 w-[200%]"
+                  className="pointer-events-none !absolute -z-10 size-[140%] rounded-full blur-2xl"
                   style={{
+                    left: ["-60%", "10%", "-40%", "30%"][index],
+                    top: ["30%", "35%", "-70%", "40%"][index],
                     background: isPrint
-                      ? "radial-gradient(35% 90% at 25% 100%, rgba(254,50,0,0.6), transparent 70%), radial-gradient(30% 80% at 75% 100%, rgba(255,170,90,0.45), transparent 70%)"
-                      : "radial-gradient(30% 85% at 25% 100%, rgba(249,115,22,0.16), transparent 70%), radial-gradient(28% 80% at 75% 100%, rgba(249,115,22,0.10), transparent 70%)",
+                      ? "radial-gradient(closest-side, rgba(254,50,0,0.75), transparent)"
+                      : "radial-gradient(closest-side, rgba(249,115,22,0.20), transparent)",
                   }}
                   animate={
-                    reduceMotion ? undefined : { x: ["0%", "-25%", "0%"] }
+                    reduceMotion
+                      ? undefined
+                      : [
+                          { x: ["0%", "30%", "0%"], y: ["0%", "-12%", "0%"] },
+                          { x: ["0%", "-35%", "0%"], y: ["0%", "-20%", "0%"] },
+                          { x: ["0%", "-20%", "0%"], y: ["0%", "35%", "0%"] },
+                          { x: ["0%", "-40%", "0%"], y: ["0%", "-18%", "0%"] },
+                        ][index]
                   }
                   transition={{
-                    duration: 9,
+                    duration: [10, 12, 11, 13][index],
                     ease: "easeInOut",
                     repeat: Infinity,
-                    delay: index * 1.2,
-                  }}
-                />
-                {/* Glare that sweeps across on a slow loop */}
-                <motion.span
-                  aria-hidden
-                  className="pointer-events-none !absolute inset-y-0 left-0 z-10 w-1/2 skew-x-[-18deg] motion-reduce:hidden"
-                  initial={{ x: "-150%" }}
-                  animate={reduceMotion ? undefined : { x: ["-150%", "260%"] }}
-                  transition={{
-                    duration: 2.2,
-                    ease: [0.65, 0, 0.35, 1],
-                    repeat: Infinity,
-                    repeatDelay: 3.5,
-                    delay: index * 0.5,
-                  }}
-                  style={{
-                    background: isPrint
-                      ? "linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent)"
-                      : "linear-gradient(90deg, transparent, rgba(249,115,22,0.16), transparent)",
                   }}
                 />
                 <p className="text-[40px] font-medium leading-[0.95] tracking-[-0.05em] md:text-[46px]">
@@ -906,6 +895,20 @@ export function PaperServices() {
 const WORK = [
   {
     client: "Nebius",
+    span: "~2 years",
+    shipped: [
+      "29 framework integrations",
+      "130+ agent examples",
+      "Workshops & meetups",
+      "Launch coverage",
+    ],
+    outcome: {
+      kind: "stat" as const,
+      value: "16K+",
+      label: "GitHub stars on the open-source examples library",
+    },
+    outcomeNote:
+      "300+ deliverables, and day-one support for every major launch.",
     situation:
       "Token Factory competes for developers who choose by building, so Nebius needed the product inside the frameworks, examples and events developers already use.",
     changed:
@@ -959,6 +962,21 @@ const WORK = [
   },
   {
     client: "Memori",
+    span: "Launch to today",
+    shipped: [
+      "Open-source launch",
+      "12 demo agents",
+      "Thought-leadership posts",
+      "Meetup talk",
+    ],
+    outcome: {
+      kind: "growth" as const,
+      from: "0",
+      to: "12,000+",
+      label: "GitHub stars, from launch to today",
+    },
+    outcomeNote:
+      "50K+ impressions on the launch post and 100+ developer comments that shaped onboarding.",
     proof:
       "100+ detailed developer comments from the launch shaped Memori's onboarding, docs, and v2 roadmap.",
     situation:
@@ -984,6 +1002,21 @@ const WORK = [
   },
   {
     client: "Bright Data",
+    span: "12+ months",
+    shipped: [
+      "50+ live posts",
+      "Comparison & integration guides",
+      "Docs architecture",
+      "Partner content review",
+    ],
+    outcome: {
+      kind: "ratio" as const,
+      value: 12,
+      total: 30,
+      label:
+        "developer queries we checked return a Studio1 post in Google's top five",
+    },
+    outcomeNote: "Six first-place results on high-intent comparison queries.",
     proof:
       "12 of 30 developer queries we checked returned a Studio1 post in Google's top five, 8 of them in the top three.",
     situation:
@@ -1039,6 +1072,19 @@ const WORK = [
   },
   {
     client: "LiteLLM",
+    span: "Docs & DX",
+    shipped: [
+      "New Learn section",
+      "SDK + Gateway quickstarts",
+      "Restructured integrations",
+      "2 workflow guides",
+    ],
+    outcome: {
+      kind: "stat" as const,
+      value: "Minutes",
+      label: "from zero to a first working request",
+    },
+    outcomeNote: "A public CEO endorsement of the revamped docs.",
     situation:
       "LiteLLM was growing fast, and new users needed a clearer path to their first request and to choosing between the SDK and the Gateway.",
     changed:
@@ -1147,6 +1193,39 @@ function MarkedSummary({ text, mark }: { text: string; mark: string }) {
 /** The case studies featured on the home page; the rest live on /case-studies. */
 const FEATURED = ["Nebius", "Bright Data", "Memori", "LiteLLM"];
 
+/** One beat of a case study story: an arrow badge, a title, then content. */
+function StoryBeat({
+  title,
+  last = false,
+  className,
+  children,
+}: {
+  title: string;
+  last?: boolean;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className={cn("py-3.5", className)}>
+      <p className="flex items-center gap-2.5 text-[14px] font-semibold tracking-[-0.01em] text-[#141414]">
+        <span
+          aria-hidden
+          className="flex size-5 shrink-0 items-center justify-center rounded-full"
+          style={
+            last
+              ? { background: PRINT, color: "#fff" }
+              : { background: "rgba(20,20,20,0.06)", color: PRINT }
+          }
+        >
+          <ArrowRight weight="bold" className="size-3" />
+        </span>
+        {title}
+      </p>
+      <div className="mt-2.5 pl-[30px]">{children}</div>
+    </div>
+  );
+}
+
 /** One featured case study: the situation, what changed, what they got. */
 function FeaturedCase({
   work,
@@ -1159,11 +1238,6 @@ function FeaturedCase({
   // Hovering the card raises the work itself, with a "View case study" bubble.
   const [preview, setPreview] = useState(false);
 
-  const story: [string, string][] = [
-    ["The situation", work.situation ?? ""],
-    ["What changed", work.changed ?? ""],
-    ["What they got", work.result ?? ""],
-  ];
   const quote = "quote" in work ? work.quote : undefined;
 
   return (
@@ -1171,7 +1245,7 @@ function FeaturedCase({
     <article
       onPointerEnter={() => setPreview(true)}
       onPointerLeave={() => setPreview(false)}
-      className="group relative isolate grid rounded-[24px] bg-white/80 p-6 shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08] transition-shadow duration-500 hover:z-10 hover:shadow-[inset_0_1px_0_#fff,0_30px_60px_-34px_rgba(249,115,22,0.45)] md:row-span-9 md:grid-rows-[subgrid] md:p-9"
+      className="group relative isolate grid min-w-0 grid-cols-[minmax(0,1fr)] rounded-[24px] bg-white/80 p-6 shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08] transition-shadow duration-500 hover:z-10 hover:shadow-[inset_0_1px_0_#fff,0_30px_60px_-34px_rgba(249,115,22,0.45)] md:row-span-9 md:grid-rows-[subgrid] md:p-9"
     >
       {/* Still orange halftone, fading out from the top-right corner */}
       <span
@@ -1216,6 +1290,11 @@ function FeaturedCase({
         <span className="text-[15px] font-semibold tracking-[-0.01em]">
           {work.client}
         </span>
+        {"span" in work && work.span ? (
+          <span className="rounded-full bg-[#f97316]/10 px-2.5 py-0.5 text-[11.5px] font-medium text-[#c2410c]">
+            {work.span}
+          </span>
+        ) : null}
         <span aria-hidden className="h-px flex-1 bg-[#141414]/12" />
         <span className="relative rounded-[10px] bg-[#fbfaf7] px-2 py-1 text-[28px] font-medium leading-none tabular-nums tracking-[-0.05em] text-[#141414]/30 shadow-[0_0_0_6px_#fbfaf7] md:text-[34px]">
           {String(index + 1).padStart(2, "0")}
@@ -1237,39 +1316,54 @@ function FeaturedCase({
         <MarkedSummary text={work.summary} mark={work.mark} />
       </p>
 
-      {/* 4-6. The story, stacked: label on top, text below */}
-      {story.map(([title, text], beat) => {
-        const last = beat === story.length - 1;
-        return (
-          <div key={title} className={cn("py-3", beat === 0 && "mt-5")}>
-            <p className="flex items-center gap-2.5 text-[14px] font-semibold tracking-[-0.01em] text-[#141414]">
+      {/* 4-6. The story: the situation, what we shipped, what changed */}
+      <StoryBeat title="The situation" className="mt-6">
+        <p className={cn("text-[14.5px] leading-[1.65]", MUTED)}>
+          {work.situation}
+        </p>
+      </StoryBeat>
+
+      <StoryBeat title="What we shipped">
+        <ul role="list" className="flex flex-wrap gap-2">
+          {(("shipped" in work && work.shipped) || []).map((item) => (
+            <li
+              key={item}
+              className="inline-flex items-center gap-2 rounded-[8px] bg-[#141414]/[0.045] px-2.5 py-1 text-[12.5px] font-medium text-[#141414]/80"
+            >
               <span
                 aria-hidden
-                className="flex size-5 shrink-0 items-center justify-center rounded-full"
-                style={
-                  last
-                    ? { background: PRINT, color: "#fff" }
-                    : { background: "rgba(20,20,20,0.06)", color: PRINT }
-                }
-              >
-                <ArrowRight weight="bold" className="size-3" />
-              </span>
-              {title}
-            </p>
-            <p
-              className={cn(
-                "mt-1.5 pl-[30px] text-[14.5px] leading-[1.65]",
-                last ? "font-medium text-[#141414]" : MUTED,
-              )}
-            >
-              {text}
-            </p>
-          </div>
-        );
-      })}
+                className="size-1.5 rounded-full"
+                style={{ background: PRINT }}
+              />
+              {item}
+            </li>
+          ))}
+        </ul>
+      </StoryBeat>
+
+      <StoryBeat title="What they got" last>
+        <p className="text-[15px] font-medium leading-[1.6] text-[#141414]">
+          {"outcomeNote" in work && work.outcomeNote ? (
+            <>
+              {work.outcome ? (
+                <span style={{ color: PRINT }}>
+                  {work.outcome.kind === "growth"
+                    ? `${work.outcome.from} → ${work.outcome.to}`
+                    : work.outcome.kind === "ratio"
+                      ? `${work.outcome.value} of ${work.outcome.total}`
+                      : work.outcome.value}{" "}
+                </span>
+              ) : null}
+              {work.outcome?.label}. {work.outcomeNote}
+            </>
+          ) : (
+            work.result
+          )}
+        </p>
+      </StoryBeat>
 
       {/* 7. Results, engraved into the card */}
-      <dl className="mt-3 grid grid-cols-1 gap-2 min-[480px]:grid-cols-3">
+      <dl className="mt-5 grid grid-cols-1 gap-2.5 min-[480px]:grid-cols-3">
         {(work.metrics as [Icon, string, string][]).map(
           ([MetricIcon, value, label], position) => (
             <div
@@ -1319,7 +1413,7 @@ function FeaturedCase({
       </dl>
 
       {/* 8. Client voice, or a verified result where no quote is published */}
-      <figure className="mt-6 flex flex-col rounded-[18px] bg-[#ece5da] p-5 shadow-[inset_0_3px_8px_rgba(20,20,20,0.10),inset_0_-1px_0_rgba(255,255,255,0.85),0_1px_0_rgba(255,255,255,0.95)] md:p-6">
+      <figure className="mt-5 flex flex-col rounded-[18px] bg-[#ece5da] p-5 shadow-[inset_0_3px_8px_rgba(20,20,20,0.10),inset_0_-1px_0_rgba(255,255,255,0.85),0_1px_0_rgba(255,255,255,0.95)] md:p-6">
         {quote ? (
           <svg
             aria-hidden
@@ -1375,8 +1469,8 @@ function FeaturedCase({
       </figure>
 
       {/* 9. Footer */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pt-7">
-        <p className={cn("min-w-0 text-[12px]", FAINT)}>
+      <div className="flex items-center justify-between gap-4 border-t border-[#141414]/[0.08] pt-5 mt-6">
+        <p className={cn("min-w-0 flex-1 truncate text-[12px]", FAINT)}>
           {work.tags.join(" · ")}
         </p>
         <Link
