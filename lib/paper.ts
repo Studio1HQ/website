@@ -42,7 +42,7 @@ export const PAPER_SCOPE = {
 } as CSSProperties;
 
 /** Routes drawn in the paper design (cream sheet, ink type, print orange); the blog is matched separately. */
-const PAPER_PATHS = new Set(["/", "/careers"]);
+const PAPER_PATHS = new Set(["/", "/careers", "/terms", "/privacy"]);
 
 /** Drops the locale prefix, so "/fr/careers" reads as "/careers". */
 export function unprefixPath(pathname: string) {
