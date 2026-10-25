@@ -12,10 +12,13 @@ import { PostShare } from "@/components/blog/post-share";
 import { PostAiActions } from "@/components/blog/post-ai-actions";
 import { ChapterRail } from "@/components/blog/chapter-rail";
 import { OnThisPage } from "@/components/blog/on-this-page";
-import { BlogSidebar } from "@/components/blog/blog-sidebar";
 import { Num } from "@/components/ui/num";
-import { NightHeader } from "@/components/shared/night-header";
+import { Cursor, SelectionFrame } from "@/components/paper/paper-hero";
+import { PaperCta } from "@/components/paper/paper-sections";
 import type { BlogPostNavigation } from "@/lib/blog";
+import { blogCoverUrl } from "@/lib/blog-cover";
+import { tagLabel } from "@/lib/blog-tags";
+import { GRAIN, INK, PAPER, PAPER_SCOPE, PRINT } from "@/lib/paper";
 
 type PostLayoutProps = {
   title: string;
@@ -25,13 +28,13 @@ type PostLayoutProps = {
   author: string;
   authors?: string[];
   tags: string[];
-  bannerImage?: string;
-  bannerImageAlt?: string;
+  slug: string;
   readingTimeMinutes?: number;
   shareUrl: string;
   markdownUrl: string;
   tldrSummary?: string;
   keyTakeaways?: string[];
+  wordCount?: number;
   navigation?: BlogPostNavigation;
   children: ReactNode;
 };
@@ -51,11 +54,26 @@ function formatDate(value: string) {
 const sideLink =
   "group flex h-11 items-center justify-between rounded-full pl-1.5 pr-4 text-[13px] transition-transform duration-300 hover:-translate-y-0.5";
 
+/** White sheet with a hairline ring, as the landing page's cards. */
+const sheet = "bg-white/80 ring-1 ring-inset ring-[#141414]/10";
+
+/** Same width and gutters as the landing page's Container. */
+const frame = "mx-auto w-full max-w-[1300px] px-4 sm:px-6 lg:px-8";
+
+function initials(name: string) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0]?.toUpperCase())
+    .join("");
+}
+
 /**
- * Docs-style blog post: pinned article index on the left, the article in the
- * centre (night header glow behind the title), and a pinned "On this page"
- * list with quick links on the right. Below xl it collapses to one column with
- * a floating chapter pill.
+ * Blog post in the paper design: a printed header with the cover framed full
+ * width on top, then the article between a numbered "On this page" list (left)
+ * and a details ledger with quick links (right). Below xl it collapses to one
+ * column with a floating chapter pill.
  */
 export function PostLayout({
   title,
@@ -65,137 +83,159 @@ export function PostLayout({
   author,
   authors,
   tags,
-  bannerImage,
-  bannerImageAlt,
+  slug,
   readingTimeMinutes,
   shareUrl,
   markdownUrl,
   tldrSummary,
   keyTakeaways = [],
+  wordCount,
   navigation = { previous: null, next: null },
   children,
 }: PostLayoutProps) {
   const showUpdatedDate = updatedDate && updatedDate !== date;
-  const byline = authors?.length ? authors.join(", ") : author;
+  const authorList = authors?.length ? authors : [author];
+  const byline = authorList.join(", ");
   const summary = tldrSummary || description;
   const takeaways = keyTakeaways.filter(
     (item) => item.trim() !== summary.trim(),
   );
-  const currentSlug = shareUrl.split("/").filter(Boolean).pop() ?? "";
+  const topic = tags[0] ? tagLabel(tags[0]) : "Journal";
+
+  const details: [string, ReactNode][] = [
+    ["Published", <time key="published" dateTime={date}>{formatDate(date)}</time>],
+    ...(showUpdatedDate
+      ? ([["Updated", <time key="updated" dateTime={updatedDate}>{formatDate(updatedDate)}</time>]] as [string, ReactNode][])
+      : []),
+    ...(readingTimeMinutes != null
+      ? ([["Reading time", <><Num>{readingTimeMinutes}</Num> min</>]] as [string, ReactNode][])
+      : []),
+    ...(wordCount ? ([["Words", <Num key="words">{wordCount.toLocaleString("en-US")}</Num>]] as [string, ReactNode][]) : []),
+    ["Topic", topic],
+  ];
 
   return (
-    <article className="bg-[var(--home-cream)] pt-20 text-[var(--home-ink)]">
-      <div className="mx-auto w-full max-w-[1680px] xl:grid xl:grid-cols-[280px_minmax(0,1fr)_280px]">
-        {/* Left: every article, grouped by topic (pinned) */}
-        <aside className="hidden border-r border-[var(--home-line)] xl:block">
-          <div data-lenis-prevent className="s1-scroll-quiet sticky top-20 h-[calc(100vh/var(--s1-zoom,1)_-_5rem)] overflow-y-auto px-7 pb-10">
-            {/* Always-available back button, pinned while the list scrolls */}
-            <div className="sticky top-0 z-10 -mx-7 mb-6 bg-gradient-to-b from-[var(--home-cream)] from-75% to-transparent px-7 pb-5 pt-8">
+    <div style={PAPER_SCOPE}>
+      <article className="relative isolate pt-20">
+        {/* Paper grain */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10 opacity-30 mix-blend-multiply"
+          style={{ backgroundImage: GRAIN }}
+        />
+
+        <header className={`${frame} pt-12 md:pt-16`}>
+          <nav aria-label="Breadcrumb" className="flex items-center justify-between gap-6 text-[13px] font-medium">
+            <span className="flex min-w-0 items-center gap-3">
               <Link
                 href="/blog"
-                className="s1-glass-card group inline-flex h-10 items-center gap-2 rounded-full pl-1.5 pr-4 text-[13px] font-medium text-[var(--home-ink)] transition-colors hover:text-primary"
+                className="group inline-flex items-center gap-1.5 text-[var(--p-muted)] transition-colors hover:text-[var(--p-fg)]"
               >
-                <span className="flex size-7 items-center justify-center rounded-full bg-[var(--home-ink)] text-[var(--home-cream)] transition-transform duration-300 group-hover:-translate-x-0.5">
-                  <ArrowLeft weight="bold" className="size-3.5" />
-                </span>
-                Back to Our Blog
+                <ArrowLeft weight="bold" className="size-3.5 transition-transform group-hover:-translate-x-0.5" />
+                Blog
               </Link>
+              <span aria-hidden className="text-[var(--p-faint)]">/</span>
+              <span className="truncate" style={{ color: PRINT }}>{topic}</span>
+            </span>
+            {readingTimeMinutes != null ? (
+              <span className="hidden shrink-0 text-[var(--p-muted)] sm:block">
+                <Num>{readingTimeMinutes}</Num> min read
+              </span>
+            ) : null}
+          </nav>
+
+          <h1 className="mt-8 max-w-[1040px] text-[36px] font-medium leading-[1.12] tracking-[-0.05em] sm:text-[50px] lg:text-[62px]">
+            <span className="bg-white px-[0.14em] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]">
+              {title}
+            </span>
+          </h1>
+          <p className="mt-6 max-w-[720px] text-[17px] leading-[1.6] text-[var(--p-muted)] sm:text-[18px]">
+            {description}
+          </p>
+
+          <div className="mt-8 flex flex-wrap items-center justify-between gap-x-6 gap-y-4 border-t border-[var(--p-line)] pt-5">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[14px] text-[var(--p-muted)]">
+              <span
+                aria-hidden
+                className="flex size-8 items-center justify-center rounded-full text-[11px] font-medium"
+                style={{ background: INK, color: PAPER }}
+              >
+                {initials(authorList[0])}
+              </span>
+              <span className="font-medium text-[var(--p-fg)]">{byline}</span>
+              <span aria-hidden className="text-[var(--p-faint)]">·</span>
+              <time dateTime={date}>{formatDate(date)}</time>
             </div>
-            <BlogSidebar currentSlug={currentSlug} />
-          </div>
-        </aside>
-
-        {/* Centre: the article */}
-        <div className="min-w-0">
-          <NightHeader className="pb-28 pt-14 md:pb-32 md:pt-16">
-            <div className="mx-auto w-full max-w-[860px] px-4 sm:px-6 lg:px-10">
-              <Link
-                href="/blog"
-                className="mb-8 inline-flex items-center gap-2 text-[13px] font-medium text-white/60 transition-colors hover:text-white xl:hidden"
-              >
-                <ArrowLeft weight="bold" className="size-3.5" />
-                Back to Our Blog
-              </Link>
-
-              <ul role="list" className="flex flex-wrap gap-2">
-                {tags.map((tag) => (
+            {tags.length ? (
+              <ul role="list" className="flex flex-wrap gap-1.5">
+                {tags.map((tag, index) => (
                   <li
                     key={tag}
-                    className="rounded-full border border-white/20 bg-black/20 px-3 py-1 text-[12px] font-medium text-white/85 backdrop-blur-sm"
+                    className={
+                      index === 0
+                        ? "px-2 py-1 text-[12px] font-medium leading-none text-white"
+                        : `px-2 py-1 text-[12px] font-medium leading-none text-[var(--p-muted)] ${sheet}`
+                    }
+                    style={index === 0 ? { background: PRINT } : undefined}
                   >
-                    {tag}
+                    {tagLabel(tag)}
                   </li>
                 ))}
               </ul>
-              <h1 className="mt-6 text-[34px] font-medium leading-[1.08] tracking-[-0.045em] sm:text-[44px] lg:text-[52px]">
-                {title}
-              </h1>
-              <p className="mt-5 max-w-[680px] text-[17px] leading-[1.6] text-white/65">
-                {description}
-              </p>
-              <div className="mt-7 flex flex-wrap items-center gap-x-3 gap-y-1 text-[14px] text-white/55">
-                <span className="text-white/85">By {byline}</span>
-                <span aria-hidden>·</span>
-                <time dateTime={date}>{formatDate(date)}</time>
-                {readingTimeMinutes != null ? (
-                  <>
-                    <span aria-hidden>·</span>
-                    <span>
-                      <Num>{readingTimeMinutes}</Num> min read
-                    </span>
-                  </>
-                ) : null}
-                {showUpdatedDate ? (
-                  <>
-                    <span aria-hidden>·</span>
-                    <span>
-                      Updated{" "}
-                      <time dateTime={updatedDate}>
-                        {formatDate(updatedDate)}
-                      </time>
-                    </span>
-                  </>
-                ) : null}
-              </div>
-            </div>
-          </NightHeader>
-
-          <div className="mx-auto w-full max-w-[860px] px-4 pb-24 sm:px-6 lg:px-10">
-            {bannerImage ? (
-              <figure className="relative -mt-16 overflow-hidden rounded-[22px] bg-black shadow-[0_40px_100px_-40px_rgba(0,0,0,0.6)] ring-1 ring-black/10 md:-mt-20 dark:ring-white/10">
-                <div className="relative aspect-[16/9]">
-                  <Image
-                    src={bannerImage}
-                    alt={bannerImageAlt || title}
-                    fill
-                    priority
-                    className="object-contain"
-                    sizes="(max-width: 900px) 100vw, 860px"
-                  />
-                </div>
-              </figure>
             ) : null}
+          </div>
 
+          <div className="relative mt-12">
+            <SelectionFrame label="cover-image" labelPosition="top-left" className="p-1.5">
+              <figure className="relative aspect-[16/9] overflow-hidden bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/10">
+                <Image
+                  src={blogCoverUrl(slug, updatedDate || date)}
+                  alt=""
+                  fill
+                  priority
+                  className="object-cover"
+                  sizes="(max-width: 1300px) 100vw, 1240px"
+                />
+              </figure>
+            </SelectionFrame>
+            <Cursor className="absolute -bottom-6 right-[10%] hidden md:block" />
+          </div>
+        </header>
+
+        <div className={`${frame} pb-24 pt-14 md:pt-16 xl:grid xl:grid-cols-[230px_minmax(0,1fr)_230px] xl:gap-14`}>
+          {/* Left: numbered chapters, the one being read opens (pinned) */}
+          <aside className="hidden xl:block">
+            <div data-lenis-prevent className="s1-scroll-none sticky top-28 max-h-[calc(100vh/var(--s1-zoom,1)_-_8rem)] overflow-y-auto pb-6">
+              <OnThisPage />
+            </div>
+          </aside>
+
+          {/* Centre: the article */}
+          <div className="mx-auto w-full min-w-0 max-w-[760px]">
             <section
               aria-label="Article TL;DR"
-              className="s1-glass-card mt-10 rounded-[22px] p-6 md:p-8"
+              className={`p-6 md:p-8 ${sheet}`}
             >
-              <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-primary">
+              <span
+                className="inline-flex px-1.5 py-1 text-[11px] font-medium uppercase leading-none tracking-[0.12em] text-white"
+                style={{ background: PRINT }}
+              >
                 TL;DR
-              </p>
-              <p className="mt-3 text-[17px] leading-[1.6] text-[var(--home-ink)]">
+              </span>
+              <p className="mt-4 text-[17px] leading-[1.6] text-[var(--p-fg)]">
                 {summary}
               </p>
               {takeaways.length ? (
-                <ul className="mt-5 space-y-2.5 border-t border-[var(--home-line)] pt-5">
+                <ul className="mt-5 space-y-2.5 border-t border-[var(--p-line)] pt-5">
                   {takeaways.map((takeaway) => (
                     <li
                       key={takeaway}
-                      className="flex gap-3 text-[15px] leading-[1.6] text-[var(--home-ink-soft)]"
+                      className="flex gap-3 text-[15px] leading-[1.6] text-[var(--p-muted)]"
                     >
                       <span
                         aria-hidden
-                        className="mt-2.5 size-1.5 shrink-0 rounded-full bg-primary"
+                        className="mt-2.5 size-1.5 shrink-0"
+                        style={{ background: PRINT }}
                       />
                       <span>{takeaway}</span>
                     </li>
@@ -212,7 +252,7 @@ export function PostLayout({
 
             <div
               data-mdx-content
-              className="prose prose-neutral mt-12 max-w-none dark:prose-invert prose-headings:scroll-mt-28 prose-headings:font-medium prose-headings:tracking-[-0.035em] prose-headings:text-[var(--home-ink)] prose-h2:mb-5 prose-h2:mt-16 prose-h2:text-[30px] prose-h3:mt-10 prose-h3:text-[22px] prose-p:text-[17px] prose-p:leading-[1.75] prose-p:text-[var(--home-ink-soft)] prose-a:font-medium prose-a:text-primary prose-a:underline prose-a:decoration-primary/30 prose-a:underline-offset-4 hover:prose-a:decoration-primary prose-strong:text-[var(--home-ink)] prose-code:before:content-none prose-code:after:content-none prose-li:text-[17px] prose-li:leading-[1.7] prose-li:text-[var(--home-ink-soft)] prose-img:rounded-2xl prose-th:text-[var(--home-ink)] prose-td:text-[var(--home-ink-soft)]"
+              className="prose prose-neutral mt-12 max-w-none prose-headings:scroll-mt-28 prose-headings:font-medium prose-headings:tracking-[-0.035em] prose-headings:text-[var(--p-fg)] prose-h2:mb-5 prose-h2:mt-16 prose-h2:border-t prose-h2:border-[var(--p-line)] prose-h2:pt-10 prose-h2:text-[30px] prose-h3:mt-10 prose-h3:text-[22px] prose-p:text-[17px] prose-p:leading-[1.75] prose-p:text-[var(--home-ink-soft)] prose-a:font-medium prose-a:text-primary prose-a:underline prose-a:decoration-primary/30 prose-a:underline-offset-4 hover:prose-a:decoration-primary prose-blockquote:border-l-[#f97316] prose-strong:text-[var(--p-fg)] prose-code:before:content-none prose-code:after:content-none prose-li:text-[17px] prose-li:leading-[1.7] prose-li:text-[var(--home-ink-soft)] prose-li:marker:text-[#f97316] prose-img:rounded-none prose-hr:border-[var(--p-line)] prose-th:text-[var(--p-fg)] prose-td:text-[var(--home-ink-soft)]"
             >
               {children}
             </div>
@@ -224,21 +264,21 @@ export function PostLayout({
             {navigation.previous || navigation.next ? (
               <nav
                 aria-label="Article navigation"
-                className="mt-16 grid gap-4 md:grid-cols-2"
+                className="mt-16 grid gap-2 md:grid-cols-2"
               >
                 {navigation.previous ? (
                   <Link
                     href={`/blog/${navigation.previous.slug}`}
-                    className="s1-glass-card group rounded-[20px] p-6 transition-transform duration-300 hover:-translate-y-0.5"
+                    className={`group p-6 transition-[transform,background-color] duration-300 hover:-translate-y-0.5 hover:bg-white ${sheet}`}
                   >
-                    <p className="inline-flex items-center gap-1.5 text-[12px] font-medium uppercase tracking-[0.12em] text-[var(--home-ink-soft)]">
+                    <p className="inline-flex items-center gap-1.5 text-[12px] font-medium uppercase tracking-[0.12em] text-[var(--p-muted)]">
                       <ArrowLeft
                         weight="bold"
                         className="size-3.5 transition-transform group-hover:-translate-x-0.5"
                       />
                       Previous
                     </p>
-                    <p className="mt-3 text-[17px] font-medium leading-snug tracking-[-0.02em] text-[var(--home-ink)] group-hover:text-primary">
+                    <p className="mt-3 text-[17px] font-medium leading-snug tracking-[-0.02em] transition-colors group-hover:text-[#f97316]">
                       {navigation.previous.title}
                     </p>
                   </Link>
@@ -248,16 +288,16 @@ export function PostLayout({
                 {navigation.next ? (
                   <Link
                     href={`/blog/${navigation.next.slug}`}
-                    className="s1-glass-card group rounded-[20px] p-6 text-right transition-transform duration-300 hover:-translate-y-0.5"
+                    className={`group p-6 text-right transition-[transform,background-color] duration-300 hover:-translate-y-0.5 hover:bg-white ${sheet}`}
                   >
-                    <p className="inline-flex items-center gap-1.5 text-[12px] font-medium uppercase tracking-[0.12em] text-[var(--home-ink-soft)]">
+                    <p className="inline-flex items-center gap-1.5 text-[12px] font-medium uppercase tracking-[0.12em] text-[var(--p-muted)]">
                       Next
                       <ArrowRight
                         weight="bold"
                         className="size-3.5 transition-transform group-hover:translate-x-0.5"
                       />
                     </p>
-                    <p className="mt-3 text-[17px] font-medium leading-snug tracking-[-0.02em] text-[var(--home-ink)] group-hover:text-primary">
+                    <p className="mt-3 text-[17px] font-medium leading-snug tracking-[-0.02em] transition-colors group-hover:text-[#f97316]">
                       {navigation.next.title}
                     </p>
                   </Link>
@@ -267,30 +307,38 @@ export function PostLayout({
               </nav>
             ) : null}
           </div>
-        </div>
 
-        {/* Right: on this page + quick links (pinned) */}
-        <aside className="hidden border-l border-[var(--home-line)] xl:block">
-          <div className="sticky top-20 flex h-[calc(100vh/var(--s1-zoom,1)_-_5rem)] flex-col">
-            {/* The list scrolls on its own; the actions below stay pinned */}
-            <div data-lenis-prevent className="s1-scroll-none min-h-0 flex-1 overflow-y-auto px-7 pb-10 pt-10 [mask-image:linear-gradient(to_bottom,black_calc(100%-56px),transparent)]">
-              <OnThisPage />
-            </div>
-            <div className="flex shrink-0 flex-col gap-5 px-7 pb-8 pt-2">
+          {/* Right: details ledger and quick links (pinned) */}
+          <aside className="hidden xl:block">
+            <div className="sticky top-28 flex flex-col gap-6">
+              <dl className="text-[12px]">
+                {details.map(([label, value]) => (
+                  <div
+                    key={label}
+                    className="flex items-baseline justify-between gap-4 border-b border-[var(--p-line)] py-2.5 first:border-t"
+                  >
+                    <dt className="font-medium uppercase tracking-[0.12em] text-[var(--p-muted)]">{label}</dt>
+                    <dd className="text-right font-medium tabular-nums">{value}</dd>
+                  </div>
+                ))}
+              </dl>
               <div className="flex flex-col gap-2">
                 <a
                   href={markdownUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`${sideLink} s1-glass-card text-[var(--home-ink-soft)] hover:text-[var(--home-ink)]`}
+                  className={`${sideLink} ${sheet} text-[var(--p-muted)] hover:text-[var(--p-fg)]`}
                 >
                   <span className="flex items-center gap-2.5">
-                    <span className="flex size-8 items-center justify-center rounded-full bg-[var(--home-ink)] text-[var(--home-cream)]">
+                    <span
+                      className="flex size-8 items-center justify-center rounded-full"
+                      style={{ background: INK, color: PAPER }}
+                    >
                       <MarkdownLogo weight="fill" className="size-4" />
                     </span>
                     <span>
                       View as{" "}
-                      <span className="font-medium text-[var(--home-ink)]">
+                      <span className="font-medium text-[var(--p-fg)]">
                         Markdown
                       </span>
                     </span>
@@ -304,10 +352,14 @@ export function PostLayout({
                   href="https://cal.com/studio1/collab"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`${sideLink} s1-glass-btn text-white`}
+                  className={sideLink}
+                  style={{ background: INK, color: PAPER }}
                 >
                   <span className="flex items-center gap-2.5">
-                    <span className="flex size-8 items-center justify-center rounded-full bg-white/20 text-white ring-1 ring-inset ring-white/30">
+                    <span
+                      className="flex size-8 items-center justify-center rounded-full text-white"
+                      style={{ background: PRINT }}
+                    >
                       <CalendarDots weight="bold" className="size-4" />
                     </span>
                     <span className="font-medium">Book a strategy call</span>
@@ -320,12 +372,16 @@ export function PostLayout({
               </div>
               <PostShare url={shareUrl} title={title} variant="sidebar" />
             </div>
-          </div>
-        </aside>
-      </div>
+          </aside>
+        </div>
 
-      {/* Below xl: floating chapter pill */}
-      <ChapterRail readingTimeMinutes={readingTimeMinutes} variant="pill" />
-    </article>
+        {/* Below xl: floating chapter pill */}
+        <ChapterRail readingTimeMinutes={readingTimeMinutes} variant="pill" />
+      </article>
+
+      <div className="border-t border-[var(--p-line)]">
+        <PaperCta index={2} />
+      </div>
+    </div>
   );
 }

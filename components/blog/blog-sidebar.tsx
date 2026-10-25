@@ -1,15 +1,7 @@
 import Link from "next/link";
 import { getAllPosts } from "@/lib/blog";
+import { tagLabel } from "@/lib/blog-tags";
 import { cn } from "@/lib/utils";
-
-/** Human label for a tag slug, e.g. "developer-experience" -> "Developer Experience". */
-function tagLabel(tag: string) {
-  return tag
-    .split(/[-_\s]+/)
-    .filter(Boolean)
-    .map((word) => (word.length <= 3 && word === word.toUpperCase() ? word : word[0].toUpperCase() + word.slice(1)))
-    .join(" ");
-}
 
 /**
  * Docs-style article index for the blog post sidebar: every post grouped by
@@ -50,9 +42,9 @@ export function BlogSidebar({ currentSlug }: { currentSlug: string }) {
                     <span
                       aria-hidden
                       className={cn(
-                        "mt-[7px] size-1.5 shrink-0 rounded-full transition-colors",
+                        "mt-[7px] size-1.5 shrink-0 transition-colors",
                         isCurrent
-                          ? "bg-primary shadow-[0_0_8px_rgba(249,115,22,0.8)]"
+                          ? "bg-[#f97316]"
                           : "bg-transparent group-hover:bg-[var(--home-line)]",
                       )}
                     />

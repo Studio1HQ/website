@@ -28,7 +28,7 @@ export function CodeBlock({ code, language = "text" }: CodeBlockProps) {
   }
 
   return (
-    <figure className="not-prose my-8 overflow-hidden rounded-[18px] bg-[#0c0908] text-zinc-100 shadow-[0_30px_70px_-40px_rgba(0,0,0,0.8)] ring-1 ring-black/10 dark:ring-white/10">
+    <figure className="not-prose my-8 overflow-hidden rounded-[18px] bg-[#0c0908] text-zinc-100 shadow-[0_30px_70px_-40px_rgba(0,0,0,0.8)] ring-1 ring-black/10">
       <div className="flex items-center justify-between border-b border-white/[0.08] px-4 py-2.5">
         <div className="flex items-center gap-3">
           <span aria-hidden className="flex gap-1.5">

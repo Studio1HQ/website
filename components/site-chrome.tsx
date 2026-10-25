@@ -13,6 +13,7 @@ import { LocalizedLinkRuntime } from "@/components/localization/localized-link-r
 import ScrollToTopButton from "@/components/scroll-to-top-button";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import { DEFAULT_LOCALE, localeMeta, type Locale } from "@/lib/i18n";
+import { isPaperPath } from "@/lib/paper";
 
 export function SiteChrome({ children }: { children: React.ReactNode }) {
   const locale = useLocale() as Locale;
@@ -20,7 +21,7 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
   const unprefixedPathname =
     pathname.replace(/^\/(fr|es|hi|zh)(?=\/|$)/, "") || "/";
   const shouldShowGlobalCta =
-    !unprefixedPathname.startsWith("/careers") && unprefixedPathname !== "/";
+    !unprefixedPathname.startsWith("/careers") && !isPaperPath(pathname);
 
   useEffect(() => {
     const meta = localeMeta[locale] ?? localeMeta[DEFAULT_LOCALE];
@@ -36,7 +37,7 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
       </Suspense>
       {children}
       {shouldShowGlobalCta ? <CTA /> : null}
-      {unprefixedPathname === "/" ? <PaperFooter /> : <Footer />}
+      {isPaperPath(pathname) ? <PaperFooter /> : <Footer />}
       <BottomNavbar />
       <ScrollToTopButton />
       <LocalizedLinkRuntime />

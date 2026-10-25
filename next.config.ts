@@ -22,6 +22,12 @@ const nextConfig: NextConfig = {
         hostname: "**",
       },
     ],
+    localPatterns: [
+      // Any local image without a query string, as before.
+      { pathname: "/**", search: "" },
+      // Blog covers carry a ?v= version so cache updates reach readers.
+      { pathname: "/blog-cover/**" },
+    ],
   },
   async rewrites() {
     // Markdown version of every blog post, for LLMs and AI tools.

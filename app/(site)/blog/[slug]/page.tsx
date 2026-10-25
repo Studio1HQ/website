@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
-import { getPostBySlug, getPostSlugs } from "@/lib/blog";
+import { countBlogWords, getPostBySlug, getPostSlugs } from "@/lib/blog";
 import { PostLayout } from "@/components/blog/post-layout";
 import { postMarkdownUrl } from "@/lib/blog-markdown";
 import { blogMdxComponents, transformBlogMdxContent } from "@/components/blog/mdx";
@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     path: `/blog/${slug}`,
     keywords: post.tags,
     image: post.socialImage,
-    imageAlt: post.bannerImageAlt,
+    imageAlt: `${post.title} cover`,
     publishedTime: post.date,
     modifiedTime: post.updatedDate,
     authors: post.authors,
@@ -85,7 +85,7 @@ export default async function BlogPostPage({ params }: Props) {
       url: absoluteImageUrl(post.socialImage),
       width: 1200,
       height: 630,
-      caption: post.bannerImageAlt,
+      caption: `${post.title} cover`,
     },
     keywords: post.tags.join(", "),
     articleSection: post.tags,
@@ -131,9 +131,9 @@ export default async function BlogPostPage({ params }: Props) {
         author={post.author}
         authors={post.authors}
         tags={post.tags}
-        bannerImage={post.bannerImage}
-        bannerImageAlt={post.bannerImageAlt}
+        slug={slug}
         readingTimeMinutes={post.readingTimeMinutes}
+        wordCount={countBlogWords(post.content)}
         shareUrl={`${baseUrl}/blog/${slug}`}
         markdownUrl={postMarkdownUrl(slug)}
         tldrSummary={post.tldrSummary}
