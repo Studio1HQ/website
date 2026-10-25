@@ -712,7 +712,7 @@ export default function PaperHero() {
             <li key={navKey} className="min-w-0">
               <Link
                 href={href}
-                className="group relative isolate flex h-full flex-col items-start overflow-hidden bg-white/80 p-5 ring-1 ring-inset ring-[#141414]/10 transition-colors duration-300 hover:bg-white [&>*:not(canvas)]:relative"
+                className="group relative isolate flex h-full flex-col items-start overflow-hidden rounded-[16px] bg-white/80 p-5 ring-1 ring-inset ring-[#141414]/10 transition-colors duration-300 hover:bg-white [&>*:not(canvas)]:relative"
               >
                 <DitherField
                   still

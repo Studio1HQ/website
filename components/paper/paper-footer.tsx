@@ -116,7 +116,7 @@ export default function PaperFooter() {
           className="grid grid-cols-2 gap-2 xl:grid-cols-4"
           style={{ marginTop: 40 }}
         >
-          <div className="col-span-2 flex flex-col justify-between gap-10 bg-white/80 p-7 ring-1 ring-inset ring-[#141414]/10 xl:col-span-1">
+          <div className="col-span-2 flex flex-col justify-between gap-10 rounded-[16px] bg-white/80 p-7 ring-1 ring-inset ring-[#141414]/10 xl:col-span-1">
             <div>
               <Link href="/" className="inline-flex items-center gap-3">
                 <Logo className="size-8" />
@@ -142,7 +142,7 @@ export default function PaperFooter() {
 
           <nav
             aria-label={nav("items.services")}
-            className="bg-white/80 p-7 ring-1 ring-inset ring-[#141414]/10"
+            className="rounded-[16px] bg-white/80 p-7 ring-1 ring-inset ring-[#141414]/10"
           >
             <p className={heading}>{nav("items.services")}</p>
             <ul className="mt-6 space-y-3.5">
@@ -158,7 +158,7 @@ export default function PaperFooter() {
 
           <nav
             aria-label="Studio1"
-            className="bg-white/80 p-7 ring-1 ring-inset ring-[#141414]/10"
+            className="rounded-[16px] bg-white/80 p-7 ring-1 ring-inset ring-[#141414]/10"
           >
             <p className={heading}>Studio1</p>
             <ul className="mt-6 space-y-3.5">
@@ -180,7 +180,7 @@ export default function PaperFooter() {
             </ul>
           </nav>
 
-          <div className="col-span-2 bg-white/80 p-7 ring-1 ring-inset ring-[#141414]/10 xl:col-span-1">
+          <div className="col-span-2 rounded-[16px] bg-white/80 p-7 ring-1 ring-inset ring-[#141414]/10 xl:col-span-1">
             <p className={heading}>Follow us</p>
             <ul className="mt-6 flex flex-wrap gap-2 xl:block xl:space-y-3">
               {SOCIAL_LINKS.map(({ href, label, icon: SocialIcon }) => (

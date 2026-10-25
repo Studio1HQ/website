@@ -113,7 +113,9 @@ export default function Navbar() {
     };
   }, [isHome, isBlogPost, isPaper, pathname]);
 
-  const overHero = hasHero && !(isHome ? pastHero : scrolled) && !isMenuOpen;
+  // The paper home gets its bar as soon as you start scrolling.
+  const overHero =
+    hasHero && !(isHome && !isPaper ? pastHero : scrolled) && !isMenuOpen;
   const tuckedAway = hasHero && pastHero && scrollingDown && !isMenuOpen;
 
   useEffect(() => {

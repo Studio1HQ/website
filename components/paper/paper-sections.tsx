@@ -50,6 +50,7 @@ import {
   motion,
   useAnimationFrame,
   useMotionValue,
+  useMotionValueEvent,
   useInView,
   useReducedMotion,
   useScroll,
@@ -106,9 +107,9 @@ export const FAINT = "text-[var(--p-faint)]";
 export const LINE = "border-[var(--p-line)]";
 /** Hairline grid: outer left/top border, each cell adds right/bottom. */
 export const GRID = "grid gap-2";
-/** The hero's card: white, hairline ring, square corners. */
+/** The hero's card: white, hairline ring, rounded corners. */
 export const CELL =
-  "bg-white/80 ring-1 ring-inset ring-[#141414]/10 transition-[transform,box-shadow,background-color] duration-500 ease-out hover:-translate-y-1 hover:bg-white hover:shadow-[0_24px_40px_-28px_rgba(20,20,20,0.45)] motion-reduce:transform-none";
+  "rounded-[16px] bg-white/80 ring-1 ring-inset ring-[#141414]/10 transition-[transform,box-shadow,background-color] duration-500 ease-out hover:-translate-y-1 hover:bg-white hover:shadow-[0_24px_40px_-28px_rgba(20,20,20,0.45)] motion-reduce:transform-none";
 
 export function PaperSection({
   id,
@@ -363,7 +364,7 @@ export function PaperLogos() {
             return (
               <li
                 key={cell}
-                className={cn("relative h-24 overflow-hidden", CELL)}
+                className="relative h-24 overflow-hidden rounded-[14px] bg-[#f8f6f2] shadow-[inset_0_5px_14px_rgba(20,20,20,0.13),inset_2px_0_8px_rgba(20,20,20,0.05),inset_0_1px_3px_rgba(20,20,20,0.12),inset_0_-2px_0_#fff,0_1px_0_#fff]"
               >
                 {cellLogos.map((item, index) => (
                   <span
@@ -393,10 +394,30 @@ export function PaperLogos() {
 /* ------------------------------------------------------------------ */
 
 const STATS = [
-  { value: 35, suffix: "", label: "Devtool and SaaS teams" },
-  { value: 2, suffix: "M", label: "Total content views" },
-  { value: 10, suffix: "", label: "High-impact developer events" },
-  { value: 30, suffix: "", label: "Successful partnerships" },
+  {
+    value: 35,
+    suffix: "",
+    label: "Devtool and SaaS teams",
+    icons: [UsersThree, Code, Star],
+  },
+  {
+    value: 2,
+    suffix: "M",
+    label: "Total content views",
+    icons: [Eye, TrendUp, Article],
+  },
+  {
+    value: 10,
+    suffix: "",
+    label: "High-impact developer events",
+    icons: [Ticket, CalendarCheck, UsersThree],
+  },
+  {
+    value: 30,
+    suffix: "",
+    label: "Successful partnerships",
+    icons: [Handshake, PlugsConnected, SealCheck],
+  },
 ];
 
 /** Scroll progress window for token `index` of `count`, overlapping a little. */
@@ -590,7 +611,7 @@ function AboutMark() {
   );
 }
 
-/** Counts up from zero the first time the number scrolls into view. */
+/** Counts up from zero each time the number scrolls into view. */
 export function CountUp({
   value,
   suffix = "",
@@ -599,12 +620,17 @@ export function CountUp({
   suffix?: string;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-15% 0px" });
+  const inView = useInView(ref, { margin: "-15% 0px" });
   const reduceMotion = useReducedMotion();
   const [shown, setShown] = useState(reduceMotion ? value : 0);
 
   useEffect(() => {
-    if (!inView || reduceMotion) return;
+    if (reduceMotion) return;
+    // Out of view: reset, so it counts again on the way back in.
+    if (!inView) {
+      setShown(0);
+      return;
+    }
     const controls = animate(0, value, {
       duration: 1.6,
       ease: [0.16, 1, 0.3, 1],
@@ -625,6 +651,7 @@ export function CountUp({
 }
 
 export function PaperPositioning() {
+  const reduceMotion = useReducedMotion();
   const cta = useTranslations("CTA");
   return (
     <PaperSection id="about" tone="paper">
@@ -649,35 +676,44 @@ export function PaperPositioning() {
               <li
                 key={stat.label}
                 className={cn(
-                  "group relative isolate overflow-hidden p-6 md:p-8 [&>*:not(canvas)]:relative",
+                  "group relative isolate flex flex-col justify-between gap-6 overflow-hidden p-6 text-left md:p-8 [&>*:not(canvas)]:relative",
                   CELL,
                   isPrint && "text-white",
                 )}
                 style={isPrint ? { background: PRINT } : undefined}
               >
-                {/* Dot field in the corner, white on the orange card */}
-                <DitherField
-                  cell={7}
-                  size={3}
-                  strength={isPrint ? 2 : 2.4}
-                  seed={index * 2.3}
-                  colors={isPrint ? ["#ffffff", "#ffe4cc"] : undefined}
-                  className="absolute right-0 top-0 -z-10 h-[90%] w-[55%] [mask-image:radial-gradient(ellipse_at_top_right,black_25%,transparent_70%)]"
-                />
-                {/* Soft glow from the lower left */}
-                <span
+                {/* Soft glow that slowly drifts along the bottom of the card */}
+                <motion.span
                   aria-hidden
-                  className="pointer-events-none !absolute inset-0 -z-10"
+                  className="pointer-events-none !absolute inset-y-0 -left-1/2 -z-10 w-[200%]"
                   style={{
                     background: isPrint
-                      ? "radial-gradient(120% 90% at 0% 100%, rgba(254,50,0,0.55), transparent 60%)"
-                      : "radial-gradient(110% 80% at 0% 100%, rgba(249,115,22,0.12), transparent 60%)",
+                      ? "radial-gradient(35% 90% at 25% 100%, rgba(254,50,0,0.6), transparent 70%), radial-gradient(30% 80% at 75% 100%, rgba(255,170,90,0.45), transparent 70%)"
+                      : "radial-gradient(30% 85% at 25% 100%, rgba(249,115,22,0.16), transparent 70%), radial-gradient(28% 80% at 75% 100%, rgba(249,115,22,0.10), transparent 70%)",
+                  }}
+                  animate={
+                    reduceMotion ? undefined : { x: ["0%", "-25%", "0%"] }
+                  }
+                  transition={{
+                    duration: 9,
+                    ease: "easeInOut",
+                    repeat: Infinity,
+                    delay: index * 1.2,
                   }}
                 />
-                {/* Glare that sweeps across on hover */}
-                <span
+                {/* Glare that sweeps across on a slow loop */}
+                <motion.span
                   aria-hidden
-                  className="pointer-events-none !absolute inset-y-0 -left-1/2 z-10 w-1/2 -translate-x-full skew-x-[-18deg] transition-transform duration-[1100ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-[420%] motion-reduce:hidden"
+                  className="pointer-events-none !absolute inset-y-0 left-0 z-10 w-1/2 skew-x-[-18deg] motion-reduce:hidden"
+                  initial={{ x: "-150%" }}
+                  animate={reduceMotion ? undefined : { x: ["-150%", "260%"] }}
+                  transition={{
+                    duration: 2.2,
+                    ease: [0.65, 0, 0.35, 1],
+                    repeat: Infinity,
+                    repeatDelay: 3.5,
+                    delay: index * 0.5,
+                  }}
                   style={{
                     background: isPrint
                       ? "linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent)"
@@ -690,7 +726,7 @@ export function PaperPositioning() {
                 </p>
                 <p
                   className={cn(
-                    "mt-6 text-[14px]",
+                    "text-[14px]",
                     isPrint ? "text-white/85" : MUTED,
                   )}
                 >
@@ -814,17 +850,9 @@ export function PaperServices() {
                 <Link
                   href={OFFERING_LINKS[id]}
                   className={cn(
-                    "group relative isolate flex h-full min-h-[220px] flex-col overflow-hidden p-5 transition-[background-color,box-shadow] duration-500 hover:bg-white hover:shadow-[0_24px_48px_-28px_rgba(255,90,0,0.55)] [&>*:not(canvas)]:relative",
-                    CELL,
+                    "group relative isolate flex h-full min-h-[220px] flex-col overflow-hidden rounded-[16px] bg-white/80 p-5 ring-1 ring-inset ring-[#141414]/[0.08] shadow-[inset_0_1px_0_#fff] transition-[background-color,box-shadow,transform] duration-500 hover:-translate-y-1 hover:bg-white hover:shadow-[inset_0_1px_0_#fff,0_24px_40px_-28px_rgba(20,20,20,0.45)] [&>*:not(canvas)]:relative",
                   )}
                 >
-                  <DitherField
-                    cell={7}
-                    size={3}
-                    strength={2.6}
-                    seed={position * 1.7}
-                    className="absolute right-0 top-0 -z-10 h-[58%] w-[62%] transition-opacity duration-700 [mask-image:radial-gradient(ellipse_at_top_right,black_30%,transparent_72%)] group-hover:opacity-40"
-                  />
                   {/* Hover: an orange wash rises from the bottom edge */}
                   <span
                     aria-hidden
@@ -1784,7 +1812,7 @@ export function PaperTestimonials() {
 
           <div
             className={cn(
-              "flex flex-col justify-between gap-10 lg:border-l lg:pl-12",
+              "flex flex-col justify-between gap-10 lg:pl-12",
               LINE,
             )}
           >
@@ -1877,15 +1905,44 @@ export function PaperProcess() {
   const t = useTranslations("DeveloperJourney");
   const reduceMotion = useReducedMotion();
   const [active, setActive] = useState(0);
+  // One rail from the first marker to the last; it fills as the list scrolls
+  // through the screen, and each marker lights up as the fill reaches it.
+  const listRef = useRef<HTMLOListElement>(null);
+  const [rail, setRail] = useState({ top: 0, height: 0 });
+  const { scrollYProgress } = useScroll({
+    target: listRef,
+    offset: ["start 0.7", "end 0.55"],
+  });
+  const fill = useTransform(scrollYProgress, (value) =>
+    reduceMotion ? 1 : value,
+  );
+  useMotionValueEvent(fill, "change", (value) => {
+    const step = Math.min(
+      STAGES.length - 1,
+      Math.floor(value * (STAGES.length - 1) + 0.02),
+    );
+    setActive((current) => (current === step ? current : step));
+  });
 
   useEffect(() => {
-    if (reduceMotion) return;
-    const id = window.setInterval(
-      () => setActive((value) => (value + 1) % STAGES.length),
-      3200,
-    );
-    return () => window.clearInterval(id);
-  }, [reduceMotion]);
+    const list = listRef.current;
+    if (!list) return;
+    const measure = () => {
+      const markers = list.querySelectorAll<HTMLElement>("[data-marker]");
+      if (markers.length < 2) return;
+      const box = list.getBoundingClientRect();
+      const first = markers[0].getBoundingClientRect();
+      const last = markers[markers.length - 1].getBoundingClientRect();
+      setRail({
+        top: first.top - box.top + first.height / 2,
+        height: last.top - first.top,
+      });
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(list);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <PaperSection id="process" tone="paper">
@@ -1914,27 +1971,34 @@ export function PaperProcess() {
           </p>
         </div>
         <ol
+          ref={listRef}
           className={cn(
-            "flex flex-col justify-center px-5 py-10 md:px-16 md:py-14",
+            "relative flex flex-col justify-center px-5 py-10 md:px-16 md:py-14",
             LIGHT_PANEL,
           )}
         >
+          <li
+            aria-hidden
+            className="pointer-events-none absolute left-5 w-[2px] bg-[#141414]/10 md:left-16"
+            style={{ top: rail.top, height: rail.height, marginLeft: 15 }}
+          >
+            <motion.span
+              className="absolute inset-0 origin-top"
+              style={{ background: PRINT, scaleY: fill }}
+            />
+          </li>
           {STAGES.map((stage, index) => {
             const isActive = index === active;
             return (
-              <li
-                key={stage.key}
-                onPointerEnter={() => setActive(index)}
-                className={cn(
-                  "py-7",
-                  index > 0 && "border-t border-[#141414]/10",
-                )}
-              >
-                <h3 className="flex items-center gap-3 text-[20px] font-medium tracking-[-0.035em] md:text-[24px]">
+              <li key={stage.key} className="relative py-7 pl-12">
+                <h3 className="flex min-h-8 items-center gap-3 text-[20px] font-medium tracking-[-0.035em] md:text-[24px]">
                   <span
+                    data-marker
                     className={cn(
-                      "w-7 text-[12px] tabular-nums transition-colors duration-500",
-                      isActive ? "text-[#f97316]" : FAINT,
+                      "absolute left-0 z-[1] flex size-8 items-center justify-center rounded-full text-[11px] font-semibold tabular-nums ring-1 transition-[background-color,color,box-shadow] duration-500",
+                      index <= active
+                        ? "bg-[#f97316] text-white ring-[#f97316] shadow-[0_0_0_5px_rgba(249,115,22,0.15)]"
+                        : "bg-[#fbfaf7] text-[#141414]/50 ring-[#141414]/15",
                     )}
                   >
                     {String(index + 1).padStart(2, "0")}
@@ -1961,7 +2025,7 @@ export function PaperProcess() {
                 </h3>
                 <p
                   className={cn(
-                    "mt-2 max-w-[520px] pl-10 text-[15px] leading-[1.6] transition-opacity duration-500",
+                    "mt-2 max-w-[520px] text-[15px] leading-[1.6] transition-opacity duration-500",
                     MUTED,
                     isActive ? "opacity-100" : "opacity-60",
                   )}
