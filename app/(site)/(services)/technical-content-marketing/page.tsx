@@ -2,18 +2,20 @@ import Process from "@/components/pages/blogs-as-a-service/process";
 import type { Metadata } from "next";
 import Hero from "@/components/pages/blogs-as-a-service/hero";
 import Services from "@/components/pages/blogs-as-a-service/services";
-import FAQ, { type FAQItem } from "@/components/landing/faq";
-import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
+import type { FAQItem } from "@/components/landing/faq";
+import { PaperSection } from "@/components/paper/paper-sections";
 import {
-  ServiceDetailSection,
-} from "@/components/pages/shared/service-detail-sections";
+  PaperCaseStudyCard,
+  PaperServiceFaq,
+  ServiceHead,
+} from "@/components/pages/shared/paper-service-kit";
+import { PAPER_SCOPE } from "@/lib/paper";
+import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
+import { ServiceDetailSection } from "@/components/pages/shared/service-detail-sections";
 import { getTranslations } from "next-intl/server";
 import { DEFAULT_LOCALE } from "@/lib/i18n";
-import { Container, SectionIntro } from "@/components/home/ui";
-import {
-  CaseStudyResult,
-  type CaseStudyResultData,
-} from "@/components/case-studies/case-study-result";
+import { Container } from "@/components/home/ui";
+import type { CaseStudyResultData } from "@/components/case-studies/case-study-result";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations({
@@ -179,31 +181,32 @@ function TechnicalContentProofGrid() {
   const [featuredStudy, ...supportingStudies] = contentCaseStudyProofs;
 
   return (
-    <section id="proof" className="relative scroll-mt-28 py-24 md:py-32">
-      <Container className="max-w-[1180px]">
-        <SectionIntro
-          eyebrow="Proof"
+    <PaperSection id="proof" tone="paper" className="scroll-mt-28">
+      <Container>
+        <ServiceHead
+          index={2}
+          name="Proof"
           title="Case studies from technical content work"
           description="Blogs, guides, deep dives, and developer education shaped around real technical topics."
         />
 
-        <div className="mt-14 grid gap-5 md:mt-16">
+        <div className="mt-10 grid gap-2">
           {featuredStudy ? (
-            <CaseStudyResult
+            <PaperCaseStudyCard
               study={featuredStudy}
               variant="featured"
               density="dense"
             />
           ) : null}
 
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="grid gap-2 md:grid-cols-2">
             {supportingStudies.map((study) => (
-              <CaseStudyResult key={study.href} study={study} />
+              <PaperCaseStudyCard key={study.href} study={study} />
             ))}
           </div>
         </div>
       </Container>
-    </section>
+    </PaperSection>
   );
 }
 
@@ -225,7 +228,7 @@ export default function Page() {
   };
 
   return (
-    <div className="">
+    <div className="overflow-x-clip" style={PAPER_SCOPE}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
@@ -253,12 +256,18 @@ export default function Page() {
         description="We align topic, outline, draft, review, publishing, and optional repurposing around one developer goal."
         items={contentWorkflow}
         columns="three"
+        index={3}
       />
-      <Process />
-      <FAQ
-        subtitle="Common questions about our technical content marketing services."
-        items={blogFaqItems}
-      />
+      <Process index={4} />
+      <PaperSection tone="paper">
+        <Container>
+          <PaperServiceFaq
+            index={5}
+            subtitle="Common questions about our technical content marketing services."
+            items={blogFaqItems}
+          />
+        </Container>
+      </PaperSection>
     </div>
   );
 }

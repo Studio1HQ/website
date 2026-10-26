@@ -9,8 +9,10 @@ import {
 } from "@phosphor-icons/react";
 import { Team } from "@/components/about-us/team";
 import { Companies } from "@/components/about-us/companies";
-import { motion } from "motion/react";
-import { NightHeader } from "@/components/shared/night-header";
+import { motion, useReducedMotion } from "motion/react";
+import { PaperPageHeader } from "@/components/paper/paper-page-header";
+import { Accent } from "@/components/paper/paper-sections";
+import { PAPER_SCOPE, PRINT } from "@/lib/paper";
 import { useTranslations } from "next-intl";
 
 const tags = [
@@ -49,11 +51,12 @@ const sectionAnimation = {
   },
 };
 
+/** The intro video, mounted on a white card like a print pinned to the sheet. */
 function StudioIntroVideo() {
   return (
     <section className="mx-auto w-full max-w-[65rem]">
-      <div className="overflow-hidden rounded-[24px] bg-black shadow-[0_40px_100px_-40px_rgba(0,0,0,0.6)] ring-1 ring-black/10 dark:ring-white/10">
-        <div className="aspect-video w-full">
+      <div className="rounded-[24px] bg-white/80 p-2 shadow-[inset_0_1px_0_#fff,0_40px_80px_-48px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/10 sm:p-2.5">
+        <div className="aspect-video w-full overflow-hidden rounded-[18px] bg-[#fbfaf7] shadow-[inset_0_3px_10px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08)]">
           <iframe
             className="h-full w-full"
             src="https://www.youtube-nocookie.com/embed/86fFNr5Dyqk?rel=0"
@@ -71,13 +74,14 @@ function StudioIntroVideo() {
 
 export default function AboutUs() {
   const t = useTranslations("AboutPage");
+  const reduceMotion = useReducedMotion();
 
   return (
-    <div className="overflow-x-clip bg-[var(--home-cream)] text-[var(--home-ink)]">
-      <NightHeader className="pb-24 pt-32 md:pb-32 md:pt-36">
+    <div className="overflow-x-clip" style={PAPER_SCOPE}>
+      <PaperPageHeader className="pb-16 pt-32 md:pb-20 md:pt-40">
         <motion.div
           className="mx-auto flex max-w-[1300px] flex-col items-center px-4 text-center sm:px-6"
-          initial="hidden"
+          initial={reduceMotion ? false : "hidden"}
           animate="visible"
           variants={sectionAnimation}
         >
@@ -85,41 +89,41 @@ export default function AboutUs() {
             <StudioIntroVideo />
           </div>
           {/* Two lines from md up; each line scales with the viewport so it never wraps. */}
-          <h1 className="mt-14 text-[34px] font-medium leading-[1.1] tracking-[-0.045em] sm:text-[44px] md:text-[min(3.7vw,54px)] md:[&>span]:whitespace-nowrap">
+          <h1 className="mt-14 text-[34px] font-medium leading-[1.1] tracking-[-0.05em] sm:text-[44px] md:text-[min(3.7vw,54px)] md:[&>span]:whitespace-nowrap">
             <span className="md:block">
-              {t("titlePrefix")}{" "}
-              <span className="s1-accent-text">{t("titleHighlightOne")}</span>{" "}
-              {t("titleMiddle")}{" "}
-              <span className="s1-accent-text">{t("titleHighlightTwo")}</span>
+              {t("titlePrefix")} <Accent>{t("titleHighlightOne")}</Accent>{" "}
+              {t("titleMiddle")} <Accent>{t("titleHighlightTwo")}</Accent>
             </span>{" "}
             <span className="md:block">{t("titleSuffix")}</span>
           </h1>
-          <p className="mt-6 max-w-[640px] text-[16px] leading-[1.6] text-white/60 sm:text-[18px]">
+          <p className="mt-6 max-w-[640px] text-[16px] leading-[1.6] text-[#141414]/[0.62] sm:text-[17px]">
             {t("descriptionLineOne")} {t("descriptionLineTwo")}
           </p>
 
-          <div className="mt-10 flex max-w-xl flex-wrap items-center justify-center gap-2.5">
+          <div className="mt-10 flex max-w-xl flex-wrap items-center justify-center gap-2">
             {tags.map((tag, index) => (
               <motion.span
                 key={tag.key}
-                initial={{ opacity: 0, y: 14 }}
+                initial={reduceMotion ? false : { opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 + 0.05 * index, duration: 0.4 }}
-                className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-[linear-gradient(160deg,rgba(255,255,255,0.16),rgba(255,255,255,0.04))] px-4 py-2 text-[13px] font-medium text-white/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_10px_24px_-14px_rgba(0,0,0,0.8)] backdrop-blur-xl"
+                className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-[13px] font-medium text-[#141414] shadow-[inset_0_1px_0_#fff] ring-1 ring-inset ring-[#141414]/10"
               >
-                <tag.icon weight="duotone" className="size-4 shrink-0 text-[#fdba74]" />
+                <tag.icon
+                  weight="duotone"
+                  className="size-4 shrink-0"
+                  style={{ color: PRINT }}
+                />
                 {t(`tags.${tag.key}`)}
               </motion.span>
             ))}
           </div>
         </motion.div>
-      </NightHeader>
+      </PaperPageHeader>
 
-      <div className="mx-auto w-full max-w-[1300px] px-4 sm:px-6 lg:px-8">
-        <VisionMission />
-        <Team />
-        <Companies />
-      </div>
+      <VisionMission />
+      <Team />
+      <Companies />
     </div>
   );
 }

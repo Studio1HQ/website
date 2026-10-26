@@ -1,6 +1,10 @@
 "use client";
 
-import { Container, Rise, SectionIntro } from "@/components/home/ui";
+import { Container, Rise } from "@/components/home/ui";
+import { CELL, MUTED, PaperSection } from "@/components/paper/paper-sections";
+import { ServiceHead } from "@/components/pages/shared/paper-service-kit";
+import { INK, PRINT } from "@/lib/paper";
+import { cn } from "@/lib/utils";
 import {
   IconCalendarEvent,
   IconListCheck,
@@ -25,40 +29,56 @@ const loop = [
   },
 ];
 
-export default function Cadence() {
+export default function Cadence({ index = 6 }: { index?: number }) {
   return (
-    <section id="process" className="relative scroll-mt-28 py-24 md:py-32">
+    <PaperSection id="process" tone="paper" className="scroll-mt-28">
       <Container>
-        <Rise>
-          <SectionIntro
-            eyebrow="Video workflow"
-            title="Repeatable video work beats"
-            accent="one-off drops"
-            description="We turn product topics into clear videos, supporting clips, and publish-ready assets when your team needs them."
-          />
-        </Rise>
+        <ServiceHead
+          index={index}
+          name="Video workflow"
+          title="Repeatable video work beats"
+          accent="one-off drops"
+          description="We turn product topics into clear videos, supporting clips, and publish-ready assets when your team needs them."
+        />
 
-        <ol className="mt-14 grid gap-5 md:mt-16 md:grid-cols-3">
-          {loop.map((step, index) => (
-            <li key={step.title}>
-              <Rise delay={index * 0.08} className="h-full">
-                <div className="s1-glass-card flex h-full flex-col rounded-[24px] p-7 md:p-8">
-                  <span className="s1-glass-dark flex size-14 items-center justify-center rounded-full text-white">
-                    <step.icon className="size-6" stroke={1.6} aria-hidden="true" />
+        <ol className="mt-10 grid gap-2 md:grid-cols-3">
+          {loop.map((step, position) => (
+            <li key={step.title} className="relative">
+              <Rise delay={position * 0.08} className="h-full">
+                <div
+                  className={cn(
+                    "flex h-full flex-col items-start p-6 md:p-7",
+                    CELL,
+                  )}
+                >
+                  <span
+                    className="flex size-12 items-center justify-center text-[#f4efe7]"
+                    style={{ background: position === 0 ? PRINT : INK }}
+                  >
+                    <step.icon
+                      className="size-6"
+                      stroke={1.6}
+                      aria-hidden="true"
+                    />
                   </span>
-                  <p className="mt-5 text-[12px] font-medium uppercase tracking-[0.14em] text-[var(--home-ink-soft)]">
-                    Step {index + 1}
+                  <p
+                    className="mt-6 text-[13px] font-medium"
+                    style={{ color: PRINT }}
+                  >
+                    Step {position + 1}
                   </p>
-                  <h3 className="mt-2 text-[22px] font-medium tracking-[-0.03em] text-[var(--home-ink)]">
+                  <h3 className="mt-1.5 text-[22px] font-medium tracking-[-0.035em]">
                     {step.title}
                   </h3>
-                  <p className="mt-3 text-[15px] leading-[1.6] text-[var(--home-ink-soft)]">{step.body}</p>
+                  <p className={cn("mt-3 text-[15px] leading-[1.6]", MUTED)}>
+                    {step.body}
+                  </p>
                 </div>
               </Rise>
             </li>
           ))}
         </ol>
       </Container>
-    </section>
+    </PaperSection>
   );
 }

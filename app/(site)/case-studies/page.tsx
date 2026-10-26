@@ -1,6 +1,16 @@
 import Link from "next/link";
 import Image from "next/image";
-import { NightEyebrow, NightHeader } from "@/components/shared/night-header";
+import {
+  PaperEyebrow,
+  PaperPageHeader,
+} from "@/components/paper/paper-page-header";
+import {
+  CELL,
+  IndexBar,
+  PaperSection,
+} from "@/components/paper/paper-sections";
+import { Container } from "@/components/home/ui";
+import { PAPER_SCOPE, PRINT } from "@/lib/paper";
 import { Trophy } from "@phosphor-icons/react/dist/ssr";
 import { getAllCaseStudies, getFeaturedCaseStudy } from "@/lib/case-studies";
 import { CaseStudyCard } from "@/components/case-studies/case-study-card";
@@ -53,53 +63,55 @@ export default async function CaseStudiesPage() {
   };
 
   return (
-    <div className="bg-[var(--home-cream)] text-[var(--home-ink)]">
+    <div style={PAPER_SCOPE}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
       />
 
       {/* Hero */}
-      <NightHeader className="pb-28 pt-40 md:pb-36 md:pt-48">
+      <PaperPageHeader className="pb-4 pt-36 md:pb-8 md:pt-44">
         <div className="mx-auto flex max-w-[1100px] flex-col items-center px-4 text-center sm:px-6">
-          <NightEyebrow
-            icon={<Trophy weight="duotone" className="size-4 text-[#fdba74]" />}
-          >
+          <PaperEyebrow icon={<Trophy weight="duotone" className="size-4" />}>
             {t("badge")}
-          </NightEyebrow>
-          <h1 className="mt-7 text-[40px] font-medium leading-[1.04] tracking-[-0.05em] sm:text-[60px] lg:text-[76px]">
+          </PaperEyebrow>
+          <h1 className="mt-7 text-[40px] font-medium leading-[1.06] tracking-[-0.05em] sm:text-[60px] lg:text-[76px]">
             {t("titlePrefix")}{" "}
-            <span className="s1-accent-text">{t("titleHighlight")}</span>
+            <span style={{ color: PRINT }}>{t("titleHighlight")}</span>
           </h1>
-          <p className="mt-6 max-w-[620px] text-[16px] leading-[1.6] text-white/60 sm:text-[18px]">
+          <p className="mt-6 max-w-[620px] text-[16px] leading-[1.6] text-[#141414]/60 sm:text-[18px]">
             {t("description")}
           </p>
         </div>
-      </NightHeader>
+      </PaperPageHeader>
 
-      <section className="relative mx-auto flex w-full max-w-[1300px] flex-col px-4 pb-28 sm:px-6 lg:px-8">
-        {/* Featured */}
-        {featuredStudy ? (
-          <div className="-mt-16 md:-mt-20">
-            <FeaturedCaseStudy />
+      <PaperSection tone="paper" className="!pt-10 md:!pt-14">
+        <Container>
+          <IndexBar index={1} name={t("badge")} />
+
+          {/* Featured */}
+          {featuredStudy ? (
+            <div className="mt-8">
+              <FeaturedCaseStudy />
+            </div>
+          ) : null}
+
+          {/* Grid */}
+          <div
+            className={`${featuredStudy ? "mt-4" : "mt-8"} grid w-full min-w-0 grid-cols-1 gap-4 md:grid-cols-2`}
+          >
+            {remainingStudies.map((study) => (
+              <CaseStudyCard key={study.slug} study={study} />
+            ))}
           </div>
-        ) : null}
+        </Container>
+      </PaperSection>
 
-        {/* Grid */}
-        <div
-          className={`${featuredStudy ? "mt-6" : "-mt-16 md:-mt-20"} grid w-full min-w-0 grid-cols-1 gap-6 md:grid-cols-2`}
-        >
-          {remainingStudies.map((study) => (
-            <CaseStudyCard key={study.slug} study={study} />
-          ))}
-        </div>
-
-        {/* Closing logo wall */}
-        <div className="s1-glass-card mt-20 flex flex-col items-center rounded-[28px] p-5 sm:p-8 md:p-10">
-          <p className="mb-8 text-[12px] font-medium uppercase tracking-[0.18em] text-[var(--home-ink-soft)]">
-            {t("trustedBy")}
-          </p>
-          <div className="grid w-full grid-cols-1 gap-3 min-[420px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      {/* Closing logo wall */}
+      <PaperSection tone="paper" className="!pt-0 !pb-24 md:!pb-28">
+        <Container>
+          <IndexBar index={2} name={t("trustedBy")} />
+          <div className="mt-8 grid w-full grid-cols-1 gap-2 min-[420px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {studies.map((study) => {
               const logo = getClientLogo(study.slug);
               if (!logo) return null;
@@ -108,12 +120,18 @@ export default async function CaseStudiesPage() {
                   key={study.slug}
                   href={`/case-studies/${study.slug}`}
                   aria-label={study.client}
-                  className="group flex min-w-0 items-center gap-3 rounded-2xl border border-[var(--home-line)] bg-white/60 p-2 pr-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] transition-[transform,border-color] duration-300 hover:-translate-y-0.5 hover:border-primary/40 dark:bg-white/[0.03] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
+                  className={`group flex min-w-0 items-center gap-3 p-2 pr-4 ${CELL}`}
                 >
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white p-1.5 shadow-[0_6px_16px_-10px_rgba(0,0,0,0.5)] ring-1 ring-black/5">
-                    <Image src={logo.icon} alt="" className="size-full rounded-md object-contain" />
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-[11px] bg-white p-1.5 ring-1 ring-[#141414]/10">
+                    <Image
+                      src={logo.icon}
+                      alt=""
+                      className="size-full rounded-md object-contain"
+                    />
                   </span>
-                  <span className="truncate text-[14px] font-medium text-[var(--home-ink)] transition-colors group-hover:text-primary">{study.client}</span>
+                  <span className="truncate text-[14px] font-medium text-[#141414] transition-colors group-hover:text-[#c2410c]">
+                    {study.client}
+                  </span>
                 </Link>
               );
             })}
@@ -124,17 +142,23 @@ export default async function CaseStudiesPage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={client.name}
-                className="group flex min-w-0 items-center gap-3 rounded-2xl border border-[var(--home-line)] bg-white/60 p-2 pr-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] transition-[transform,border-color] duration-300 hover:-translate-y-0.5 hover:border-primary/40 dark:bg-white/[0.03] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
+                className={`group flex min-w-0 items-center gap-3 p-2 pr-4 ${CELL}`}
               >
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white p-1.5 shadow-[0_6px_16px_-10px_rgba(0,0,0,0.5)] ring-1 ring-black/5">
-                  <Image src={client.icon} alt="" className="size-full rounded-md object-contain" />
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-[11px] bg-white p-1.5 ring-1 ring-[#141414]/10">
+                  <Image
+                    src={client.icon}
+                    alt=""
+                    className="size-full rounded-md object-contain"
+                  />
                 </span>
-                <span className="truncate text-[14px] font-medium text-[var(--home-ink)] transition-colors group-hover:text-primary">{client.name}</span>
+                <span className="truncate text-[14px] font-medium text-[#141414] transition-colors group-hover:text-[#c2410c]">
+                  {client.name}
+                </span>
               </a>
             ))}
           </div>
-        </div>
-      </section>
+        </Container>
+      </PaperSection>
     </div>
   );
 }

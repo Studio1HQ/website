@@ -1,42 +1,47 @@
 "use client";
 
 import { Cube } from "@phosphor-icons/react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { containerVariants, headerVariants } from "@/lib/animations";
-import { NightEyebrow, NightHeader } from "@/components/shared/night-header";
+import {
+  PaperEyebrow,
+  PaperPageHeader,
+} from "@/components/paper/paper-page-header";
+import { Accent } from "@/components/paper/paper-sections";
 import { useTranslations } from "next-intl";
 
 export default function ProductHero() {
   const t = useTranslations("ProductPage.hero");
+  const reduceMotion = useReducedMotion();
 
   return (
-    <NightHeader className="pb-28 pt-40 md:pb-36 md:pt-48">
+    <PaperPageHeader className="pb-10 pt-36 md:pb-14 md:pt-44">
       <motion.div
         className="mx-auto flex max-w-[1100px] flex-col items-center px-4 text-center sm:px-6"
-        initial="hidden"
+        initial={reduceMotion ? false : "hidden"}
         animate="visible"
         variants={containerVariants}
       >
         <motion.div variants={headerVariants}>
-          <NightEyebrow icon={<Cube weight="duotone" className="size-4 text-[#fdba74]" />}>
+          <PaperEyebrow icon={<Cube weight="duotone" className="size-4" />}>
             {t("badge")} Studio1
-          </NightEyebrow>
+          </PaperEyebrow>
         </motion.div>
 
         <motion.h1
           variants={headerVariants}
-          className="mt-7 text-[40px] font-medium leading-[1.04] tracking-[-0.05em] sm:text-[60px] lg:text-[76px]"
+          className="mt-7 text-[40px] font-medium leading-[1.04] tracking-[-0.055em] sm:text-[60px] lg:text-[76px]"
         >
-          {t("titlePrefix")} <span className="s1-accent-text">{t("titleHighlight")}</span>
+          {t("titlePrefix")} <Accent>{t("titleHighlight")}</Accent>
         </motion.h1>
 
         <motion.p
           variants={headerVariants}
-          className="mt-6 max-w-[640px] text-balance text-[16px] leading-[1.6] text-white/60 sm:text-[18px]"
+          className="mt-6 max-w-[640px] text-balance text-[16px] leading-[1.6] text-[#141414]/[0.62] sm:text-[17px]"
         >
           {t("description")}
         </motion.p>
       </motion.div>
-    </NightHeader>
+    </PaperPageHeader>
   );
 }

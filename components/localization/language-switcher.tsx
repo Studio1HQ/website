@@ -81,7 +81,7 @@ export function LanguageSwitcher({
   const optionClassName = (isActive: boolean) =>
     isPaper
       ? cn(
-          "group/item flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium text-[#141414] transition-colors duration-200 hover:bg-[#f4efe7]",
+          "group/item flex w-full items-center gap-3 rounded-[12px] px-3 py-2.5 text-sm font-medium text-[#141414] transition-colors duration-200 hover:bg-[#f4efe7]",
           isActive && "bg-[#f4efe7]",
         )
       : cn(
@@ -169,7 +169,7 @@ export function LanguageSwitcher({
         <div
           className={
             isPaper
-              ? "min-w-[15rem] space-y-0.5 bg-white p-1.5 shadow-[0_24px_50px_-28px_rgba(20,20,20,0.35)] ring-1 ring-[#141414]/10"
+              ? "min-w-[15rem] space-y-0.5 rounded-[18px] bg-white p-2 shadow-[0_24px_50px_-28px_rgba(20,20,20,0.35)] ring-1 ring-[#141414]/10"
               : "s1-glass-card s1-glass-raised min-w-[15rem] space-y-0.5 rounded-2xl p-1.5"
           }
         >

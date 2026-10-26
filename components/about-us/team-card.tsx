@@ -83,7 +83,7 @@ export const TeamCard = ({
   };
 
   return (
-    <div className="s1-glass-card group flex h-full flex-col rounded-[24px] p-3">
+    <div className="group flex h-full flex-col rounded-[24px] bg-white/80 p-3 shadow-[inset_0_1px_0_#fff] ring-1 ring-inset ring-[#141414]/[0.08] transition-[transform,box-shadow,background-color] duration-500 ease-out hover:-translate-y-1 hover:bg-white hover:shadow-[inset_0_1px_0_#fff,0_24px_40px_-28px_rgba(20,20,20,0.45)] motion-reduce:transform-none">
       {/* Portrait tile — the wrapper's 2px padding IS the border; the glow
           sits underneath and the opaque inner panel covers its center, so it
           can only ever be visible in the 2px ring */}
@@ -91,20 +91,18 @@ export const TeamCard = ({
         ref={tileRef}
         onMouseMove={handleMouseMove}
         onMouseEnter={handleMouseEnter}
-        className="group/tile relative rounded-[18px] bg-[var(--home-line)] p-[2px]"
+        className="group/tile relative rounded-[18px] bg-[#141414]/[0.08] p-[2px]"
       >
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 rounded-[18px] opacity-0 transition-opacity duration-500 ease-out group-hover/tile:opacity-100 [background:radial-gradient(200px_circle_at_var(--mouse-x,50%)_var(--mouse-y,50%),hsl(var(--primary))_0%,hsl(var(--primary)/0.4)_40%,transparent_75%)]"
+          className="pointer-events-none absolute inset-0 rounded-[18px] opacity-0 transition-opacity duration-500 ease-out group-hover/tile:opacity-100 [background:radial-gradient(200px_circle_at_var(--mouse-x,50%)_var(--mouse-y,50%),#f97316_0%,rgba(249,115,22,0.4)_40%,transparent_75%)]"
         />
         <div className="relative aspect-[9/10] overflow-hidden rounded-[16px]">
+          {/* Recessed paper tile the portrait stands in */}
+          <div aria-hidden className="absolute inset-0 bg-[#fbfaf7]" />
           <div
             aria-hidden
-            className="absolute inset-0 bg-[var(--home-cream)]"
-          />
-          <div
-            aria-hidden
-            className="absolute inset-0 bg-gradient-to-b from-[var(--home-paper)] to-[var(--home-cream)] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.22),inset_0_-1px_0_0_rgba(0,0,0,0.12)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),inset_0_-1px_0_0_rgba(0,0,0,0.2)]"
+            className="absolute inset-0 bg-gradient-to-b from-[#fbfaf7] to-[#ece5da] shadow-[inset_0_3px_10px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08)]"
           />
           {typeof member.image === "string" ? (
             <Image
@@ -127,17 +125,17 @@ export const TeamCard = ({
         </div>
       </div>
 
-      {/* Caption: name + role on the left, socials in one slim glass capsule */}
+      {/* Caption: name + role on the left, socials in one slim capsule */}
       <div className="flex flex-1 items-end justify-between gap-3 px-2 pb-1.5 pt-5">
         <div className="min-w-0">
-          <h3 className="truncate text-[19px] font-medium leading-tight tracking-[-0.03em] text-[var(--home-ink)]">
+          <h3 className="truncate text-[19px] font-medium leading-tight tracking-[-0.03em] text-[#141414]">
             {member.name}
           </h3>
-          <p className="mt-1.5 text-[13px] leading-snug text-[var(--home-ink-soft)]">
+          <p className="mt-1.5 text-[13px] leading-snug text-[#141414]/[0.62]">
             {member.role}
           </p>
         </div>
-        <div className="flex shrink-0 items-center rounded-full bg-black/[0.03] p-0.5 ring-1 ring-inset ring-[var(--home-line)] dark:bg-white/[0.04]">
+        <div className="flex shrink-0 items-center rounded-full bg-[#141414]/[0.03] p-0.5 ring-1 ring-inset ring-[#141414]/10">
           {socialLinks(member).map(({ href, label, Icon, weight }) => (
             <Link
               key={label}
@@ -145,7 +143,7 @@ export const TeamCard = ({
               target="_blank"
               rel="noreferrer"
               aria-label={`${member.name} on ${label}`}
-              className="flex size-8 items-center justify-center rounded-full text-[var(--home-ink)] opacity-70 transition-[color,background-color,opacity] duration-300 hover:bg-primary/10 hover:text-primary hover:opacity-100"
+              className="flex size-8 items-center justify-center rounded-full text-[#141414] opacity-70 transition-[color,background-color,opacity] duration-300 hover:bg-[#f97316]/10 hover:text-[#f97316] hover:opacity-100"
             >
               <Icon weight={weight} className="size-[17px]" />
             </Link>

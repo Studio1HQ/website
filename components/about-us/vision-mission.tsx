@@ -13,8 +13,15 @@ import {
   Rocket,
   HandHeart,
 } from "@phosphor-icons/react/dist/ssr";
-import { motion } from "motion/react";
-import { Rise, SectionIntro } from "@/components/home/ui";
+import { motion, useReducedMotion } from "motion/react";
+import { Container } from "@/components/home/ui";
+import {
+  Accent,
+  IndexBar,
+  PaperSection,
+  SectionHead,
+} from "@/components/paper/paper-sections";
+import { INK, PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 
 const contentData = {
@@ -72,8 +79,10 @@ const contentData = {
   },
 };
 
-const cardSurface =
-  "s1-glass-card group relative h-full rounded-[24px] p-7 md:p-9";
+/** Paper card: white sheet, hairline ring, a soft lift on hover. */
+const cardSurface = cn(
+  "group relative isolate h-full overflow-hidden rounded-[24px] bg-white p-7 shadow-[inset_0_1px_0_#fff] ring-1 ring-inset ring-[#141414]/[0.08] transition-[transform,box-shadow,background-color] duration-500 ease-out hover:-translate-y-1 hover:bg-white hover:shadow-[inset_0_1px_0_#fff,0_24px_40px_-28px_rgba(20,20,20,0.45)] motion-reduce:transform-none md:p-9",
+);
 
 const ContentBlock = ({
   data,
@@ -90,44 +99,53 @@ const ContentBlock = ({
   index: number;
 }) => {
   const HeaderIcon = data.icon;
+  const reduceMotion = useReducedMotion();
 
   return (
     <motion.article
       className={cardSurface}
-      initial={{ opacity: 0, y: 24 }}
+      initial={reduceMotion ? false : { opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.55, delay: 0.08 * index, ease: "easeOut" }}
     >
+      {/* Orange hairline along the top edge */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-8 top-0 h-px"
+        style={{
+          background: `linear-gradient(90deg, transparent, ${PRINT}, transparent)`,
+        }}
+      />
 
-      <div className="relative z-[1] flex h-full flex-col gap-7">
+      <div className="relative z-10 flex h-full flex-col gap-7">
         <header className="flex items-center gap-3.5">
           <span
-            className={cn(
-              "flex size-12 shrink-0 items-center justify-center rounded-lg",
-              "s1-glass-dark rounded-2xl text-white",
-              "transition-transform duration-500 ease-out group-hover:scale-110",
-              "motion-reduce:transition-none motion-reduce:group-hover:scale-100"
-            )}
+            className="flex size-12 shrink-0 items-center justify-center rounded-[12px] text-[#f4efe7] transition-transform duration-500 ease-out group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+            style={{ background: index === 1 ? PRINT : INK }}
             aria-hidden
           >
             <HeaderIcon weight="regular" className="size-6" />
           </span>
-          <h3 className="text-[26px] font-medium tracking-[-0.035em] text-[var(--home-ink)]">
+          <h3 className="text-[24px] font-medium tracking-[-0.035em] text-[#141414] md:text-[28px]">
             {data.title}
           </h3>
+          <span
+            aria-hidden
+            className="ml-auto text-[28px] font-medium leading-none tracking-[-0.05em] tabular-nums text-[#141414]/20 md:text-[34px]"
+          >
+            {String(index + 1).padStart(2, "0")}
+          </span>
         </header>
 
-        <div className="h-px w-full bg-[var(--home-line)]" />
-
-        <ul className="flex flex-col gap-4">
+        <ul className="flex flex-col border-t border-[#141414]/[0.12]">
           {data.points.map((point, pointIndex) => {
             const PointIcon = point.icon;
             return (
               <motion.li
                 key={point.text}
-                className="flex items-start gap-3"
-                initial={{ opacity: 0, y: 10 }}
+                className="flex items-start gap-3 border-b border-[#141414]/[0.08] py-3.5 last:border-b-0 last:pb-0"
+                initial={reduceMotion ? false : { opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{
@@ -136,12 +154,17 @@ const ContentBlock = ({
                   ease: "easeOut",
                 }}
               >
-                <PointIcon
-                  weight="regular"
-                  className="mt-0.5 size-[1.125rem] shrink-0 text-primary"
+                <span
                   aria-hidden
-                />
-                <p className="text-[15px] leading-relaxed text-[var(--home-ink-soft)]">
+                  className="flex size-7 shrink-0 items-center justify-center rounded-[8px] bg-[#fbfaf7] shadow-[inset_0_2px_5px_rgba(20,20,20,0.10),inset_0_1px_1px_rgba(20,20,20,0.08),inset_0_-1px_0_#fff,0_1px_0_rgba(255,255,255,0.95)]"
+                >
+                  <PointIcon
+                    weight="duotone"
+                    className="size-4"
+                    style={{ color: PRINT }}
+                  />
+                </span>
+                <p className="pt-0.5 text-[15px] leading-relaxed text-[#141414]/[0.68]">
                   {point.text}
                 </p>
               </motion.li>
@@ -155,19 +178,23 @@ const ContentBlock = ({
 
 export const VisionMission = () => {
   return (
-    <section className="relative py-24 md:py-32">
-      <Rise>
-        <SectionIntro
-          title="What"
-          accent="Fuels Us?"
+    <PaperSection tone="paper">
+      <Container>
+        <IndexBar index={1} name="Vision & mission" />
+        <SectionHead
+          title={
+            <>
+              What <Accent>Fuels Us?</Accent>
+            </>
+          }
           description="We help SaaS teams build developer trust through high-impact content and DevRel strategy that scales with their product."
         />
-      </Rise>
 
-      <div className="mx-auto mt-14 grid max-w-[1100px] grid-cols-1 gap-5 md:mt-16 md:grid-cols-2">
-        <ContentBlock data={contentData.vision} index={0} />
-        <ContentBlock data={contentData.mission} index={1} />
-      </div>
-    </section>
+        <div className="mt-10 grid grid-cols-1 gap-2 md:mt-12 md:grid-cols-2">
+          <ContentBlock data={contentData.vision} index={0} />
+          <ContentBlock data={contentData.mission} index={1} />
+        </div>
+      </Container>
+    </PaperSection>
   );
 };

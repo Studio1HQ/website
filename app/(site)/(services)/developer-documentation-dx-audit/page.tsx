@@ -3,7 +3,11 @@ import type { Metadata } from "next";
 import Hero from "@/components/pages/docs-as-a-service/hero";
 import Services from "@/components/pages/docs-as-a-service/services";
 import Process from "@/components/pages/docs-as-a-service/process";
-import FAQ, { type FAQItem } from "@/components/landing/faq";
+import type { FAQItem } from "@/components/landing/faq";
+import { Container } from "@/components/home/ui";
+import { PaperSection } from "@/components/paper/paper-sections";
+import { PaperServiceFaq } from "@/components/pages/shared/paper-service-kit";
+import { PAPER_SCOPE } from "@/lib/paper";
 import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 import {
   ServiceDetailSection,
@@ -184,7 +188,7 @@ export default function Page() {
   };
 
   return (
-    <div className="">
+    <div className="overflow-x-clip" style={PAPER_SCOPE}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
@@ -211,17 +215,24 @@ export default function Page() {
         description="We edit docs, write missing pages, and audit developer journeys across docs, APIs, SDKs, dashboards, and onboarding."
         items={docsWorkstreams}
         columns="three"
+        index={2}
       />
-      <Process />
+      <Process index={3} />
       <ServiceProofSection
         title="Docs that became a developer onboarding engine"
         description="LiteLLM focused on docs architecture, quickstarts, integrations, and community feedback."
         study={litellmProof}
+        index={4}
       />
-      <FAQ
-        subtitle="Common questions about our developer documentation and DX audit services."
-        items={docsFaqItems}
-      />
+      <PaperSection tone="paper">
+        <Container>
+          <PaperServiceFaq
+            index={5}
+            subtitle="Common questions about our developer documentation and DX audit services."
+            items={docsFaqItems}
+          />
+        </Container>
+      </PaperSection>
     </div>
   );
 }

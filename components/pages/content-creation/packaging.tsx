@@ -1,6 +1,15 @@
 "use client";
 
-import { Container, Eyebrow, Rise } from "@/components/home/ui";
+import { Container, Rise } from "@/components/home/ui";
+import {
+  Accent,
+  CELL,
+  IndexBar,
+  MUTED,
+  PaperSection,
+} from "@/components/paper/paper-sections";
+import { INK, PRINT } from "@/lib/paper";
+import { cn } from "@/lib/utils";
 import {
   IconClick,
   IconPhoto,
@@ -31,43 +40,70 @@ const layers = [
   },
 ];
 
-export default function Packaging() {
+export default function Packaging({ index = 4 }: { index?: number }) {
   return (
-    <section className="relative py-24 md:py-32">
+    <PaperSection tone="paper">
       <Container>
-        <div className="grid gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:gap-20">
-          <Rise className="lg:sticky lg:top-28 lg:self-start">
-            <Eyebrow>The packaging layer</Eyebrow>
-            <h2 className="mt-5 max-w-md text-[34px] font-medium leading-[1.06] tracking-[-0.045em] text-[var(--home-ink)] sm:text-[48px]">
-              Make the technical idea clear before <span className="s1-accent-text">play</span>
+        <IndexBar index={index} name="The packaging layer" />
+        <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-16">
+          <div className="lg:sticky lg:top-28 lg:self-start">
+            <h2 className="max-w-md text-[32px] font-medium leading-[1.2] tracking-[-0.045em] sm:text-[40px] lg:text-[46px]">
+              <span className="bg-white px-[0.14em] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]">
+                Make the technical idea clear before <Accent>play</Accent>
+              </span>
             </h2>
-            <p className="mt-6 max-w-md text-[16px] leading-[1.6] text-[var(--home-ink-soft)]">
+            <p className={cn("mt-6 max-w-md text-[16px] leading-[1.6]", MUTED)}>
               We support the practical details around a video: title, thumbnail,
               description, chapters, clips, and upload-ready assets when needed.
             </p>
-          </Rise>
-
-          <div className="grid gap-4">
-            {layers.map((layer, index) => (
-              <Rise key={layer.title} delay={index * 0.06}>
-                <div className="s1-glass-card grid gap-5 rounded-[24px] p-6 sm:grid-cols-[auto_1fr] sm:gap-6 md:p-8">
-                  <span className="s1-glass-dark flex size-12 items-center justify-center rounded-2xl text-white">
-                    <layer.icon className="size-6" stroke={1.6} aria-hidden="true" />
-                  </span>
-                  <div>
-                    <h3 className="text-[20px] font-medium tracking-[-0.025em] text-[var(--home-ink)] md:text-[22px]">
-                      {layer.title}
-                    </h3>
-                    <p className="mt-2.5 max-w-xl text-[15px] leading-[1.6] text-[var(--home-ink-soft)]">
-                      {layer.body}
-                    </p>
-                  </div>
-                </div>
-              </Rise>
-            ))}
           </div>
+
+          <ol className="grid gap-2">
+            {layers.map((layer, position) => (
+              <li key={layer.title}>
+                <Rise delay={position * 0.06}>
+                  <div
+                    className={cn(
+                      "grid gap-5 p-6 sm:grid-cols-[auto_1fr] sm:gap-6 md:p-7",
+                      CELL,
+                    )}
+                  >
+                    <span
+                      className="flex size-12 items-center justify-center text-[#f4efe7]"
+                      style={{ background: INK }}
+                    >
+                      <layer.icon
+                        className="size-6"
+                        stroke={1.6}
+                        aria-hidden="true"
+                      />
+                    </span>
+                    <div>
+                      <h3 className="flex items-baseline gap-3 text-[20px] font-medium tracking-[-0.03em] md:text-[22px]">
+                        <span
+                          className="text-[13px] tabular-nums"
+                          style={{ color: PRINT }}
+                        >
+                          {String(position + 1).padStart(2, "0")}
+                        </span>
+                        {layer.title}
+                      </h3>
+                      <p
+                        className={cn(
+                          "mt-2.5 max-w-xl text-[15px] leading-[1.6]",
+                          MUTED,
+                        )}
+                      >
+                        {layer.body}
+                      </p>
+                    </div>
+                  </div>
+                </Rise>
+              </li>
+            ))}
+          </ol>
         </div>
       </Container>
-    </section>
+    </PaperSection>
   );
 }

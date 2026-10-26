@@ -42,7 +42,20 @@ export const PAPER_SCOPE = {
 } as CSSProperties;
 
 /** Routes drawn in the paper design (cream sheet, ink type, print orange); the blog is matched separately. */
-const PAPER_PATHS = new Set(["/", "/careers", "/terms", "/privacy"]);
+const PAPER_PATHS = new Set([
+  "/",
+  "/careers",
+  "/terms",
+  "/privacy",
+  "/about-us",
+  "/product",
+  "/case-studies",
+  "/devrel-jobs",
+  "/technical-content-marketing",
+  "/developer-relations-growth-campaigns",
+  "/developer-video-production",
+  "/developer-documentation-dx-audit",
+]);
 
 /** Drops the locale prefix, so "/fr/careers" reads as "/careers". */
 export function unprefixPath(pathname: string) {
@@ -55,6 +68,7 @@ export function isPaperPath(pathname: string) {
   return (
     PAPER_PATHS.has(path) ||
     /^\/blog(\/|$)/.test(path) ||
-    /^\/careers\/[^/]+\/?$/.test(path)
+    /^\/careers\/[^/]+\/?$/.test(path) ||
+    /^\/case-studies\/[^/]+\/?$/.test(path)
   );
 }

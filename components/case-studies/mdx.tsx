@@ -18,7 +18,9 @@ function extractText(children: ReactNode): string {
   if (typeof children === "number") return String(children);
   if (Array.isArray(children)) return children.map(extractText).join("");
   if (children && typeof children === "object" && "props" in children) {
-    return extractText((children as { props: { children?: ReactNode } }).props.children);
+    return extractText(
+      (children as { props: { children?: ReactNode } }).props.children,
+    );
   }
   return "";
 }
@@ -31,17 +33,17 @@ function Frame({
   caption?: string;
 }) {
   return (
-    <figure className="not-prose my-10 w-fit max-w-full overflow-hidden rounded-xl border border-border/70 bg-[linear-gradient(135deg,hsl(var(--muted)/0.5),hsl(var(--background)),hsl(var(--primary)/0.06))] p-2 shadow-[0_18px_52px_-36px_rgba(0,0,0,0.55)] dark:border-white/[0.08] dark:bg-[linear-gradient(135deg,hsl(var(--muted)/0.18),hsl(var(--background)),hsl(var(--primary)/0.08))]">
+    <figure className="not-prose my-10 w-fit max-w-full overflow-hidden rounded-[18px] bg-white/80 p-2 shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08]">
       <div className="mb-2 flex items-center gap-1.5 px-1">
-        <span className="size-2 rounded-full bg-primary/70" />
-        <span className="size-2 rounded-full bg-primary/35" />
-        <span className="size-2 rounded-full bg-muted-foreground/25" />
+        <span className="size-2 rounded-full bg-[#f97316]" />
+        <span className="size-2 rounded-full bg-[#f97316]/40" />
+        <span className="size-2 rounded-full bg-[#141414]/15" />
       </div>
-      <div className="w-fit max-w-full overflow-hidden rounded-lg border border-border/60 bg-background/80 dark:border-white/[0.08] dark:bg-background/45">
+      <div className="w-fit max-w-full overflow-hidden rounded-[12px] bg-[#fbf8f3] ring-1 ring-[#141414]/[0.08]">
         {children}
       </div>
       {caption ? (
-        <figcaption className="px-1 pt-2 text-center text-xs font-medium text-muted-foreground">
+        <figcaption className="px-1 pt-2 text-center text-[12.5px] font-medium text-[#141414]/55">
           {caption}
         </figcaption>
       ) : null}
@@ -77,7 +79,7 @@ function CaseStudyImage({
       title={title ?? undefined}
       loading="lazy"
       decoding="async"
-      className="block h-auto w-auto max-w-full bg-muted/20"
+      className="block h-auto w-auto max-w-full bg-[#f4efe7]"
     />
   );
 }
@@ -87,7 +89,7 @@ function CaseStudyH2({ children, ...props }: ComponentPropsWithoutRef<"h2">) {
   return (
     <h2
       id={id}
-      className="font-inter font-semibold mt-12 mb-4 text-xl md:text-2xl text-foreground scroll-mt-24"
+      className="mb-5 mt-16 scroll-mt-32 border-t border-[#141414]/10 pt-10 text-[26px] font-medium tracking-[-0.04em] text-[#141414] md:text-[30px]"
       {...props}
     >
       {children}
@@ -132,7 +134,7 @@ function CaseStudyH3({ children, ...props }: ComponentPropsWithoutRef<"h3">) {
   return (
     <h3
       id={id}
-      className="font-inter font-medium mt-8 mb-3 text-lg text-foreground scroll-mt-24"
+      className="mb-3 mt-10 scroll-mt-32 text-[20px] font-medium tracking-[-0.03em] text-[#141414] md:text-[22px]"
       {...props}
     >
       {children}

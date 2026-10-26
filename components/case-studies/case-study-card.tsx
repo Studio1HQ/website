@@ -5,29 +5,69 @@ import { NumericText } from "@/components/ui/num";
 import { getClientLogo } from "@/components/case-studies/client-logos";
 import { CaseStudyCoverArt } from "@/components/case-studies/case-study-cover-art";
 import { cn } from "@/lib/utils";
+import { PRINT } from "@/lib/paper";
 import type { CaseStudyMeta } from "@/lib/case-studies";
 
 /**
- * Case-study card system.
+ * Case-study card system, in the paper design.
  *
  * Deliberately spare: artwork, category, headline, arrow. No summary, no tag
  * row, no separate metric block, the headlines already carry their numbers
  * ("...to 12,000+ GitHub stars"), so a metric underneath only repeated the
  * title. Detail belongs on the case study itself, not the index.
  *
- * Imagery is inset inside the card rather than bleeding to its edges, and
- * shown at 16/10 instead of a 3/1 letterbox, the old strip cropped roughly a
- * third off 16:9 sources, which is what made the art look poor.
+ * Cards are the home page's white sheets: rounded, a hairline ink ring, an
+ * orange hairline along the top edge, and the artwork engraved into the card.
  */
 
 export type CardVariant = "featured" | "default" | "compact";
 
-/** Shared frame: theme glass surface + one hover language across all sizes. */
+/** Shared frame: white paper sheet + one hover language across all sizes. */
 export function cardFrame(extra?: string) {
   return cn(
-    "s1-glass-card group relative flex min-w-0 overflow-hidden rounded-[22px]",
-    "transition-transform duration-500 ease-out hover:-translate-y-1 motion-reduce:transform-none motion-reduce:transition-none",
+    "group relative isolate flex min-w-0 overflow-hidden rounded-[24px] bg-white/80 text-[#141414] ring-1 ring-inset ring-[#141414]/[0.08]",
+    "shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)]",
+    "transition-[transform,box-shadow,background-color] duration-500 ease-out hover:-translate-y-1 hover:bg-white hover:shadow-[inset_0_1px_0_#fff,0_30px_60px_-34px_rgba(249,115,22,0.45)]",
+    "motion-reduce:transform-none motion-reduce:transition-none",
     extra,
+  );
+}
+
+/** Orange hairline along the top edge of a card, as on the home page. */
+export function CardHairline() {
+  return (
+    <span
+      aria-hidden
+      className="pointer-events-none absolute inset-x-8 top-0 z-[2] h-px"
+      style={{
+        background: `linear-gradient(90deg, transparent, ${PRINT}, transparent)`,
+      }}
+    />
+  );
+}
+
+/** Small orange disc with an arrow, turning on hover. */
+export function CardArrow({ className }: { className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "flex size-8 shrink-0 items-center justify-center rounded-full text-white transition-transform duration-300 group-hover:rotate-45 motion-reduce:transform-none",
+        className,
+      )}
+      style={{ background: PRINT }}
+    >
+      <ArrowUpRight weight="bold" className="size-3.5" />
+    </span>
+  );
+}
+
+/** Category label: a soft orange pill. */
+export function CategoryPill({ children }: { children: string }) {
+  return (
+    <span className="inline-flex max-w-full items-center truncate rounded-full bg-[#f97316]/10 px-2.5 py-0.5 text-[11.5px] font-medium text-[#c2410c]">
+      {children}
+    </span>
   );
 }
 
@@ -43,7 +83,7 @@ export function ClientMark({
   const logo = getClientLogo(study.slug);
   if (!logo) return null;
 
-  const tile = { sm: "size-10", md: "size-12", lg: "size-14" }[size];
+  const tile = { sm: "size-10", md: "size-11", lg: "size-12" }[size];
   const pad = { sm: "p-1", md: "p-1.5", lg: "p-1.5" }[size];
 
   return (
@@ -51,14 +91,8 @@ export function ClientMark({
       className={cn(
         tile,
         pad,
-        "flex shrink-0 items-center justify-center overflow-hidden rounded-lg transition-all duration-500",
-        frosted
-          ? cn(
-              "bg-background/90 shadow-[0_8px_20px_-10px_rgba(0,0,0,0.45)] ring-1 ring-black/10 backdrop-blur-md",
-              "dark:bg-background/80 dark:ring-white/15",
-              "group-hover:ring-primary/35 group-hover:shadow-[0_10px_24px_-10px_hsl(var(--primary)/0.35)]",
-            )
-          : "border border-border/60 bg-background/70 backdrop-blur-md group-hover:border-primary/30",
+        "flex shrink-0 items-center justify-center overflow-hidden rounded-[11px] bg-white ring-1 ring-[#141414]/10 transition-shadow duration-500",
+        frosted && "shadow-[0_8px_20px_-12px_rgba(20,20,20,0.45)]",
       )}
     >
       <Image
@@ -75,10 +109,9 @@ export function ClientMark({
 /**
  * Card artwork.
  *
- * Inset with rounded corners and a hairline ring so it reads as a deliberate
- * plate. The plate itself is a live component (`CaseStudyCoverArt`), not a
- * designed banner image, so every card renders at identical quality and a
- * new case study only needs a title + logo to look right.
+ * Engraved into the card (the home page's pressed result boxes) with the
+ * live cover plate inset on top, so every card renders at identical quality
+ * and a new case study only needs a title + logo to look right.
  */
 export function CardMedia({
   study,
@@ -89,19 +122,19 @@ export function CardMedia({
 }) {
   const containerClass =
     variant === "featured"
-      ? "aspect-[16/9] p-3 md:aspect-auto md:h-full md:min-h-0 md:p-4"
+      ? "aspect-[16/9] p-2.5 md:aspect-auto md:h-full md:min-h-0 md:p-3"
       : variant === "compact"
         ? "aspect-[16/9] p-2"
-        : "aspect-[16/9] p-3";
+        : "aspect-[16/9] p-2.5";
 
   return (
     <div
       className={cn(
-        "relative w-full overflow-hidden rounded-xl bg-[linear-gradient(135deg,hsl(var(--muted)/0.62),hsl(var(--background)),hsl(var(--primary)/0.08))] ring-1 ring-inset ring-foreground/[0.07] dark:bg-[linear-gradient(135deg,hsl(var(--muted)/0.22),hsl(var(--background)),hsl(var(--primary)/0.1))] dark:ring-white/[0.07]",
+        "relative w-full overflow-hidden rounded-[16px] bg-[#ece5da] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10),inset_0_-1px_0_rgba(255,255,255,0.85),0_1px_0_rgba(255,255,255,0.95)]",
         containerClass,
       )}
     >
-      <div className="relative h-full w-full overflow-hidden rounded-lg bg-background/70 shadow-[0_16px_40px_-24px_rgba(0,0,0,0.45)] ring-1 ring-black/5 dark:bg-background/45 dark:ring-white/10">
+      <div className="relative h-full w-full overflow-hidden rounded-[11px] bg-[#fbf8f3] shadow-[0_14px_30px_-22px_rgba(20,20,20,0.5)] ring-1 ring-[#141414]/[0.06]">
         <CaseStudyCoverArt study={study} variant={variant} />
       </div>
     </div>
@@ -119,24 +152,22 @@ export function CaseStudyCard({
   return (
     <Link
       href={`/case-studies/${study.slug}`}
-      className={cardFrame("flex-col items-stretch p-3")}
+      className={cardFrame("h-full flex-col items-stretch p-3")}
     >
+      <CardHairline />
       <CardMedia study={study} variant={variant} />
 
-      <div className="relative z-[1] flex min-w-0 flex-1 items-start justify-between gap-4 p-4 pt-5">
+      <div className="relative z-[1] flex min-w-0 flex-1 items-start justify-between gap-4 p-4 pt-5 md:p-5 md:pt-6">
         <div className="min-w-0">
-          <span className="text-[11px] font-medium uppercase tracking-wider text-primary">
-            {study.category}
-          </span>
-          <h3 className="mt-2 line-clamp-2 text-[18px] font-medium leading-snug tracking-[-0.025em] text-[var(--home-ink)] transition-colors group-hover:text-primary md:text-[19px]">
-            <NumericText>{study.title}</NumericText>
+          <CategoryPill>{study.category}</CategoryPill>
+          <h3 className="mt-3 line-clamp-2 text-[19px] font-medium leading-[1.25] tracking-[-0.035em] text-[#141414] md:text-[22px]">
+            <span className="bg-[linear-gradient(currentColor,currentColor)] bg-[length:0%_1.5px] bg-left-bottom bg-no-repeat transition-[background-size] duration-500 group-hover:bg-[length:100%_1.5px]">
+              <NumericText>{study.title}</NumericText>
+            </span>
           </h3>
         </div>
 
-        <ArrowUpRight
-          weight="bold"
-          className="mt-6 size-4 shrink-0 text-[var(--home-ink-soft)] group-hover:text-primary transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 dark:group-hover:text-primary motion-reduce:transform-none"
-        />
+        <CardArrow className="mt-1" />
       </div>
     </Link>
   );
@@ -147,15 +178,18 @@ export function CaseStudyCardCompact({ study }: { study: CaseStudyMeta }) {
   return (
     <Link
       href={`/case-studies/${study.slug}`}
-      className={cardFrame("flex-col items-stretch p-2.5")}
+      className={cardFrame(
+        "h-full flex-col items-stretch rounded-[20px] p-2.5",
+      )}
     >
+      <CardHairline />
       <CardMedia study={study} variant="compact" />
 
       <div className="relative z-[1] flex min-w-0 flex-1 flex-col p-3 pt-4">
-        <span className="text-[11px] font-medium uppercase tracking-wider text-primary">
+        <span className="text-[12px] font-medium text-[#c2410c]">
           {study.category}
         </span>
-        <h3 className="mt-1.5 line-clamp-2 text-[15px] font-medium leading-snug tracking-[-0.02em] text-[var(--home-ink)]">
+        <h3 className="mt-1.5 line-clamp-2 text-[15.5px] font-medium leading-snug tracking-[-0.025em] text-[#141414] transition-colors group-hover:text-[#c2410c]">
           <NumericText>{study.title}</NumericText>
         </h3>
       </div>

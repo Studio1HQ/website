@@ -1,15 +1,29 @@
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
-import { ArrowDown, Code, Package, PenNib } from "@phosphor-icons/react";
-import { EASE, GlassIcon, PillLink } from "@/components/home/ui";
-import { NightEyebrow, NightHeader } from "@/components/shared/night-header";
-import { Num } from "@/components/ui/num";
+import {
+  ArrowDown,
+  ArrowUpRight,
+  Code,
+  Package,
+  PenNib,
+} from "@phosphor-icons/react";
+import { EASE } from "@/components/home/ui";
+import {
+  PaperEyebrow,
+  PaperPageHeader,
+} from "@/components/paper/paper-page-header";
+import { Cursor } from "@/components/paper/paper-hero";
+import { INK, PAPER, PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 
 export type ServiceHeroStat = { value: string; label: string };
 
-/** Service page hero in the homepage's night style; all copy comes from the page. */
+/**
+ * Service page hero on the paper sheet (cream, grain, ink type, print
+ * orange); all copy comes from the page. Kept under its old name so every
+ * service hero picks it up unchanged.
+ */
 export function ServiceNightHero({
   badge,
   titleAccent,
@@ -35,60 +49,122 @@ export function ServiceNightHero({
   });
 
   return (
-    <NightHeader className="scroll-mt-28 pb-20 pt-40 md:pb-28 md:pt-48">
-      {/* Floating icon tiles flanking the headline (lg+), as before */}
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 mx-auto hidden h-full w-full max-w-7xl px-4 lg:block">
+    <PaperPageHeader className="scroll-mt-28 pb-16 pt-36 md:pb-24 md:pt-44">
+      {/* Faint ruled lines behind the headline, like the sheet underneath */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 opacity-60 [background-image:linear-gradient(to_bottom,rgba(20,20,20,0.06)_1px,transparent_1px)] [background-size:100%_48px] [mask-image:linear-gradient(to_bottom,transparent,black_20%,black_70%,transparent)]"
+      />
+
+      {/* Ink icon tiles flanking the headline (lg+), each "selected" */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 mx-auto hidden h-full w-full max-w-[1300px] px-8 lg:block"
+      >
         {[
-          { icon: <Code weight="bold" />, className: "left-[3rem] top-[13rem] xl:left-[5rem]", delay: 0 },
-          { icon: <PenNib weight="bold" />, className: "right-[3rem] top-[15rem] xl:right-[5rem]", delay: 1.2 },
+          {
+            icon: <Code weight="regular" className="size-6" />,
+            label: "code",
+            className: "left-[3rem] top-[13rem] xl:left-[4rem]",
+            delay: 0,
+          },
+          {
+            icon: <PenNib weight="regular" className="size-6" />,
+            label: "write",
+            className: "right-[3rem] top-[16rem] xl:right-[4rem]",
+            delay: 1.2,
+          },
         ].map((tile, index) => (
           <motion.div
-            key={index}
+            key={tile.label}
             className={cn("absolute", tile.className)}
             initial={reduceMotion ? false : { opacity: 0, scale: 0.8 }}
-            animate={reduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: [0, -12, 0] }}
+            animate={
+              reduceMotion
+                ? { opacity: 1 }
+                : { opacity: 1, scale: 1, y: [0, -12, 0] }
+            }
             transition={{
               opacity: { duration: 0.8, delay: 0.4 },
               scale: { duration: 0.8, ease: EASE, delay: 0.4 },
-              y: { duration: 6, repeat: Infinity, ease: "easeInOut", delay: tile.delay },
+              y: {
+                duration: 6,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: tile.delay,
+              },
             }}
           >
-            <GlassIcon className="size-14 text-white">{tile.icon}</GlassIcon>
+            <span className="block border-[1.5px] border-[#f97316] p-1.5">
+              <span
+                className="flex size-14 items-center justify-center"
+                style={{ background: index === 0 ? INK : PRINT, color: PAPER }}
+              >
+                {tile.icon}
+              </span>
+            </span>
+            {index === 1 ? (
+              <Cursor className="absolute -bottom-7 -left-5 size-7" />
+            ) : null}
           </motion.div>
         ))}
       </div>
 
-      <div id="overview" className="mx-auto flex max-w-[1300px] flex-col items-center px-4 text-center sm:px-6 lg:px-8">
+      <div
+        id="overview"
+        className="mx-auto flex max-w-[1300px] flex-col items-center px-4 text-center sm:px-6 lg:px-8"
+      >
         <motion.div {...enter(0)}>
-          <NightEyebrow icon={<Package weight="duotone" className="size-4 text-[#fdba74]" />}>
+          <PaperEyebrow icon={<Package weight="duotone" className="size-4" />}>
             {badge}
-          </NightEyebrow>
+          </PaperEyebrow>
         </motion.div>
 
         <motion.h1
           {...enter(0.1)}
-          className="mt-7 max-w-[1000px] text-[42px] font-medium leading-[1.04] tracking-[-0.05em] sm:text-[60px] lg:text-[76px]"
+          className="mt-7 max-w-[980px] text-balance text-[40px] font-medium leading-[1.04] tracking-[-0.055em] sm:text-[60px] lg:text-[76px]"
         >
-          <span className="s1-accent-text">{titleAccent}</span> {titleRest}
+          <span className="bg-white/80 px-[0.12em] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]">
+            <span style={{ color: PRINT }}>{titleAccent}</span>
+          </span>{" "}
+          {titleRest}
         </motion.h1>
 
         <motion.p
           {...enter(0.2)}
-          className="mt-6 max-w-[640px] text-balance text-[16px] leading-[1.6] text-white/60 sm:text-[18px]"
+          className="mt-6 max-w-[640px] text-balance text-[16px] leading-[1.6] text-[#141414]/65 sm:text-[18px]"
         >
           {description}
         </motion.p>
 
-        <motion.div {...enter(0.3)} className="mt-10 flex w-full flex-col items-center justify-center gap-4 sm:w-auto sm:flex-row">
-          <PillLink href="https://cal.com/studio1/collab" tone="brand" external>
+        <motion.div
+          {...enter(0.3)}
+          className="mt-10 flex w-full flex-col items-center justify-center gap-4 sm:w-auto sm:flex-row sm:gap-7"
+        >
+          <a
+            href="https://cal.com/studio1/collab"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group inline-flex h-12 items-center gap-3 whitespace-nowrap rounded-full py-1.5 pl-6 pr-1.5 text-[15px] font-medium shadow-[0_14px_30px_-16px_rgba(20,20,20,0.6)] transition-transform duration-300 hover:-translate-y-0.5 motion-reduce:transform-none"
+            style={{ background: INK, color: PAPER }}
+          >
             {primaryCta}
-          </PillLink>
+            <span
+              className="flex size-9 items-center justify-center rounded-full text-white transition-transform duration-300 group-hover:rotate-45"
+              style={{ background: PRINT }}
+            >
+              <ArrowUpRight weight="bold" className="size-4" />
+            </span>
+          </a>
           <a
             href="#work"
-            className="s1-glass-btn-light group inline-flex h-12 items-center gap-2 rounded-full px-6 text-[13px] font-medium uppercase tracking-[0.06em] text-white"
+            className="group inline-flex items-center gap-1.5 text-[15px] font-medium underline decoration-[#141414]/25 decoration-2 underline-offset-[6px] transition-colors hover:decoration-[#f97316]"
           >
             {secondaryCta}
-            <ArrowDown weight="bold" className="size-4 transition-transform duration-300 group-hover:translate-y-0.5" />
+            <ArrowDown
+              weight="bold"
+              className="size-4 transition-transform duration-300 group-hover:translate-y-0.5"
+            />
           </a>
         </motion.div>
 
@@ -97,22 +173,30 @@ export function ServiceNightHero({
             {...enter(0.45)}
             role="list"
             className={cn(
-              "mt-14 grid w-full max-w-[1000px] gap-px overflow-hidden rounded-[22px] bg-white/10 shadow-[0_50px_120px_-40px_rgba(40,10,0,0.75)] ring-1 ring-white/10 md:mt-20",
+              "mt-14 grid w-full max-w-[1000px] gap-2 md:mt-20",
               stats.length === 3 ? "grid-cols-3" : "grid-cols-2",
               stats.length >= 4 && "lg:grid-cols-4",
             )}
           >
-            {stats.map((stat) => (
-              <li key={stat.label} className="flex flex-col items-center justify-center gap-1.5 bg-[#0c0807] px-3 py-5 md:px-6 md:py-8">
-                <Num className="text-[26px] font-medium leading-none tracking-[-0.04em] text-white sm:text-[34px] md:text-[42px]">
+            {stats.map((stat, index) => (
+              <li
+                key={stat.label}
+                className="flex min-w-0 flex-col items-center justify-center gap-2 rounded-[16px] bg-white/80 px-3 py-5 ring-1 ring-inset ring-[#141414]/10 md:px-6 md:py-8"
+              >
+                <span
+                  className="whitespace-nowrap text-[24px] font-medium leading-none tabular-nums tracking-[-0.05em] sm:text-[34px] md:text-[42px]"
+                  style={index === 0 ? { color: PRINT } : undefined}
+                >
                   {stat.value}
-                </Num>
-                <span className="text-center text-[12px] leading-snug text-white/55 md:text-[13px]">{stat.label}</span>
+                </span>
+                <span className="text-center text-[12px] leading-snug text-[#141414]/60 md:text-[13px]">
+                  {stat.label}
+                </span>
               </li>
             ))}
           </motion.ul>
         ) : null}
       </div>
-    </NightHeader>
+    </PaperPageHeader>
   );
 }

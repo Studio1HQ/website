@@ -6,7 +6,11 @@ import Process from "@/components/pages/devrel-as-a-service/process";
 import DevRelPricing from "@/components/sections/devrel-as-service/pricing";
 import type { Metadata } from "next";
 import Hero from "@/components/pages/devrel-as-a-service/hero";
-import FAQ, { type FAQItem } from "@/components/landing/faq";
+import type { FAQItem } from "@/components/landing/faq";
+import { Container } from "@/components/home/ui";
+import { PaperSection } from "@/components/paper/paper-sections";
+import { PaperServiceFaq } from "@/components/pages/shared/paper-service-kit";
+import { PAPER_SCOPE } from "@/lib/paper";
 import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 import {
   ServiceDetailSection,
@@ -189,7 +193,7 @@ export default function DevRel() {
   };
 
   return (
-    <div className="">
+    <div className="overflow-x-clip" style={PAPER_SCOPE}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
@@ -216,22 +220,30 @@ export default function DevRel() {
         description="We support docs, content, social, open-source, partnerships, hackathons, creator campaigns, launches, and feedback loops."
         items={devrelScope}
         columns="three"
+        index={2}
       />
-      <Process />
+      <Process index={3} />
       <ServiceProofSection
         title="Open-source growth through validation, demos, and meaningful collaborations"
         description="Memori combined early product validation, demo agents, community education, feedback loops, and relevant developer collaborations."
         study={memoriProof}
+        index={4}
       />
       <ServiceProofSection
         title="Workshops and community distribution that lead to product usage"
         description="Nebius paired hands-on workshops, conference talks, and Reddit distribution so every event and post ended with developers using the product."
         study={nebiusProof}
+        index={5}
       />
-      <FAQ
-        subtitle="Common questions about our developer relations and growth campaign services."
-        items={devrelFaqItems}
-      />
+      <PaperSection tone="paper">
+        <Container>
+          <PaperServiceFaq
+            index={6}
+            subtitle="Common questions about our developer relations and growth campaign services."
+            items={devrelFaqItems}
+          />
+        </Container>
+      </PaperSection>
       {/* <DevRelPricing /> */}
       {/* <PricingSection /> */}
       {/* <Team /> */}

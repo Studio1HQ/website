@@ -1,33 +1,22 @@
 "use client";
-import React from "react";
-import { SectionIntro } from "@/components/home/ui";
-import { ProcessScroller } from "@/components/sections/process-scroller";
-import { blogAsServiceProcess } from "@/data/service-processes";
-import {
-  serviceProcessInnerClassName,
-  serviceProcessOuterClassName,
-} from "@/components/pages/shared/service-hero-layout";
 
-export default function Process() {
+import { Container } from "@/components/home/ui";
+import { PaperSection } from "@/components/paper/paper-sections";
+import { PaperServiceProcess } from "@/components/pages/shared/paper-service-kit";
+import { blogAsServiceProcess } from "@/data/service-processes";
+
+export default function Process({ index = 4 }: { index?: number }) {
   return (
-    <div
-      id="process"
-      className={`${serviceProcessOuterClassName} pt-10 pb-6 sm:pt-8 sm:pb-8`}
-    >
-      <div
-        className={`${serviceProcessInnerClassName} flex flex-col items-center`}
-      >
-        <ProcessScroller
+    <PaperSection id="process" tone="paper" className="scroll-mt-28">
+      <Container>
+        <PaperServiceProcess
+          index={index}
           steps={blogAsServiceProcess}
-          heading={
-            <SectionIntro
-              title="How We Deliver"
-              accent="Developer-First Content"
-              description="A transparent, collaborative content process built for fast-moving SaaS and devtool teams."
-            />
-          }
+          title="How We Deliver"
+          accent="Developer-First Content"
+          description="A transparent, collaborative content process built for fast-moving SaaS and devtool teams."
         />
-      </div>
-    </div>
+      </Container>
+    </PaperSection>
   );
 }

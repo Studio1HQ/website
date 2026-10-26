@@ -1,9 +1,14 @@
 "use client";
 
 import type { Icon } from "@phosphor-icons/react";
-import { motion } from "motion/react";
-import { SectionIntro } from "@/components/home/ui";
-import { staggerChildren, serviceItemVariants } from "@/lib/animations";
+import { Container, Rise } from "@/components/home/ui";
+import { MUTED, PaperSection } from "@/components/paper/paper-sections";
+import {
+  PaperChip,
+  PaperPoints,
+  ServiceHead,
+} from "@/components/pages/shared/paper-service-kit";
+import { INK, PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 
 export type ServiceOfferCard = {
@@ -24,13 +29,9 @@ type ServiceOfferCardsProps = {
   subtitle: string;
   cards: ServiceOfferCard[];
   id?: string;
+  /** Position in the page's printed section index. */
+  index?: number;
 };
-
-const cardMotion = [
-  { hoverClass: "hover:-translate-y-4", offsetClass: "" },
-  { hoverClass: "hover:translate-y-4", offsetClass: "md:translate-y-16" },
-  { hoverClass: "hover:-translate-y-4", offsetClass: "" },
-] as const;
 
 export function ServiceOfferCards({
   eyebrow,
@@ -39,86 +40,92 @@ export function ServiceOfferCards({
   subtitle,
   cards,
   id = "work",
+  index = 1,
 }: ServiceOfferCardsProps) {
   return (
-    <motion.section
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: "-100px" }}
-      variants={staggerChildren}
-      id={id}
-      className="relative mb-28 px-4 pb-20 pt-24 md:pt-32"
-    >
-      <motion.div variants={serviceItemVariants}>
-        <SectionIntro eyebrow={eyebrow} title={titlePrefix} accent={titleAccent} description={subtitle} />
-      </motion.div>
+    <PaperSection id={id} tone="paper" className="scroll-mt-28">
+      <Container>
+        <ServiceHead
+          index={index}
+          name={eyebrow ?? "Services"}
+          title={titlePrefix}
+          accent={titleAccent}
+          description={subtitle}
+        />
 
-      <div className="mx-auto flex max-w-7xl flex-col">
-        <motion.div
-          variants={serviceItemVariants}
-          className="relative mt-20 flex w-full flex-col items-center justify-center md:flex-row md:items-start md:gap-5 md:pb-20"
-        >
-          {cards.map((card, index) => {
+        <ul role="list" className="mt-10 grid gap-2 md:grid-cols-3">
+          {cards.map((card, position) => {
             const IconComponent = card.icon;
-            const motionClasses = cardMotion[index % cardMotion.length];
-
             return (
-              <div
-                key={card.accent}
-                id={card.id}
-                className={cn(
-                  "s1-glass-card s1-glass-raised group relative mb-8 flex min-h-[30rem] w-full max-w-[23rem] flex-col items-start justify-start rounded-[24px] p-8 transition-transform duration-700 md:mb-0",
-                  "motion-reduce:transition-none",
-                  motionClasses.hoverClass,
-                  motionClasses.offsetClass,
-                )}
-              >
+              <li key={card.accent} id={card.id} className="relative min-w-0">
                 {card.anchorIds?.map((anchorId) => (
-                  <span key={anchorId} id={anchorId} className="absolute -top-24" />
+                  <span
+                    key={anchorId}
+                    id={anchorId}
+                    className="absolute -top-24"
+                  />
                 ))}
-
-                <div className="relative z-10 flex w-full flex-1 flex-col">
-                  <span className="s1-glass-dark flex size-14 items-center justify-center rounded-2xl text-white">
-                    <IconComponent className="size-7" weight="duotone" />
-                  </span>
-
-                  <div className="mt-auto flex flex-col gap-2 pt-8">
-                    <div className="flex flex-wrap gap-1.5">
-                      {card.badges.map((badge) => (
-                        <span
-                          key={badge}
-                          className="rounded-full border border-[var(--home-line)] px-2.5 py-0.5 text-[12px] font-medium text-[var(--home-ink-soft)]"
-                        >
-                          {badge}
-                        </span>
-                      ))}
+                <Rise delay={position * 0.08} className="h-full">
+                  <article className="group relative isolate flex h-full min-h-[440px] flex-col overflow-hidden rounded-[16px] bg-white/80 p-6 shadow-[inset_0_1px_0_#fff] ring-1 ring-inset ring-[#141414]/[0.08] transition-[background-color,box-shadow,transform] duration-500 hover:-translate-y-1 hover:bg-white hover:shadow-[inset_0_1px_0_#fff,0_24px_40px_-28px_rgba(20,20,20,0.45)] motion-reduce:transform-none md:p-7">
+                    {/* Hover: a soft orange wash rises from the bottom edge */}
+                    <span
+                      aria-hidden
+                      className="pointer-events-none absolute inset-0 -z-[5] translate-y-8 opacity-0 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-0 group-hover:opacity-100 motion-reduce:translate-y-0"
+                      style={{
+                        background:
+                          "radial-gradient(120% 60% at 50% 115%, rgba(249,115,22,0.16) 0%, rgba(249,115,22,0) 70%)",
+                      }}
+                    />
+                    <div className="flex items-start justify-between gap-4">
+                      <span
+                        className="flex size-12 items-center justify-center text-[#f4efe7]"
+                        style={{ background: INK }}
+                      >
+                        <IconComponent className="size-6" weight="regular" />
+                      </span>
+                      <span
+                        className="text-[13px] font-medium tabular-nums"
+                        style={{ color: PRINT }}
+                      >
+                        {String(position + 1).padStart(2, "0")}
+                      </span>
                     </div>
-                    <p className="mt-2 text-[32px] font-medium leading-[1.08] tracking-[-0.04em] text-[var(--home-ink)]">
-                      <span className="s1-accent-text">{card.accent}</span>
-                      {card.rest ? (
-                        <>
-                          <br />
-                          {card.rest}
-                        </>
-                      ) : null}
-                    </p>
-                    <p className="mt-2 text-[14px] leading-[1.6] text-[var(--home-ink-soft)]">{card.description}</p>
 
-                    <ul className="mt-5 space-y-2 border-t border-[var(--home-line)] pt-4">
-                      {card.features.map((feature) => (
-                        <li key={feature} className="flex items-start gap-2.5 text-[14px] text-[var(--home-ink)]">
-                          <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary" aria-hidden />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </div>
+                    <div className="mt-auto flex flex-col pt-10">
+                      <div className="flex flex-wrap gap-1.5">
+                        {card.badges.map((badge) => (
+                          <PaperChip key={badge}>{badge}</PaperChip>
+                        ))}
+                      </div>
+                      <h3 className="mt-4 text-[28px] font-medium leading-[1.08] tracking-[-0.045em] md:text-[30px]">
+                        <span style={{ color: PRINT }}>{card.accent}</span>
+                        {card.rest ? (
+                          <>
+                            <br />
+                            {card.rest}
+                          </>
+                        ) : null}
+                      </h3>
+                      <p
+                        className={cn(
+                          "mt-3 text-[14.5px] leading-[1.6]",
+                          MUTED,
+                        )}
+                      >
+                        {card.description}
+                      </p>
+                      <PaperPoints
+                        points={card.features}
+                        className="mt-5 border-t border-[#141414]/10 pt-4"
+                      />
+                    </div>
+                  </article>
+                </Rise>
+              </li>
             );
           })}
-        </motion.div>
-      </div>
-    </motion.section>
+        </ul>
+      </Container>
+    </PaperSection>
   );
 }

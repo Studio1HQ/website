@@ -217,7 +217,7 @@ export default function Navbar() {
                       className={cn(
                         isPaper
                           ? // Paper menu: the hero's white card, square, hairline ring.
-                            "bg-white p-1.5 text-[#141414] shadow-[0_24px_50px_-28px_rgba(20,20,20,0.35)] ring-1 ring-[#141414]/10"
+                            "rounded-[18px] bg-white p-2 text-[#141414] shadow-[0_24px_50px_-28px_rgba(20,20,20,0.35)] ring-1 ring-[#141414]/10"
                           : "rounded-lg border bg-background/95 px-1 py-1.5 shadow-lg backdrop-blur-xl",
                         item.children.some(
                           (child) =>
@@ -241,15 +241,15 @@ export default function Navbar() {
                             "group/item flex w-full items-start gap-2.5 px-3 py-2.5 transition-colors duration-200",
                             isPaper && "min-w-[19rem]",
                             isPaper
-                              ? "items-center gap-3 py-2 text-[14px] text-[#141414] hover:bg-[#f4efe7]/60"
+                              ? "items-center gap-3 rounded-[12px] py-2 text-[14px] text-[#141414] hover:bg-[#f4efe7]/60"
                               : "text-muted-foreground hover:text-foreground",
                           )}
                         >
                           {isPaper ? (
-                            <span className="flex size-7 shrink-0 items-center justify-center bg-[#f4efe7] text-[#141414] transition-colors duration-200 group-hover/item:bg-[#f97316] group-hover/item:text-white">
+                            <span className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-[#f6f3ee] text-[#141414]/75 shadow-[inset_0_2px_6px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08),inset_0_-1px_0_#fff,0_1px_0_rgba(255,255,255,0.95)] transition-colors duration-200 group-hover/item:text-[#f97316]">
                               <child.icon
-                                weight="regular"
-                                className="size-3.5"
+                                weight="duotone"
+                                className="size-[18px]"
                               />
                             </span>
                           ) : (

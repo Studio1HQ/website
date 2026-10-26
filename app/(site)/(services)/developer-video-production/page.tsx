@@ -8,7 +8,11 @@ import Cadence from "@/components/pages/content-creation/cadence";
 // import ProjectDemo from "@/components/pages/content-creation/project-demo";
 import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 import { ServiceDetailSection } from "@/components/pages/shared/service-detail-sections";
-import FAQ, { type FAQItem } from "@/components/landing/faq";
+import type { FAQItem } from "@/components/landing/faq";
+import { Container } from "@/components/home/ui";
+import { PaperSection } from "@/components/paper/paper-sections";
+import { PaperServiceFaq } from "@/components/pages/shared/paper-service-kit";
+import { PAPER_SCOPE } from "@/lib/paper";
 import { getTranslations } from "next-intl/server";
 import { DEFAULT_LOCALE } from "@/lib/i18n";
 
@@ -143,7 +147,7 @@ export default function Page() {
   };
 
   return (
-    <div className="">
+    <div className="overflow-x-clip" style={PAPER_SCOPE}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
@@ -171,15 +175,21 @@ export default function Page() {
         description="We produce walkthroughs, shorts, demo projects, repo-led videos, and supporting assets for developer brands."
         items={videoWorkstreams}
         columns="three"
+        index={2}
       />
       {/* <ProjectDemo /> */}
-      <Packaging />
-      <Formats />
-      <Cadence />
-      <FAQ
-        subtitle="Common questions about our developer video production services."
-        items={videoFaqItems}
-      />
+      <Packaging index={3} />
+      <Formats index={4} />
+      <Cadence index={5} />
+      <PaperSection tone="paper">
+        <Container>
+          <PaperServiceFaq
+            index={6}
+            subtitle="Common questions about our developer video production services."
+            items={videoFaqItems}
+          />
+        </Container>
+      </PaperSection>
     </div>
   );
 }

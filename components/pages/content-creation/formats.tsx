@@ -1,6 +1,13 @@
 "use client";
 
-import { Container, Rise, SectionIntro } from "@/components/home/ui";
+import { Container, Rise } from "@/components/home/ui";
+import { CELL, MUTED, PaperSection } from "@/components/paper/paper-sections";
+import {
+  PaperChip,
+  ServiceHead,
+} from "@/components/pages/shared/paper-service-kit";
+import { PRINT } from "@/lib/paper";
+import { cn } from "@/lib/utils";
 
 const formats = [
   {
@@ -33,39 +40,41 @@ const formats = [
   },
 ];
 
-export default function Formats() {
+export default function Formats({ index = 5 }: { index?: number }) {
   return (
-    <section id="formats" className="relative scroll-mt-28 py-24 md:py-32">
+    <PaperSection id="formats" tone="paper" className="scroll-mt-28">
       <Container>
-        <Rise>
-          <SectionIntro
-            eyebrow="Formats"
-            title="The videos we make most often"
-            description="Pick what fits your product and audience. We can support scripting, editing, packaging, and upload-ready assets."
-          />
-        </Rise>
+        <ServiceHead
+          index={index}
+          name="Formats"
+          title="The videos we make most often"
+          description="Pick what fits your product and audience. We can support scripting, editing, packaging, and upload-ready assets."
+        />
 
         <ul
           role="list"
           aria-label="Video formats"
-          className="mt-14 grid gap-5 sm:grid-cols-2 md:mt-16"
+          className="mt-10 grid gap-2 sm:grid-cols-2 lg:grid-cols-4"
         >
-          {formats.map((format, index) => (
+          {formats.map((format, position) => (
             <li key={format.title} className="min-w-0">
-              <Rise delay={index * 0.06} className="h-full">
-                <div className="s1-glass-card flex h-full flex-col rounded-[24px] p-7">
+              <Rise delay={position * 0.06} className="h-full">
+                <div
+                  className={cn("flex h-full min-h-[260px] flex-col p-6", CELL)}
+                >
                   <div className="flex items-center justify-between gap-3">
-                    <span className="font-numeric text-[44px] font-medium leading-none tracking-[-0.04em] text-primary tabular-nums">
+                    <span
+                      className="text-[40px] font-medium leading-none tabular-nums tracking-[-0.05em]"
+                      style={{ color: PRINT }}
+                    >
                       {format.number}
                     </span>
-                    <span className="rounded-full border border-[var(--home-line)] px-2.5 py-0.5 text-[12px] font-medium text-[var(--home-ink-soft)]">
-                      {format.meta}
-                    </span>
+                    <PaperChip>{format.meta}</PaperChip>
                   </div>
-                  <h3 className="mt-10 text-[22px] font-medium tracking-[-0.03em] text-[var(--home-ink)]">
+                  <h3 className="mt-auto pt-10 text-[20px] font-medium tracking-[-0.03em] md:text-[22px]">
                     {format.title}
                   </h3>
-                  <p className="mt-3 text-[15px] leading-[1.6] text-[var(--home-ink-soft)]">
+                  <p className={cn("mt-2.5 text-[15px] leading-[1.6]", MUTED)}>
                     {format.detail}
                   </p>
                 </div>
@@ -74,6 +83,6 @@ export default function Formats() {
           ))}
         </ul>
       </Container>
-    </section>
+    </PaperSection>
   );
 }

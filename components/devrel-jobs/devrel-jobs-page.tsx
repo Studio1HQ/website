@@ -1,14 +1,16 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
 import {
   ArrowSquareOut,
+  ArrowUpRight,
   ArrowsClockwise,
   Buildings,
   CalendarBlank,
   CaretDown,
+  Check,
   CurrencyDollar,
   GlobeHemisphereWest,
   MagnifyingGlass,
@@ -17,9 +19,20 @@ import {
   RocketLaunch,
   XCircle,
 } from "@phosphor-icons/react/dist/ssr";
-import { NightEyebrow, NightHeader } from "@/components/shared/night-header";
+import { Container, EASE } from "@/components/home/ui";
+import {
+  PaperEyebrow,
+  PaperPageHeader,
+} from "@/components/paper/paper-page-header";
+import {
+  Accent,
+  CELL,
+  FAINT,
+  IndexBar,
+  MUTED,
+  PaperSection,
+} from "@/components/paper/paper-sections";
 import { Input } from "@/components/ui/input";
-import { staggerChildren, itemVariants } from "@/lib/animations";
 import {
   DEVREL_JOB_SUBMIT_URL,
   getDevRelJobCategories,
@@ -31,42 +44,48 @@ import {
   type DevRelJobCategory,
   type DevRelJobWorkplace,
 } from "@/lib/devrel-jobs";
-import {
-} from "@/lib/shadows";
+import { GRAIN, INK, PAPER_SCOPE, PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 import { useLocale, useTranslations } from "next-intl";
 
-/** Glass pill on the night header. */
-const capsuleClassName =
-  "inline-flex items-center gap-2 rounded-full border border-white/20 bg-[linear-gradient(160deg,rgba(255,255,255,0.16),rgba(255,255,255,0.04))] px-4 py-2 text-[13px] font-medium text-white/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_10px_24px_-14px_rgba(0,0,0,0.8)] backdrop-blur-xl";
-
-/** Glass control surface for the toolbar (search + filters). */
-const controlClassName =
-  "border border-[var(--home-line)] bg-white/75 text-[var(--home-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-xl dark:bg-white/[0.06] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]";
-
 const JOBS_PER_PAGE = 12;
 
-const heroAnimation = {
-  hidden: { opacity: 0, y: 24 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.35,
-      ease: "easeOut" as const,
-    },
-  },
-};
+/** White pill on the paper header, holding one hero stat. */
+const statPillClassName =
+  "inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-[13px] font-medium text-[#141414] ring-1 ring-inset ring-[#141414]/10";
+
+/** Outline pill used for pagination and secondary actions. */
+const outlinePillClassName =
+  "inline-flex h-11 items-center gap-2 rounded-full border-[1.5px] border-[#141414]/20 px-5 text-[14px] font-medium text-[#141414] transition-colors duration-300 hover:border-[#141414] hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316]/50 disabled:pointer-events-none disabled:opacity-40";
 
 const workplaceIcons: Record<
   DevRelJobWorkplace,
-  React.ComponentType<{ className?: string; weight?: "duotone" }>
+  React.ComponentType<{ className?: string; weight?: "bold" | "duotone" }>
 > = {
   Remote: GlobeHemisphereWest,
   Hybrid: ArrowsClockwise,
   "On-site": Buildings,
   Unspecified: MapPin,
 };
+
+/** Fade-and-rise variants that collapse to a plain fade-free state under reduced motion. */
+function useRiseVariants() {
+  const reduceMotion = useReducedMotion();
+  return {
+    list: {
+      hidden: {},
+      visible: { transition: { staggerChildren: reduceMotion ? 0 : 0.05 } },
+    },
+    item: {
+      hidden: reduceMotion ? {} : { opacity: 0, y: 14 },
+      visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.6, ease: EASE },
+      },
+    },
+  };
+}
 
 type FilterDropdownProps = {
   id: string;
@@ -89,6 +108,7 @@ function FilterDropdown({
 }: FilterDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
+  const isActive = value !== null;
 
   React.useEffect(() => {
     const closeMenu = (event: MouseEvent) => {
@@ -107,6 +127,12 @@ function FilterDropdown({
     };
   }, []);
 
+  const optionClassName = (selected: boolean) =>
+    cn(
+      "flex w-full items-center justify-between gap-3 rounded-[10px] px-3 py-2 text-left text-[13px] font-medium text-[#141414] transition-colors hover:bg-[#141414]/[0.05]",
+      selected && "bg-[#f97316]/10",
+    );
+
   return (
     <div ref={menuRef} className={cn("relative min-w-0", className)}>
       <button
@@ -116,15 +142,18 @@ function FilterDropdown({
         aria-expanded={isOpen}
         onClick={() => setIsOpen((open) => !open)}
         className={cn(
-          "flex h-10 w-full items-center justify-between gap-3 rounded-full px-4 text-[13px] font-medium transition-colors hover:border-primary/35 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-0",
-          controlClassName,
+          "flex h-11 w-full items-center justify-between gap-3 rounded-full border-[1.5px] px-4 text-[13px] font-medium transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316]/50",
+          isActive
+            ? "border-[#141414] bg-[#141414] text-[#f4efe7]"
+            : "border-[#141414]/20 bg-white/60 text-[#141414] hover:border-[#141414] hover:bg-white",
         )}
       >
         <span className="truncate">{value ?? allLabel}</span>
         <CaretDown
           aria-hidden
           className={cn(
-            "size-3.5 shrink-0 text-[var(--home-ink-soft)] transition-transform duration-200",
+            "size-3.5 shrink-0 transition-transform duration-200 motion-reduce:transition-none",
+            isActive ? "text-[#f97316]" : "text-[#141414]/50",
             isOpen && "rotate-180",
           )}
           weight="bold"
@@ -135,7 +164,7 @@ function FilterDropdown({
         <div
           role="listbox"
           aria-label={label}
-          className="s1-glass-card s1-glass-raised absolute left-0 top-[calc(100%+0.5rem)] z-50 w-full min-w-48 overflow-hidden rounded-2xl p-1.5"
+          className="absolute left-0 top-[calc(100%+0.5rem)] z-50 max-h-72 w-full min-w-48 overflow-y-auto rounded-[16px] bg-white p-1.5 shadow-[0_24px_40px_-24px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/10"
         >
           <button
             type="button"
@@ -145,12 +174,17 @@ function FilterDropdown({
               onChange(null);
               setIsOpen(false);
             }}
-            className={cn(
-              "flex w-full rounded-xl px-3 py-2 text-left text-[13px] text-[var(--home-ink)] transition-colors hover:bg-primary/10 hover:text-primary",
-              value === null && "bg-primary/10 text-primary",
-            )}
+            className={optionClassName(value === null)}
           >
             {allLabel}
+            {value === null ? (
+              <Check
+                aria-hidden
+                weight="bold"
+                className="size-3.5 shrink-0"
+                style={{ color: PRINT }}
+              />
+            ) : null}
           </button>
           {options.map((option) => (
             <button
@@ -162,12 +196,17 @@ function FilterDropdown({
                 onChange(option);
                 setIsOpen(false);
               }}
-              className={cn(
-                "flex w-full rounded-xl px-3 py-2 text-left text-[13px] text-[var(--home-ink)] transition-colors hover:bg-primary/10 hover:text-primary",
-                value === option && "bg-primary/10 text-primary",
-              )}
+              className={optionClassName(value === option)}
             >
-              {option}
+              <span className="truncate">{option}</span>
+              {value === option ? (
+                <Check
+                  aria-hidden
+                  weight="bold"
+                  className="size-3.5 shrink-0"
+                  style={{ color: PRINT }}
+                />
+              ) : null}
             </button>
           ))}
         </div>
@@ -187,106 +226,124 @@ function formatPostedDate(value: string, locale: string) {
   });
 }
 
-function JobCard({ job, locale }: { job: DevRelJob; locale: string }) {
+/** One listing, printed as a white row card like the careers role rows. */
+function JobRow({ job, locale }: { job: DevRelJob; locale: string }) {
   const t = useTranslations("DevRelJobsPage");
   const WorkplaceIcon = workplaceIcons[job.workplace];
   const isNew = isNewDevRelJob(job);
   const [hasLogoError, setHasLogoError] = useState(false);
 
   return (
-    <article
-      className={cn(
-        "s1-glass-card group relative flex h-full flex-col overflow-hidden rounded-[24px]",
-        "transition-transform duration-500 ease-out hover:-translate-y-1 motion-reduce:transform-none motion-reduce:transition-none",
-      )}
-    >
-
+    <article className="relative min-w-0">
       <a
         href={job.url}
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`${job.title} at ${job.company}`}
-        className="relative z-[1] flex flex-1 flex-col rounded-[24px] p-6 outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+        className={cn(
+          "group relative isolate grid grid-cols-[44px_minmax(0,1fr)] gap-x-4 gap-y-4 overflow-hidden p-5 outline-none focus-visible:ring-2 focus-visible:ring-[#f97316]/50 md:p-6 lg:grid-cols-[44px_minmax(0,1fr)_230px_auto] lg:items-center lg:gap-x-6 [&>*]:relative",
+          CELL,
+        )}
       >
-        <div className="flex items-start gap-3.5">
-          <span
-            aria-hidden
-            className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white p-2 ring-1 ring-black/5 dark:ring-white/10"
-          >
-            {job.logo && !hasLogoError ? (
-              <span className="relative block size-7">
-                <Image
-                  src={job.logo}
-                  alt=""
-                  fill
-                  sizes="28px"
-                  unoptimized
-                  className="object-contain"
-                  onError={() => setHasLogoError(true)}
-                />
-              </span>
-            ) : (
-              <span className="font-primary text-lg font-semibold text-primary">
-                {job.company.charAt(0)}
-              </span>
-            )}
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-[var(--home-ink)]">
-              {job.company}
-            </p>
-            <p className="mt-0.5 flex items-center gap-1.5 text-xs text-[var(--home-ink-soft)]">
-              <MapPin className="size-3.5 shrink-0" weight="duotone" />
-              <span className="truncate">{job.location}</span>
-            </p>
-          </div>
-          <ArrowSquareOut
-            className="size-4.5 shrink-0 text-[var(--home-ink-soft)] transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary motion-reduce:transform-none"
-            weight="duotone"
-          />
-        </div>
+        {/* Hover: an orange wash rises from the right edge */}
+        <span
+          aria-hidden
+          className="pointer-events-none !absolute inset-0 -z-[5] translate-x-8 opacity-0 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0 group-hover:opacity-100 motion-reduce:translate-x-0"
+          style={{
+            background:
+              "radial-gradient(40% 140% at 104% 50%, rgba(249,115,22,0.22) 0%, rgba(249,115,22,0) 70%)",
+          }}
+        />
 
-        <h3 className="mt-5 text-[19px] font-medium leading-snug tracking-[-0.025em] text-[var(--home-ink)] transition-colors group-hover:text-primary">
-          {job.title}
-        </h3>
-
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[12px] font-medium text-[var(--home-ink)] border border-[var(--home-line)] bg-white/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_14px_-8px_rgba(90,30,0,0.4)] backdrop-blur-md dark:bg-white/[0.08] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.14)]">
-            {job.category}
-          </span>
-          {isNew ? (
-            <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] font-medium text-primary border border-[var(--home-line)] bg-white/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_14px_-8px_rgba(90,30,0,0.4)] backdrop-blur-md dark:bg-white/[0.08] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.14)]">
-              {t("newBadge")}
+        <span
+          aria-hidden
+          className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-[12px] bg-white p-2 ring-1 ring-inset ring-[#141414]/10"
+        >
+          {job.logo && !hasLogoError ? (
+            <span className="relative block size-7">
+              <Image
+                src={job.logo}
+                alt=""
+                fill
+                sizes="28px"
+                unoptimized
+                className="object-contain"
+                onError={() => setHasLogoError(true)}
+              />
             </span>
-          ) : null}
+          ) : (
+            <span className="text-lg font-semibold" style={{ color: PRINT }}>
+              {job.company.charAt(0)}
+            </span>
+          )}
+        </span>
+
+        <div className="min-w-0">
+          <p
+            className={cn(
+              "flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-[13px] font-medium",
+              MUTED,
+            )}
+          >
+            <span className="truncate text-[#141414]">{job.company}</span>
+            <span aria-hidden className={FAINT}>
+              ·
+            </span>
+            <span className="inline-flex min-w-0 items-center gap-1">
+              <MapPin weight="bold" className="size-3.5 shrink-0 opacity-60" />
+              <span className="truncate">{job.location}</span>
+            </span>
+          </p>
+          <h3 className="mt-1.5 text-[19px] font-medium leading-tight tracking-[-0.035em] md:text-[21px]">
+            {job.title}
+          </h3>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center rounded-full bg-[#141414]/[0.05] px-2.5 py-1 text-[12px] font-medium text-[#141414]/80">
+              {job.category}
+            </span>
+            {isNew ? (
+              <span
+                className="inline-flex items-center px-1.5 py-[3px] text-[11px] font-medium leading-none text-white"
+                style={{ background: PRINT }}
+              >
+                {t("newBadge")}
+              </span>
+            ) : null}
+          </div>
         </div>
 
-        <div className="mt-auto">
-          <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-[var(--home-line)] pt-4 text-xs font-medium text-[var(--home-ink-soft)]">
-            <span className="inline-flex items-center gap-1.5">
+        <div className="col-span-2 flex items-end justify-between gap-4 border-t border-[#141414]/[0.1] pt-4 lg:col-span-2 lg:border-t-0 lg:pt-0">
+          <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-[13px] font-medium lg:w-[230px] lg:flex-col">
+            <span className="inline-flex items-center gap-2">
               <WorkplaceIcon
-                className="size-4 shrink-0 text-primary"
-                weight="duotone"
+                className="size-3.5 shrink-0 text-[#f97316]"
+                weight="bold"
               />
               {job.workplace}
             </span>
             {job.salary ? (
-              <span className="inline-flex items-center gap-1.5">
+              <span className="inline-flex items-center gap-2">
                 <CurrencyDollar
-                  className="size-4 shrink-0 text-primary"
-                  weight="duotone"
+                  className="size-3.5 shrink-0 opacity-60"
+                  weight="bold"
                 />
                 {job.salary}
               </span>
             ) : null}
-            <span className="inline-flex items-center gap-1.5">
+            <span className={cn("inline-flex items-center gap-2", MUTED)}>
               <CalendarBlank
-                className="size-4 shrink-0 text-primary"
-                weight="duotone"
+                className="size-3.5 shrink-0 opacity-80"
+                weight="bold"
               />
               {formatPostedDate(job.postedDate, locale)}
             </span>
           </div>
+          <span
+            className="flex size-10 shrink-0 items-center justify-center rounded-full text-white transition-[background-color,transform] duration-300 group-hover:rotate-45 group-hover:!bg-[#f97316] motion-reduce:group-hover:rotate-0"
+            style={{ background: isNew ? PRINT : INK }}
+          >
+            <ArrowUpRight weight="bold" className="size-4" />
+          </span>
         </div>
       </a>
     </article>
@@ -300,6 +357,8 @@ type DevRelJobsPageProps = {
 export function DevRelJobsPage({ jobs }: DevRelJobsPageProps) {
   const t = useTranslations("DevRelJobsPage");
   const locale = useLocale();
+  const reduceMotion = useReducedMotion();
+  const rise = useRiseVariants();
   const [query, setQuery] = useState("");
   const [selectedCategory, setSelectedCategory] =
     useState<DevRelJobCategory | null>(null);
@@ -339,7 +398,14 @@ export function DevRelJobsPage({ jobs }: DevRelJobsPageProps) {
 
       return haystack.includes(normalizedQuery);
     });
-  }, [jobs, query, selectedCategory, selectedType, selectedLocation, selectedLevel]);
+  }, [
+    jobs,
+    query,
+    selectedCategory,
+    selectedType,
+    selectedLocation,
+    selectedLevel,
+  ]);
 
   const hasActiveFilters =
     query.trim() !== "" ||
@@ -348,7 +414,10 @@ export function DevRelJobsPage({ jobs }: DevRelJobsPageProps) {
     selectedLocation !== null ||
     selectedLevel !== null;
 
-  const totalPages = Math.max(1, Math.ceil(filteredJobs.length / JOBS_PER_PAGE));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredJobs.length / JOBS_PER_PAGE),
+  );
   const currentPage = Math.min(page, totalPages);
   const paginatedJobs = filteredJobs.slice(
     (currentPage - 1) * JOBS_PER_PAGE,
@@ -366,220 +435,218 @@ export function DevRelJobsPage({ jobs }: DevRelJobsPageProps) {
 
   const gridKey = `${query}-${selectedCategory ?? "all"}-${selectedType ?? "all"}-${selectedLocation ?? "all"}-${selectedLevel ?? "all"}-${currentPage}`;
 
+  const stats = [
+    { icon: Megaphone, label: t("statsRoles", { count: jobs.length }) },
+    { icon: Buildings, label: t("statsCompanies", { count: companyCount }) },
+    { icon: ArrowsClockwise, label: t("statsUpdated") },
+  ];
+
   return (
-    <section className="overflow-x-clip bg-[var(--home-cream)] text-[var(--home-ink)]">
+    <div style={PAPER_SCOPE} className="overflow-x-clip">
       {/* Hero */}
-      <NightHeader className="pb-20 pt-40 md:pb-28 md:pt-48">
-        <section className="relative flex flex-col px-4 sm:px-6 lg:px-8">
+      <PaperPageHeader className="pb-14 pt-36 md:pb-20 md:pt-44">
+        <Container>
           <motion.div
             className="mx-auto max-w-3xl text-center"
             initial="hidden"
             animate="visible"
-            variants={staggerChildren}
+            variants={rise.list}
           >
-            <motion.div variants={itemVariants} className="flex justify-center">
-              <NightEyebrow icon={<RocketLaunch weight="duotone" className="size-4 text-[#fdba74]" />}>
+            <motion.div variants={rise.item} className="flex justify-center">
+              <PaperEyebrow
+                icon={<RocketLaunch weight="duotone" className="size-4" />}
+              >
                 {t("badge")}
-              </NightEyebrow>
+              </PaperEyebrow>
             </motion.div>
 
             <motion.h1
-              className="mt-7 text-[40px] font-medium leading-[1.04] tracking-[-0.05em] text-white sm:text-[60px] md:text-[72px]"
-              variants={itemVariants}
+              className="mt-7 text-[40px] font-medium leading-[1.04] tracking-[-0.055em] sm:text-[60px] md:text-[72px]"
+              variants={rise.item}
             >
-              {t("titlePrefix")}{" "}
-              <span className="s1-accent-text">{t("titleHighlight")}</span>
+              {t("titlePrefix")} <Accent>{t("titleHighlight")}</Accent>
             </motion.h1>
 
-            <motion.div
-              className="mt-8 flex flex-wrap items-center justify-center gap-2.5"
-              variants={itemVariants}
+            <motion.ul
+              role="list"
+              className="mt-9 flex flex-wrap items-center justify-center gap-2.5"
+              variants={rise.item}
             >
-              <span className={capsuleClassName}>
-                <Megaphone
-                  weight="duotone"
-                  className="size-4 shrink-0 text-[#fdba74]"
-                />
-                {t("statsRoles", { count: jobs.length })}
-              </span>
-              <span className={capsuleClassName}>
-                <Buildings
-                  weight="duotone"
-                  className="size-4 shrink-0 text-[#fdba74]"
-                />
-                {t("statsCompanies", { count: companyCount })}
-              </span>
-              <span className={capsuleClassName}>
-                <ArrowsClockwise
-                  weight="duotone"
-                  className="size-4 shrink-0 text-[#fdba74]"
-                />
-                {t("statsUpdated")}
-              </span>
-            </motion.div>
+              {stats.map(({ icon: StatIcon, label }) => (
+                <li key={label} className={statPillClassName}>
+                  <StatIcon
+                    weight="duotone"
+                    className="size-4 shrink-0"
+                    style={{ color: PRINT }}
+                  />
+                  {label}
+                </li>
+              ))}
+            </motion.ul>
           </motion.div>
-        </section>
-      </NightHeader>
+        </Container>
+      </PaperPageHeader>
 
-      <div className="relative mx-auto max-w-7xl">
-        {/* Jobs */}
-        <motion.section
-          id="devrel-jobs"
-          className="mx-auto max-w-6xl scroll-mt-28 px-4 pb-28 pt-12 sm:px-6 md:pt-16 lg:px-8"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.05 }}
-          variants={staggerChildren}
-        >
+      {/* Jobs */}
+      <PaperSection
+        id="devrel-jobs"
+        tone="paper"
+        className="scroll-mt-28 !pt-6 pb-24 md:!pt-8 md:pb-28"
+      >
+        <Container>
+          <IndexBar index={1} name={t("badge")} aside={t("statsUpdated")} />
+
           {/* Sticky toolbar */}
-          <motion.div
-            variants={itemVariants}
-            className="sticky top-24 z-30 mx-auto mb-8 w-full max-w-4xl"
-          >
-            <div className="relative mx-auto w-full">
-              <div className="relative mx-auto min-w-0 w-full max-w-xl">
-                <MagnifyingGlass
-                  className="pointer-events-none absolute left-4 top-1/2 z-[1] size-4 -translate-y-1/2 text-[var(--home-ink-soft)]"
-                  weight="duotone"
-                />
-                <Input
-                  type="search"
-                  value={query}
-                  onChange={(event) => {
-                    setQuery(event.target.value);
-                    setPage(1);
-                  }}
-                  placeholder={t("searchPlaceholder")}
-                  aria-label={t("searchLabel")}
-                  className={cn("h-11 rounded-full pl-10 pr-10 text-[14px] placeholder:text-[var(--home-ink-soft)] focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-0", controlClassName)}
-                />
-                {query ? (
-                  <button
-                    type="button"
-                    onClick={() => setQuery("")}
-                    aria-label={t("clearFilters")}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--home-ink-soft)] transition-colors hover:text-[var(--home-ink)]"
-                  >
-                    <XCircle className="size-4" weight="fill" />
-                  </button>
-                ) : null}
-              </div>
+          <div className="sticky top-24 z-30 mt-6">
+            <div className="rounded-[20px] bg-[#f4efe7]/90 p-2.5 ring-1 ring-inset ring-[#141414]/10 backdrop-blur-xl sm:p-3">
+              <div className="grid gap-2 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,2fr)]">
+                <div className="relative min-w-0">
+                  <MagnifyingGlass
+                    className="pointer-events-none absolute left-4 top-1/2 z-[1] size-4 -translate-y-1/2 text-[#141414]/50"
+                    weight="bold"
+                  />
+                  <Input
+                    type="search"
+                    value={query}
+                    onChange={(event) => {
+                      setQuery(event.target.value);
+                      setPage(1);
+                    }}
+                    placeholder={t("searchPlaceholder")}
+                    aria-label={t("searchLabel")}
+                    className="h-11 rounded-full border-0 bg-white pl-10 pr-10 text-[14px] text-[#141414] shadow-none ring-1 ring-inset ring-[#141414]/[0.12] placeholder:text-[#141414]/45 focus-visible:ring-2 focus-visible:ring-[#f97316]/50 focus-visible:ring-offset-0"
+                  />
+                  {query ? (
+                    <button
+                      type="button"
+                      onClick={() => setQuery("")}
+                      aria-label={t("clearFilters")}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#141414]/45 transition-colors hover:text-[#141414]"
+                    >
+                      <XCircle className="size-4" weight="fill" />
+                    </button>
+                  ) : null}
+                </div>
 
-              <div className="mx-auto mt-3 grid w-full max-w-xl grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-                <FilterDropdown
-                  id="job-category"
-                  label={t("categoryFilter")}
-                  value={selectedCategory}
-                  options={categories}
-                  allLabel={t("allCategories")}
-                  onChange={(value) =>
-                    {
+                <div className="grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-4">
+                  <FilterDropdown
+                    id="job-category"
+                    label={t("categoryFilter")}
+                    value={selectedCategory}
+                    options={categories}
+                    allLabel={t("allCategories")}
+                    onChange={(value) => {
                       setSelectedCategory(value as DevRelJobCategory | null);
                       setPage(1);
-                    }
-                  }
-                  className="w-full"
-                />
-
-                <FilterDropdown
-                  id="job-type"
-                  label={t("typeFilter")}
-                  value={selectedType}
-                  options={types}
-                  allLabel={t("allTypes")}
-                  onChange={(value) => {
-                    setSelectedType(value);
-                    setPage(1);
-                  }}
-                  className="w-full"
-                />
-                <FilterDropdown
-                  id="job-location"
-                  label={t("locationFilter")}
-                  value={selectedLocation}
-                  options={locations}
-                  allLabel={t("allLocations")}
-                  onChange={(value) => {
-                    setSelectedLocation(value);
-                    setPage(1);
-                  }}
-                  className="w-full"
-                />
-                <FilterDropdown
-                  id="job-level"
-                  label={t("levelFilter")}
-                  value={selectedLevel}
-                  options={levels}
-                  allLabel={t("allLevels")}
-                  onChange={(value) => {
-                    setSelectedLevel(value);
-                    setPage(1);
-                  }}
-                  className="w-full"
-                />
+                    }}
+                    className="w-full"
+                  />
+                  <FilterDropdown
+                    id="job-type"
+                    label={t("typeFilter")}
+                    value={selectedType}
+                    options={types}
+                    allLabel={t("allTypes")}
+                    onChange={(value) => {
+                      setSelectedType(value);
+                      setPage(1);
+                    }}
+                    className="w-full"
+                  />
+                  <FilterDropdown
+                    id="job-location"
+                    label={t("locationFilter")}
+                    value={selectedLocation}
+                    options={locations}
+                    allLabel={t("allLocations")}
+                    onChange={(value) => {
+                      setSelectedLocation(value);
+                      setPage(1);
+                    }}
+                    className="w-full"
+                  />
+                  <FilterDropdown
+                    id="job-level"
+                    label={t("levelFilter")}
+                    value={selectedLevel}
+                    options={levels}
+                    allLabel={t("allLevels")}
+                    onChange={(value) => {
+                      setSelectedLevel(value);
+                      setPage(1);
+                    }}
+                    className="w-full"
+                  />
+                </div>
               </div>
-
-              {hasActiveFilters ? (
-                <button
-                  type="button"
-                  onClick={clearFilters}
-                  className="mx-auto mt-2 h-8 rounded-full px-3 text-xs font-medium text-[var(--home-ink-soft)] transition-colors hover:text-primary"
-                >
-                  {t("clearFilters")}
-                </button>
-              ) : null}
             </div>
-          </motion.div>
+          </div>
 
-          <motion.p
-            variants={itemVariants}
-            aria-live="polite"
-            className="mb-5 text-sm font-medium text-[var(--home-ink-soft)]"
-          >
-            {t("showing", {
-              shown: filteredJobs.length,
-              total: jobs.length,
-            })}
-          </motion.p>
+          <div className="mb-4 mt-6 flex min-h-8 flex-wrap items-center justify-between gap-3">
+            <p
+              aria-live="polite"
+              className={cn("text-[13px] font-medium tabular-nums", MUTED)}
+            >
+              {t("showing", {
+                shown: filteredJobs.length,
+                total: jobs.length,
+              })}
+            </p>
+            {hasActiveFilters ? (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[13px] font-medium text-[#141414] underline decoration-[#141414]/25 decoration-2 underline-offset-[5px] transition-colors hover:decoration-[#f97316]"
+              >
+                {t("clearFilters")}
+              </button>
+            ) : null}
+          </div>
 
           {filteredJobs.length > 0 ? (
             <>
-              <motion.div
+              <motion.ul
                 key={gridKey}
-                className="grid w-full grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3"
+                role="list"
+                className="grid w-full gap-2"
                 initial="hidden"
                 animate="visible"
-                variants={staggerChildren}
+                variants={rise.list}
               >
                 {paginatedJobs.map((job) => (
-                  <motion.div
+                  <motion.li
                     key={job.id}
                     className="min-w-0"
-                    variants={itemVariants}
+                    variants={rise.item}
                   >
-                    <JobCard job={job} locale={locale} />
-                  </motion.div>
+                    <JobRow job={job} locale={locale} />
+                  </motion.li>
                 ))}
-              </motion.div>
+              </motion.ul>
               {totalPages > 1 ? (
                 <nav
                   aria-label={t("pagination")}
-                  className="mt-8 flex items-center justify-center gap-3"
+                  className="mt-10 flex flex-wrap items-center justify-center gap-3"
                 >
                   <button
                     type="button"
-                    className="s1-glass-card inline-flex h-10 items-center rounded-full px-5 text-[13px] font-medium text-[var(--home-ink)] transition-colors hover:text-primary disabled:pointer-events-none disabled:opacity-40"
+                    className={outlinePillClassName}
                     onClick={() => setPage((value) => Math.max(1, value - 1))}
                     disabled={currentPage === 1}
                   >
                     {t("previousPage")}
                   </button>
-                  <span className="text-sm font-medium text-[var(--home-ink-soft)]">
+                  <span
+                    className={cn(
+                      "px-2 text-[13px] font-medium tabular-nums",
+                      MUTED,
+                    )}
+                  >
                     {t("pageOf", { page: currentPage, total: totalPages })}
                   </span>
                   <button
                     type="button"
-                    className="s1-glass-card inline-flex h-10 items-center rounded-full px-5 text-[13px] font-medium text-[var(--home-ink)] transition-colors hover:text-primary disabled:pointer-events-none disabled:opacity-40"
+                    className={outlinePillClassName}
                     onClick={() =>
                       setPage((value) => Math.min(totalPages, value + 1))
                     }
@@ -591,21 +658,32 @@ export function DevRelJobsPage({ jobs }: DevRelJobsPageProps) {
               ) : null}
             </>
           ) : (
-            <div className="flex flex-col items-center gap-4 py-16 text-center">
-              <MagnifyingGlass
-                className="size-10 text-[var(--home-ink-soft)]"
-                weight="duotone"
-              />
+            <div
+              className={cn(
+                "flex flex-col items-center gap-5 px-6 py-14 text-center hover:translate-y-0",
+                CELL,
+              )}
+            >
+              <span
+                className="flex size-12 items-center justify-center rounded-full text-[#f4efe7]"
+                style={{ background: INK }}
+              >
+                <MagnifyingGlass className="size-5" weight="bold" />
+              </span>
               <div>
-                <p className="text-[20px] font-medium tracking-[-0.025em] text-[var(--home-ink)]">
+                <p className="text-[20px] font-medium tracking-[-0.035em]">
                   {t("emptyTitle")}
                 </p>
-                <p className="mt-1 text-sm text-[var(--home-ink-soft)]">
+                <p className={cn("mt-1.5 text-[15px]", MUTED)}>
                   {t("emptyDescription")}
                 </p>
               </div>
               {hasActiveFilters ? (
-                <button type="button" onClick={clearFilters} className="s1-glass-card inline-flex h-10 items-center rounded-full px-5 text-[13px] font-medium text-[var(--home-ink)] transition-colors hover:text-primary disabled:pointer-events-none disabled:opacity-40">
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className={outlinePillClassName}
+                >
                   {t("clearFilters")}
                 </button>
               ) : null}
@@ -614,34 +692,64 @@ export function DevRelJobsPage({ jobs }: DevRelJobsPageProps) {
 
           {/* Submit CTA */}
           <motion.div
-            variants={itemVariants}
-            className={cn(
-              "s1-glass-card relative mt-16 overflow-hidden rounded-[28px] p-8 text-center sm:p-12",
-            )}
+            initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.8, ease: EASE }}
+            className="relative isolate mt-16 overflow-hidden rounded-[24px] bg-white/80 p-7 shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08] sm:p-10 md:mt-20 lg:p-12"
           >
-            <div className="relative z-[1] mx-auto flex max-w-2xl flex-col items-center">
-              <h2 className="text-[28px] font-medium tracking-[-0.04em] text-[var(--home-ink)] sm:text-[36px]">
-                {t("submitTitle")}
-              </h2>
-              <p className="mt-3 text-[15px] leading-[1.6] text-[var(--home-ink-soft)] sm:text-[16px]">
-                {t("submitDescription")}
-              </p>
-              <a
-                href={DEVREL_JOB_SUBMIT_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="s1-glass-btn group mt-7 inline-flex h-12 items-center gap-2 rounded-full px-6 text-[13px] font-medium uppercase tracking-[0.06em] text-white"
-              >
-                {t("submitCta")}
-                <ArrowSquareOut className="size-4" weight="bold" />
-              </a>
-              <p className="mt-3 text-xs text-[var(--home-ink-soft)]">
-                {t("submitNote")}
-              </p>
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 -z-10 opacity-25 mix-blend-multiply"
+              style={{ backgroundImage: GRAIN }}
+            />
+            <span
+              aria-hidden
+              className="pointer-events-none absolute -right-24 -top-24 -z-10 size-[360px] rounded-full bg-[radial-gradient(closest-side,rgba(249,115,22,0.18),transparent)]"
+            />
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-x-10 top-0 h-px"
+              style={{
+                background: `linear-gradient(90deg, transparent, ${PRINT}, transparent)`,
+              }}
+            />
+            <div className="grid gap-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:items-end lg:gap-16">
+              <div>
+                <h2 className="text-[30px] font-medium leading-[1.1] tracking-[-0.045em] sm:text-[40px] lg:text-[46px]">
+                  {t("submitTitle")}
+                </h2>
+                <p
+                  className={cn(
+                    "mt-4 max-w-[560px] text-[15px] leading-[1.6] sm:text-[16px]",
+                    MUTED,
+                  )}
+                >
+                  {t("submitDescription")}
+                </p>
+              </div>
+              <div className="flex flex-col items-start gap-3 lg:items-end">
+                <a
+                  href={DEVREL_JOB_SUBMIT_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group inline-flex h-12 items-center gap-3 rounded-full py-1.5 pl-6 pr-1.5 text-[15px] font-medium text-[#f4efe7] transition-transform duration-300 hover:-translate-y-0.5 motion-reduce:transform-none"
+                  style={{ background: INK }}
+                >
+                  {t("submitCta")}
+                  <span
+                    className="flex size-9 items-center justify-center rounded-full text-white"
+                    style={{ background: PRINT }}
+                  >
+                    <ArrowSquareOut weight="bold" className="size-4" />
+                  </span>
+                </a>
+                <p className={cn("text-[12px]", MUTED)}>{t("submitNote")}</p>
+              </div>
             </div>
           </motion.div>
-        </motion.section>
-      </div>
-    </section>
+        </Container>
+      </PaperSection>
+    </div>
   );
 }

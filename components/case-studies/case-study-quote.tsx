@@ -50,11 +50,8 @@ export function CaseStudyQuote({
         className={cn(
           "flex items-center gap-3 border-t",
           isPull
-            ? cn(
-                "border-primary/15 pt-3.5 dark:border-primary/20",
-                pinFooter ? "mt-auto" : "mt-4",
-              )
-            : "mt-5 border-border/50 pt-4 dark:border-white/[0.06]",
+            ? cn("border-[#141414]/10 pt-3.5", pinFooter ? "mt-auto" : "mt-4")
+            : "mt-5 border-[#141414]/10 pt-4",
         )}
       >
         {avatar ? (
@@ -63,14 +60,14 @@ export function CaseStudyQuote({
             alt={author ? `${author}` : "Quote author"}
             width={40}
             height={40}
-            className="size-10 shrink-0 rounded-full object-cover ring-2 ring-background dark:ring-white/10"
+            className="size-10 shrink-0 rounded-full object-cover ring-2 ring-white shadow-[0_6px_14px_-8px_rgba(20,20,20,0.5)]"
           />
         ) : null}
         <div className="min-w-0 flex-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 sm:flex-nowrap">
           {author ? (
             <cite
               className={cn(
-                "font-primary font-medium not-italic text-foreground",
+                "font-primary font-semibold not-italic text-[#141414]",
                 isPull ? "text-base md:text-[1.0625rem]" : "text-[0.9375rem]",
               )}
             >
@@ -80,11 +77,11 @@ export function CaseStudyQuote({
           {role ? (
             <span
               className={cn(
-                "font-secondary text-muted-foreground",
+                "font-secondary text-[#141414]/60",
                 isPull ? "text-base md:text-[1.0625rem]" : "text-[0.9375rem]",
               )}
             >
-              <span className="serif-accent font-accent text-foreground/75">
+              <span className="serif-accent font-accent text-[#141414]/70">
                 {role}
               </span>
             </span>
@@ -96,7 +93,7 @@ export function CaseStudyQuote({
             target="_blank"
             rel="noopener noreferrer"
             className={cn(
-              "group shrink-0 inline-flex items-center gap-1 font-medium text-muted-foreground transition-colors hover:text-primary",
+              "group shrink-0 inline-flex items-center gap-1 font-medium text-[#141414]/55 transition-colors hover:text-[#c2410c]",
               isPull ? "text-sm" : "text-xs",
             )}
           >
@@ -121,9 +118,9 @@ export function CaseStudyQuote({
           "font-accent pointer-events-none select-none leading-none",
           isPull
             ? compact
-              ? "block text-5xl text-primary/45 dark:text-primary/30"
-              : "block text-6xl text-primary/45 md:text-7xl dark:text-primary/30"
-            : "relative text-[2.75rem] text-primary/35 dark:text-primary/20",
+              ? "block text-5xl text-[#f97316]"
+              : "block text-6xl text-[#f97316] md:text-7xl"
+            : "relative text-[2.75rem] text-[#f97316]/70",
         )}
         aria-hidden
       >
@@ -132,11 +129,11 @@ export function CaseStudyQuote({
 
       <p
         className={cn(
-          "relative font-secondary text-foreground/90",
+          "relative font-secondary text-[#141414]",
           isPull
             ? compact
-              ? "-mt-3 pl-0.5 text-[1.0625rem] font-medium leading-snug md:text-lg"
-              : "-mt-4 pl-0.5 text-[1.25rem] font-medium leading-snug md:-mt-5 md:text-[1.5rem] lg:text-[1.625rem]"
+              ? "-mt-3 pl-0.5 text-[1.0625rem] font-medium leading-snug tracking-[-0.02em] md:text-lg"
+              : "-mt-4 pl-0.5 text-[1.25rem] font-medium leading-snug md:-mt-5 md:text-[1.5rem] tracking-[-0.03em] lg:text-[1.625rem]"
             : "-mt-1 text-base leading-relaxed sm:text-[1.0625rem] md:leading-[1.65]",
         )}
       >
