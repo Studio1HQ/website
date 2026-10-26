@@ -30,11 +30,11 @@ export function BlogCard({
       href={`/blog/${post.slug}`}
       data-blog-card
       className={cn(
-        "s1-glass-card group relative flex min-w-0 flex-col overflow-hidden rounded-[22px] p-3 transition-transform duration-500 ease-out hover:-translate-y-1 motion-reduce:transform-none",
+        "s1-glass-card group relative flex min-w-0 flex-col overflow-hidden rounded-[6px] p-3 transition-transform duration-500 ease-out hover:-translate-y-1 motion-reduce:transform-none",
         featured && "s1-glass-raised lg:grid lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:items-center lg:gap-4",
       )}
     >
-      <div className="relative aspect-[16/9] w-full overflow-hidden rounded-[16px] bg-black ring-1 ring-black/5 dark:ring-white/10">
+      <div className="relative aspect-[16/9] w-full overflow-hidden rounded-[6px] bg-black ring-1 ring-black/5 dark:ring-white/10">
         <Image
           src={cardImage}
           alt={cardImageAlt}

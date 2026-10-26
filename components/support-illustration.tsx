@@ -44,7 +44,7 @@ export default function SupportIllustration({
               ) : null}
               <span
                 className={cn(
-                  "max-w-[78%] rounded-2xl px-3 py-2 text-[12.5px] leading-[1.4]",
+                  "max-w-[78%] rounded-[6px] px-3 py-2 text-[12.5px] leading-[1.4]",
                   message.from === "client"
                     ? "rounded-br-md bg-white/[0.1] text-white/85"
                     : "rounded-bl-md bg-gradient-to-b from-[#f97316] to-[#c2410c] text-white shadow-[0_8px_20px_-10px_rgba(234,88,12,0.8)]",

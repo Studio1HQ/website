@@ -132,6 +132,8 @@ export default async function BlogPostPage({ params }: Props) {
         authors={post.authors}
         tags={post.tags}
         slug={slug}
+        bannerImage={post.bannerImage}
+        bannerImageAlt={post.bannerImageAlt}
         readingTimeMinutes={post.readingTimeMinutes}
         wordCount={countBlogWords(post.content)}
         shareUrl={`${baseUrl}/blog/${slug}`}

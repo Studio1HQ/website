@@ -28,7 +28,7 @@ type CaseStudyResultProps = {
 };
 
 const cardSurface =
-  "s1-glass-card group relative overflow-hidden rounded-[24px] transition-transform duration-500 ease-out hover:-translate-y-1 motion-reduce:transform-none";
+  "s1-glass-card group relative overflow-hidden rounded-[6px] transition-transform duration-500 ease-out hover:-translate-y-1 motion-reduce:transform-none";
 
 export function CaseStudyResult({
   study,

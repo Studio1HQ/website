@@ -229,8 +229,8 @@ function Slide({
           />
           {/* Glass bezel, posed so it leans out of the screen (static, no motion) */}
           <div className="absolute inset-x-4 top-[12%] aspect-[16/10] opacity-30 [perspective:1800px] sm:inset-x-8 lg:inset-x-auto lg:right-[3%] lg:top-1/2 lg:w-[58%] lg:-translate-y-1/2 lg:opacity-100">
-            <div className="relative h-full w-full rounded-[22px] bg-[linear-gradient(150deg,rgba(255,255,255,0.22),rgba(255,255,255,0.05)_45%,rgba(255,255,255,0.12))] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.45),inset_0_0_0_1px_rgba(255,255,255,0.14),0_60px_140px_-40px_rgba(0,0,0,0.95),0_30px_60px_-30px_rgba(249,115,22,0.35)] backdrop-blur-xl [transform:rotateY(-14deg)_rotateX(5deg)_rotateZ(-1deg)] [transform-origin:right_center]">
-              <div className="relative h-full overflow-hidden rounded-[15px] bg-[#0d0b0a] ring-1 ring-black/40">
+            <div className="relative h-full w-full rounded-[6px] bg-[linear-gradient(150deg,rgba(255,255,255,0.22),rgba(255,255,255,0.05)_45%,rgba(255,255,255,0.12))] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.45),inset_0_0_0_1px_rgba(255,255,255,0.14),0_60px_140px_-40px_rgba(0,0,0,0.95),0_30px_60px_-30px_rgba(249,115,22,0.35)] backdrop-blur-xl [transform:rotateY(-14deg)_rotateX(5deg)_rotateZ(-1deg)] [transform-origin:right_center]">
+              <div className="relative h-full overflow-hidden rounded-[6px] bg-[#0d0b0a] ring-1 ring-black/40">
                 <Image
                   src={slide.image}
                   alt={`${slide.client} case study`}

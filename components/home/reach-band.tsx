@@ -8,7 +8,7 @@ import { CTA_GLOBE_MARKERS } from "@/components/landing/globe-markers";
 import { Container, Rise } from "./ui";
 
 function MapPlaceholder() {
-  return <div className="aspect-[2/1] w-full rounded-2xl bg-white/[0.03]" />;
+  return <div className="aspect-[2/1] w-full rounded-[6px] bg-white/[0.03]" />;
 }
 
 const LazyWorldMap = dynamic(
@@ -104,7 +104,7 @@ export default function ReachBand() {
       <Container>
         <Rise>
           {/* Always-dark panel, like the night sections, in both themes */}
-          <div className="dark s1-glass-dark relative isolate overflow-hidden rounded-[28px] text-white">
+          <div className="dark s1-glass-dark relative isolate overflow-hidden rounded-[6px] text-white">
             <div
               aria-hidden
               className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[420px] w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(249,115,22,0.3),transparent_65%)] blur-2xl"

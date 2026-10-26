@@ -34,7 +34,7 @@ export function FeaturedCaseStudy() {
       {/* Still orange halftone, fading out from the top-left corner */}
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-[24px]"
+        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-[6px]"
       >
         <DitherField
           still
@@ -71,7 +71,7 @@ export function FeaturedCaseStudy() {
             {metrics.map((metric) => (
               <div
                 key={metric.label}
-                className="min-w-0 rounded-[14px] bg-[#ece5da] p-3.5 shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10),inset_0_-1px_0_rgba(255,255,255,0.85),0_1px_0_rgba(255,255,255,0.95)]"
+                className="min-w-0 rounded-[6px] bg-[#ece5da] p-3.5 shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10),inset_0_-1px_0_rgba(255,255,255,0.85),0_1px_0_rgba(255,255,255,0.95)]"
               >
                 <dt className="sr-only">{metric.label}</dt>
                 <dd

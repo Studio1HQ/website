@@ -33,13 +33,13 @@ function Frame({
   caption?: string;
 }) {
   return (
-    <figure className="not-prose my-10 w-fit max-w-full overflow-hidden rounded-[18px] bg-white/80 p-2 shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08]">
+    <figure className="not-prose my-10 w-fit max-w-full overflow-hidden rounded-[6px] bg-white/80 p-2 shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08]">
       <div className="mb-2 flex items-center gap-1.5 px-1">
         <span className="size-2 rounded-full bg-[#f97316]" />
         <span className="size-2 rounded-full bg-[#f97316]/40" />
         <span className="size-2 rounded-full bg-[#141414]/15" />
       </div>
-      <div className="w-fit max-w-full overflow-hidden rounded-[12px] bg-[#fbf8f3] ring-1 ring-[#141414]/[0.08]">
+      <div className="w-fit max-w-full overflow-hidden rounded-[6px] bg-[#fbf8f3] ring-1 ring-[#141414]/[0.08]">
         {children}
       </div>
       {caption ? (

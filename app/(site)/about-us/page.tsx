@@ -56,8 +56,8 @@ const sectionAnimation = {
 function StudioIntroVideo() {
   return (
     <section className="mx-auto w-full max-w-[65rem]">
-      <div className="rounded-[24px] bg-white/80 p-2 shadow-[inset_0_1px_0_#fff,0_40px_80px_-48px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/10 sm:p-2.5">
-        <div className="aspect-video w-full overflow-hidden rounded-[18px] bg-[#fbfaf7] shadow-[inset_0_3px_10px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08)]">
+      <div className="rounded-[6px] bg-white/80 p-2 shadow-[inset_0_1px_0_#fff,0_40px_80px_-48px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/10 sm:p-2.5">
+        <div className="aspect-video w-full overflow-hidden rounded-[6px] bg-[#fbfaf7] shadow-[inset_0_3px_10px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08)]">
           <iframe
             className="h-full w-full"
             src="https://www.youtube-nocookie.com/embed/86fFNr5Dyqk?rel=0"

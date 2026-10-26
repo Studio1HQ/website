@@ -5,7 +5,13 @@ import { cn } from "@/lib/utils";
 
 /** `index` is the heading's position: ids can repeat (an FAQ question that
  * echoes a chapter title), so tracking goes by position, not id. */
-type Entry = { id: string; text: string; level: 2 | 3; index: number; el: HTMLElement };
+type Entry = {
+  id: string;
+  text: string;
+  level: 2 | 3;
+  index: number;
+  el: HTMLElement;
+};
 type Section = Entry & { children: Entry[] };
 
 const READING_LINE = 140;
@@ -22,7 +28,9 @@ export function OnThisPage() {
   const [active, setActive] = useState(0);
   const [progress, setProgress] = useState(0);
   const listRef = useRef<HTMLOListElement>(null);
-  const [marker, setMarker] = useState<{ top: number; height: number } | null>(null);
+  const [marker, setMarker] = useState<{ top: number; height: number } | null>(
+    null,
+  );
 
   useEffect(() => {
     const article = document.querySelector("[data-mdx-content]");
@@ -60,7 +68,8 @@ export function OnThisPage() {
       raf = 0;
       let current = 0;
       for (const entry of entries) {
-        if (entry.el.getBoundingClientRect().top <= READING_LINE) current = entry.index;
+        if (entry.el.getBoundingClientRect().top <= READING_LINE)
+          current = entry.index;
       }
       setActive(current);
       const rect = article.getBoundingClientRect();
@@ -105,14 +114,55 @@ export function OnThisPage() {
     <nav aria-label="On this page">
       <div className="flex items-baseline justify-between text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--p-muted)]">
         <p>On this page</p>
-        <p className="tabular-nums">{Math.round(progress * 100)}%</p>
+        <p className="flex items-center gap-2 tabular-nums">
+          {Math.round(progress * 100)}%{/* Reading progress ring */}
+          <svg
+            aria-hidden
+            viewBox="0 0 20 20"
+            className="size-[18px] -rotate-90"
+          >
+            <circle
+              cx="10"
+              cy="10"
+              r="8"
+              fill="none"
+              stroke="rgba(20,20,20,0.1)"
+              strokeWidth="2"
+            />
+            <circle
+              cx="10"
+              cy="10"
+              r="8"
+              fill="none"
+              stroke="#f97316"
+              strokeWidth="2"
+              strokeLinecap="round"
+              pathLength={1}
+              strokeDasharray="1"
+              strokeDashoffset={1 - progress}
+              className="transition-[stroke-dashoffset] duration-150 ease-out"
+            />
+          </svg>
+        </p>
       </div>
-      <div className="mb-4 mt-3 h-px bg-[var(--p-line)]">
-        <div className="h-px bg-[#f97316] transition-[width] duration-150 ease-out" style={{ width: `${progress * 100}%` }} />
+      {/* Progress line with a circle pointer riding its leading edge */}
+      <div className="relative mb-5 mt-3 h-px bg-[var(--p-line)]">
+        <div
+          className="h-px bg-[#f97316] transition-[width] duration-150 ease-out"
+          style={{ width: `${progress * 100}%` }}
+        />
+        <span
+          aria-hidden
+          className="absolute top-1/2 size-[9px] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[#f97316] bg-white shadow-[0_0_0_3px_rgba(249,115,22,0.15)] transition-[left] duration-150 ease-out"
+          style={{ left: `clamp(5px, ${progress * 100}%, calc(100% - 5px))` }}
+        />
       </div>
 
       <div className="relative">
-        <span aria-hidden className="absolute bottom-0 left-0 top-0 w-px bg-[var(--p-line)]" />
+        <span
+          aria-hidden
+          className="absolute bottom-0 left-0 top-0 w-px bg-[var(--p-line)]"
+        />
         {marker ? (
           <span
             aria-hidden
@@ -122,7 +172,9 @@ export function OnThisPage() {
         ) : null}
         <ol ref={listRef}>
           {sections.map((section, index) => {
-            const isOpen = section.index === active || section.children.some((child) => child.index === active);
+            const isOpen =
+              section.index === active ||
+              section.children.some((child) => child.index === active);
             return (
               <li key={section.index}>
                 <a
@@ -131,10 +183,17 @@ export function OnThisPage() {
                   onClick={jump(section)}
                   className={cn(
                     "flex gap-2.5 py-1.5 pl-4 text-[13px] leading-snug transition-colors duration-300",
-                    isOpen ? "font-medium text-[var(--p-fg)]" : "text-[var(--p-muted)] hover:text-[var(--p-fg)]",
+                    isOpen
+                      ? "font-medium text-[var(--p-fg)]"
+                      : "text-[var(--p-muted)] hover:text-[var(--p-fg)]",
                   )}
                 >
-                  <span className={cn("shrink-0 tabular-nums", isOpen ? "text-[#f97316]" : "text-[var(--p-faint)]")}>
+                  <span
+                    className={cn(
+                      "shrink-0 tabular-nums",
+                      isOpen ? "text-[#f97316]" : "text-[var(--p-faint)]",
+                    )}
+                  >
                     {pad(index + 1)}
                   </span>
                   <span>{section.text}</span>

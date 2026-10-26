@@ -121,7 +121,7 @@ function StageTitle({
 function Caption({ children, tilt }: { children: string; tilt: number }) {
   return (
     <p
-      className="s1-glass-card mt-5 max-w-[360px] rounded-[18px] px-6 py-4 text-[15px] leading-[1.55] tracking-[-0.02em] text-[var(--home-ink-soft)] dark:[background:rgba(23,18,15,0.94)]"
+      className="s1-glass-card mt-5 max-w-[360px] rounded-[6px] px-6 py-4 text-[15px] leading-[1.55] tracking-[-0.02em] text-[var(--home-ink-soft)] dark:[background:rgba(23,18,15,0.94)]"
       data-tilt={tilt}
     >
       {children}

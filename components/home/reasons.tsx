@@ -19,7 +19,7 @@ function ReasonCard({ feature, index }: { feature: Feature; index: number }) {
     <article
       ref={ref}
       onPointerMove={onPointerMove}
-      className="group relative isolate flex h-full min-h-[24rem] flex-col overflow-hidden rounded-[20px] p-7 ring-1 ring-inset ring-white/[0.08] transition-[box-shadow,transform] duration-500 ease-s1 hover:-translate-y-1 hover:ring-[#fb923c]/30 sm:min-h-[26rem] md:p-8"
+      className="group relative isolate flex h-full min-h-[24rem] flex-col overflow-hidden rounded-[6px] p-7 ring-1 ring-inset ring-white/[0.08] transition-[box-shadow,transform] duration-500 ease-s1 hover:-translate-y-1 hover:ring-[#fb923c]/30 sm:min-h-[26rem] md:p-8"
       style={{ backgroundColor: CARD_BG }}
     >
       {/* Cursor-following brand light */}

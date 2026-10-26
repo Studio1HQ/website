@@ -12,7 +12,7 @@ type CaseStudyHighlightQuotesProps = {
 
 /** Shared surface with CaseStudyHighlightStats: the paper white sheet. */
 export const caseStudyHighlightCardClassName =
-  "relative rounded-[24px] bg-white/80 shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08] px-5 py-5 text-[#141414] md:px-7 md:py-7";
+  "relative rounded-[6px] bg-white/80 shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08] px-5 py-5 text-[#141414] md:px-7 md:py-7";
 
 /**
  * Single editorial pull quote when a study has no verified metrics.

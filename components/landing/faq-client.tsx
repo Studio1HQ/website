@@ -55,7 +55,7 @@ export default function FAQClient({ items, subtitle }: FAQClientProps) {
           </div>
         </motion.aside>
 
-        <motion.div className="s1-glass-card min-w-0 rounded-[24px] px-5 py-2 sm:px-8" variants={fadeInUp}>
+        <motion.div className="s1-glass-card min-w-0 rounded-[6px] px-5 py-2 sm:px-8" variants={fadeInUp}>
           <Accordion type="single" collapsible className="w-full">
             {items.map((item, index) => {
               const number = String(index + 1).padStart(2, "0");

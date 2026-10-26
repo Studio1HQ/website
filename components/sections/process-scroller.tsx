@@ -47,7 +47,7 @@ type TimelineNode =
   { type: "main"; index: number } | { type: "sub"; index: number };
 
 const processCardSurface =
-  "s1-glass-card s1-glass-raised group relative min-h-[22rem] overflow-hidden rounded-[24px]";
+  "s1-glass-card s1-glass-raised group relative min-h-[22rem] overflow-hidden rounded-[6px]";
 
 function ProcessDeckCard({
   step,

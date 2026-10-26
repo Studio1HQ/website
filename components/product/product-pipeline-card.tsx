@@ -8,7 +8,7 @@ import { useTranslations } from "next-intl";
 
 /** An empty slot engraved into the sheet: the next product, not yet printed. */
 const pipelineCardSurface =
-  "relative overflow-hidden rounded-[24px] bg-[#fbfaf7] p-6 shadow-[inset_0_3px_10px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08),inset_0_-1px_0_#fff,0_1px_0_rgba(255,255,255,0.95)] sm:p-7";
+  "relative overflow-hidden rounded-[6px] bg-[#fbfaf7] p-6 shadow-[inset_0_3px_10px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08),inset_0_-1px_0_#fff,0_1px_0_rgba(255,255,255,0.95)] sm:p-7";
 
 export default function ProductPipelineCard() {
   const t = useTranslations("ProductPage.pipeline");
@@ -22,7 +22,7 @@ export default function ProductPipelineCard() {
 
       <div className="relative z-[1] flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
         <div className="flex min-w-0 items-start gap-4">
-          <div className="flex size-12 shrink-0 items-center justify-center rounded-[12px] border-[1.5px] border-dashed border-[#141414]/25 bg-white/70">
+          <div className="flex size-12 shrink-0 items-center justify-center rounded-[6px] border-[1.5px] border-dashed border-[#141414]/25 bg-white/70">
             <Database
               className="size-6"
               weight="duotone"

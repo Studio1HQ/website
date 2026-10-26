@@ -44,7 +44,7 @@ type CursorGlowCardEffectsProps = {
 };
 
 export function CursorGlowCardEffects({
-  roundedClassName = "rounded-2xl",
+  roundedClassName = "rounded-[6px]",
 }: CursorGlowCardEffectsProps) {
   return (
     <>

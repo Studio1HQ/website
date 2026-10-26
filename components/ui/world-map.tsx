@@ -202,7 +202,7 @@ export function WorldMap({
   return (
     <div
       className={cn(
-        "relative aspect-[2/1] w-full overflow-hidden rounded-[10px] font-secondary md:aspect-[2.5/1] lg:aspect-[2/1]",
+        "relative aspect-[2/1] w-full overflow-hidden rounded-[6px] font-secondary md:aspect-[2.5/1] lg:aspect-[2/1]",
         className,
       )}
     >

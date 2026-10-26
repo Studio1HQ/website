@@ -66,7 +66,7 @@ export function CaseStudyLayout({
             <div className={`${COLUMN} mt-10`}>
               <div className="flex items-center gap-3">
                 {logo ? (
-                  <div className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-[11px] bg-white p-2 shadow-[0_8px_20px_-12px_rgba(20,20,20,0.45)] ring-1 ring-[#141414]/10">
+                  <div className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-[6px] bg-white p-2 shadow-[0_8px_20px_-12px_rgba(20,20,20,0.45)] ring-1 ring-[#141414]/10">
                     <Image
                       src={logo.icon}
                       alt={`${study.client} logo`}

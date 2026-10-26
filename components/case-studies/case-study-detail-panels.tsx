@@ -11,7 +11,7 @@ type CaseStudyDetailPanelsProps = {
 };
 
 const quietPanel =
-  "rounded-[24px] bg-white/80 shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08]";
+  "rounded-[6px] bg-white/80 shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08]";
 
 export function CaseStudySnapshot({ study }: CaseStudyDetailPanelsProps) {
   const snapshot = [

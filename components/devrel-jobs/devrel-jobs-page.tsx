@@ -129,7 +129,7 @@ function FilterDropdown({
 
   const optionClassName = (selected: boolean) =>
     cn(
-      "flex w-full items-center justify-between gap-3 rounded-[10px] px-3 py-2 text-left text-[13px] font-medium text-[#141414] transition-colors hover:bg-[#141414]/[0.05]",
+      "flex w-full items-center justify-between gap-3 rounded-[6px] px-3 py-2 text-left text-[13px] font-medium text-[#141414] transition-colors hover:bg-[#141414]/[0.05]",
       selected && "bg-[#f97316]/10",
     );
 
@@ -164,7 +164,7 @@ function FilterDropdown({
         <div
           role="listbox"
           aria-label={label}
-          className="absolute left-0 top-[calc(100%+0.5rem)] z-50 max-h-72 w-full min-w-48 overflow-y-auto rounded-[16px] bg-white p-1.5 shadow-[0_24px_40px_-24px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/10"
+          className="absolute left-0 top-[calc(100%+0.5rem)] z-50 max-h-72 w-full min-w-48 overflow-y-auto rounded-[6px] bg-white p-1.5 shadow-[0_24px_40px_-24px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/10"
         >
           <button
             type="button"
@@ -257,7 +257,7 @@ function JobRow({ job, locale }: { job: DevRelJob; locale: string }) {
 
         <span
           aria-hidden
-          className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-[12px] bg-white p-2 ring-1 ring-inset ring-[#141414]/10"
+          className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-[6px] bg-white p-2 ring-1 ring-inset ring-[#141414]/10"
         >
           {job.logo && !hasLogoError ? (
             <span className="relative block size-7">
@@ -498,7 +498,7 @@ export function DevRelJobsPage({ jobs }: DevRelJobsPageProps) {
 
           {/* Sticky toolbar */}
           <div className="sticky top-24 z-30 mt-6">
-            <div className="rounded-[20px] bg-[#f4efe7]/90 p-2.5 ring-1 ring-inset ring-[#141414]/10 backdrop-blur-xl sm:p-3">
+            <div className="rounded-[6px] bg-[#f4efe7]/90 p-2.5 ring-1 ring-inset ring-[#141414]/10 backdrop-blur-xl sm:p-3">
               <div className="grid gap-2 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,2fr)]">
                 <div className="relative min-w-0">
                   <MagnifyingGlass
@@ -696,7 +696,7 @@ export function DevRelJobsPage({ jobs }: DevRelJobsPageProps) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.8, ease: EASE }}
-            className="relative isolate mt-16 overflow-hidden rounded-[24px] bg-white/80 p-7 shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08] sm:p-10 md:mt-20 lg:p-12"
+            className="relative isolate mt-16 overflow-hidden rounded-[6px] bg-white/80 p-7 shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08] sm:p-10 md:mt-20 lg:p-12"
           >
             <span
               aria-hidden

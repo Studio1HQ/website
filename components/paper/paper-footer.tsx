@@ -116,7 +116,7 @@ export default function PaperFooter() {
           className="grid grid-cols-2 gap-2 xl:grid-cols-4"
           style={{ marginTop: 40 }}
         >
-          <div className="col-span-2 flex flex-col justify-between gap-10 rounded-[16px] bg-white/80 p-7 ring-1 ring-inset ring-[#141414]/10 xl:col-span-1">
+          <div className="col-span-2 flex flex-col justify-between gap-10 rounded-[6px] bg-white/80 p-7 ring-1 ring-inset ring-[#141414]/10 xl:col-span-1">
             <div>
               <Link href="/" className="inline-flex items-center gap-3">
                 <Logo className="size-8" />
@@ -142,7 +142,7 @@ export default function PaperFooter() {
 
           <nav
             aria-label={nav("items.services")}
-            className="rounded-[16px] bg-white/80 p-7 ring-1 ring-inset ring-[#141414]/10"
+            className="rounded-[6px] bg-white/80 p-7 ring-1 ring-inset ring-[#141414]/10"
           >
             <p className={heading}>{nav("items.services")}</p>
             <ul className="mt-6 space-y-3.5">
@@ -158,7 +158,7 @@ export default function PaperFooter() {
 
           <nav
             aria-label="Studio1"
-            className="rounded-[16px] bg-white/80 p-7 ring-1 ring-inset ring-[#141414]/10"
+            className="rounded-[6px] bg-white/80 p-7 ring-1 ring-inset ring-[#141414]/10"
           >
             <p className={heading}>Studio1</p>
             <ul className="mt-6 space-y-3.5">
@@ -180,7 +180,7 @@ export default function PaperFooter() {
             </ul>
           </nav>
 
-          <div className="col-span-2 rounded-[16px] bg-white/80 p-7 ring-1 ring-inset ring-[#141414]/10 xl:col-span-1">
+          <div className="col-span-2 rounded-[6px] bg-white/80 p-7 ring-1 ring-inset ring-[#141414]/10 xl:col-span-1">
             <p className={heading}>Follow us</p>
             <ul className="mt-6 flex flex-wrap gap-2 xl:block xl:space-y-3">
               {SOCIAL_LINKS.map(({ href, label, icon: SocialIcon }) => (
@@ -192,7 +192,7 @@ export default function PaperFooter() {
                     aria-label={label}
                     className="group inline-flex items-center gap-3 text-[15px] transition-colors duration-200 hover:text-[#f97316]"
                   >
-                    <span className="flex size-10 items-center justify-center rounded-[11px] bg-[#f6f3ee] text-[#141414]/75 shadow-[inset_0_2px_6px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08),inset_0_-1px_0_#fff,0_1px_0_rgba(255,255,255,0.95)] transition-colors group-hover:text-[#f97316]">
+                    <span className="flex size-10 items-center justify-center rounded-[6px] bg-[#f6f3ee] text-[#141414]/75 shadow-[inset_0_2px_6px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08),inset_0_-1px_0_#fff,0_1px_0_rgba(255,255,255,0.95)] transition-colors group-hover:text-[#f97316]">
                       <SocialIcon className="size-4" />
                     </span>
                     <span className="hidden xl:inline">{label}</span>

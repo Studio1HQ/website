@@ -122,7 +122,7 @@ export default async function CaseStudiesPage() {
                   aria-label={study.client}
                   className={`group flex min-w-0 items-center gap-3 p-2 pr-4 ${CELL}`}
                 >
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-[11px] bg-white p-1.5 ring-1 ring-[#141414]/10">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-[6px] bg-white p-1.5 ring-1 ring-[#141414]/10">
                     <Image
                       src={logo.icon}
                       alt=""
@@ -144,7 +144,7 @@ export default async function CaseStudiesPage() {
                 aria-label={client.name}
                 className={`group flex min-w-0 items-center gap-3 p-2 pr-4 ${CELL}`}
               >
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-[11px] bg-white p-1.5 ring-1 ring-[#141414]/10">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-[6px] bg-white p-1.5 ring-1 ring-[#141414]/10">
                   <Image
                     src={client.icon}
                     alt=""

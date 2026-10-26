@@ -56,7 +56,7 @@ export const Companies = () => {
                 key={`${item.name}-${index}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative flex h-full w-full flex-col items-center justify-center gap-3 rounded-[16px] bg-[#f8f6f2] px-3 pb-5 pt-6 shadow-[inset_0_5px_14px_rgba(20,20,20,0.13),inset_2px_0_8px_rgba(20,20,20,0.05),inset_0_1px_3px_rgba(20,20,20,0.12),inset_0_-2px_0_#fff,0_1px_0_#fff] transition-colors duration-300 hover:bg-white sm:pb-6 sm:pt-7"
+                className="group relative flex h-full w-full flex-col items-center justify-center gap-3 rounded-[6px] bg-[#f8f6f2] px-3 pb-5 pt-6 shadow-[inset_0_5px_14px_rgba(20,20,20,0.13),inset_2px_0_8px_rgba(20,20,20,0.05),inset_0_1px_3px_rgba(20,20,20,0.12),inset_0_-2px_0_#fff,0_1px_0_#fff] transition-colors duration-300 hover:bg-white sm:pb-6 sm:pt-7"
               >
                 <ArrowUpRight
                   aria-hidden

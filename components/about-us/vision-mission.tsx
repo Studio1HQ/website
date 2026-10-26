@@ -81,7 +81,7 @@ const contentData = {
 
 /** Paper card: white sheet, hairline ring, a soft lift on hover. */
 const cardSurface = cn(
-  "group relative isolate h-full overflow-hidden rounded-[24px] bg-white p-7 shadow-[inset_0_1px_0_#fff] ring-1 ring-inset ring-[#141414]/[0.08] transition-[transform,box-shadow,background-color] duration-500 ease-out hover:-translate-y-1 hover:bg-white hover:shadow-[inset_0_1px_0_#fff,0_24px_40px_-28px_rgba(20,20,20,0.45)] motion-reduce:transform-none md:p-9",
+  "group relative isolate h-full overflow-hidden rounded-[6px] bg-white p-7 shadow-[inset_0_1px_0_#fff] ring-1 ring-inset ring-[#141414]/[0.08] transition-[transform,box-shadow,background-color] duration-500 ease-out hover:-translate-y-1 hover:bg-white hover:shadow-[inset_0_1px_0_#fff,0_24px_40px_-28px_rgba(20,20,20,0.45)] motion-reduce:transform-none md:p-9",
 );
 
 const ContentBlock = ({
@@ -121,7 +121,7 @@ const ContentBlock = ({
       <div className="relative z-10 flex h-full flex-col gap-7">
         <header className="flex items-center gap-3.5">
           <span
-            className="flex size-12 shrink-0 items-center justify-center rounded-[12px] text-[#f4efe7] transition-transform duration-500 ease-out group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+            className="flex size-12 shrink-0 items-center justify-center rounded-[6px] text-[#f4efe7] transition-transform duration-500 ease-out group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
             style={{ background: index === 1 ? PRINT : INK }}
             aria-hidden
           >
@@ -156,7 +156,7 @@ const ContentBlock = ({
               >
                 <span
                   aria-hidden
-                  className="flex size-7 shrink-0 items-center justify-center rounded-[8px] bg-[#fbfaf7] shadow-[inset_0_2px_5px_rgba(20,20,20,0.10),inset_0_1px_1px_rgba(20,20,20,0.08),inset_0_-1px_0_#fff,0_1px_0_rgba(255,255,255,0.95)]"
+                  className="flex size-7 shrink-0 items-center justify-center rounded-[6px] bg-[#fbfaf7] shadow-[inset_0_2px_5px_rgba(20,20,20,0.10),inset_0_1px_1px_rgba(20,20,20,0.08),inset_0_-1px_0_#fff,0_1px_0_rgba(255,255,255,0.95)]"
                 >
                   <PointIcon
                     weight="duotone"

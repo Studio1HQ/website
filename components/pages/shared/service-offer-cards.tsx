@@ -66,7 +66,7 @@ export function ServiceOfferCards({
                   />
                 ))}
                 <Rise delay={position * 0.08} className="h-full">
-                  <article className="group relative isolate flex h-full min-h-[440px] flex-col overflow-hidden rounded-[16px] bg-white/80 p-6 shadow-[inset_0_1px_0_#fff] ring-1 ring-inset ring-[#141414]/[0.08] transition-[background-color,box-shadow,transform] duration-500 hover:-translate-y-1 hover:bg-white hover:shadow-[inset_0_1px_0_#fff,0_24px_40px_-28px_rgba(20,20,20,0.45)] motion-reduce:transform-none md:p-7">
+                  <article className="group relative isolate flex h-full min-h-[440px] flex-col overflow-hidden rounded-[6px] bg-white/80 p-6 shadow-[inset_0_1px_0_#fff] ring-1 ring-inset ring-[#141414]/[0.08] transition-[background-color,box-shadow,transform] duration-500 hover:-translate-y-1 hover:bg-white hover:shadow-[inset_0_1px_0_#fff,0_24px_40px_-28px_rgba(20,20,20,0.45)] motion-reduce:transform-none md:p-7">
                     {/* Hover: a soft orange wash rises from the bottom edge */}
                     <span
                       aria-hidden

@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 /** Recessed paper frame the screenshot or video sits in. */
 const mediaFrameClassName = cn(
-  "relative w-full min-w-0 overflow-hidden rounded-[18px] bg-[#fbfaf7] ring-1 ring-inset ring-[#141414]/[0.06]",
+  "relative w-full min-w-0 overflow-hidden rounded-[6px] bg-[#fbfaf7] ring-1 ring-inset ring-[#141414]/[0.06]",
   "shadow-[inset_0_3px_10px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08),inset_0_-1px_0_#fff,0_1px_0_rgba(255,255,255,0.95)]",
   "aspect-video sm:aspect-[16/9] lg:aspect-[16/10]",
 );

@@ -72,7 +72,7 @@ export function ServiceHead({
 /** Small ink-on-paper chip, e.g. a badge or a format tag. */
 export function PaperChip({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-flex items-center rounded-[8px] bg-[#141414]/[0.05] px-2.5 py-1 text-[12px] font-medium text-[#141414]/75">
+    <span className="inline-flex items-center rounded-[6px] bg-[#141414]/[0.05] px-2.5 py-1 text-[12px] font-medium text-[#141414]/75">
       {children}
     </span>
   );
@@ -111,10 +111,10 @@ export function PaperPoints({
 
 /** Inset "engraved" tile used for result numbers, as on the home page. */
 const ENGRAVED =
-  "rounded-[14px] bg-[#ece5da] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10),inset_0_-1px_0_rgba(255,255,255,0.85),0_1px_0_rgba(255,255,255,0.95)]";
+  "rounded-[6px] bg-[#ece5da] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10),inset_0_-1px_0_rgba(255,255,255,0.85),0_1px_0_rgba(255,255,255,0.95)]";
 
 const CARD =
-  "group relative isolate overflow-hidden rounded-[24px] bg-white/80 ring-1 ring-inset ring-[#141414]/[0.08] shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)] transition-[transform,box-shadow,background-color] duration-500 ease-out hover:-translate-y-1 hover:bg-white hover:shadow-[inset_0_1px_0_#fff,0_30px_60px_-34px_rgba(249,115,22,0.45)] motion-reduce:transform-none";
+  "group relative isolate overflow-hidden rounded-[6px] bg-white/80 ring-1 ring-inset ring-[#141414]/[0.08] shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)] transition-[transform,box-shadow,background-color] duration-500 ease-out hover:-translate-y-1 hover:bg-white hover:shadow-[inset_0_1px_0_#fff,0_30px_60px_-34px_rgba(249,115,22,0.45)] motion-reduce:transform-none";
 
 function TopHairline() {
   return (
@@ -363,7 +363,7 @@ export function PaperServiceProcess({
       <div className="mt-8 grid gap-2 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
         <div className="lg:sticky lg:top-28 lg:self-start">
           <div
-            className="relative isolate flex flex-col justify-between gap-10 overflow-hidden rounded-[24px] px-6 py-10 text-white md:px-10 md:py-14 lg:min-h-[460px]"
+            className="relative isolate flex flex-col justify-between gap-10 overflow-hidden rounded-[6px] px-6 py-10 text-white md:px-10 md:py-14 lg:min-h-[460px]"
             style={ORANGE_PANEL}
           >
             <div
@@ -390,7 +390,7 @@ export function PaperServiceProcess({
 
         <ol
           ref={listRef}
-          className="relative flex flex-col gap-2 rounded-[24px] bg-white/60 p-3 ring-1 ring-inset ring-[#141414]/[0.08] sm:p-4"
+          className="relative flex flex-col gap-2 rounded-[6px] bg-white/60 p-3 ring-1 ring-inset ring-[#141414]/[0.08] sm:p-4"
         >
           <li
             aria-hidden
@@ -408,7 +408,7 @@ export function PaperServiceProcess({
             return (
               <li
                 key={step.name}
-                className="relative rounded-[16px] bg-white/90 p-5 pl-[60px] ring-1 ring-inset ring-[#141414]/[0.06] sm:p-6 sm:pl-[68px]"
+                className="relative rounded-[6px] bg-white/90 p-5 pl-[60px] ring-1 ring-inset ring-[#141414]/[0.06] sm:p-6 sm:pl-[68px]"
               >
                 <span
                   data-marker
@@ -532,7 +532,7 @@ export function PaperServiceFaq({
           </div>
         </aside>
 
-        <div className="min-w-0 rounded-[24px] bg-white/80 px-5 py-2 ring-1 ring-inset ring-[#141414]/10 sm:px-8">
+        <div className="min-w-0 rounded-[6px] bg-white/80 px-5 py-2 ring-1 ring-inset ring-[#141414]/10 sm:px-8">
           <Accordion type="single" collapsible className="w-full">
             {items.map((item, position) => (
               <AccordionItem

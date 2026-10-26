@@ -42,7 +42,7 @@ export default function Showreel() {
     >
       <Container className="pb-24 pt-6 md:pb-32">
         <Rise>
-          <div className="relative aspect-[4/5] overflow-hidden rounded-[20px] bg-black shadow-[0_40px_120px_-30px_rgba(0,0,0,0.8)] ring-1 ring-white/10 sm:aspect-[16/10] lg:aspect-[16/8]">
+          <div className="relative aspect-[4/5] overflow-hidden rounded-[6px] bg-black shadow-[0_40px_120px_-30px_rgba(0,0,0,0.8)] ring-1 ring-white/10 sm:aspect-[16/10] lg:aspect-[16/8]">
             <div className="absolute inset-0 grid grid-cols-2 gap-3 p-3 sm:grid-cols-3 lg:grid-cols-4">
               {COLUMNS.map((column, index) => (
                 <div

@@ -299,7 +299,7 @@ export default function NightHero() {
             <li key={navKey} className="min-w-0">
               <Link
                 href={href}
-                className="group relative isolate flex h-full flex-col items-start overflow-hidden rounded-[12px] bg-[#16130f] p-5 ring-1 ring-inset ring-white/[0.05] transition-colors duration-300 hover:bg-[#1d1915] [&>*:not(canvas)]:relative"
+                className="group relative isolate flex h-full flex-col items-start overflow-hidden rounded-[6px] bg-[#16130f] p-5 ring-1 ring-inset ring-white/[0.05] transition-colors duration-300 hover:bg-[#1d1915] [&>*:not(canvas)]:relative"
               >
                 {/* Animated orange dither on the right side, fading into the card */}
                 <DitherField
@@ -308,7 +308,7 @@ export default function NightHero() {
                 />
                 {/* Icon on top, then the heading, then the offerings cycling */}
                 <span className="flex w-full items-start justify-between">
-                  <span className="relative flex size-11 items-center justify-center overflow-hidden rounded-[14px] bg-[linear-gradient(160deg,rgba(255,255,255,0.18)_0%,rgba(255,255,255,0.04)_60%)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_10px_24px_-12px_rgba(249,115,22,0.55)] ring-1 ring-inset ring-white/15 backdrop-blur-md transition-transform duration-500 group-hover:-translate-y-0.5">
+                  <span className="relative flex size-11 items-center justify-center overflow-hidden rounded-[6px] bg-[linear-gradient(160deg,rgba(255,255,255,0.18)_0%,rgba(255,255,255,0.04)_60%)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_10px_24px_-12px_rgba(249,115,22,0.55)] ring-1 ring-inset ring-white/15 backdrop-blur-md transition-transform duration-500 group-hover:-translate-y-0.5">
                     <Icon weight="regular" className="size-5" />
                   </span>
                   <ArrowUpRight

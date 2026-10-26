@@ -83,7 +83,7 @@ export const TeamCard = ({
   };
 
   return (
-    <div className="group flex h-full flex-col rounded-[24px] bg-white/80 p-3 shadow-[inset_0_1px_0_#fff] ring-1 ring-inset ring-[#141414]/[0.08] transition-[transform,box-shadow,background-color] duration-500 ease-out hover:-translate-y-1 hover:bg-white hover:shadow-[inset_0_1px_0_#fff,0_24px_40px_-28px_rgba(20,20,20,0.45)] motion-reduce:transform-none">
+    <div className="group flex h-full flex-col rounded-[6px] bg-white/80 p-3 shadow-[inset_0_1px_0_#fff] ring-1 ring-inset ring-[#141414]/[0.08] transition-[transform,box-shadow,background-color] duration-500 ease-out hover:-translate-y-1 hover:bg-white hover:shadow-[inset_0_1px_0_#fff,0_24px_40px_-28px_rgba(20,20,20,0.45)] motion-reduce:transform-none">
       {/* Portrait tile — the wrapper's 2px padding IS the border; the glow
           sits underneath and the opaque inner panel covers its center, so it
           can only ever be visible in the 2px ring */}
@@ -91,13 +91,13 @@ export const TeamCard = ({
         ref={tileRef}
         onMouseMove={handleMouseMove}
         onMouseEnter={handleMouseEnter}
-        className="group/tile relative rounded-[18px] bg-[#141414]/[0.08] p-[2px]"
+        className="group/tile relative rounded-[6px] bg-[#141414]/[0.08] p-[2px]"
       >
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 rounded-[18px] opacity-0 transition-opacity duration-500 ease-out group-hover/tile:opacity-100 [background:radial-gradient(200px_circle_at_var(--mouse-x,50%)_var(--mouse-y,50%),#f97316_0%,rgba(249,115,22,0.4)_40%,transparent_75%)]"
+          className="pointer-events-none absolute inset-0 rounded-[6px] opacity-0 transition-opacity duration-500 ease-out group-hover/tile:opacity-100 [background:radial-gradient(200px_circle_at_var(--mouse-x,50%)_var(--mouse-y,50%),#f97316_0%,rgba(249,115,22,0.4)_40%,transparent_75%)]"
         />
-        <div className="relative aspect-[4/4] overflow-hidden rounded-[16px]">
+        <div className="relative aspect-[4/4] overflow-hidden rounded-[6px]">
           {/* Recessed paper tile the portrait stands in */}
           <div aria-hidden className="absolute inset-0 bg-[#fbfaf7]" />
           <div

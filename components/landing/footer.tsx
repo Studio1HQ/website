@@ -170,7 +170,7 @@ export default function Footer() {
 
             <a
               href="mailto:contact@studio1hq.com"
-              className="s1-glass-btn-light group mt-8 flex max-w-[340px] items-center justify-between gap-4 rounded-2xl px-5 py-4"
+              className="s1-glass-btn-light group mt-8 flex max-w-[340px] items-center justify-between gap-4 rounded-[6px] px-5 py-4"
             >
               <span>
                 <span className="block text-[11px] font-medium uppercase tracking-[0.12em] text-white/45">

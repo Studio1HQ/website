@@ -109,7 +109,7 @@ export const LINE = "border-[var(--p-line)]";
 export const GRID = "grid gap-2";
 /** The hero's card: white, hairline ring, rounded corners. */
 export const CELL =
-  "rounded-[16px] bg-white/80 ring-1 ring-inset ring-[#141414]/10 transition-[transform,box-shadow,background-color] duration-500 ease-out hover:-translate-y-1 hover:bg-white hover:shadow-[0_24px_40px_-28px_rgba(20,20,20,0.45)] motion-reduce:transform-none";
+  "rounded-[6px] bg-white/80 ring-1 ring-inset ring-[#141414]/10 transition-[transform,box-shadow,background-color] duration-500 ease-out hover:-translate-y-1 hover:bg-white hover:shadow-[0_24px_40px_-28px_rgba(20,20,20,0.45)] motion-reduce:transform-none";
 
 export function PaperSection({
   id,
@@ -364,7 +364,7 @@ export function PaperLogos() {
             return (
               <li
                 key={cell}
-                className="relative h-24 overflow-hidden rounded-[14px] bg-[#f8f6f2] shadow-[inset_0_5px_14px_rgba(20,20,20,0.13),inset_2px_0_8px_rgba(20,20,20,0.05),inset_0_1px_3px_rgba(20,20,20,0.12),inset_0_-2px_0_#fff,0_1px_0_#fff]"
+                className="relative h-24 overflow-hidden rounded-[6px] bg-[#f8f6f2] shadow-[inset_0_5px_14px_rgba(20,20,20,0.13),inset_2px_0_8px_rgba(20,20,20,0.05),inset_0_1px_3px_rgba(20,20,20,0.12),inset_0_-2px_0_#fff,0_1px_0_#fff]"
               >
                 {cellLogos.map((item, index) => (
                   <span
@@ -839,7 +839,7 @@ export function PaperServices() {
                 <Link
                   href={OFFERING_LINKS[id]}
                   className={cn(
-                    "group relative isolate flex h-full min-h-[220px] flex-col overflow-hidden rounded-[16px] bg-white/80 p-5 ring-1 ring-inset ring-[#141414]/[0.08] shadow-[inset_0_1px_0_#fff] transition-[background-color,box-shadow,transform] duration-500 hover:-translate-y-1 hover:bg-white hover:shadow-[inset_0_1px_0_#fff,0_24px_40px_-28px_rgba(20,20,20,0.45)] [&>*:not(canvas)]:relative",
+                    "group relative isolate flex h-full min-h-[220px] flex-col overflow-hidden rounded-[6px] bg-white/80 p-5 ring-1 ring-inset ring-[#141414]/[0.08] shadow-[inset_0_1px_0_#fff] transition-[background-color,box-shadow,transform] duration-500 hover:-translate-y-1 hover:bg-white hover:shadow-[inset_0_1px_0_#fff,0_24px_40px_-28px_rgba(20,20,20,0.45)] [&>*:not(canvas)]:relative",
                   )}
                 >
                   {/* Hover: an orange wash rises from the bottom edge */}
@@ -1304,12 +1304,12 @@ function FeaturedCase({
     <article
       onPointerEnter={() => setPreview(true)}
       onPointerLeave={() => setPreview(false)}
-      className="group relative isolate grid min-w-0 grid-cols-[minmax(0,1fr)] rounded-[24px] bg-white/80 p-6 shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08] transition-shadow duration-500 hover:z-10 hover:shadow-[inset_0_1px_0_#fff,0_30px_60px_-34px_rgba(249,115,22,0.45)] md:row-span-9 md:grid-rows-[subgrid] md:p-9"
+      className="group relative isolate grid min-w-0 grid-cols-[minmax(0,1fr)] rounded-[6px] bg-white/80 p-6 shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08] transition-shadow duration-500 hover:z-10 hover:shadow-[inset_0_1px_0_#fff,0_30px_60px_-34px_rgba(249,115,22,0.45)] md:row-span-9 md:grid-rows-[subgrid] md:p-9"
     >
       {/* Still orange halftone, fading out from the top-right corner */}
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-[24px]"
+        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-[6px]"
       >
         <DitherField
           still
@@ -1332,7 +1332,7 @@ function FeaturedCase({
 
       {/* 1. Client */}
       <div className="flex items-center gap-3">
-        <span className="relative size-10 shrink-0 overflow-hidden rounded-[11px] bg-white ring-1 ring-[#141414]/10">
+        <span className="relative size-10 shrink-0 overflow-hidden rounded-[6px] bg-white ring-1 ring-[#141414]/10">
           <Image
             src={work.logo}
             alt=""
@@ -1355,7 +1355,7 @@ function FeaturedCase({
           </span>
         ) : null}
         <span aria-hidden className="h-px flex-1 bg-[#141414]/12" />
-        <span className="relative rounded-[10px] bg-[#fbfaf7] px-2 py-1 text-[28px] font-medium leading-none tabular-nums tracking-[-0.05em] text-[#141414]/30 shadow-[0_0_0_6px_#fbfaf7] md:text-[34px]">
+        <span className="relative rounded-[6px] bg-[#fbfaf7] px-2 py-1 text-[28px] font-medium leading-none tabular-nums tracking-[-0.05em] text-[#141414]/30 shadow-[0_0_0_6px_#fbfaf7] md:text-[34px]">
           {String(index + 1).padStart(2, "0")}
         </span>
       </div>
@@ -1387,7 +1387,7 @@ function FeaturedCase({
           {(("shipped" in work && work.shipped) || []).map((item) => (
             <li
               key={item}
-              className="inline-flex items-center gap-2 rounded-[8px] bg-[#141414]/[0.045] px-2.5 py-1 text-[12.5px] font-medium text-[#141414]/80"
+              className="inline-flex items-center gap-2 rounded-[6px] bg-[#141414]/[0.045] px-2.5 py-1 text-[12.5px] font-medium text-[#141414]/80"
             >
               <span
                 aria-hidden
@@ -1427,7 +1427,7 @@ function FeaturedCase({
           ([MetricIcon, value, label], position) => (
             <div
               key={label}
-              className="relative isolate min-w-0 overflow-hidden rounded-[14px] bg-[#ece5da] p-3.5 shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10),inset_0_-1px_0_rgba(255,255,255,0.85),0_1px_0_rgba(255,255,255,0.95)] [&>*:not(canvas)]:relative"
+              className="relative isolate min-w-0 overflow-hidden rounded-[6px] bg-[#ece5da] p-3.5 shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10),inset_0_-1px_0_rgba(255,255,255,0.85),0_1px_0_rgba(255,255,255,0.95)] [&>*:not(canvas)]:relative"
             >
               <DitherField
                 cell={6}
@@ -1472,7 +1472,7 @@ function FeaturedCase({
       </dl>
 
       {/* 8. Client voice, or a verified result where no quote is published */}
-      <figure className="mt-5 flex flex-col rounded-[18px] bg-[#ece5da] p-5 shadow-[inset_0_3px_8px_rgba(20,20,20,0.10),inset_0_-1px_0_rgba(255,255,255,0.85),0_1px_0_rgba(255,255,255,0.95)] md:p-6">
+      <figure className="mt-5 flex flex-col rounded-[6px] bg-[#ece5da] p-5 shadow-[inset_0_3px_8px_rgba(20,20,20,0.10),inset_0_-1px_0_rgba(255,255,255,0.85),0_1px_0_rgba(255,255,255,0.95)] md:p-6">
         {quote ? (
           <svg
             aria-hidden
@@ -1561,9 +1561,9 @@ function FeaturedCase({
             exit={{ opacity: 0, y: "-70%", rotate: 4, scale: 0.94 }}
             transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
           >
-            <span className="block overflow-hidden rounded-[16px] bg-white p-1.5 shadow-[0_30px_60px_-24px_rgba(20,20,20,0.5)] ring-1 ring-[#141414]/10">
+            <span className="block overflow-hidden rounded-[6px] bg-white p-1.5 shadow-[0_30px_60px_-24px_rgba(20,20,20,0.5)] ring-1 ring-[#141414]/10">
               <span
-                className="relative block overflow-hidden rounded-[11px]"
+                className="relative block overflow-hidden rounded-[6px]"
                 style={{ aspectRatio: work.ratio }}
               >
                 <Image
@@ -1871,7 +1871,7 @@ export function PaperReasons() {
             {REASON_SHOTS.map((src, index) => (
               <span
                 key={src}
-                className="absolute inset-0 overflow-hidden rounded-[12px] bg-white shadow-[0_18px_44px_-18px_rgba(20,20,20,0.4)] ring-1 ring-[#141414]/10 transition-[transform,opacity] duration-[1100ms] ease-[cubic-bezier(0.65,0,0.35,1)] will-change-transform"
+                className="absolute inset-0 overflow-hidden rounded-[6px] bg-white shadow-[0_18px_44px_-18px_rgba(20,20,20,0.4)] ring-1 ring-[#141414]/10 transition-[transform,opacity] duration-[1100ms] ease-[cubic-bezier(0.65,0,0.35,1)] will-change-transform"
                 style={shotStyle(mod(index - active, total), total)}
               >
                 <Image
@@ -1986,7 +1986,7 @@ export function PaperTestimonials() {
                       aria-label={`Show testimonial from ${person.name}, ${company}`}
                       aria-pressed={isActive}
                       className={cn(
-                        "flex h-12 w-full items-center gap-3 rounded-[12px] px-3.5 text-left text-[15px] font-medium tracking-[-0.02em] transition-all duration-300",
+                        "flex h-12 w-full items-center gap-3 rounded-[6px] px-3.5 text-left text-[15px] font-medium tracking-[-0.02em] transition-all duration-300",
                         isActive
                           ? "bg-white text-[#141414] shadow-[0_10px_24px_-16px_rgba(20,20,20,0.45)] ring-2 ring-inset ring-[#f97316]"
                           : "bg-[#f5f1ea] text-[#141414]/65 shadow-[inset_0_2px_6px_rgba(20,20,20,0.07),inset_0_1px_2px_rgba(20,20,20,0.05),inset_0_-1px_0_rgba(255,255,255,0.85),0_1px_0_rgba(255,255,255,0.95)] hover:text-[#141414]",
@@ -2282,7 +2282,7 @@ export function PaperReach() {
 export function PrintBanner({ children }: { children: ReactNode }) {
   return (
     <div
-      className="relative isolate mt-10 overflow-hidden rounded-[24px] px-6 pb-24 pt-20 text-center text-white md:pb-32 md:pt-24"
+      className="relative isolate mt-10 overflow-hidden rounded-[6px] px-6 pb-24 pt-20 text-center text-white md:pb-32 md:pt-24"
       style={{
         background:
           "radial-gradient(60% 70% at 0% 0%, #ff3a00 0%, transparent 70%), radial-gradient(60% 70% at 100% 0%, #ff3a00 0%, transparent 70%), linear-gradient(180deg, #fb8a1e 0%, #f7a54a 38%, #e9b8a6 72%, #f2b38a 100%)",

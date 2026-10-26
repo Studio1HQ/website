@@ -55,18 +55,18 @@ export default function TestimonialLetter() {
           {/* Stacked letters behind the card */}
           <div
             aria-hidden
-            className="absolute inset-y-6 -right-3 left-6 rotate-[2.2deg] rounded-[10px] bg-[var(--home-sheet-2)] md:-right-6"
+            className="absolute inset-y-6 -right-3 left-6 rotate-[2.2deg] rounded-[6px] bg-[var(--home-sheet-2)] md:-right-6"
           />
           <div
             aria-hidden
-            className="absolute inset-y-3 -right-1 left-3 rotate-[1deg] rounded-[10px] bg-[var(--home-sheet-1)] md:-right-3"
+            className="absolute inset-y-3 -right-1 left-3 rotate-[1deg] rounded-[6px] bg-[var(--home-sheet-1)] md:-right-3"
           />
 
           <div
             ref={cardRef}
             onPointerEnter={() => setPaused(true)}
             onPointerLeave={() => setPaused(false)}
-            className="relative rounded-[10px] bg-[var(--home-paper)] px-6 py-16 text-center text-[var(--home-ink)] shadow-[0_40px_100px_-40px_rgba(0,0,0,0.6)] ring-1 ring-inset ring-[var(--home-line)] sm:px-12 md:px-20 md:py-24"
+            className="relative rounded-[6px] bg-[var(--home-paper)] px-6 py-16 text-center text-[var(--home-ink)] shadow-[0_40px_100px_-40px_rgba(0,0,0,0.6)] ring-1 ring-inset ring-[var(--home-line)] sm:px-12 md:px-20 md:py-24"
             aria-roledescription="carousel"
           >
             <h2 className="font-editorial text-[52px] leading-[0.95] md:text-[88px]">

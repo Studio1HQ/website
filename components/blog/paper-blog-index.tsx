@@ -61,14 +61,14 @@ function PrintTag({ children }: { children: string }) {
 /** Every post shows its generated paper cover, all at the same 16:9 size. */
 function PostCover({ post, priority = false, sizes }: { post: BlogPostMeta; priority?: boolean; sizes: string }) {
   return (
-    <div className="relative aspect-[16/9] w-full overflow-hidden bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/10">
+    <div className={`relative aspect-[16/9] w-full overflow-hidden ring-1 ring-inset ring-[#141414]/10 ${post.bannerImage ? "bg-[#0b0b0b]" : "bg-[#f4efe7]"}`}>
       <Image
-        src={blogCoverUrl(post.slug, post.updatedDate)}
+        src={post.bannerImage || blogCoverUrl(post.slug, post.updatedDate)}
         alt={`${post.title} cover`}
         fill
         priority={priority}
         sizes={sizes}
-        className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03] motion-reduce:transform-none"
+        className={`${post.bannerImage ? "object-contain" : "object-cover"} transition-transform duration-700 ease-out group-hover:scale-[1.03] motion-reduce:transform-none`}
       />
     </div>
   );

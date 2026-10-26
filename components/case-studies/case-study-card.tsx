@@ -25,7 +25,7 @@ export type CardVariant = "featured" | "default" | "compact";
 /** Shared frame: white paper sheet + one hover language across all sizes. */
 export function cardFrame(extra?: string) {
   return cn(
-    "group relative isolate flex min-w-0 overflow-hidden rounded-[24px] bg-white/80 text-[#141414] ring-1 ring-inset ring-[#141414]/[0.08]",
+    "group relative isolate flex min-w-0 overflow-hidden rounded-[6px] bg-white/80 text-[#141414] ring-1 ring-inset ring-[#141414]/[0.08]",
     "shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)]",
     "transition-[transform,box-shadow,background-color] duration-500 ease-out hover:-translate-y-1 hover:bg-white hover:shadow-[inset_0_1px_0_#fff,0_30px_60px_-34px_rgba(249,115,22,0.45)]",
     "motion-reduce:transform-none motion-reduce:transition-none",
@@ -91,7 +91,7 @@ export function ClientMark({
       className={cn(
         tile,
         pad,
-        "flex shrink-0 items-center justify-center overflow-hidden rounded-[11px] bg-white ring-1 ring-[#141414]/10 transition-shadow duration-500",
+        "flex shrink-0 items-center justify-center overflow-hidden rounded-[6px] bg-white ring-1 ring-[#141414]/10 transition-shadow duration-500",
         frosted && "shadow-[0_8px_20px_-12px_rgba(20,20,20,0.45)]",
       )}
     >
@@ -130,11 +130,11 @@ export function CardMedia({
   return (
     <div
       className={cn(
-        "relative w-full overflow-hidden rounded-[16px] bg-[#ece5da] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10),inset_0_-1px_0_rgba(255,255,255,0.85),0_1px_0_rgba(255,255,255,0.95)]",
+        "relative w-full overflow-hidden rounded-[6px] bg-[#ece5da] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10),inset_0_-1px_0_rgba(255,255,255,0.85),0_1px_0_rgba(255,255,255,0.95)]",
         containerClass,
       )}
     >
-      <div className="relative h-full w-full overflow-hidden rounded-[11px] bg-[#fbf8f3] shadow-[0_14px_30px_-22px_rgba(20,20,20,0.5)] ring-1 ring-[#141414]/[0.06]">
+      <div className="relative h-full w-full overflow-hidden rounded-[6px] bg-[#fbf8f3] shadow-[0_14px_30px_-22px_rgba(20,20,20,0.5)] ring-1 ring-[#141414]/[0.06]">
         <CaseStudyCoverArt study={study} variant={variant} />
       </div>
     </div>
@@ -179,7 +179,7 @@ export function CaseStudyCardCompact({ study }: { study: CaseStudyMeta }) {
     <Link
       href={`/case-studies/${study.slug}`}
       className={cardFrame(
-        "h-full flex-col items-stretch rounded-[20px] p-2.5",
+        "h-full flex-col items-stretch rounded-[6px] p-2.5",
       )}
     >
       <CardHairline />

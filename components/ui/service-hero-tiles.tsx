@@ -8,7 +8,7 @@ import { floatingTileSurface } from "@/lib/shadows";
 import { cn } from "@/lib/utils";
 
 const tileBase =
-  "pointer-events-none absolute hidden lg:flex size-14 items-center justify-center rounded-2xl";
+  "pointer-events-none absolute hidden lg:flex size-14 items-center justify-center rounded-[6px]";
 
 type ServiceHeroTilesProps = {
   /** Icons default to the landing hero's Code / PenNib pair. */

@@ -43,7 +43,7 @@ function CoverTile({
       className={cn(
         TILE_SIZE[variant],
         TILE_PAD[variant],
-        "flex shrink-0 items-center justify-center rounded-[14px] bg-white shadow-[0_10px_24px_-14px_rgba(20,20,20,0.45)] ring-1 ring-[#141414]/10",
+        "flex shrink-0 items-center justify-center rounded-[6px] bg-white shadow-[0_10px_24px_-14px_rgba(20,20,20,0.45)] ring-1 ring-[#141414]/10",
       )}
     >
       {children}

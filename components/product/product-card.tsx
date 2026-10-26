@@ -22,7 +22,7 @@ export type ProductCardData = {
 
 /** Paper card: white sheet, hairline ring, an orange hairline on top. */
 const productCardSurface =
-  "group relative isolate overflow-hidden rounded-[24px] bg-white/80 p-3 shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08] transition-shadow duration-500 hover:shadow-[inset_0_1px_0_#fff,0_30px_60px_-34px_rgba(249,115,22,0.45)] sm:p-4 lg:p-5";
+  "group relative isolate overflow-hidden rounded-[6px] bg-white/80 p-3 shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08] transition-shadow duration-500 hover:shadow-[inset_0_1px_0_#fff,0_30px_60px_-34px_rgba(249,115,22,0.45)] sm:p-4 lg:p-5";
 
 export default function ProductCard({
   product,

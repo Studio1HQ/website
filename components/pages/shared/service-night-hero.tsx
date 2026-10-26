@@ -182,7 +182,7 @@ export function ServiceNightHero({
             {stats.map((stat, index) => (
               <li
                 key={stat.label}
-                className="flex min-w-0 flex-col items-center justify-center gap-2 rounded-[16px] bg-white/80 px-3 py-5 ring-1 ring-inset ring-[#141414]/10 md:px-6 md:py-8"
+                className="flex min-w-0 flex-col items-center justify-center gap-2 rounded-[6px] bg-white/80 px-3 py-5 ring-1 ring-inset ring-[#141414]/10 md:px-6 md:py-8"
               >
                 <span
                   className="whitespace-nowrap text-[24px] font-medium leading-none tabular-nums tracking-[-0.05em] sm:text-[34px] md:text-[42px]"
