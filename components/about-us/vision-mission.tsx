@@ -178,7 +178,7 @@ const ContentBlock = ({
 
 export const VisionMission = () => {
   return (
-    <PaperSection tone="paper">
+    <PaperSection tone="paper" className="py-10 md:py-14">
       <Container>
         <IndexBar index={1} name="Vision & mission" />
         <SectionHead

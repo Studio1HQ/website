@@ -97,7 +97,7 @@ export const TeamCard = ({
           aria-hidden
           className="pointer-events-none absolute inset-0 rounded-[18px] opacity-0 transition-opacity duration-500 ease-out group-hover/tile:opacity-100 [background:radial-gradient(200px_circle_at_var(--mouse-x,50%)_var(--mouse-y,50%),#f97316_0%,rgba(249,115,22,0.4)_40%,transparent_75%)]"
         />
-        <div className="relative aspect-[9/10] overflow-hidden rounded-[16px]">
+        <div className="relative aspect-[4/4] overflow-hidden rounded-[16px]">
           {/* Recessed paper tile the portrait stands in */}
           <div aria-hidden className="absolute inset-0 bg-[#fbfaf7]" />
           <div

@@ -19,7 +19,7 @@ type TeamProps = {
 export const Team = ({ showHeader = true, className }: TeamProps) => {
   const reduceMotion = useReducedMotion();
   return (
-    <PaperSection tone="paper" className={className}>
+    <PaperSection tone="paper" className={cn("py-10 md:py-14", className)}>
       <Container>
         {showHeader ? (
           <>

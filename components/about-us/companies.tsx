@@ -25,7 +25,7 @@ function lightOnly(className?: string) {
 
 export const Companies = () => {
   return (
-    <PaperSection tone="paper" className="pb-24 md:pb-32">
+    <PaperSection tone="paper" className="pb-20 pt-10 md:pb-24 md:pt-14">
       <Container>
         <IndexBar index={3} name="Partnered companies" />
         <SectionHead

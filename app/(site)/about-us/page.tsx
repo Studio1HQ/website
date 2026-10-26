@@ -11,6 +11,7 @@ import { Team } from "@/components/about-us/team";
 import { Companies } from "@/components/about-us/companies";
 import { motion, useReducedMotion } from "motion/react";
 import { PaperPageHeader } from "@/components/paper/paper-page-header";
+import { HeroArrows } from "@/components/about-us/hero-arrows";
 import { Accent } from "@/components/paper/paper-sections";
 import { PAPER_SCOPE, PRINT } from "@/lib/paper";
 import { useTranslations } from "next-intl";
@@ -78,7 +79,8 @@ export default function AboutUs() {
 
   return (
     <div className="overflow-x-clip" style={PAPER_SCOPE}>
-      <PaperPageHeader className="pb-16 pt-32 md:pb-20 md:pt-40">
+      <PaperPageHeader className="pb-10 pt-28 md:pb-12 md:pt-36">
+        <HeroArrows />
         <motion.div
           className="mx-auto flex max-w-[1300px] flex-col items-center px-4 text-center sm:px-6"
           initial={reduceMotion ? false : "hidden"}
@@ -89,7 +91,7 @@ export default function AboutUs() {
             <StudioIntroVideo />
           </div>
           {/* Two lines from md up; each line scales with the viewport so it never wraps. */}
-          <h1 className="mt-14 text-[34px] font-medium leading-[1.1] tracking-[-0.05em] sm:text-[44px] md:text-[min(3.7vw,54px)] md:[&>span]:whitespace-nowrap">
+          <h1 className="mt-12 text-[34px] font-medium leading-[1.1] tracking-[-0.05em] sm:text-[44px] md:text-[min(3.7vw,54px)] md:[&>span]:whitespace-nowrap">
             <span className="md:block">
               {t("titlePrefix")} <Accent>{t("titleHighlightOne")}</Accent>{" "}
               {t("titleMiddle")} <Accent>{t("titleHighlightTwo")}</Accent>
@@ -100,14 +102,14 @@ export default function AboutUs() {
             {t("descriptionLineOne")} {t("descriptionLineTwo")}
           </p>
 
-          <div className="mt-10 flex max-w-xl flex-wrap items-center justify-center gap-2">
+          <div className="mt-8 flex max-w-5xl flex-wrap items-center justify-center gap-2">
             {tags.map((tag, index) => (
               <motion.span
                 key={tag.key}
                 initial={reduceMotion ? false : { opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 + 0.05 * index, duration: 0.4 }}
-                className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-[13px] font-medium text-[#141414] shadow-[inset_0_1px_0_#fff] ring-1 ring-inset ring-[#141414]/10"
+                className="inline-flex items-center gap-2 rounded-full bg-[#f8f6f2] px-4 py-2 text-[13px] font-medium text-[#141414] shadow-[inset_0_2px_6px_rgba(20,20,20,0.09),inset_0_1px_2px_rgba(20,20,20,0.07),inset_0_-1px_0_#fff,0_1px_0_rgba(255,255,255,0.95)]"
               >
                 <tag.icon
                   weight="duotone"
