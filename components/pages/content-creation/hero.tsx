@@ -1,6 +1,12 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import {
+  FilmSlate,
+  PlayCircle,
+  Scissors,
+  VideoCamera,
+} from "@phosphor-icons/react";
 import { ServiceNightHero } from "@/components/pages/shared/service-night-hero";
 
 export default function Hero() {
@@ -14,6 +20,15 @@ export default function Hero() {
       description={t("description")}
       primaryCta={t("primaryCta")}
       secondaryCta={t("secondaryCta")}
+      decor={{
+        tiles: [PlayCircle, FilmSlate],
+        tabs: [
+          { icon: PlayCircle, label: "Demos" },
+          { icon: VideoCamera, label: "Tutorials" },
+          { icon: Scissors, label: "Edits" },
+          { icon: FilmSlate, label: "Shorts" },
+        ],
+      }}
     />
   );
 }

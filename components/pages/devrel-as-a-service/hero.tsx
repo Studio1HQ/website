@@ -1,6 +1,12 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import {
+  Megaphone,
+  RocketLaunch,
+  Sparkle,
+  UsersThree,
+} from "@phosphor-icons/react";
 import { ServiceNightHero } from "@/components/pages/shared/service-night-hero";
 
 export default function Hero() {
@@ -20,6 +26,15 @@ export default function Hero() {
         { value: "35+", label: t("stats.partners") },
         { value: "5+", label: t("stats.launch") },
       ]}
+      decor={{
+        tiles: [Megaphone, UsersThree],
+        tabs: [
+          { icon: Megaphone, label: "Advocacy" },
+          { icon: UsersThree, label: "Community" },
+          { icon: RocketLaunch, label: "Launches" },
+          { icon: Sparkle, label: "Creators" },
+        ],
+      }}
     />
   );
 }

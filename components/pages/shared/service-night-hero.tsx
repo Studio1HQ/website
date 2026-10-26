@@ -4,20 +4,23 @@ import { motion, useReducedMotion } from "motion/react";
 import {
   ArrowDown,
   ArrowUpRight,
-  Code,
   Package,
-  PenNib,
+  type Icon,
 } from "@phosphor-icons/react";
 import { EASE } from "@/components/home/ui";
 import {
   PaperEyebrow,
   PaperPageHeader,
 } from "@/components/paper/paper-page-header";
-import { Cursor } from "@/components/paper/paper-hero";
+import { GlassTab, Icon3D } from "@/components/about-us/hero-arrows";
 import { INK, PAPER, PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 
 export type ServiceHeroStat = { value: string; label: string };
+export type ServiceHeroDecor = {
+  tiles: Icon[];
+  tabs: { icon: Icon; label: string }[];
+};
 
 /**
  * Service page hero on the paper sheet (cream, grain, ink type, print
@@ -32,6 +35,7 @@ export function ServiceNightHero({
   primaryCta,
   secondaryCta,
   stats = [],
+  decor,
 }: {
   badge: string;
   titleAccent: string;
@@ -40,6 +44,8 @@ export function ServiceNightHero({
   primaryCta: string;
   secondaryCta: string;
   stats?: ServiceHeroStat[];
+  /** Two 3D icon tiles and up to four glass tabs flanking the headline. */
+  decor?: ServiceHeroDecor;
 }) {
   const reduceMotion = useReducedMotion();
   const enter = (delay: number) => ({
@@ -56,59 +62,54 @@ export function ServiceNightHero({
         className="pointer-events-none absolute inset-0 -z-10 opacity-60 [background-image:linear-gradient(to_bottom,rgba(20,20,20,0.06)_1px,transparent_1px)] [background-size:100%_48px] [mask-image:linear-gradient(to_bottom,transparent,black_20%,black_70%,transparent)]"
       />
 
-      {/* Ink icon tiles flanking the headline (lg+), each "selected" */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 mx-auto hidden h-full w-full max-w-[1300px] px-8 lg:block"
-      >
-        {[
-          {
-            icon: <Code weight="regular" className="size-6" />,
-            label: "code",
-            className: "left-[3rem] top-[13rem] xl:left-[4rem]",
-            delay: 0,
-          },
-          {
-            icon: <PenNib weight="regular" className="size-6" />,
-            label: "write",
-            className: "right-[3rem] top-[16rem] xl:right-[4rem]",
-            delay: 1.2,
-          },
-        ].map((tile, index) => (
-          <motion.div
-            key={tile.label}
-            className={cn("absolute", tile.className)}
-            initial={reduceMotion ? false : { opacity: 0, scale: 0.8 }}
-            animate={
-              reduceMotion
-                ? { opacity: 1 }
-                : { opacity: 1, scale: 1, y: [0, -12, 0] }
-            }
-            transition={{
-              opacity: { duration: 0.8, delay: 0.4 },
-              scale: { duration: 0.8, ease: EASE, delay: 0.4 },
-              y: {
-                duration: 6,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: tile.delay,
-              },
-            }}
-          >
-            <span className="block border-[1.5px] border-[#f97316] p-1.5">
-              <span
-                className="flex size-14 items-center justify-center"
-                style={{ background: index === 0 ? INK : PRINT, color: PAPER }}
+      {/* Mirrored decorations (lg+): a 3D tile and two glass tabs per side */}
+      {decor ? (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-[1] mx-auto hidden max-w-[1440px] lg:block"
+        >
+          {[
+            {
+              kind: "tile",
+              n: 0,
+              spot: "left-[7%] top-[20%] w-14 -rotate-[8deg]",
+            },
+            { kind: "tab", n: 0, spot: "left-[13%] top-[40%] rotate-[4deg]" },
+            { kind: "tab", n: 1, spot: "left-[3%] top-[62%] -rotate-[5deg]" },
+            {
+              kind: "tile",
+              n: 1,
+              spot: "right-[4%] top-[46%] w-12 rotate-[9deg]",
+            },
+            { kind: "tab", n: 2, spot: "right-[10%] top-[18%] -rotate-[4deg]" },
+            { kind: "tab", n: 3, spot: "right-[12%] top-[66%] rotate-[3deg]" },
+          ].map((item, k) => {
+            const tab = decor.tabs[item.n];
+            const tile = decor.tiles[item.n];
+            if (item.kind === "tab" && !tab) return null;
+            if (item.kind === "tile" && !tile) return null;
+            return (
+              <motion.div
+                key={k}
+                className={cn("absolute", item.spot)}
+                initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1, ease: EASE, delay: 0.4 + k * 0.12 }}
               >
-                {tile.icon}
-              </span>
-            </span>
-            {index === 1 ? (
-              <Cursor className="absolute -bottom-7 -left-5 size-7" />
-            ) : null}
-          </motion.div>
-        ))}
-      </div>
+                {item.kind === "tile" ? (
+                  <Icon3D icon={tile} className="w-full" />
+                ) : (
+                  <GlassTab
+                    icon={tab.icon}
+                    label={tab.label}
+                    ink={item.n % 2 === 0}
+                  />
+                )}
+              </motion.div>
+            );
+          })}
+        </div>
+      ) : null}
 
       <div
         id="overview"

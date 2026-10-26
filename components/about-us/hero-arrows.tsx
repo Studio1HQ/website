@@ -22,7 +22,7 @@ import {
  * A 3D icon tile in the brand orange: a lit rounded face on an extruded base,
  * with a white glyph for what Studio1 makes (videos, docs, DevRel).
  */
-function Icon3D({
+export function Icon3D({
   icon: Glyph,
   className,
 }: {
@@ -73,6 +73,36 @@ const ARROWS: {
     delay: 1.2,
   },
 ];
+
+/** A frosted glass label tab with an ink or orange icon tile. */
+export function GlassTab({
+  icon: Glyph,
+  label,
+  ink,
+  className,
+}: {
+  icon: Icon;
+  label: string;
+  ink?: boolean;
+  className?: string;
+}) {
+  return (
+    <span
+      className={cn(
+        "flex items-center gap-2.5 rounded-[14px] bg-white/45 py-2 pl-2 pr-4 text-[13px] font-medium text-[#141414] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),inset_0_0_0_1px_rgba(255,255,255,0.55),0_16px_32px_-20px_rgba(20,20,20,0.45)] ring-1 ring-[#141414]/[0.06] backdrop-blur-xl backdrop-saturate-150",
+        className,
+      )}
+    >
+      <span
+        className="flex size-7 items-center justify-center rounded-[8px] text-[#f4efe7]"
+        style={{ background: ink ? "#141414" : "#f97316" }}
+      >
+        <Glyph weight="regular" className="size-4" />
+      </span>
+      {label}
+    </span>
+  );
+}
 
 /** 3D arrows that glide in from the page edges toward the hero, then rest. */
 export function HeroArrows() {
