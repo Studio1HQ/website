@@ -4,14 +4,15 @@ import Hero from "@/components/pages/blogs-as-a-service/hero";
 import Services from "@/components/pages/blogs-as-a-service/services";
 import type { FAQItem } from "@/components/landing/faq";
 import { PaperSection } from "@/components/paper/paper-sections";
-import {
-  PaperCaseStudyCard,
-  PaperServiceFaq,
-  ServiceHead,
-} from "@/components/pages/shared/paper-service-kit";
+import { PaperServiceFaq } from "@/components/pages/shared/paper-service-kit";
 import { PAPER_SCOPE } from "@/lib/paper";
 import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
-import { ServiceDetailSection } from "@/components/pages/shared/service-detail-sections";
+import {
+  StoryCards,
+  StoryLogos,
+  StoryProof,
+} from "@/components/pages/shared/service-story";
+import { PaperCta } from "@/components/paper/paper-sections";
 import { getTranslations } from "next-intl/server";
 import { DEFAULT_LOCALE } from "@/lib/i18n";
 import { Container } from "@/components/home/ui";
@@ -177,39 +178,6 @@ const contentCaseStudyProofs: CaseStudyResultData[] = [
   },
 ];
 
-function TechnicalContentProofGrid() {
-  const [featuredStudy, ...supportingStudies] = contentCaseStudyProofs;
-
-  return (
-    <PaperSection id="proof" tone="paper" className="scroll-mt-28">
-      <Container>
-        <ServiceHead
-          index={2}
-          name="Proof"
-          title="Case studies from technical content work"
-          description="Blogs, guides, deep dives, and developer education shaped around real technical topics."
-        />
-
-        <div className="mt-10 grid gap-2">
-          {featuredStudy ? (
-            <PaperCaseStudyCard
-              study={featuredStudy}
-              variant="featured"
-              density="dense"
-            />
-          ) : null}
-
-          <div className="grid gap-2 md:grid-cols-2">
-            {supportingStudies.map((study) => (
-              <PaperCaseStudyCard key={study.href} study={study} />
-            ))}
-          </div>
-        </div>
-      </Container>
-    </PaperSection>
-  );
-}
-
 export default function Page() {
   const serviceSchema = {
     "@context": "https://schema.org",
@@ -248,17 +216,21 @@ export default function Page() {
         }}
       />
       <Hero />
+      <StoryLogos />
       <Services />
-      <TechnicalContentProofGrid />
-      <ServiceDetailSection
-        eyebrow="How the content engine works"
+      <StoryCards
+        index={2}
         title="From topic idea to published technical content"
         description="We align topic, outline, draft, review, publishing, and optional repurposing around one developer goal."
-        items={contentWorkflow}
-        columns="three"
-        index={3}
+        steps={contentWorkflow}
       />
-      <Process index={4} />
+      <Process index={3} />
+      <StoryProof
+        index={4}
+        title="Case studies from technical content work"
+        description="Blogs, guides, deep dives, and developer education shaped around real technical topics."
+        studies={contentCaseStudyProofs}
+      />
       <PaperSection tone="paper">
         <Container>
           <PaperServiceFaq
@@ -268,6 +240,11 @@ export default function Page() {
           />
         </Container>
       </PaperSection>
+      <PaperCta
+        index={6}
+        title="Ready to Ship Technical Content Developers Trust?"
+        description="We create developer tutorials, guides, and SEO content that build trust, increase product visibility, and drive technical adoption."
+      />
     </div>
   );
 }

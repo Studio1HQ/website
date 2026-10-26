@@ -1,33 +1,25 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import {
-  FilmSlate,
-  PlayCircle,
-  Scissors,
-  VideoCamera,
-} from "@phosphor-icons/react";
-import { ServiceNightHero } from "@/components/pages/shared/service-night-hero";
+import { StoryHero } from "@/components/pages/shared/service-story";
 
 export default function Hero() {
   const t = useTranslations("ServiceHero.video");
 
   return (
-    <ServiceNightHero
-      badge={t("badge")}
+    <StoryHero
+      eyebrow={t("badge")}
+      pill="Demos · Tutorials · Edits · Shorts"
       titleAccent={t("titleAccent")}
       titleRest={t("titleRest")}
       description={t("description")}
       primaryCta={t("primaryCta")}
       secondaryCta={t("secondaryCta")}
-      decor={{
-        tiles: [PlayCircle, FilmSlate],
-        tabs: [
-          { icon: PlayCircle, label: "Demos" },
-          { icon: VideoCamera, label: "Tutorials" },
-          { icon: Scissors, label: "Edits" },
-          { icon: FilmSlate, label: "Shorts" },
-        ],
+      highlights={["Technical demos", "upload-ready assets"]}
+      photo={{
+        src: "/case-studies/jozu/devfest-pune-2025.webp",
+        alt: "Studio1 at DevFest Pune 2025",
+        position: "center 40%",
       }}
     />
   );

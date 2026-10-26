@@ -3,7 +3,6 @@
 import { Suspense, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useLocale } from "next-intl";
-import BottomNavbar from "@/components/bottom-navbar";
 import CTA from "@/components/landing/cta";
 import Footer from "@/components/landing/footer";
 import PaperFooter from "@/components/paper/paper-footer";
@@ -38,7 +37,6 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
       {children}
       {shouldShowGlobalCta ? <CTA /> : null}
       {isPaperPath(pathname) ? <PaperFooter /> : <Footer />}
-      <BottomNavbar />
       <ScrollToTopButton />
       <LocalizedLinkRuntime />
     </>

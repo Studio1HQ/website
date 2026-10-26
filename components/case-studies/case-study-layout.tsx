@@ -66,13 +66,13 @@ export function CaseStudyLayout({
             <div className={`${COLUMN} mt-10`}>
               <div className="flex items-center gap-3">
                 {logo ? (
-                  <div className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-[6px] bg-white p-2 shadow-[0_8px_20px_-12px_rgba(20,20,20,0.45)] ring-1 ring-[#141414]/10">
+                  <div className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-[6px] bg-[#f8f6f2] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10),inset_0_-1px_0_#fff,0_1px_0_#fff] p-2">
                     <Image
                       src={logo.icon}
                       alt={`${study.client} logo`}
                       width={28}
                       height={28}
-                      className="size-full rounded-lg object-contain"
+                      className="size-full rounded-lg object-contain mix-blend-multiply"
                     />
                   </div>
                 ) : null}

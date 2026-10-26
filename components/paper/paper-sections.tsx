@@ -302,7 +302,7 @@ const LOGO_HEIGHT: Record<string, number> = {
 /** Logos drawn on a white square: multiplied onto the card instead of inked. */
 const ON_WHITE = new Set(["LiteLLM", "Jozu"]);
 
-function InkLogo({ item }: { item: (typeof trustedbyLogo)[number] }) {
+export function InkLogo({ item }: { item: (typeof trustedbyLogo)[number] }) {
   const beside = "showNameBeside" in item && item.showNameBeside;
   const height = beside ? 26 : (LOGO_HEIGHT[item.name] ?? 24);
   return (
@@ -1100,7 +1100,6 @@ const WORK = [
     headline: "A docs revamp publicly endorsed by LiteLLM's CEO",
     mark: "clear SDK and Gateway paths",
     logo: "/assets/litellm.webp",
-    logoZoom: 1.3,
     href: "/case-studies/litellm",
     image: "/case-studies/litellm/github-guides-activity.webp",
     ratio: 792 / 619,
@@ -1332,13 +1331,13 @@ function FeaturedCase({
 
       {/* 1. Client */}
       <div className="flex items-center gap-3">
-        <span className="relative size-10 shrink-0 overflow-hidden rounded-[6px] bg-white ring-1 ring-[#141414]/10">
+        <span className="relative size-10 shrink-0 overflow-hidden rounded-[6px] bg-[#f8f6f2] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10),inset_0_-1px_0_#fff,0_1px_0_#fff]">
           <Image
             src={work.logo}
             alt=""
             fill
             sizes="40px"
-            className="object-cover"
+            className="object-cover mix-blend-multiply"
             style={
               "logoZoom" in work
                 ? { transform: `scale(${work.logoZoom})` }
@@ -2308,7 +2307,16 @@ export function PrintBanner({ children }: { children: ReactNode }) {
   );
 }
 
-export function PaperCta({ index = 9 }: { index?: number }) {
+/** The landing's closing banner; pages swap in their own title and line. */
+export function PaperCta({
+  index = 9,
+  title,
+  description,
+}: {
+  index?: number;
+  title?: ReactNode;
+  description?: ReactNode;
+}) {
   const t = useTranslations("CTA");
   const bullets = ["savings", "lockIn", "content", "turnaround"] as const;
   return (
@@ -2317,10 +2325,10 @@ export function PaperCta({ index = 9 }: { index?: number }) {
         <IndexBar index={index} name="Contact" aside="contact@studio1hq.com" />
         <PrintBanner>
           <h2 className="mx-auto max-w-[760px] text-[32px] font-medium leading-[1.15] tracking-[-0.045em] [text-shadow:0_1px_18px_rgba(160,50,0,0.18)] sm:text-[40px] lg:text-[52px]">
-            {t("titleLine1")} {t("titleLine2")}
+            {title ?? `${t("titleLine1")} ${t("titleLine2")}`}
           </h2>
           <p className="mx-auto mt-4 max-w-[480px] text-[16px] leading-[1.6] text-white/85 md:text-[17px]">
-            {t("descriptionLine1")} {t("descriptionLine2")}
+            {description ?? `${t("descriptionLine1")} ${t("descriptionLine2")}`}
           </p>
           <a
             href="https://cal.com/studio1/collab"

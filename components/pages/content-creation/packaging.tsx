@@ -8,7 +8,7 @@ import {
   MUTED,
   PaperSection,
 } from "@/components/paper/paper-sections";
-import { INK, PRINT } from "@/lib/paper";
+import { PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 import {
   IconClick,
@@ -68,10 +68,7 @@ export default function Packaging({ index = 4 }: { index?: number }) {
                       CELL,
                     )}
                   >
-                    <span
-                      className="flex size-12 items-center justify-center text-[#f4efe7]"
-                      style={{ background: INK }}
-                    >
+                    <span className="flex size-12 items-center justify-center rounded-[6px] bg-[#f8f6f2] text-[#141414] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10),inset_0_-1px_0_#fff,0_1px_0_#fff]">
                       <layer.icon
                         className="size-6"
                         stroke={1.6}

@@ -1,14 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import Link from "next/link";
-import {
-  motion,
-  useMotionValueEvent,
-  useReducedMotion,
-  useScroll,
-  useTransform,
-} from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { ArrowRight, ArrowUpRight, Check, Plus } from "@phosphor-icons/react";
 import {
   Accordion,
@@ -114,7 +108,7 @@ const ENGRAVED =
   "rounded-[6px] bg-[#ece5da] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10),inset_0_-1px_0_rgba(255,255,255,0.85),0_1px_0_rgba(255,255,255,0.95)]";
 
 const CARD =
-  "group relative isolate overflow-hidden rounded-[6px] bg-white/80 ring-1 ring-inset ring-[#141414]/[0.08] shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)] transition-[transform,box-shadow,background-color] duration-500 ease-out hover:-translate-y-1 hover:bg-white hover:shadow-[inset_0_1px_0_#fff,0_30px_60px_-34px_rgba(249,115,22,0.45)] motion-reduce:transform-none";
+  "group relative isolate overflow-hidden rounded-[6px] bg-white/80 ring-1 ring-inset ring-[#141414]/[0.08] shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)] transition-[transform,box-shadow,background-color] duration-500 ease-out hover:-translate-y-1 hover:bg-white hover:shadow-[inset_0_1px_0_#fff,0_30px_60px_-34px_rgba(249,115,22,0.45)] motion-reduce:transform-none after:pointer-events-none after:absolute after:inset-0 after:-z-10 after:bg-[radial-gradient(120%_70%_at_50%_110%,rgba(249,115,22,0.20),transparent_70%)] after:opacity-0 after:transition-opacity after:duration-500 hover:after:opacity-100";
 
 function TopHairline() {
   return (
@@ -291,7 +285,7 @@ export function PaperCaseStudyCard({
 }
 
 /* ------------------------------------------------------------------ */
-/* Process: orange panel + steps on a rail that fills as you scroll    */
+/* Process: orange panel and step cards inside one outer card          */
 /* ------------------------------------------------------------------ */
 
 const ORANGE_PANEL = {
@@ -317,148 +311,101 @@ export function PaperServiceProcess({
   stepLabel?: string;
 }) {
   const reduceMotion = useReducedMotion();
-  const [active, setActive] = useState(0);
-  const listRef = useRef<HTMLOListElement>(null);
-  const [rail, setRail] = useState({ top: 0, height: 0 });
-  const { scrollYProgress } = useScroll({
-    target: listRef,
-    offset: ["start 0.7", "end 0.55"],
-  });
-  const fill = useTransform(scrollYProgress, (value) =>
-    reduceMotion ? 1 : value,
-  );
-  useMotionValueEvent(fill, "change", (value) => {
-    const step = Math.min(
-      steps.length - 1,
-      Math.max(0, Math.floor(value * (steps.length - 1) + 0.02)),
-    );
-    setActive((current) => (current === step ? current : step));
-  });
-
-  useEffect(() => {
-    const list = listRef.current;
-    if (!list) return;
-    const measure = () => {
-      const markers = list.querySelectorAll<HTMLElement>("[data-marker]");
-      if (markers.length < 2) return;
-      const box = list.getBoundingClientRect();
-      const first = markers[0].getBoundingClientRect();
-      const last = markers[markers.length - 1].getBoundingClientRect();
-      setRail({
-        top: first.top - box.top + first.height / 2,
-        height: last.top - first.top,
-      });
-    };
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(list);
-    return () => observer.disconnect();
-  }, []);
-
-  const reached = (position: number) => reduceMotion || position <= active;
 
   return (
     <>
       <IndexBar index={index} name={name} />
-      <div className="mt-8 grid gap-2 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
-        <div className="lg:sticky lg:top-28 lg:self-start">
-          <div
-            className="relative isolate flex flex-col justify-between gap-10 overflow-hidden rounded-[6px] px-6 py-10 text-white md:px-10 md:py-14 lg:min-h-[460px]"
-            style={ORANGE_PANEL}
-          >
+      {/* One outer card; the orange panel and the step tray sit inside it */}
+      <div className="mt-8 rounded-[6px] bg-white/70 p-2 shadow-[0_30px_60px_-44px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08] sm:p-2.5">
+        <div className="grid gap-2 sm:gap-2.5 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+          <div className="lg:sticky lg:top-28 lg:self-start">
             <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0 -z-10 opacity-30 mix-blend-multiply"
-              style={{ backgroundImage: GRAIN }}
-            />
-            <h2 className="max-w-[520px] text-[32px] font-medium leading-[1.15] tracking-[-0.045em] sm:text-[40px] lg:text-[46px]">
-              {title}
-              {accent ? (
-                <>
-                  {" "}
-                  <span className="text-[#141414]">{accent}</span>
-                </>
-              ) : null}
-            </h2>
-            {description ? (
-              <p className="max-w-[420px] text-[16px] leading-relaxed text-white/90 md:text-[17px]">
-                {description}
-              </p>
-            ) : null}
-          </div>
-        </div>
-
-        <ol
-          ref={listRef}
-          className="relative flex flex-col gap-2 rounded-[6px] bg-white/60 p-3 ring-1 ring-inset ring-[#141414]/[0.08] sm:p-4"
-        >
-          <li
-            aria-hidden
-            className="pointer-events-none absolute left-[39px] z-[1] w-[2px] bg-[#141414]/10 sm:left-[47px]"
-            style={{ top: rail.top, height: rail.height }}
-          >
-            <motion.span
-              className="absolute inset-0 origin-top"
-              style={{ background: PRINT, scaleY: fill }}
-            />
-          </li>
-          {steps.map((step, position) => {
-            const StepIcon = step.icon;
-            const on = reached(position);
-            return (
-              <li
-                key={step.name}
-                className="relative rounded-[6px] bg-white/90 p-5 pl-[60px] ring-1 ring-inset ring-[#141414]/[0.06] sm:p-6 sm:pl-[68px]"
-              >
-                <span
-                  data-marker
-                  className={cn(
-                    "absolute left-3 top-5 z-[2] flex size-8 items-center justify-center rounded-full text-[11px] font-semibold tabular-nums ring-1 transition-[background-color,color,box-shadow] duration-500 sm:left-4 sm:top-6",
-                    on
-                      ? "bg-[#f97316] text-white ring-[#f97316] shadow-[0_0_0_5px_rgba(249,115,22,0.15)]"
-                      : "bg-[#fbfaf7] text-[#141414]/50 ring-[#141414]/15",
-                  )}
-                >
-                  {pad2(position + 1)}
-                </span>
-                <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0">
-                    <p className={cn("text-[12px] font-medium", FAINT)}>
-                      {stepLabel} {pad2(position + 1)} / {pad2(steps.length)}
-                    </p>
-                    <h3 className="mt-1 text-[22px] font-medium leading-tight tracking-[-0.035em] md:text-[24px]">
-                      {step.name}
-                    </h3>
-                  </div>
-                  <span
-                    className="flex size-10 shrink-0 items-center justify-center text-[#f4efe7]"
-                    style={{ background: INK }}
-                  >
-                    <StepIcon className="size-5" />
-                  </span>
-                </div>
-                <p className={cn("mt-3 text-[15px] leading-[1.6]", MUTED)}>
-                  {step.description}
+              className="relative isolate flex flex-col justify-between gap-10 overflow-hidden rounded-[4px] px-6 py-10 text-white md:px-10 md:py-12 lg:min-h-[440px]"
+              style={ORANGE_PANEL}
+            >
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 -z-10 opacity-30 mix-blend-multiply"
+                style={{ backgroundImage: GRAIN }}
+              />
+              <h2 className="max-w-[520px] text-[32px] font-medium leading-[1.15] tracking-[-0.045em] sm:text-[40px] lg:text-[44px]">
+                {title}
+                {accent ? (
+                  <>
+                    {" "}
+                    <span className="text-[#141414]">{accent}</span>
+                  </>
+                ) : null}
+              </h2>
+              <div>
+                {description ? (
+                  <p className="max-w-[420px] text-[16px] leading-relaxed text-white/90 md:text-[17px]">
+                    {description}
+                  </p>
+                ) : null}
+                <p className="mt-8 flex flex-wrap items-center gap-3 text-[13px] font-medium text-white/80">
+                  <span className="tabular-nums">{pad2(steps.length)}</span>
+                  <span className="h-px w-10 bg-white/50" />
+                  {steps.map((step) => step.name).join(" · ")}
                 </p>
-                <ul className="mt-5 grid gap-x-5 gap-y-2.5 border-t border-[#141414]/10 pt-4 sm:grid-cols-2">
-                  {step.details.map((detail, detailIndex) => (
-                    <li
-                      key={detailIndex}
-                      className="flex items-start gap-2.5 text-[14px] font-medium leading-snug text-[#141414]"
-                    >
-                      <Check
-                        weight="bold"
-                        className="mt-[2px] size-4 shrink-0"
-                        style={{ color: PRINT }}
-                      />
-                      <div className="min-w-0">{detail}</div>
-                    </li>
-                  ))}
-                </ul>
-              </li>
-            );
-          })}
-        </ol>
+              </div>
+            </div>
+          </div>
+
+          {/* Engraved tray holding one white card per step */}
+          <ol className="flex flex-col gap-2 rounded-[4px] bg-[#f3eee6] p-2 shadow-[inset_0_3px_10px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08),inset_0_-1px_0_#fff] sm:p-2.5">
+            {steps.map((step, position) => {
+              const StepIcon = step.icon;
+              return (
+                <motion.li
+                  key={step.name}
+                  initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-60px" }}
+                  transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                  className="group rounded-[4px] bg-white p-5 shadow-[0_1px_2px_rgba(20,20,20,0.06),0_10px_24px_-18px_rgba(20,20,20,0.35)] ring-1 ring-inset ring-[#141414]/[0.06] transition-shadow duration-500 hover:shadow-[0_1px_2px_rgba(20,20,20,0.06),0_16px_30px_-22px_rgba(20,20,20,0.35)] sm:p-6"
+                >
+                  <div className="flex items-start gap-4">
+                    <span className="flex size-11 shrink-0 items-center justify-center rounded-[6px] bg-[#f8f6f2] text-[#141414] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10),inset_0_-1px_0_#fff,0_1px_0_#fff] transition-colors duration-500 group-hover:text-[#ea580c]">
+                      <StepIcon className="size-5" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p
+                        className={cn(
+                          "text-[12px] font-medium tabular-nums",
+                          FAINT,
+                        )}
+                      >
+                        {stepLabel} {pad2(position + 1)} / {pad2(steps.length)}
+                      </p>
+                      <h3 className="mt-0.5 text-[21px] font-medium leading-tight tracking-[-0.035em] md:text-[23px]">
+                        {step.name}
+                      </h3>
+                    </div>
+                  </div>
+                  <p className={cn("mt-4 text-[15px] leading-[1.6]", MUTED)}>
+                    {step.description}
+                  </p>
+                  <ul className="mt-5 grid gap-x-5 gap-y-2.5 rounded-[4px] bg-[#f8f6f2] p-4 shadow-[inset_0_2px_6px_rgba(20,20,20,0.07),inset_0_-1px_0_#fff] sm:grid-cols-2">
+                    {step.details.map((detail, detailIndex) => (
+                      <li
+                        key={detailIndex}
+                        className="flex items-start gap-2.5 text-[14px] font-medium leading-snug text-[#141414]"
+                      >
+                        <Check
+                          weight="bold"
+                          className="mt-[2px] size-4 shrink-0"
+                          style={{ color: PRINT }}
+                        />
+                        <div className="min-w-0">{detail}</div>
+                      </li>
+                    ))}
+                  </ul>
+                </motion.li>
+              );
+            })}
+          </ol>
+        </div>
       </div>
     </>
   );
@@ -499,40 +446,38 @@ export function PaperServiceFaq({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       />
       <IndexBar index={index} name="FAQ" />
-      <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.35fr)] lg:gap-16">
-        <aside className="flex flex-col items-start gap-6 lg:sticky lg:top-28 lg:self-start">
-          <h2 className="text-[32px] font-medium leading-[1.2] tracking-[-0.045em] sm:text-[40px] lg:text-[46px]">
-            <span className="bg-white px-[0.14em] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]">
-              Frequently Asked <Accent>Questions</Accent>
-            </span>
-          </h2>
-          <p className={cn("max-w-md text-[16px] leading-[1.6]", MUTED)}>
-            {subtitle ??
-              "Everything you need to know about working with Studio1."}
-          </p>
-          <div className="flex flex-col items-start">
-            <p className={cn("text-[14px]", MUTED)}>
-              Still deciding? We&apos;re happy to walk through fit and scope.
-            </p>
-            <a
-              href="https://cal.com/studio1/collab"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group mt-5 inline-flex h-12 items-center gap-3 rounded-full py-1.5 pl-6 pr-1.5 text-[15px] font-medium transition-transform duration-300 hover:-translate-y-0.5 motion-reduce:transform-none"
-              style={{ background: INK, color: PAPER }}
+      {/* Head on top, then the questions one after another */}
+      <SectionHead
+        title={
+          <>
+            Frequently Asked <Accent>Questions</Accent>
+          </>
+        }
+        description={
+          subtitle ?? "Everything you need to know about working with Studio1."
+        }
+        actionEnd
+        action={
+          <a
+            href="https://cal.com/studio1/collab"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group inline-flex h-12 items-center gap-3 rounded-full py-1.5 pl-6 pr-1.5 text-[15px] font-medium transition-transform duration-300 hover:-translate-y-0.5 motion-reduce:transform-none"
+            style={{ background: INK, color: PAPER }}
+          >
+            Book a call
+            <span
+              className="flex size-9 items-center justify-center rounded-full text-white transition-transform duration-300 group-hover:rotate-45"
+              style={{ background: PRINT }}
             >
-              Book a call
-              <span
-                className="flex size-9 items-center justify-center rounded-full text-white transition-transform duration-300 group-hover:rotate-45"
-                style={{ background: PRINT }}
-              >
-                <ArrowUpRight weight="bold" className="size-4" />
-              </span>
-            </a>
-          </div>
-        </aside>
-
-        <div className="min-w-0 rounded-[6px] bg-white/80 px-5 py-2 ring-1 ring-inset ring-[#141414]/10 sm:px-8">
+              <ArrowUpRight weight="bold" className="size-4" />
+            </span>
+          </a>
+        }
+      />
+      <div className="mt-10">
+        {/* Questions in one white card, hairline rows */}
+        <div className="min-w-0 rounded-[6px] bg-white/80 px-6 py-2 ring-1 ring-inset ring-[#141414]/10 sm:px-8">
           <Accordion type="single" collapsible className="w-full">
             {items.map((item, position) => (
               <AccordionItem
@@ -542,34 +487,30 @@ export function PaperServiceFaq({
               >
                 <AccordionTrigger
                   className={cn(
-                    "group gap-4 py-6 text-left hover:no-underline sm:gap-6 sm:py-7",
+                    "group gap-5 py-5 text-left hover:no-underline sm:py-6",
                     "[&>svg]:hidden",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] focus-visible:ring-offset-2 focus-visible:ring-offset-white",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316] focus-visible:ring-offset-2",
                   )}
                 >
-                  <span className="w-8 shrink-0 pt-0.5 text-[13px] font-medium tabular-nums text-[#141414]/40 transition-colors group-data-[state=open]:text-[#f97316] sm:w-10">
+                  <span className="w-7 shrink-0 text-[13px] font-medium tabular-nums text-[#141414]/35 transition-colors group-data-[state=open]:text-[#f97316]">
                     {pad2(position + 1)}
                   </span>
-                  <span className="min-w-0 flex-1 pr-2 text-[16px] font-medium leading-snug tracking-[-0.02em] text-[#141414] sm:text-[18px]">
+                  <span className="min-w-0 flex-1 text-[16px] font-medium leading-snug tracking-[-0.02em] text-[#141414] transition-colors duration-200 group-hover:text-[#f97316] group-data-[state=open]:text-[#f97316] sm:text-[17px]">
                     {item.question}
                   </span>
                   <span
                     aria-hidden
-                    className={cn(
-                      "mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full ring-1 ring-inset ring-[#141414]/15 text-[#141414]/60 transition-colors duration-200",
-                      "group-hover:text-[#141414] group-hover:ring-[#141414]/40",
-                      "group-data-[state=open]:bg-[#f97316] group-data-[state=open]:text-white group-data-[state=open]:ring-[#f97316]",
-                    )}
+                    className="flex size-8 shrink-0 items-center justify-center rounded-[6px] bg-[#f8f6f2] text-[#141414]/55 shadow-[inset_0_2px_5px_rgba(20,20,20,0.10),inset_0_-1px_0_#fff] transition-colors group-data-[state=open]:bg-[#f97316] group-data-[state=open]:text-white group-data-[state=open]:shadow-none"
                   >
                     <Plus
                       weight="bold"
-                      className="size-3.5 transition-transform duration-200 group-data-[state=open]:rotate-45"
+                      className="size-3.5 transition-transform duration-300 group-data-[state=open]:rotate-45"
                     />
                   </span>
                 </AccordionTrigger>
                 <AccordionContent
                   className={cn(
-                    "pb-6 pl-12 pr-4 text-[15px] leading-relaxed sm:pl-16 sm:pr-14 sm:text-[16px]",
+                    "max-w-[760px] pb-6 pl-12 pr-12 text-[15px] leading-[1.7]",
                     MUTED,
                   )}
                 >

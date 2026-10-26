@@ -43,7 +43,7 @@ function CoverTile({
       className={cn(
         TILE_SIZE[variant],
         TILE_PAD[variant],
-        "flex shrink-0 items-center justify-center rounded-[6px] bg-white shadow-[0_10px_24px_-14px_rgba(20,20,20,0.45)] ring-1 ring-[#141414]/10",
+        "flex shrink-0 items-center justify-center rounded-[6px] bg-[#f8f6f2] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10),inset_0_-1px_0_#fff,0_1px_0_#fff]",
       )}
     >
       {children}
@@ -91,7 +91,7 @@ export function CaseStudyCoverArt({
               alt=""
               width={96}
               height={96}
-              className="size-full rounded-md object-contain"
+              className="size-full rounded-md object-contain mix-blend-multiply"
             />
           ) : (
             <span className="text-2xl font-semibold text-[#141414]">

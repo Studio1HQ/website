@@ -7,12 +7,16 @@ import Formats from "@/components/pages/content-creation/formats";
 import Cadence from "@/components/pages/content-creation/cadence";
 // import ProjectDemo from "@/components/pages/content-creation/project-demo";
 import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
-import { ServiceDetailSection } from "@/components/pages/shared/service-detail-sections";
 import type { FAQItem } from "@/components/landing/faq";
 import { Container } from "@/components/home/ui";
 import { PaperSection } from "@/components/paper/paper-sections";
 import { PaperServiceFaq } from "@/components/pages/shared/paper-service-kit";
 import { PAPER_SCOPE } from "@/lib/paper";
+import {
+  StoryCards,
+  StoryLogos,
+} from "@/components/pages/shared/service-story";
+import { PaperCta } from "@/components/paper/paper-sections";
 import { getTranslations } from "next-intl/server";
 import { DEFAULT_LOCALE } from "@/lib/i18n";
 
@@ -167,15 +171,14 @@ export default function Page() {
         }}
       />
       <Hero />
+      <StoryLogos />
       <Services />
-      <ServiceDetailSection
-        id="work"
-        eyebrow="Video production scope"
+      <StoryCards
+        index={2}
+        name="Video production scope"
         title="Technical videos that developers can actually learn from"
         description="We produce walkthroughs, shorts, demo projects, repo-led videos, and supporting assets for developer brands."
-        items={videoWorkstreams}
-        columns="three"
-        index={2}
+        steps={videoWorkstreams}
       />
       {/* <ProjectDemo /> */}
       <Packaging index={3} />
@@ -190,6 +193,11 @@ export default function Page() {
           />
         </Container>
       </PaperSection>
+      <PaperCta
+        index={7}
+        title="Ready to Make Videos Developers Learn From?"
+        description="Technical demos, tutorials, scripts, edits, shorts, and upload-ready assets for developer brands."
+      />
     </div>
   );
 }

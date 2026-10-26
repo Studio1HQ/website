@@ -1,20 +1,15 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import {
-  Megaphone,
-  RocketLaunch,
-  Sparkle,
-  UsersThree,
-} from "@phosphor-icons/react";
-import { ServiceNightHero } from "@/components/pages/shared/service-night-hero";
+import { StoryHero } from "@/components/pages/shared/service-story";
 
 export default function Hero() {
   const t = useTranslations("ServiceHero.devrel");
 
   return (
-    <ServiceNightHero
-      badge={t("badge")}
+    <StoryHero
+      eyebrow={t("badge")}
+      pill="Advocacy · Community · Launches · Creators"
       titleAccent={t("titleAccent")}
       titleRest={t("titleRest")}
       description={t("description")}
@@ -26,14 +21,15 @@ export default function Hero() {
         { value: "35+", label: t("stats.partners") },
         { value: "5+", label: t("stats.launch") },
       ]}
-      decor={{
-        tiles: [Megaphone, UsersThree],
-        tabs: [
-          { icon: Megaphone, label: "Advocacy" },
-          { icon: UsersThree, label: "Community" },
-          { icon: RocketLaunch, label: "Launches" },
-          { icon: Sparkle, label: "Creators" },
-        ],
+      highlights={[
+        "Developer advocacy",
+        "launch campaigns",
+        "creator programs",
+      ]}
+      photo={{
+        src: "/case-studies/jozu/kubecon-jozu-booth.webp",
+        alt: "The Studio1 team at the Jozu booth at KubeCon",
+        position: "center 30%",
       }}
     />
   );

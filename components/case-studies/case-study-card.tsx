@@ -91,7 +91,7 @@ export function ClientMark({
       className={cn(
         tile,
         pad,
-        "flex shrink-0 items-center justify-center overflow-hidden rounded-[6px] bg-white ring-1 ring-[#141414]/10 transition-shadow duration-500",
+        "flex shrink-0 items-center justify-center overflow-hidden rounded-[6px] bg-[#f8f6f2] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10),inset_0_-1px_0_#fff,0_1px_0_#fff] transition-shadow duration-500",
         frosted && "shadow-[0_8px_20px_-12px_rgba(20,20,20,0.45)]",
       )}
     >
@@ -100,7 +100,7 @@ export function ClientMark({
         alt={`${study.client} logo`}
         width={48}
         height={48}
-        className="size-full scale-110 rounded-md object-contain"
+        className="size-full scale-110 rounded-md object-contain mix-blend-multiply"
       />
     </div>
   );

@@ -45,8 +45,8 @@ export const Companies = () => {
               "logoClassName" in item ? item.logoClassName : undefined;
             const logoImageClassName = cn(
               logoVariant === "wide"
-                ? "object-contain"
-                : "rounded-lg object-contain",
+                ? "object-contain mix-blend-multiply"
+                : "rounded-lg object-contain mix-blend-multiply",
               lightOnly(logoClassName),
             );
 

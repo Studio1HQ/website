@@ -1,8 +1,8 @@
+import Process from "@/components/pages/devrel-as-a-service/process";
 import React from "react";
 import Impact from "@/components/sections/devrel-as-service/impact";
 import Services from "@/components/sections/devrel-as-service/services";
 import Team from "@/components/sections/devrel-as-service/team";
-import Process from "@/components/pages/devrel-as-a-service/process";
 import DevRelPricing from "@/components/sections/devrel-as-service/pricing";
 import type { Metadata } from "next";
 import Hero from "@/components/pages/devrel-as-a-service/hero";
@@ -11,11 +11,13 @@ import { Container } from "@/components/home/ui";
 import { PaperSection } from "@/components/paper/paper-sections";
 import { PaperServiceFaq } from "@/components/pages/shared/paper-service-kit";
 import { PAPER_SCOPE } from "@/lib/paper";
-import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 import {
-  ServiceDetailSection,
-  ServiceProofSection,
-} from "@/components/pages/shared/service-detail-sections";
+  StoryCards,
+  StoryLogos,
+  StoryProof,
+} from "@/components/pages/shared/service-story";
+import { PaperCta } from "@/components/paper/paper-sections";
+import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 import { getTranslations } from "next-intl/server";
 import { DEFAULT_LOCALE } from "@/lib/i18n";
 
@@ -213,37 +215,36 @@ export default function DevRel() {
         }}
       />
       <Hero />
+      <StoryLogos />
       <Services />
-      <ServiceDetailSection
-        eyebrow="DevRel and growth scope"
+      <StoryCards
+        index={2}
+        name="DevRel and growth scope"
         title="The execution layer behind developer adoption"
         description="We support docs, content, social, open-source, partnerships, hackathons, creator campaigns, launches, and feedback loops."
-        items={devrelScope}
-        columns="three"
-        index={2}
+        steps={devrelScope}
       />
       <Process index={3} />
-      <ServiceProofSection
-        title="Open-source growth through validation, demos, and meaningful collaborations"
-        description="Memori combined early product validation, demo agents, community education, feedback loops, and relevant developer collaborations."
-        study={memoriProof}
+      <StoryProof
         index={4}
-      />
-      <ServiceProofSection
-        title="Workshops and community distribution that lead to product usage"
-        description="Nebius paired hands-on workshops, conference talks, and Reddit distribution so every event and post ended with developers using the product."
-        study={nebiusProof}
-        index={5}
+        title="Case studies from DevRel and growth work"
+        description="Memori combined early product validation, demo agents, community education, feedback loops, and relevant developer collaborations. Nebius paired hands-on workshops, conference talks, and Reddit distribution so every event and post ended with developers using the product."
+        studies={[memoriProof, nebiusProof]}
       />
       <PaperSection tone="paper">
         <Container>
           <PaperServiceFaq
-            index={6}
+            index={5}
             subtitle="Common questions about our developer relations and growth campaign services."
             items={devrelFaqItems}
           />
         </Container>
       </PaperSection>
+      <PaperCta
+        index={6}
+        title="Ready to Grow Your Developer Community?"
+        description="Developer advocacy, community growth, launch campaigns, organic distribution, and creator programs for developer products."
+      />
       {/* <DevRelPricing /> */}
       {/* <PricingSection /> */}
       {/* <Team /> */}

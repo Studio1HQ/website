@@ -941,36 +941,55 @@ html:has(#s1-pre-quick) .s1-pre-mark path {
 html:has(#s1-pre-quick) .s1-pre-word span {
   animation-delay: calc(0.4s + var(--i) * 30ms);
 }
-html:has(#s1-pre-quick) .s1-pre-label {
-  animation:
-    s1-pre-label 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.55s forwards,
-    s1-pre-lift 0.6s cubic-bezier(0.65, 0, 0.35, 1) 1.05s forwards;
+html:has(#s1-pre-quick) .s1-pre-label::after {
+  animation-delay: 0.6s;
 }
 
-/* Page name under the lockup on inner pages ("Case Studies", "Blog"...) */
+/*
+ * Page name on inner pages ("Case Studies", "Blog"...): a second line under
+ * the wordmark, beside the mark, rising into place the same way. The mark
+ * grows to the height of both lines.
+ */
+.s1-pre-text {
+  display: flex;
+  flex-direction: column;
+}
 .s1-pre-label {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: calc(50% + 40px);
-  transform: translateY(8px);
+  display: none;
+  overflow: hidden;
   margin: 0;
-  text-align: center;
-  font-size: 17px;
+  padding-bottom: 0.08em;
+  font-size: 30px;
   font-weight: 500;
-  letter-spacing: -0.02em;
+  line-height: 1;
+  letter-spacing: -0.04em;
   color: #f97316;
   white-space: nowrap;
-  opacity: 0;
-  animation: s1-pre-label 0.6s cubic-bezier(0.16, 1, 0.3, 1) 1s forwards;
+}
+html:has(#s1-pre-named) .s1-pre-label {
+  display: block;
+}
+html:has(#s1-pre-named) .s1-pre-mark {
+  width: 84px;
+  height: 84px;
+}
+html:has(#s1-pre-named) .s1-pre-word {
+  padding-bottom: 0.02em;
+  line-height: 1;
 }
 .s1-pre-label::after {
   content: var(--s1-pre-label, "");
+  display: inline-block;
+  transform: translateY(110%);
+  animation: s1-pre-rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) 1.1s forwards;
 }
-@keyframes s1-pre-label {
-  to {
-    opacity: 1;
-    transform: translateY(0);
+@media (max-width: 639px) {
+  .s1-pre-label {
+    font-size: 22px;
+  }
+  html:has(#s1-pre-named) .s1-pre-mark {
+    width: 62px;
+    height: 62px;
   }
 }
 
@@ -1331,4 +1350,23 @@ html::-webkit-scrollbar-thumb:hover {
 }
 [data-mdx-content] [data-blog-table]::before {
   content: "Table " counter(s1-table, decimal-leading-zero);
+}
+
+/* Book a Call: a soft light sweep every few seconds */
+.s1-cta-sheen {
+  animation: s1-cta-sheen 4.5s cubic-bezier(0.65, 0, 0.35, 1) 1.6s infinite;
+}
+@keyframes s1-cta-sheen {
+  0% {
+    transform: translateX(0) skewX(-12deg);
+  }
+  35%,
+  100% {
+    transform: translateX(450%) skewX(-12deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .s1-cta-sheen {
+    animation: none;
+  }
 }
