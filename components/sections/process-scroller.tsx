@@ -17,6 +17,8 @@ export interface ProcessStep {
   description: string;
   icon: React.ComponentType<{ className?: string }>;
   details: React.ReactNode[];
+  /** Phrase in the description to underline. */
+  highlight?: string;
 }
 
 interface ProcessScrollerProps {

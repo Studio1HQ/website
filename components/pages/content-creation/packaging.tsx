@@ -1,6 +1,7 @@
 "use client";
 
-import { Container, Rise } from "@/components/home/ui";
+import { motion, useReducedMotion } from "motion/react";
+import { Container, EASE } from "@/components/home/ui";
 import {
   Accent,
   CELL,
@@ -8,7 +9,6 @@ import {
   MUTED,
   PaperSection,
 } from "@/components/paper/paper-sections";
-import { PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 import {
   IconClick,
@@ -41,6 +41,7 @@ const layers = [
 ];
 
 export default function Packaging({ index = 4 }: { index?: number }) {
+  const reduceMotion = useReducedMotion();
   return (
     <PaperSection tone="paper">
       <Container>
@@ -61,14 +62,36 @@ export default function Packaging({ index = 4 }: { index?: number }) {
           <ol className="grid gap-2">
             {layers.map((layer, position) => (
               <li key={layer.title}>
-                <Rise delay={position * 0.06}>
+                <motion.div
+                  initial={
+                    reduceMotion
+                      ? false
+                      : { opacity: 0, y: 18, filter: "blur(8px)" }
+                  }
+                  whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  viewport={{ once: false, amount: 0.4 }}
+                  transition={{
+                    duration: 0.8,
+                    ease: EASE,
+                    delay: position * 0.06,
+                  }}
+                >
                   <div
                     className={cn(
-                      "grid gap-5 p-6 sm:grid-cols-[auto_1fr] sm:gap-6 md:p-7",
+                      "group relative isolate grid gap-5 overflow-hidden p-6 sm:grid-cols-[auto_1fr] sm:gap-6 md:p-7",
                       CELL,
                     )}
                   >
-                    <span className="flex size-12 items-center justify-center rounded-[6px] bg-[#f8f6f2] text-[#141414] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10),inset_0_-1px_0_#fff,0_1px_0_#fff]">
+                    {/* Orange wash rising from the bottom on hover */}
+                    <span
+                      aria-hidden
+                      className="pointer-events-none absolute inset-0 -z-10 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                      style={{
+                        background:
+                          "radial-gradient(120% 80% at 50% 120%, rgba(249,115,22,0.18), transparent 70%)",
+                      }}
+                    />
+                    <span className="flex size-12 items-center justify-center rounded-[6px] transition-colors duration-500 group-hover:text-[#ea580c] bg-[#f8f6f2] text-[#141414] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10),inset_0_-1px_0_#fff,0_1px_0_#fff]">
                       <layer.icon
                         className="size-6"
                         stroke={1.6}
@@ -76,13 +99,7 @@ export default function Packaging({ index = 4 }: { index?: number }) {
                       />
                     </span>
                     <div>
-                      <h3 className="flex items-baseline gap-3 text-[20px] font-medium tracking-[-0.03em] md:text-[22px]">
-                        <span
-                          className="text-[13px] tabular-nums"
-                          style={{ color: PRINT }}
-                        >
-                          {String(position + 1).padStart(2, "0")}
-                        </span>
+                      <h3 className="text-[20px] font-medium tracking-[-0.03em] md:text-[22px]">
                         {layer.title}
                       </h3>
                       <p
@@ -95,7 +112,7 @@ export default function Packaging({ index = 4 }: { index?: number }) {
                       </p>
                     </div>
                   </div>
-                </Rise>
+                </motion.div>
               </li>
             ))}
           </ol>

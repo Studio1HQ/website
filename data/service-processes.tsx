@@ -16,6 +16,7 @@ export const blogAsServiceProcess = [
       name: "Topic",
       description:
         "We pick the right topic together: from your roadmap, your brief, or our research into what developers are searching for.",
+      highlight: "the right topic",
       icon: IconSearch,
       details: [
         <p>Client-provided or Studio1-researched topics</p>,
@@ -28,6 +29,7 @@ export const blogAsServiceProcess = [
       name: "Outline",
       description:
         "We prepare an outline and overview first, so your team can review the angle, structure, and examples early.",
+      highlight: "an outline and overview first",
       icon: IconBulb,
       details: [
         <p>Article outline and technical flow</p>,
@@ -40,6 +42,7 @@ export const blogAsServiceProcess = [
       name: "Draft",
       description:
         "Studio1 writes the technical draft, reviews it internally, and sends it to your team for product and engineering feedback.",
+      highlight: "the technical draft",
       icon: IconRocket,
       details: [
         <p>Code-rich technical writing</p>,
@@ -52,6 +55,7 @@ export const blogAsServiceProcess = [
       name: "Publish",
       description:
         "We help publish on your company channels, Studio1/team profiles, or approved developer platforms.",
+      highlight: "company channels, Studio1/team profiles, or approved developer platforms",
       icon: IconChartBar,
       details: [
         <p>Company blog or external profile publishing</p>,
@@ -92,6 +96,7 @@ export const devRelAsServiceProcess = [
       name: "Discovery",
       description:
         "We assess your product, developer audience, communities, open-source surface, and existing DevRel touchpoints.",
+      highlight: "developer audience, communities, open-source surface",
       icon: IconSearch,
       details: [
         <p>Audit existing developer programs</p>,
@@ -104,6 +109,7 @@ export const devRelAsServiceProcess = [
       name: "Strategy",
       description:
         "We build a DevRel and growth roadmap across content, community, partnerships, integrations, launches, and events.",
+      highlight: "a DevRel and growth roadmap",
       icon: IconBulb,
       details: [
         <p>Custom DevRel roadmap</p>,
@@ -117,6 +123,7 @@ export const devRelAsServiceProcess = [
       name: "Creation",
       description:
         "Our writers, engineers, and DevRel operators execute the work: docs, blogs, demos, repos, social posts, and community programs.",
+      highlight: "docs, blogs, demos, repos, social posts, and community programs",
       icon: IconRocket,
       details: [
         <p>Technical content and repo-led demos</p>,
@@ -130,6 +137,7 @@ export const devRelAsServiceProcess = [
       name: "Amplification",
       description:
         "We distribute through developer communities, creators, events, partner channels, and social platforms, then iterate based on signals.",
+      highlight: "developer communities, creators, events, partner channels, and social platforms",
       icon: IconChartBar,
       details: [
         <p>Creator and influencer management</p>,
@@ -181,6 +189,7 @@ export const docsAsServiceProcess = [
       name: "Audit",
       description:
         "We review your existing docs, API and SDK references, onboarding path, dashboard flows, and developer-facing product surfaces.",
+      highlight: "API and SDK references, onboarding path",
       icon: IconSearch,
       details: [
         <p>Existing docs assessment</p>,
@@ -193,6 +202,7 @@ export const docsAsServiceProcess = [
       name: "Analysis",
       description:
         "We map what is missing, outdated, confusing, or blocking developers from first success.",
+      highlight: "blocking developers from first success",
       icon: IconChartBar,
       details: [
         <p>Developer journey mapping</p>,
@@ -205,6 +215,7 @@ export const docsAsServiceProcess = [
       name: "Roadmap",
       description:
         "You get a findings report and prioritized plan for edits, new docs, IA fixes, examples, and onboarding improvements.",
+      highlight: "a findings report and prioritized plan",
       icon: IconBulb,
       details: [
         <p>Findings report</p>,
@@ -217,6 +228,7 @@ export const docsAsServiceProcess = [
       name: "Implementation",
       description:
         "We can edit existing docs, write missing docs from scratch, update examples, and support follow-up reviews.",
+      highlight: "write missing docs from scratch",
       icon: IconRocket,
       details: [
         <p>Existing-doc edits</p>,

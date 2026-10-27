@@ -1,38 +1,34 @@
 "use client";
 
-import { Container, Rise } from "@/components/home/ui";
+import { Container } from "@/components/home/ui";
+import { BlurRise, HoverWash } from "@/components/pages/shared/blur-rise";
 import { CELL, MUTED, PaperSection } from "@/components/paper/paper-sections";
 import {
   PaperChip,
   ServiceHead,
 } from "@/components/pages/shared/paper-service-kit";
-import { PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 
 const formats = [
   {
-    number: "01",
     meta: "Tutorials",
     title: "Long-form tutorials",
     detail:
       "Step-by-step videos that walk developers through a real workflow in your product.",
   },
   {
-    number: "02",
     meta: "Demos",
     title: "Product deep dives",
     detail:
       "Feature demos and architecture explainers for people deciding whether to adopt you.",
   },
   {
-    number: "03",
     meta: "Shorts",
     title: "Shorts and cutdowns",
     detail:
       "Short clips from the long videos, made to get new viewers into the full watch.",
   },
   {
-    number: "04",
     meta: "Series",
     title: "Channel series",
     detail:
@@ -58,17 +54,15 @@ export default function Formats({ index = 5 }: { index?: number }) {
         >
           {formats.map((format, position) => (
             <li key={format.title} className="min-w-0">
-              <Rise delay={position * 0.06} className="h-full">
+              <BlurRise delay={position * 0.06} className="h-full">
                 <div
-                  className={cn("flex h-full min-h-[260px] flex-col p-6", CELL)}
+                  className={cn(
+                    "group relative isolate flex h-full min-h-[260px] flex-col overflow-hidden p-6",
+                    CELL,
+                  )}
                 >
-                  <div className="flex items-center justify-between gap-3">
-                    <span
-                      className="text-[40px] font-medium leading-none tabular-nums tracking-[-0.05em]"
-                      style={{ color: PRINT }}
-                    >
-                      {format.number}
-                    </span>
+                  <HoverWash />
+                  <div>
                     <PaperChip>{format.meta}</PaperChip>
                   </div>
                   <h3 className="mt-auto pt-10 text-[20px] font-medium tracking-[-0.03em] md:text-[22px]">
@@ -78,7 +72,7 @@ export default function Formats({ index = 5 }: { index?: number }) {
                     {format.detail}
                   </p>
                 </div>
-              </Rise>
+              </BlurRise>
             </li>
           ))}
         </ul>

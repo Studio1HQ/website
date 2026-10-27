@@ -1,9 +1,9 @@
 "use client";
 
-import { Container, Rise } from "@/components/home/ui";
+import { Container } from "@/components/home/ui";
+import { BlurRise, HoverWash } from "@/components/pages/shared/blur-rise";
 import { CELL, MUTED, PaperSection } from "@/components/paper/paper-sections";
 import { ServiceHead } from "@/components/pages/shared/paper-service-kit";
-import { INK, PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 import {
   IconCalendarEvent,
@@ -44,37 +44,29 @@ export default function Cadence({ index = 6 }: { index?: number }) {
         <ol className="mt-10 grid gap-2 md:grid-cols-3">
           {loop.map((step, position) => (
             <li key={step.title} className="relative">
-              <Rise delay={position * 0.08} className="h-full">
+              <BlurRise delay={position * 0.08} className="h-full">
                 <div
                   className={cn(
-                    "flex h-full flex-col items-start p-6 md:p-7",
+                    "group relative isolate flex h-full flex-col items-start overflow-hidden p-6 md:p-7",
                     CELL,
                   )}
                 >
-                  <span
-                    className="flex size-12 items-center justify-center text-[#f4efe7]"
-                    style={{ background: position === 0 ? PRINT : INK }}
-                  >
+                  <HoverWash />
+                  <span className="flex size-12 items-center justify-center rounded-[6px] bg-[#f8f6f2] text-[#141414] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10),inset_0_-1px_0_#fff,0_1px_0_#fff] transition-colors duration-500 group-hover:text-[#ea580c]">
                     <step.icon
                       className="size-6"
                       stroke={1.6}
                       aria-hidden="true"
                     />
                   </span>
-                  <p
-                    className="mt-6 text-[13px] font-medium"
-                    style={{ color: PRINT }}
-                  >
-                    Step {position + 1}
-                  </p>
-                  <h3 className="mt-1.5 text-[22px] font-medium tracking-[-0.035em]">
+                  <h3 className="mt-6 text-[22px] font-medium tracking-[-0.035em]">
                     {step.title}
                   </h3>
                   <p className={cn("mt-3 text-[15px] leading-[1.6]", MUTED)}>
                     {step.body}
                   </p>
                 </div>
-              </Rise>
+              </BlurRise>
             </li>
           ))}
         </ol>

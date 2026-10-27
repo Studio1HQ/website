@@ -1,10 +1,18 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { motion, useReducedMotion } from "motion/react";
+import {
+  motion,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+  useTransform,
+  type MotionValue,
+} from "motion/react";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -35,6 +43,7 @@ import {
 import { Container, EASE } from "@/components/home/ui";
 import {
   CELL,
+  CountUp,
   IndexBar,
   InkLogo,
   SectionHead,
@@ -58,6 +67,21 @@ const pad2 = (value: number) => String(value).padStart(2, "0");
 /** Brand gradient for the accent words in headlines. */
 const GRADIENT_TEXT =
   "bg-[linear-gradient(100deg,#fe3c34_0%,#f97316_45%,#fb8a1e_100%)] bg-clip-text text-transparent";
+
+/**
+ * Card reveal: each card rises out of a soft blur as it enters the screen,
+ * staggered across a row, and plays again whenever it comes back into view.
+ */
+function cardReveal(reduceMotion: boolean | null, column: number) {
+  return {
+    initial: reduceMotion
+      ? false
+      : { opacity: 0, y: 48, scale: 0.97, filter: "blur(12px)" },
+    whileInView: { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" },
+    viewport: { once: false, margin: "0px 0px -12% 0px" },
+    transition: { duration: 0.9, ease: EASE, delay: column * 0.08 },
+  } as const;
+}
 
 type Indexed = { index?: number; name?: string };
 
@@ -89,12 +113,10 @@ function Band({
       />
       {/* One reveal per section, the same as the landing's PaperSection */}
       <motion.div
-        initial={
-          reduceMotion ? false : { opacity: 0, y: 24, filter: "blur(10px)" }
-        }
-        whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-        viewport={{ once: false, amount: 0.12 }}
-        transition={{ duration: 1, ease: EASE }}
+        initial={reduceMotion ? false : { opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: false, margin: "0px 0px -10% 0px" }}
+        transition={{ duration: 0.6, ease: EASE }}
       >
         {index && name ? (
           <Container>
@@ -239,6 +261,7 @@ export function StoryHero({
 
   return (
     <PaperPageHeader className="pb-6 pt-[88px] md:pb-8 md:pt-[96px]">
+      <ScrollEdgeBlur />
       <Container>
         {/* One engraved panel holds the headline and the photo arch */}
         <div className="relative isolate flex min-h-[600px] flex-col px-4 pt-10 md:pt-12">
@@ -378,7 +401,20 @@ export function StoryHero({
                   style={isPrint ? { background: PRINT } : undefined}
                 >
                   <dd className="whitespace-nowrap text-[36px] font-medium leading-[0.95] tabular-nums tracking-[-0.05em] md:text-[44px]">
-                    {plus ? stat.value.slice(0, -1) : stat.value}
+                    {/* Numbers count up as they come into view */}
+                    {/^\d+$/.test(
+                      plus ? stat.value.slice(0, -1) : stat.value,
+                    ) ? (
+                      <CountUp
+                        value={Number(
+                          plus ? stat.value.slice(0, -1) : stat.value,
+                        )}
+                      />
+                    ) : plus ? (
+                      stat.value.slice(0, -1)
+                    ) : (
+                      stat.value
+                    )}
                     {plus ? (
                       <span className={isPrint ? undefined : "text-[#f97316]"}>
                         +
@@ -426,6 +462,9 @@ export function StoryLogos() {
   return (
     <Band className="py-6">
       <Container>
+        <p className="mb-6 text-center text-[13px] font-medium text-[#141414]/45">
+          Trusted by developer-first teams we have worked with
+        </p>
         <ul className="flex flex-wrap items-center justify-center gap-x-12 gap-y-6 opacity-70">
           {logos.map((item) => (
             <li key={item.name}>
@@ -466,6 +505,7 @@ export function StoryRows({
   offers: StoryOffer[];
   id?: string;
 }) {
+  const reduceMotion = useReducedMotion();
   return (
     <Band id={id} index={index} name={name} className="py-12 md:py-16">
       <Container>
@@ -477,9 +517,10 @@ export function StoryRows({
             {offers.map((offer, position) => {
               const OfferIcon = offer.icon;
               return (
-                <li
+                <motion.li
                   key={offer.accent + position}
                   id={offer.id}
+                  {...cardReveal(reduceMotion, position)}
                   className={cn(
                     "group relative isolate flex scroll-mt-28 flex-col overflow-hidden rounded-[6px] p-7 transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 motion-reduce:transform-none md:p-8",
                     position === 0
@@ -608,7 +649,7 @@ export function StoryRows({
                       </li>
                     ))}
                   </ul>
-                </li>
+                </motion.li>
               );
             })}
           </ol>
@@ -664,6 +705,205 @@ export type StoryStep = {
   points?: string[];
 };
 
+/* Real Studio1 event photos used in the step carousel. */
+const CAROUSEL_PHOTOS = [
+  "/case-studies/openlore/openlore-hackspire-talk.webp",
+  "/case-studies/jozu/kubecon-jozu-booth.webp",
+  "/case-studies/jozu/devfest-pune-2025.webp",
+  "/case-studies/jozu/kubecon-jozu-team.webp",
+  "/case-studies/jozu/devfest-jozu-booth.webp",
+  "/case-studies/jozu/kubecon-india-2025.webp",
+];
+
+/* Card colours, cycled: print orange, white, warm sand. */
+const CAROUSEL_TONES = [
+  {
+    card: "linear-gradient(160deg, #fe3c34 0%, #f97316 50%, #fb8a1e 100%)",
+    ink: "#ffffff",
+    soft: "rgba(255,255,255,0.82)",
+    dot: "#ffffff",
+  },
+  {
+    card: "#ffffff",
+    ink: "#141414",
+    soft: "rgba(20,20,20,0.62)",
+    dot: "#f97316",
+  },
+  {
+    card: "#efe6d8",
+    ink: "#141414",
+    soft: "rgba(20,20,20,0.62)",
+    dot: "#f97316",
+  },
+];
+
+/**
+ * Desktop step carousel: the row of cards is pinned while you scroll and
+ * slides across. The card in the middle sits flat and full size; the ones
+ * either side tilt away, shrink a little and peek in from the edges.
+ */
+function StepCarousel({ steps }: { steps: StoryStep[] }) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: trackRef,
+    offset: ["start start", "end end"],
+  });
+  // Hold the first card a moment, move through the rest, then rest on the
+  // last card before the next section scrolls in.
+  const travel = useTransform(scrollYProgress, [0.08, 0.86], [0, 1], {
+    clamp: true,
+  });
+  const progress = useSpring(travel, {
+    stiffness: 55,
+    damping: 20,
+    mass: 0.8,
+    restDelta: 0.0002,
+  });
+  // As the section leaves, the whole stage eases back and fades out.
+  const { scrollYProgress: leave } = useScroll({
+    target: trackRef,
+    offset: ["end end", "end start"],
+  });
+  const stageScale = useTransform(leave, [0, 0.6], [1, 0.9]);
+  const stageOpacity = useTransform(leave, [0, 0.55], [1, 0]);
+  const stageY = useTransform(leave, [0, 0.6], ["0vh", "-6vh"]);
+  const last = Math.max(1, steps.length - 1);
+
+  return (
+    <div
+      ref={trackRef}
+      className="relative mt-10 hidden lg:block"
+      style={{ height: `${steps.length * 95 + 60}vh` }}
+    >
+      <div className="sticky top-0 flex h-[100svh] items-center overflow-hidden">
+        <motion.ol
+          className="relative h-full w-full will-change-transform"
+          style={
+            reduceMotion
+              ? undefined
+              : { scale: stageScale, opacity: stageOpacity, y: stageY }
+          }
+        >
+          {steps.map((step, position) => (
+            <CarouselCard
+              key={step.title}
+              step={step}
+              position={position}
+              last={last}
+              count={steps.length}
+              progress={progress}
+            />
+          ))}
+        </motion.ol>
+      </div>
+    </div>
+  );
+}
+
+function CarouselCard({
+  step,
+  position,
+  last,
+  count,
+  progress,
+}: {
+  step: StoryStep;
+  position: number;
+  last: number;
+  count: number;
+  progress: MotionValue<number>;
+}) {
+  // How far this card is from the centre, in cards (0 = centred).
+  const offset = useTransform(progress, (value) => position - value * last);
+  // Next cards wait at the bottom-left, passed ones lift away to the top-right.
+  const x = useTransform(offset, (value) => `${-value * 64}vw`);
+  const y = useTransform(offset, (value) => `${value * 16}vh`);
+  // The card nearest the centre always sits on top.
+  const zIndex = useTransform(offset, (value) =>
+    Math.round(100 - Math.abs(value) * 10),
+  );
+  const rotate = useTransform(offset, [-1, 0, 1], [6, 0, -6]);
+  const scale = useTransform(offset, [-1, 0, 1], [0.86, 1, 0.86]);
+  const opacity = useTransform(
+    offset,
+    [-1.6, -1, 0, 1, 1.6],
+    [0, 0.55, 1, 0.55, 0],
+  );
+  // Side cards out of focus. Stepped, so the blur only redraws a few times.
+  const blur = useTransform(offset, (value) => {
+    const level = Math.min(3, Math.round(Math.abs(value) * 3));
+    return level ? `blur(${level * 1.5}px)` : "none";
+  });
+  const tone = CAROUSEL_TONES[position % CAROUSEL_TONES.length];
+
+  return (
+    <motion.li
+      className="absolute inset-y-0 left-[19vw] my-auto h-fit w-[62vw] max-w-[1080px] rounded-[28px] p-4 will-change-transform [backface-visibility:hidden]"
+      style={{
+        rotate,
+        scale,
+        x,
+        y,
+        opacity,
+        zIndex,
+        filter: blur,
+        background: tone.card,
+        boxShadow: "0 50px 90px -60px rgba(60,20,0,0.55)",
+      }}
+    >
+      <div className="grid min-h-[min(520px,62svh)] grid-cols-[minmax(0,0.92fr)_minmax(0,1fr)] gap-10">
+        <div className="relative overflow-hidden rounded-[20px]">
+          <Image
+            src={CAROUSEL_PHOTOS[position % CAROUSEL_PHOTOS.length]}
+            alt=""
+            fill
+            sizes="34vw"
+            className="object-cover"
+          />
+          <span className="absolute left-4 top-4 flex size-12 items-center justify-center rounded-full bg-white/90 text-[#141414] shadow-[0_8px_20px_-10px_rgba(0,0,0,0.5)] backdrop-blur">
+            <StepGlyph title={step.title} className="size-6" />
+          </span>
+        </div>
+        <div className="flex flex-col py-8 pr-8" style={{ color: tone.ink }}>
+          <p
+            className="text-[14px] font-medium tabular-nums"
+            style={{ color: tone.soft }}
+          >
+            {pad2(position + 1)} / {pad2(count)}
+          </p>
+          <h3 className="mt-5 text-[clamp(28px,2.6vw,40px)] font-medium leading-[1.08] tracking-[-0.045em]">
+            {step.title}
+          </h3>
+          <p
+            className="mt-5 text-[clamp(15px,1.15vw,17px)] leading-[1.6]"
+            style={{ color: tone.soft }}
+          >
+            {step.description}
+          </p>
+          {step.points?.length ? (
+            <ul className="mt-auto flex flex-col gap-2.5 pt-8">
+              {step.points.map((point) => (
+                <li
+                  key={point}
+                  className="flex items-start gap-2.5 text-[14.5px] leading-snug"
+                >
+                  <span
+                    aria-hidden
+                    className="mt-[7px] size-1.5 shrink-0 rounded-full"
+                    style={{ background: tone.dot }}
+                  />
+                  {point}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+      </div>
+    </motion.li>
+  );
+}
+
 export function StoryCards({
   index,
   name = "How it works",
@@ -677,16 +917,22 @@ export function StoryCards({
   steps: StoryStep[];
   id?: string;
 }) {
+  const reduceMotion = useReducedMotion();
   return (
     <Band id={id} index={index} name={name} className="py-12 md:py-16">
       <Container>
         <SectionHead title={title} description={description} />
+      </Container>
 
-        {/* Rows of three, as on the live site; a short last row widens to fill */}
-        <ol className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+      <StepCarousel steps={steps} />
+
+      <Container>
+        {/* Phones and tablets: rows of cards */}
+        <ol className="mt-10 grid gap-3 sm:grid-cols-2 lg:hidden">
           {steps.map((step, position) => (
-            <li
+            <motion.li
               key={step.title}
+              {...cardReveal(reduceMotion, position % 3)}
               className={cn(
                 "lg:col-span-2",
                 steps.length % 3 === 2 &&
@@ -737,11 +983,98 @@ export function StoryCards({
                   ) : null}
                 </div>
               </div>
-            </li>
+            </motion.li>
           ))}
         </ol>
       </Container>
     </Band>
+  );
+}
+
+/**
+ * Fills the empty half of a proof row: a link to every case study, with a
+ * case-study screenshot tilted and half cropped off the card's corner.
+ */
+function MoreProofCard() {
+  return (
+    <Link
+      href="/case-studies"
+      className="group relative isolate flex min-h-[300px] flex-col overflow-hidden rounded-[6px] bg-[#efe8dd] p-7 shadow-[inset_0_3px_10px_rgba(20,20,20,0.08),inset_0_-1px_0_#fff] ring-1 ring-inset ring-[#141414]/[0.06] sm:p-8"
+    >
+      <p className="text-[13px] font-medium text-[#141414]/50">More proof</p>
+      <p className="mt-3 max-w-[260px] text-[26px] font-medium leading-[1.15] tracking-[-0.04em]">
+        Developer adoption, <span className={GRADIENT_TEXT}>case by case</span>
+      </p>
+      <span className="mt-auto inline-flex items-center gap-2 pt-8 text-[14px] font-medium text-[#141414]">
+        View all case studies
+        <ArrowRight
+          weight="bold"
+          className="size-4 text-[#f97316] transition-transform duration-500 group-hover:translate-x-1"
+        />
+      </span>
+      {/* Half-cropped screenshot sliding out of the corner */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -bottom-10 -right-12 w-[58%] rotate-[-6deg] overflow-hidden rounded-[6px] bg-white p-1.5 shadow-[0_30px_60px_-30px_rgba(20,20,20,0.5)] ring-1 ring-[#141414]/[0.06] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-x-2 group-hover:-translate-y-2 group-hover:rotate-[-3deg]"
+      >
+        <Image
+          src="/case-studies/nebius/workshop-dublin-poster.webp"
+          alt=""
+          width={640}
+          height={420}
+          className="aspect-[4/3] w-full rounded-[4px] object-cover object-top"
+        />
+      </span>
+    </Link>
+  );
+}
+
+/**
+ * Soft blur along the bottom of the screen: content coming up from below
+ * sharpens as it scrolls into view. Stacked layers make the blur ramp up
+ * smoothly toward the edge.
+ */
+export function ScrollEdgeBlur() {
+  // Hidden over the hero; fades in once the page has scrolled past it.
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    const update = () => setShown(window.scrollY > window.innerHeight * 0.7);
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, []);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const layers = [
+    { blur: 1, from: 0, to: 30 },
+    { blur: 3, from: 15, to: 50 },
+    { blur: 6, from: 35, to: 75 },
+    { blur: 12, from: 55, to: 100 },
+  ];
+  if (!mounted) return null;
+  return createPortal(
+    <div
+      aria-hidden
+      className={cn(
+        "pointer-events-none fixed inset-x-0 bottom-0 z-40 h-28 transition-opacity duration-700 md:h-36",
+        shown ? "opacity-100" : "opacity-0",
+      )}
+    >
+      {layers.map((layer) => (
+        <div
+          key={layer.blur}
+          className="absolute inset-0"
+          style={{
+            backdropFilter: `blur(${layer.blur}px)`,
+            WebkitBackdropFilter: `blur(${layer.blur}px)`,
+            maskImage: `linear-gradient(to bottom, transparent ${layer.from}%, #000 ${layer.to}%)`,
+            WebkitMaskImage: `linear-gradient(to bottom, transparent ${layer.from}%, #000 ${layer.to}%)`,
+          }}
+        />
+      ))}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#f4efe7]/20 to-[#f4efe7]/70" />
+    </div>,
+    document.body,
   );
 }
 
@@ -764,6 +1097,7 @@ export function StoryProof({
   studies: CaseStudyResultData[];
   id?: string;
 }) {
+  const reduceMotion = useReducedMotion();
   const [featured, ...rest] = studies;
   return (
     <Band id={id} index={index} name={name} className="py-12 md:py-16">
@@ -787,17 +1121,29 @@ export function StoryProof({
         />
         <div className="mt-10 grid gap-2">
           {featured ? (
-            <PaperCaseStudyCard
-              study={featured}
-              variant="featured"
-              density="dense"
-            />
+            <motion.div {...cardReveal(reduceMotion, 0)}>
+              <PaperCaseStudyCard
+                study={featured}
+                variant="featured"
+                density="dense"
+              />
+            </motion.div>
           ) : null}
           {rest.length ? (
             <div className="grid gap-2 md:grid-cols-2">
-              {rest.map((study) => (
-                <PaperCaseStudyCard key={study.href} study={study} />
+              {rest.map((study, position) => (
+                <motion.div
+                  key={study.href}
+                  {...cardReveal(reduceMotion, position % 2)}
+                >
+                  <PaperCaseStudyCard study={study} />
+                </motion.div>
               ))}
+              {rest.length % 2 === 1 ? (
+                <motion.div {...cardReveal(reduceMotion, 1)}>
+                  <MoreProofCard />
+                </motion.div>
+              ) : null}
             </div>
           ) : null}
         </div>
