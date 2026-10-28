@@ -69,9 +69,14 @@ function LeaderCard({ member }: { member: Member }) {
         className="relative aspect-[4/4.4] overflow-hidden rounded-[28px] border-[3px] border-[#141414] shadow-[0_24px_44px_-28px_rgba(20,20,20,0.55)] md:rounded-[36px]"
         style={{
           background:
-            "radial-gradient(90% 70% at 50% 15%, #fbc58c 0%, #f9a259 45%, #f37a1f 100%)",
+            "radial-gradient(90% 75% at 50% 18%, #f1eee9 0%, #dcd7cf 55%, #c7c1b8 100%)",
         }}
       >
+        {/* Dot grid on the backdrop, behind the portrait */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 [background-image:radial-gradient(rgba(20,20,20,0.18)_1px,transparent_1.2px)] [background-size:12px_12px]"
+        />
         <motion.div
           className="absolute inset-0"
           style={reduceMotion ? undefined : { scale, y }}
@@ -81,14 +86,9 @@ function LeaderCard({ member }: { member: Member }) {
             alt={member.name}
             fill
             sizes="(max-width: 768px) 50vw, 300px"
-            className="object-cover object-top grayscale contrast-[1.08]"
+            className="object-cover object-top grayscale contrast-[1.05] mix-blend-multiply"
           />
         </motion.div>
-        {/* Fine, even halftone over the whole print */}
-        <span
-          aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-45 mix-blend-multiply [background-image:radial-gradient(circle,rgba(20,20,20,0.85)_0.7px,transparent_1px)] [background-size:4px_4px]"
-        />
       </div>
 
       {/* Role, name and links */}
