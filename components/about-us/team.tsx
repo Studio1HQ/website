@@ -66,7 +66,11 @@ function LeaderCard({ member }: { member: Member }) {
     <>
       <div
         ref={ref}
-        className="relative aspect-[4/5.4] overflow-hidden rounded-[28px] border-[3px] border-[#141414] bg-[#f97316] shadow-[0_24px_44px_-28px_rgba(20,20,20,0.55)] md:rounded-[36px]"
+        className="relative aspect-[4/4.4] overflow-hidden rounded-[28px] border-[3px] border-[#141414] shadow-[0_24px_44px_-28px_rgba(20,20,20,0.55)] md:rounded-[36px]"
+        style={{
+          background:
+            "radial-gradient(90% 70% at 50% 15%, #fbc58c 0%, #f9a259 45%, #f37a1f 100%)",
+        }}
       >
         <motion.div
           className="absolute inset-0"
@@ -133,7 +137,7 @@ function TeamPanel() {
         aria-hidden
         className="pointer-events-none absolute -inset-x-6 -inset-y-8 -z-10 opacity-60 [background-image:radial-gradient(rgba(20,20,20,0.12)_1px,transparent_1px)] [background-size:12px_12px] [mask-image:radial-gradient(70%_80%_at_50%_50%,black,transparent)]"
       />
-      <ul className="mx-auto grid max-w-[960px] grid-cols-2 gap-4 md:grid-cols-3 md:gap-5">
+      <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 md:gap-5">
         {teamMembers.map((member, index) => (
           <motion.li key={member.name} {...enter(index * 0.1)}>
             <LeaderCard member={member} />

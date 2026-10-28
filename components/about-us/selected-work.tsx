@@ -5,7 +5,13 @@ import Link from "next/link";
 import { useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, ArrowUpRight } from "@phosphor-icons/react";
 import { getClientLogo } from "@/components/case-studies/client-logos";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+} from "motion/react";
 import { Container, EASE } from "@/components/home/ui";
 import { IndexBar, PaperSection } from "@/components/paper/paper-sections";
 import { cn } from "@/lib/utils";
@@ -134,6 +140,8 @@ export function SelectedWork({ index = 3 }: { index?: number }) {
   const [tab, setTab] = useState<Tab | "all">("all");
   // Up to four per view, one row, like a studio's selected projects.
   const rowRef = useRef<HTMLDivElement>(null);
+  const { scrollXProgress } = useScroll({ container: rowRef });
+  const trackLeft = useTransform(scrollXProgress, (v) => `${v * 100}%`);
   const shown = PROJECTS.filter((p) => tab === "all" || p.tab === tab);
   const scrollRow = (direction: 1 | -1) =>
     rowRef.current?.scrollBy({
@@ -346,6 +354,33 @@ export function SelectedWork({ index = 3 }: { index?: number }) {
                 })}
               </AnimatePresence>
             </div>
+          </div>
+
+          {/* Dotted scale tracking how far the gallery has scrolled */}
+          <div className="relative mx-auto mt-6 max-w-[520px]">
+            <div
+              aria-hidden
+              className="h-[2px] w-full [background-image:radial-gradient(circle,rgba(20,20,20,0.35)_1px,transparent_1.4px)] [background-size:8px_2px]"
+            />
+            <div
+              aria-hidden
+              className="absolute inset-x-0 -top-1 flex justify-between"
+            >
+              {Array.from({ length: 11 }, (_, i) => (
+                <span
+                  key={i}
+                  className={cn(
+                    "w-px bg-[#141414]/30",
+                    i % 5 === 0 ? "h-3" : "h-2",
+                  )}
+                />
+              ))}
+            </div>
+            <motion.span
+              aria-hidden
+              className="absolute -top-[5px] size-3 -translate-x-1/2 rounded-full bg-[#f97316] shadow-[0_0_0_4px_rgba(249,115,22,0.18)]"
+              style={{ left: trackLeft }}
+            />
           </div>
         </div>
       </Container>
