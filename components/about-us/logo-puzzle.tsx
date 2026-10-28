@@ -124,7 +124,6 @@ function Piece({
   href,
   label,
   external = true,
-  tag,
 }: {
   r: number;
   c: number;
@@ -134,7 +133,6 @@ function Piece({
   href: string;
   label: string;
   external?: boolean;
-  tag?: string;
 }) {
   return (
     <div
@@ -167,11 +165,6 @@ function Piece({
         <span className="absolute inset-[18%] flex flex-col items-center justify-center gap-1.5">
           {children}
         </span>
-        {tag ? (
-          <span className="absolute left-1/2 top-[9%] -translate-x-1/2 whitespace-nowrap rounded-full bg-[#f97316]/10 px-2 py-[2px] text-[9.5px] font-semibold uppercase tracking-[0.08em] text-[#c2410c]">
-            {tag}
-          </span>
-        ) : null}
       </Link>
     </div>
   );
@@ -266,7 +259,6 @@ export function LogoPuzzle({ className }: { className?: string }) {
             total={total}
             href={study ? `/case-studies/${study}` : item.href}
             external={!study}
-            tag={study ? "Case study" : undefined}
             label={study ? `${item.name} case study` : item.name}
           >
             <CompanyMark item={item} />
