@@ -9,6 +9,7 @@ import {
   AnimatePresence,
   motion,
   useReducedMotion,
+  useMotionValueEvent,
   useScroll,
   useTransform,
 } from "motion/react";
@@ -140,9 +141,17 @@ export function SelectedWork({ index = 3 }: { index?: number }) {
   const [tab, setTab] = useState<Tab | "all">("all");
   // Up to four per view, one row, like a studio's selected projects.
   const rowRef = useRef<HTMLDivElement>(null);
-  const { scrollXProgress } = useScroll({ container: rowRef });
-  const trackLeft = useTransform(scrollXProgress, (v) => `${v * 100}%`);
   const shown = PROJECTS.filter((p) => tab === "all" || p.tab === tab);
+  const { scrollXProgress } = useScroll({ container: rowRef });
+  // At least one card's worth shows, so the bar never looks empty.
+  const trackWidth = useTransform(
+    scrollXProgress,
+    (v) => `${Math.max(1 / Math.max(shown.length, 1), v) * 100}%`,
+  );
+  const [current, setCurrent] = useState(1);
+  useMotionValueEvent(scrollXProgress, "change", (v) =>
+    setCurrent(Math.max(1, Math.round(v * (shown.length - 1)) + 1)),
+  );
   const scrollRow = (direction: 1 | -1) =>
     rowRef.current?.scrollBy({
       left: direction * 380,
@@ -356,31 +365,20 @@ export function SelectedWork({ index = 3 }: { index?: number }) {
             </div>
           </div>
 
-          {/* Dotted scale tracking how far the gallery has scrolled */}
-          <div className="relative mx-auto mt-6 max-w-[520px]">
-            <div
-              aria-hidden
-              className="h-[2px] w-full [background-image:radial-gradient(circle,rgba(20,20,20,0.35)_1px,transparent_1.4px)] [background-size:8px_2px]"
-            />
-            <div
-              aria-hidden
-              className="absolute inset-x-0 -top-1 flex justify-between"
-            >
-              {Array.from({ length: 11 }, (_, i) => (
-                <span
-                  key={i}
-                  className={cn(
-                    "w-px bg-[#141414]/30",
-                    i % 5 === 0 ? "h-3" : "h-2",
-                  )}
-                />
-              ))}
+          {/* Progress track: fills as the gallery scrolls */}
+          <div className="mx-auto mt-6 flex max-w-[420px] items-center gap-4">
+            <span className="text-[12px] font-medium tabular-nums text-[#141414]">
+              {String(current).padStart(2, "0")}
+            </span>
+            <div className="relative h-[2px] flex-1 overflow-hidden rounded-full bg-[#141414]/20">
+              <motion.span
+                className="absolute inset-y-0 left-0 rounded-full bg-[#f97316]"
+                style={{ width: trackWidth }}
+              />
             </div>
-            <motion.span
-              aria-hidden
-              className="absolute -top-[5px] size-3 -translate-x-1/2 rounded-full bg-[#f97316] shadow-[0_0_0_4px_rgba(249,115,22,0.18)]"
-              style={{ left: trackLeft }}
-            />
+            <span className="text-[12px] font-medium tabular-nums text-[#141414]/40">
+              {String(shown.length).padStart(2, "0")}
+            </span>
           </div>
         </div>
       </Container>
