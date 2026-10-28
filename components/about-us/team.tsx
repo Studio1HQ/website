@@ -109,9 +109,9 @@ function LeaderCard({ member }: { member: Member }) {
               target="_blank"
               rel="noreferrer"
               aria-label={`${member.name} on ${label}`}
-              className="flex size-8 items-center justify-center rounded-full bg-white text-[#141414] shadow-[0_4px_10px_-6px_rgba(20,20,20,0.4)] ring-1 ring-inset ring-[#141414]/[0.08] transition-colors hover:bg-[#f97316] hover:text-white hover:ring-[#f97316]"
+              className="flex size-7 items-center justify-center text-[#141414]/70 transition-colors hover:text-[#f97316]"
             >
-              <Icon weight={weight} className="size-[14px]" />
+              <Icon weight={weight} className="size-[18px]" />
             </Link>
           ))}
         </div>
