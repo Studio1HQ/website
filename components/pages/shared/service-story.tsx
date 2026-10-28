@@ -465,7 +465,7 @@ export function StoryLogos() {
         <p className="mb-6 text-center text-[13px] font-medium text-[#141414]/45">
           Trusted by developer-first teams we have worked with
         </p>
-        <ul className="flex flex-wrap items-center justify-center gap-x-12 gap-y-6 opacity-70">
+        <ul className="flex flex-wrap items-center justify-center gap-x-12 gap-y-6">
           {logos.map((item) => (
             <li key={item.name}>
               <InkLogo item={item} />
@@ -567,8 +567,8 @@ export function StoryRows({
                       className={cn(
                         "flex size-14 items-center justify-center rounded-[6px]",
                         position === 0
-                          ? "bg-white/15 text-white shadow-[inset_0_3px_10px_rgba(120,30,0,0.35),inset_0_-1px_0_rgba(255,255,255,0.3)]"
-                          : "bg-[#f8f6f2] text-[#141414] shadow-[inset_0_5px_14px_rgba(20,20,20,0.13),inset_2px_0_8px_rgba(20,20,20,0.05),inset_0_1px_3px_rgba(20,20,20,0.12),inset_0_-2px_0_#fff,0_1px_0_#fff] transition-colors duration-500 group-hover:text-[#ea580c]",
+                          ? "bg-white/15 text-white shadow-[inset_0_3px_10px_rgba(120,30,0,0.35)]"
+                          : "bg-[#f8f6f2] text-[#141414] shadow-[inset_0_5px_14px_rgba(20,20,20,0.13),inset_2px_0_8px_rgba(20,20,20,0.05),inset_0_1px_3px_rgba(20,20,20,0.12)] transition-colors duration-500 group-hover:text-[#ea580c]",
                       )}
                     >
                       <OfferIcon weight="regular" className="size-7" />
@@ -999,7 +999,7 @@ function MoreProofCard() {
   return (
     <Link
       href="/case-studies"
-      className="group relative isolate flex min-h-[300px] flex-col overflow-hidden rounded-[6px] bg-[#efe8dd] p-7 shadow-[inset_0_3px_10px_rgba(20,20,20,0.08),inset_0_-1px_0_#fff] ring-1 ring-inset ring-[#141414]/[0.06] sm:p-8"
+      className="group relative isolate flex min-h-[300px] flex-col overflow-hidden rounded-[6px] bg-[#efe8dd] p-7 shadow-[inset_0_3px_10px_rgba(20,20,20,0.08)] ring-1 ring-inset ring-[#141414]/[0.06] sm:p-8"
     >
       <p className="text-[13px] font-medium text-[#141414]/50">More proof</p>
       <p className="mt-3 max-w-[260px] text-[26px] font-medium leading-[1.15] tracking-[-0.04em]">
@@ -1136,7 +1136,7 @@ export function StoryProof({
                   key={study.href}
                   {...cardReveal(reduceMotion, position % 2)}
                 >
-                  <PaperCaseStudyCard study={study} />
+                  <PaperCaseStudyCard study={study} position={position} />
                 </motion.div>
               ))}
               {rest.length % 2 === 1 ? (

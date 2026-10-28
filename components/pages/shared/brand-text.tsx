@@ -44,7 +44,14 @@ const BRANDS: { pattern: RegExp; icon: Icon; color: string }[] = [
 const SPLIT =
   /(\bGitHub\b|\b[Oo]pen[- ]source\b|\bLinkedIn\b|\bReddit\b|\bYouTube\b|(?<![\w.])X(?![\w.])|\bDev\.to\b|\bMedium\b|\bDiscord\b|\b[Ee]vents?\b|\b[Mm]eetups?\b|\b[Ww]orkshops?\b|\b[Hh]ackathons?\b|\b[Cc]onferences?\b)/;
 
-export function BrandText({ text }: { text: string }) {
+export function BrandText({
+  text,
+  color,
+}: {
+  text: string;
+  /** Draw every mark in this colour (e.g. white on an orange card). */
+  color?: string;
+}) {
   const parts = text.split(SPLIT);
   if (parts.length === 1) return <>{text}</>;
   // One span, so the parts stay a single line of text inside flex rows.
@@ -60,7 +67,7 @@ export function BrandText({ text }: { text: string }) {
               aria-hidden
               weight="fill"
               className="mr-[0.25em] inline-block size-[1.05em] -translate-y-[0.08em] align-middle"
-              style={{ color: brand.color }}
+              style={{ color: color ?? brand.color }}
             />
             {part}
           </span>
@@ -83,7 +90,7 @@ export function ClientMark({
   return (
     <span
       className={cn(
-        "flex shrink-0 items-center justify-center overflow-hidden rounded-[6px] bg-[#f8f6f2] p-1.5 shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10),inset_0_-1px_0_#fff,0_1px_0_#fff]",
+        "flex shrink-0 items-center justify-center overflow-hidden rounded-[6px] bg-[#f8f6f2] p-1.5 shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10)]",
         className,
       )}
     >

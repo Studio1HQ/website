@@ -300,7 +300,7 @@ const LOGO_HEIGHT: Record<string, number> = {
   "Novita AI": 22,
 };
 /** Logos drawn on a white square: multiplied onto the card instead of inked. */
-const ON_WHITE = new Set(["LiteLLM", "Jozu"]);
+const ON_WHITE = new Set(["LiteLLM"]);
 
 export function InkLogo({ item }: { item: (typeof trustedbyLogo)[number] }) {
   const beside = "showNameBeside" in item && item.showNameBeside;
@@ -312,14 +312,14 @@ export function InkLogo({ item }: { item: (typeof trustedbyLogo)[number] }) {
         alt={item.alt ?? item.name}
         style={{ height: `calc(${height}px * var(--logo-scale))` }}
         className={cn(
-          "w-auto max-w-full shrink-0 object-contain opacity-85",
+          "w-auto max-w-full shrink-0 object-contain",
           ON_WHITE.has(item.name)
-            ? "mix-blend-multiply [filter:grayscale(1)_contrast(1.4)]"
+            ? "[filter:grayscale(1)_contrast(1.5)_brightness(0.75)]"
             : "[filter:grayscale(1)_brightness(0)_invert(var(--p-invert,0))]",
         )}
       />
       {beside ? (
-        <span className="whitespace-nowrap text-[13px] font-medium opacity-85 sm:text-[16px]">
+        <span className="whitespace-nowrap text-[13px] font-medium sm:text-[16px]">
           {item.name}
         </span>
       ) : null}
@@ -364,7 +364,7 @@ export function PaperLogos() {
             return (
               <li
                 key={cell}
-                className="relative h-24 overflow-hidden rounded-[6px] bg-[#f8f6f2] shadow-[inset_0_5px_14px_rgba(20,20,20,0.13),inset_2px_0_8px_rgba(20,20,20,0.05),inset_0_1px_3px_rgba(20,20,20,0.12),inset_0_-2px_0_#fff,0_1px_0_#fff]"
+                className="relative h-24 overflow-hidden rounded-[6px] bg-white/80 ring-1 ring-inset ring-[#141414]/10"
               >
                 {cellLogos.map((item, index) => (
                   <span
@@ -1331,7 +1331,7 @@ function FeaturedCase({
 
       {/* 1. Client */}
       <div className="flex items-center gap-3">
-        <span className="relative size-10 shrink-0 overflow-hidden rounded-[6px] bg-[#f8f6f2] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10),inset_0_-1px_0_#fff,0_1px_0_#fff]">
+        <span className="relative size-10 shrink-0 overflow-hidden rounded-[6px] bg-[#f8f6f2] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10)]">
           <Image
             src={work.logo}
             alt=""
@@ -1426,7 +1426,7 @@ function FeaturedCase({
           ([MetricIcon, value, label], position) => (
             <div
               key={label}
-              className="relative isolate min-w-0 overflow-hidden rounded-[6px] bg-[#ece5da] p-3.5 shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10),inset_0_-1px_0_rgba(255,255,255,0.85),0_1px_0_rgba(255,255,255,0.95)] [&>*:not(canvas)]:relative"
+              className="relative isolate min-w-0 overflow-hidden rounded-[6px] bg-[#ece5da] p-3.5 shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10)] [&>*:not(canvas)]:relative"
             >
               <DitherField
                 cell={6}
@@ -1471,7 +1471,7 @@ function FeaturedCase({
       </dl>
 
       {/* 8. Client voice, or a verified result where no quote is published */}
-      <figure className="mt-5 flex flex-col rounded-[6px] bg-[#ece5da] p-5 shadow-[inset_0_3px_8px_rgba(20,20,20,0.10),inset_0_-1px_0_rgba(255,255,255,0.85),0_1px_0_rgba(255,255,255,0.95)] md:p-6">
+      <figure className="mt-5 flex flex-col rounded-[6px] bg-[#ece5da] p-5 shadow-[inset_0_3px_8px_rgba(20,20,20,0.10)] md:p-6">
         {quote ? (
           <svg
             aria-hidden
@@ -1988,7 +1988,7 @@ export function PaperTestimonials() {
                         "flex h-12 w-full items-center gap-3 rounded-[6px] px-3.5 text-left text-[15px] font-medium tracking-[-0.02em] transition-all duration-300",
                         isActive
                           ? "bg-white text-[#141414] shadow-[0_10px_24px_-16px_rgba(20,20,20,0.45)] ring-2 ring-inset ring-[#f97316]"
-                          : "bg-[#f5f1ea] text-[#141414]/65 shadow-[inset_0_2px_6px_rgba(20,20,20,0.07),inset_0_1px_2px_rgba(20,20,20,0.05),inset_0_-1px_0_rgba(255,255,255,0.85),0_1px_0_rgba(255,255,255,0.95)] hover:text-[#141414]",
+                          : "bg-[#f5f1ea] text-[#141414]/65 shadow-[inset_0_2px_6px_rgba(20,20,20,0.07),inset_0_1px_2px_rgba(20,20,20,0.05)] hover:text-[#141414]",
                       )}
                     >
                       {/* Logo lockup: mark + name; marks stay mono until selected */}

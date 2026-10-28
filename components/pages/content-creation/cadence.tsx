@@ -52,7 +52,7 @@ export default function Cadence({ index = 6 }: { index?: number }) {
                   )}
                 >
                   <HoverWash />
-                  <span className="flex size-12 items-center justify-center rounded-[6px] bg-[#f8f6f2] text-[#141414] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10),inset_0_-1px_0_#fff,0_1px_0_#fff] transition-colors duration-500 group-hover:text-[#ea580c]">
+                  <span className="flex size-12 items-center justify-center rounded-[6px] bg-[#f8f6f2] text-[#141414] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10)] transition-colors duration-500 group-hover:text-[#ea580c]">
                     <step.icon
                       className="size-6"
                       stroke={1.6}

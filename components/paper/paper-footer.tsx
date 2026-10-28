@@ -192,7 +192,7 @@ export default function PaperFooter() {
                     aria-label={label}
                     className="group inline-flex items-center gap-3 text-[15px] transition-colors duration-200 hover:text-[#f97316]"
                   >
-                    <span className="flex size-10 items-center justify-center rounded-[6px] bg-[#f6f3ee] text-[#141414]/75 shadow-[inset_0_2px_6px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08),inset_0_-1px_0_#fff,0_1px_0_rgba(255,255,255,0.95)] transition-colors group-hover:text-[#f97316]">
+                    <span className="flex size-10 items-center justify-center rounded-[6px] bg-[#f6f3ee] text-[#141414]/75 shadow-[inset_0_2px_6px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08)] transition-colors group-hover:text-[#f97316]">
                       <SocialIcon className="size-4" />
                     </span>
                     <span className="hidden xl:inline">{label}</span>

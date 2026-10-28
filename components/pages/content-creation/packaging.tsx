@@ -91,7 +91,7 @@ export default function Packaging({ index = 4 }: { index?: number }) {
                           "radial-gradient(120% 80% at 50% 120%, rgba(249,115,22,0.18), transparent 70%)",
                       }}
                     />
-                    <span className="flex size-12 items-center justify-center rounded-[6px] transition-colors duration-500 group-hover:text-[#ea580c] bg-[#f8f6f2] text-[#141414] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10),inset_0_-1px_0_#fff,0_1px_0_#fff]">
+                    <span className="flex size-12 items-center justify-center rounded-[6px] transition-colors duration-500 group-hover:text-[#ea580c] bg-[#f8f6f2] text-[#141414] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10)]">
                       <layer.icon
                         className="size-6"
                         stroke={1.6}

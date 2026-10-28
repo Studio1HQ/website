@@ -91,7 +91,7 @@ export function ClientMark({
       className={cn(
         tile,
         pad,
-        "flex shrink-0 items-center justify-center overflow-hidden rounded-[6px] bg-[#f8f6f2] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10),inset_0_-1px_0_#fff,0_1px_0_#fff] transition-shadow duration-500",
+        "flex shrink-0 items-center justify-center overflow-hidden rounded-[6px] bg-[#f8f6f2] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10)] transition-shadow duration-500",
         frosted && "shadow-[0_8px_20px_-12px_rgba(20,20,20,0.45)]",
       )}
     >
@@ -130,7 +130,7 @@ export function CardMedia({
   return (
     <div
       className={cn(
-        "relative w-full overflow-hidden rounded-[6px] bg-[#ece5da] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10),inset_0_-1px_0_rgba(255,255,255,0.85),0_1px_0_rgba(255,255,255,0.95)]",
+        "relative w-full overflow-hidden rounded-[6px] bg-[#ece5da] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10)]",
         containerClass,
       )}
     >

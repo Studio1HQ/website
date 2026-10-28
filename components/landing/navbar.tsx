@@ -246,7 +246,7 @@ export default function Navbar() {
                           )}
                         >
                           {isPaper ? (
-                            <span className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-[#f6f3ee] text-[#141414]/75 shadow-[inset_0_2px_6px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08),inset_0_-1px_0_#fff,0_1px_0_rgba(255,255,255,0.95)] transition-colors duration-200 group-hover/item:text-[#f97316]">
+                            <span className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-[#f6f3ee] text-[#141414]/75 shadow-[inset_0_2px_6px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08)] transition-colors duration-200 group-hover/item:text-[#f97316]">
                               <child.icon
                                 weight="duotone"
                                 className="size-[18px]"

@@ -3,6 +3,7 @@
 import { useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import Logo from "@/components/ui/svgs/logo";
 import {
   AnimatePresence,
   motion,
@@ -13,7 +14,13 @@ import {
   useTransform,
   type MotionValue,
 } from "motion/react";
-import { ArrowRight, ArrowUpRight, Check, Plus } from "@phosphor-icons/react";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Check,
+  Plus,
+  RedditLogo,
+} from "@phosphor-icons/react";
 import {
   Accordion,
   AccordionContent,
@@ -116,33 +123,187 @@ export function PaperPoints({
 
 /** Inset "engraved" tile used for result numbers, as on the home page. */
 const ENGRAVED =
-  "rounded-[6px] bg-[#ece5da] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10),inset_0_-1px_0_rgba(255,255,255,0.85),0_1px_0_rgba(255,255,255,0.95)]";
+  "rounded-[6px] bg-[#ece5da] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10)]";
 
 const CARD =
   "group relative isolate overflow-hidden rounded-[6px] bg-white/80 ring-1 ring-inset ring-[#141414]/[0.08] shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)] transition-[transform,box-shadow,background-color] duration-500 ease-out hover:-translate-y-1 hover:bg-white hover:shadow-[inset_0_1px_0_#fff,0_30px_60px_-34px_rgba(249,115,22,0.45)] motion-reduce:transform-none after:pointer-events-none after:absolute after:inset-0 after:-z-10 after:bg-[radial-gradient(120%_70%_at_50%_110%,rgba(249,115,22,0.20),transparent_70%)] after:opacity-0 after:transition-opacity after:duration-500 hover:after:opacity-100";
 
-function TopHairline() {
+/** A real image from each client's case study, for the featured banner. */
+const CASE_ART: Record<string, string> = {
+  "entelligence-ai":
+    "/case-studies/entelligence-ai/openclaw-technical-deep-dive.webp",
+  memori: "/case-studies/memori/memori-reddit-launch-stats.png",
+  nebius: "/case-studies/nebius/workshop-dublin-poster.webp",
+  litellm: "/case-studies/litellm/github-guides-activity.webp",
+  tensorlake: "/case-studies/tensorlake/tensorlake-home.webp",
+  jozu: "/case-studies/jozu/kubecon-jozu-booth.webp",
+  openlore: "/case-studies/openlore/openlore-hackspire-talk.webp",
+};
+
+/* Banner colours, cycled across the smaller cards. */
+const CASE_TONES = [
+  {
+    bg: "#141414",
+    ink: "#f4efe7",
+    soft: "rgba(244,239,231,0.7)",
+    pill: "#f4efe7",
+    pillInk: "#141414",
+  },
+  {
+    bg: "#ece2d3",
+    ink: "#141414",
+    soft: "rgba(20,20,20,0.62)",
+    pill: "#141414",
+    pillInk: "#f4efe7",
+  },
+];
+
+function CasePill({
+  bg,
+  ink,
+  company,
+}: {
+  bg: string;
+  ink: string;
+  company: string;
+}) {
   return (
     <span
-      aria-hidden
-      className="pointer-events-none absolute inset-x-8 top-0 h-px"
-      style={{
-        background: `linear-gradient(90deg, transparent, ${PRINT}, transparent)`,
-      }}
-    />
+      className="inline-flex h-10 items-center gap-2 rounded-full pl-5 pr-1.5 text-[14px] font-medium transition-transform duration-300 group-hover:-translate-y-0.5"
+      style={{ background: bg, color: ink }}
+    >
+      Read case study
+      <span
+        className="flex size-7 items-center justify-center rounded-full text-white transition-transform duration-300 group-hover:rotate-45"
+        style={{ background: PRINT }}
+      >
+        <ArrowUpRight weight="bold" className="size-3.5" />
+      </span>
+      <span className="sr-only">: {company}</span>
+    </span>
   );
 }
 
-function ReadLink() {
+/** Logo tile that breaks out of the banner's top edge. */
+function PoppingMark({ href }: { href: string }) {
   return (
-    <span className="inline-flex items-center gap-2 text-[14px] font-medium text-[#141414]">
-      Read case study
-      <span className="flex size-7 items-center justify-center rounded-full text-[#141414]/60 ring-1 ring-inset ring-[#141414]/15 transition-colors duration-300 group-hover:bg-[#f97316] group-hover:text-white group-hover:ring-transparent">
-        <ArrowRight
-          weight="bold"
-          className="size-3.5 transition-transform group-hover:translate-x-0.5"
-        />
+    <span className="absolute -top-7 right-7 rotate-[6deg] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1 group-hover:rotate-[2deg]">
+      <ClientMark
+        href={href}
+        className="size-16 rounded-[14px] bg-white p-2.5 shadow-[0_18px_34px_-16px_rgba(20,20,20,0.55)]"
+      />
+    </span>
+  );
+}
+
+/**
+ * The case image in a clean white frame: client logo and name in the
+ * header, a small Studio1 badge on the right, the image below.
+ */
+function CaseFrame({
+  study,
+  art,
+  imageHeight,
+}: {
+  study: CaseStudyResultData;
+  art?: string;
+  imageHeight: string;
+}) {
+  return (
+    <div className="flex h-full flex-col overflow-hidden rounded-[10px] bg-white p-1.5 text-[#141414] shadow-[0_30px_60px_-34px_rgba(60,20,0,0.55)] ring-1 ring-[#141414]/[0.05] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1">
+      <div className="flex items-center gap-2 px-2 pb-2 pt-1">
+        <ClientMark href={study.href} className="size-6 rounded-[5px] p-0.5" />
+        <span className="truncate text-[12.5px] font-medium">
+          {study.company}
+        </span>
+        <span className="ml-auto flex items-center gap-1 rounded-full bg-[#f97316] py-0.5 pl-1 pr-2 text-[10.5px] font-medium text-white">
+          <Logo className="size-3.5 brightness-0 invert" />
+          Studio1
+        </span>
+      </div>
+      <div
+        className={cn(
+          "relative overflow-hidden rounded-[6px] bg-[#f6f2ec]",
+          imageHeight === "100%" && "min-h-0 flex-1",
+        )}
+        style={imageHeight === "100%" ? undefined : { height: imageHeight }}
+      >
+        {art ? (
+          <Image
+            src={art}
+            alt=""
+            fill
+            sizes="(max-width: 768px) 100vw, 600px"
+            className="object-cover object-left-top"
+          />
+        ) : (
+          <span className="absolute inset-x-0 top-5 flex justify-center">
+            <ClientMark href={study.href} className="size-16 bg-white p-2.5" />
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** The study's stats as tidy chips inside the card's text column. */
+function CaseChips({
+  stats,
+  dark,
+}: {
+  stats?: CaseStudyResultData["stats"];
+  /** Chips on a dark or orange card. */
+  dark?: boolean;
+}) {
+  if (!stats?.length) return null;
+  return (
+    <ul className="flex flex-wrap gap-2">
+      {stats.slice(0, 3).map((stat, index) => (
+        <li
+          key={`${stat.value}-${index}`}
+          className={cn(
+            "flex items-center gap-2 rounded-full py-1 pl-1 pr-3.5 text-[12.5px] font-medium ring-1 ring-inset backdrop-blur-md",
+            dark
+              ? "bg-white/12 text-white ring-white/20"
+              : "bg-white/70 text-[#141414] ring-[#141414]/[0.06]",
+          )}
+        >
+          <span
+            className={cn(
+              "rounded-full px-2.5 py-0.5 text-[11px] font-semibold",
+              dark ? "bg-white text-[#141414]" : "bg-[#141414] text-white",
+            )}
+          >
+            {stat.value}
+          </span>
+          {stat.label}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** One stat chip set across the image frame's edge, half on each side. */
+function EdgeChip({
+  stat,
+  className,
+}: {
+  stat?: NonNullable<CaseStudyResultData["stats"]>[number];
+  className?: string;
+}) {
+  if (!stat) return null;
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "pointer-events-none absolute z-10 hidden items-center gap-2 rounded-full bg-white/80 py-1.5 pl-1.5 pr-4 text-[12.5px] font-medium text-[#141414] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_14px_30px_-14px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-white/70 backdrop-blur-md transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1 md:flex",
+        className,
+      )}
+    >
+      <span className="rounded-full bg-[#f97316] px-2.5 py-0.5 text-[11px] font-semibold text-white">
+        {stat.value}
       </span>
+      {stat.label}
     </span>
   );
 }
@@ -150,148 +311,133 @@ function ReadLink() {
 export function PaperCaseStudyCard({
   study,
   variant = "compact",
-  density = "default",
+  position = 0,
 }: {
   study: CaseStudyResultData;
   variant?: "featured" | "compact";
   density?: "default" | "dense";
+  /** Index among the smaller cards, to alternate their colour. */
+  position?: number;
 }) {
-  const dense = density === "dense";
+  const slug = study.href.split("/").filter(Boolean).pop() ?? "";
+  const art = CASE_ART[slug];
 
   if (variant === "featured") {
     return (
       <Link
         href={study.href}
-        className={cn("flex flex-col md:flex-row md:items-stretch", CARD)}
+        className="group relative isolate mt-8 grid overflow-visible rounded-[10px] text-white md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]"
+        style={{
+          background:
+            "linear-gradient(140deg, #fe3c34 0%, #f97316 55%, #fb8a1e 100%)",
+        }}
       >
-        <TopHairline />
-        <div
-          className={cn(
-            "flex flex-col justify-between border-b border-[#141414]/10 md:w-[42%] md:border-b-0 md:border-r",
-            dense ? "gap-6 p-6 md:p-7" : "gap-8 p-6 md:p-9",
-          )}
-        >
-          <div>
-            <p className="flex items-center gap-2 text-[13px] font-medium text-[#141414]/60">
-              <span
-                aria-hidden
-                className="size-1.5 shrink-0"
-                style={{ background: PRINT }}
-              />
-              {study.category}
-            </p>
-            <p className="mt-3 flex items-center gap-3 text-[22px] font-medium tracking-[-0.035em] md:text-[26px]">
-              <ClientMark href={study.href} className="size-10" />
-              {study.company}
-            </p>
-          </div>
-          <div>
-            <p
-              className={cn(
-                "font-medium leading-none tabular-nums tracking-[-0.05em]",
-                dense
-                  ? "text-[40px] md:text-[48px] lg:text-[56px]"
-                  : "text-[44px] md:text-[56px] lg:text-[64px]",
-              )}
-              style={{ color: PRINT }}
-            >
-              {study.heroValue}
-            </p>
-            <p
-              className={cn(
-                "mt-3 max-w-[16rem] text-[14px] leading-snug",
-                MUTED,
-              )}
-            >
-              <BrandText text={study.heroLabel} />
-            </p>
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10 rounded-[10px] opacity-30 mix-blend-multiply"
+          style={{ backgroundImage: GRAIN }}
+        />
+        {/* Large, faint Reddit marks in the background, where the reach came from */}
+        {/reddit/i.test(study.heroLabel) ? (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-[10px]"
+          >
+            <RedditLogo
+              weight="fill"
+              className="absolute -bottom-16 left-[30%] size-[300px] -rotate-[12deg] text-white/[0.09]"
+            />
+            <RedditLogo
+              weight="fill"
+              className="absolute -left-10 top-[38%] size-[150px] rotate-[10deg] text-white/[0.07]"
+            />
+            <RedditLogo
+              weight="fill"
+              className="absolute left-[44%] top-6 size-[90px] rotate-[18deg] text-white/[0.08]"
+            />
+          </span>
+        ) : null}
+        <div className="relative flex flex-col gap-6 p-7 md:p-10">
+          <p className="text-[13px] font-medium text-white/75">
+            {study.company} · {study.category}
+          </p>
+          <h3 className="text-[clamp(38px,4.4vw,64px)] font-normal leading-[1] tracking-[-0.05em]">
+            {study.heroValue}
+            <span className="mt-2 block text-[clamp(22px,2.2vw,32px)] leading-[1.15] tracking-[-0.035em] text-white/95">
+              <BrandText text={study.heroLabel} color="#ffffff" />
+            </span>
+          </h3>
+          <p className="max-w-[520px] text-[15.5px] leading-[1.6] text-white/85">
+            {study.proof}
+          </p>
+          <CaseChips stats={study.stats?.slice(1)} dark />
+          <div className="mt-auto pt-2">
+            <CasePill bg="#141414" ink="#f4efe7" company={study.company} />
           </div>
         </div>
 
-        <div
-          className={cn(
-            "flex flex-1 flex-col justify-between",
-            dense ? "gap-6 p-6 md:p-7" : "gap-8 p-6 md:p-9",
-          )}
-        >
-          <div>
-            <p
-              className={cn(
-                "max-w-xl font-normal leading-snug tracking-[-0.025em] text-[#141414]",
-                dense
-                  ? "text-[18px] md:text-[20px] lg:text-[22px]"
-                  : "text-[19px] md:text-[22px] lg:text-[25px]",
-              )}
-            >
-              {study.proof}
-            </p>
-            {study.stats?.length ? (
-              <dl
-                className={cn(
-                  "grid grid-cols-1 gap-2 min-[420px]:grid-cols-3",
-                  dense ? "mt-6" : "mt-8",
-                )}
-              >
-                {study.stats.map((stat, index) => (
-                  <div
-                    key={`${stat.value}-${stat.label}-${index}`}
-                    className={cn("min-w-0 p-3.5", ENGRAVED)}
-                  >
-                    <dt className="sr-only">{stat.label}</dt>
-                    <dd className="text-[18px] font-medium leading-none tabular-nums tracking-[-0.04em] md:text-[20px]">
-                      {stat.value}
-                    </dd>
-                    <span
-                      className={cn(
-                        "mt-1.5 block text-[12px] leading-snug",
-                        MUTED,
-                      )}
-                    >
-                      <BrandText text={stat.label} />
-                    </span>
-                  </div>
-                ))}
-              </dl>
-            ) : null}
+        {/* Case image, running off the card's right edge */}
+        <div className="relative min-h-[320px] md:min-h-0">
+          <div className="absolute inset-0 overflow-hidden rounded-b-[10px] md:rounded-l-none md:rounded-r-[10px]">
+            <div className="absolute inset-y-10 left-5 w-[118%] md:left-2">
+              <CaseFrame study={study} art={art} imageHeight="100%" />
+            </div>
           </div>
-          <ReadLink />
+          <PoppingMark href={study.href} />
+          <EdgeChip stat={study.stats?.[0]} className="-left-10 bottom-16" />
         </div>
       </Link>
     );
   }
 
+  const tone = CASE_TONES[position % CASE_TONES.length];
   return (
     <Link
       href={study.href}
-      className={cn("flex h-full flex-col p-6 sm:p-7", CARD)}
+      className="group relative isolate mt-8 flex h-full min-h-[420px] flex-col gap-6 overflow-visible rounded-[10px] p-7 ring-1 ring-inset ring-[#141414]/[0.06] md:p-9"
+      style={{ background: tone.bg, color: tone.ink }}
     >
-      <TopHairline />
-      <div className="mb-6 flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="flex items-center gap-2.5 truncate text-[17px] font-medium tracking-[-0.025em]">
-            <ClientMark href={study.href} className="size-8 p-1" />
-            {study.company}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 rounded-[10px] opacity-25 mix-blend-multiply"
+        style={{ backgroundImage: GRAIN }}
+      />
+
+      <PoppingMark href={study.href} />
+      <div className="relative grid flex-1 gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:items-center">
+        <div className="flex flex-col gap-6">
+          <p className="text-[13px] font-medium" style={{ color: tone.soft }}>
+            {study.company} · {study.category}
           </p>
-          <p className={cn("mt-1 text-[13px]", MUTED)}>{study.category}</p>
+          <h3 className="text-[clamp(34px,3.6vw,52px)] font-normal leading-[1] tracking-[-0.05em]">
+            {study.heroValue}
+            <span className="mt-2 block text-[clamp(19px,1.7vw,24px)] leading-[1.2] tracking-[-0.03em]">
+              <BrandText text={study.heroLabel} />
+            </span>
+          </h3>
+          <p className="text-[15px] leading-[1.6]" style={{ color: tone.soft }}>
+            {study.proof}
+          </p>
+          <CaseChips
+            stats={study.stats?.slice(1)}
+            dark={tone.bg === "#141414"}
+          />
+          <div className="mt-auto pt-2">
+            <CasePill
+              bg={tone.pill}
+              ink={tone.pillInk}
+              company={study.company}
+            />
+          </div>
         </div>
-        <ArrowUpRight
-          weight="bold"
-          className="mt-1 size-4 shrink-0 text-[#141414]/40 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#141414]"
-        />
-      </div>
-      <div className="mt-auto">
-        <p
-          className="text-[40px] font-medium leading-none tabular-nums tracking-[-0.05em] sm:text-[44px]"
-          style={{ color: PRINT }}
-        >
-          {study.heroValue}
-        </p>
-        <p className="mt-2 text-[14px] font-medium text-[#141414]">
-          {study.heroLabel}
-        </p>
-        <p className={cn("mt-4 text-[14px] leading-relaxed", MUTED)}>
-          {study.proof}
-        </p>
+        <div className="relative hidden lg:block">
+          <div className="relative -mr-9 overflow-hidden rounded-r-[10px]">
+            <div className="w-[108%]">
+              <CaseFrame study={study} art={art} imageHeight="210px" />
+            </div>
+          </div>
+          <EdgeChip stat={study.stats?.[0]} className="-bottom-4 -left-8" />
+        </div>
       </div>
     </Link>
   );
@@ -316,15 +462,6 @@ const STORY_PHOTOS = [
 ];
 
 const STORY_EASE = [0.16, 1, 0.3, 1] as const;
-
-/** One background curve per step; same commands, so they morph smoothly. */
-const STORY_LINES = [
-  "M-40 760 C 260 560, 420 820, 640 560 S 980 80, 1260 220",
-  "M-40 620 C 220 760, 480 700, 700 420 S 1000 200, 1260 360",
-  "M-40 420 C 300 300, 520 640, 760 520 S 1040 640, 1260 460",
-  "M-40 300 C 240 160, 460 480, 680 380 S 960 760, 1260 640",
-  "M-40 540 C 280 700, 500 260, 720 300 S 1020 520, 1260 120",
-];
 
 /** Sweeps an orange highlighter across one phrase of a sentence. */
 function UnderlinedPhrase({
@@ -360,66 +497,107 @@ function UnderlinedPhrase({
 }
 
 /**
- * Step number in a small circle; on the active step an orange ring fills
- * as you scroll through it.
+ * Step marker. Passed steps show a quiet check, the active step is filled
+ * orange with a soft breathing halo and a ring that fills as you scroll
+ * through it, upcoming steps are a thin grey outline.
  */
 function StepRing({
   progress,
   position,
   count,
   on,
+  done,
 }: {
   progress: MotionValue<number>;
   position: number;
   count: number;
   on: boolean;
+  done: boolean;
 }) {
+  const reduceMotion = useReducedMotion();
   const fill = useTransform(
     progress,
     [position / count, (position + 1) / count],
-    [0, 1],
+    [0.04, 1],
     { clamp: true },
   );
   return (
-    <span className="relative flex size-8 shrink-0 items-center justify-center">
+    <span className="relative flex size-9 shrink-0 items-center justify-center">
+      {/* Breathing halo on the active step */}
+      {on && !reduceMotion ? (
+        <motion.span
+          aria-hidden
+          className="absolute inset-0 rounded-full"
+          style={{ background: "rgba(249,115,22,0.18)" }}
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: [1, 1.45], opacity: [0.55, 0] }}
+          transition={{ duration: 2.2, repeat: Infinity, ease: "easeOut" }}
+        />
+      ) : null}
       <svg
         aria-hidden
-        viewBox="0 0 32 32"
+        viewBox="0 0 36 36"
         className="absolute inset-0 -rotate-90"
       >
         <circle
-          cx="16"
-          cy="16"
-          r="14.5"
-          fill={on ? "#ffffff" : "transparent"}
-          stroke="rgba(20,20,20,0.12)"
-          strokeWidth="1"
-          className="transition-[fill] duration-500"
+          cx="18"
+          cy="18"
+          r="16"
+          fill="none"
+          stroke={done ? "rgba(249,115,22,0.55)" : "rgba(20,20,20,0.2)"}
+          strokeWidth="1.75"
+          className="transition-[stroke] duration-500"
         />
         {on ? (
           <motion.circle
-            cx="16"
-            cy="16"
-            r="14.5"
+            cx="18"
+            cy="18"
+            r="16"
             fill="none"
             stroke={PRINT}
-            strokeWidth="1.75"
+            strokeWidth="2.5"
             strokeLinecap="round"
             style={{ pathLength: fill }}
           />
         ) : null}
       </svg>
-      <span
-        className={cn(
-          "relative text-[11px] font-medium tabular-nums transition-colors duration-500",
-          on ? "text-[#f97316]" : "text-[#141414]/35",
-        )}
+      {/* Inner disc */}
+      <motion.span
+        className="relative flex size-7 items-center justify-center rounded-full text-[11px] font-medium tabular-nums"
+        initial={false}
+        animate={
+          on
+            ? { backgroundColor: PRINT, color: "#ffffff", scale: 1 }
+            : {
+                backgroundColor: "rgba(255,255,255,0)",
+                color: done ? PRINT : "rgba(20,20,20,0.38)",
+                scale: 0.92,
+              }
+        }
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       >
-        {pad2(position + 1)}
-      </span>
+        {done ? (
+          <Check weight="bold" className="size-3.5" />
+        ) : (
+          pad2(position + 1)
+        )}
+      </motion.span>
     </span>
   );
 }
+
+/* ------------------------------------------------------------------ */
+/* Line art for the process scene                                      */
+/* ------------------------------------------------------------------ */
+
+/** One background curve per step; same commands, so they morph smoothly. */
+const STORY_LINES = [
+  "M-40 760 C 260 560, 420 820, 640 560 S 980 80, 1260 220",
+  "M-40 620 C 220 760, 480 700, 700 420 S 1000 200, 1260 360",
+  "M-40 420 C 300 300, 520 640, 760 520 S 1040 640, 1260 460",
+  "M-40 300 C 240 160, 460 480, 680 380 S 960 760, 1260 640",
+  "M-40 540 C 280 700, 500 260, 720 300 S 1020 520, 1260 120",
+];
 
 /**
  * Desktop process: a pinned scene that steps through the process as you
@@ -462,7 +640,6 @@ function ProcessStory({
     setActive((current) => (current === next ? current : next));
   });
   // The background line draws itself and drifts as you scroll.
-  const lineLength = useTransform(progress, [0, 1], [0.08, 1]);
   const lineShift = useTransform(progress, [0, 1], [40, -40]);
 
   const jump = (position: number) => {
@@ -492,7 +669,7 @@ function ProcessStory({
       style={{ height: `${steps.length * 130 + 40}vh` }}
     >
       <div className="sticky top-0 h-[100svh]">
-        {/* Soft swoosh drawn behind the scene */}
+        {/* Soft textured band behind the scene, a new curve for each step */}
         <motion.svg
           aria-hidden
           viewBox="0 0 1200 800"
@@ -505,7 +682,6 @@ function ProcessStory({
             stroke="rgba(20,20,20,0.045)"
             strokeWidth="150"
             strokeLinecap="round"
-            style={{ pathLength: lineLength }}
             initial={false}
             animate={{ d: STORY_LINES[active % STORY_LINES.length] }}
             transition={{ duration: 1.8, ease: [0.45, 0, 0.2, 1] }}
@@ -542,6 +718,7 @@ function ProcessStory({
                         position={position}
                         count={steps.length}
                         on={on}
+                        done={position < active}
                       />
                       <span
                         className={cn(
@@ -755,7 +932,7 @@ export function PaperServiceProcess({
           </div>
 
           {/* Engraved tray holding one white card per step */}
-          <ol className="flex flex-col gap-2 rounded-[4px] bg-[#f3eee6] p-2 shadow-[inset_0_3px_10px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08),inset_0_-1px_0_#fff] sm:p-2.5">
+          <ol className="flex flex-col gap-2 rounded-[4px] bg-[#f3eee6] p-2 shadow-[inset_0_3px_10px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08)] sm:p-2.5">
             {steps.map((step, position) => {
               const StepIcon = step.icon;
               return (
@@ -777,7 +954,7 @@ export function PaperServiceProcess({
                   className="group rounded-[4px] bg-white p-5 shadow-[0_1px_2px_rgba(20,20,20,0.06),0_10px_24px_-18px_rgba(20,20,20,0.35)] ring-1 ring-inset ring-[#141414]/[0.06] transition-shadow duration-500 hover:shadow-[0_1px_2px_rgba(20,20,20,0.06),0_16px_30px_-22px_rgba(20,20,20,0.35)] sm:p-6"
                 >
                   <div className="flex items-start gap-4">
-                    <span className="flex size-11 shrink-0 items-center justify-center rounded-[6px] bg-[#f8f6f2] text-[#141414] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10),inset_0_-1px_0_#fff,0_1px_0_#fff] transition-colors duration-500 group-hover:text-[#ea580c]">
+                    <span className="flex size-11 shrink-0 items-center justify-center rounded-[6px] bg-[#f8f6f2] text-[#141414] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10)] transition-colors duration-500 group-hover:text-[#ea580c]">
                       <StepIcon className="size-5" />
                     </span>
                     <div className="min-w-0 flex-1">
@@ -797,7 +974,7 @@ export function PaperServiceProcess({
                   <p className={cn("mt-4 text-[15px] leading-[1.6]", MUTED)}>
                     {step.description}
                   </p>
-                  <ul className="mt-5 grid gap-x-5 gap-y-2.5 rounded-[4px] bg-[#f8f6f2] p-4 shadow-[inset_0_2px_6px_rgba(20,20,20,0.07),inset_0_-1px_0_#fff] sm:grid-cols-2">
+                  <ul className="mt-5 grid gap-x-5 gap-y-2.5 rounded-[4px] bg-[#f8f6f2] p-4 shadow-[inset_0_2px_6px_rgba(20,20,20,0.07)] sm:grid-cols-2">
                     {step.details.map((detail, detailIndex) => (
                       <li
                         key={detailIndex}
@@ -911,7 +1088,7 @@ export function PaperServiceFaq({
                   </span>
                   <span
                     aria-hidden
-                    className="flex size-8 shrink-0 items-center justify-center rounded-[6px] bg-[#f8f6f2] text-[#141414]/55 shadow-[inset_0_2px_5px_rgba(20,20,20,0.10),inset_0_-1px_0_#fff] transition-colors group-data-[state=open]:bg-[#f97316] group-data-[state=open]:text-white group-data-[state=open]:shadow-none"
+                    className="flex size-8 shrink-0 items-center justify-center rounded-[6px] bg-[#f8f6f2] text-[#141414]/55 shadow-[inset_0_2px_5px_rgba(20,20,20,0.10)] transition-colors group-data-[state=open]:bg-[#f97316] group-data-[state=open]:text-white group-data-[state=open]:shadow-none"
                   >
                     <Plus
                       weight="bold"

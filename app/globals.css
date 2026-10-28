@@ -1370,3 +1370,27 @@ html::-webkit-scrollbar-thumb:hover {
     animation: none;
   }
 }
+
+/* Studio map connectors: dots that drift along the line */
+.s1-flow-v {
+  animation: s1-flow-v 1.2s linear infinite;
+}
+.s1-flow-h {
+  animation: s1-flow-h 1.2s linear infinite;
+}
+@keyframes s1-flow-v {
+  to {
+    background-position: 0 6px;
+  }
+}
+@keyframes s1-flow-h {
+  to {
+    background-position: 6px 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .s1-flow-v,
+  .s1-flow-h {
+    animation: none;
+  }
+}

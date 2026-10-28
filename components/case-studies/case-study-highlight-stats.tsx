@@ -70,7 +70,7 @@ export function CaseStudyHighlightStats({
           metrics.length >= 3 && "sm:grid-cols-3",
         )}
       >
-        <div className="min-w-0 rounded-[6px] bg-[#ece5da] p-4 shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10),inset_0_-1px_0_rgba(255,255,255,0.85),0_1px_0_rgba(255,255,255,0.95)] md:p-5">
+        <div className="min-w-0 rounded-[6px] bg-[#ece5da] p-4 shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10)] md:p-5">
           <dt className="sr-only">{headline.label}</dt>
           <dd>
             <StatValue
@@ -86,7 +86,7 @@ export function CaseStudyHighlightStats({
         {supporting.map((metric) => (
           <div
             key={`${metric.value}-${metric.label}`}
-            className="min-w-0 rounded-[6px] bg-[#ece5da] p-4 shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10),inset_0_-1px_0_rgba(255,255,255,0.85),0_1px_0_rgba(255,255,255,0.95)] md:p-5"
+            className="min-w-0 rounded-[6px] bg-[#ece5da] p-4 shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10)] md:p-5"
           >
             <dt className="sr-only">{metric.label}</dt>
             <dd>

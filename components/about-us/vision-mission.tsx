@@ -156,7 +156,7 @@ const ContentBlock = ({
               >
                 <span
                   aria-hidden
-                  className="flex size-7 shrink-0 items-center justify-center rounded-[6px] bg-[#fbfaf7] shadow-[inset_0_2px_5px_rgba(20,20,20,0.10),inset_0_1px_1px_rgba(20,20,20,0.08),inset_0_-1px_0_#fff,0_1px_0_rgba(255,255,255,0.95)]"
+                  className="flex size-7 shrink-0 items-center justify-center rounded-[6px] bg-[#fbfaf7] shadow-[inset_0_2px_5px_rgba(20,20,20,0.10),inset_0_1px_1px_rgba(20,20,20,0.08)]"
                 >
                   <PointIcon
                     weight="duotone"
