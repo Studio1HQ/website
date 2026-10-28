@@ -94,6 +94,23 @@ const FADE = [
 
 type Company = (typeof companies)[number];
 
+/** Partners with a Studio1 case study; their piece opens it. */
+const CASE_STUDY: Record<string, string> = {
+  Nebius: "nebius",
+  LiteLLM: "litellm",
+  "Bright Data": "brightdata",
+  Tensorlake: "tensorlake",
+  OpenLore: "openlore",
+  Memori: "memori",
+  Ittybit: "ittybit",
+  ScrapeGraph: "scrapegraph",
+  Enteligence: "entelligence-ai",
+  "Permit.io": "permit",
+  Jozu: "jozu",
+  Corsair: "corsair",
+  WebCrumbs: "webcrumbs",
+};
+
 /** Percentages rounded so the server and browser render the same string. */
 const pct = (n: number) => `${n.toFixed(4)}%`;
 
@@ -107,6 +124,7 @@ function Piece({
   href,
   label,
   external = true,
+  tag,
 }: {
   r: number;
   c: number;
@@ -116,6 +134,7 @@ function Piece({
   href: string;
   label: string;
   external?: boolean;
+  tag?: string;
 }) {
   return (
     <div
@@ -148,6 +167,11 @@ function Piece({
         <span className="absolute inset-[18%] flex flex-col items-center justify-center gap-1.5">
           {children}
         </span>
+        {tag ? (
+          <span className="absolute left-1/2 top-[9%] -translate-x-1/2 whitespace-nowrap rounded-full bg-[#f97316]/10 px-2 py-[2px] text-[9.5px] font-semibold uppercase tracking-[0.08em] text-[#c2410c]">
+            {tag}
+          </span>
+        ) : null}
       </Link>
     </div>
   );
@@ -230,6 +254,7 @@ export function LogoPuzzle({ className }: { className?: string }) {
     (item, index) => {
       const r = Math.floor(index / COLS);
       const c = index % COLS;
+      const study = CASE_STUDY[item.name];
       return {
         c,
         node: (
@@ -239,8 +264,10 @@ export function LogoPuzzle({ className }: { className?: string }) {
             c={c}
             rows={rows}
             total={total}
-            href={item.href}
-            label={item.name}
+            href={study ? `/case-studies/${study}` : item.href}
+            external={!study}
+            tag={study ? "Case study" : undefined}
+            label={study ? `${item.name} case study` : item.name}
           >
             <CompanyMark item={item} />
           </Piece>
