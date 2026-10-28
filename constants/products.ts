@@ -40,6 +40,8 @@ export type Product = {
   status: ProductStatus;
   statusLabel: string;
   media: ProductMedia;
+  /** The product's own app icon. */
+  logo: string;
 };
 
 export const products: Product[] = [
@@ -89,6 +91,7 @@ export const products: Product[] = [
       },
     ],
     url: "https://raah.dev",
+    logo: "/products/raah-logo.svg",
     category: "Analytics & Observability",
     status: "launched",
     statusLabel: "Launched",
@@ -145,6 +148,7 @@ export const products: Product[] = [
       },
     ],
     url: "https://assetsnip.com",
+    logo: "/products/assetsnip-logo.svg",
     category: "Design Tooling",
     status: "live",
     statusLabel: "Live",

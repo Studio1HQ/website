@@ -23,7 +23,6 @@ import {
   SectionHead,
 } from "@/components/paper/paper-sections";
 import { PRINT } from "@/lib/paper";
-import { cn } from "@/lib/utils";
 
 const contentData = {
   vision: {
@@ -104,46 +103,51 @@ const ContentBlock = ({
 
   return (
     <motion.article
-      className="group relative isolate flex h-full flex-col overflow-hidden rounded-[22px] bg-[#f9f6f2] p-7 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_30px_60px_-44px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-white/70 backdrop-blur-xl backdrop-saturate-150 md:p-9"
+      className="group relative isolate flex h-full flex-col overflow-hidden rounded-[16px] bg-[#f9f6f2] p-7 text-[#141414] shadow-[inset_0_1px_0_#fff,0_20px_40px_-34px_rgba(20,20,20,0.4)] ring-1 ring-inset ring-[#141414]/[0.06] md:p-9"
       initial={reduceMotion ? false : { opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.55, delay: 0.08 * index, ease: "easeOut" }}
     >
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -bottom-24 -right-16 -z-10 size-[320px] rounded-full opacity-60 blur-3xl"
-        style={{
-          background:
-            "radial-gradient(closest-side, rgba(249,115,22,0.45), transparent)",
-        }}
-      />
-      {/* 3D tile tucked into the card's corner */}
-      <div className="pointer-events-none absolute right-7 top-7 w-[72px] rotate-[8deg] transition-transform duration-700 ease-out group-hover:-translate-y-1 group-hover:rotate-[2deg] md:right-9 md:top-9 md:w-[88px]">
-        <Icon3D icon={TileIcon} className="w-full" />
+      {/* Header: the 3D tile beside the title and lede */}
+      <div className="flex items-start gap-5">
+        <div className="mt-0.5 w-14 shrink-0 transition-transform duration-700 ease-out group-hover:-translate-y-0.5 md:w-16">
+          <Icon3D icon={TileIcon} className="w-full" />
+        </div>
+        <div>
+          <h3 className="text-[30px] font-medium leading-[1.05] tracking-[-0.045em] md:text-[36px]">
+            {first} <span style={{ color: PRINT }}>{accent}</span>
+          </h3>
+          <p className="mt-2 max-w-[420px] text-[14.5px] leading-[1.55] text-[#141414]/60">
+            {lede}
+          </p>
+        </div>
       </div>
-      <h3 className="text-[34px] font-medium leading-[1.05] tracking-[-0.045em] text-[#141414] md:text-[40px]">
-        {first} <span style={{ color: PRINT }}>{accent}</span>
-      </h3>
-      <p className="mt-3 min-h-[3.1em] max-w-[420px] pr-24 text-[15px] leading-[1.55] text-[#141414]/70">
-        {lede}
-      </p>
 
-      <div className="mt-7">
-        <ul className="flex flex-col items-start gap-2.5">
-          {data.points.map((point) => (
-            <li key={point.text}>
-              <span className="inline-flex items-center gap-2.5 rounded-full bg-[#141414]/[0.04] px-4 py-2 text-[13.5px] font-medium leading-snug text-[#141414] shadow-[inset_0_2px_6px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.08),inset_0_-1px_0_rgba(255,255,255,0.8)] backdrop-blur-md transition-colors duration-200 hover:bg-[#f97316]/10">
+      {/* Points: engraved tiles, two across */}
+      <ul className="mt-8 grid flex-1 grid-cols-1 gap-2.5 sm:grid-cols-2">
+        {data.points.map((point, i) => {
+          const PointIcon = point.icon;
+          const last =
+            i === data.points.length - 1 && data.points.length % 2 === 1;
+          return (
+            <li
+              key={point.text}
+              className={
+                "group/tile flex items-start gap-3 rounded-[12px] bg-[#f1ece4] p-4 shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)] transition-colors duration-300 hover:bg-white" +
+                (last ? " sm:col-span-2" : "")
+              }
+            >
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-white text-[#f97316] shadow-[0_4px_10px_-6px_rgba(20,20,20,0.35)] transition-colors duration-300 group-hover/tile:bg-[#f97316] group-hover/tile:text-white">
+                <PointIcon weight="bold" className="size-4" />
+              </span>
+              <span className="pt-[7px] text-[14px] font-medium leading-[18px] tracking-[-0.01em] text-[#141414]/85">
                 {point.text}
-                <span aria-hidden className="text-[#f97316]">
-                  &rarr;
-                </span>
               </span>
             </li>
-          ))}
-        </ul>
-        {/* 3D tile, the same as the About hero */}
-      </div>
+          );
+        })}
+      </ul>
     </motion.article>
   );
 };
@@ -162,7 +166,7 @@ export const VisionMission = () => {
           description="We help SaaS teams build developer trust through high-impact content and DevRel strategy that scales with their product."
         />
 
-        <div className="relative isolate mt-10 grid grid-cols-1 gap-2 md:mt-12 md:grid-cols-2">
+        <div className="relative isolate mt-10 grid grid-cols-1 gap-3 md:mt-12 md:grid-cols-2">
           <ContentBlock
             data={contentData.vision}
             index={0}

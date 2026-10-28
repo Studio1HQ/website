@@ -15,7 +15,9 @@ export function BlogSidebar({ currentSlug }: { currentSlug: string }) {
     list.push({ slug: post.slug, title: post.title });
     groups.set(key, list);
   }
-  const ordered = Array.from(groups.entries()).sort((a, b) => b[1].length - a[1].length);
+  const ordered = Array.from(groups.entries()).sort(
+    (a, b) => b[1].length - a[1].length,
+  );
 
   return (
     <nav aria-label="All articles" className="space-y-8">

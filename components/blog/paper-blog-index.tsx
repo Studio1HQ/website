@@ -2,14 +2,20 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, ArrowUpRight, RssSimple } from "@phosphor-icons/react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  ArrowUpRight,
+  RssSimple,
+} from "@phosphor-icons/react";
 import type { BlogPostMeta } from "@/lib/blog";
 import { blogCoverUrl } from "@/lib/blog-cover";
 import { tagLabel } from "@/lib/blog-tags";
 import { cn } from "@/lib/utils";
+import Logo from "@/components/ui/svgs/logo";
 import { Container } from "@/components/home/ui";
 import { NumericText } from "@/components/ui/num";
-import { Cursor, INK, PAPER, PRINT, SelectionFrame } from "@/components/paper/paper-hero";
+import { INK, PAPER, PRINT } from "@/components/paper/paper-hero";
 import {
   Accent,
   CELL,
@@ -39,7 +45,12 @@ function formatDate(value: string) {
   const date = new Date(`${value}T00:00:00Z`);
   return Number.isNaN(date.getTime())
     ? value
-    : date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" });
+    : date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        timeZone: "UTC",
+      });
 }
 
 function blogPageHref(page: number) {
@@ -59,9 +70,19 @@ function PrintTag({ children }: { children: string }) {
 }
 
 /** Every post shows its generated paper cover, all at the same 16:9 size. */
-function PostCover({ post, priority = false, sizes }: { post: BlogPostMeta; priority?: boolean; sizes: string }) {
+function PostCover({
+  post,
+  priority = false,
+  sizes,
+}: {
+  post: BlogPostMeta;
+  priority?: boolean;
+  sizes: string;
+}) {
   return (
-    <div className={`relative aspect-[16/9] w-full overflow-hidden ring-1 ring-inset ring-[#141414]/10 ${post.bannerImage ? "bg-[#0b0b0b]" : "bg-[#f4efe7]"}`}>
+    <div
+      className={`relative aspect-[16/9] w-full overflow-hidden rounded-[12px] ring-1 ring-inset ring-[#141414]/10 ${post.bannerImage ? "bg-[#0b0b0b]" : "bg-[#f4efe7]"}`}
+    >
       <Image
         src={post.bannerImage || blogCoverUrl(post.slug, post.updatedDate)}
         alt={`${post.title} cover`}
@@ -96,55 +117,131 @@ function PostMeta({ post, number }: { post: BlogPostMeta; number: number }) {
         <span aria-hidden className={FAINT}>
           ·
         </span>
-        <span className={cn("tabular-nums", MUTED)}>{post.readingTimeMinutes} min read</span>
+        <span className={cn("tabular-nums", MUTED)}>
+          {post.readingTimeMinutes} min read
+        </span>
       </span>
-      <span className={cn("shrink-0 tabular-nums", FAINT)}>No. {String(number).padStart(2, "0")}</span>
+      <span className={cn("shrink-0 tabular-nums", FAINT)}>
+        No. {String(number).padStart(2, "0")}
+      </span>
     </div>
   );
 }
 
-function FeaturedPost({ post, number }: { post: BlogPostMeta; number: number }) {
+function FeaturedPost({
+  post,
+  number,
+}: {
+  post: BlogPostMeta;
+  number: number;
+}) {
   return (
     <div className="relative mt-14">
-      <SelectionFrame label="latest-article" labelPosition="top-left" className="p-1.5">
-        <Link
-          href={`/blog/${post.slug}`}
-          className="group grid bg-white lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]"
-        >
-          <PostCover post={post} priority sizes="(max-width: 1024px) 100vw, 720px" />
-          <div className="flex min-w-0 flex-col p-5 sm:p-7 lg:p-9">
-            <PostMeta post={post} number={number} />
-            <h2 className="mt-6 text-[26px] font-medium leading-[1.15] tracking-[-0.045em] transition-colors group-hover:text-[#f97316] md:text-[34px]">
-              <NumericText>{post.title}</NumericText>
-            </h2>
-            <p className={cn("mt-4 line-clamp-3 text-[16px] leading-[1.6]", MUTED)}>{post.description}</p>
-            <div className={cn("mt-auto flex items-center justify-between gap-4 border-t pt-5 text-[13px] font-medium", LINE)}>
-              <span className={cn("truncate", MUTED)}>By {post.authors.join(", ")}</span>
-              <span className="inline-flex items-center gap-3">
-                Read article
-                <ReadArrow />
-              </span>
-            </div>
+      <Link
+        href={`/blog/${post.slug}`}
+        className="group grid overflow-hidden rounded-[16px] bg-white shadow-[0_30px_60px_-44px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/[0.06] lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]"
+      >
+        <PostCover
+          post={post}
+          priority
+          sizes="(max-width: 1024px) 100vw, 720px"
+        />
+        <div className="flex min-w-0 flex-col p-5 sm:p-7 lg:p-9">
+          <PostMeta post={post} number={number} />
+          <h2 className="mt-6 text-[26px] font-medium leading-[1.15] tracking-[-0.045em] transition-colors group-hover:text-[#f97316] md:text-[34px]">
+            <NumericText>{post.title}</NumericText>
+          </h2>
+          <p
+            className={cn("mt-4 line-clamp-3 text-[16px] leading-[1.6]", MUTED)}
+          >
+            {post.description}
+          </p>
+          <div
+            className={cn(
+              "mt-auto flex items-center justify-between gap-4 border-t pt-5 text-[13px] font-medium",
+              LINE,
+            )}
+          >
+            <Authors authors={post.authors} prefix="By " />
+            <span className="inline-flex items-center gap-3">
+              Read article
+              <ReadArrow />
+            </span>
           </div>
-        </Link>
-      </SelectionFrame>
-      <Cursor className="absolute -bottom-6 right-[18%] hidden lg:block" />
+        </div>
+      </Link>
     </div>
+  );
+}
+
+/** Team photos for named authors; the Studio1 mark for the team byline. */
+const AUTHOR_PHOTO: Record<string, string> = {
+  "Amitesh Anand": "/assets/amitesh.webp",
+  "Arindam Majumder": "/assets/arindam-nobg.webp",
+};
+
+function Authors({
+  authors,
+  prefix = "",
+}: {
+  authors: string[];
+  prefix?: string;
+}) {
+  return (
+    <span className="flex min-w-0 items-center gap-2.5">
+      <span className="flex shrink-0 -space-x-1.5">
+        {authors.map((name) => (
+          <span
+            key={name}
+            className="relative flex size-6 items-center justify-center overflow-hidden rounded-full bg-white ring-2 ring-white"
+          >
+            {AUTHOR_PHOTO[name] ? (
+              <Image
+                src={AUTHOR_PHOTO[name]}
+                alt=""
+                fill
+                sizes="24px"
+                className="object-cover object-top"
+              />
+            ) : (
+              <Logo className="size-4" />
+            )}
+          </span>
+        ))}
+      </span>
+      <span className={cn("truncate", MUTED)}>
+        {prefix}
+        {authors.join(", ")}
+      </span>
+    </span>
   );
 }
 
 function PostCard({ post, number }: { post: BlogPostMeta; number: number }) {
   return (
-    <Link href={`/blog/${post.slug}`} className={cn("group flex min-w-0 flex-col p-2", CELL)}>
-      <PostCover post={post} sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 420px" />
+    <Link
+      href={`/blog/${post.slug}`}
+      className={cn("group flex min-w-0 flex-col p-2", CELL, "rounded-[16px]")}
+    >
+      <PostCover
+        post={post}
+        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 420px"
+      />
       <div className="flex flex-1 flex-col px-3 pb-3 pt-5">
         <PostMeta post={post} number={number} />
         <h3 className="mt-4 line-clamp-2 text-[20px] font-medium leading-[1.22] tracking-[-0.035em] transition-colors group-hover:text-[#f97316]">
           <NumericText>{post.title}</NumericText>
         </h3>
-        <p className={cn("mt-3 line-clamp-2 text-[15px] leading-[1.6]", MUTED)}>{post.description}</p>
-        <div className={cn("mt-auto flex items-center justify-between gap-4 border-t pt-4 text-[13px] font-medium", LINE)}>
-          <span className={cn("truncate", MUTED)}>{post.authors.join(", ")}</span>
+        <p className={cn("mt-3 line-clamp-2 text-[15px] leading-[1.6]", MUTED)}>
+          {post.description}
+        </p>
+        <div
+          className={cn(
+            "mt-auto flex items-center justify-between gap-4 border-t pt-4 text-[13px] font-medium",
+            LINE,
+          )}
+        >
+          <Authors authors={post.authors} />
           <ReadArrow />
         </div>
       </div>
@@ -152,24 +249,45 @@ function PostCard({ post, number }: { post: BlogPostMeta; number: number }) {
   );
 }
 
-function Pagination({ currentPage, totalPages }: { currentPage: number; totalPages: number }) {
+function Pagination({
+  currentPage,
+  totalPages,
+}: {
+  currentPage: number;
+  totalPages: number;
+}) {
   if (totalPages < 2) return null;
-  const step = "flex size-11 items-center justify-center rounded-full text-[14px] font-medium tabular-nums transition-colors";
+  const step =
+    "flex size-11 items-center justify-center rounded-full text-[14px] font-medium tabular-nums transition-colors";
   const idle = "bg-white/70 ring-1 ring-inset ring-[#141414]/10 hover:bg-white";
   const arrow = (page: number, label: string, icon: React.ReactNode) =>
     page >= 1 && page <= totalPages ? (
-      <Link href={blogPageHref(page)} aria-label={label} className={cn(step, idle)}>
+      <Link
+        href={blogPageHref(page)}
+        aria-label={label}
+        className={cn(step, idle)}
+      >
         {icon}
       </Link>
     ) : (
-      <span aria-hidden className={cn(step, "opacity-30 ring-1 ring-inset ring-[#141414]/10")}>
+      <span
+        aria-hidden
+        className={cn(step, "opacity-30 ring-1 ring-inset ring-[#141414]/10")}
+      >
         {icon}
       </span>
     );
 
   return (
-    <nav aria-label="Blog pagination" className="mt-14 flex items-center justify-center gap-2">
-      {arrow(currentPage - 1, "Previous page", <ArrowLeft weight="bold" className="size-4" />)}
+    <nav
+      aria-label="Blog pagination"
+      className="mt-14 flex items-center justify-center gap-2"
+    >
+      {arrow(
+        currentPage - 1,
+        "Previous page",
+        <ArrowLeft weight="bold" className="size-4" />,
+      )}
       {Array.from({ length: totalPages }, (_, index) => {
         const page = index + 1;
         const isCurrent = page === currentPage;
@@ -185,22 +303,37 @@ function Pagination({ currentPage, totalPages }: { currentPage: number; totalPag
           </Link>
         );
       })}
-      {arrow(currentPage + 1, "Next page", <ArrowRight weight="bold" className="size-4" />)}
+      {arrow(
+        currentPage + 1,
+        "Next page",
+        <ArrowRight weight="bold" className="size-4" />,
+      )}
     </nav>
   );
 }
 
 /** Blog index in the paper design: printed header, featured article, ruled card grid. */
-export function PaperBlogIndex({ posts, pagePosts, pageStart, currentPage, totalPages }: PaperBlogIndexProps) {
+export function PaperBlogIndex({
+  posts,
+  pagePosts,
+  pageStart,
+  currentPage,
+  totalPages,
+}: PaperBlogIndexProps) {
   const [featured, ...rest] = pagePosts;
   const showFeatured = currentPage === 1 && Boolean(featured);
   const gridPosts = showFeatured ? rest : pagePosts;
   const gridStart = pageStart + (showFeatured ? 1 : 0);
   // "No." counts posts in publishing order (oldest is No. 01), as on the covers.
 
-  const topics = new Set(posts.flatMap((post) => post.tags.map((tag) => tag.toLowerCase())));
+  const topics = new Set(
+    posts.flatMap((post) => post.tags.map((tag) => tag.toLowerCase())),
+  );
   const avgRead = posts.length
-    ? Math.round(posts.reduce((sum, post) => sum + post.readingTimeMinutes, 0) / posts.length)
+    ? Math.round(
+        posts.reduce((sum, post) => sum + post.readingTimeMinutes, 0) /
+          posts.length,
+      )
     : 0;
   const stats = [
     { value: posts.length, label: "Articles published" },
@@ -215,7 +348,11 @@ export function PaperBlogIndex({ posts, pagePosts, pageStart, currentPage, total
           <IndexBar
             index={1}
             name="Journal"
-            aside={posts[0] ? `Last updated ${formatDate(posts[0].updatedDate || posts[0].date)}` : undefined}
+            aside={
+              posts[0]
+                ? `Last updated ${formatDate(posts[0].updatedDate || posts[0].date)}`
+                : undefined
+            }
           />
           <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:items-end lg:gap-16">
             <h1 className="text-[44px] font-medium leading-[1.08] tracking-[-0.055em] sm:text-[60px] lg:text-[76px]">
@@ -225,15 +362,25 @@ export function PaperBlogIndex({ posts, pagePosts, pageStart, currentPage, total
               <br />& tech <Accent>blog</Accent>
             </h1>
             <div className="flex flex-col items-start gap-6 lg:pb-3">
-              <p className={cn("max-w-[440px] text-[16px] leading-[1.6] sm:text-[17px]", MUTED)}>
-                Practical guides on technical content, developer relations, documentation, developer experience, and
-                growth for SaaS, AI, and devtool teams.
+              <p
+                className={cn(
+                  "max-w-[440px] text-[16px] leading-[1.6] sm:text-[17px]",
+                  MUTED,
+                )}
+              >
+                Practical guides on technical content, developer relations,
+                documentation, developer experience, and growth for SaaS, AI,
+                and devtool teams.
               </p>
               <a
                 href="/feed.xml"
                 className="group inline-flex h-12 items-center gap-2 rounded-full border-[1.5px] border-[var(--p-fg)] px-6 text-[15px] font-medium transition-colors hover:bg-[var(--p-fg)] hover:text-[var(--p-bg)]"
               >
-                <RssSimple weight="bold" className="size-4" style={{ color: PRINT }} />
+                <RssSimple
+                  weight="bold"
+                  className="size-4"
+                  style={{ color: PRINT }}
+                />
                 Subscribe via RSS
               </a>
             </div>
@@ -241,16 +388,28 @@ export function PaperBlogIndex({ posts, pagePosts, pageStart, currentPage, total
 
           <div className={cn("mt-12 sm:grid-cols-3", GRID)}>
             {stats.map((stat) => (
-              <div key={stat.label} className={cn("flex items-end justify-between gap-4 px-6 py-5", CELL)}>
+              <div
+                key={stat.label}
+                className={cn(
+                  "flex items-end justify-between gap-4 px-6 py-5",
+                  CELL,
+                )}
+              >
                 <span className="text-[34px] font-medium leading-none tracking-[-0.045em]">
                   <CountUp value={stat.value} suffix={stat.suffix} />
                 </span>
-                <span className={cn("text-right text-[13px] font-medium", MUTED)}>{stat.label}</span>
+                <span
+                  className={cn("text-right text-[13px] font-medium", MUTED)}
+                >
+                  {stat.label}
+                </span>
               </div>
             ))}
           </div>
 
-          {showFeatured && featured ? <FeaturedPost post={featured} number={posts.length} /> : null}
+          {showFeatured && featured ? (
+            <FeaturedPost post={featured} number={posts.length} />
+          ) : null}
         </Container>
       </PaperSection>
 
@@ -259,7 +418,11 @@ export function PaperBlogIndex({ posts, pagePosts, pageStart, currentPage, total
           <IndexBar
             index={2}
             name="All articles"
-            aside={totalPages > 1 ? `Page ${currentPage} of ${totalPages}` : `${posts.length} articles`}
+            aside={
+              totalPages > 1
+                ? `Page ${currentPage} of ${totalPages}`
+                : `${posts.length} articles`
+            }
           />
           <SectionHead
             title={
@@ -267,19 +430,31 @@ export function PaperBlogIndex({ posts, pagePosts, pageStart, currentPage, total
                 Notes from the <Accent>studio floor</Accent>
               </>
             }
-            action={<OutlineLink href="/case-studies">See the work behind them</OutlineLink>}
+            action={
+              <OutlineLink href="/case-studies">
+                See the work behind them
+              </OutlineLink>
+            }
             actionEnd
           />
           <div className={cn("mt-10 sm:grid-cols-2 lg:grid-cols-3", GRID)}>
             {gridPosts.map((post, index) => (
-              <PostCard key={post.slug} post={post} number={posts.length - (gridStart + index)} />
+              <PostCard
+                key={post.slug}
+                post={post}
+                number={posts.length - (gridStart + index)}
+              />
             ))}
           </div>
           <Pagination currentPage={currentPage} totalPages={totalPages} />
         </Container>
       </PaperSection>
 
-      <PaperCta index={3} />
+      <PaperCta
+        index={3}
+        title="Want Content Developers Actually Read?"
+        description="We write, film and ship technical content for devtools. Let's plan what your audience needs next."
+      />
     </div>
   );
 }

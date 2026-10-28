@@ -160,11 +160,14 @@ function ProductCase({ product, index }: { product: Product; index: number }) {
 
       {/* Product, status and number */}
       <div className="flex items-center gap-3">
-        <span
-          className="flex size-10 shrink-0 items-center justify-center rounded-[6px] bg-[#f8f6f2] text-[18px] font-semibold tracking-[-0.04em] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10)]"
-          style={{ color: PRINT }}
-        >
-          {product.name.charAt(0)}
+        <span className="relative size-10 shrink-0 overflow-hidden rounded-[10px] shadow-[0_6px_14px_-8px_rgba(20,20,20,0.45)]">
+          <Image
+            src={product.logo}
+            alt=""
+            fill
+            unoptimized
+            className="object-cover"
+          />
         </span>
         <span className="text-[15px] font-semibold tracking-[-0.01em]">
           {product.name}

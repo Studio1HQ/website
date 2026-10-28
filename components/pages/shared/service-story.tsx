@@ -219,7 +219,7 @@ function BookCall({
 }
 
 /* ------------------------------------------------------------------ */
-/* Hero: pill, centred headline, then an arch holding the canvas        */
+/* Hero: copy and stats on the left, a tall photo card on the right   */
 /* ------------------------------------------------------------------ */
 
 export type StoryStat = { value: string; label: string };
@@ -260,30 +260,21 @@ export function StoryHero({
   });
 
   return (
-    <PaperPageHeader className="pb-6 pt-[88px] md:pb-8 md:pt-[96px]">
+    <PaperPageHeader className="pb-10 pt-[104px] md:pb-14 md:pt-[120px]">
       <ScrollEdgeBlur />
+      {/* Warm wash behind the hero, fading into the page on every side */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{
+          background:
+            "radial-gradient(45% 55% at 78% 45%, rgba(251,150,60,0.28), transparent 70%), radial-gradient(35% 40% at 15% 20%, rgba(254,60,52,0.08), transparent 70%)",
+        }}
+      />
       <Container>
-        {/* One engraved panel holds the headline and the photo arch */}
-        <div className="relative isolate flex min-h-[600px] flex-col px-4 pt-10 md:pt-12">
-          {/* Panel colour, its left and right edges fading into the page */}
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-y-0 -inset-x-4 -z-10 md:-inset-x-16"
-            style={{
-              background:
-                "radial-gradient(55% 38% at 50% 0%, rgba(251,138,30,0.30) 0%, rgba(251,170,110,0.14) 45%, transparent 75%), radial-gradient(30% 22% at 50% 0%, rgba(254,60,52,0.16), transparent 70%), linear-gradient(180deg, #faf6f0 0%, #f7efe5 45%, #f9e2cf 80%, #fbd5bb 100%)",
-              maskImage:
-                "linear-gradient(90deg, transparent 0%, #000 14%, #000 86%, transparent 100%), linear-gradient(180deg, transparent 0%, #000 12%)",
-              WebkitMaskImage:
-                "linear-gradient(90deg, transparent 0%, #000 14%, #000 86%, transparent 100%), linear-gradient(180deg, transparent 0%, #000 12%)",
-              maskComposite: "intersect",
-              WebkitMaskComposite: "source-in",
-            }}
-          />
-          <div
-            id="overview"
-            className="relative z-10 flex flex-col items-center text-center"
-          >
+        <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-16">
+          {/* Copy */}
+          <div id="overview" className="relative z-10">
             <motion.a
               {...enter(0)}
               href={secondaryHref}
@@ -304,19 +295,19 @@ export function StoryHero({
 
             <motion.h1
               {...enter(0.1)}
-              className="mt-7 max-w-[1040px] text-balance text-[46px] font-medium leading-[1.02] tracking-[-0.055em] sm:text-[64px] lg:text-[76px]"
+              className="mt-7 text-balance text-[44px] font-medium leading-[1.02] tracking-[-0.055em] sm:text-[58px] lg:text-[66px]"
             >
               <span className={GRADIENT_TEXT}>{titleAccent}</span> {titleRest}
             </motion.h1>
             <motion.p
               {...enter(0.15)}
-              className="mt-5 max-w-[620px] text-balance text-[16px] leading-[1.6] text-[#141414]/65 md:text-[18px]"
+              className="mt-6 max-w-[540px] text-[16px] leading-[1.65] text-[#141414]/65 md:text-[17px]"
             >
               <Highlighted text={description} phrases={highlights} />
             </motion.p>
             <motion.div
               {...enter(0.2)}
-              className="mt-7 flex flex-wrap items-center justify-center gap-x-7 gap-y-4"
+              className="mt-8 flex flex-wrap items-center gap-x-7 gap-y-4"
             >
               <BookCall label={primaryCta} />
               <a
@@ -326,114 +317,100 @@ export function StoryHero({
                 {secondaryCta}
               </a>
             </motion.div>
+
+            {/* Stats as one quiet row under the actions */}
+            {stats.length ? (
+              <motion.dl
+                {...enter(0.3)}
+                className="mt-12 grid max-w-[560px] grid-cols-2 gap-y-6 border-t border-[#141414]/[0.1] pt-7 sm:grid-cols-4"
+              >
+                {stats.slice(0, 4).map((stat, index) => {
+                  const plus = stat.value.endsWith("+");
+                  const raw = plus ? stat.value.slice(0, -1) : stat.value;
+                  return (
+                    <div
+                      key={stat.label}
+                      className={cn(
+                        "pr-4",
+                        index > 0 &&
+                          "sm:border-l sm:border-[#141414]/[0.08] sm:pl-5",
+                      )}
+                    >
+                      <dd className="whitespace-nowrap text-[30px] font-medium leading-none tabular-nums tracking-[-0.05em]">
+                        {/^\d+$/.test(raw) ? (
+                          <CountUp value={Number(raw)} />
+                        ) : (
+                          raw
+                        )}
+                        {plus ? (
+                          <span className="text-[#f97316]">+</span>
+                        ) : null}
+                      </dd>
+                      <dt className="mt-2 text-[12.5px] leading-snug text-[#141414]/55">
+                        {stat.label}
+                      </dt>
+                    </div>
+                  );
+                })}
+              </motion.dl>
+            ) : null}
           </div>
 
-          {/* The arch: a real photo, edges melting into a warm blur */}
+          {/* Photo: a tall card with a soft glow and a floating note */}
           <motion.div
             {...enter(0.2)}
-            className="relative mx-auto mt-9 flex w-full max-w-[1180px] flex-col md:mt-10"
+            className="relative mx-auto w-full max-w-[520px] lg:mr-0"
           >
-            {/* Golden glow bleeding out from the rim */}
             <span
               aria-hidden
-              className="pointer-events-none absolute -inset-x-8 -top-8 bottom-0 -z-10 [border-radius:50%_50%_0_0/100%_100%_0_0] blur-3xl"
+              className="pointer-events-none absolute -inset-10 -z-10 rounded-[60px] blur-3xl"
               style={{
                 background:
-                  "radial-gradient(60% 70% at 50% 60%, rgba(240,180,100,0.85), rgba(250,200,150,0.4) 60%, transparent 80%)",
+                  "radial-gradient(60% 60% at 55% 55%, rgba(249,140,60,0.45), transparent 75%)",
               }}
             />
-            <div
-              className="relative isolate h-[460px] overflow-hidden [border-radius:50%_50%_0_0/100%_100%_0_0] sm:h-[560px] md:h-[660px]"
-              style={{
-                background:
-                  "radial-gradient(80% 90% at 50% 100%, #f2a866 0%, #f6c48f 55%, #f9dcbc 100%)",
-              }}
-            >
-              {/* Sharp photo, fading out toward the edges */}
+            <div className="relative aspect-[4/5] overflow-hidden rounded-[28px] bg-[#f2c9a0] shadow-[0_40px_80px_-40px_rgba(120,40,0,0.55)] ring-1 ring-white/60">
               <Image
                 src={photo.src}
                 alt={photo.alt}
                 fill
                 priority
-                sizes="(max-width: 1120px) 100vw, 1120px"
-                className="-z-10 object-cover [mask-image:radial-gradient(90%_100%_at_50%_95%,black_68%,transparent_100%)]"
+                sizes="(max-width: 1024px) 90vw, 520px"
+                className="object-cover"
                 style={{ objectPosition: photo.position ?? "center" }}
               />
-              {/* Warm halo on the rim */}
               <span
                 aria-hidden
-                className="pointer-events-none absolute inset-0 [border-radius:50%_50%_0_0/100%_100%_0_0] shadow-[inset_0_0_50px_14px_rgba(247,205,155,0.65)]"
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/45 to-transparent"
               />
-              {/* Caption: where the photo was taken */}
-              <span className="absolute bottom-6 left-1/2 hidden -translate-x-1/2 items-center gap-2 whitespace-nowrap rounded-full bg-white/80 px-3.5 py-1.5 text-[12.5px] font-medium text-[#141414] shadow-[0_8px_24px_-12px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-white/70 backdrop-blur-md md:inline-flex">
+              <span className="absolute bottom-5 left-5 right-5 flex items-center gap-2 text-[13px] font-medium text-white">
                 <span
-                  className="size-1.5 rounded-full"
+                  className="size-1.5 shrink-0 rounded-full"
                   style={{ background: PRINT }}
                 />
                 {photo.alt}
               </span>
             </div>
+
+            {/* The lead stat, printed orange, resting on the card's edge */}
+            {stats[0] ? (
+              <motion.div
+                initial={reduceMotion ? false : { opacity: 0, x: -16 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, ease: EASE, delay: 0.5 }}
+                className="absolute -left-6 top-10 hidden rounded-[14px] px-5 py-4 text-white shadow-[0_24px_44px_-20px_rgba(194,65,12,0.7)] sm:block lg:-left-10"
+                style={{ background: PRINT }}
+              >
+                <p className="text-[34px] font-medium leading-none tracking-[-0.05em]">
+                  {stats[0].value}
+                </p>
+                <p className="mt-1.5 max-w-[150px] text-[12.5px] leading-snug text-white/85">
+                  {stats[0].label}
+                </p>
+              </motion.div>
+            ) : null}
           </motion.div>
         </div>
-
-        {stats.length ? (
-          <motion.dl
-            {...enter(0.3)}
-            className={cn(
-              "mt-2 grid grid-cols-2 gap-2",
-              stats.length === 3 && "md:grid-cols-3",
-              stats.length >= 4 && "md:grid-cols-4",
-            )}
-          >
-            {/* Stat cards in the landing's style; the first one is printed orange */}
-            {stats.map((stat, index) => {
-              const isPrint = index === 0;
-              const plus = stat.value.endsWith("+");
-              return (
-                <div
-                  key={stat.label}
-                  className={cn(
-                    "relative isolate flex min-h-[132px] flex-col justify-between gap-6 overflow-hidden rounded-[6px] p-6 ring-1 ring-inset transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 motion-reduce:transform-none md:p-7",
-                    isPrint
-                      ? "text-white ring-transparent"
-                      : "bg-white/80 ring-[#141414]/10 hover:shadow-[0_24px_44px_-30px_rgba(234,88,12,0.55)] after:pointer-events-none after:absolute after:inset-0 after:-z-10 after:bg-[radial-gradient(120%_70%_at_50%_110%,rgba(249,115,22,0.20),transparent_70%)] after:opacity-0 after:transition-opacity after:duration-500 hover:after:opacity-100",
-                  )}
-                  style={isPrint ? { background: PRINT } : undefined}
-                >
-                  <dd className="whitespace-nowrap text-[36px] font-medium leading-[0.95] tabular-nums tracking-[-0.05em] md:text-[44px]">
-                    {/* Numbers count up as they come into view */}
-                    {/^\d+$/.test(
-                      plus ? stat.value.slice(0, -1) : stat.value,
-                    ) ? (
-                      <CountUp
-                        value={Number(
-                          plus ? stat.value.slice(0, -1) : stat.value,
-                        )}
-                      />
-                    ) : plus ? (
-                      stat.value.slice(0, -1)
-                    ) : (
-                      stat.value
-                    )}
-                    {plus ? (
-                      <span className={isPrint ? undefined : "text-[#f97316]"}>
-                        +
-                      </span>
-                    ) : null}
-                  </dd>
-                  <dt
-                    className={cn(
-                      "text-[14px] leading-snug",
-                      isPrint ? "text-white/85" : "text-[#141414]/55",
-                    )}
-                  >
-                    {stat.label}
-                  </dt>
-                </div>
-              );
-            })}
-          </motion.dl>
-        ) : null}
       </Container>
     </PaperPageHeader>
   );

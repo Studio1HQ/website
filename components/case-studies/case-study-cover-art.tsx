@@ -13,12 +13,6 @@ const TILE_SIZE: Record<CardVariant, string> = {
   compact: "size-12 md:size-14",
 };
 
-const TILE_PAD: Record<CardVariant, string> = {
-  featured: "p-1",
-  default: "p-1",
-  compact: "p-0.5",
-};
-
 const GAP: Record<CardVariant, string> = {
   featured: "gap-5 md:gap-6",
   default: "gap-4 md:gap-5",
@@ -42,8 +36,7 @@ function CoverTile({
     <div
       className={cn(
         TILE_SIZE[variant],
-        TILE_PAD[variant],
-        "flex shrink-0 items-center justify-center rounded-[6px] bg-[#f8f6f2] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10)]",
+        "relative flex shrink-0 items-center justify-center overflow-hidden rounded-[22%] [filter:drop-shadow(0_10px_14px_rgba(20,20,20,0.22))]",
       )}
     >
       {children}
@@ -89,9 +82,9 @@ export function CaseStudyCoverArt({
             <Image
               src={logo.icon}
               alt=""
-              width={96}
-              height={96}
-              className="size-full rounded-md object-contain mix-blend-multiply"
+              fill
+              sizes="96px"
+              className="object-cover"
             />
           ) : (
             <span className="text-2xl font-semibold text-[#141414]">

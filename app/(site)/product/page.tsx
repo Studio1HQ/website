@@ -39,7 +39,10 @@ export default function ProductPage() {
           </div>
         </Container>
       </PaperSection>
-      <PaperCta />
+      <PaperCta
+        title="Building a Developer Product?"
+        description="We help devtools launch, explain and grow. Let's talk about getting yours in front of developers."
+      />
     </main>
   );
 }

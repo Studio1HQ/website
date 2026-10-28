@@ -10,10 +10,26 @@ type CodeBlockProps = {
 };
 
 /** Languages that are prose-like; the JS highlighter mangles them, so render as plain text. */
-const PLAIN_LANGUAGES = new Set(["text", "txt", "plain", "md", "markdown", "mdx", "yaml", "yml", "toml", "ini", "env", "csv"]);
+const PLAIN_LANGUAGES = new Set([
+  "text",
+  "txt",
+  "plain",
+  "md",
+  "markdown",
+  "mdx",
+  "yaml",
+  "yml",
+  "toml",
+  "ini",
+  "env",
+  "csv",
+]);
 
 function escapeHtml(value: string) {
-  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
 
 export function CodeBlock({ code, language = "text" }: CodeBlockProps) {
@@ -45,7 +61,11 @@ export function CodeBlock({ code, language = "text" }: CodeBlockProps) {
           onClick={copyCode}
           className="inline-flex items-center gap-1.5 rounded-full border border-white/10 px-2.5 py-1 text-[12px] text-zinc-300 transition-colors hover:border-[#fb923c]/50 hover:text-white"
         >
-          {copied ? <Check className="size-3.5 text-[#fb923c]" /> : <Copy className="size-3.5" />}
+          {copied ? (
+            <Check className="size-3.5 text-[#fb923c]" />
+          ) : (
+            <Copy className="size-3.5" />
+          )}
           {copied ? "Copied" : "Copy"}
         </button>
       </div>

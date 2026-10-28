@@ -2,10 +2,18 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
-import { countBlogWords, getPostBySlug, getPostSlugs } from "@/lib/blog";
+import {
+  countBlogWords,
+  getLatestPosts,
+  getPostBySlug,
+  getPostSlugs,
+} from "@/lib/blog";
 import { PostLayout } from "@/components/blog/post-layout";
 import { postMarkdownUrl } from "@/lib/blog-markdown";
-import { blogMdxComponents, transformBlogMdxContent } from "@/components/blog/mdx";
+import {
+  blogMdxComponents,
+  transformBlogMdxContent,
+} from "@/components/blog/mdx";
 import {
   absoluteImageUrl,
   articlePageMetadata,
@@ -141,6 +149,7 @@ export default async function BlogPostPage({ params }: Props) {
         tldrSummary={post.tldrSummary}
         keyTakeaways={post.keyTakeaways}
         navigation={post.navigation}
+        latest={getLatestPosts(slug, 3)}
       >
         <MDXRemote
           source={transformBlogMdxContent(post.content)}

@@ -9,7 +9,6 @@ import {
   useScroll,
   useSpring,
   useTransform,
-  type MotionValue,
 } from "motion/react";
 import Logo from "@/components/ui/svgs/logo";
 import { companies } from "@/data/companies";
@@ -19,7 +18,7 @@ import { cn } from "@/lib/utils";
 /*
  * Partner logos as a white jigsaw: one logo per piece, the pieces locked
  * together into a single board. Pieces settle into place as the board
- * comes into view, ripple column by column as you scroll, and a hovered
+ * comes into view, the board tilts gently as you scroll, and a hovered
  * piece lifts off the board. A Studio1 piece completes the set.
  */
 
@@ -170,38 +169,20 @@ function Piece({
   );
 }
 
-/**
- * One column of pieces. The whole column rides a wave tied to scroll, each
- * column a step behind the last, so the board ripples as you scroll. Nine
- * columns move, not every piece, which keeps scrolling smooth.
- */
-function Column({
-  c,
-  wave,
-  children,
-}: {
-  c: number;
-  wave: MotionValue<number>;
-  children: ReactNode;
-}) {
-  const reduceMotion = useReducedMotion();
-  const y = useTransform(
-    wave,
-    (v) => Math.round(Math.sin(v * Math.PI * 5 - c * 0.7) * 700) / 100,
-  );
+/** One column of pieces. */
+function Column({ c, children }: { c: number; children: ReactNode }) {
   return (
-    <motion.div
-      className="absolute inset-y-0 will-change-transform"
-      style={{
-        left: pct((c / COLS) * 100),
-        width: pct(100 / COLS),
-        y: reduceMotion ? 0 : y,
-      }}
+    <div
+      className="absolute inset-y-0"
+      style={{ left: pct((c / COLS) * 100), width: pct(100 / COLS) }}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }
+
+/** Logos that already spell out the name. */
+const WORDMARKS = new Set(["Eachlabs", "Memori", "Interact AI"]);
 
 function CompanyMark({ item }: { item: Company }) {
   const wide = "logoVariant" in item && item.logoVariant === "wide";
@@ -210,8 +191,8 @@ function CompanyMark({ item }: { item: Company }) {
   return (
     <>
       {/* Every logo sits in the same 80 x 32 box, centred */}
-      <span className="relative flex h-8 w-[80px] items-center justify-center">
-        <span className={wide ? "relative h-6 w-full" : "relative size-8"}>
+      <span className="relative flex h-8 w-[76px] items-center justify-center">
+        <span className={wide ? "relative h-5 w-[68px]" : "relative size-8"}>
           <Image
             src={item.image}
             alt=""
@@ -225,9 +206,11 @@ function CompanyMark({ item }: { item: Company }) {
           />
         </span>
       </span>
-      <span className="line-clamp-1 max-w-full text-center text-[11.5px] font-medium tracking-[-0.01em] text-[#141414]/75">
-        {item.name}
-      </span>
+      {WORDMARKS.has(item.name) ? null : (
+        <span className="line-clamp-1 max-w-full text-center text-[11.5px] font-medium tracking-[-0.01em] text-[#141414]/75">
+          {item.name}
+        </span>
+      )}
     </>
   );
 }
@@ -242,6 +225,8 @@ export function LogoPuzzle({ className }: { className?: string }) {
     offset: ["start end", "end start"],
   });
   const wave = useSpring(scrollYProgress, { stiffness: 60, damping: 20 });
+  const reduceMotion = useReducedMotion();
+  const tilt = useTransform(wave, [0, 0.5, 1], [32, 22, 16]);
 
   const pieces: { c: number; node: ReactNode }[] = companies.map(
     (item, index) => {
@@ -316,15 +301,19 @@ export function LogoPuzzle({ className }: { className?: string }) {
         </defs>
       </svg>
       <motion.div
-        className="relative mx-auto w-[min(1280px,92vw)] [transform:rotateX(24deg)_scale(0.94)] [transform-origin:50%_0%]"
-        style={{ aspectRatio: `${COLS} / ${rows}` }}
+        className="relative mx-auto w-[min(1280px,92vw)] [transform-origin:50%_0%]"
+        style={{
+          aspectRatio: `${COLS} / ${rows}`,
+          rotateX: reduceMotion ? 22 : tilt,
+          scale: 0.94,
+        }}
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.8, ease: EASE }}
       >
         {Array.from({ length: COLS }, (_, c) => (
-          <Column key={c} c={c} wave={wave}>
+          <Column key={c} c={c}>
             {pieces.filter((piece) => piece.c === c).map((piece) => piece.node)}
           </Column>
         ))}

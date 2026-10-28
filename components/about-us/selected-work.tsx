@@ -135,10 +135,10 @@ const PROJECTS: Project[] = [
 
 const TINTS = [
   {
-    tab: "rgba(253,214,182,0.95)",
-    from: "rgba(254,240,228,0.95)",
-    to: "rgba(251,197,153,0.92)",
-    glass: "rgba(255,250,245,0.62)",
+    tab: "#fbcfa6",
+    from: "#fde2cb",
+    to: "#f9b98a",
+    glass: "rgba(255,255,255,0.8)",
   },
 ];
 
@@ -181,7 +181,7 @@ function Folder({
           />
           <span
             aria-hidden
-            className="absolute inset-0 rounded-[14px] rounded-tl-none shadow-[inset_0_1px_0_#fff,inset_0_0_0_1px_rgba(255,255,255,0.7),0_24px_50px_-34px_rgba(194,65,12,0.45)] ring-1 ring-[#f97316]/20 backdrop-blur-md"
+            className="absolute inset-0 rounded-[14px] rounded-tl-none shadow-[inset_0_1px_0_#fff,inset_0_0_0_1px_rgba(255,255,255,0.7),0_12px_24px_-20px_rgba(20,20,20,0.25)] ring-1 ring-[#141414]/[0.06] backdrop-blur-md"
             style={{
               background: `linear-gradient(180deg, ${colors.from}, ${colors.to})`,
             }}
@@ -206,7 +206,7 @@ function Folder({
 
           {/* Glass front pocket with the writing */}
           <div
-            className="absolute inset-x-0 bottom-0 h-[56%] overflow-hidden rounded-[14px] shadow-[0_-12px_28px_-18px_rgba(194,65,12,0.35)] backdrop-blur-xl backdrop-saturate-150"
+            className="absolute inset-x-0 bottom-0 h-[56%] overflow-hidden rounded-[14px] shadow-[0_-1px_0_rgba(20,20,20,0.04)] backdrop-blur-xl backdrop-saturate-150"
             style={{ background: colors.glass }}
           >
             {/* the pocket's lip: a light edge and a faint orange hairline */}
@@ -285,7 +285,7 @@ function GroupRow({
   return (
     <div className="grid gap-6 border-t border-[#141414]/[0.1] pt-8 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-6">
       {/* Group panel: a frosted card the height of the folders */}
-      <div className="relative flex flex-col overflow-hidden rounded-[16px] bg-[linear-gradient(180deg,rgba(255,255,255,0.78),rgba(254,232,214,0.75))] p-6 shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(194,65,12,0.35)] ring-1 ring-[#f97316]/20 backdrop-blur-md lg:mt-10">
+      <div className="relative flex flex-col overflow-hidden rounded-[16px] bg-[linear-gradient(180deg,rgba(255,255,255,0.78),rgba(254,232,214,0.75))] p-6 shadow-[inset_0_1px_0_#fff,0_12px_24px_-20px_rgba(20,20,20,0.25)] ring-1 ring-[#141414]/[0.06] backdrop-blur-md lg:mt-10 lg:h-[324px] lg:self-start">
         <div className="flex items-center justify-end">
           <span className="rounded-full bg-white/80 px-2.5 py-1 text-[11.5px] font-medium tabular-nums text-[#141414]/60 ring-1 ring-[#141414]/[0.06]">
             {items.length} projects

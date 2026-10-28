@@ -145,7 +145,11 @@ export default function AboutUs() {
       <Team />
       <SelectedWork />
       <Companies />
-      <PaperCta index={5} />
+      <PaperCta
+        index={5}
+        title="Let's Build Your Developer Story Together"
+        description="Tell us about your product and the developers you want to reach. We will shape the plan with you."
+      />
     </div>
   );
 }

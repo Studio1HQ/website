@@ -22,7 +22,10 @@ export function BlogIndexView({ currentPage = 1 }: BlogIndexViewProps) {
   const totalPages = Math.max(1, Math.ceil(posts.length / POSTS_PER_BLOG_PAGE));
   const safePage = Math.min(Math.max(currentPage, 1), totalPages);
   const pageStart = (safePage - 1) * POSTS_PER_BLOG_PAGE;
-  const paginatedPosts = posts.slice(pageStart, pageStart + POSTS_PER_BLOG_PAGE);
+  const paginatedPosts = posts.slice(
+    pageStart,
+    pageStart + POSTS_PER_BLOG_PAGE,
+  );
   const currentUrl = `${baseUrl}${pageHref(safePage)}`;
 
   const blogJsonLd = {

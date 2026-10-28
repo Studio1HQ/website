@@ -10,15 +10,22 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import { PostShare } from "@/components/blog/post-share";
 import { PostAiActions } from "@/components/blog/post-ai-actions";
-import { ChapterRail } from "@/components/blog/chapter-rail";
+import { ChapterRail, ReadingLine } from "@/components/blog/chapter-rail";
 import { OnThisPage } from "@/components/blog/on-this-page";
 import { Num } from "@/components/ui/num";
-import { Cursor, SelectionFrame } from "@/components/paper/paper-hero";
+import Logo from "@/components/ui/svgs/logo";
 import { PaperCta } from "@/components/paper/paper-sections";
-import type { BlogPostNavigation } from "@/lib/blog";
+import type { BlogPostMeta, BlogPostNavigation } from "@/lib/blog";
+import { LatestArticles } from "@/components/blog/latest-articles";
 import { blogCoverUrl } from "@/lib/blog-cover";
 import { tagLabel } from "@/lib/blog-tags";
-import { GRAIN, INK, PAPER, PAPER_SCOPE, PRINT } from "@/lib/paper";
+import { GRAIN, PAPER_SCOPE, PRINT } from "@/lib/paper";
+
+/** Team photos for named authors; the Studio1 mark for the team byline. */
+const AUTHOR_PHOTO: Record<string, string> = {
+  "Amitesh Anand": "/assets/amitesh.webp",
+  "Arindam Majumder": "/assets/arindam-nobg.webp",
+};
 
 type PostLayoutProps = {
   title: string;
@@ -39,6 +46,7 @@ type PostLayoutProps = {
   keyTakeaways?: string[];
   wordCount?: number;
   navigation?: BlogPostNavigation;
+  latest?: BlogPostMeta[];
   children: ReactNode;
 };
 
@@ -53,9 +61,6 @@ function formatDate(value: string) {
         timeZone: "UTC",
       });
 }
-
-const sideLink =
-  "group flex h-11 items-center justify-between rounded-full pl-1.5 pr-4 text-[13px] transition-transform duration-300 hover:-translate-y-0.5";
 
 /** White sheet with a hairline ring, as the landing page's cards. */
 const sheet = "bg-white/80 ring-1 ring-inset ring-[#141414]/10";
@@ -96,6 +101,7 @@ export function PostLayout({
   keyTakeaways = [],
   wordCount,
   navigation = { previous: null, next: null },
+  latest = [],
   children,
 }: PostLayoutProps) {
   const showUpdatedDate = updatedDate && updatedDate !== date;
@@ -108,19 +114,43 @@ export function PostLayout({
   const topic = tags[0] ? tagLabel(tags[0]) : "Journal";
 
   const details: [string, ReactNode][] = [
-    ["Published", <time key="published" dateTime={date}>{formatDate(date)}</time>],
+    [
+      "Published",
+      <time key="published" dateTime={date}>
+        {formatDate(date)}
+      </time>,
+    ],
     ...(showUpdatedDate
-      ? ([["Updated", <time key="updated" dateTime={updatedDate}>{formatDate(updatedDate)}</time>]] as [string, ReactNode][])
+      ? ([
+          [
+            "Updated",
+            <time key="updated" dateTime={updatedDate}>
+              {formatDate(updatedDate)}
+            </time>,
+          ],
+        ] as [string, ReactNode][])
       : []),
     ...(readingTimeMinutes != null
-      ? ([["Reading time", <><Num>{readingTimeMinutes}</Num> min</>]] as [string, ReactNode][])
+      ? ([
+          [
+            "Reading time",
+            <>
+              <Num>{readingTimeMinutes}</Num> min
+            </>,
+          ],
+        ] as [string, ReactNode][])
       : []),
-    ...(wordCount ? ([["Words", <Num key="words">{wordCount.toLocaleString("en-US")}</Num>]] as [string, ReactNode][]) : []),
+    ...(wordCount
+      ? ([
+          ["Words", <Num key="words">{wordCount.toLocaleString("en-US")}</Num>],
+        ] as [string, ReactNode][])
+      : []),
     ["Topic", topic],
   ];
 
   return (
     <div style={PAPER_SCOPE}>
+      <ReadingLine />
       <article className="relative isolate pt-20">
         {/* Paper grain */}
         <div
@@ -130,17 +160,27 @@ export function PostLayout({
         />
 
         <header className={`${frame} pt-12 md:pt-16`}>
-          <nav aria-label="Breadcrumb" className="flex items-center justify-between gap-6 text-[13px] font-medium">
+          <nav
+            aria-label="Breadcrumb"
+            className="flex items-center justify-between gap-6 text-[13px] font-medium"
+          >
             <span className="flex min-w-0 items-center gap-3">
               <Link
                 href="/blog"
                 className="group inline-flex items-center gap-1.5 text-[var(--p-muted)] transition-colors hover:text-[var(--p-fg)]"
               >
-                <ArrowLeft weight="bold" className="size-3.5 transition-transform group-hover:-translate-x-0.5" />
+                <ArrowLeft
+                  weight="bold"
+                  className="size-3.5 transition-transform group-hover:-translate-x-0.5"
+                />
                 Blog
               </Link>
-              <span aria-hidden className="text-[var(--p-faint)]">/</span>
-              <span className="truncate" style={{ color: PRINT }}>{topic}</span>
+              <span aria-hidden className="text-[var(--p-faint)]">
+                /
+              </span>
+              <span className="truncate" style={{ color: PRINT }}>
+                {topic}
+              </span>
             </span>
             {readingTimeMinutes != null ? (
               <span className="hidden shrink-0 text-[var(--p-muted)] sm:block">
@@ -160,15 +200,35 @@ export function PostLayout({
 
           <div className="mt-8 flex flex-wrap items-center justify-between gap-x-6 gap-y-4 border-t border-[var(--p-line)] pt-5">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[14px] text-[var(--p-muted)]">
-              <span
-                aria-hidden
-                className="flex size-8 items-center justify-center rounded-full text-[11px] font-medium"
-                style={{ background: INK, color: PAPER }}
-              >
-                {initials(authorList[0])}
+              <span className="flex -space-x-2">
+                {authorList.map((name) => (
+                  <span
+                    key={name}
+                    aria-hidden
+                    className="relative flex size-9 items-center justify-center overflow-hidden rounded-full bg-white ring-2 ring-[#f4efe7]"
+                  >
+                    {AUTHOR_PHOTO[name] ? (
+                      <Image
+                        src={AUTHOR_PHOTO[name]}
+                        alt=""
+                        fill
+                        sizes="36px"
+                        className="object-cover object-top"
+                      />
+                    ) : name === "Studio1 Team" ? (
+                      <Logo className="size-5" />
+                    ) : (
+                      <span className="text-[11px] font-medium">
+                        {initials(name)}
+                      </span>
+                    )}
+                  </span>
+                ))}
               </span>
               <span className="font-medium text-[var(--p-fg)]">{byline}</span>
-              <span aria-hidden className="text-[var(--p-faint)]">·</span>
+              <span aria-hidden className="text-[var(--p-faint)]">
+                ·
+              </span>
               <time dateTime={date}>{formatDate(date)}</time>
             </div>
             {tags.length ? (
@@ -190,27 +250,31 @@ export function PostLayout({
             ) : null}
           </div>
 
-          <div className="relative mx-auto mt-12 w-full max-w-[920px]">
-            <SelectionFrame label="cover-image" labelPosition="top-left" className="p-1.5">
-              <figure className={`relative aspect-[16/9] overflow-hidden rounded-[6px] ${bannerImage ? "bg-[#0b0b0b]" : "bg-[#f4efe7]"} shadow-[0_30px_60px_-40px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/10`}>
-                <Image
-                  src={bannerImage || blogCoverUrl(slug, updatedDate || date)}
-                  alt={bannerImage ? bannerImageAlt || title : ""}
-                  fill
-                  priority
-                  className={bannerImage ? "object-contain" : "object-cover"}
-                  sizes="(max-width: 960px) 100vw, 920px"
-                />
-              </figure>
-            </SelectionFrame>
-            <Cursor className="absolute -bottom-6 right-[10%] hidden md:block" />
+          <div className="relative mx-auto mt-12 w-full max-w-[1000px]">
+            <figure
+              className={`relative aspect-[16/9] overflow-hidden rounded-[16px] ${bannerImage ? "bg-[#0b0b0b]" : "bg-[#f4efe7]"} shadow-[0_40px_80px_-50px_rgba(20,20,20,0.6)] ring-1 ring-inset ring-[#141414]/10`}
+            >
+              <Image
+                src={bannerImage || blogCoverUrl(slug, updatedDate || date)}
+                alt={bannerImage ? bannerImageAlt || title : ""}
+                fill
+                priority
+                className={bannerImage ? "object-contain" : "object-cover"}
+                sizes="(max-width: 960px) 100vw, 920px"
+              />
+            </figure>
           </div>
         </header>
 
-        <div className={`${frame} pb-24 pt-14 md:pt-16 xl:grid xl:grid-cols-[230px_minmax(0,1fr)_230px] xl:gap-14`}>
+        <div
+          className={`${frame} pb-24 pt-14 md:pt-16 xl:grid xl:grid-cols-[230px_minmax(0,1fr)_230px] xl:gap-14`}
+        >
           {/* Left: numbered chapters, the one being read opens (pinned) */}
           <aside className="hidden xl:block">
-            <div data-lenis-prevent className="s1-scroll-none sticky top-28 max-h-[calc(100vh/var(--s1-zoom,1)_-_8rem)] overflow-y-auto pb-6">
+            <div
+              data-lenis-prevent
+              className="s1-scroll-none sticky top-28 max-h-[calc(100vh/var(--s1-zoom,1)_-_8rem)] overflow-y-auto"
+            >
               <OnThisPage />
             </div>
           </aside>
@@ -313,61 +377,53 @@ export function PostLayout({
             ) : null}
           </div>
 
-          {/* Right: details ledger and quick links (pinned) */}
+          {/* Right: one engraved panel with details, actions and sharing */}
           <aside className="hidden xl:block">
-            <div className="sticky top-28 flex flex-col gap-6">
-              <dl className="rounded-[6px] bg-white/80 px-4 shadow-[inset_0_1px_0_#fff] ring-1 ring-inset ring-[#141414]/[0.08] text-[12px]">
+            <div className="sticky top-28">
+              {/* Details, set into the panel */}
+              <dl className="rounded-[11px] px-4 py-1 bg-white/70 shadow-[inset_0_1px_0_#fff,0_10px_24px_-20px_rgba(20,20,20,0.35)] ring-1 ring-white/80 backdrop-blur-xl backdrop-saturate-150">
                 {details.map(([label, value]) => (
                   <div
                     key={label}
-                    className="flex items-baseline justify-between gap-4 border-b border-[var(--p-line)] py-3 last:border-b-0"
+                    className="flex items-baseline justify-between gap-4 border-b border-[#141414]/[0.07] py-2.5 last:border-b-0"
                   >
-                    <dt className="text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--p-muted)]">{label}</dt>
-                    <dd className="text-right font-medium tabular-nums">{value}</dd>
+                    <dt className="text-[11.5px] text-[#141414]/50">{label}</dt>
+                    <dd className="text-right text-[12.5px] font-medium tabular-nums text-[#141414]">
+                      {value}
+                    </dd>
                   </div>
                 ))}
               </dl>
-              <div className="flex flex-col gap-2">
+
+              {/* Actions */}
+              <div className="mt-2 flex flex-col gap-1.5">
                 <a
-                  href={markdownUrl}
+                  href="https://cal.com/studio1/collab"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`${sideLink} ${sheet} text-[var(--p-muted)] hover:text-[var(--p-fg)]`}
+                  className="group flex items-center gap-3 rounded-[11px] bg-white/55 p-2 pr-3.5 text-[13px] font-medium text-[#141414] shadow-[inset_0_1px_0_#fff,0_10px_24px_-18px_rgba(20,20,20,0.45)] ring-1 ring-[#141414]/[0.06] backdrop-blur-xl backdrop-saturate-150 transition-colors hover:bg-white/80"
                 >
-                  <span className="flex items-center gap-2.5">
-                    <span
-                      className="flex size-8 items-center justify-center rounded-full"
-                      style={{ background: INK, color: PAPER }}
-                    >
-                      <MarkdownLogo weight="fill" className="size-4" />
-                    </span>
-                    <span>
-                      View as{" "}
-                      <span className="font-medium text-[var(--p-fg)]">
-                        Markdown
-                      </span>
-                    </span>
+                  <span className="flex size-8 items-center justify-center text-[#141414]">
+                    <CalendarDots weight="bold" className="size-4" />
                   </span>
+                  <span className="flex-1">Book a strategy call</span>
                   <ArrowUpRight
                     weight="bold"
                     className="size-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
                   />
                 </a>
                 <a
-                  href="https://cal.com/studio1/collab"
+                  href={markdownUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={sideLink}
-                  style={{ background: INK, color: PAPER }}
+                  className="group flex items-center gap-3 rounded-[11px] bg-white/70 shadow-[inset_0_1px_0_#fff,0_10px_24px_-20px_rgba(20,20,20,0.35)] ring-1 ring-white/80 backdrop-blur-xl backdrop-saturate-150 p-2 pr-3.5 text-[13px] text-[#141414]/65 transition-colors hover:text-[#141414]"
                 >
-                  <span className="flex items-center gap-2.5">
-                    <span
-                      className="flex size-8 items-center justify-center rounded-full text-white"
-                      style={{ background: PRINT }}
-                    >
-                      <CalendarDots weight="bold" className="size-4" />
-                    </span>
-                    <span className="font-medium">Book a strategy call</span>
+                  <span className="flex size-8 items-center justify-center text-[#141414]">
+                    <MarkdownLogo weight="fill" className="size-4" />
+                  </span>
+                  <span className="flex-1">
+                    View as{" "}
+                    <span className="font-medium text-[#141414]">Markdown</span>
                   </span>
                   <ArrowUpRight
                     weight="bold"
@@ -375,17 +431,24 @@ export function PostLayout({
                   />
                 </a>
               </div>
-              <PostShare url={shareUrl} title={title} variant="sidebar" />
+              <div className="mt-4 px-1">
+                <PostShare url={shareUrl} title={title} variant="sidebar" />
+              </div>
             </div>
           </aside>
         </div>
 
         {/* Below xl: floating chapter pill */}
         <ChapterRail readingTimeMinutes={readingTimeMinutes} variant="pill" />
+        <LatestArticles posts={latest} />
       </article>
 
-      <div className="border-t border-[var(--p-line)]">
-        <PaperCta index={2} />
+      <div>
+        <PaperCta
+          index={2}
+          title="Need Help Putting This Into Practice?"
+          description="Book a call and we will turn the ideas in this article into a plan for your developer product."
+        />
       </div>
     </div>
   );

@@ -160,7 +160,10 @@ export default async function CaseStudiesPage() {
           </div>
         </Container>
       </PaperSection>
-      <PaperCta />
+      <PaperCta
+        title="Want Results Like These?"
+        description="Every case study started with one call. Share your goals and we will map what moves adoption for you."
+      />
     </div>
   );
 }

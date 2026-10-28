@@ -20,14 +20,20 @@ const pad = (n: number) => String(n).padStart(2, "0");
  */
 function useChapterProgress() {
   const [chapters, setChapters] = useState<Chapter[]>([]);
-  const [state, setState] = useState({ active: 0, chapterProgress: 0, total: 0 });
+  const [state, setState] = useState({
+    active: 0,
+    chapterProgress: 0,
+    total: 0,
+  });
 
   useEffect(() => {
     const article = document.querySelector("[data-mdx-content]");
     if (!article) return;
     // Posts written with only h3s use them as their chapters.
     setChapters(
-      Array.from(article.querySelectorAll(article.querySelector("h2") ? "h2" : "h3"))
+      Array.from(
+        article.querySelectorAll(article.querySelector("h2") ? "h2" : "h3"),
+      )
         .filter((el) => el.id)
         .map((el) => ({ id: el.id, title: el.textContent ?? "" })),
     );
@@ -57,8 +63,11 @@ function useChapterProgress() {
       const start = tops[active];
       const end = tops[active + 1] ?? articleEnd;
       const clamp = (v: number) => Math.min(1, Math.max(0, v));
-      const chapterProgress = line < tops[0] ? 0 : clamp((line - start) / Math.max(1, end - start));
-      const total = clamp((line - articleTop) / Math.max(1, articleEnd - articleTop));
+      const chapterProgress =
+        line < tops[0] ? 0 : clamp((line - start) / Math.max(1, end - start));
+      const total = clamp(
+        (line - articleTop) / Math.max(1, articleEnd - articleTop),
+      );
 
       setState((prev) =>
         prev.active === active &&
@@ -128,7 +137,10 @@ export function ChapterRail({
   const { chapters, active, chapterProgress, total } = useChapterProgress();
   const [open, setOpen] = useState(false);
   const minutesLeft = useMemo(
-    () => (readingTimeMinutes ? Math.max(0, Math.ceil(readingTimeMinutes * (1 - total))) : null),
+    () =>
+      readingTimeMinutes
+        ? Math.max(0, Math.ceil(readingTimeMinutes * (1 - total)))
+        : null,
     [readingTimeMinutes, total],
   );
 
@@ -159,7 +171,10 @@ export function ChapterRail({
               className="relative flex gap-3 rounded-xl py-2.5 pl-2.5 pr-3"
             >
               {/* Per-chapter progress line */}
-              <span aria-hidden className="relative mt-0.5 w-[3px] shrink-0 self-stretch overflow-hidden rounded-full bg-[var(--home-line)]">
+              <span
+                aria-hidden
+                className="relative mt-0.5 w-[3px] shrink-0 self-stretch overflow-hidden rounded-full bg-[var(--home-line)]"
+              >
                 <span
                   className="absolute inset-x-0 top-0 rounded-full bg-primary transition-[height] duration-150 ease-out"
                   style={{ height: `${fill * 100}%` }}
@@ -172,7 +187,11 @@ export function ChapterRail({
                   !isActive && !done && "opacity-70",
                 )}
               >
-                {done ? <Check weight="bold" className="mt-0.5 size-3 text-primary" /> : pad(index + 1)}
+                {done ? (
+                  <Check weight="bold" className="mt-0.5 size-3 text-primary" />
+                ) : (
+                  pad(index + 1)
+                )}
               </span>
               <span
                 className={cn(
@@ -196,14 +215,17 @@ export function ChapterRail({
   const header = (
     <div className="flex items-end justify-between gap-3">
       <div>
-        <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-[var(--home-ink-soft)]">Chapter</p>
+        <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-[var(--home-ink-soft)]">
+          Chapter
+        </p>
         <p className="mt-1.5 flex items-baseline gap-1.5 text-[28px] font-medium leading-none tracking-[-0.04em] text-[var(--home-ink)]">
           <ChapterNumber value={active + 1} />
-          <span className="text-[14px] font-normal tracking-normal text-[var(--home-ink-soft)]">/ {pad(chapters.length)}</span>
+          <span className="text-[14px] font-normal tracking-normal text-[var(--home-ink-soft)]">
+            / {pad(chapters.length)}
+          </span>
         </p>
       </div>
       <div className="text-right">
-        <p className="text-[13px] font-medium tabular-nums text-[var(--home-ink)]">{Math.round(total * 100)}%</p>
         {minutesLeft != null ? (
           <p className="mt-0.5 text-[11px] text-[var(--home-ink-soft)]">
             {minutesLeft > 0 ? `${minutesLeft} min left` : "Finished"}
@@ -227,11 +249,19 @@ export function ChapterRail({
       {/* Desktop rail */}
       <nav
         aria-label="Chapters"
-        className={cn("hidden bg-white/80 p-5 ring-1 ring-inset ring-[#141414]/10", variant === "full" && "xl:block")}
+        className={cn(
+          "hidden bg-white/80 p-5 ring-1 ring-inset ring-[#141414]/10",
+          variant === "full" && "xl:block",
+        )}
       >
         {header}
         <div className="mt-4">{totalBar}</div>
-        <div data-lenis-prevent className="-mx-1.5 mt-4 max-h-[calc(100vh/var(--s1-zoom,1)_-_20rem)] overflow-y-auto pr-0.5">{list()}</div>
+        <div
+          data-lenis-prevent
+          className="-mx-1.5 mt-4 max-h-[calc(100vh/var(--s1-zoom,1)_-_20rem)] overflow-y-auto pr-0.5"
+        >
+          {list()}
+        </div>
       </nav>
 
       {/* Small screens: floating chapter pill */}
@@ -265,14 +295,41 @@ export function ChapterRail({
             <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-[var(--home-ink)]">
               {chapters[active]?.title}
             </span>
-            <span className="text-[11px] tabular-nums text-[var(--home-ink-soft)]">{Math.round(total * 100)}%</span>
-            <CaretUp weight="bold" className={cn("size-3.5 text-[var(--home-ink-soft)] transition-transform duration-300", open && "rotate-180")} />
-            <span aria-hidden className="absolute inset-x-0 bottom-0 h-[2px] bg-[var(--home-line)]">
-              <span className="block h-full bg-primary transition-[width] duration-150 ease-out" style={{ width: `${total * 100}%` }} />
+            <CaretUp
+              weight="bold"
+              className={cn(
+                "size-3.5 text-[var(--home-ink-soft)] transition-transform duration-300",
+                open && "rotate-180",
+              )}
+            />
+            <span
+              aria-hidden
+              className="absolute inset-x-0 bottom-0 h-[2px] bg-[var(--home-line)]"
+            >
+              <span
+                className="block h-full bg-primary transition-[width] duration-150 ease-out"
+                style={{ width: `${total * 100}%` }}
+              />
             </span>
           </button>
         </div>
       </div>
     </>
+  );
+}
+
+/** A thin orange line along the top of the page that fills as you read. */
+export function ReadingLine() {
+  const { total } = useChapterProgress();
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none fixed inset-x-0 top-0 z-[1000] h-[3px]"
+    >
+      <div
+        className="h-full origin-left bg-[#f97316] transition-transform duration-150 ease-out"
+        style={{ transform: `scaleX(${total})` }}
+      />
+    </div>
   );
 }
