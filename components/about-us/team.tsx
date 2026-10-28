@@ -1,13 +1,7 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { useRef } from "react";
-import {
-  motion,
-  useReducedMotion,
-  useScroll,
-  useTransform,
-} from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import {
   GlobeSimple,
   LinkedinLogo,
@@ -51,57 +45,51 @@ const socials = (member: Member) => [
   },
 ];
 
-/** One leader: framed halftone portrait that drifts as you scroll. */
+/* Pixel-dithered portraits, ink dots on a transparent ground. */
+const DITHER: Record<string, string> = {
+  "Arindam Majumder": "/assets/dither/arindam-dither.png",
+  "Amitesh Anand": "/assets/dither/amitesh-dither.png",
+  "Shivay Lamba": "/assets/dither/shivay-dither.png",
+};
+
 function LeaderCard({ member }: { member: Member }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const reduceMotion = useReducedMotion();
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"],
-  });
-  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [1.14, 1.02, 1.1]);
-  const y = useTransform(scrollYProgress, [0, 1], ["6%", "-6%"]);
+  const portrait = DITHER[member.name] ?? member.image;
 
   return (
     <>
       <div
-        ref={ref}
-        className="relative aspect-[4/4.4] overflow-hidden rounded-[28px] border-[3px] border-[#141414] shadow-[0_24px_44px_-28px_rgba(20,20,20,0.55)] md:rounded-[36px]"
+        className="relative aspect-[4/4.4] overflow-hidden rounded-[6px]"
         style={{
-          background:
-            "radial-gradient(90% 75% at 50% 18%, #f1eee9 0%, #dcd7cf 55%, #c7c1b8 100%)",
+          background: "linear-gradient(180deg, #e6e3de 0%, #d8d4ce 100%)",
         }}
       >
-        {/* Dot grid on the backdrop, behind the portrait */}
+        {/* Ordered-dither portrait, ink dots on a transparent ground */}
+        <Image
+          src={portrait}
+          alt={member.name}
+          fill
+          unoptimized
+          sizes="(max-width: 768px) 50vw, 300px"
+          className="object-cover object-top"
+        />
+        {/* Engraved glass: inner shadow along the top, light catch below */}
         <span
           aria-hidden
-          className="pointer-events-none absolute inset-0 [background-image:radial-gradient(rgba(20,20,20,0.18)_1px,transparent_1.2px)] [background-size:12px_12px]"
+          className="pointer-events-none absolute inset-0 rounded-[6px] bg-gradient-to-b from-white/25 via-transparent to-transparent shadow-[inset_0_6px_16px_rgba(20,20,20,0.16),inset_0_1px_3px_rgba(20,20,20,0.18),inset_0_-1px_0_rgba(255,255,255,0.7)] ring-1 ring-inset ring-white/50"
         />
-        <motion.div
-          className="absolute inset-0"
-          style={reduceMotion ? undefined : { scale, y }}
-        >
-          <Image
-            src={member.image}
-            alt={member.name}
-            fill
-            sizes="(max-width: 768px) 50vw, 300px"
-            className="object-cover object-top grayscale contrast-[1.05] mix-blend-multiply"
-          />
-        </motion.div>
       </div>
 
-      {/* Role, name and links */}
-      <div className="mt-4 flex items-end justify-between gap-3">
+      {/* Name, role and links */}
+      <div className="mt-4 flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[11.5px] font-medium uppercase tracking-[0.08em] text-[#141414]/50">
-            {member.role}
-          </p>
-          <p className="mt-1 text-[20px] font-medium leading-[1.15] tracking-[-0.03em] md:text-[22px]">
+          <p className="text-[17px] font-medium leading-[1.25] tracking-[-0.02em] text-[#141414] md:text-[18px]">
             {member.name}
           </p>
+          <p className="mt-0.5 text-[14px] leading-[1.4] text-[#141414]/55">
+            {member.role}
+          </p>
         </div>
-        <div className="flex shrink-0 gap-1">
+        <div className="mt-0.5 flex shrink-0 items-center gap-2.5">
           {socials(member).map(({ href, label, Icon, weight }) => (
             <Link
               key={label}
@@ -109,9 +97,9 @@ function LeaderCard({ member }: { member: Member }) {
               target="_blank"
               rel="noreferrer"
               aria-label={`${member.name} on ${label}`}
-              className="flex size-7 items-center justify-center text-[#141414]/70 transition-colors hover:text-[#f97316]"
+              className="text-[#141414]/45 transition-colors duration-200 hover:text-[#141414]"
             >
-              <Icon weight={weight} className="size-[18px]" />
+              <Icon weight={weight} className="size-4" />
             </Link>
           ))}
         </div>
@@ -131,12 +119,7 @@ function TeamPanel() {
   });
 
   return (
-    <div className="relative">
-      {/* Faint dot grid behind the cards */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -inset-x-6 -inset-y-8 -z-10 opacity-60 [background-image:radial-gradient(rgba(20,20,20,0.12)_1px,transparent_1px)] [background-size:12px_12px] [mask-image:radial-gradient(70%_80%_at_50%_50%,black,transparent)]"
-      />
+    <div className="relative isolate">
       <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 md:gap-5">
         {teamMembers.map((member, index) => (
           <motion.li key={member.name} {...enter(index * 0.1)}>

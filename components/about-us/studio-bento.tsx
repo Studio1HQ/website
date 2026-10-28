@@ -185,9 +185,9 @@ export function StudioBento() {
   });
 
   return (
-    <PaperSection tone="paper" className="py-10 md:py-14">
+    <PaperSection tone="paper" className="pb-10 pt-0 md:pb-14 md:pt-0">
       <Container>
-        <div className="grid gap-3 lg:grid-cols-2">
+        <div className="relative isolate grid gap-3 lg:grid-cols-2">
           {/* Wide statement card */}
           <motion.div
             {...enter(0)}

@@ -104,7 +104,7 @@ const ContentBlock = ({
 
   return (
     <motion.article
-      className="group relative isolate flex h-full flex-col overflow-hidden rounded-[22px] bg-white/45 p-7 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_30px_60px_-44px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-white/70 backdrop-blur-xl backdrop-saturate-150 md:p-9"
+      className="group relative isolate flex h-full flex-col overflow-hidden rounded-[22px] bg-[#f9f6f2] p-7 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_30px_60px_-44px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-white/70 backdrop-blur-xl backdrop-saturate-150 md:p-9"
       initial={reduceMotion ? false : { opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -162,7 +162,7 @@ export const VisionMission = () => {
           description="We help SaaS teams build developer trust through high-impact content and DevRel strategy that scales with their product."
         />
 
-        <div className="mt-10 grid grid-cols-1 gap-2 md:mt-12 md:grid-cols-2">
+        <div className="relative isolate mt-10 grid grid-cols-1 gap-2 md:mt-12 md:grid-cols-2">
           <ContentBlock
             data={contentData.vision}
             index={0}

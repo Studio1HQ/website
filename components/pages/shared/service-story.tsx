@@ -769,6 +769,8 @@ function StepCarousel({ steps }: { steps: StoryStep[] }) {
   const stageOpacity = useTransform(leave, [0, 0.55], [1, 0]);
   const stageY = useTransform(leave, [0, 0.6], ["0vh", "-6vh"]);
   const last = Math.max(1, steps.length - 1);
+  // The backdrop ribbon draws itself left to right with the cards.
+  const ribbon = useTransform(progress, [0, 1], [0.18, 1]);
 
   return (
     <div
@@ -777,6 +779,24 @@ function StepCarousel({ steps }: { steps: StoryStep[] }) {
       style={{ height: `${steps.length * 95 + 60}vh` }}
     >
       <div className="sticky top-0 flex h-[100svh] items-center overflow-hidden">
+        {/* Soft paper ribbon sweeping across behind the cards */}
+        <motion.svg
+          aria-hidden
+          viewBox="0 0 1440 900"
+          preserveAspectRatio="xMidYMid slice"
+          className="pointer-events-none absolute inset-0 h-full w-full"
+          style={reduceMotion ? undefined : { opacity: stageOpacity }}
+        >
+          <motion.path
+            d="M -120 470 C 240 500 520 640 820 730 C 1060 800 1150 660 1200 470 C 1250 270 1360 130 1580 40"
+            fill="none"
+            stroke="#141414"
+            strokeOpacity={0.045}
+            strokeWidth={110}
+            strokeLinecap="round"
+            style={reduceMotion ? undefined : { pathLength: ribbon }}
+          />
+        </motion.svg>
         <motion.ol
           className="relative h-full w-full will-change-transform"
           style={

@@ -1,34 +1,42 @@
 "use client";
 
+import { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, ArrowUpRight } from "@phosphor-icons/react";
+import { motion, useReducedMotion } from "motion/react";
 import { getClientLogo } from "@/components/case-studies/client-logos";
-import {
-  AnimatePresence,
-  motion,
-  useReducedMotion,
-  useMotionValueEvent,
-  useScroll,
-  useTransform,
-} from "motion/react";
 import { Container, EASE } from "@/components/home/ui";
 import { IndexBar, PaperSection } from "@/components/paper/paper-sections";
-import { cn } from "@/lib/utils";
 
 /*
- * Selected work: four real images from case studies stepping down the
- * page, each with the case study's own summary and its year underneath.
+ * Selected work as glass folders, grouped by what we did. Each folder holds
+ * the case study's image like a print tucked inside; on hover (or tap) the
+ * print slides up out of the folder. The client and result are written on
+ * the folder's glass front.
  */
 
 type Tab = "devrel" | "content" | "docs";
 
-const TABS: { key: Tab | "all"; label: string }[] = [
-  { key: "all", label: "All work" },
-  { key: "devrel", label: "DevRel & Community" },
-  { key: "content", label: "Content & SEO" },
-  { key: "docs", label: "Docs & DX" },
+const GROUPS: { key: Tab; label: string; note: string; slugs: string[] }[] = [
+  {
+    key: "devrel",
+    label: "DevRel & Community",
+    note: "Workshops, talks, launches and community programs.",
+    slugs: ["nebius", "openlore", "jozu"],
+  },
+  {
+    key: "content",
+    label: "Content & SEO",
+    note: "Search-led tutorials and technical writing that ranks.",
+    slugs: ["entelligence-ai", "brightdata", "tensorlake"],
+  },
+  {
+    key: "docs",
+    label: "Docs & DX",
+    note: "Docs revamps and developer experience audits.",
+    slugs: ["litellm", "corsair"],
+  },
 ];
 
 type Project = {
@@ -125,39 +133,227 @@ const PROJECTS: Project[] = [
   },
 ];
 
-function logoFor(slug: string) {
-  const logo = getClientLogo(slug);
-  return logo ? (
-    <Image
-      src={logo.icon}
-      alt=""
-      className="size-4 rounded-[3px] object-contain"
-    />
-  ) : null;
+const TINTS = [
+  {
+    tab: "rgba(232,242,251,0.95)",
+    from: "rgba(246,250,254,0.92)",
+    to: "rgba(219,234,248,0.92)",
+    glass: "rgba(255,255,255,0.6)",
+  },
+];
+
+function Folder({
+  project,
+  order,
+  tint,
+}: {
+  project: Project;
+  order: number;
+  tint: number;
+}) {
+  const colors = TINTS[tint % TINTS.length];
+  const reduceMotion = useReducedMotion();
+  const [open, setOpen] = useState(false);
+  const logo = getClientLogo(project.slug);
+  const lift = open && !reduceMotion;
+
+  return (
+    <motion.div
+      initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.8, ease: EASE, delay: order * 0.08 }}
+    >
+      <Link
+        href={`/case-studies/${project.slug}`}
+        className="group relative block pt-10"
+        onPointerEnter={() => setOpen(true)}
+        onPointerLeave={() => setOpen(false)}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setOpen(false)}
+      >
+        <div className="relative aspect-[1/1]">
+          {/* Back of the folder, with its tab */}
+          <span
+            aria-hidden
+            className="absolute -top-4 left-0 h-6 w-[42%] rounded-t-[12px] [clip-path:polygon(0_0,82%_0,100%_100%,0_100%)]"
+            style={{ background: colors.tab }}
+          />
+          <span
+            aria-hidden
+            className="absolute inset-0 rounded-[14px] rounded-tl-none shadow-[inset_0_1px_0_#fff,inset_0_0_0_1px_rgba(255,255,255,0.7),0_24px_50px_-34px_rgba(30,60,90,0.45)] ring-1 ring-[#7aa6c8]/20 backdrop-blur-md"
+            style={{
+              background: `linear-gradient(180deg, ${colors.from}, ${colors.to})`,
+            }}
+          />
+
+          {/* The print inside; slides up and out on hover */}
+          <motion.div
+            className="absolute inset-x-[6%] top-[5%] h-[74%]"
+            animate={lift ? { y: "-22%" } : { y: "0%" }}
+            transition={{ duration: 0.6, ease: EASE }}
+          >
+            <div className="relative h-full">
+              <Image
+                src={project.image}
+                alt={`${project.client} case study`}
+                fill
+                sizes="(max-width: 768px) 90vw, 380px"
+                className="object-contain object-top drop-shadow-[0_18px_24px_rgba(20,20,20,0.3)]"
+              />
+            </div>
+          </motion.div>
+
+          {/* Glass front pocket with the writing */}
+          <div
+            className="absolute inset-x-0 bottom-0 h-[56%] overflow-hidden rounded-[14px] shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_-10px_30px_-18px_rgba(20,20,20,0.3)] backdrop-blur-xl backdrop-saturate-150"
+            style={{ background: colors.glass }}
+          >
+            {/* light catching the glass */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 bg-[linear-gradient(160deg,rgba(255,255,255,0.7)_0%,transparent_40%)]"
+            />
+            <div className="relative flex h-full flex-col p-5">
+              <div className="flex items-center gap-2.5">
+                {logo ? (
+                  <span className="relative size-8 shrink-0 overflow-hidden rounded-[8px] shadow-[0_4px_10px_-6px_rgba(20,20,20,0.35)]">
+                    <Image
+                      src={logo.icon}
+                      alt=""
+                      fill
+                      sizes="32px"
+                      className="object-cover"
+                    />
+                  </span>
+                ) : null}
+                <span className="text-[18px] font-medium tracking-[-0.03em] text-[#141414]">
+                  {project.client}
+                </span>
+                <span className="ml-auto text-[12px] font-medium tabular-nums text-[#141414]/45">
+                  {project.year}
+                </span>
+              </div>
+              <p className="mt-3 line-clamp-3 pr-8 text-[13.5px] leading-[1.5] text-[#141414]/70">
+                {project.summary}
+              </p>
+              <span
+                aria-hidden
+                className="absolute bottom-4 right-4 flex size-8 items-center justify-center rounded-full bg-white/70 text-[#141414]/70 shadow-[inset_0_1px_0_#fff] transition-all duration-300 group-hover:rotate-45 group-hover:bg-[#141414] group-hover:text-white"
+              >
+                <ArrowUpRight weight="bold" className="size-3.5" />
+              </span>
+            </div>
+          </div>
+        </div>
+      </Link>
+    </motion.div>
+  );
+}
+
+const GUTTER = "max(1rem, calc((100vw - 1300px) / 2 + 2rem))";
+
+function GroupRow({
+  group,
+  number,
+}: {
+  group: (typeof GROUPS)[number];
+  number: number;
+}) {
+  const rowRef = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
+  const items = group.slugs
+    .map((slug) => PROJECTS.find((p) => p.slug === slug))
+    .filter((p): p is Project => Boolean(p));
+  const scrollRow = (direction: 1 | -1) =>
+    rowRef.current?.scrollBy({
+      left: direction * 344,
+      behavior: reduceMotion ? "auto" : "smooth",
+    });
+  const fade =
+    "linear-gradient(to right, black 0, black calc(100% - 96px), transparent 100%)";
+
+  return (
+    <div className="grid gap-6 border-t border-[#141414]/[0.1] pt-8 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-6">
+      {/* Group panel: a frosted card the height of the folders */}
+      <div className="relative flex flex-col overflow-hidden rounded-[16px] bg-[linear-gradient(180deg,rgba(255,255,255,0.75),rgba(232,242,251,0.7))] p-6 shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(30,60,90,0.4)] ring-1 ring-[#7aa6c8]/20 backdrop-blur-md lg:mt-10">
+        <div className="flex items-center justify-end">
+          <span className="rounded-full bg-white/80 px-2.5 py-1 text-[11.5px] font-medium tabular-nums text-[#141414]/60 ring-1 ring-[#141414]/[0.06]">
+            {items.length} projects
+          </span>
+        </div>
+        <h3 className="mt-4 text-[26px] font-medium leading-[1.1] tracking-[-0.04em]">
+          {group.label}
+        </h3>
+        <p className="mt-3 text-[14px] leading-[1.55] text-[#141414]/60">
+          {group.note}
+        </p>
+
+        {/* Client logos in this group */}
+        <div className="mt-6 flex gap-2">
+          {items.map((project) => {
+            const logo = getClientLogo(project.slug);
+            return logo ? (
+              <span
+                key={project.slug}
+                title={project.client}
+                className="relative size-8 overflow-hidden rounded-[8px] shadow-[0_4px_10px_-6px_rgba(20,20,20,0.35)]"
+              >
+                <Image
+                  src={logo.icon}
+                  alt={project.client}
+                  fill
+                  sizes="32px"
+                  className="object-cover"
+                />
+              </span>
+            ) : null;
+          })}
+        </div>
+
+        <div className="mt-auto flex items-center justify-between border-t border-[#141414]/[0.08] pt-5 [margin-top:max(1.5rem,auto)]">
+          <span className="text-[12.5px] text-[#141414]/50">
+            Scroll to explore
+          </span>
+          <span className="flex gap-2">
+            {([-1, 1] as const).map((dir) => {
+              const Icon = dir === -1 ? ArrowLeft : ArrowRight;
+              return (
+                <button
+                  key={dir}
+                  type="button"
+                  onClick={() => scrollRow(dir)}
+                  aria-label={dir === -1 ? "Previous" : "Next"}
+                  className="flex size-9 items-center justify-center rounded-full bg-white text-[#141414] shadow-[0_10px_22px_-14px_rgba(20,20,20,0.5)] ring-1 ring-[#141414]/[0.08] transition-colors hover:bg-[#141414] hover:text-white"
+                >
+                  <Icon weight="bold" className="size-3.5" />
+                </button>
+              );
+            })}
+          </span>
+        </div>
+      </div>
+
+      {/* Row: scrolls sideways and fades out at its right edge */}
+      <div
+        ref={rowRef}
+        className="-mx-4 flex snap-x snap-mandatory gap-5 overflow-x-auto px-4 pb-6 [scrollbar-width:none] lg:mx-0 lg:px-0 lg:pr-24 [&::-webkit-scrollbar]:hidden"
+        style={{ maskImage: fade, WebkitMaskImage: fade }}
+      >
+        {items.map((project, i) => (
+          <div
+            key={project.slug}
+            className="w-[290px] shrink-0 snap-start md:w-[324px]"
+          >
+            <Folder project={project} order={i} tint={0} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 export function SelectedWork({ index = 3 }: { index?: number }) {
-  const reduceMotion = useReducedMotion();
-  const [tab, setTab] = useState<Tab | "all">("all");
-  // Up to four per view, one row, like a studio's selected projects.
-  const rowRef = useRef<HTMLDivElement>(null);
-  const shown = PROJECTS.filter((p) => tab === "all" || p.tab === tab);
-  const { scrollXProgress } = useScroll({ container: rowRef });
-  // At least one card's worth shows, so the bar never looks empty.
-  const trackWidth = useTransform(
-    scrollXProgress,
-    (v) => `${Math.max(1 / Math.max(shown.length, 1), v) * 100}%`,
-  );
-  const [current, setCurrent] = useState(1);
-  useMotionValueEvent(scrollXProgress, "change", (v) =>
-    setCurrent(Math.max(1, Math.round(v * (shown.length - 1)) + 1)),
-  );
-  const scrollRow = (direction: 1 | -1) =>
-    rowRef.current?.scrollBy({
-      left: direction * 380,
-      behavior: reduceMotion ? "auto" : "smooth",
-    });
-
   return (
     <PaperSection tone="paper" className="py-12 md:py-16">
       <Container>
@@ -174,212 +370,16 @@ export function SelectedWork({ index = 3 }: { index?: number }) {
           }
         />
 
-        <div className="mt-12">
-          {/* Heading on the left, filter and arrows on the right */}
-          <div className="mb-12 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-            <h2 className="text-[36px] font-medium leading-[1.05] tracking-[-0.05em] sm:text-[46px] lg:text-[54px]">
-              Work that moved
-              <br />
-              <span className="text-[#f97316]">developer adoption</span>
-            </h2>
-            <div className="flex items-center gap-3">
-              <div
-                role="tablist"
-                aria-label="Filter selected work"
-                className="inline-flex max-w-full gap-1 overflow-x-auto rounded-full bg-white/70 p-1 shadow-[inset_0_1px_0_#fff,0_10px_24px_-18px_rgba(20,20,20,0.4)] ring-1 ring-inset ring-[#141414]/[0.08] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-              >
-                {TABS.map((item) => {
-                  const active = tab === item.key;
-                  return (
-                    <button
-                      key={item.key}
-                      type="button"
-                      role="tab"
-                      aria-selected={active}
-                      onClick={() => {
-                        setTab(item.key);
-                        rowRef.current?.scrollTo({ left: 0 });
-                      }}
-                      className={cn(
-                        "relative whitespace-nowrap rounded-full px-4 py-2 text-[13.5px] font-medium transition-colors duration-300 sm:px-5",
-                        active
-                          ? "text-white"
-                          : "text-[#141414]/60 hover:text-[#141414]",
-                      )}
-                    >
-                      {active ? (
-                        <motion.span
-                          layoutId="work-filter"
-                          className="absolute inset-0 rounded-full bg-[#141414]"
-                          transition={{
-                            type: "spring",
-                            stiffness: 380,
-                            damping: 32,
-                          }}
-                        />
-                      ) : null}
-                      <span className="relative">{item.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-              {[
-                {
-                  dir: -1 as const,
-                  Icon: ArrowLeft,
-                  label: "Previous case studies",
-                },
-                {
-                  dir: 1 as const,
-                  Icon: ArrowRight,
-                  label: "Next case studies",
-                },
-              ].map(({ dir, Icon, label }) => (
-                <button
-                  key={label}
-                  type="button"
-                  onClick={() => scrollRow(dir)}
-                  aria-label={label}
-                  className="hidden size-11 shrink-0 items-center justify-center rounded-full bg-white/90 text-[#141414] shadow-[0_14px_30px_-14px_rgba(20,20,20,0.5)] ring-1 ring-[#141414]/[0.08] transition-colors hover:bg-[#141414] hover:text-white md:flex"
-                >
-                  <Icon weight="bold" className="size-4" />
-                </button>
-              ))}
-            </div>
-          </div>
+        <h2 className="mt-12 text-[36px] font-medium leading-[1.05] tracking-[-0.05em] sm:text-[46px] lg:text-[54px]">
+          Work that moved
+          <br />
+          <span className="text-[#f97316]">developer adoption</span>
+        </h2>
 
-          {/* Gallery: image cards with a white note overlapping each */}
-          <div className="relative">
-            {/* Edge fades: the gallery dissolves into the paper on both sides */}
-            {(["left", "right"] as const).map((side) => (
-              <span
-                key={side}
-                aria-hidden
-                className={cn(
-                  "pointer-events-none absolute -inset-y-10 z-10 w-[max(3rem,calc((100vw_-_1300px)/2_+_3rem))]",
-                  side === "left"
-                    ? "left-1/2 -ml-[50vw]"
-                    : "right-1/2 -mr-[50vw]",
-                )}
-                style={{
-                  background: `linear-gradient(to ${side === "left" ? "right" : "left"}, #e9e4dc 0%, rgba(233,228,220,0.85) 30%, rgba(233,228,220,0.4) 65%, rgba(233,228,220,0) 100%)`,
-                  backdropFilter: "blur(6px)",
-                  WebkitBackdropFilter: "blur(6px)",
-                  maskImage: `linear-gradient(to ${side === "left" ? "right" : "left"}, black 40%, transparent), linear-gradient(to bottom, transparent, black 18%, black 82%, transparent)`,
-                  WebkitMaskImage: `linear-gradient(to ${side === "left" ? "right" : "left"}, black 40%, transparent), linear-gradient(to bottom, transparent, black 18%, black 82%, transparent)`,
-                  maskComposite: "intersect",
-                  WebkitMaskComposite: "source-in",
-                }}
-              />
-            ))}
-            <div
-              ref={rowRef}
-              className="relative left-1/2 flex w-screen -translate-x-1/2 snap-x snap-mandatory items-center gap-6 overflow-x-auto pb-16 pt-4 -mb-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-              style={{
-                paddingInline: "max(1rem, calc((100vw - 1300px) / 2 + 2rem))",
-                scrollPaddingInline:
-                  "max(1rem, calc((100vw - 1300px) / 2 + 2rem))",
-              }}
-            >
-              <AnimatePresence mode="popLayout" initial={false}>
-                {shown.map((project, position) => {
-                  const big = position % 2 === 0;
-                  return (
-                    <motion.div
-                      key={project.slug}
-                      layout
-                      initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{
-                        duration: 0.6,
-                        ease: EASE,
-                        delay: Math.min(position, 4) * 0.05,
-                      }}
-                      className="shrink-0 snap-start"
-                    >
-                      <Link
-                        href={`/case-studies/${project.slug}`}
-                        className={cn(
-                          "group relative block",
-                          big
-                            ? "w-[300px] md:w-[440px]"
-                            : "w-[260px] md:w-[340px]",
-                        )}
-                      >
-                        <div
-                          className={cn(
-                            "relative overflow-hidden rounded-[18px] bg-[#f1ece4]",
-                            big
-                              ? "aspect-[4/5] md:ml-[30%] md:w-[70%]"
-                              : "aspect-[1.4] md:w-[78%]",
-                          )}
-                        >
-                          <Image
-                            src={project.image}
-                            alt={`${project.client} case study`}
-                            fill
-                            sizes="(max-width: 768px) 300px, 320px"
-                            className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]"
-                          />
-                        </div>
-                        {/* Note overlapping the image */}
-                        <div
-                          className={cn(
-                            "relative z-10 -mt-16 w-[78%] rounded-[16px] bg-[#f7f4ef]/95 p-4 shadow-[0_1px_2px_rgba(20,20,20,0.06),0_18px_36px_-24px_rgba(20,20,20,0.35)] ring-1 ring-[#141414]/[0.06] backdrop-blur-md transition-transform duration-500 group-hover:-translate-y-1 md:w-[62%]",
-                            big
-                              ? "md:-mt-40 md:mr-auto"
-                              : "md:ml-auto md:-mt-24",
-                          )}
-                        >
-                          <div className="flex items-start justify-between gap-3">
-                            <span className="flex items-center gap-2">
-                              <span className="text-[14px] font-semibold tracking-[-0.02em] text-[#141414]">
-                                {project.client}
-                              </span>
-                              <span className="rounded-full bg-[#141414]/[0.06] px-2 py-0.5 text-[11px] font-medium tabular-nums text-[#141414]/60">
-                                {project.year}
-                              </span>
-                            </span>
-                            <span className="flex gap-1">
-                              <span className="flex size-7 items-center justify-center rounded-full ring-1 ring-[#141414]/25">
-                                {logoFor(project.slug)}
-                              </span>
-                              <span className="flex size-7 items-center justify-center rounded-full text-[#141414] ring-1 ring-[#141414]/25 transition-colors group-hover:bg-[#141414] group-hover:text-white">
-                                <ArrowUpRight
-                                  weight="bold"
-                                  className="size-3"
-                                />
-                              </span>
-                            </span>
-                          </div>
-                          <p className="mt-6 line-clamp-3 text-[14px] font-medium leading-[1.35] tracking-[-0.01em] text-[#141414]">
-                            {project.summary}
-                          </p>
-                        </div>
-                      </Link>
-                    </motion.div>
-                  );
-                })}
-              </AnimatePresence>
-            </div>
-          </div>
-
-          {/* Progress track: fills as the gallery scrolls */}
-          <div className="mx-auto mt-6 flex max-w-[420px] items-center gap-4">
-            <span className="text-[12px] font-medium tabular-nums text-[#141414]">
-              {String(current).padStart(2, "0")}
-            </span>
-            <div className="relative h-[2px] flex-1 overflow-hidden rounded-full bg-[#141414]/20">
-              <motion.span
-                className="absolute inset-y-0 left-0 rounded-full bg-[#f97316]"
-                style={{ width: trackWidth }}
-              />
-            </div>
-            <span className="text-[12px] font-medium tabular-nums text-[#141414]/40">
-              {String(shown.length).padStart(2, "0")}
-            </span>
-          </div>
+        <div className="mt-14 space-y-14">
+          {GROUPS.map((group, g) => (
+            <GroupRow key={group.key} group={group} number={g + 1} />
+          ))}
         </div>
       </Container>
     </PaperSection>

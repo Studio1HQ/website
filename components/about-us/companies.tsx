@@ -11,6 +11,7 @@ import {
   SectionHead,
 } from "@/components/paper/paper-sections";
 import { cn } from "@/lib/utils";
+import { LogoPuzzle } from "@/components/about-us/logo-puzzle";
 
 /**
  * The paper sheet is always light, so theme-dependent logo tweaks from the
@@ -37,9 +38,12 @@ export const Companies = () => {
           description="We empower tech brands to build thriving developer communities through DevRel and high-impact content."
         />
 
-        <div className="relative">
+        <div className="relative isolate">
+          {/* Desktop: the logos as one jigsaw board */}
+          <LogoPuzzle className="mt-12 hidden md:block" />
+          {/* Phones: the plain grid */}
           <div
-            className="mt-10 grid grid-cols-2 gap-2 sm:grid-cols-3 md:mt-12 md:grid-cols-4 lg:grid-cols-5"
+            className="mt-10 grid grid-cols-2 gap-2 sm:grid-cols-3 md:hidden"
             style={{
               maskImage:
                 "linear-gradient(to top, transparent 0px, black 220px)",
@@ -100,7 +104,7 @@ export const Companies = () => {
         </div>
 
         {/* The list fades out, then invites the next partner */}
-        <div className="relative mt-4 flex flex-col items-center text-center">
+        <div className="relative mt-12 flex flex-col items-center text-center">
           <p className="text-[26px] font-medium leading-[1.1] tracking-[-0.04em] text-[#141414] md:text-[34px]">
             Your company could be <Accent>next</Accent>
           </p>

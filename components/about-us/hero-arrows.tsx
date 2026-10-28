@@ -1,15 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
-import {
-  BookOpenText,
-  Megaphone,
-  PenNib,
-  PlayCircle,
-  UsersThree,
-  VideoCamera,
-  type Icon,
-} from "@phosphor-icons/react";
+import { PlayCircle, type Icon } from "@phosphor-icons/react";
 import Logo from "@/components/ui/svgs/logo";
 import { cn } from "@/lib/utils";
 import {
@@ -57,20 +49,6 @@ const ARROWS: {
     spot: "right-[5%] top-[16%] w-14 rotate-[3deg]",
     from: { x: 60, y: -30 },
     delay: 0.6,
-  },
-  {
-    id: "a2",
-    icon: UsersThree,
-    spot: "left-[8%] top-[74%] w-12 -rotate-[3deg]",
-    from: { x: -60, y: 30 },
-    delay: 0.9,
-  },
-  {
-    id: "a3",
-    icon: Megaphone,
-    spot: "right-[8%] top-[68%] w-12 rotate-[3deg]",
-    from: { x: 60, y: 30 },
-    delay: 1.2,
   },
 ];
 
@@ -125,49 +103,6 @@ export function HeroArrows() {
         </SelectionFrame>
         <Cursor className="absolute -bottom-7 -right-5" />
       </div>
-      {/* Glass tabs scattered around the video, each resting at its own angle */}
-      {[
-        {
-          icon: PenNib,
-          label: "Tutorials",
-          spot: "right-[4%] top-[40%] rotate-[3deg]",
-          ink: true,
-        },
-        {
-          icon: BookOpenText,
-          label: "Docs",
-          spot: "left-[4%] top-[48%] -rotate-[3deg]",
-          ink: false,
-        },
-        {
-          icon: VideoCamera,
-          label: "Videos",
-          spot: "right-[6%] top-[52%] rotate-[3deg]",
-          ink: true,
-        },
-        {
-          icon: Megaphone,
-          label: "DevRel",
-          spot: "left-[6%] top-[60%] -rotate-[3deg]",
-          ink: false,
-        },
-      ].map(({ icon: Glyph, label, spot, ink }) => (
-        <span
-          key={label}
-          className={cn(
-            "absolute flex items-center gap-2.5 rounded-[14px] bg-white/45 py-2 pl-2 pr-4 text-[13px] font-medium text-[#141414] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),inset_0_0_0_1px_rgba(255,255,255,0.55),0_16px_32px_-20px_rgba(20,20,20,0.45)] ring-1 ring-[#141414]/[0.06] backdrop-blur-xl backdrop-saturate-150",
-            spot,
-          )}
-        >
-          <span
-            className="flex size-7 items-center justify-center rounded-[8px] text-[#f4efe7]"
-            style={{ background: ink ? "#141414" : "#f97316" }}
-          >
-            <Glyph weight="regular" className="size-4" />
-          </span>
-          {label}
-        </span>
-      ))}
       {ARROWS.map((arrow) => (
         <motion.div
           key={arrow.id}

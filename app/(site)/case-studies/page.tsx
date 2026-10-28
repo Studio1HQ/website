@@ -7,6 +7,7 @@ import {
 import {
   CELL,
   IndexBar,
+  PaperCta,
   PaperSection,
 } from "@/components/paper/paper-sections";
 import { Container } from "@/components/home/ui";
@@ -159,6 +160,7 @@ export default async function CaseStudiesPage() {
           </div>
         </Container>
       </PaperSection>
+      <PaperCta />
     </div>
   );
 }

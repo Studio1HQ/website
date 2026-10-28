@@ -1,35 +1,11 @@
 import { products } from "@/constants/products";
 import ProductHero from "@/components/product/product-hero";
-import ProductList from "@/components/product/product-list";
+import ProductShowcase from "@/components/product/product-showcase";
 import ProductPipelineCard from "@/components/product/product-pipeline-card";
 import { Container } from "@/components/home/ui";
-import { PaperSection } from "@/components/paper/paper-sections";
+import { PaperCta, PaperSection } from "@/components/paper/paper-sections";
 import { softwareApplicationJsonLd } from "@/lib/seo";
 import { PAPER_SCOPE } from "@/lib/paper";
-
-const shipped = products
-  .filter((p) => p.status !== "upcoming")
-  .map(
-    ({
-      name,
-      tagline,
-      description,
-      highlights,
-      url,
-      category,
-      statusLabel,
-      media,
-    }) => ({
-      name,
-      tagline,
-      description,
-      highlights,
-      url,
-      category,
-      statusLabel,
-      media,
-    }),
-  );
 
 export default function ProductPage() {
   const productSchemas = products
@@ -57,12 +33,13 @@ export default function ProductPage() {
 
       <PaperSection tone="paper" className="pb-24 pt-4 md:pb-32 md:pt-6">
         <Container>
-          <ProductList products={shipped} />
-          <div className="mt-2">
+          <ProductShowcase />
+          <div className="mt-3">
             <ProductPipelineCard />
           </div>
         </Container>
       </PaperSection>
+      <PaperCta />
     </main>
   );
 }
