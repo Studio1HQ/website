@@ -1,0 +1,349 @@
+---
+title: "Build Your Own Grok Bot: A Step-by-Step Guide"
+slug: build-your-own-grok-bot-opencrewbot
+description: Learn to set up OpenCrewBot, an open-source Grok Bot alternative.
+  Try scripted demos without API keys, then connect models, tools, and apps.
+tldrSummary: OpenCrewBot is a free, open-source app for running your own Grok
+  Bot-style AI team locally.
+date: 2026-10-28
+updatedDate: 2026-10-28
+draft: false
+authors:
+  - Studio1 Team
+bannerImage: /blog/uploads/opencrewbot-ai-bot-team.png
+---
+## TL;DR
+
+You can build your own Grok Bot-style team of AI bots with OpenCrewBot, a free, MIT-licensed app that runs on your own machine. You can explore the app without API keys using scripted demo replies. Add a Nebius API key when you’re ready for real model responses.
+
+- **What you get:** a chat app where every contact is a bot with its own model settings, tools, and memory. You can optionally enable a cloud browser through Browserbase. Put several in a room, and they split the work.
+- **What you need:** Node.js 22.13 or newer, pnpm, and five commands. Every API key is optional.
+- **What it costs:** the app is free. You pay only for the services you switch on, like open-source models on Nebius Token Factory.
+
+SpaceXAI released Grok Bot as an early beta on August 11, 2026. It gives you named AI teammates that keep working in the cloud, hand tasks to each other, and ask before risky actions. Since October 12, 2026, new users get it through the X Subscription, which starts at $30 a month.
+
+We liked the idea but wanted something we could run ourselves, on open models, with our data in files we can open. So we built OpenCrewBot and put it on GitHub. This guide walks you through the setup, your first tasks, the API keys, and the problems you might hit along the way.
+
+## What is OpenCrewBot?
+
+OpenCrewBot is an open-source chat app for your own team of AI bots. It looks like a messaging app. Each contact in the sidebar is a bot with its own name, role, instructions, open-source model, tools, and memory. You can talk to one bot directly, or put a few in a room and let them share the work.
+
+On first run, you get three bots and one room:
+
+- **Scout** (Research): searches the web and answers with its sources.
+- **Quill** (Writing): turns notes and research into posts, docs, and emails.
+- **Atlas** (Planning): breaks goals into steps and hands work to the other two.
+- **Studio** (a room): all three bots together, with Atlas as the lead.
+
+It's built on Mastra, an open-source TypeScript framework for AI agents, and uses open models from Nebius Token Factory. It's a starting point you run yourself, not a hosted product.
+
+### OpenCrewBot vs Grok Bot at a glance
+
+|  | Grok Bot | OpenCrewBot |
+| --- | --- | --- |
+| Where it runs | SpaceXAI's cloud | Your own machine |
+| Price | Included in paid plans (from $30/month) | Free app; you pay only the APIs you switch on |
+| Models | Grok | Open models from Nebius Token Factory's live catalog (MiniMax, DeepSeek, Qwen, GLM, Kimi and more) |
+| Source code | Closed | Open, MIT license |
+| Group chats | 2 to 6 Bots per chat (source) | Rooms with @mentions, @everyone and auto routing |
+| Memory | Managed by the product | One plain MEMORY.md file per bot you can open and edit |
+| Browser | One shared cloud computer for all Bots | One Browserbase cloud browser per bot |
+| Approvals | Yes | Yes, Allow once or Deny cards in chat |
+| Apps and MCP | Connectors, plugins, MCP | Composio (1,000+ apps) and your own MCP servers |
+| Scheduled routines | Yes | Not yet |
+| Multiple users | Yes | No, one local owner |
+
+The short version: Grok Bot is a polished product you rent. OpenCrewBot is a project you own, change, and run on your terms.
+
+## What do you need before you start?
+
+You need two things on your computer and nothing else to begin:
+
+1. **Node.js 22.13 or newer.** The project was built on Node 24. Check yours with `node -v`.
+2. **pnpm**, the package manager the repo uses. Check it with `pnpm -v`.
+
+That's it for the first run. API keys come later, and all of them are optional. Here is what each one turns on, so you can decide what you want:
+
+| Key | What it turns on | Where to get it |
+| --- | --- | --- |
+| `NEBIUS_API_KEY` | Real open-source models. Without it, bots use a scripted mock model. | Nebius Token Factory |
+| `TAVILY_API_KEY` | Web search, page reading and site crawls | Tavily |
+| `BROWSERBASE_API_KEY` | A real cloud browser for bots with the Browser tool | Browserbase |
+| `COMPOSIO_API_KEY` | Connected apps like Slack, GitHub, Gmail and Notion | Composio |
+| `TYPESAFE_API_KEY` | Jev, which picks the right bot in Auto rooms | TypeSafe |
+
+If you only add one key, make it Nebius. That's the one that swaps the mock model for real ones.
+
+## How to build your own Grok Bot with OpenCrewBot, step by step
+
+The whole install is five commands. Open a terminal and run them in order.
+
+### Step 1: Clone the repo
+
+```bash
+git clone https://github.com/Studio1-OSS/OpenCrewBot.git
+cd OpenCrewBot
+```
+
+### Step 2: Install the packages
+
+```bash
+pnpm install
+```
+
+### Step 3: Create your settings file
+
+```bash
+cp .env.example .env
+```
+
+This copies the example file into a real `.env`. Leave it empty for now. Empty means mock mode, which is exactly what you want for a first look.
+
+### Step 4: Start the app
+
+```bash
+pnpm dev
+```
+
+### Step 5: Open it in your browser
+
+Go to **http://localhost:3000**. You'll see Scout, Quill, and Atlas in the sidebar, plus the Studio room. Scout and Studio are pinned to the top.
+
+A small dot on the Settings icon means you're in mock mode. Hover it, and it says the app stays in mock mode until `NEBIUS_API_KEY` is set. Nothing is broken. It just means replies come from a scripted model while the tools, approvals, and streaming are all real.
+
+### Where your data lives
+
+Everything stays in a `data` folder inside the project:
+
+- `data/opencrewbot.db` holds your bots, rooms, and chats (SQLite).
+- `data/mastra.db` holds each bot's model-side history.
+- `data/workspaces/<botId>/MEMORY.md` is each bot's memory, as a plain text file.
+
+You can move the folder anywhere with `OPENCREWBOT_DATA_DIR` in `.env`. The app sends no telemetry of its own.
+
+## Your first tasks (no API keys needed)
+
+Mock mode is worth five minutes of your time. The fake model only writes the replies. The memory tool, question cards, approval cards, and streaming are the same code that runs with real models. Open a chat with **Scout** and try these.
+
+### Task 1: Make a bot remember something
+
+Type:
+
+```
+remember that I like short answers
+```
+
+Scout calls its `memory_add` tool and writes a dated line to its `MEMORY.md` file. Open the bot's **Memory** tab, and you'll see the line appear. That tab is the file itself, and it refreshes live when the bot writes to it. You can edit it there or in any text editor.
+
+The first 200 lines of that file load into the bot's instructions on every turn, so it remembers across chats. Anything that looks like a password, token, or API key gets redacted before it's saved.
+
+### Task 2: Let a bot ask you a question
+
+Type:
+
+```
+ask me something
+```
+
+A question card shows up in the chat with two buttons, **Short** and **Detailed**. The bot waits. Click one, and it picks up where it left off. With a real model, a bot uses this when it can't go on without a decision from you.
+
+### Task 3: See an approval card
+
+None of the starter bots have the browser turned on, so switch it on first:
+
+1. Open a bot's menu in the sidebar and click **Edit profile**. Its details panel opens.
+2. Click **Edit details** and turn on **Browser** under Tools.
+3. Keep **Approval** on **Ask first** and click **Save changes**.
+
+Now type:
+
+```
+open https://example.com
+```
+
+The bot stops and shows a card asking to open the page. **Allow once** to run it. **Deny** skips it and the bot carries on. Nothing happens until you choose. (The browser itself needs a Browserbase key, so in mock mode the action will fail after you allow it. The point here is the card.)
+
+### Task 4: Talk to a room
+
+Open the **Studio** room. Bots in a room decide who answers in this order:
+
+1. **@everyone** (or @all) gets every bot to reply.
+2. **@scout**, **@quill,** or **@atlas** gets that bot to reply.
+3. With no mention, an **Auto** room asks Jev to pick the best bot. If Jev isn't at least 55% sure, or there's no Jev key, the room's lead answers. In Studio, that's Atlas.
+
+A bot can also @mention a teammate in its reply to hand work off. Atlas is told to send research to Scout and drafting to Quill. Hand-offs stop after two hops, so bots can't keep passing work back and forth forever.
+
+Two small things you'll notice: messages you send while a bot is busy wait in line until it finishes, and the **Stop** button cancels a reply midway.
+
+## How to add API keys (and what each one unlocks)
+
+Once you've seen how it works, open `.env` and add keys one at a time. Restart `pnpm dev` after every change, because the app only reads the file on start.
+
+### 1. Nebius Token Factory: real models
+
+```bash
+NEBIUS_API_KEY=your-key-here
+```
+
+This is the big switch. Bots stop using the mock model and start using open-source models from Nebius Token Factory. Each reply then shows its tokens and cost.
+
+To pick a model, open a bot's details and click **Change** under Default model. The model sheet suggests three picks and lists every model in the live catalog, with search, context size, tool support, and price. These are the suggestions and prices from the app's built-in list (per million tokens, input/output):
+
+| Pick | Model | Context | Price per 1M tokens |
+| --- | --- | --- | --- |
+| Fastest | Nemotron 3.5 Lightning | 1M | $0.06 / $0.24 |
+| Best all-rounder (default) | MiniMax M3 | 1M | $0.30 / $1.20 |
+| Strongest | Qwen3.5 397B A17B | 262K | $0.60 / $3.60 |
+
+Once your key is set, the live catalog from Nebius replaces these numbers, so check the sheet for current prices. A new model applies from the bot's next reply, with no restart.
+
+### 2. Tavily: web search
+
+```bash
+TAVILY_API_KEY=your-key-here
+```
+
+Bots with **Web search** turned on can now search, read pages, and crawl sites. The sources show up under the answer. Try `search for Nebius Token Factory` with Scout.
+
+### 3. Browserbase: a real browser
+
+```bash
+BROWSERBASE_API_KEY=your-key-here
+```
+
+Bots with **Browser** turned on get their own cloud browser for pages that need clicks, forms or JavaScript. Open the bot's **Browser** tab to watch it live, and click in to take over. Two optional settings sit next to it: `BROWSERBASE_PROJECT_ID` (worked out from the key if empty) and `BROWSERBASE_SESSION_MINUTES` (default 15), which caps how long one session runs. Sessions are released when you reset or delete a bot, so they stop billing.
+
+### 4. Composio: your apps
+
+```bash
+COMPOSIO_API_KEY=your-key-here
+```
+
+Click the plug icon in the sidebar to open **Connections**. Click **Connect** on an app, sign in on that app's own page, and come back. Featured apps include Slack, GitHub, Gmail, Google Calendar, Notion, Linear, Google Drive, and Jira, and search finds the rest. Then switch each app on for the bots that should have it, in the bot's details.
+
+In the same panel, you can add your own remote MCP server by URL and token. There's a preset for GitHub's official server. **Add, and test** connects right away and tells you how many tools it offers.
+
+### 5. TypeSafe: smart room routing
+
+```bash
+TYPESAFE_API_KEY=your-key-here
+```
+
+This turns on Jev in Auto rooms. When you post without an @mention, Jev reads the room and picks the best bot in a few hundred milliseconds. Without it, the room's lead always answers.
+
+## How to make your own bots and rooms
+
+The three starter bots are examples. The real fun starts when you build bots for your own work.
+
+### Create a bot
+
+Click the **+** at the top of the sidebar and choose **New bot**. You'll fill in:
+
+- **Name and role:** up to 40 characters each, like "Scout" and "Research". The name also becomes its @handle in rooms.
+- **Description:** one line on what the bot does. Write this one carefully. In Auto rooms, Jev reads each bot's description to decide who should answer.
+- **Instructions:** how the bot should work, up to 8,000 characters.
+- **Model:** any model from the model sheet.
+- **Tools:** Web search, Memory, Code mode, Browser and Ask me questions. Turn on only what the bot needs.
+- **Approval:** **Ask first** makes browser actions wait for your OK. **Full access** acts without asking.
+
+Changes apply from the bot's next reply, so you can tweak and test fast.
+
+### What Code mode does
+
+With Code mode on, the bot can write one small TypeScript function that calls several tools at once, instead of calling them one by one. A question that needs five searches can take one round trip. The code runs in a locked sandbox with no access to your files or the internet, and its only reach is the bot's own tools. Scout has it on by default.
+
+### Create a room
+
+Click **+** and choose **New room**. Give it a name and topic, add members, pick a lead, and choose how it answers:
+
+| Mode | Who answers |
+| --- | --- |
+| Auto | Jev picks the best bot (needs a TypeSafe key, otherwise the lead answers) |
+| Lead | The lead bot answers |
+| Everyone | Every bot answers |
+
+In Auto and Lead rooms, an @mention overrides the mode, so you can send any message to a specific bot. In an Everyone room, every bot replies no matter what.
+
+### What still asks for permission
+
+Some actions always run on their own: web searches, page reads, memory updates, and lookups in connected apps. Anything that changes something in the real world asks first, unless the bot has Full access. That includes clicking or typing in the browser, sending a Slack message, or opening a GitHub issue.
+
+## Troubleshooting: common problems and fixes
+
+Most problems come down to a missing key, a missing restart or an old Node version. Here's what you might see and what to do.
+
+| What you see | Why it happens | How to fix it |
+| --- | --- | --- |
+| Every bot replies with "running on the mock model" | No `NEBIUS_API_KEY` is set, or the app wasn't restarted | Add the key to `.env` and restart `pnpm dev` |
+| A key you just added does nothing | The app reads `.env` only when it starts | Stop `pnpm dev` and start it again |
+| The install or start fails right away | Your Node.js may be older than 22.13, the minimum the project asks for | Update Node, then run `pnpm install` again |
+| "Blocked: OpenCrewBot only answers on localhost" | You opened the app from another device or another host name | Open it on the same machine at `localhost:3000`. To serve another host name on purpose, add it to `OPENCREWBOT_ALLOWED_HOSTS` (only behind your own sign-in) |
+| A bot says it can't search right now | Web search is on, but `TAVILY_API_KEY` is missing | Add the Tavily key and restart |
+| Browser actions fail after you click Allow once | `BROWSERBASE_API_KEY` is missing | Add the Browserbase key and restart |
+| A bot says connected apps aren't available | `COMPOSIO_API_KEY` is missing, or the app isn't connected yet | Add the key, then connect the app in Connections and switch it on for that bot |
+| An Auto room always gets the same bot | No TypeSafe key, or Jev wasn't at least 55% sure | Add `TYPESAFE_API_KEY`, sharpen each bot's description, or @mention the bot you want |
+| A reply shows "Interrupted by a server restart" | The server stopped while that bot was replying | Send the message again. Replies can't resume after a restart |
+| Clicking an old approval or question card fails | The bot restarted and that request is no longer waiting | Ask the bot again to get a fresh card |
+| Your MCP server won't save | The URL isn't `https://` | Use an https URL. Plain http only works for localhost |
+| A bot can't take browser screenshots | Its model can't read images, so the app hides that tool | Pick a model with vision in the model sheet, or let it read the page as text |
+
+If something else breaks, the terminal running `pnpm dev` prints errors with an `[opencrewbot]` tag, which is the first place to look. You can also open an issue on GitHub.
+
+## FAQ
+
+### Is there a free, open-source alternative to Grok Bot?
+
+Yes. OpenCrewBot is a free, MIT-licensed app that gives you a team of AI bots with their own models, tools, memory, and browsers. You run it on your own machine and pay only for the services you connect.
+
+### Can I build my own Grok Bot without writing code?
+
+Yes. You need to run five commands in a terminal, and after that, everything happens in the app. Creating bots, rooms, and connections is all done with forms.
+
+### Do I need API keys to try OpenCrewBot?
+
+No. With no keys, it runs in mock mode. A scripted model writes the replies, but memory, question cards, approvals, and streaming all work for real.
+
+### Which AI models does OpenCrewBot use?
+
+Open-source models from Nebius Token Factory, including MiniMax, DeepSeek, Qwen, GLM, Kimi, Nemotron, and gpt-oss. The default is MiniMax M3. You can give every bot a different model and switch it any time.
+
+### How much does it cost to run?
+
+The app is free. Model calls are billed by Nebius per token, and every reply shows its own tokens and cost. In the app's built-in list, the default MiniMax M3 costs $0.30 per million input tokens and $1.20 per million output tokens.
+
+### Is my data private?
+
+Your bots, chats, and memory files stay in a local `data` folder, and the app sends no telemetry of its own. Data only leaves your machine for the services you set up. For example, Nebius receives the conversation, and Tavily receives your search queries.
+
+### Can I share it with my team or put it on a server?
+
+Not as it is. It has no sign-in and assumes one owner, so it only listens on your own machine. Adding sign-in and multiple users is on the list of ways to extend it.
+
+### How do the bots remember things?
+
+Each bot has one plain `MEMORY.md` file. The bot adds and fixes lines with two tools, and the first 200 lines load into every chat. You can read or edit the file in the app or in any text editor.
+
+### Can the bots use Slack, GitHub, or Gmail?
+
+Yes, through Composio or your own MCP servers. Lookups run on their own, while actions like sending a message ask for your OK first. Chatting with the bots from inside Slack or Discord isn't there yet.
+
+### Is OpenCrewBot ready for real work?
+
+It's an early release. On October 13 and 14, 2026, streaming, tools, memory, approvals, rooms, and hand-offs were tested with the mock model. Composio sign-in, live Browserbase sessions, Jev routing, and how well each open model handles tools still need testing with live services.
+
+## What to try next
+
+You now have your own Grok Bot style team running on your machine. A good next step is to build one bot for a job you do every week, give it a clear description and the fewest tools it needs, and add it to a room with Scout and Quill.
+
+If you want to take the project further, these are the extensions we've listed in the repo:
+
+- Let bots hand work to each other in direct chats, not just rooms.
+- Add scheduled routines, so a bot can run a task on a timer.
+- Let Jev pick the model for each message: a fast one for simple asks, a strong one for hard ones.
+- Talk to your bots from Slack or Discord.
+- Add sign-in and multiple users before you deploy it anywhere shared.
+- Add voice, so you can speak to a bot and hear replies.
+
+The code is on GitHub. Issues and pull requests are welcome. Before you open a pull request, run `pnpm exec tsc --noEmit` and `pnpm lint`, and say whether you tested it with live services or the mock model.
+
+In the next post, we'll open up the code and explain how we built it: why we used Mastra instead of writing our own agent loop, how rooms decide who answers, and why each bot's memory is a plain Markdown file.
