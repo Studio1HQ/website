@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { StoryHero } from "@/components/pages/shared/service-story";
+import { DOCS_SIDES } from "@/components/pages/shared/hero-sides";
 
 export default function Hero() {
   const t = useTranslations("ServiceHero.docs");
@@ -20,11 +21,7 @@ export default function Hero() {
         { value: "4+", label: t("stats.pages") },
       ]}
       highlights={["Documentation audits, DX reviews", "first success"]}
-      photo={{
-        src: "/case-studies/jozu/kubecon-india-2025.webp",
-        alt: "A live product demo on a laptop at KubeCon India",
-        position: "center 60%",
-      }}
+      sides={DOCS_SIDES}
     />
   );
 }

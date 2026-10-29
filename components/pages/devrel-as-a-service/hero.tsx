@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { StoryHero } from "@/components/pages/shared/service-story";
+import { DEVREL_SIDES } from "@/components/pages/shared/hero-sides";
 
 export default function Hero() {
   const t = useTranslations("ServiceHero.devrel");
@@ -26,11 +27,7 @@ export default function Hero() {
         "launch campaigns",
         "creator programs",
       ]}
-      photo={{
-        src: "/case-studies/jozu/kubecon-jozu-booth.webp",
-        alt: "The Studio1 team at the Jozu booth at KubeCon",
-        position: "center 30%",
-      }}
+      sides={DEVREL_SIDES}
     />
   );
 }

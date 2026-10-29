@@ -215,6 +215,7 @@ export default function Page() {
         title="From topic idea to published technical content"
         description="We align topic, outline, draft, review, publishing, and optional repurposing around one developer goal."
         steps={contentWorkflow}
+        workflow="technical-content.yml"
       />
       <Process index={3} />
       <StoryProof

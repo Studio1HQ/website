@@ -11,53 +11,33 @@ import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import {
-  motion,
-  useReducedMotion,
-  useScroll,
-  useSpring,
-  useTransform,
-  type MotionValue,
-} from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import {
   ArrowRight,
   ArrowUpRight,
   CaretRight,
-  ChatCircleText,
   Check,
-  Code,
-  Compass,
-  FileText,
-  FilmSlate,
-  Flag,
-  Gauge,
-  GithubLogo,
-  ListBullets,
-  ListChecks,
-  MagnifyingGlass,
-  Megaphone,
-  PaperPlaneTilt,
-  PencilSimple,
-  PencilSimpleLine,
-  PuzzlePiece,
-  RocketLaunch,
-  Sparkle,
-  Television,
-  UsersThree,
-  VideoCamera,
   type Icon,
 } from "@phosphor-icons/react";
 import { Container, EASE } from "@/components/home/ui";
 import { DitherField } from "@/components/home/dither-field";
 import {
   CELL,
-  CountUp,
   IndexBar,
   InkLogo,
   SectionHead,
 } from "@/components/paper/paper-sections";
 import { PaperPageHeader } from "@/components/paper/paper-page-header";
+import {
+  HeroFlanks,
+  HeroWorkRow,
+  type HeroSides,
+} from "@/components/pages/shared/hero-sides";
 import { PaperCaseStudyCard } from "@/components/pages/shared/paper-service-kit";
+import {
+  StoryPipeline,
+  type StoryStep,
+} from "@/components/pages/shared/story-pipeline";
 import type { CaseStudyResultData } from "@/components/case-studies/case-study-result";
 import { trustedbyLogo } from "@/constants/data";
 import { GRAIN, INK, PAPER, PRINT } from "@/lib/paper";
@@ -66,8 +46,8 @@ import { cn } from "@/lib/utils";
 /*
  * Service page blocks, laid out as one quiet product story: a centred hero
  * with an arch, a logo strip, alternating offer rows beside product-style
- * visuals, the workflow as tall cards, one proof panel and a closing prompt.
- * All copy comes from the page.
+ * visuals, the workflow as a pipeline run, one proof panel and a closing
+ * prompt. All copy comes from the page.
  */
 
 const pad2 = (value: number) => String(value).padStart(2, "0");
@@ -227,7 +207,7 @@ function BookCall({
 }
 
 /* ------------------------------------------------------------------ */
-/* Hero: copy and stats on the left, a tall photo card on the right   */
+/* Hero: the pitch centred on the sheet, real work on either side      */
 /* ------------------------------------------------------------------ */
 
 export type StoryStat = { value: string; label: string };
@@ -242,7 +222,7 @@ export function StoryHero({
   secondaryCta,
   secondaryHref = "#work",
   stats = [],
-  photo,
+  sides,
   highlights = [],
 }: {
   eyebrow: string;
@@ -255,170 +235,77 @@ export function StoryHero({
   secondaryCta: string;
   secondaryHref?: string;
   stats?: StoryStat[];
-  /** Real Studio1 photo shown inside the arch. */
-  photo: { src: string; alt: string; position?: string };
+  /** Case-study work shown on either side of the headline. */
+  sides: HeroSides;
   /** Phrases in the description to mark with the orange highlighter. */
   highlights?: string[];
 }) {
-  const reduceMotion = useReducedMotion();
-  const enter = (delay: number) => ({
-    initial: reduceMotion ? false : { opacity: 0, y: 12 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.8, ease: EASE, delay },
-  });
-
   return (
-    <PaperPageHeader className="pb-10 pt-[104px] md:pb-14 md:pt-[120px]">
+    <PaperPageHeader className="pb-14 pt-[112px] md:pb-20 md:pt-[140px]">
       <ScrollEdgeBlur />
-      {/* Warm wash behind the hero, fading into the page on every side */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10"
-        style={{
-          background:
-            "radial-gradient(45% 55% at 78% 45%, rgba(251,150,60,0.28), transparent 70%), radial-gradient(35% 40% at 15% 20%, rgba(254,60,52,0.08), transparent 70%)",
-        }}
-      />
+      <HeroFlanks sides={sides} />
       <Container>
-        <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-16">
-          {/* Copy */}
-          <div id="overview" className="relative z-10">
-            <motion.a
-              {...enter(0)}
-              href={secondaryHref}
-              className="group inline-flex items-center gap-2.5 rounded-full bg-white/70 py-1 pl-1 pr-3.5 text-[13px] font-medium text-[#141414] shadow-[inset_0_1px_0_#fff] ring-1 ring-inset ring-[#141414]/[0.08] transition-colors hover:bg-white"
-            >
-              <span
-                className="rounded-full px-2.5 py-1 text-[12px] text-white"
-                style={{ background: PRINT }}
-              >
-                {eyebrow}
-              </span>
-              {pill}
-              <CaretRight
-                weight="bold"
-                className="size-3 text-[#f97316] transition-transform group-hover:translate-x-0.5"
-              />
-            </motion.a>
-
-            <motion.h1
-              {...enter(0.1)}
-              className="mt-7 text-balance text-[44px] font-medium leading-[1.02] tracking-[-0.055em] sm:text-[58px] lg:text-[66px]"
-            >
-              <span className={GRADIENT_TEXT}>{titleAccent}</span> {titleRest}
-            </motion.h1>
-            <motion.p
-              {...enter(0.15)}
-              className="mt-6 max-w-[540px] text-[16px] leading-[1.65] text-[#141414]/65 md:text-[17px]"
-            >
-              <Highlighted text={description} phrases={highlights} />
-            </motion.p>
-            <motion.div
-              {...enter(0.2)}
-              className="mt-8 flex flex-wrap items-center gap-x-7 gap-y-4"
-            >
-              <BookCall label={primaryCta} />
-              <a
-                href={secondaryHref}
-                className="text-[15px] font-medium underline decoration-[#141414]/25 decoration-2 underline-offset-[6px] transition-colors hover:decoration-[#f97316]"
-              >
-                {secondaryCta}
-              </a>
-            </motion.div>
-
-            {/* Stats as one quiet row under the actions */}
-            {stats.length ? (
-              <motion.dl
-                {...enter(0.3)}
-                className="mt-12 grid max-w-[560px] grid-cols-2 gap-y-6 border-t border-[#141414]/[0.1] pt-7 sm:grid-cols-4"
-              >
-                {stats.slice(0, 4).map((stat, index) => {
-                  const plus = stat.value.endsWith("+");
-                  const raw = plus ? stat.value.slice(0, -1) : stat.value;
-                  return (
-                    <div
-                      key={stat.label}
-                      className={cn(
-                        "pr-4",
-                        index > 0 &&
-                          "sm:border-l sm:border-[#141414]/[0.08] sm:pl-5",
-                      )}
-                    >
-                      <dd className="whitespace-nowrap text-[30px] font-medium leading-none tabular-nums tracking-[-0.05em]">
-                        {/^\d+$/.test(raw) ? (
-                          <CountUp value={Number(raw)} />
-                        ) : (
-                          raw
-                        )}
-                        {plus ? (
-                          <span className="text-[#f97316]">+</span>
-                        ) : null}
-                      </dd>
-                      <dt className="mt-2 text-[12.5px] leading-snug text-[#141414]/55">
-                        {stat.label}
-                      </dt>
-                    </div>
-                  );
-                })}
-              </motion.dl>
-            ) : null}
-          </div>
-
-          {/* Photo: a tall card with a soft glow and a floating note */}
-          <motion.div
-            {...enter(0.2)}
-            className="relative mx-auto w-full max-w-[520px] lg:mr-0"
+        {/* Tall enough on large screens for the flanks, whatever the copy */}
+        <div
+          id="overview"
+          className="relative mx-auto flex max-w-[820px] flex-col items-center justify-center text-center xl:min-h-[560px]"
+        >
+          <a
+            href={secondaryHref}
+            className="group inline-flex items-center gap-2.5 rounded-full bg-white/70 py-1 pl-1 pr-3.5 text-[13px] font-medium text-[#141414] shadow-[inset_0_1px_0_#fff] ring-1 ring-inset ring-[#141414]/[0.08] transition-colors hover:bg-white"
           >
             <span
-              aria-hidden
-              className="pointer-events-none absolute -inset-10 -z-10 rounded-[60px] blur-3xl"
-              style={{
-                background:
-                  "radial-gradient(60% 60% at 55% 55%, rgba(249,140,60,0.45), transparent 75%)",
-              }}
+              className="rounded-full px-2.5 py-1 text-[12px] text-white"
+              style={{ background: PRINT }}
+            >
+              {eyebrow}
+            </span>
+            {pill}
+            <CaretRight
+              weight="bold"
+              className="size-3 text-[#f97316] transition-transform group-hover:translate-x-0.5"
             />
-            <div className="relative aspect-[4/5] overflow-hidden rounded-[28px] bg-[#f2c9a0] shadow-[0_40px_80px_-40px_rgba(120,40,0,0.55)] ring-1 ring-white/60">
-              <Image
-                src={photo.src}
-                alt={photo.alt}
-                fill
-                priority
-                sizes="(max-width: 1024px) 90vw, 520px"
-                className="object-cover"
-                style={{ objectPosition: photo.position ?? "center" }}
-              />
-              <span
-                aria-hidden
-                className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/45 to-transparent"
-              />
-              <span className="absolute bottom-5 left-5 right-5 flex items-center gap-2 text-[13px] font-medium text-white">
-                <span
-                  className="size-1.5 shrink-0 rounded-full"
-                  style={{ background: PRINT }}
-                />
-                {photo.alt}
-              </span>
-            </div>
+          </a>
 
-            {/* The lead stat, printed orange, resting on the card's edge */}
-            {stats[0] ? (
-              <motion.div
-                initial={reduceMotion ? false : { opacity: 0, x: -16 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, ease: EASE, delay: 0.5 }}
-                className="absolute -left-6 top-10 hidden rounded-[14px] px-5 py-4 text-white shadow-[0_24px_44px_-20px_rgba(194,65,12,0.7)] sm:block lg:-left-10"
-                style={{ background: PRINT }}
-              >
-                <p className="text-[34px] font-medium leading-none tracking-[-0.05em]">
-                  {stats[0].value}
-                </p>
-                <p className="mt-1.5 max-w-[150px] text-[12.5px] leading-snug text-white/85">
-                  {stats[0].label}
-                </p>
-              </motion.div>
-            ) : null}
-          </motion.div>
+          {/* The headline on white blocks, as on the home sheet */}
+          <h1 className="mt-8 max-w-[760px] text-balance text-[38px] font-medium leading-[1.12] tracking-[-0.045em] sm:text-[52px] lg:text-[60px] 2xl:text-[64px]">
+            <span className="bg-white px-[0.18em] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]">
+              <span style={{ color: PRINT }}>{titleAccent}</span> {titleRest}
+            </span>
+          </h1>
+          <p className="mt-7 max-w-[560px] text-[16px] leading-[1.6] text-[#141414]/70 sm:text-[17px]">
+            <Highlighted text={description} phrases={highlights} />
+          </p>
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-x-7 gap-y-4">
+            <BookCall label={primaryCta} />
+            <a
+              href={secondaryHref}
+              className="text-[15px] font-medium underline decoration-[#141414]/25 decoration-2 underline-offset-[6px] transition-colors hover:decoration-[#f97316]"
+            >
+              {secondaryCta}
+            </a>
+          </div>
+
+          {stats.length ? (
+            <dl className="mt-12 flex flex-wrap justify-center gap-x-10 gap-y-5 border-t border-[#141414]/[0.1] pt-7">
+              {stats.slice(0, 4).map((stat) => {
+                const plus = stat.value.endsWith("+");
+                return (
+                  <div key={stat.label} className="min-w-[96px]">
+                    <dd className="whitespace-nowrap text-[28px] font-medium leading-none tracking-[-0.05em]">
+                      {plus ? stat.value.slice(0, -1) : stat.value}
+                      {plus ? <span style={{ color: PRINT }}>+</span> : null}
+                    </dd>
+                    <dt className="mt-2 text-[12.5px] leading-snug text-[#141414]/55">
+                      {stat.label}
+                    </dt>
+                  </div>
+                );
+              })}
+            </dl>
+          ) : null}
         </div>
+        <HeroWorkRow sides={sides} />
       </Container>
     </PaperPageHeader>
   );
@@ -703,12 +590,7 @@ function OfferCard({
           beside && "sm:justify-center sm:pl-6 sm:pt-4",
         )}
       >
-        <div
-          className={cn(
-            "flex flex-wrap gap-1.5",
-            core && "mb-4 sm:hidden",
-          )}
-        >
+        <div className={cn("flex flex-wrap gap-1.5", core && "mb-4 sm:hidden")}>
           {offer.badges.map((badge) => (
             <span
               key={badge}
@@ -830,269 +712,8 @@ export function StoryRows({
 }
 
 /* ------------------------------------------------------------------ */
-/* Workflow cards                                                      */
+/* Workflow: the engagement as a pipeline run (see story-pipeline)     */
 /* ------------------------------------------------------------------ */
-
-/* Thin icon per workflow step, picked from the step's own title. */
-const STEP_ICONS: [RegExp, Icon][] = [
-  [/shorts/i, FilmSlate],
-  [/series/i, Television],
-  [/demo|repo/i, GithubLogo],
-  [/campaign/i, RocketLaunch],
-  [/long-form|video/i, VideoCamera],
-  [/packaging|publish/i, PaperPlaneTilt],
-  [/topic/i, MagnifyingGlass],
-  [/outline/i, ListBullets],
-  [/draft|review/i, PencilSimpleLine],
-  [/editing/i, PencilSimple],
-  [/scratch/i, FileText],
-  [/completeness/i, ListChecks],
-  [/platform|dx/i, Gauge],
-  [/feedback/i, ChatCircleText],
-  [/implementation/i, Code],
-  [/embedded/i, UsersThree],
-  [/integration/i, PuzzlePiece],
-  [/community|hackathon/i, Flag],
-  [/influencer/i, Megaphone],
-  [/leadership/i, Compass],
-];
-
-function StepGlyph({
-  title,
-  className,
-}: {
-  title: string;
-  className?: string;
-}) {
-  const Glyph =
-    STEP_ICONS.find(([pattern]) => pattern.test(title))?.[1] ?? Sparkle;
-  return <Glyph aria-hidden weight="light" className={className} />;
-}
-
-export type StoryStep = {
-  title: string;
-  description: string;
-  points?: string[];
-};
-
-/* Real Studio1 event photos used in the step carousel. */
-const CAROUSEL_PHOTOS = [
-  "/case-studies/openlore/openlore-hackspire-talk.webp",
-  "/case-studies/jozu/kubecon-jozu-booth.webp",
-  "/case-studies/jozu/devfest-pune-2025.webp",
-  "/case-studies/jozu/kubecon-jozu-team.webp",
-  "/case-studies/jozu/devfest-jozu-booth.webp",
-  "/case-studies/jozu/kubecon-india-2025.webp",
-];
-
-/* Card colours, cycled: print orange, white, warm sand. */
-const CAROUSEL_TONES = [
-  {
-    card: "linear-gradient(160deg, #fe3c34 0%, #f97316 50%, #fb8a1e 100%)",
-    ink: "#ffffff",
-    soft: "rgba(255,255,255,0.82)",
-    dot: "#ffffff",
-  },
-  {
-    card: "#ffffff",
-    ink: "#141414",
-    soft: "rgba(20,20,20,0.62)",
-    dot: "#f97316",
-  },
-  {
-    card: "#efe6d8",
-    ink: "#141414",
-    soft: "rgba(20,20,20,0.62)",
-    dot: "#f97316",
-  },
-];
-
-/**
- * Desktop step carousel: the row of cards is pinned while you scroll and
- * slides across. The card in the middle sits flat and full size; the ones
- * either side tilt away, shrink a little and peek in from the edges.
- */
-function StepCarousel({ steps }: { steps: StoryStep[] }) {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const reduceMotion = useReducedMotion();
-  const { scrollYProgress } = useScroll({
-    target: trackRef,
-    offset: ["start start", "end end"],
-  });
-  // Hold the first card a moment, move through the rest, then rest on the
-  // last card before the next section scrolls in.
-  const travel = useTransform(scrollYProgress, [0.08, 0.86], [0, 1], {
-    clamp: true,
-  });
-  const progress = useSpring(travel, {
-    stiffness: 55,
-    damping: 20,
-    mass: 0.8,
-    restDelta: 0.0002,
-  });
-  // As the section leaves, the whole stage eases back and fades out.
-  const { scrollYProgress: leave } = useScroll({
-    target: trackRef,
-    offset: ["end end", "end start"],
-  });
-  const stageScale = useTransform(leave, [0, 0.6], [1, 0.9]);
-  const stageOpacity = useTransform(leave, [0, 0.55], [1, 0]);
-  const stageY = useTransform(leave, [0, 0.6], ["0vh", "-6vh"]);
-  const last = Math.max(1, steps.length - 1);
-  // The backdrop ribbon draws itself left to right with the cards.
-  const ribbon = useTransform(progress, [0, 1], [0.18, 1]);
-
-  return (
-    <div
-      ref={trackRef}
-      className="relative mt-10 hidden lg:block"
-      style={{ height: `${steps.length * 95 + 60}vh` }}
-    >
-      <div className="sticky top-0 flex h-[100svh] items-center overflow-hidden">
-        {/* Soft paper ribbon sweeping across behind the cards */}
-        <motion.svg
-          aria-hidden
-          viewBox="0 0 1440 900"
-          preserveAspectRatio="xMidYMid slice"
-          className="pointer-events-none absolute inset-0 h-full w-full"
-          style={reduceMotion ? undefined : { opacity: stageOpacity }}
-        >
-          <motion.path
-            d="M -120 470 C 240 500 520 640 820 730 C 1060 800 1150 660 1200 470 C 1250 270 1360 130 1580 40"
-            fill="none"
-            stroke="#141414"
-            strokeOpacity={0.045}
-            strokeWidth={110}
-            strokeLinecap="round"
-            style={reduceMotion ? undefined : { pathLength: ribbon }}
-          />
-        </motion.svg>
-        <motion.ol
-          className="relative h-full w-full will-change-transform"
-          style={
-            reduceMotion
-              ? undefined
-              : { scale: stageScale, opacity: stageOpacity, y: stageY }
-          }
-        >
-          {steps.map((step, position) => (
-            <CarouselCard
-              key={step.title}
-              step={step}
-              position={position}
-              last={last}
-              count={steps.length}
-              progress={progress}
-            />
-          ))}
-        </motion.ol>
-      </div>
-    </div>
-  );
-}
-
-function CarouselCard({
-  step,
-  position,
-  last,
-  count,
-  progress,
-}: {
-  step: StoryStep;
-  position: number;
-  last: number;
-  count: number;
-  progress: MotionValue<number>;
-}) {
-  // How far this card is from the centre, in cards (0 = centred).
-  const offset = useTransform(progress, (value) => position - value * last);
-  // Next cards wait at the bottom-left, passed ones lift away to the top-right.
-  const x = useTransform(offset, (value) => `${-value * 64}vw`);
-  const y = useTransform(offset, (value) => `${value * 16}vh`);
-  // The card nearest the centre always sits on top.
-  const zIndex = useTransform(offset, (value) =>
-    Math.round(100 - Math.abs(value) * 10),
-  );
-  const rotate = useTransform(offset, [-1, 0, 1], [6, 0, -6]);
-  const scale = useTransform(offset, [-1, 0, 1], [0.86, 1, 0.86]);
-  const opacity = useTransform(
-    offset,
-    [-1.6, -1, 0, 1, 1.6],
-    [0, 0.55, 1, 0.55, 0],
-  );
-  // Side cards out of focus. Stepped, so the blur only redraws a few times.
-  const blur = useTransform(offset, (value) => {
-    const level = Math.min(3, Math.round(Math.abs(value) * 3));
-    return level ? `blur(${level * 1.5}px)` : "none";
-  });
-  const tone = CAROUSEL_TONES[position % CAROUSEL_TONES.length];
-
-  return (
-    <motion.li
-      className="absolute inset-y-0 left-[19vw] my-auto h-fit w-[62vw] max-w-[1080px] rounded-[28px] p-4 will-change-transform [backface-visibility:hidden]"
-      style={{
-        rotate,
-        scale,
-        x,
-        y,
-        opacity,
-        zIndex,
-        filter: blur,
-        background: tone.card,
-        boxShadow: "0 50px 90px -60px rgba(60,20,0,0.55)",
-      }}
-    >
-      <div className="grid min-h-[min(520px,62svh)] grid-cols-[minmax(0,0.92fr)_minmax(0,1fr)] gap-10">
-        <div className="relative overflow-hidden rounded-[20px]">
-          <Image
-            src={CAROUSEL_PHOTOS[position % CAROUSEL_PHOTOS.length]}
-            alt=""
-            fill
-            sizes="34vw"
-            className="object-cover"
-          />
-          <span className="absolute left-4 top-4 flex size-12 items-center justify-center rounded-full bg-white/90 text-[#141414] shadow-[0_8px_20px_-10px_rgba(0,0,0,0.5)] backdrop-blur">
-            <StepGlyph title={step.title} className="size-6" />
-          </span>
-        </div>
-        <div className="flex flex-col py-8 pr-8" style={{ color: tone.ink }}>
-          <p
-            className="text-[14px] font-medium tabular-nums"
-            style={{ color: tone.soft }}
-          >
-            {pad2(position + 1)} / {pad2(count)}
-          </p>
-          <h3 className="mt-5 text-[clamp(28px,2.6vw,40px)] font-medium leading-[1.08] tracking-[-0.045em]">
-            {step.title}
-          </h3>
-          <p
-            className="mt-5 text-[clamp(15px,1.15vw,17px)] leading-[1.6]"
-            style={{ color: tone.soft }}
-          >
-            {step.description}
-          </p>
-          {step.points?.length ? (
-            <ul className="mt-auto flex flex-col gap-2.5 pt-8">
-              {step.points.map((point) => (
-                <li
-                  key={point}
-                  className="flex items-start gap-2.5 text-[14.5px] leading-snug"
-                >
-                  <span
-                    aria-hidden
-                    className="mt-[7px] size-1.5 shrink-0 rounded-full"
-                    style={{ background: tone.dot }}
-                  />
-                  {point}
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </div>
-      </div>
-    </motion.li>
-  );
-}
 
 export function StoryCards({
   index,
@@ -1100,83 +721,22 @@ export function StoryCards({
   title,
   description,
   steps,
+  workflow,
   id = "workflow",
 }: Indexed & {
   title: ReactNode;
   description?: string;
   steps: StoryStep[];
+  /** File name in the run window's title bar, e.g. `docs-dx.yml`. */
+  workflow?: string;
   id?: string;
 }) {
-  const reduceMotion = useReducedMotion();
   return (
     <Band id={id} index={index} name={name} className="py-12 md:py-16">
       <Container>
         <SectionHead title={title} description={description} />
       </Container>
-
-      <StepCarousel steps={steps} />
-
-      <Container>
-        {/* Phones and tablets: rows of cards */}
-        <ol className="mt-10 grid gap-3 sm:grid-cols-2 lg:hidden">
-          {steps.map((step, position) => (
-            <motion.li
-              key={step.title}
-              {...cardReveal(reduceMotion, position % 3)}
-              className={cn(
-                "lg:col-span-2",
-                steps.length % 3 === 2 &&
-                  position >= steps.length - 2 &&
-                  "lg:col-span-3",
-                steps.length % 3 === 1 &&
-                  position === steps.length - 1 &&
-                  "lg:col-span-6",
-              )}
-            >
-              {/* Hover: the card lifts and an orange glow fills it */}
-              <div className="group relative isolate flex h-full flex-col overflow-hidden rounded-[6px] bg-white/80 p-7 ring-1 ring-inset ring-[#141414]/10 transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:shadow-[0_24px_44px_-30px_rgba(234,88,12,0.55)] motion-reduce:transform-none md:p-8">
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 -z-10 opacity-0 transition-opacity duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:opacity-100"
-                  style={{
-                    background:
-                      "linear-gradient(180deg, #fbc99b 0%, #f9a55a 22%, #fb8a1e 55%, #ff4d0d 100%)",
-                  }}
-                />
-                {/* One thin ink icon names the step; the copy sits at the foot */}
-                <StepGlyph
-                  title={step.title}
-                  className="size-7 text-[#141414] transition-colors duration-500 group-hover:text-white"
-                />
-                <div className="mt-auto flex flex-col pt-14 transition-colors duration-500 group-hover:text-white">
-                  <h3 className="text-[20px] font-medium leading-[1.25] tracking-[-0.03em]">
-                    {step.title}
-                  </h3>
-                  <p className="mt-3 text-[15px] leading-[1.6] text-[#141414]/60 transition-colors duration-500 group-hover:text-white/90">
-                    {step.description}
-                  </p>
-                  {step.points?.length ? (
-                    <ul className="mt-6 flex flex-col gap-2 border-t border-[#141414]/[0.08] pt-5 transition-colors duration-500 group-hover:border-white/30">
-                      {step.points.map((point) => (
-                        <li
-                          key={point}
-                          className="flex items-start gap-3 text-[14px] leading-snug text-[#141414]/75 transition-colors duration-500 group-hover:text-white/90"
-                        >
-                          <span
-                            aria-hidden
-                            className="mt-[6px] size-1.5 shrink-0 bg-[#f97316] transition-colors duration-500 group-hover:bg-white"
-                          />
-                          {point}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null}
-                </div>
-              </div>
-            </motion.li>
-          ))}
-        </ol>
-      </Container>
+      <StoryPipeline id={id} steps={steps} workflow={workflow} />
     </Band>
   );
 }

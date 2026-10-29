@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { StoryHero } from "@/components/pages/shared/service-story";
+import { CONTENT_SIDES } from "@/components/pages/shared/hero-sides";
 
 export default function Hero() {
   const t = useTranslations("ServiceHero.technicalContent");
@@ -24,11 +25,7 @@ export default function Hero() {
         "developer tutorials, guides, and SEO content",
         "technical adoption",
       ]}
-      photo={{
-        src: "/case-studies/openlore/openlore-hackspire-talk.webp",
-        alt: "Studio1 presenting OpenLore at Hackspire",
-        position: "center 40%",
-      }}
+      sides={CONTENT_SIDES}
     />
   );
 }

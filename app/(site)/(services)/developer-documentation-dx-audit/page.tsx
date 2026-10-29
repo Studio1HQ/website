@@ -210,6 +210,7 @@ export default function Page() {
         title="We improve the full developer path, not just the words"
         description="We edit docs, write missing pages, and audit developer journeys across docs, APIs, SDKs, dashboards, and onboarding."
         steps={docsWorkstreams}
+        workflow="docs-dx.yml"
       />
       <Process index={3} />
       <StoryProof

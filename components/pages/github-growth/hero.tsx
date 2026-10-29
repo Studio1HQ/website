@@ -1,6 +1,7 @@
 "use client";
 
 import { StoryHero } from "@/components/pages/shared/service-story";
+import { GITHUB_SIDES } from "@/components/pages/shared/hero-sides";
 
 export default function Hero() {
   return (
@@ -19,12 +20,7 @@ export default function Hero() {
         { value: "2K+", label: "Corsair in 5 weeks" },
       ]}
       highlights={["a README and first run that work", "launches"]}
-      photo={{
-        src: "/case-studies/openlore/openlore-hackspire-talk.webp",
-        alt: "Arindam presenting a Meet OpenLore slide to hackathon participants at Hackspire",
-        // Keeps the speaker and the "Meet OpenLore." headline inside the 4:5 arch.
-        position: "32% center",
-      }}
+      sides={GITHUB_SIDES}
     />
   );
 }

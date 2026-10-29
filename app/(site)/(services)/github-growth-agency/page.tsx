@@ -220,6 +220,7 @@ export default function Page() {
         title="From README to launch week and beyond"
         description="Five steps we run for open-source projects, from the first run a developer sees to the communities that keep them coming."
         steps={growthWorkflow}
+        workflow="repo-growth.yml"
       />
       <StoryProof
         index={3}

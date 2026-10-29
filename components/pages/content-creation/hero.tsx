@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { StoryHero } from "@/components/pages/shared/service-story";
+import { VIDEO_SIDES } from "@/components/pages/shared/hero-sides";
 
 export default function Hero() {
   const t = useTranslations("ServiceHero.video");
@@ -16,11 +17,7 @@ export default function Hero() {
       primaryCta={t("primaryCta")}
       secondaryCta={t("secondaryCta")}
       highlights={["Technical demos", "upload-ready assets"]}
-      photo={{
-        src: "/case-studies/jozu/devfest-pune-2025.webp",
-        alt: "Studio1 at DevFest Pune 2025",
-        position: "center 40%",
-      }}
+      sides={VIDEO_SIDES}
     />
   );
 }

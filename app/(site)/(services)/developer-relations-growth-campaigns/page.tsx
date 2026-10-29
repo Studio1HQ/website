@@ -215,6 +215,7 @@ export default function DevRel() {
         title="The execution layer behind developer adoption"
         description="We support docs, content, social, open-source, partnerships, hackathons, creator campaigns, launches, and feedback loops."
         steps={devrelScope}
+        workflow="devrel-growth.yml"
       />
       <Process index={3} />
       <StoryProof

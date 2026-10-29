@@ -171,6 +171,7 @@ export default function Page() {
         title="Technical videos that developers can actually learn from"
         description="We produce walkthroughs, shorts, demo projects, repo-led videos, and supporting assets for developer brands."
         steps={videoWorkstreams}
+        workflow="video-production.yml"
       />
       {/* <ProjectDemo /> */}
       <Packaging index={3} />
