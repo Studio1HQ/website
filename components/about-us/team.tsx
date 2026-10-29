@@ -9,6 +9,7 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import { teamMembers } from "@/constants/data";
 import { cn } from "@/lib/utils";
+import { PixelPortrait } from "@/components/about-us/pixel-portrait";
 import { Container, EASE } from "@/components/home/ui";
 import {
   Accent,
@@ -23,6 +24,9 @@ type TeamProps = {
 };
 
 type Member = (typeof teamMembers)[number];
+
+/** The founders shown on About Us. */
+const LEADERS = teamMembers.filter((member) => member.name !== "Shivay Lamba");
 
 const socials = (member: Member) => [
   {
@@ -63,15 +67,8 @@ function LeaderCard({ member }: { member: Member }) {
           background: "linear-gradient(180deg, #e6e3de 0%, #d8d4ce 100%)",
         }}
       >
-        {/* Ordered-dither portrait, ink dots on a transparent ground */}
-        <Image
-          src={portrait}
-          alt={member.name}
-          fill
-          unoptimized
-          sizes="(max-width: 768px) 50vw, 300px"
-          className="object-cover object-top"
-        />
+        {/* Ordered-dither portrait; its pixels shift around the cursor */}
+        <PixelPortrait src={portrait} alt={member.name} />
         {/* Engraved glass: inner shadow along the top, light catch below */}
         <span
           aria-hidden
@@ -120,8 +117,8 @@ function TeamPanel() {
 
   return (
     <div className="relative isolate">
-      <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 md:gap-5">
-        {teamMembers.map((member, index) => (
+      <ul className="mx-auto grid max-w-[880px] grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6">
+        {LEADERS.map((member, index) => (
           <motion.li key={member.name} {...enter(index * 0.1)}>
             <LeaderCard member={member} />
           </motion.li>

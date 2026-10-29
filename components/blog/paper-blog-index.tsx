@@ -367,7 +367,7 @@ export function PaperBlogIndex({
           />
           <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:items-end lg:gap-16">
             <h1 className="text-[44px] font-medium leading-[1.08] tracking-[-0.055em] sm:text-[60px] lg:text-[76px]">
-              <span className="bg-white px-[0.14em] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]">
+              <span>
                 Developer marketing
               </span>
               <br />& tech <Accent>blog</Accent>

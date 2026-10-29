@@ -125,7 +125,7 @@ export function ServiceNightHero({
           {...enter(0.1)}
           className="mt-7 max-w-[980px] text-balance text-[40px] font-medium leading-[1.04] tracking-[-0.055em] sm:text-[60px] lg:text-[76px]"
         >
-          <span className="bg-white/80 px-[0.12em] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]">
+          <span>
             <span style={{ color: PRINT }}>{titleAccent}</span>
           </span>{" "}
           {titleRest}

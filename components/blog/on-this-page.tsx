@@ -22,7 +22,7 @@ const READING_LINE = 140;
  * its h3s.
  */
 const WELL =
-  "bg-white/70 shadow-[inset_0_1px_0_#fff,0_10px_24px_-20px_rgba(20,20,20,0.35)] ring-1 ring-white/80 backdrop-blur-xl backdrop-saturate-150";
+  "bg-white/70 shadow-[0_10px_24px_-20px_rgba(20,20,20,0.35)] ring-1 ring-[#141414]/[0.06] backdrop-blur-xl backdrop-saturate-150";
 
 export function OnThisPage() {
   const [entries, setEntries] = useState<Entry[]>([]);

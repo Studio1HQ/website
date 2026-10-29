@@ -92,7 +92,7 @@ export function CaseStudyLayout({
               </div>
 
               <h1 className="mt-8 text-[34px] font-medium leading-[1.14] tracking-[-0.05em] md:text-[46px] lg:text-[56px]">
-                <span className="bg-white px-[0.14em] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]">
+                <span>
                   <NumericText>{study.title}</NumericText>
                 </span>
               </h1>

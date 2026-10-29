@@ -694,7 +694,7 @@ function ProcessStory({
           <div className="self-start pt-2">
             {/* Same highlighted heading as the other sections */}
             <h2 className="text-[30px] font-medium leading-[1.2] tracking-[-0.045em] xl:text-[34px]">
-              <span className="bg-white px-[0.14em] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]">
+              <span>
                 {title}
                 {accent ? (
                   <>

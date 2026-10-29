@@ -6,13 +6,17 @@ import {
   ArrowUpRight,
   MapPin,
   PaperPlaneTilt,
-  Scissors,
   UsersThree,
 } from "@phosphor-icons/react";
 import { motion, useReducedMotion } from "motion/react";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import Logo from "@/components/ui/svgs/logo";
+import {
+  Hanging,
+  IconText,
+  RoleIcon,
+} from "@/components/careers/careers-extras";
 import { Container, EASE } from "@/components/home/ui";
 import {
   Cursor,
@@ -52,6 +56,12 @@ export function availabilityOf(status: string): Availability {
 }
 
 /** Departments grouped into the teams a candidate would join. */
+/** Glass card and engraved well, shared by this page's blocks. */
+const GLASS_CARD =
+  "rounded-[18px] bg-white/70 shadow-[0_20px_44px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.06] backdrop-blur-xl";
+const WELL =
+  "bg-[#f1ece4] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)]";
+
 const TEAMS = [
   { key: "engineering", label: "Engineering", departments: ["Engineering"] },
   {
@@ -210,7 +220,6 @@ const FLYER_TABS = 5;
  * current role and links to it; closed roles leave a tab already torn off.
  */
 function HiringFlyer({ jobs }: { jobs: JobOpening[] }) {
-  const reduceMotion = useReducedMotion();
   const current = jobs
     .filter((job) => availabilityOf(job.status) !== "closed")
     .sort(byAvailability);
@@ -219,18 +228,7 @@ function HiringFlyer({ jobs }: { jobs: JobOpening[] }) {
   const tornAt = hasClosed ? Math.min(1, tabs.length) : -1;
 
   return (
-    <motion.div
-      className="relative mx-auto w-full max-w-[420px] lg:mr-4"
-      initial={reduceMotion ? false : { opacity: 0, y: 40, rotate: -7 }}
-      animate={{ opacity: 1, y: 0, rotate: -2.5 }}
-      transition={{ duration: 1.1, ease: EASE, delay: 0.15 }}
-    >
-      {/* Tape holding the flyer to the page */}
-      <span
-        aria-hidden
-        className="absolute -top-4 left-1/2 z-10 h-8 w-32 -translate-x-1/2 rotate-[4deg] bg-[#f4efe7]/75 shadow-[0_2px_6px_-2px_rgba(20,20,20,0.25)] ring-1 ring-[#141414]/[0.06]"
-      />
-
+    <div className="relative w-full">
       <div
         className="relative isolate overflow-hidden text-white shadow-[0_44px_80px_-44px_rgba(90,25,0,0.75)]"
         style={{ background: PRINT }}
@@ -262,14 +260,7 @@ function HiringFlyer({ jobs }: { jobs: JobOpening[] }) {
           </p>
         </div>
         {/* Cut line */}
-        <div className="relative border-t-[1.5px] border-dashed border-white/60">
-          <Scissors
-            aria-hidden
-            weight="fill"
-            className="absolute -top-[9px] left-4 size-4 -scale-x-100 px-0.5 text-white"
-            style={{ background: PRINT }}
-          />
-        </div>
+        <div className="relative border-t-[1.5px] border-dashed border-white/60"></div>
       </div>
 
       {/* Tear-off tabs, one per role */}
@@ -278,16 +269,9 @@ function HiringFlyer({ jobs }: { jobs: JobOpening[] }) {
           (_, slot) => {
             if (slot === tornAt) {
               return (
-                <li key="torn" aria-hidden className="flex-1">
-                  {/* Only a ragged stub is left of this one */}
-                  <span
-                    className="block h-2.5 w-full"
-                    style={{
-                      background: PRINT,
-                      clipPath:
-                        "polygon(0 0,100% 0,100% 60%,88% 100%,72% 55%,58% 95%,40% 50%,26% 100%,12% 60%,0 90%)",
-                    }}
-                  />
+                <li key="torn" aria-hidden className="flex-1 px-[3px]">
+                  {/* A tab already taken: only its outline is left */}
+                  <span className="block h-[216px] border-[1.5px] border-t-0 border-dashed border-[#f97316]/40" />
                 </li>
               );
             }
@@ -324,21 +308,7 @@ function HiringFlyer({ jobs }: { jobs: JobOpening[] }) {
           },
         )}
       </ul>
-
-      {/* A cursor about to pull one */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -bottom-9 left-[38%]"
-      >
-        <Cursor />
-        <span
-          className="absolute left-7 top-6 whitespace-nowrap px-1.5 py-[3px] text-[11px] font-medium leading-none text-white"
-          style={{ background: INK }}
-        >
-          take one
-        </span>
-      </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -398,8 +368,8 @@ function CareersHero({ jobs }: { jobs: JobOpening[] }) {
             <span style={{ color: PRINT }}>.</span>
           </h1>
 
-          <p className="mt-8 max-w-[520px] text-[16px] leading-[1.6] text-[#141414]/70 sm:text-[18px]">
-            {t("description")}
+          <p className="mt-8 max-w-[680px] text-[16px] leading-[1.7] text-[#141414]/70 sm:text-[17px]">
+            <IconText text={t("description")} />
           </p>
 
           <div className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-5">
@@ -416,30 +386,48 @@ function CareersHero({ jobs }: { jobs: JobOpening[] }) {
             </a>
           </div>
 
-          {/* Ruled fact row */}
-          <dl className="mt-14 grid grid-cols-2 border-t border-[#141414]/[0.14] sm:grid-cols-4">
+          {/* Facts: engraved tiles in one glass card */}
+          <motion.dl
+            className={cn(
+              "mt-14 grid max-w-[680px] grid-cols-2 gap-2 p-2 sm:grid-cols-4",
+              GLASS_CARD,
+            )}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-40px" }}
+            variants={{ visible: { transition: { staggerChildren: 0.09 } } }}
+          >
             {facts.map(([value, label], index) => (
-              <div
+              <motion.div
                 key={label}
-                className={cn(
-                  "border-b border-[#141414]/[0.14] py-4 pr-4 sm:border-b-0",
-                  index > 0 && "sm:border-l sm:pl-5",
-                  index % 2 === 1 && "border-l pl-5 sm:pl-5",
-                )}
+                className={cn("rounded-[12px] px-4 py-4", WELL)}
+                variants={{
+                  hidden: { opacity: 0, y: 14, scale: 0.97 },
+                  visible: {
+                    opacity: 1,
+                    y: 0,
+                    scale: 1,
+                    transition: { duration: 0.6, ease: EASE },
+                  },
+                }}
               >
                 <dd
-                  className="text-[30px] font-medium leading-none tracking-[-0.05em] tabular-nums md:text-[34px]"
+                  className="text-[26px] font-medium leading-none tracking-[-0.05em] tabular-nums md:text-[30px]"
                   style={index === 0 ? { color: PRINT } : undefined}
                 >
                   {value}
                 </dd>
-                <dt className={cn("mt-2 text-[13px]", MUTED)}>{label}</dt>
-              </div>
+                <dt className={cn("mt-2 text-[12.5px] leading-snug", MUTED)}>
+                  {label}
+                </dt>
+              </motion.div>
             ))}
-          </dl>
+          </motion.dl>
         </div>
 
-        <HiringFlyer jobs={jobs} />
+        <Hanging>
+          <HiringFlyer jobs={jobs} />
+        </Hanging>
       </Container>
     </section>
   );
@@ -679,26 +667,50 @@ function OpenRoles({
         )}
 
         {closed.length > 0 ? (
-          <p
-            className={cn(
-              "mt-8 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px]",
-              MUTED,
-            )}
+          <motion.div
+            className={cn("mt-12 p-6 md:p-7", GLASS_CARD)}
+            initial={{ opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.7, ease: EASE }}
           >
-            <span className="font-medium">Recently closed</span>
-            <span aria-hidden className={FAINT}>
-              —
-            </span>
-            {closed.map((job) => (
-              <Link
-                key={job.id}
-                href={`/careers/${job.id}`}
-                className="underline decoration-[var(--p-line)] underline-offset-4 transition-colors hover:text-[var(--p-fg)] hover:decoration-[#f97316]"
-              >
-                {job.title}
-              </Link>
-            ))}
-          </p>
+            <div className="flex items-baseline justify-between gap-4">
+              <h3 className="text-[18px] font-medium tracking-[-0.03em]">
+                Recently closed
+              </h3>
+              <span className={cn("text-[13px]", MUTED)}>
+                {closed.length} roles filled
+              </span>
+            </div>
+            <ul
+              role="list"
+              className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-4"
+            >
+              {closed.map((job) => (
+                <li key={job.id}>
+                  <Link
+                    href={`/careers/${job.id}`}
+                    className={cn(
+                      "group flex items-center gap-3 rounded-[12px] p-3 transition-colors",
+                      WELL,
+                    )}
+                  >
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-white text-[#f97316] shadow-[0_4px_10px_-6px_rgba(20,20,20,0.35)]">
+                      <RoleIcon title={job.title} className="size-4" />
+                    </span>
+                    <span className="min-w-0 flex-1 leading-tight">
+                      <span className="block truncate text-[13.5px] font-medium text-[#141414]/80 group-hover:text-[#141414]">
+                        {job.title}
+                      </span>
+                      <span className="mt-0.5 block text-[11.5px] text-[#141414]/40">
+                        Filled
+                      </span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
         ) : null}
       </Container>
     </PaperSection>
@@ -755,7 +767,7 @@ function WhyStudio1() {
         <div className="mt-8 grid gap-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-20">
           <div className="lg:sticky lg:top-28 lg:self-start">
             <h2 className="text-[32px] font-medium leading-[1.2] tracking-[-0.045em] sm:text-[40px] lg:text-[46px]">
-              <span className="bg-[var(--p-card)] px-[0.14em] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]">
+              <span>
                 Work on products <Accent>developers actually use</Accent>
               </span>
             </h2>
@@ -780,29 +792,45 @@ function WhyStudio1() {
             </ul>
           </div>
 
-          <ol className="border-b border-[#141414]/[0.14]">
+          <ol className="grid gap-3">
             {PRINCIPLES.map((principle, index) => (
-              <li
+              <motion.li
                 key={principle.title}
-                className="group grid grid-cols-[56px_minmax(0,1fr)] gap-x-4 border-t border-[#141414]/[0.14] py-8 md:grid-cols-[84px_minmax(0,1fr)] md:py-10"
+                className={cn("group p-2", GLASS_CARD)}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.7, ease: EASE, delay: index * 0.05 }}
               >
-                <span className="text-[34px] font-medium leading-none tracking-[-0.05em] tabular-nums text-[#141414]/20 transition-colors duration-500 group-hover:text-[#f97316] md:text-[44px]">
-                  {pad(index + 1)}
-                </span>
-                <div>
-                  <h3 className="text-[22px] font-medium leading-tight tracking-[-0.035em] md:text-[28px]">
-                    {principle.title}
-                  </h3>
-                  <p
+                <div
+                  className={cn(
+                    "grid grid-cols-[48px_minmax(0,1fr)] gap-x-4 rounded-[12px] p-5 md:grid-cols-[60px_minmax(0,1fr)] md:p-6",
+                    "bg-white shadow-[inset_0_2px_6px_rgba(20,20,20,0.06),inset_0_1px_2px_rgba(20,20,20,0.05)]",
+                  )}
+                >
+                  <span
                     className={cn(
-                      "mt-3 max-w-[520px] text-[15px] leading-[1.6]",
-                      MUTED,
+                      "flex size-12 items-center justify-center rounded-[12px] text-[15px] font-medium tabular-nums text-[#141414]/40 transition-colors duration-500 group-hover:text-[#f97316] md:size-[52px]",
+                      WELL,
                     )}
                   >
-                    {principle.description}
-                  </p>
+                    {pad(index + 1)}
+                  </span>
+                  <div>
+                    <h3 className="text-[21px] font-medium leading-tight tracking-[-0.035em] md:text-[24px]">
+                      {principle.title}
+                    </h3>
+                    <p
+                      className={cn(
+                        "mt-2.5 max-w-[520px] text-[15px] leading-[1.6]",
+                        MUTED,
+                      )}
+                    >
+                      {principle.description}
+                    </p>
+                  </div>
                 </div>
-              </li>
+              </motion.li>
             ))}
           </ol>
         </div>
@@ -857,48 +885,80 @@ function HiringProcess() {
           description="No trick questions and no endless rounds. Show us what you can do, and we will tell you quickly if it is a fit."
         />
 
-        <ol className="relative mt-14 grid gap-10 lg:grid-cols-4 lg:gap-6">
-          {/* The track: a hairline that fills with orange as it scrolls in */}
-          <span
-            aria-hidden
-            className="absolute left-[21px] top-0 h-full w-px bg-[#141414]/[0.14] lg:left-0 lg:top-[21px] lg:h-px lg:w-full"
-          />
-          <motion.span
-            aria-hidden
-            className="absolute left-[21px] top-0 h-full w-px origin-top lg:left-0 lg:top-[21px] lg:h-px lg:w-full lg:origin-left"
-            style={{ background: PRINT }}
-            initial={reduceMotion ? false : { scaleX: 0, scaleY: 0 }}
-            whileInView={{ scaleX: 1, scaleY: 1 }}
-            viewport={{ once: true, amount: 0.6 }}
-            transition={{ duration: 1.6, ease: [0.65, 0, 0.35, 1] }}
-          />
+        <motion.ol
+          className="relative mt-14 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.4 }}
+          variants={{ visible: { transition: { staggerChildren: 0.35 } } }}
+        >
           {STEPS.map((step, index) => (
             <motion.li
               key={step.title}
-              className="relative grid grid-cols-[44px_minmax(0,1fr)] gap-x-5 lg:block"
-              initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.6 }}
-              transition={{
-                duration: 0.7,
-                ease: EASE,
-                delay: 0.2 + index * 0.25,
+              className={cn("relative flex flex-col p-2", GLASS_CARD)}
+              variants={{
+                hidden: reduceMotion ? {} : { opacity: 0, y: 24 },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  transition: { duration: 0.7, ease: EASE },
+                },
               }}
             >
-              <span
-                className="relative flex size-11 items-center justify-center text-[13px] font-medium tabular-nums text-[#f4efe7]"
-                style={{ background: index === STEPS.length - 1 ? PRINT : INK }}
-              >
-                {pad(index + 1)}
-              </span>
-              <div className="lg:mt-7 lg:pr-6">
+              <div className="flex h-full flex-col rounded-[12px] bg-white p-5 shadow-[inset_0_2px_6px_rgba(20,20,20,0.06),inset_0_1px_2px_rgba(20,20,20,0.05)]">
+                <div className="flex items-center justify-between">
+                  {/* Number tile: engraved, then lit orange in turn */}
+                  <span
+                    className={cn(
+                      "relative flex size-11 items-center justify-center overflow-hidden rounded-[12px] text-[14px] font-semibold tabular-nums",
+                      WELL,
+                    )}
+                  >
+                    <motion.span
+                      aria-hidden
+                      className="absolute inset-0 bg-[linear-gradient(150deg,#fb923c,#f97316_50%,#ea580c)]"
+                      variants={{
+                        hidden: reduceMotion ? {} : { opacity: 0, scale: 0.4 },
+                        visible: {
+                          opacity: 1,
+                          scale: 1,
+                          transition: {
+                            duration: 0.5,
+                            ease: EASE,
+                            delay: 0.25,
+                          },
+                        },
+                      }}
+                    />
+                    <span className="relative text-white mix-blend-normal">
+                      {index + 1}
+                    </span>
+                  </span>
+                  {index < STEPS.length - 1 ? (
+                    <motion.span
+                      aria-hidden
+                      className="hidden h-px flex-1 origin-left bg-[#f97316]/50 lg:ml-4 lg:block"
+                      variants={{
+                        hidden: reduceMotion ? {} : { scaleX: 0 },
+                        visible: {
+                          scaleX: 1,
+                          transition: {
+                            duration: 0.6,
+                            ease: EASE,
+                            delay: 0.45,
+                          },
+                        },
+                      }}
+                    />
+                  ) : null}
+                </div>
                 <p
-                  className="text-[11px] font-medium uppercase tracking-[0.14em]"
+                  className="mt-6 text-[11px] font-medium uppercase tracking-[0.14em]"
                   style={{ color: PRINT }}
                 >
                   {step.when}
                 </p>
-                <h3 className="mt-2 text-[20px] font-medium leading-tight tracking-[-0.035em]">
+                <h3 className="mt-2 text-[19px] font-medium leading-tight tracking-[-0.035em]">
                   {step.title}
                 </h3>
                 <p className={cn("mt-2 text-[14px] leading-[1.6]", MUTED)}>
@@ -907,7 +967,7 @@ function HiringProcess() {
               </div>
             </motion.li>
           ))}
-        </ol>
+        </motion.ol>
       </Container>
     </PaperSection>
   );

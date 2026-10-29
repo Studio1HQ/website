@@ -190,7 +190,7 @@ export function PostLayout({
           </nav>
 
           <h1 className="mt-8 max-w-[1040px] text-[36px] font-medium leading-[1.12] tracking-[-0.05em] sm:text-[50px] lg:text-[62px]">
-            <span className="bg-white px-[0.14em] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]">
+            <span>
               {title}
             </span>
           </h1>
@@ -381,7 +381,7 @@ export function PostLayout({
           <aside className="hidden xl:block">
             <div className="sticky top-28">
               {/* Details, set into the panel */}
-              <dl className="rounded-[11px] px-4 py-1 bg-white/70 shadow-[inset_0_1px_0_#fff,0_10px_24px_-20px_rgba(20,20,20,0.35)] ring-1 ring-white/80 backdrop-blur-xl backdrop-saturate-150">
+              <dl className="rounded-[11px] px-4 py-1 bg-white/70 shadow-[0_10px_24px_-20px_rgba(20,20,20,0.35)] ring-1 ring-[#141414]/[0.06] backdrop-blur-xl backdrop-saturate-150">
                 {details.map(([label, value]) => (
                   <div
                     key={label}
@@ -401,7 +401,7 @@ export function PostLayout({
                   href="https://cal.com/studio1/collab"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-center gap-3 rounded-[11px] bg-white/55 p-2 pr-3.5 text-[13px] font-medium text-[#141414] shadow-[inset_0_1px_0_#fff,0_10px_24px_-18px_rgba(20,20,20,0.45)] ring-1 ring-[#141414]/[0.06] backdrop-blur-xl backdrop-saturate-150 transition-colors hover:bg-white/80"
+                  className="group flex items-center gap-3 rounded-[11px] bg-white/55 p-2 pr-3.5 text-[13px] font-medium text-[#141414] shadow-[0_10px_24px_-18px_rgba(20,20,20,0.45)] ring-1 ring-[#141414]/[0.06] backdrop-blur-xl backdrop-saturate-150 transition-colors hover:bg-white/80"
                 >
                   <span className="flex size-8 items-center justify-center text-[#141414]">
                     <CalendarDots weight="bold" className="size-4" />
@@ -416,7 +416,7 @@ export function PostLayout({
                   href={markdownUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-center gap-3 rounded-[11px] bg-white/70 shadow-[inset_0_1px_0_#fff,0_10px_24px_-20px_rgba(20,20,20,0.35)] ring-1 ring-white/80 backdrop-blur-xl backdrop-saturate-150 p-2 pr-3.5 text-[13px] text-[#141414]/65 transition-colors hover:text-[#141414]"
+                  className="group flex items-center gap-3 rounded-[11px] bg-white/70 shadow-[0_10px_24px_-20px_rgba(20,20,20,0.35)] ring-1 ring-[#141414]/[0.06] backdrop-blur-xl backdrop-saturate-150 p-2 pr-3.5 text-[13px] text-[#141414]/65 transition-colors hover:text-[#141414]"
                 >
                   <span className="flex size-8 items-center justify-center text-[#141414]">
                     <MarkdownLogo weight="fill" className="size-4" />

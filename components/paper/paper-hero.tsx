@@ -378,7 +378,7 @@ export default function PaperHero() {
   });
 
   const highlight =
-    "bg-white px-[0.18em] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]";
+    "";
 
   return (
     <section

@@ -49,7 +49,7 @@ export default function Packaging({ index = 4 }: { index?: number }) {
         <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-16">
           <div className="lg:sticky lg:top-28 lg:self-start">
             <h2 className="max-w-md text-[32px] font-medium leading-[1.2] tracking-[-0.045em] sm:text-[40px] lg:text-[46px]">
-              <span className="bg-white px-[0.14em] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]">
+              <span>
                 Make the technical idea clear before <Accent>play</Accent>
               </span>
             </h2>

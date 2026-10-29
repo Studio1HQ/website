@@ -26,7 +26,6 @@ import {
 } from "@/components/paper/paper-page-header";
 import {
   Accent,
-  CELL,
   FAINT,
   IndexBar,
   MUTED,
@@ -51,12 +50,20 @@ import { useLocale, useTranslations } from "next-intl";
 const JOBS_PER_PAGE = 12;
 
 /** White pill on the paper header, holding one hero stat. */
+/** Frosted glass card, the outer layer of every block on the page. */
+const GLASS_CARD =
+  "rounded-[16px] bg-white/60 shadow-[0_20px_44px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.06] backdrop-blur-xl backdrop-saturate-150 transition-[transform,background-color,box-shadow] duration-500 ease-out";
+
+/** Engraved well, set into a glass card. */
+const WELL =
+  "bg-[#f1ece4] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)]";
+
 const statPillClassName =
-  "inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-[13px] font-medium text-[#141414] ring-1 ring-inset ring-[#141414]/10";
+  "inline-flex items-center gap-2 rounded-full bg-white/60 shadow-[0_20px_44px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.06] backdrop-blur-xl backdrop-saturate-150 px-4 py-2 text-[13px] font-medium text-[#141414]";
 
 /** Outline pill used for pagination and secondary actions. */
 const outlinePillClassName =
-  "inline-flex h-11 items-center gap-2 rounded-full border-[1.5px] border-[#141414]/20 px-5 text-[14px] font-medium text-[#141414] transition-colors duration-300 hover:border-[#141414] hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316]/50 disabled:pointer-events-none disabled:opacity-40";
+  "inline-flex h-11 items-center gap-2 rounded-full bg-white/60 shadow-[0_20px_44px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.06] backdrop-blur-xl backdrop-saturate-150 px-5 text-[14px] font-medium text-[#141414] transition-colors duration-300 hover:bg-white/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316]/50 disabled:pointer-events-none disabled:opacity-40";
 
 const workplaceIcons: Record<
   DevRelJobWorkplace,
@@ -142,10 +149,10 @@ function FilterDropdown({
         aria-expanded={isOpen}
         onClick={() => setIsOpen((open) => !open)}
         className={cn(
-          "flex h-11 w-full items-center justify-between gap-3 rounded-full border-[1.5px] px-4 text-[13px] font-medium transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316]/50",
+          "flex h-11 w-full items-center justify-between gap-3 rounded-[11px] px-4 text-[13px] font-medium transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316]/50",
           isActive
-            ? "border-[#141414] bg-[#141414] text-[#f4efe7]"
-            : "border-[#141414]/20 bg-white/60 text-[#141414] hover:border-[#141414] hover:bg-white",
+            ? "bg-[#141414] text-[#f4efe7]"
+            : "bg-[#f1ece4] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)] text-[#141414] hover:text-[#141414]",
         )}
       >
         <span className="truncate">{value ?? allLabel}</span>
@@ -164,7 +171,7 @@ function FilterDropdown({
         <div
           role="listbox"
           aria-label={label}
-          className="absolute left-0 top-[calc(100%+0.5rem)] z-50 max-h-72 w-full min-w-48 overflow-y-auto rounded-[6px] bg-white p-1.5 shadow-[0_24px_40px_-24px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/10"
+          className="absolute left-0 top-[calc(100%+0.5rem)] z-50 max-h-72 w-full min-w-48 overflow-y-auto rounded-[12px] bg-white/90 p-1.5 shadow-[0_24px_40px_-24px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-white backdrop-blur-xl"
         >
           <button
             type="button"
@@ -241,8 +248,8 @@ function JobRow({ job, locale }: { job: DevRelJob; locale: string }) {
         rel="noopener noreferrer"
         aria-label={`${job.title} at ${job.company}`}
         className={cn(
-          "group relative isolate grid grid-cols-[44px_minmax(0,1fr)] gap-x-4 gap-y-4 overflow-hidden p-5 outline-none focus-visible:ring-2 focus-visible:ring-[#f97316]/50 md:p-6 lg:grid-cols-[44px_minmax(0,1fr)_230px_auto] lg:items-center lg:gap-x-6 [&>*]:relative",
-          CELL,
+          "group relative isolate grid grid-cols-[44px_minmax(0,1fr)] gap-x-4 gap-y-4 overflow-hidden p-5 outline-none hover:-translate-y-0.5 hover:bg-white/80 focus-visible:ring-2 focus-visible:ring-[#f97316]/50 md:p-6 lg:grid-cols-[44px_minmax(0,1fr)_230px_auto] lg:items-center lg:gap-x-6 [&>*]:relative",
+          GLASS_CARD,
         )}
       >
         {/* Hover: an orange wash rises from the right edge */}
@@ -257,7 +264,7 @@ function JobRow({ job, locale }: { job: DevRelJob; locale: string }) {
 
         <span
           aria-hidden
-          className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-[6px] bg-white p-2 ring-1 ring-inset ring-[#141414]/10"
+          className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-[#f1ece4] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)] p-2"
         >
           {job.logo && !hasLogoError ? (
             <span className="relative block size-7">
@@ -298,7 +305,7 @@ function JobRow({ job, locale }: { job: DevRelJob; locale: string }) {
             {job.title}
           </h3>
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center rounded-full bg-[#141414]/[0.05] px-2.5 py-1 text-[12px] font-medium text-[#141414]/80">
+            <span className="inline-flex items-center rounded-full bg-[#f1ece4] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)] px-2.5 py-1 text-[12px] font-medium text-[#141414]/80">
               {job.category}
             </span>
             {isNew ? (
@@ -498,7 +505,7 @@ export function DevRelJobsPage({ jobs }: DevRelJobsPageProps) {
 
           {/* Sticky toolbar */}
           <div className="sticky top-24 z-30 mt-6">
-            <div className="rounded-[6px] bg-[#f4efe7]/90 p-2.5 ring-1 ring-inset ring-[#141414]/10 backdrop-blur-xl sm:p-3">
+            <div className={cn(GLASS_CARD, "p-2.5 sm:p-3")}>
               <div className="grid gap-2 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,2fr)]">
                 <div className="relative min-w-0">
                   <MagnifyingGlass
@@ -514,7 +521,7 @@ export function DevRelJobsPage({ jobs }: DevRelJobsPageProps) {
                     }}
                     placeholder={t("searchPlaceholder")}
                     aria-label={t("searchLabel")}
-                    className="h-11 rounded-full border-0 bg-white pl-10 pr-10 text-[14px] text-[#141414] shadow-none ring-1 ring-inset ring-[#141414]/[0.12] placeholder:text-[#141414]/45 focus-visible:ring-2 focus-visible:ring-[#f97316]/50 focus-visible:ring-offset-0"
+                    className="h-11 rounded-[11px] border-0 bg-[#f1ece4] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)] pl-10 pr-10 text-[14px] text-[#141414] ring-0 placeholder:text-[#141414]/45 focus-visible:ring-2 focus-visible:ring-[#f97316]/50 focus-visible:ring-offset-0"
                   />
                   {query ? (
                     <button
@@ -660,8 +667,8 @@ export function DevRelJobsPage({ jobs }: DevRelJobsPageProps) {
           ) : (
             <div
               className={cn(
-                "flex flex-col items-center gap-5 px-6 py-14 text-center hover:translate-y-0",
-                CELL,
+                "flex flex-col items-center gap-5 px-6 py-14 text-center",
+                GLASS_CARD,
               )}
             >
               <span
@@ -696,7 +703,7 @@ export function DevRelJobsPage({ jobs }: DevRelJobsPageProps) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.8, ease: EASE }}
-            className="relative isolate mt-16 overflow-hidden rounded-[6px] bg-white/80 p-7 shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08] sm:p-10 md:mt-20 lg:p-12"
+            className="relative isolate mt-16 overflow-hidden rounded-[20px] bg-white/60 shadow-[0_20px_44px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.06] backdrop-blur-xl backdrop-saturate-150 p-7 sm:p-10 md:mt-20 lg:p-12"
           >
             <span
               aria-hidden
