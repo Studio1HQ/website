@@ -10,6 +10,7 @@ import {
 import { teamMembers } from "@/constants/data";
 import { cn } from "@/lib/utils";
 import { PixelPortrait } from "@/components/about-us/pixel-portrait";
+import { PrintBlock } from "@/components/paper/paper-hero";
 import { Container, EASE } from "@/components/home/ui";
 import {
   Accent,
@@ -117,6 +118,29 @@ function TeamPanel() {
 
   return (
     <div className="relative isolate">
+      {/* The reaching hands from the home hero, one each side */}
+      {(["left", "right"] as const).map((side) => (
+        <PrintBlock
+          key={side}
+          className={cn(
+            "absolute top-[34%] hidden h-[150px] xl:block",
+            side === "left"
+              ? "left-[calc(50%-50vw)] right-[calc(50%+452px)]"
+              : "left-[calc(50%+452px)] right-[calc(50%-50vw)]",
+          )}
+        >
+          <Image
+            src={`/assets/hand-${side}.png`}
+            alt=""
+            fill
+            sizes="30vw"
+            className={cn(
+              "object-contain p-[10%] [filter:brightness(0)_invert(96%)_sepia(8%)]",
+              side === "left" ? "object-right" : "object-left",
+            )}
+          />
+        </PrintBlock>
+      ))}
       <ul className="mx-auto grid max-w-[880px] grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6">
         {LEADERS.map((member, index) => (
           <motion.li key={member.name} {...enter(index * 0.1)}>

@@ -102,9 +102,9 @@ export function PixelPortrait({
 
     const tick = () => {
       // Ease toward the cursor and the target strength, so it glides.
-      s.strength += (s.target - s.strength) * 0.07;
-      s.px += (s.mx - s.px) * 0.14;
-      s.py += (s.my - s.py) * 0.14;
+      s.strength += (s.target - s.strength) * 0.045;
+      s.px += (s.mx - s.px) * 0.09;
+      s.py += (s.my - s.py) * 0.09;
       draw();
       if (s.target === 0 && s.strength < 0.002) {
         s.strength = 0;

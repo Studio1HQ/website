@@ -204,9 +204,7 @@ export function SectionHead({
   return (
     <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:items-end lg:gap-16">
       <h2 className="max-w-[760px] text-[32px] font-medium leading-[1.2] tracking-[-0.045em] sm:text-[40px] lg:text-[46px]">
-        <span>
-          {title}
-        </span>
+        <span>{title}</span>
       </h2>
       {description || action ? (
         <div
@@ -1252,7 +1250,10 @@ type FeaturedWork = (typeof WORK)[number];
 type ProofPrint = { src: string; ratio: number; name: string; alt: string };
 
 /** What each featured proof sheet pins down: two evidence prints and a margin note. */
-const PROOFS: Record<string, { note: string; prints: [ProofPrint, ProofPrint] }> = {
+const PROOFS: Record<
+  string,
+  { note: string; prints: [ProofPrint, ProofPrint] }
+> = {
   Nebius: {
     note: "with day-one support for every launch",
     prints: [
@@ -1444,6 +1445,18 @@ function MarginNote({
 }
 
 /** A rubber stamp in print orange: ring text around a check. Lands once `active`. */
+/** Irregular, blobby wax edge (fixed so server and client match). */
+const WAX_EDGE = Array.from({ length: 36 }, (_, i) => {
+  const angle = (i / 36) * Math.PI * 2;
+  const r = 46 + Math.sin(i * 2.3) * 1.8 + Math.cos(i * 5.1) * 1.4;
+  return `${(50 + r * Math.cos(angle)).toFixed(2)} ${(50 + r * Math.sin(angle)).toFixed(2)}`;
+}).join(" L ");
+
+/** The Studio1 mark, as a single path (from the logo). */
+const SEAL_LOGO =
+  "M0 35C0 16.6807 14.0744 1.64844 32 0.126953V141H51.0523C52.4308 137.344 54.7446 133.689 57.9938 130.033C61.1446 126.508 64.6892 123.44 68.6277 120.829C72.5662 118.349 76.3569 116.782 80 116.129V86.7544C75.4708 87.9292 71.3846 89.6919 67.7415 92.0415C64 94.5225 60.7508 97.46 57.9938 100.854C56.5345 102.72 55.2545 104.659 54.1539 106.671V0H125C144.33 0 160 15.6699 160 35V125C160 144.33 144.33 160 125 160H124V18H104.948C103.569 21.6816 101.255 25.3628 98.0062 29.0444C94.8554 32.5942 91.3108 35.6841 87.3723 38.314C83.4338 40.812 79.6431 42.3896 76 43.0474V72.6304C80.5292 71.4473 84.6154 69.6724 88.2585 67.3057C92 64.8076 95.2492 61.8491 98.0062 58.4307C99.4655 56.5513 100.745 54.5986 101.846 52.5723V160H35C15.67 160 0 144.33 0 125V35Z";
+
+/** A Studio1 wax seal, pressed onto the sign-off. */
 function RubberStamp({ text, active }: { text: string; active: boolean }) {
   const id = `stamp-${useId().replace(/[^\w-]/g, "")}`;
   const reduceMotion = useReducedMotion();
@@ -1451,35 +1464,105 @@ function RubberStamp({ text, active }: { text: string; active: boolean }) {
     <motion.svg
       aria-hidden
       viewBox="0 0 100 100"
-      className="size-[76px] mix-blend-multiply lg:size-[88px]"
-      initial={reduceMotion ? false : { opacity: 0, scale: 1.9, rotate: -36 }}
+      className="size-[84px] drop-shadow-[0_8px_10px_rgba(90,20,0,0.4)] lg:size-[96px]"
+      initial={reduceMotion ? false : { opacity: 0, scale: 1.5, rotate: -30 }}
       animate={
         active || reduceMotion
-          ? { opacity: 0.9, scale: 1, rotate: -14 }
+          ? { opacity: 1, scale: 1, rotate: -10 }
           : undefined
       }
-      transition={{ type: "spring", stiffness: 520, damping: 19, delay: 0.55 }}
+      transition={{ type: "spring", stiffness: 420, damping: 18, delay: 0.55 }}
     >
       <defs>
-        <path
-          id={id}
-          d="M50 50 m-35 0 a35 35 0 1 1 70 0 a35 35 0 1 1 -70 0"
-        />
+        <radialGradient id={`${id}-wax`} cx="38%" cy="32%" r="75%">
+          <stop offset="0" stopColor="#f97316" />
+          <stop offset="0.55" stopColor="#c2410c" />
+          <stop offset="1" stopColor="#7c2d12" />
+        </radialGradient>
+        <radialGradient id={`${id}-well`} cx="60%" cy="65%" r="70%">
+          <stop offset="0" stopColor="#ea580c" />
+          <stop offset="1" stopColor="#9a3412" />
+        </radialGradient>
+        <path id={id} d="M50 50 m-29 0 a29 29 0 1 1 58 0 a29 29 0 1 1 -58 0" />
       </defs>
-      <circle cx="50" cy="50" r="46" fill="none" stroke={PRINT} strokeWidth="3" />
-      <circle cx="50" cy="50" r="24" fill="none" stroke={PRINT} strokeWidth="1.5" />
-      <text fill={PRINT} fontSize="10" fontWeight="600">
-        <textPath href={`#${id}`} textLength="214" lengthAdjust="spacing">
+      {/* the poured wax */}
+      <path d={`M ${WAX_EDGE} Z`} fill={`url(#${id}-wax)`} />
+      {/* pressed ring: dark groove with a light lip below it */}
+      <circle cx="50" cy="50" r="37" fill={`url(#${id}-well)`} />
+      <circle
+        cx="50"
+        cy="50"
+        r="37"
+        fill="none"
+        stroke="#5c1a06"
+        strokeOpacity="0.55"
+        strokeWidth="1.6"
+      />
+      <circle
+        cx="50"
+        cy="50.8"
+        r="37"
+        fill="none"
+        stroke="#fdba74"
+        strokeOpacity="0.35"
+        strokeWidth="0.8"
+      />
+      <circle
+        cx="50"
+        cy="50"
+        r="21"
+        fill="none"
+        stroke="#5c1a06"
+        strokeOpacity="0.5"
+        strokeWidth="1.2"
+      />
+      <circle
+        cx="50"
+        cy="50.7"
+        r="21"
+        fill="none"
+        stroke="#fdba74"
+        strokeOpacity="0.35"
+        strokeWidth="0.7"
+      />
+      {/* embossed lettering */}
+      <text
+        fill="#6b1f08"
+        fillOpacity="0.85"
+        fontSize="7.2"
+        fontWeight="700"
+        letterSpacing="0.5"
+      >
+        <textPath href={`#${id}`} textLength="178" lengthAdjust="spacing">
           {text}
         </textPath>
       </text>
-      <path
-        d="M39 50.5 47 58.5 62 42"
-        fill="none"
-        stroke={PRINT}
-        strokeWidth="5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+      {/* the Studio1 logo, pressed into the centre */}
+      <g transform="translate(39.5 40.3) scale(0.13125)">
+        <path
+          d={SEAL_LOGO}
+          fillRule="evenodd"
+          fill="#fdba74"
+          fillOpacity="0.35"
+        />
+      </g>
+      <g transform="translate(39.5 39.5) scale(0.13125)">
+        <path
+          d={SEAL_LOGO}
+          fillRule="evenodd"
+          fill="#5c1a06"
+          fillOpacity="0.72"
+        />
+      </g>
+      {/* glossy highlight on the wax */}
+      <ellipse
+        cx="32"
+        cy="24"
+        rx="12"
+        ry="5"
+        fill="#fff"
+        fillOpacity="0.28"
+        transform="rotate(-30 32 24)"
       />
     </motion.svg>
   );
@@ -1590,7 +1673,11 @@ function SignOff({ work, active }: { work: FeaturedWork; active: boolean }) {
       </figcaption>
       <span className="pointer-events-none absolute -right-5 -top-10 lg:-right-8 lg:-top-12">
         <RubberStamp
-          text={quote ? "CLIENT APPROVED · STUDIO1 · " : "VERIFIED RESULT · STUDIO1 · "}
+          text={
+            quote
+              ? "CLIENT APPROVED · STUDIO1 · "
+              : "VERIFIED RESULT · STUDIO1 · "
+          }
           active={active}
         />
       </span>
@@ -1662,9 +1749,15 @@ function ProofSheet({
     : outcome.kind === "growth"
       ? { value: outcome.to, suffix: "", label: outcome.label }
       : outcome.kind === "ratio"
-        ? { value: String(outcome.value), suffix: `/${outcome.total}`, label: outcome.label }
+        ? {
+            value: String(outcome.value),
+            suffix: `/${outcome.total}`,
+            label: outcome.label,
+          }
         : { value: outcome.value, suffix: "", label: outcome.label };
-  const extras = metrics.filter(([, value]) => value !== stat.value).slice(0, 2);
+  const extras = metrics
+    .filter(([, value]) => value !== stat.value)
+    .slice(0, 2);
   const { note, prints } = PROOFS[work.client];
   const [lead, second] = prints;
   const titleId = `proof-${index}`;
@@ -1744,7 +1837,11 @@ function ProofSheet({
                   {stat.suffix}
                 </span>
                 <span aria-hidden>
-                  <TwoInkStat value={stat.value} suffix={stat.suffix} active={active} />
+                  <TwoInkStat
+                    value={stat.value}
+                    suffix={stat.suffix}
+                    active={active}
+                  />
                 </span>
               </p>
               <MarginNote active={active}>{note}</MarginNote>
@@ -1818,7 +1915,11 @@ function ProofSheet({
         >
           <span className="flex h-2.5 shrink-0">
             {[...SWATCHES, INK].map((color) => (
-              <span key={color} className="w-3.5 sm:w-5" style={{ background: color }} />
+              <span
+                key={color}
+                className="w-3.5 sm:w-5"
+                style={{ background: color }}
+              />
             ))}
           </span>
           <span className="hidden truncate sm:inline">
