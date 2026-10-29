@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
   motion,
@@ -46,11 +47,13 @@ const SERVICE_LINKS = [
   { key: "devrel", href: "/developer-relations-growth-campaigns" },
   { key: "video", href: "/developer-video-production" },
   { key: "docs", href: "/developer-documentation-dx-audit" },
+  { key: "githubGrowth", href: "/github-growth-agency" },
 ] as const;
 
 const COMPANY_LINKS = [
   { key: "about", href: "/about-us" },
   { key: "caseStudies", href: "/case-studies" },
+  { key: "results", href: "/results" },
   { key: "blog", href: "/blog" },
   { key: "product", href: "/product" },
 ] as const;
@@ -91,6 +94,13 @@ export default function PaperFooter() {
   // Rises gently into place, fully visible by the time the footer is in view.
   const y = useTransform(scrollYProgress, [0, 1], [40, 0]);
   const fade = useTransform(scrollYProgress, [0, 0.6], [0, 1]);
+  // Numbered after the page's last section, so it reads "10" on the home page.
+  const pathname = usePathname();
+  const [index, setIndex] = useState(10);
+  useEffect(() => {
+    const sections = document.querySelectorAll("[data-index-bar]").length;
+    if (sections > 0) setIndex(sections + 1);
+  }, [pathname]);
 
   return (
     <footer
@@ -107,7 +117,9 @@ export default function PaperFooter() {
           className="pt-4 text-[13px] font-medium"
           style={{ borderColor: INK }}
         >
-          <span style={{ color: PRINT }}>10</span>
+          <span className="tabular-nums" style={{ color: PRINT }}>
+            {String(index).padStart(2, "0")}
+          </span>
           <span className="mx-3 text-[#141414]/40">—</span>
           Studio1
         </div>

@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif">
+<rect width="1200" height="520" fill="#f4efe7"/>
+<text x="60.0" y="74.0" font-size="32" font-weight="700" fill="#141414" fill-opacity="1.0" text-anchor="start">A Product Hunt launch, start to finish</text><text x="60.0" y="108.0" font-size="18" font-weight="400" fill="#141414" fill-opacity="0.6" text-anchor="start">Most of the work happens before the day. The rest happens after it.</text>
+<line x1="60" y1="168" x2="1140" y2="168" stroke="#141414" stroke-opacity="0.15" stroke-width="2"/>
+<circle cx="82.0" cy="168" r="7" fill="#f4efe7" stroke="#141414" stroke-opacity="0.35" stroke-width="2"/>
+<text x="100.0" y="154.0" font-size="12" font-weight="700" fill="#141414" fill-opacity="0.5" text-anchor="start">4-6 WEEKS OUT</text>
+<rect x="60.0" y="198.0" width="203.2" height="270" rx="10" fill="#ffffff" stroke="#141414" stroke-opacity="0.12" stroke-width="1.5"/>
+<text x="82.0" y="244.0" font-size="21" font-weight="700" fill="#141414" fill-opacity="1.0" text-anchor="start">Decide</text>
+<text x="82.0" y="290.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.68" text-anchor="start">Pick what's new and</text>
+<text x="82.0" y="316.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.68" text-anchor="start">who it's for</text>
+<text x="82.0" y="372.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.68" text-anchor="start">Make it usable without</text>
+<text x="82.0" y="398.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.68" text-anchor="start">a waitlist</text>
+<line x1="82.0" y1="348" x2="241.2" y2="348" stroke="#141414" stroke-opacity="0.08" stroke-width="1.5"/>
+<text x="241.2" y="448.0" font-size="44" font-weight="700" fill="#141414" fill-opacity="0.1" text-anchor="end">01</text>
+<circle cx="301.2" cy="168" r="7" fill="#f4efe7" stroke="#141414" stroke-opacity="0.35" stroke-width="2"/>
+<text x="319.2" y="154.0" font-size="12" font-weight="700" fill="#141414" fill-opacity="0.5" text-anchor="start">2-3 WEEKS OUT</text>
+<rect x="279.2" y="198.0" width="203.2" height="270" rx="10" fill="#ffffff" stroke="#141414" stroke-opacity="0.12" stroke-width="1.5"/>
+<text x="301.2" y="244.0" font-size="21" font-weight="700" fill="#141414" fill-opacity="1.0" text-anchor="start">Build the listing</text>
+<text x="301.2" y="290.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.68" text-anchor="start">Tagline, gallery,</text>
+<text x="301.2" y="316.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.68" text-anchor="start">thumbnail, demo video</text>
+<text x="301.2" y="372.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.68" text-anchor="start">Draft the maker</text>
+<text x="301.2" y="398.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.68" text-anchor="start">comment</text>
+<line x1="301.2" y1="348" x2="460.4" y2="348" stroke="#141414" stroke-opacity="0.08" stroke-width="1.5"/>
+<text x="460.4" y="448.0" font-size="44" font-weight="700" fill="#141414" fill-opacity="0.1" text-anchor="end">02</text>
+<circle cx="520.4" cy="168" r="7" fill="#f4efe7" stroke="#141414" stroke-opacity="0.35" stroke-width="2"/>
+<text x="538.4" y="154.0" font-size="12" font-weight="700" fill="#141414" fill-opacity="0.5" text-anchor="start">LAUNCH WEEK</text>
+<rect x="498.4" y="198.0" width="203.2" height="270" rx="10" fill="#ffffff" stroke="#141414" stroke-opacity="0.12" stroke-width="1.5"/>
+<text x="520.4" y="244.0" font-size="21" font-weight="700" fill="#141414" fill-opacity="1.0" text-anchor="start">Warm up</text>
+<text x="520.4" y="290.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.68" text-anchor="start">Tell users and your</text>
+<text x="520.4" y="316.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.68" text-anchor="start">community the date</text>
+<text x="520.4" y="372.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.68" text-anchor="start">Write a post for</text>
+<text x="520.4" y="398.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.68" text-anchor="start">each channel</text>
+<line x1="520.4" y1="348" x2="679.6" y2="348" stroke="#141414" stroke-opacity="0.08" stroke-width="1.5"/>
+<text x="679.6" y="448.0" font-size="44" font-weight="700" fill="#141414" fill-opacity="0.1" text-anchor="end">03</text>
+<circle cx="739.6" cy="168" r="9" fill="#f97316" stroke="#f97316" stroke-opacity="1" stroke-width="2"/>
+<text x="757.6" y="154.0" font-size="12" font-weight="700" fill="#c2410c" fill-opacity="1" text-anchor="start">LAUNCH DAY</text>
+<rect x="717.6" y="198.0" width="203.2" height="270" rx="10" fill="#f97316" stroke="#141414" stroke-opacity="0.12" stroke-width="1.5"/>
+<text x="739.6" y="244.0" font-size="21" font-weight="700" fill="#ffffff" fill-opacity="1.0" text-anchor="start">Run it</text>
+<text x="739.6" y="290.0" font-size="15" font-weight="400" fill="#ffffff" fill-opacity="0.95" text-anchor="start">Live at 12:01 AM PT</text>
+<text x="739.6" y="316.0" font-size="15" font-weight="400" fill="#ffffff" fill-opacity="0.95" text-anchor="start">for 24 hours</text>
+<text x="739.6" y="372.0" font-size="15" font-weight="400" fill="#ffffff" fill-opacity="0.95" text-anchor="start">Reply to every</text>
+<text x="739.6" y="398.0" font-size="15" font-weight="400" fill="#ffffff" fill-opacity="0.95" text-anchor="start">comment</text>
+<line x1="739.6" y1="348" x2="898.8" y2="348" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1.5"/>
+<text x="898.8" y="448.0" font-size="44" font-weight="700" fill="#ffffff" fill-opacity="0.25" text-anchor="end">04</text>
+<circle cx="958.8" cy="168" r="7" fill="#f4efe7" stroke="#141414" stroke-opacity="0.35" stroke-width="2"/>
+<text x="976.8" y="154.0" font-size="12" font-weight="700" fill="#141414" fill-opacity="0.5" text-anchor="start">WEEK AFTER</text>
+<rect x="936.8" y="198.0" width="203.2" height="270" rx="10" fill="#ffffff" stroke="#141414" stroke-opacity="0.12" stroke-width="1.5"/>
+<text x="958.8" y="244.0" font-size="21" font-weight="700" fill="#141414" fill-opacity="1.0" text-anchor="start">Convert</text>
+<text x="958.8" y="290.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.68" text-anchor="start">Thank-you and</text>
+<text x="958.8" y="316.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.68" text-anchor="start">recap post</text>
+<text x="958.8" y="372.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.68" text-anchor="start">Fix what the launch</text>
+<text x="958.8" y="398.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.68" text-anchor="start">feedback found</text>
+<line x1="958.8" y1="348" x2="1118.0" y2="348" stroke="#141414" stroke-opacity="0.08" stroke-width="1.5"/>
+<text x="1118.0" y="448.0" font-size="44" font-weight="700" fill="#141414" fill-opacity="0.1" text-anchor="end">05</text>
+</svg>

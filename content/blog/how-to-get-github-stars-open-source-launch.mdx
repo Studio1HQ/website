@@ -1,0 +1,183 @@
+---
+title: "How to Get More GitHub Stars for Your Open-Source Launch (A Playbook From 0 to 12,000+)"
+slug: how-to-get-github-stars-open-source-launch
+description: "A practical playbook for getting GitHub stars at launch: prelaunch prep, README, Hacker News, Reddit, Product Hunt, X, demos and community loops, with real results from Memori, OpenLore and Corsair."
+tldrSummary: Make the repo itself the landing page, launch in the communities where your users already talk, and back the launch with demos, live events, daily content and feedback loops. Stars come from that connected system, not one viral post.
+tldrBullets:
+  - Make the repo the landing page, with a one-line pitch, a visual demo, and an install that works in minutes.
+  - Launch in the same week on Show HN, the right subreddits, X, and Product Hunt, adapting the post to each channel.
+  - Ship demo projects, talks, hackathons, and daily technical content, and turn every comment into docs and product fixes.
+  - This system took Memori from launch to 12,000+ GitHub stars and OpenLore from about 135 to 1,700+ stars in one month.
+date: 2026-10-29
+updatedDate: 2026-10-29
+draft: false
+authors:
+  - Studio1 Team
+tags:
+  - open-source
+  - github
+  - devrel
+  - launches
+---
+**The short answer:** To get more GitHub stars for an open-source launch, make the repo itself the landing page (a one-line pitch, a visual demo, and an install that works in minutes), then launch in the communities where your users already talk: Show HN on Hacker News, the right subreddits, X, and Product Hunt. Back the launch with hands-on demo projects, live talks or hackathons, and daily technical content, and turn every comment into docs and product fixes. Stars come from a connected system of distribution, demos and feedback, not from one viral post. That system took Memori from launch to 12,000+ GitHub stars and OpenLore from about 135 to 1,700+ stars in one month.
+
+![Flywheel diagram with five steps around your repo: README and first run, launch channels, demo projects, community loops, and sustained content, looping back to the start](/blog/uploads/how-to-get-github-stars-open-source-launch/github-growth-flywheel.svg "The open-source growth flywheel: each step feeds the next.")
+
+## Why most open-source launches stall
+
+Most launches get one spike and then go flat. Infrasity's guide notes that launch-driven growth usually decays within about 72 hours, and that GitHub hosts more than 200 million repositories. A good tool that nobody can find does not grow. The fix is to treat the launch as the start of a distribution system, not the finish line.
+
+A star is also a decision made in seconds. Developers land on your repo, skim, and either star it or close the tab. Everything below is about winning that moment and then creating more of them.
+
+## Step 1: Prelaunch prep (2 to 4 weeks before)
+
+Do this before you ask anyone for attention.
+
+* **Write your positioning line.** One sentence describing the problem you solve, in the words a developer would use. Memori's work started with framing around real developer problems, such as why stateless AI apps lose context, rather than a feature list.
+* **Audit the first session.** Run through install and first use like a stranger. For Corsair, Studio1 started with an onboarding audit of the hosted app, docs and first-run flow, and the Corsair team used it to rework the quickstart so it reaches a working example in under a minute.
+* **Set a baseline.** Record stars, forks, installs or package downloads, and contributors today, so you can tell what actually moved the numbers.
+* **List the questions buyers ask.** Write down the 5 questions developers type into Google or an AI assistant before picking a tool in your category. Note which threads and pages get cited. Those are your target conversations.
+* **Prepare launch assets.** A short demo video or GIF, a launch post per channel, and 2 or 3 example projects.
+
+## Step 2: Make your README the landing page
+
+For an open-source project, the repo is the landing page. Lucas da Costa's Hacker News launch notes for Layerform put it plainly: link your repo, not your landing page, because repos are more likely to lead to stars, and GitHub broadcasts stars to people's followers.
+
+A README that converts has:
+
+1. A one-line description of what the project does and who it is for
+2. A screenshot, GIF or short video above the fold
+3. An install command and quickstart that work on the first try
+4. Real examples, linked from the README
+5. A license, a CONTRIBUTING.md, and labeled good first issues
+6. All relevant GitHub topics (you can add up to 20) and a custom social preview image
+
+![Annotated README mockup with six numbered parts: one-line pitch, visual demo, quickstart, examples, community files, and topics](/blog/uploads/how-to-get-github-stars-open-source-launch/readme-anatomy.svg "Anatomy of a README that earns stars.")
+
+If the quickstart fails, you lose that developer. Fix README and docs gaps before launch day, and keep fixing them after, based on feedback. For Corsair, README and docs improvements were driven directly by audit and community feedback.
+
+Here is the difference on a real repo. Before OpenLore's DX audit, its README opened with a dense, text-heavy About section. After, it led with a one-line pitch and a diagram of agents sharing one knowledge server.
+
+![OpenLore GitHub README before the audit, with a dense text-heavy About section](/case-studies/openlore/openlore-readme-before.webp "OpenLore's README before the DX audit.")
+
+![OpenLore GitHub README after the audit, with a one-line pitch and a diagram of agents sharing one knowledge server](/case-studies/openlore/openlore-readme-after.webp "OpenLore's README after the DX audit.")
+
+## Step 3: Pick your launch channels and play each one by its rules
+
+Each channel has its own culture. Adapt the post for each one instead of copy-pasting.
+
+![Example launch week across five days: Hacker News, Reddit, X and LinkedIn, Product Hunt, then daily.dev and Dev.to, with daily issue replies, docs fixes, and small releases](/blog/uploads/how-to-get-github-stars-open-source-launch/launch-week.svg "An example launch week. Adjust the order to where your users are.")
+
+**Hacker News.** Use the "Show HN:" prefix only for something people can actually try. HN's [Show HN guidelines](https://news.ycombinator.com/showhn.html) exclude landing pages, sign-up pages and waitlists. Make the title direct and specific, skip marketing language, stay in the thread to answer questions, and never ask for upvotes. HN detects voting rings. A strong HN launch can be large: Infrasity cites ToolJet hitting #1 and passing 1,000 stars within 8 hours, reaching 2,400 stars over three days.
+
+**Reddit.** Lead with the problem, not the product. Post in the subreddits where your users already discuss that problem, and reply to every serious comment. Memori's Reddit launch post reached 85+ upvotes and 50K+ impressions, and a later thought-leadership post generated 100+ detailed developer comments.
+
+![Memori Reddit launch metrics showing 85+ upvotes and 50K+ impressions](/case-studies/memori/memori-reddit-launch-stats.png "Memori's Reddit launch post: 85+ upvotes and 50K+ impressions.")
+
+**X.** Use a short launch video and a thread or X Article that explains the problem in plain terms. For OpenLore, an X Article on giving every coding agent the same memory reached 24K views.
+
+![X Article titled How I give every coding agent the same memory, with 24K views](/case-studies/openlore/openlore-x-article.webp "The OpenLore X Article, with 24K views.")
+
+**Product Hunt.** Useful when you have a hosted version or a website people can visit. Treat it as one more spike, timed in the same week as your other channels.
+
+**Developer feeds and newsletters.** daily.dev, Dev.to, LinkedIn and niche newsletters extend reach. OpenLore's single daily.dev post reached 50K organic impressions.
+
+![daily.dev post analytics for OpenLore showing 50K lifetime impressions](/case-studies/openlore/openlore-daily-dev.webp "One daily.dev post for OpenLore: 50K organic impressions.")
+
+## Step 4: Ship demo content that shows the product working
+
+Developers trust what they can run. Demos turn "interesting" into "let me try this," and trying is what earns the star.
+
+* Build several small, real projects, not one generic hello world.
+* Each demo should solve a recognizable problem and run locally with minimal setup.
+* Package each demo with a walkthrough video or short post.
+
+Studio1 built 12 hands-on demo agents for Memori, including a Wellness Coach, an arXiv Researcher and a Customer Support Voice Agent, and amplified them through the Awesome AI Apps repository. For Corsair, demos like Brieflane (meeting transcripts to Linear issues and Slack updates) and SlideFlow (prompt to slides, published to Drive and Slack) gave developers something to run instead of a list of integrations.
+
+![SlideFlow demo app that generates decks from a sentence and publishes through Corsair](/case-studies/corsair/slideflow-demo.webp "SlideFlow, one of the Corsair demos: describe a deck, then publish it to Drive and Slack.")
+
+## Step 5: Build community loops, online and in person
+
+Stars that come with conversation last longer than stars from a drive-by click.
+
+![Arindam presenting a Meet OpenLore slide to hackathon participants at Hackspire](/case-studies/openlore/openlore-hackspire-talk.webp "Introducing OpenLore to builders at Hackspire. Stars jumped after each session.")
+
+* **Talks and meetups.** Memori was featured at the MongoDB Kolkata Meetup with 150+ attendees. For OpenLore, stars jumped after each talk and hackathon session.
+* **Hackathons.** A dedicated track gives builders a reason to try your project. Corsair had a dedicated track at student hackathons, and many participants starred the repo afterward.
+* **Feedback into product.** Turn recurring questions into docs, issues and releases. Memori's 100+ Reddit comments shaped onboarding, documentation and the v2 roadmap.
+* **Creator partnerships.** Work with developer creators whose audience actually fits the product.
+
+![Feedback loop diagram: a community comment becomes a docs fix or feature, then a release note, then a new post, which brings the next question](/blog/uploads/how-to-get-github-stars-open-source-launch/feedback-loop.svg "Turn every recurring question into the next post.")
+
+## Step 6: Sustain momentum after launch week
+
+The launch spike fades. Momentum comes from steady output.
+
+* Post something useful every day or every week: tutorials, architecture breakdowns, release notes.
+* Submit to relevant awesome lists, following each list's contribution format.
+* Publish comparison and "how to" content that matches what developers search for, so Google and AI assistants have a clear source to cite.
+* Ship small releases often and announce them.
+* Track stars alongside installs, forks and contributors. Stars are social proof; usage is the business.
+
+## How Studio1 did it: Memori, OpenLore, Corsair and Awesome AI Apps
+
+### Memori: from launch to 12,000+ GitHub stars
+
+Memori is an open-source, SQL-native memory layer for LLM apps and AI agents. Studio1 ran community-led launches, thought leadership, demo engineering, live events and creator partnerships as one connected system.
+
+* **0 to 12,000+ GitHub stars** from launch
+* **85+ upvotes and 50K+ impressions** on the Reddit launch post
+* **100+ detailed developer comments** that informed onboarding, docs and the v2 roadmap
+* **12 hands-on demo agents** shipped
+* **150+ attendees** at the MongoDB Kolkata meetup talk
+
+No single post did it. Launches created attention, demos helped developers try it, and feedback improved the product. [Read the full Memori case study](/case-studies/memori).
+
+![Memori GitHub star history from its 2025 launch, climbing steeply past 10K and continuing to grow through 2026](/blog/uploads/how-to-get-github-stars-open-source-launch/memori-star-history.svg "Memori's GitHub star history, from star-history.com.")
+
+### OpenLore: 12x stars in one month
+
+OpenLore is a shared docs server that coding agents can read and edit together. In a one-month engagement in September and October 2026, Studio1 ran a DX audit, launch positioning, talks and hackathons, and daily distribution across X, LinkedIn, daily.dev and Reddit.
+
+* **About 135 to 1,700+ GitHub stars** in one month (12x)
+* **100K+ impressions** across platforms, including a 50K-impression daily.dev post and a 24K-view X Article
+* **#3 trending in Go** on Trendshift
+* **200+ LinkedIn posts and comments** from developers after the sessions
+
+![OpenLore GitHub star history, flat through September and climbing past 1.5K stars in October](/case-studies/openlore/openlore-star-history.webp "OpenLore's star history: flat for months, then 12x in one month.")
+
+[Read the OpenLore case study](/case-studies/openlore).
+
+### Corsair: about 300 to 2,000 stars in five weeks
+
+For Corsair, an open-source integration layer for AI agents, Studio1 ran onboarding audits, example projects, hackathon tracks and technical posts. Stars grew from about 300 in mid-May to 1,000 in early June and 2,000 by mid-June. [Read the Corsair case study](/case-studies/corsair).
+
+### Awesome AI Apps: a distribution channel of its own
+
+[Awesome AI Apps](https://github.com/Arindam200/awesome-ai-apps), a collection of projects showcasing RAG, agents and workflows, had 16,652 GitHub stars and 1,864 forks as of October 29, 2026. It was created in February 2025. Because it already reaches a large OSS audience, it is where Studio1 amplifies client demos, as it did with Memori's 12 agents.
+
+![Awesome AI Apps GitHub README with a GitHub Trending badge and a catalog of AI app projects](/case-studies/nebius/awesome-ai-apps-readme.webp "The Awesome AI Apps README.")
+
+If you are planning a launch or your repo has stalled after one, our [GitHub growth service](/github-growth-agency) can run the launch, demos, content and community work with you.
+
+## FAQ
+
+### How do I get my first 1,000 GitHub stars?
+
+Fix the README and quickstart first, then launch in the same week on Show HN, the right subreddits and X, with a demo people can run. Follow up with daily content and at least one live talk or hackathon. OpenLore crossed 1,000 stars within weeks using this mix, and Corsair went from about 300 to 1,000 in roughly three weeks.
+
+### Is Hacker News or Product Hunt better for an open-source launch?
+
+For an open-source developer tool, Show HN usually fits better because readers can try the repo directly. Product Hunt works best when you have a hosted product or site. Many teams use both in the same launch week.
+
+### Should I hire an agency to grow GitHub stars?
+
+Hire help when your team is shipping product and has no time for daily distribution, demos and events. Look for an agency that writes technical content engineers respect, builds real demos, and reports on stars alongside installs and feedback. Avoid anyone selling stars.
+
+### How long does it take to see results?
+
+A good launch can add hundreds of stars in days, but the spike fades. Sustained growth from content, demos and community typically shows over weeks: OpenLore grew 12x in one month, and Corsair grew about 300 to 2,000 in five weeks.
+
+### Are GitHub stars a vanity metric?
+
+Partly. A star is a bookmark, but developers do use star counts as social proof when evaluating a tool. Track stars, then look at installs, forks, contributors and feedback to judge real adoption.

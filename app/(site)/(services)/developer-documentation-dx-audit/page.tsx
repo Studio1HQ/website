@@ -14,7 +14,7 @@ import {
   StoryProof,
 } from "@/components/pages/shared/service-story";
 import { PaperCta } from "@/components/paper/paper-sections";
-import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
+import { breadcrumbJsonLd, pageMetadata, serviceJsonLd } from "@/lib/seo";
 import { getTranslations } from "next-intl/server";
 import { DEFAULT_LOCALE } from "@/lib/i18n";
 
@@ -173,21 +173,13 @@ const litellmProof = {
 };
 
 export default function Page() {
-  const serviceSchema = {
-    "@context": "https://schema.org",
-    "@type": "Service",
+  const serviceSchema = serviceJsonLd({
     name: "Developer Documentation & DX Audit Services",
     description:
       "Developer documentation and DX audit services for AI and DevTool products: onboarding reviews, API clarity, quickstarts, reference docs, and a clearer path to first success.",
-    provider: {
-      "@type": "Organization",
-      name: "Studio1",
-      url: "https://studio1hq.com",
-    },
+    path: "/developer-documentation-dx-audit",
     serviceType: "Developer Documentation, Docs Audit, and DX Improvements",
-    areaServed: "Worldwide",
-    url: "https://studio1hq.com/developer-documentation-dx-audit",
-  };
+  });
 
   return (
     <div className="overflow-x-clip" style={PAPER_SCOPE}>

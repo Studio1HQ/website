@@ -1,12 +1,18 @@
 const baseUrl = process.env.AGENT_READINESS_BASE_URL ?? "http://localhost:3000";
 
+// Keep in sync with app/robots.ts.
 const agentUserAgents = [
   "GPTBot",
+  "OAI-SearchBot",
   "ChatGPT-User",
   "ClaudeBot",
-  "Google-Extended",
-  "DeepSeekBot",
+  "Claude-SearchBot",
+  "Claude-User",
   "PerplexityBot",
+  "Perplexity-User",
+  "Google-Extended",
+  "Applebot-Extended",
+  "DeepSeekBot",
   "ora-agent",
 ];
 
@@ -62,7 +68,7 @@ async function verifyRobots() {
   }
   assert(text.includes("Allow: /"), "robots.txt missing Allow: /");
   assert(
-    text.includes("Sitemap: https://studio1hq.com/sitemap.xml"),
+    text.includes("Sitemap: https://www.studio1hq.com/sitemap.xml"),
     "robots.txt missing production sitemap URL",
   );
 }
@@ -120,7 +126,7 @@ async function verifyMachineReadableFiles() {
     "sitemap.xml did not return XML content-type",
   );
   assert(
-    sitemap.text.includes("https://studio1hq.com/case-studies/jozu"),
+    sitemap.text.includes("https://www.studio1hq.com/case-studies/jozu"),
     "sitemap.xml missing the Jozu case study URL",
   );
 

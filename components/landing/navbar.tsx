@@ -11,7 +11,7 @@ import {
 } from "@tabler/icons-react";
 import { navItems } from "@/constants/data";
 import { cn } from "@/lib/utils";
-import { isPaperPath } from "@/lib/paper";
+import { useIsPaper } from "@/components/paper/paper-chrome-context";
 import Logo from "../ui/svgs/logo";
 import { MailIcon } from "@/components/ui/mail-icon";
 import { LanguageSwitcher } from "@/components/localization/language-switcher";
@@ -66,7 +66,7 @@ export default function Navbar() {
   const pathname = usePathname() || "/";
   const isHome =
     (pathname.replace(/^\/(fr|es|hi|zh)(?=\/|$)/, "") || "/") === "/";
-  const isPaper = isPaperPath(pathname);
+  const isPaper = useIsPaper();
   const isBlogPost = /^\/blog\/(?!page\/)[^/]+/.test(
     pathname.replace(/^\/(fr|es|hi|zh)(?=\/|$)/, ""),
   );

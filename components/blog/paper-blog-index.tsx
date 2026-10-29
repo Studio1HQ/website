@@ -69,19 +69,29 @@ function PrintTag({ children }: { children: string }) {
   );
 }
 
-/** Every post shows its generated paper cover, all at the same 16:9 size. */
+/**
+ * Every post shows its generated paper cover, all at the same 16:9 size.
+ * `bleed` runs it edge to edge in a split card: at least 16:9, stretched to
+ * the height of the text beside it, with the card's own corners.
+ */
 function PostCover({
   post,
   priority = false,
   sizes,
+  bleed = false,
 }: {
   post: BlogPostMeta;
   priority?: boolean;
   sizes: string;
+  bleed?: boolean;
 }) {
   return (
     <div
-      className={`relative aspect-[16/9] w-full overflow-hidden rounded-[12px] ring-1 ring-inset ring-[#141414]/10 ${post.bannerImage ? "bg-[#0b0b0b]" : "bg-[#f4efe7]"}`}
+      className={cn(
+        "relative aspect-[16/9] w-full overflow-hidden ring-1 ring-inset ring-[#141414]/10",
+        bleed ? "lg:h-full lg:self-stretch" : "rounded-[12px]",
+        post.bannerImage && !bleed ? "bg-[#0b0b0b]" : "bg-[#f4efe7]",
+      )}
     >
       <Image
         src={post.bannerImage || blogCoverUrl(post.slug, post.updatedDate)}
@@ -89,7 +99,7 @@ function PostCover({
         fill
         priority={priority}
         sizes={sizes}
-        className={`${post.bannerImage ? "object-contain" : "object-cover"} transition-transform duration-700 ease-out group-hover:scale-[1.03] motion-reduce:transform-none`}
+        className={`${post.bannerImage && !bleed ? "object-contain" : "object-cover"} transition-transform duration-700 ease-out group-hover:scale-[1.03] motion-reduce:transform-none`}
       />
     </div>
   );
@@ -144,6 +154,7 @@ function FeaturedPost({
         <PostCover
           post={post}
           priority
+          bleed
           sizes="(max-width: 1024px) 100vw, 720px"
         />
         <div className="flex min-w-0 flex-col p-5 sm:p-7 lg:p-9">

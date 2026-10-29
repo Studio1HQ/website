@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="500" viewBox="0 0 1200 500" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif">
+<rect width="1200" height="500" fill="#f4efe7"/>
+<text x="60.0" y="74.0" font-size="32" font-weight="700" fill="#141414" fill-opacity="1.0" text-anchor="start">Launch day, hour by hour (Pacific time)</text><text x="60.0" y="108.0" font-size="18" font-weight="400" fill="#141414" fill-opacity="0.6" text-anchor="start">Launches run 24 hours from 12:01 AM PT. Reply to every comment, all day.</text>
+<rect x="60.0" y="160.0" width="204.8" height="150" rx="10" fill="#141414" stroke="#141414" stroke-opacity="0.12" stroke-width="1.5"/>
+<text x="80.0" y="196.0" font-size="13" font-weight="700" fill="#f97316" fill-opacity="1" text-anchor="start">12:01 AM</text>
+<text x="80.0" y="230.0" font-size="20" font-weight="700" fill="#ffffff" fill-opacity="1.0" text-anchor="start">Go live</text>
+<text x="80.0" y="270.0" font-size="14.5" font-weight="400" fill="#ffffff" fill-opacity="0.85" text-anchor="start">Post the maker comment</text>
+<text x="80.0" y="294.0" font-size="14.5" font-weight="400" fill="#ffffff" fill-opacity="0.85" text-anchor="start">and tell your team</text>
+<rect x="278.8" y="160.0" width="204.8" height="150" rx="10" fill="#ffffff" stroke="#141414" stroke-opacity="0.12" stroke-width="1.5"/>
+<text x="298.8" y="196.0" font-size="13" font-weight="700" fill="#f97316" fill-opacity="1" text-anchor="start">Early hours</text>
+<text x="298.8" y="230.0" font-size="20" font-weight="700" fill="#141414" fill-opacity="1.0" text-anchor="start">Europe and India</text>
+<text x="298.8" y="270.0" font-size="14.5" font-weight="400" fill="#141414" fill-opacity="0.65" text-anchor="start">Your network there</text>
+<text x="298.8" y="294.0" font-size="14.5" font-weight="400" fill="#141414" fill-opacity="0.65" text-anchor="start">carries the first hours</text>
+<rect x="497.6" y="160.0" width="204.8" height="150" rx="10" fill="#ffffff" stroke="#141414" stroke-opacity="0.12" stroke-width="1.5"/>
+<text x="517.6" y="196.0" font-size="13" font-weight="700" fill="#f97316" fill-opacity="1" text-anchor="start">6-10 AM</text>
+<text x="517.6" y="230.0" font-size="20" font-weight="700" fill="#141414" fill-opacity="1.0" text-anchor="start">US wakes up</text>
+<text x="517.6" y="270.0" font-size="14.5" font-weight="400" fill="#141414" fill-opacity="0.65" text-anchor="start">Post on X and LinkedIn,</text>
+<text x="517.6" y="294.0" font-size="14.5" font-weight="400" fill="#141414" fill-opacity="0.65" text-anchor="start">email your users</text>
+<rect x="716.4" y="160.0" width="204.8" height="150" rx="10" fill="#ffffff" stroke="#141414" stroke-opacity="0.12" stroke-width="1.5"/>
+<text x="736.4" y="196.0" font-size="13" font-weight="700" fill="#f97316" fill-opacity="1" text-anchor="start">Afternoon</text>
+<text x="736.4" y="230.0" font-size="20" font-weight="700" fill="#141414" fill-opacity="1.0" text-anchor="start">Mid-day update</text>
+<text x="736.4" y="270.0" font-size="14.5" font-weight="400" fill="#141414" fill-opacity="0.65" text-anchor="start">Share what people asked</text>
+<text x="736.4" y="294.0" font-size="14.5" font-weight="400" fill="#141414" fill-opacity="0.65" text-anchor="start">and what you shipped</text>
+<rect x="935.2" y="160.0" width="204.8" height="150" rx="10" fill="#ffffff" stroke="#141414" stroke-opacity="0.12" stroke-width="1.5"/>
+<text x="955.2" y="196.0" font-size="13" font-weight="700" fill="#f97316" fill-opacity="1" text-anchor="start">11:59 PM</text>
+<text x="955.2" y="230.0" font-size="20" font-weight="700" fill="#141414" fill-opacity="1.0" text-anchor="start">Day closes</text>
+<text x="955.2" y="270.0" font-size="14.5" font-weight="400" fill="#141414" fill-opacity="0.65" text-anchor="start">Awards use points:</text>
+<text x="955.2" y="294.0" font-size="14.5" font-weight="400" fill="#141414" fill-opacity="0.65" text-anchor="start">upvotes plus engagement</text>
+<rect x="60" y="338" width="1080" height="58" rx="10" fill="#f97316"/>
+<text x="88.0" y="374.0" font-size="12" font-weight="700" fill="#ffffff" fill-opacity="0.85" text-anchor="start">ALL DAY</text>
+<text x="170.0" y="375.0" font-size="17" font-weight="600" fill="#ffffff" fill-opacity="1.0" text-anchor="start">Reply to every comment within minutes. Ask for feedback, never for upvotes.</text>
+<text x="60.0" y="438.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.55" text-anchor="start">12:01 AM PT is morning in Europe and afternoon in India, so line up supporters there for the first hours.</text>
+</svg>

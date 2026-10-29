@@ -479,14 +479,14 @@ function Pages() {
   );
 }
 
-function Terminal({ name }: { name: string }) {
+function Terminal({ command, result = "→ decision ready" }: { command: string; result?: string }) {
   const lines: { bar?: number; color?: string; text?: string; indent?: number }[] = [
-    { text: `$ ${name.toLowerCase()} --explain`, color: CREAM },
+    { text: `$ ${command}`, color: CREAM },
     { bar: 360, color: "rgba(244,239,231,0.28)" },
     { bar: 280, color: PRINT, indent: 1 },
     { bar: 330, color: "rgba(244,239,231,0.28)", indent: 1 },
     { bar: 210, color: "rgba(244,239,231,0.28)", indent: 1 },
-    { text: "→ decision ready", color: PRINT },
+    { text: result, color: PRINT },
   ];
   return (
     <div style={flex({ flexDirection: "column", width: 560, background: INK, boxShadow: "0 30px 60px -30px rgba(60,20,0,0.7)" })}>
@@ -513,6 +513,70 @@ function Terminal({ name }: { name: string }) {
   );
 }
 
+/** Tabler's outline GitHub mark (MIT), drawn with a stroke. */
+const GITHUB_PATH =
+  "M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5";
+const STAR_PATH = "M12 2.5l2.9 6.2 6.6.8-4.9 4.6 1.3 6.6L12 17.4l-5.9 3.3 1.3-6.6L2.5 9.5l6.6-.8z";
+
+function StarHistory() {
+  const W = 536;
+  const H = 200;
+  // Illustrative star count: flat, a jump at each launch moment, then a steady climb.
+  const points: [number, number][] = [
+    [0, 192], [80, 186], [150, 178], [178, 172], [206, 108], [250, 96], [300, 86],
+    [330, 80], [362, 34], [420, 24], [480, 16], [W, 8],
+  ];
+  const line = points.map(([x, y], index) => `${index ? "L" : "M"}${x} ${y}`).join(" ");
+  const launches: { x: number; y: number; label: string }[] = [
+    { x: 206, y: 108, label: "Show HN" },
+    { x: 362, y: 34, label: "Launch week" },
+  ];
+  return (
+    <div style={card({ width: 600, padding: "28px 32px 26px" })}>
+      <div style={flex({ justifyContent: "space-between", alignItems: "center" })}>
+        <div style={flex({ alignItems: "center", gap: 12, fontSize: 24, fontWeight: 500, letterSpacing: "-0.02em" })}>
+          <svg width={32} height={32} viewBox="0 0 24 24">
+            <path d={GITHUB_PATH} fill="none" stroke={INK} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <span style={{ color: MUTED }}>your-org /</span>
+          <span>launch</span>
+        </div>
+        <div style={flex({ alignItems: "center", gap: 6, padding: "6px 10px", background: PRINT, color: "#fff", fontSize: 18, fontWeight: 500 })}>
+          <svg width={18} height={18} viewBox="0 0 24 24">
+            <path d={STAR_PATH} fill="#fff" />
+          </svg>
+          12k
+        </div>
+      </div>
+      <div style={flex({ marginTop: 18 })}>
+        <Caption>STAR HISTORY</Caption>
+      </div>
+      <div style={flex({ position: "relative", width: W, height: H, flexShrink: 0, marginTop: 16 })}>
+        <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ position: "absolute", left: 0, top: 0 }}>
+          {[0.25, 0.5, 0.75].map((row) => (
+            <line key={row} x1="0" x2={W} y1={H * row} y2={H * row} stroke={LINE} strokeWidth="2" strokeDasharray="6 6" />
+          ))}
+          <path d={`${line} L${W} ${H} L0 ${H} Z`} fill={PRINT} fillOpacity="0.14" />
+          <path d={line} fill="none" stroke={PRINT} strokeWidth="5" strokeLinejoin="round" strokeLinecap="round" />
+          {launches.map(({ x, y }) => (
+            <circle key={x} cx={x} cy={y} r="10" fill={INK} stroke="#fff" strokeWidth="4" />
+          ))}
+        </svg>
+        {launches.map(({ x, y, label }) => (
+          <div key={label} style={flex({ position: "absolute", left: x - 150, top: y - 14, width: 132, justifyContent: "flex-end" })}>
+            <Tag dark>{label}</Tag>
+          </div>
+        ))}
+      </div>
+      <div style={flex({ justifyContent: "space-between", marginTop: 14, paddingTop: 12, borderTop: `1px solid ${LINE}`, fontSize: 15, color: MUTED })}>
+        <span>Day 0</span>
+        <span>Day 30</span>
+        <span>Day 90</span>
+      </div>
+    </div>
+  );
+}
+
 function PrintMark() {
   return (
     <div style={flex({ width: 380, height: 380, alignItems: "center", justifyContent: "center", background: CREAM })}>
@@ -521,7 +585,8 @@ function PrintMark() {
   );
 }
 
-type Art = { label: string; node: ReactNode };
+/** `scale` overrides the panel's zoom for art too tall to fit the cover at it. */
+type Art = { label: string; node: ReactNode; scale?: number };
 
 /** Picks the illustration from what the post is about. */
 function artFor(post: BlogPostMeta): Art {
@@ -531,8 +596,11 @@ function artFor(post: BlogPostMeta): Art {
     const [left, right] = lead.split(/\s+vs\.?\s+/i);
     return { label: "versus.fig", node: <Versus left={left} right={right} /> };
   }
-  if (/\breview\b/i.test(lead)) {
+  if (/\breviews?\b/i.test(title)) {
     return { label: "benchmarks.fig", node: <Bench name={lead.replace(/\s+review$/i, "")} /> };
+  }
+  if (/github|open[- ]source/i.test(title) || post.tags.some((tag) => /^(github|open-source)$/i.test(tag))) {
+    return { label: "star-history.fig", node: <StarHistory /> };
   }
   if (/llms\.txt/i.test(title)) {
     return {
@@ -577,12 +645,15 @@ function artFor(post: BlogPostMeta): Art {
   if (/\broi\b/i.test(title)) return { label: "funnel.fig", node: <Funnel /> };
   if (/\bcosts?\b/i.test(title)) return { label: "pricing.fig", node: <Pricing /> };
   if (/mistake/i.test(title)) return { label: "checklist.fig", node: <Checklist /> };
-  if (/communit/i.test(title)) return { label: "community.fig", node: <Network /> };
+  if (/communit/i.test(title)) return { label: "community.fig", node: <Network />, scale: 1.05 };
   if (/projects/i.test(title)) return { label: "projects.fig", node: <Tiles /> };
-  if (/content/i.test(title)) return { label: "content.fig", node: <Pages /> };
+  if (/content/i.test(title)) return { label: "content.fig", node: <Pages />, scale: 1.05 };
   if (/^what is/i.test(title)) {
     const name = lead.replace(/^what is\s+/i, "").replace(/\?.*$/, "");
-    return { label: "terminal", node: <Terminal name={name} /> };
+    return { label: "terminal", node: <Terminal command={`${name.toLowerCase()} --explain`} /> };
+  }
+  if (/^build\b|step-by-step/i.test(title)) {
+    return { label: "terminal", node: <Terminal command="pnpm install && pnpm dev" result="→ running locally" /> };
   }
   return { label: "studio1-mark", node: <PrintMark /> };
 }
@@ -627,7 +698,9 @@ function Frame({ label, children }: { label: string; children: ReactNode }) {
 /** Orange panel with the horizon glow and the framed illustration. */
 function Panel({ art, width, scale = 1 }: { art: Art; width: number; scale?: number }) {
   return (
-    <div style={flex({ position: "relative", width, height: "100%", alignItems: "center", justifyContent: "center", overflow: "hidden", ...PANEL })}>
+    // No overflow clip here: next/og drops SVGs (icons, charts, the cursor) inside
+    // the scaled frame when an ancestor clips. The canvas edge clips anyway.
+    <div style={flex({ position: "relative", width, height: "100%", alignItems: "center", justifyContent: "center", ...PANEL })}>
       {/* Horizon: a soft glowing arc rising from the bottom edge */}
       <svg
         width={width}
@@ -653,7 +726,7 @@ function Panel({ art, width, scale = 1 }: { art: Art; width: number; scale?: num
           opacity="0.9"
         />
       </svg>
-      <div style={flex({ transform: `scale(${scale})` })}>
+      <div style={flex({ transform: `scale(${art.scale ?? scale})` })}>
         <Frame label={art.label}>{art.node}</Frame>
       </div>
     </div>

@@ -207,6 +207,14 @@ const config: Config = {
             transform: "translateY(0)",
           },
         },
+        sweep: {
+          from: {
+            transform: "translateX(-100%)",
+          },
+          to: {
+            transform: "translateX(200%)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -222,6 +230,7 @@ const config: Config = {
         "fade-in": "fade-in 0.5s ease-out",
         "spin-slow": "spin 60s linear infinite",
         "spin-reverse-slow": "spin 60s linear infinite reverse",
+        sweep: "sweep 2.8s ease-in-out infinite",
       },
     },
   },

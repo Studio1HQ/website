@@ -55,6 +55,8 @@ const PAPER_PATHS = new Set([
   "/developer-relations-growth-campaigns",
   "/developer-video-production",
   "/developer-documentation-dx-audit",
+  "/github-growth-agency",
+  "/results",
 ]);
 
 /** Drops the locale prefix, so "/fr/careers" reads as "/careers". */

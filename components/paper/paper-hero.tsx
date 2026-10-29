@@ -17,6 +17,7 @@ import Logo from "@/components/ui/svgs/logo";
 import { cn } from "@/lib/utils";
 import { Container, EASE } from "@/components/home/ui";
 import { DitherField } from "@/components/home/dither-field";
+import { GRAIN, INK, PAPER, PRINT } from "@/lib/paper";
 
 type OfferingCopy = { label: string; description: string };
 
@@ -27,16 +28,8 @@ const TRUSTED_FACES = [
   { src: JuliaImg, alt: "Julia" },
 ] as const;
 
-/** Paper canvas palette (fixed, independent of the site theme). */
-export const PAPER = "#f4efe7";
-export const INK = "#141414";
-/** Near-black used for the dark bands that alternate with the paper. */
-export const NIGHT = "#0d0d0d";
-export const PRINT = "#f97316";
-
-/** Fine paper grain, as a tiny inline SVG noise tile. */
-export const GRAIN =
-  "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.1  0 0 0 0 0.08  0 0 0 0 0.06  0 0 0 0.55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")";
+/** Paper palette lives in lib/paper so server components can use it too. */
+export { GRAIN, INK, NIGHT, PAPER, PRINT } from "@/lib/paper";
 
 /**
  * Seconds after navigation start when the preloader curtain is lifting

@@ -6,7 +6,7 @@ export const BLOG_COVER_SIZE = { width: 1600, height: 900 };
  * browsers cache covers by URL for weeks, so a new version is what makes
  * readers see the new design.
  */
-const COVER_VERSION = 3;
+const COVER_VERSION = 4;
 
 /** `updated` is the post's updated date, so editing a title refreshes its cover too. */
 function version(updated?: string) {

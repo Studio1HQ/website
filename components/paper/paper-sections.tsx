@@ -2,6 +2,7 @@
 
 import {
   useEffect,
+  useId,
   useRef,
   useState,
   type CSSProperties,
@@ -59,7 +60,6 @@ import {
   type MotionValue,
 } from "motion/react";
 import AsciiHands from "@/components/home/ascii-hands";
-import { DitherField } from "@/components/home/dither-field";
 import { preloadLocators } from "./country-locator";
 import { CountryFlag, WorldReachMap } from "./world-reach-map";
 import {
@@ -70,6 +70,7 @@ import {
   PAPER,
   PRINT,
   PrintBlock,
+  SWATCHES,
   SelectionFrame,
 } from "./paper-hero";
 
@@ -166,7 +167,10 @@ export function IndexBar({
   aside?: ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between gap-6 text-[13px] font-medium">
+    <div
+      data-index-bar
+      className="flex items-center justify-between gap-6 text-[13px] font-medium"
+    >
       <span className="flex items-center gap-3">
         <span className="tabular-nums" style={{ color: PRINT }}>
           {String(index).padStart(2, "0")}
@@ -1122,17 +1126,15 @@ const WORK = [
   },
 ];
 
-/** Counts a metric like "16K+" or "12,000+" up from zero; words stay as they are. */
-function MetricValue({ value }: { value: string }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-10% 0px" });
+/** Counts a value like "16K+" or "12,000+" up from zero once `start` is set; words stay as they are. */
+function useCountUp(value: string, start: boolean) {
   const reduceMotion = useReducedMotion();
   const match = value.match(/^([\d,]+)(.*)$/);
   const target = match ? Number(match[1].replace(/,/g, "")) : 0;
   const [shown, setShown] = useState(match && !reduceMotion ? 0 : target);
 
   useEffect(() => {
-    if (!match || !inView || reduceMotion) return;
+    if (!match || !start || reduceMotion) return;
     const controls = animate(0, target, {
       duration: 1.6,
       ease: [0.16, 1, 0.3, 1],
@@ -1140,18 +1142,13 @@ function MetricValue({ value }: { value: string }) {
     });
     return () => controls.stop();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inView, reduceMotion, target]);
+  }, [start, reduceMotion, target]);
 
-  if (!match) return <span ref={ref}>{value}</span>;
+  if (!match) return value;
   const digits = match[1].includes(",")
     ? Math.round(shown).toLocaleString("en-US")
     : String(Math.round(shown));
-  return (
-    <span ref={ref} className="tabular-nums">
-      {digits}
-      {match[2]}
-    </span>
-  );
+  return digits + match[2];
 }
 
 /** Summary text with one key phrase underlined by a hand-drawn orange stroke. */
@@ -1251,342 +1248,596 @@ function BrandText({ text }: { text: string }) {
   );
 }
 
-/** One beat of a case study story: an arrow badge, a title, then content. */
-function StoryBeat({
-  title,
-  last = false,
-  className,
-  children,
-}: {
-  title: string;
-  last?: boolean;
-  className?: string;
-  children: ReactNode;
-}) {
+type FeaturedWork = (typeof WORK)[number];
+type ProofPrint = { src: string; ratio: number; name: string; alt: string };
+
+/** What each featured proof sheet pins down: two evidence prints and a margin note. */
+const PROOFS: Record<string, { note: string; prints: [ProofPrint, ProofPrint] }> = {
+  Nebius: {
+    note: "with day-one support for every launch",
+    prints: [
+      {
+        src: "/case-studies/nebius/awesome-ai-apps-readme.webp",
+        ratio: 1434 / 1660,
+        name: "awesome-ai-apps.webp",
+        alt: "The Awesome AI Apps README, maintained by the Studio1 team",
+      },
+      {
+        src: "/case-studies/nebius/meetup-talk.webp",
+        ratio: 720 / 311,
+        name: "meetup-talk.webp",
+        alt: "A Studio1 talk at a Nebius developer meetup",
+      },
+    ],
+  },
+  "Bright Data": {
+    note: "8 of them in the top three",
+    prints: [
+      {
+        src: "/case-studies/brightdata/bright-data-vs-zyte-google.webp",
+        ratio: 1024 / 570,
+        name: "serp-bright-data-vs-zyte.webp",
+        alt: "Google results for “bright data vs zyte”, with the Studio1 comparison post first",
+      },
+      {
+        src: "/case-studies/brightdata/docs-deep-research-architecture.webp",
+        ratio: 2000 / 1293,
+        name: "docs-architecture.webp",
+        alt: "The Deep Research Agent Architecture page in the Bright Data docs",
+      },
+    ],
+  },
+  Memori: {
+    note: "from zero at launch",
+    prints: [
+      {
+        src: "/case-studies/memori/memori-launch-reddit-redacted.png",
+        ratio: 1488 / 968,
+        name: "launch-post.png",
+        alt: "The Memori open-source launch post on r/LocalLLaMA",
+      },
+      {
+        src: "/case-studies/memori/memori-reddit-launch-stats.png",
+        ratio: 1318 / 988,
+        name: "launch-stats.png",
+        alt: "Launch post stats: 50K views and a 95.6% upvote ratio",
+      },
+    ],
+  },
+  LiteLLM: {
+    note: "one clear place to start",
+    prints: [
+      {
+        src: "/case-studies/litellm/github-guides-activity.webp",
+        ratio: 792 / 619,
+        name: "docs-pull-requests.webp",
+        alt: "Studio1 docs pull requests and issues in the BerriAI/litellm repository",
+      },
+      {
+        src: "/case-studies/litellm/litellm-support-feedback.avif",
+        ratio: 902 / 170,
+        name: "team-feedback.avif",
+        alt: "Team feedback in Slack: “this is amazing work, i love it”",
+      },
+    ],
+  },
+};
+
+/** Printer's registration mark: a crosshair in a circle. */
+function RegMark({ className }: { className?: string }) {
   return (
-    <div className={cn("py-3.5", className)}>
-      <p className="flex items-center gap-2.5 text-[14px] font-semibold tracking-[-0.01em] text-[#141414]">
-        <span
-          aria-hidden
-          className="flex size-5 shrink-0 items-center justify-center rounded-full"
-          style={
-            last
-              ? { background: PRINT, color: "#fff" }
-              : { background: "rgba(20,20,20,0.06)", color: PRINT }
-          }
-        >
-          <ArrowRight weight="bold" className="size-3" />
-        </span>
-        {title}
-      </p>
-      <div className="mt-2.5 pl-[30px]">{children}</div>
-    </div>
+    <svg
+      aria-hidden
+      viewBox="0 0 16 16"
+      className={cn("size-3 shrink-0", className)}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1"
+    >
+      <circle cx="8" cy="8" r="4.5" />
+      <path d="M8 0v16M0 8h16" />
+    </svg>
   );
 }
 
-/** One featured case study: the situation, what changed, what they got. */
-function FeaturedCase({
-  work,
-  index,
-}: {
-  work: (typeof WORK)[number];
-  index: number;
-}) {
-  const reduceMotion = useReducedMotion();
-  // Hovering the card raises the work itself, with a "View case study" bubble.
-  const [preview, setPreview] = useState(false);
+const CROP_CORNERS = [
+  ["left", "top"],
+  ["right", "top"],
+  ["left", "bottom"],
+  ["right", "bottom"],
+] as const;
 
-  const quote = "quote" in work ? work.quote : undefined;
-
+/** Crop marks just outside each corner, as on a press sheet. */
+function CropMarks() {
+  const tick = "absolute bg-[#141414]/35";
   return (
-    // Nine rows on a shared subgrid, so every section lines up across the cards in a row.
-    <article
-      onPointerEnter={() => setPreview(true)}
-      onPointerLeave={() => setPreview(false)}
-      className="group relative isolate grid min-w-0 grid-cols-[minmax(0,1fr)] rounded-[6px] bg-white/80 p-6 shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08] transition-shadow duration-500 hover:z-10 hover:shadow-[inset_0_1px_0_#fff,0_30px_60px_-34px_rgba(249,115,22,0.45)] md:row-span-9 md:grid-rows-[subgrid] md:p-9"
+    <span
+      aria-hidden
+      className="pointer-events-none absolute inset-0 hidden lg:block"
     >
-      {/* Still orange halftone, fading out from the top-right corner */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-[6px]"
-      >
-        <DitherField
-          still
-          pattern="halftone"
-          fade="left"
-          cell={8}
-          size={3}
-          strength={1.6}
-          className="absolute right-0 top-0 h-[150px] w-[220px] [mask-image:radial-gradient(ellipse_at_top_right,black_10%,transparent_70%)]"
-        />
-      </span>
-      {/* Orange hairline along the top edge */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-x-8 top-0 h-px"
-        style={{
-          background: `linear-gradient(90deg, transparent, ${PRINT}, transparent)`,
-        }}
-      />
-
-      {/* 1. Client */}
-      <div className="flex items-center gap-3">
-        <span className="relative size-10 shrink-0 overflow-hidden rounded-[6px] bg-[#f8f6f2] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10)]">
-          <Image
-            src={work.logo}
-            alt=""
-            fill
-            sizes="40px"
-            className="object-cover mix-blend-multiply"
-            style={
-              "logoZoom" in work
-                ? { transform: `scale(${work.logoZoom})` }
-                : undefined
-            }
+      {CROP_CORNERS.map(([x, y]) => (
+        <span key={`${x}-${y}`}>
+          <span
+            className={cn(tick, "h-px w-3")}
+            style={{ [x]: -20, [y]: 0 } as CSSProperties}
+          />
+          <span
+            className={cn(tick, "h-3 w-px")}
+            style={{ [x]: 0, [y]: -20 } as CSSProperties}
           />
         </span>
-        <span className="text-[15px] font-semibold tracking-[-0.01em]">
-          {work.client}
-        </span>
-        {"span" in work && work.span ? (
-          <span className="rounded-full bg-[#f97316]/10 px-2.5 py-0.5 text-[11.5px] font-medium text-[#c2410c]">
-            {work.span}
-          </span>
-        ) : null}
-        <span aria-hidden className="h-px flex-1 bg-[#141414]/12" />
-        <span className="relative rounded-[6px] bg-[#fbfaf7] px-2 py-1 text-[28px] font-medium leading-none tabular-nums tracking-[-0.05em] text-[#141414]/30 shadow-[0_0_0_6px_#fbfaf7] md:text-[34px]">
-          {String(index + 1).padStart(2, "0")}
-        </span>
-      </div>
+      ))}
+    </span>
+  );
+}
 
-      {/* 2. Headline */}
-      <h3 className="mt-6 text-[24px] font-medium leading-[1.2] tracking-[-0.035em] md:text-[28px]">
-        <Link
-          href={work.href}
-          className="bg-[linear-gradient(currentColor,currentColor)] bg-[length:0%_1.5px] bg-left-bottom bg-no-repeat transition-[background-size] duration-500 hover:bg-[length:100%_1.5px]"
+/**
+ * The headline figure printed in two inks, the orange plate a touch out of
+ * register; hovering the sheet pulls it into register.
+ */
+function TwoInkStat({
+  value,
+  suffix,
+  active,
+}: {
+  value: string;
+  suffix?: string;
+  active: boolean;
+}) {
+  const shown = useCountUp(value, active);
+  const figure = (
+    <>
+      {shown}
+      {suffix ? (
+        <span className="text-[0.4em] tracking-[-0.03em]">{suffix}</span>
+      ) : null}
+    </>
+  );
+  return (
+    <span className="relative inline-block whitespace-nowrap tabular-nums">
+      <span
+        className="absolute left-0 top-0 translate-x-[0.045em] translate-y-[0.035em] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/sheet:translate-x-0 group-hover/sheet:translate-y-0"
+        style={{ color: PRINT }}
+      >
+        {figure}
+      </span>
+      <span className="relative">{figure}</span>
+    </span>
+  );
+}
+
+/** A proofreader's note in the margin, with a hand-drawn arrow back to the figure. */
+function MarginNote({
+  children,
+  active,
+}: {
+  children: ReactNode;
+  active: boolean;
+}) {
+  const reduceMotion = useReducedMotion();
+  const draw = (delay: number) => ({
+    initial: reduceMotion ? false : { pathLength: 0 },
+    animate: active ? { pathLength: 1 } : undefined,
+    transition: { duration: 0.6, delay, ease: [0.65, 0, 0.35, 1] as const },
+  });
+  return (
+    <span
+      className="inline-flex max-w-[190px] items-start gap-1.5 font-['Georgia',serif] text-[15px] italic leading-[1.25] lg:mt-4"
+      style={{ color: PRINT }}
+    >
+      <svg
+        aria-hidden
+        viewBox="0 0 34 26"
+        className="mt-0.5 h-[22px] w-[30px] shrink-0 overflow-visible"
+        fill="none"
+        stroke={PRINT}
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <motion.path d="M32 22 C 22 23, 9 18, 4 5" {...draw(0.9)} />
+        <motion.path d="M1 11 4 4 10 8" {...draw(1.4)} />
+      </svg>
+      {children}
+    </span>
+  );
+}
+
+/** A rubber stamp in print orange: ring text around a check. Lands once `active`. */
+function RubberStamp({ text, active }: { text: string; active: boolean }) {
+  const id = `stamp-${useId().replace(/[^\w-]/g, "")}`;
+  const reduceMotion = useReducedMotion();
+  return (
+    <motion.svg
+      aria-hidden
+      viewBox="0 0 100 100"
+      className="size-[76px] mix-blend-multiply lg:size-[88px]"
+      initial={reduceMotion ? false : { opacity: 0, scale: 1.9, rotate: -36 }}
+      animate={
+        active || reduceMotion
+          ? { opacity: 0.9, scale: 1, rotate: -14 }
+          : undefined
+      }
+      transition={{ type: "spring", stiffness: 520, damping: 19, delay: 0.55 }}
+    >
+      <defs>
+        <path
+          id={id}
+          d="M50 50 m-35 0 a35 35 0 1 1 70 0 a35 35 0 1 1 -70 0"
+        />
+      </defs>
+      <circle cx="50" cy="50" r="46" fill="none" stroke={PRINT} strokeWidth="3" />
+      <circle cx="50" cy="50" r="24" fill="none" stroke={PRINT} strokeWidth="1.5" />
+      <text fill={PRINT} fontSize="10" fontWeight="600">
+        <textPath href={`#${id}`} textLength="214" lengthAdjust="spacing">
+          {text}
+        </textPath>
+      </text>
+      <path
+        d="M39 50.5 47 58.5 62 42"
+        fill="none"
+        stroke={PRINT}
+        strokeWidth="5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </motion.svg>
+  );
+}
+
+/** One piece of evidence, printed and taped to the sheet. */
+function TapedPrint({
+  print,
+  sizes,
+  selected = false,
+  className,
+}: {
+  print: ProofPrint;
+  sizes: string;
+  /** Shows a design-tool selection with the file name while the sheet is hovered. */
+  selected?: boolean;
+  className?: string;
+}) {
+  return (
+    <span
+      className={cn(
+        "absolute block bg-white shadow-[0_22px_40px_-24px_rgba(20,20,20,0.55),0_1px_0_rgba(20,20,20,0.05)] ring-1 ring-[#141414]/[0.06] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
+        className,
+      )}
+      style={{ aspectRatio: print.ratio }}
+    >
+      <span className="absolute inset-1.5 overflow-hidden bg-[#141414]/5">
+        <Image
+          src={print.src}
+          alt={print.alt}
+          fill
+          sizes={sizes}
+          className="object-cover object-top"
+        />
+      </span>
+      {/* Masking tape */}
+      <span
+        aria-hidden
+        className="absolute -top-2.5 left-1/2 h-5 w-[clamp(44px,24%,84px)] -translate-x-1/2 -rotate-[4deg] bg-[#eadcc4]/80 shadow-[0_1px_2px_rgba(20,20,20,0.12)] mix-blend-multiply"
+      />
+      {selected ? (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -inset-[5px] hidden border-[1.5px] opacity-0 transition-opacity duration-300 group-hover/sheet:opacity-100 lg:block"
+          style={{ borderColor: PRINT }}
         >
-          <BrandText text={work.headline} />
-        </Link>
-      </h3>
-
-      {/* 3. Sub-point, key phrase underlined */}
-      <p className={cn("mt-3 text-[15px] leading-[1.6]", MUTED)}>
-        <MarkedSummary text={work.summary} mark={work.mark} />
-      </p>
-
-      {/* 4-6. The story: the situation, what we shipped, what changed */}
-      <StoryBeat title="The situation" className="mt-6">
-        <p className={cn("text-[14.5px] leading-[1.65]", MUTED)}>
-          {work.situation}
-        </p>
-      </StoryBeat>
-
-      <StoryBeat title="What we shipped">
-        <ul role="list" className="flex flex-wrap gap-2">
-          {(("shipped" in work && work.shipped) || []).map((item) => (
-            <li
-              key={item}
-              className="inline-flex items-center gap-2 rounded-[6px] bg-[#141414]/[0.045] px-2.5 py-1 text-[12.5px] font-medium text-[#141414]/80"
-            >
-              <span
-                aria-hidden
-                className="size-1.5 rounded-full"
-                style={{ background: PRINT }}
-              />
-              {item}
-            </li>
-          ))}
-        </ul>
-      </StoryBeat>
-
-      <StoryBeat title="What they got" last>
-        <p className="text-[15px] font-medium leading-[1.6] text-[#141414]">
-          {"outcomeNote" in work && work.outcomeNote ? (
-            <>
-              {work.outcome ? (
-                <span style={{ color: PRINT }}>
-                  {work.outcome.kind === "growth"
-                    ? `${work.outcome.from} → ${work.outcome.to}`
-                    : work.outcome.kind === "ratio"
-                      ? `${work.outcome.value} of ${work.outcome.total}`
-                      : work.outcome.value}{" "}
-                </span>
-              ) : null}
-              <BrandText text={`${work.outcome?.label}. ${work.outcomeNote}`} />
-            </>
-          ) : (
-            work.result
-          )}
-        </p>
-      </StoryBeat>
-
-      {/* 7. Results, engraved into the card */}
-      <dl className="mt-5 grid grid-cols-1 gap-2.5 min-[480px]:grid-cols-3">
-        {(work.metrics as [Icon, string, string][]).map(
-          ([MetricIcon, value, label], position) => (
-            <div
-              key={label}
-              className="relative isolate min-w-0 overflow-hidden rounded-[6px] bg-[#ece5da] p-3.5 shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10)] [&>*:not(canvas)]:relative"
-            >
-              <DitherField
-                cell={6}
-                size={2}
-                strength={2}
-                seed={index * 3.1 + position * 1.3}
-                className="pointer-events-none absolute right-0 top-0 -z-10 h-[60%] w-[55%] [mask-image:radial-gradient(ellipse_at_top_right,black_20%,transparent_70%)]"
-              />
-              <dt className="sr-only">{label}</dt>
-              <dd>
-                <MetricIcon
-                  aria-hidden
-                  weight="duotone"
-                  className="size-4"
-                  style={{ color: PRINT }}
-                />
-                <p className="mt-2.5 flex items-baseline whitespace-nowrap font-medium leading-none tracking-[-0.045em]">
-                  <span
-                    aria-hidden
-                    className="invisible w-0 text-[20px] md:text-[22px]"
-                  >
-                    0
-                  </span>
-                  <span
-                    className={
-                      /^[#\d]/.test(value)
-                        ? "text-[20px] md:text-[22px]"
-                        : "text-[14px] md:text-[15px]"
-                    }
-                    style={position === 0 ? { color: PRINT } : undefined}
-                  >
-                    <MetricValue value={value} />
-                  </span>
-                </p>
-                <p className={cn("mt-1.5 text-[11.5px] leading-snug", MUTED)}>
-                  <BrandText text={label} />
-                </p>
-              </dd>
-            </div>
-          ),
-        )}
-      </dl>
-
-      {/* 8. Client voice, or a verified result where no quote is published */}
-      <figure className="mt-5 flex flex-col rounded-[6px] bg-[#ece5da] p-5 shadow-[inset_0_3px_8px_rgba(20,20,20,0.10)] md:p-6">
-        {quote ? (
-          <svg
-            aria-hidden
-            viewBox="0 0 32 24"
-            className="h-5 w-7"
-            style={{ fill: PRINT }}
-          >
-            <path d="M0 24V14.4C0 6.6 4.2 1.8 12.6 0l1.5 3.4C9.6 4.9 7.4 7.6 7.2 11.4h6.1V24H0Zm17.9 0V14.4C17.9 6.6 22.1 1.8 30.5 0L32 3.4c-4.5 1.5-6.7 4.2-6.9 8h6.1V24H17.9Z" />
-          </svg>
-        ) : (
           <span
-            className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em]"
-            style={{ color: PRINT }}
-          >
-            <SealCheck aria-hidden weight="fill" className="size-4" />
-            Verified result
-          </span>
-        )}
-        <blockquote className="mb-5 mt-3 text-[16px] font-medium leading-[1.55] tracking-[-0.015em] text-[#141414]">
-          {quote ? (
-            quote.text
-          ) : "proof" in work && work.proof ? (
-            <BrandText text={work.proof} />
-          ) : null}
-        </blockquote>
-        <figcaption className="mt-auto flex items-center gap-3 border-t border-[#141414]/10 pt-4">
-          {quote ? (
-            <>
-              <Image
-                src={quote.avatar}
-                alt=""
-                width={72}
-                height={72}
-                sizes="36px"
-                className="size-9 rounded-full object-cover ring-2 ring-white"
-              />
-              <span className="min-w-0">
-                <span className="flex items-center gap-1.5 text-[14px] font-medium">
-                  {quote.author}
-                  <SealCheck
-                    aria-label="Verified client"
-                    weight="fill"
-                    className="size-4 text-[#1d9bf0]"
-                  />
-                </span>
-                <span className={cn("block text-[12.5px]", FAINT)}>
-                  {quote.role}
-                </span>
-              </span>
-            </>
-          ) : (
-            <span className={cn("text-[12.5px]", FAINT)}>
-              From the {work.client} case study
-            </span>
-          )}
-        </figcaption>
-      </figure>
-
-      {/* 9. Footer */}
-      <div className="flex items-center justify-between gap-4 border-t border-[#141414]/[0.08] pt-5 mt-6">
-        <p className={cn("min-w-0 flex-1 truncate text-[12px]", FAINT)}>
-          {work.tags.join(" · ")}
-        </p>
-        <Link
-          href={work.href}
-          className="inline-flex shrink-0 items-center gap-2 text-[14px] font-medium transition-colors hover:text-[#f97316]"
-        >
-          Read case study
-          <span
-            className="flex size-7 items-center justify-center rounded-full text-white transition-transform duration-300 group-hover:rotate-45"
+            className="absolute -left-[1.5px] -top-[21px] whitespace-nowrap px-1.5 py-[3px] text-[11px] font-medium leading-none text-white"
             style={{ background: PRINT }}
           >
-            <ArrowUpRight weight="bold" className="size-3.5" />
+            {print.name}
           </span>
-        </Link>
-      </div>
+        </span>
+      ) : null}
+    </span>
+  );
+}
 
-      {/* Hover: the work rises in at the top-right corner with a "View case study" bubble */}
-      <AnimatePresence>
-        {preview && !reduceMotion ? (
-          <motion.span
-            aria-hidden
-            className="pointer-events-none absolute right-6 top-0 z-30 hidden w-[240px] lg:block xl:w-[270px]"
-            initial={{ opacity: 0, y: "-70%", rotate: 4, scale: 0.92 }}
-            animate={{ opacity: 1, y: "-82%", rotate: 2, scale: 1 }}
-            exit={{ opacity: 0, y: "-70%", rotate: 4, scale: 0.94 }}
-            transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <span className="block overflow-hidden rounded-[6px] bg-white p-1.5 shadow-[0_30px_60px_-24px_rgba(20,20,20,0.5)] ring-1 ring-[#141414]/10">
-              <span
-                className="relative block overflow-hidden rounded-[6px]"
-                style={{ aspectRatio: work.ratio }}
-              >
+/** The client's sign-off, or a verified result, with a stamp landing on it. */
+function SignOff({ work, active }: { work: FeaturedWork; active: boolean }) {
+  const quote = "quote" in work ? work.quote : undefined;
+  const proof = "outcomeNote" in work ? work.outcomeNote : undefined;
+  const signer = quote ? quote.author.split(" ")[0].toLowerCase() : "studio1";
+
+  return (
+    <figure className="relative bg-white p-4 shadow-[0_22px_40px_-24px_rgba(20,20,20,0.55),0_1px_0_rgba(20,20,20,0.05)] ring-1 ring-[#141414]/[0.06] lg:p-5">
+      {quote ? null : (
+        <p
+          className="text-[10.5px] font-semibold uppercase tracking-[0.16em]"
+          style={{ color: PRINT }}
+        >
+          Verified result
+        </p>
+      )}
+      <blockquote
+        className={cn(
+          "text-[13.5px] font-medium leading-[1.5] tracking-[-0.01em] text-[#141414] lg:text-[14.5px]",
+          !quote && "mt-2",
+        )}
+      >
+        {quote ? `“${quote.text}”` : <BrandText text={proof ?? ""} />}
+      </blockquote>
+      <figcaption className="mt-3 flex items-center gap-2.5 border-t border-dashed border-[#141414]/15 pt-3">
+        {quote ? (
+          <>
+            <Image
+              src={quote.avatar}
+              alt=""
+              width={64}
+              height={64}
+              sizes="32px"
+              className="size-8 shrink-0 rounded-full object-cover ring-2 ring-white"
+            />
+            <span className="min-w-0">
+              <span className="block truncate text-[13px] font-medium">
+                {quote.author}
+              </span>
+              <span className="block truncate text-[11.5px] text-[#141414]/50">
+                {quote.role}
+              </span>
+            </span>
+          </>
+        ) : (
+          <span className="text-[11.5px] text-[#141414]/50">
+            From the {work.client} case study
+          </span>
+        )}
+      </figcaption>
+      <span className="pointer-events-none absolute -right-5 -top-10 lg:-right-8 lg:-top-12">
+        <RubberStamp
+          text={quote ? "CLIENT APPROVED · STUDIO1 · " : "VERIFIED RESULT · STUDIO1 · "}
+          active={active}
+        />
+      </span>
+      {/* Whoever signed it off, still hovering over the file */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -bottom-6 right-[14%] flex items-start"
+      >
+        <Cursor className="size-5" color={PRINT} />
+        <span
+          className="-ml-0.5 mt-4 px-1.5 py-[3px] text-[11px] font-medium leading-none text-white"
+          style={{ background: PRINT }}
+        >
+          {signer}
+        </span>
+      </span>
+    </figure>
+  );
+}
+
+/** Sheets stack only on large screens tall enough to pin a whole sheet. */
+const STACK_QUERY = "(min-width: 1024px) and (min-height: 720px)";
+const STACK_TOP = 96; // px from the viewport top where the first sheet pins, clear of the navbar
+const STACK_PEEK = 36; // px of each earlier sheet left showing above the next
+
+function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(false);
+  useEffect(() => {
+    const media = window.matchMedia(query);
+    const update = () => setMatches(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, [query]);
+  return matches;
+}
+
+/**
+ * One featured case as a printer's proof: slug line, crop marks, the headline
+ * figure in two inks, and the evidence taped down beside it with the
+ * client's sign-off stamped on. On large screens the sheets pin and pile up
+ * as you scroll, each leaving its slug line showing above the next.
+ */
+function ProofSheet({
+  work,
+  index,
+  total,
+  progress,
+  stacked,
+}: {
+  work: FeaturedWork;
+  index: number;
+  total: number;
+  progress: MotionValue<number>;
+  stacked: boolean;
+}) {
+  const ref = useRef<HTMLElement>(null);
+  const active = useInView(ref, { once: true, amount: 0.45 });
+  // Sheets still to land on this one: each pushes it back a little further.
+  const under = total - 1 - index;
+  const range = [index / total, 1];
+  const scale = useTransform(progress, range, [1, 1 - under * 0.04]);
+  const shade = useTransform(progress, range, [0, under * 0.05]);
+
+  const outcome = "outcome" in work ? work.outcome : undefined;
+  const metrics = work.metrics as [Icon, string, string][];
+  const stat = !outcome
+    ? { value: metrics[0][1], suffix: "", label: metrics[0][2] }
+    : outcome.kind === "growth"
+      ? { value: outcome.to, suffix: "", label: outcome.label }
+      : outcome.kind === "ratio"
+        ? { value: String(outcome.value), suffix: `/${outcome.total}`, label: outcome.label }
+        : { value: outcome.value, suffix: "", label: outcome.label };
+  const extras = metrics.filter(([, value]) => value !== stat.value).slice(0, 2);
+  const { note, prints } = PROOFS[work.client];
+  const [lead, second] = prints;
+  const titleId = `proof-${index}`;
+  const sheetNumber = `${String(index + 1).padStart(2, "0")} / ${String(total).padStart(2, "0")}`;
+
+  return (
+    <div
+      className="lg:mb-[10vh] lg:[@media(min-height:720px)]:sticky"
+      style={{ top: STACK_TOP + index * STACK_PEEK }}
+    >
+      <motion.article
+        ref={ref}
+        aria-labelledby={titleId}
+        className="group/sheet relative isolate flex flex-col bg-[#fbf9f5] px-5 pb-4 pt-3.5 shadow-[0_1px_0_rgba(20,20,20,0.05),0_30px_60px_-40px_rgba(20,20,20,0.5)] ring-1 ring-[#141414]/[0.07] sm:px-7 lg:h-[clamp(500px,calc(100svh-220px),620px)] lg:px-9"
+        style={stacked ? { scale, transformOrigin: "50% 0%" } : undefined}
+      >
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10 opacity-25 mix-blend-multiply"
+          style={{ backgroundImage: GRAIN }}
+        />
+        <CropMarks />
+
+        {/* Slug line: what stays visible once the next sheet lands on top */}
+        <div className="flex items-center gap-3 text-[10.5px] font-medium uppercase tracking-[0.16em] text-[#141414]/45">
+          <RegMark />
+          <span className="shrink-0 tabular-nums" style={{ color: PRINT }}>
+            Proof {sheetNumber}
+          </span>
+          <span aria-hidden className="h-px min-w-6 flex-1 bg-[#141414]/12" />
+          <span className="min-w-0 truncate">
+            {work.client}
+            <span className="hidden md:inline"> · {work.tags.join(" · ")}</span>
+          </span>
+          <RegMark />
+        </div>
+
+        <div className="mt-5 grid min-h-0 flex-1 gap-10 lg:mt-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.08fr)] lg:grid-rows-[minmax(0,1fr)] lg:gap-10">
+          <div className="flex min-h-0 flex-col">
+            <div className="flex items-center gap-3">
+              <span className="relative size-9 shrink-0 overflow-hidden rounded-[6px] bg-[#f8f6f2] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10)]">
                 <Image
-                  src={work.image}
+                  src={work.logo}
                   alt=""
                   fill
-                  sizes="270px"
-                  className="object-cover"
+                  sizes="36px"
+                  className="object-cover mix-blend-multiply"
+                  style={
+                    "logoZoom" in work
+                      ? { transform: `scale(${work.logoZoom})` }
+                      : undefined
+                  }
                 />
               </span>
-            </span>
-            <span className="absolute -bottom-4 left-1/2 inline-flex -translate-x-1/2 items-center gap-2 whitespace-nowrap rounded-full bg-[#141414] py-1.5 pl-4 pr-1.5 text-[12px] font-medium text-[#f4efe7] shadow-[0_12px_28px_-14px_rgba(20,20,20,0.6)]">
-              View case study
-              <span
-                className="flex size-6 items-center justify-center rounded-full text-white"
-                style={{ background: PRINT }}
+              <h3
+                id={titleId}
+                className="text-[16px] font-semibold tracking-[-0.01em]"
               >
-                <ArrowUpRight weight="bold" className="size-3" />
-              </span>
-            </span>
-          </motion.span>
+                <Link
+                  href={work.href}
+                  className="transition-colors hover:text-[#f97316]"
+                >
+                  {work.client}
+                </Link>
+              </h3>
+              {"span" in work && work.span ? (
+                <span className="rounded-full bg-[#f97316]/10 px-2.5 py-0.5 text-[11.5px] font-medium text-[#c2410c]">
+                  {work.span}
+                </span>
+              ) : null}
+            </div>
+
+            <div className="mt-7 flex flex-wrap items-start gap-x-4 gap-y-2 lg:mt-[clamp(20px,4svh,44px)]">
+              <p className="text-[length:clamp(64px,min(8.4vw,15svh),132px)] font-medium leading-[0.84] tracking-[-0.065em]">
+                <span className="sr-only">
+                  {stat.value}
+                  {stat.suffix}
+                </span>
+                <span aria-hidden>
+                  <TwoInkStat value={stat.value} suffix={stat.suffix} active={active} />
+                </span>
+              </p>
+              <MarginNote active={active}>{note}</MarginNote>
+            </div>
+            <p className="mt-3 max-w-[380px] text-[14px] leading-[1.45] text-[#141414]/60">
+              <BrandText text={stat.label} />
+            </p>
+
+            <p className="mt-5 max-w-[470px] text-[16px] leading-[1.55] text-[#141414]/80 lg:text-[17px]">
+              <MarkedSummary text={work.summary} mark={work.mark} />
+            </p>
+
+            <div className="mt-6 flex flex-wrap items-end justify-between gap-x-6 gap-y-4 border-t border-dashed border-[#141414]/15 pt-4 lg:mt-auto">
+              <ul role="list" className="flex gap-6">
+                {extras.map(([, value, label]) => (
+                  <li key={label} className="min-w-0 max-w-[150px]">
+                    <span className="block text-[20px] font-medium leading-none tracking-[-0.04em]">
+                      {value}
+                    </span>
+                    <span className="mt-1.5 block text-[11.5px] leading-snug text-[#141414]/55">
+                      <BrandText text={label} />
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href={work.href}
+                aria-label={`Read the ${work.client} case study`}
+                className="group/cta inline-flex shrink-0 items-center gap-2 text-[14px] font-medium transition-colors hover:text-[#f97316]"
+              >
+                Read case study
+                <span
+                  className="flex size-8 items-center justify-center rounded-full text-white transition-transform duration-300 group-hover/cta:rotate-45"
+                  style={{ background: PRINT }}
+                >
+                  <ArrowUpRight weight="bold" className="size-3.5" />
+                </span>
+              </Link>
+            </div>
+          </div>
+
+          {/* The evidence, taped down, with the sign-off on top */}
+          <div className="relative h-[clamp(330px,84vw,460px)] lg:h-auto lg:min-h-0">
+            <TapedPrint
+              print={lead}
+              selected
+              sizes="(min-width: 1024px) 560px, 90vw"
+              className={cn(
+                "top-[4%] z-10 max-h-[70%] rotate-[2deg] group-hover/sheet:-translate-y-1 group-hover/sheet:rotate-0",
+                lead.ratio < 1 ? "right-[10%] w-[50%]" : "right-[2%] w-[84%]",
+              )}
+            />
+            <TapedPrint
+              print={second}
+              sizes="(min-width: 1024px) 320px, 55vw"
+              className={cn(
+                "bottom-[18%] right-0 z-[15] max-h-[40%] -rotate-[5deg] group-hover/sheet:-rotate-2 group-hover/sheet:translate-x-1",
+                second.ratio > 3 ? "w-[60%]" : "w-[44%]",
+              )}
+            />
+            <div className="absolute bottom-[4%] left-0 z-20 w-[74%] max-w-[340px] -rotate-[1.5deg] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/sheet:rotate-0 sm:w-[62%]">
+              <SignOff work={work} active={active} />
+            </div>
+          </div>
+        </div>
+
+        {/* Press colour bar along the foot of the sheet */}
+        <div
+          aria-hidden
+          className="mt-5 flex items-center gap-3 text-[10px] font-medium uppercase tracking-[0.16em] text-[#141414]/40"
+        >
+          <span className="flex h-2.5 shrink-0">
+            {[...SWATCHES, INK].map((color) => (
+              <span key={color} className="w-3.5 sm:w-5" style={{ background: color }} />
+            ))}
+          </span>
+          <span className="hidden truncate sm:inline">
+            Studio1 · {work.client} · OK to print
+          </span>
+          <span className="h-px flex-1 bg-[#141414]/12" />
+          <RegMark />
+        </div>
+
+        {/* Earlier sheets dim slightly as the pile grows */}
+        {stacked ? (
+          <motion.span
+            aria-hidden
+            className="pointer-events-none absolute inset-0 z-30 bg-[#141414]"
+            style={{ opacity: shade }}
+          />
         ) : null}
-      </AnimatePresence>
-    </article>
+      </motion.article>
+    </div>
   );
 }
 
@@ -1671,9 +1922,17 @@ function AllCaseStudiesLink() {
 }
 
 export function PaperWork() {
+  const reduceMotion = useReducedMotion();
+  const stackRef = useRef<HTMLDivElement>(null);
+  const canStack = useMediaQuery(STACK_QUERY);
+  const { scrollYProgress } = useScroll({
+    target: stackRef,
+    offset: ["start start", "end end"],
+  });
   const featured = FEATURED.map((name) =>
     WORK.find((work) => work.client === name),
-  ).filter((work): work is (typeof WORK)[number] => Boolean(work));
+  ).filter((work): work is FeaturedWork => Boolean(work));
+
   return (
     <PaperSection id="results" tone="paper">
       <Container>
@@ -1687,13 +1946,20 @@ export function PaperWork() {
           description="Results from building developer trust at every stage of the journey."
         />
 
-        <div className="mt-10 grid gap-4 md:grid-cols-2 md:gap-x-4 md:gap-y-0 md:[&>article]:mb-4">
+        <div ref={stackRef} className="mt-12 flex flex-col gap-6 lg:block">
           {featured.map((work, index) => (
-            <FeaturedCase key={work.client} work={work} index={index} />
+            <ProofSheet
+              key={work.client}
+              work={work}
+              index={index}
+              total={featured.length}
+              progress={scrollYProgress}
+              stacked={canStack && !reduceMotion}
+            />
           ))}
         </div>
 
-        <div className="mt-10 flex justify-center">
+        <div className="mt-10 flex justify-center lg:mt-0">
           <AllCaseStudiesLink />
         </div>
       </Container>

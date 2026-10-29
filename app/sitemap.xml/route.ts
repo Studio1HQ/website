@@ -19,6 +19,7 @@ type SitemapEntry = {
 
 const STATIC_LAST_MODIFIED = "2026-08-12";
 const LEGAL_LAST_MODIFIED = "2025-01-15";
+const GROWTH_PAGES_LAST_MODIFIED = "2026-10-29";
 
 function escapeXml(value: string) {
   return value
@@ -60,6 +61,16 @@ export async function GET() {
   );
 
   const englishOnlyPaths: SitemapEntry[] = [
+    {
+      path: "/github-growth-agency",
+      lastModified: GROWTH_PAGES_LAST_MODIFIED,
+      priority: 0.9,
+    },
+    {
+      path: "/results",
+      lastModified: GROWTH_PAGES_LAST_MODIFIED,
+      priority: 0.8,
+    },
     {
       path: "/case-studies",
       lastModified: STATIC_LAST_MODIFIED,

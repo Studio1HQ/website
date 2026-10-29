@@ -1,5 +1,5 @@
 import { PaperBlogIndex } from "@/components/blog/paper-blog-index";
-import { getAllPosts } from "@/lib/blog";
+import { getListedPosts } from "@/lib/blog";
 import { baseUrl } from "@/lib/site";
 import { absoluteImageUrl, breadcrumbJsonLd } from "@/lib/seo";
 
@@ -10,7 +10,7 @@ type BlogIndexViewProps = {
 };
 
 export function getBlogPageCount() {
-  return Math.max(1, Math.ceil(getAllPosts().length / POSTS_PER_BLOG_PAGE));
+  return Math.max(1, Math.ceil(getListedPosts().length / POSTS_PER_BLOG_PAGE));
 }
 
 function pageHref(page: number) {
@@ -18,7 +18,7 @@ function pageHref(page: number) {
 }
 
 export function BlogIndexView({ currentPage = 1 }: BlogIndexViewProps) {
-  const posts = getAllPosts();
+  const posts = getListedPosts();
   const totalPages = Math.max(1, Math.ceil(posts.length / POSTS_PER_BLOG_PAGE));
   const safePage = Math.min(Math.max(currentPage, 1), totalPages);
   const pageStart = (safePage - 1) * POSTS_PER_BLOG_PAGE;

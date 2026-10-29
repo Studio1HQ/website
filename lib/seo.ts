@@ -98,9 +98,9 @@ export function pageMetadata({
   };
 }
 
-const HOME_TITLE = "Technical Content & Developer Growth Agency for DevTools";
+const HOME_TITLE = "DevRel & Developer Marketing Agency for Devtools";
 const HOME_DESCRIPTION =
-  "Studio1 is a technical content and developer growth partner for SaaS and devtool teams. We produce tutorials, docs, videos, launches, and developer programs that drive adoption.";
+  "Studio1 is a DevRel and developer marketing agency for devtool, AI, and open-source teams: technical content, docs, video, launches, and GitHub growth.";
 
 export function homePageMetadata({
   title = HOME_TITLE,
@@ -313,6 +313,96 @@ export function jobPostingJsonLd(job: {
   };
 }
 
+/** Stable id so every page's schema points at the same Organization node. */
+export const ORGANIZATION_ID = `${baseUrl}/#organization`;
+
+export const ORGANIZATION_DESCRIPTION =
+  "Studio1 is a DevRel and GitHub growth agency for devtool, AI, and open-source teams. We ship technical content, docs and DX audits, developer videos, launches, and community programs that drive developer adoption.";
+
+export function organizationJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": ORGANIZATION_ID,
+    name: "Studio1",
+    alternateName: "Studio1HQ",
+    url: baseUrl,
+    logo: {
+      "@type": "ImageObject",
+      url: `${baseUrl}/icon.png`,
+    },
+    description: ORGANIZATION_DESCRIPTION,
+    email: "contact@studio1hq.com",
+    knowsAbout: [
+      "Developer relations",
+      "Developer marketing",
+      "Technical content marketing",
+      "GitHub growth",
+      "Open-source marketing",
+      "Developer documentation",
+      "Developer experience audits",
+      "Developer video production",
+      "Product launches for developer tools",
+    ],
+    founder: [
+      {
+        "@type": "Person",
+        name: "Arindam Majumder",
+        jobTitle: "Co-founder & Content Lead",
+        sameAs: [
+          "https://github.com/Arindam200",
+          "https://www.arindammajumder.com/",
+        ],
+      },
+      {
+        "@type": "Person",
+        name: "Amitesh Anand",
+        jobTitle: "Co-founder & Operations Lead",
+        sameAs: [
+          "https://www.linkedin.com/in/amitesh1208/",
+          "https://x.com/astrodevil_",
+          "https://mranand.com/",
+        ],
+      },
+    ],
+    sameAs: [
+      "https://x.com/Studio1HQ",
+      "https://www.linkedin.com/company/studio1hq/",
+      "https://github.com/Studio1HQ",
+      "https://www.youtube.com/@studio1hq",
+      "https://dev.to/studio1hq",
+      "https://www.instagram.com/studio1_hq/",
+    ],
+  };
+}
+
+export function serviceJsonLd({
+  name,
+  description,
+  path,
+  serviceType,
+}: {
+  name: string;
+  description: string;
+  path: string;
+  serviceType: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name,
+    description,
+    serviceType,
+    provider: { "@id": ORGANIZATION_ID },
+    areaServed: "Worldwide",
+    audience: {
+      "@type": "BusinessAudience",
+      audienceType: "Developer tool, AI, and open-source companies",
+    },
+    url: pageUrl(path),
+  };
+}
+
 export function websiteJsonLd() {
   return {
     "@context": "https://schema.org",
@@ -320,12 +410,7 @@ export function websiteJsonLd() {
     name: "Studio1",
     url: baseUrl,
     description: HOME_DESCRIPTION,
-    publisher: {
-      "@type": "Organization",
-      name: "Studio1",
-      url: baseUrl,
-      logo: `${baseUrl}/icon.png`,
-    },
+    publisher: { "@id": ORGANIZATION_ID },
   };
 }
 

@@ -1,15 +1,15 @@
 import Link from "next/link";
-import { getAllPosts } from "@/lib/blog";
+import { getListedPosts } from "@/lib/blog";
 import { tagLabel } from "@/lib/blog-tags";
 import { cn } from "@/lib/utils";
 
 /**
- * Docs-style article index for the blog post sidebar: every post grouped by
+ * Docs-style article index for the blog post sidebar: every listed post grouped by
  * its primary tag, with the current post marked.
  */
 export function BlogSidebar({ currentSlug }: { currentSlug: string }) {
   const groups = new Map<string, { slug: string; title: string }[]>();
-  for (const post of getAllPosts()) {
+  for (const post of getListedPosts()) {
     const key = tagLabel(post.tags[0] ?? "Articles");
     const list = groups.get(key) ?? [];
     list.push({ slug: post.slug, title: post.title });

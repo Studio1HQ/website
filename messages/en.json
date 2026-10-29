@@ -10,25 +10,25 @@
   },
   "Metadata": {
     "home": {
-      "title": "Technical Content & DevRel Agency for DevTools",
-      "description": "Studio1 helps SaaS, AI, and devtool teams ship technical content, docs, videos, launches, and DevRel programs that drive developer adoption."
+      "title": "DevRel & Developer Marketing Agency for Devtools",
+      "description": "Studio1 is a DevRel and developer marketing agency for devtool, AI, and open-source teams: technical content, docs, video, launches, and GitHub growth."
     },
     "services": {
       "technicalContent": {
-        "title": "Technical Content Marketing Services",
-        "description": "Technical content marketing for developer products: tutorials, integration guides, SEO articles, and code-rich content that builds trust and drives adoption."
+        "title": "Technical Content Marketing Agency for Devtools",
+        "description": "Technical content marketing agency for devtools and AI products: engineer-written tutorials, integration guides, and SEO articles. 50+ posts for Bright Data."
       },
       "docs": {
-        "title": "Developer Documentation & DX Audit Services",
-        "description": "Developer documentation and DX audit services for AI and DevTool products: onboarding reviews, API clarity, quickstarts, reference docs, and a clearer path to first success."
+        "title": "Developer Experience Audit & Docs Services",
+        "description": "Developer experience audits and documentation services for devtools: onboarding reviews, quickstarts, API docs, and a faster time to first hello world."
       },
       "video": {
-        "title": "Developer Video Production Services",
-        "description": "Developer video production services for AI and DevTool startups: technical demos, tutorials, scripts, edits, thumbnails, SEO titles, Shorts, and a publishing cadence built for growth."
+        "title": "Developer Video Production Agency for Devtools",
+        "description": "Developer video production for devtool and AI teams: technical demo videos, coding tutorials, YouTube series, Shorts, scripts, edits, and thumbnails."
       },
       "devrel": {
-        "title": "Developer Relations & Growth Campaigns",
-        "description": "Developer relations and growth campaigns for developer products: advocacy, community programs, product launches, organic distribution, and influencer management."
+        "title": "DevRel as a Service & Developer Growth Campaigns",
+        "description": "Outsourced developer relations for devtool startups: developer advocacy, community programs, launches, Reddit and X distribution, and creator campaigns."
       }
     },
     "pages": {
@@ -128,6 +128,7 @@
       "content": "Content",
       "devrel": "Developer Relations & Growth",
       "docs": "Documentation & DX Audits",
+      "githubGrowth": "GitHub Growth",
       "home": "Home",
       "overview": "Overview",
       "process": "Process",
@@ -161,16 +162,57 @@
   },
   "ProductPage": {
     "visitProduct": "Visit {name}",
+    "sampleData": "Sample data",
+    "copy": "Copy",
+    "copied": "Copied",
     "hero": {
-      "badge": "Built by",
-      "titlePrefix": "Our",
-      "titleHighlight": "Products",
-      "description": "Tools we build and ship for developers, designers, and teams."
+      "eyebrow": "Studio1 Products",
+      "count": "{shipped} shipped, {building} in the works",
+      "titleLineOne": "We market devtools.",
+      "titleLineTwo": "We also <mark>ship</mark> them.",
+      "description": "Raah and AssetSnip are tools we design, build, and grow in-house. Shipping our own products keeps us close to what developers actually go through, and that is what we bring to every devtool we work with."
     },
-    "pipeline": {
+    "dock": {
+      "jumpTo": "Jump to {name}",
+      "nextName": "Product 03",
+      "nextTagline": "Something new is on the workbench"
+    },
+    "why": {
+      "indexName": "Why we build",
+      "aside": "Built in-house by the Studio1 team",
+      "title": "Shipping our own tools makes us better at <accent>launching yours</accent>.",
+      "description": "We sit on both sides of a launch. What we learn building Raah and AssetSnip goes straight into the docs, videos, and campaigns we make for devtool teams.",
+      "points": {
+        "friction": {
+          "title": "We hit the friction first",
+          "body": "Setup steps, unclear errors, missing docs. We run into them on our own products, so we know where to look on yours."
+        },
+        "launches": {
+          "title": "We run launches, not just plan them",
+          "body": "Landing pages, demo videos, changelogs, and community posts. Every launch of our own sharpens the playbook we run for clients."
+        },
+        "builders": {
+          "title": "Content from people who build",
+          "body": "We write about devtools as builders, so tutorials and docs come from real use of the product, not a feature list."
+        }
+      },
+      "playbook": "Get the same playbook for your product"
+    },
+    "next": {
+      "indexName": "In the works",
+      "aside": "Product 03",
       "category": "AI SaaS",
       "status": "In progress",
-      "title": "upcoming ..."
+      "title": "Product 03 is on the workbench.",
+      "codename": "Codename",
+      "redacted": "Redacted",
+      "description": "Our next product is an AI SaaS tool, built the same way as Raah and AssetSnip. We will share more as soon as it is ready for real users.",
+      "follow": "Follow the build",
+      "building": "Building"
+    },
+    "cta": {
+      "title": "Building a developer product?",
+      "description": "We help devtools launch, explain, and grow, with the same playbook we use on our own products."
     }
   },
   "CareersPage": {
@@ -357,7 +399,17 @@
     "titleHighlight": "not found",
     "description": "The page you're looking for doesn't exist or may have moved.",
     "homeCta": "Back to home",
-    "servicesCta": "Explore services"
+    "servicesCta": "Explore services",
+    "suggestions": "Try one of these"
+  },
+  "ErrorPage": {
+    "eyebrow": "Error",
+    "titlePrefix": "Something went",
+    "titleHighlight": "wrong",
+    "description": "An unexpected error stopped this page from rendering. Try again, or head back home.",
+    "retryCta": "Try again",
+    "homeCta": "Back to home",
+    "reference": "Ref"
   },
   "Footer": {
     "description": "Technical content and developer growth partner for devtool and SaaS teams.",

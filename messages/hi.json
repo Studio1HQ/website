@@ -128,6 +128,7 @@
       "content": "कंटेंट",
       "devrel": "DevRel और ग्रोथ",
       "docs": "डॉक्यूमेंटेशन और DX ऑडिट",
+      "githubGrowth": "GitHub ग्रोथ",
       "home": "होम",
       "overview": "अवलोकन",
       "process": "प्रक्रिया",
@@ -161,16 +162,57 @@
   },
   "ProductPage": {
     "visitProduct": "{name} देखें",
+    "sampleData": "Sample data",
+    "copy": "Copy करें",
+    "copied": "Copied",
     "hero": {
-      "badge": "Built by",
-      "titlePrefix": "हमारे",
-      "titleHighlight": "Products",
-      "description": "Developers, designers और teams के लिए बनाए और ship किए गए tools."
+      "eyebrow": "Studio1 Products",
+      "count": "{shipped} shipped, {building} पर काम जारी",
+      "titleLineOne": "हम devtools को grow करते हैं.",
+      "titleLineTwo": "और खुद भी <mark>ship</mark> करते हैं.",
+      "description": "Raah और AssetSnip ऐसे tools हैं जिन्हें हम in-house design, build और grow करते हैं. अपने products ship करने से हम समझते हैं कि developers असल में किन चीज़ों से गुज़रते हैं, और यही समझ हम हर devtool के काम में लाते हैं."
     },
-    "pipeline": {
+    "dock": {
+      "jumpTo": "{name} पर जाएँ",
+      "nextName": "Product 03",
+      "nextTagline": "Workbench पर कुछ नया बन रहा है"
+    },
+    "why": {
+      "indexName": "हम क्यों build करते हैं",
+      "aside": "Studio1 team द्वारा in-house बनाया गया",
+      "title": "अपने tools ship करके हम <accent>आपका launch</accent> बेहतर बनाते हैं.",
+      "description": "हम launch के दोनों तरफ़ रहते हैं. Raah और AssetSnip बनाते हुए जो सीखते हैं, वही devtool teams के लिए बनाए docs, videos और campaigns में जाता है.",
+      "points": {
+        "friction": {
+          "title": "Friction सबसे पहले हमें मिलती है",
+          "body": "Setup steps, unclear errors, missing docs. हम इन्हें अपने products पर झेलते हैं, इसलिए जानते हैं कि आपके product में कहाँ देखना है."
+        },
+        "launches": {
+          "title": "हम launches चलाते हैं, सिर्फ़ plan नहीं करते",
+          "body": "Landing pages, demo videos, changelogs और community posts. हमारा हर launch उस playbook को और बेहतर बनाता है जो हम clients के लिए चलाते हैं."
+        },
+        "builders": {
+          "title": "Builders का लिखा content",
+          "body": "हम devtools के बारे में builders की तरह लिखते हैं, इसलिए tutorials और docs product के असली इस्तेमाल से आते हैं, feature list से नहीं."
+        }
+      },
+      "playbook": "अपने product के लिए वही playbook पाएँ"
+    },
+    "next": {
+      "indexName": "काम जारी",
+      "aside": "Product 03",
       "category": "AI SaaS",
       "status": "In progress",
-      "title": "upcoming ..."
+      "title": "Product 03 workbench पर है.",
+      "codename": "Codename",
+      "redacted": "Redacted",
+      "description": "हमारा अगला product एक AI SaaS tool है, जिसे Raah और AssetSnip की तरह ही बनाया जा रहा है. Real users के लिए तैयार होते ही हम और बताएँगे.",
+      "follow": "Build को follow करें",
+      "building": "Building"
+    },
+    "cta": {
+      "title": "Developer product बना रहे हैं?",
+      "description": "हम devtools को launch, explain और grow करने में मदद करते हैं, उसी playbook के साथ जो हम अपने products पर इस्तेमाल करते हैं."
     }
   },
   "CareersPage": {
@@ -357,7 +399,17 @@
     "titleHighlight": "नहीं मिला",
     "description": "आप जो पेज खोज रहे हैं वह मौजूद नहीं है या हटा दिया गया है।",
     "homeCta": "होम पर वापस जाएँ",
-    "servicesCta": "सेवाएँ देखें"
+    "servicesCta": "सेवाएँ देखें",
+    "suggestions": "इनमें से कोई पेज देखें"
+  },
+  "ErrorPage": {
+    "eyebrow": "त्रुटि",
+    "titlePrefix": "कुछ",
+    "titleHighlight": "गड़बड़ हो गई",
+    "description": "एक अनपेक्षित त्रुटि के कारण यह पेज नहीं दिख सका। फिर से कोशिश करें या होम पर वापस जाएँ।",
+    "retryCta": "फिर से कोशिश करें",
+    "homeCta": "होम पर वापस जाएँ",
+    "reference": "संदर्भ"
   },
   "Footer": {
     "description": "Devtool और SaaS teams के लिए technical content और developer growth partner.",

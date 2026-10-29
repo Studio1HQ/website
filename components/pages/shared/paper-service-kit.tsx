@@ -138,6 +138,7 @@ const CASE_ART: Record<string, string> = {
   tensorlake: "/case-studies/tensorlake/tensorlake-home.webp",
   jozu: "/case-studies/jozu/kubecon-jozu-booth.webp",
   openlore: "/case-studies/openlore/openlore-hackspire-talk.webp",
+  corsair: "/case-studies/corsair/github-readme.webp",
 };
 
 /* Banner colours, cycled across the smaller cards. */

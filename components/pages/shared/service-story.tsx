@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
+} from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
@@ -18,6 +24,7 @@ import {
   ArrowUpRight,
   CaretRight,
   ChatCircleText,
+  Check,
   Code,
   Compass,
   FileText,
@@ -41,6 +48,7 @@ import {
   type Icon,
 } from "@phosphor-icons/react";
 import { Container, EASE } from "@/components/home/ui";
+import { DitherField } from "@/components/home/dither-field";
 import {
   CELL,
   CountUp,
@@ -469,6 +477,317 @@ export type StoryOffer = {
   anchorIds?: string[];
 };
 
+/** Raised 3D key that holds an offer's icon; it lifts and tilts on hover. */
+function OfferKey({
+  icon: OfferIcon,
+  core,
+  large,
+}: {
+  icon: Icon;
+  core: boolean;
+  large: boolean;
+}) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "relative flex shrink-0 items-center justify-center transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:[transform:translateY(-6px)_rotateX(12deg)_rotateY(-16deg)] motion-reduce:transform-none",
+        large ? "size-[92px] rounded-[22px]" : "size-[68px] rounded-[18px]",
+      )}
+      style={{
+        background: core
+          ? "linear-gradient(150deg, #ffffff 0%, #fff1e4 55%, #ffd9b8 100%)"
+          : "linear-gradient(150deg, #ffffff 0%, #f7f2ea 60%, #ece3d6 100%)",
+        boxShadow: core
+          ? "inset 0 2px 0 #ffffff, inset 0 -5px 0 rgba(160,60,0,0.16), 0 5px 0 #f3b98c, 0 26px 40px -16px rgba(110,30,0,0.6)"
+          : "inset 0 2px 0 #ffffff, inset 0 -5px 0 rgba(20,20,20,0.07), 0 5px 0 #e2d7c7, 0 24px 36px -18px rgba(20,20,20,0.4)",
+      }}
+    >
+      <OfferIcon
+        weight="duotone"
+        className={cn("text-[#ea580c]", large ? "size-11" : "size-8")}
+      />
+    </span>
+  );
+}
+
+/**
+ * One offer: a recessed stage (dither, icon key, outlined number) above or
+ * beside the copy. The core offer prints on orange with its features as tiles.
+ */
+function OfferCard({
+  offer,
+  position,
+  bento,
+}: {
+  offer: StoryOffer;
+  position: number;
+  bento: boolean;
+}) {
+  const reduceMotion = useReducedMotion();
+  const ref = useRef<HTMLLIElement>(null);
+  const core = position === 0;
+  // Side cards in the bento lay the stage beside the copy.
+  const beside = bento && !core;
+  const number = pad2(position + 1);
+
+  // A soft spotlight follows the cursor, written straight to CSS variables.
+  const trackPointer = (event: ReactPointerEvent<HTMLLIElement>) => {
+    const card = ref.current;
+    if (!card) return;
+    const box = card.getBoundingClientRect();
+    card.style.setProperty("--mx", `${event.clientX - box.left}px`);
+    card.style.setProperty("--my", `${event.clientY - box.top}px`);
+  };
+
+  return (
+    <motion.li
+      ref={ref}
+      id={offer.id}
+      onPointerMove={trackPointer}
+      {...cardReveal(reduceMotion, position)}
+      className={cn(
+        "group relative isolate flex scroll-mt-28 flex-col gap-1 rounded-[6px] p-2.5 transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 motion-reduce:transform-none",
+        core
+          ? "text-white shadow-[0_30px_60px_-36px_rgba(160,50,0,0.7)]"
+          : "bg-white/80 ring-1 ring-inset ring-[#141414]/10 hover:shadow-[0_24px_48px_-32px_rgba(20,20,20,0.4)]",
+        bento && (core ? "lg:col-span-7 lg:row-span-2" : "lg:col-span-5"),
+        beside && "sm:grid sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]",
+      )}
+      style={
+        core
+          ? {
+              background:
+                "linear-gradient(160deg, #fe3c34 0%, #f97316 45%, #fb8a1e 100%)",
+            }
+          : undefined
+      }
+    >
+      {core ? (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10 rounded-[6px] opacity-30 mix-blend-multiply"
+          style={{ backgroundImage: GRAIN }}
+        />
+      ) : null}
+      {/* Spotlight under the content, following the cursor */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 rounded-[6px] opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+        style={{
+          background: `radial-gradient(360px circle at var(--mx, 50%) var(--my, 0%), ${
+            core ? "rgba(255,255,255,0.22)" : "rgba(249,115,22,0.14)"
+          }, transparent 65%)`,
+        }}
+      />
+      {offer.anchorIds?.map((anchorId) => (
+        <span key={anchorId} id={anchorId} className="absolute -top-28" />
+      ))}
+
+      {/* Stage: a recessed window with drifting dither and the icon key */}
+      <div
+        className={cn(
+          "relative isolate overflow-hidden rounded-[4px] [perspective:700px]",
+          core ? "min-h-[230px] flex-1 md:min-h-[270px]" : "min-h-[170px]",
+          beside && "sm:min-h-full",
+          core
+            ? "bg-[#9a3412]/20 shadow-[inset_0_3px_14px_rgba(110,30,0,0.35),inset_0_1px_2px_rgba(110,30,0,0.25)]"
+            : "bg-[#f6f1ea] shadow-[inset_0_3px_12px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08)]",
+        )}
+      >
+        <DitherField
+          seed={position * 2.7 + 1}
+          strength={core ? 1.4 : 1}
+          colors={core ? ["#ffffff", "#ffe4cc"] : undefined}
+          className="absolute inset-0 -z-10 size-full"
+        />
+        <p
+          className={cn(
+            "absolute left-4 top-3.5 text-[12px] font-medium tracking-[0.02em]",
+            core ? "text-white/80" : "text-[#141414]/45",
+          )}
+        >
+          {core ? "Core service" : `Service ${number}`}
+        </p>
+        {/* Outlined index number, cropped by the stage edge */}
+        <span
+          aria-hidden
+          className={cn(
+            "pointer-events-none absolute right-3 select-none font-medium leading-none tracking-[-0.06em] text-transparent",
+            core
+              ? "-bottom-7 text-[132px] [-webkit-text-stroke:1.5px_rgba(255,255,255,0.5)]"
+              : "-bottom-5 text-[96px] [-webkit-text-stroke:1.5px_rgba(20,20,20,0.14)]",
+          )}
+        >
+          {number}
+        </span>
+        <div
+          className={cn(
+            "absolute inset-0 flex items-center",
+            core ? "pl-12 md:pl-[17%]" : "justify-center",
+          )}
+        >
+          <div className="relative">
+            {/* Orbit rings around the key, each with a dot circling slowly */}
+            <span aria-hidden className="absolute left-1/2 top-1/2">
+              {(core ? [200, 310, 430] : [128, 196]).map((size, ring) => (
+                <span
+                  key={size}
+                  className={cn(
+                    "absolute rounded-full border",
+                    core ? "border-white/30" : "border-[#141414]/[0.09]",
+                    ring === 1 && "border-dashed",
+                  )}
+                  style={{
+                    width: size,
+                    height: size,
+                    left: -size / 2,
+                    top: -size / 2,
+                  }}
+                >
+                  <span
+                    className="absolute inset-0 animate-spin motion-reduce:animate-none"
+                    style={{
+                      animationDuration: `${18 + ring * 9}s`,
+                      animationDirection: ring % 2 ? "reverse" : "normal",
+                    }}
+                  >
+                    <span
+                      className={cn(
+                        "absolute left-1/2 top-0 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full",
+                        core
+                          ? "bg-white shadow-[0_0_10px_rgba(255,255,255,0.8)]"
+                          : "bg-[#f97316]",
+                      )}
+                    />
+                  </span>
+                </span>
+              ))}
+            </span>
+            <OfferKey icon={offer.icon} core={core} large={core} />
+            {/* The core card's badges sit on the outer rings */}
+            {core
+              ? offer.badges.slice(0, 2).map((badge, slot) => (
+                  <span
+                    key={badge}
+                    // Too wide for a phone's stage; the copy shows them there.
+                    className="absolute hidden -translate-x-1/2 -translate-y-1/2 sm:block"
+                    style={
+                      slot === 0
+                        ? { left: "calc(50% + 132px)", top: "calc(50% - 80px)" }
+                        : { left: "calc(50% + 196px)", top: "calc(50% + 78px)" }
+                    }
+                  >
+                    <span
+                      className={cn(
+                        "block whitespace-nowrap rounded-full bg-white/25 px-3.5 py-1.5 text-[13px] font-medium text-white shadow-[0_10px_24px_-12px_rgba(110,30,0,0.6)] ring-1 ring-inset ring-white/40 backdrop-blur-md transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
+                        slot === 0
+                          ? "rotate-[4deg] group-hover:-translate-y-1.5"
+                          : "-rotate-[3deg] group-hover:translate-x-1.5",
+                      )}
+                    >
+                      {badge}
+                    </span>
+                  </span>
+                ))
+              : null}
+          </div>
+        </div>
+      </div>
+
+      {/* Copy */}
+      <div
+        className={cn(
+          "flex flex-col px-4 pb-4 pt-5 md:px-5",
+          core && "md:pb-5 md:pt-7",
+          beside && "sm:justify-center sm:pl-6 sm:pt-4",
+        )}
+      >
+        <div
+          className={cn(
+            "flex flex-wrap gap-1.5",
+            core && "mb-4 sm:hidden",
+          )}
+        >
+          {offer.badges.map((badge) => (
+            <span
+              key={badge}
+              className={cn(
+                "rounded-full px-2.5 py-1 text-[12px] font-medium",
+                core
+                  ? "bg-white/20 text-white"
+                  : "bg-[#141414]/[0.05] text-[#141414]/70",
+              )}
+            >
+              {badge}
+            </span>
+          ))}
+        </div>
+
+        <h3
+          className={cn(
+            "font-medium leading-[1.02] tracking-[-0.05em]",
+            core
+              ? "text-[38px] md:text-[48px]"
+              : "mt-4 text-[28px] md:text-[32px]",
+          )}
+        >
+          <span className={core ? undefined : GRADIENT_TEXT}>
+            {offer.accent}
+          </span>
+          {offer.rest ? (
+            <>
+              {core ? " " : <br />}
+              {offer.rest}
+            </>
+          ) : null}
+        </h3>
+
+        <p
+          className={cn(
+            "mt-3 leading-[1.6]",
+            core
+              ? "max-w-[540px] text-[16px] text-white/85"
+              : "text-[14.5px] text-[#141414]/60",
+          )}
+        >
+          {offer.description}
+        </p>
+
+        {core ? (
+          <ul className="mt-6 grid gap-2 sm:grid-cols-2">
+            {offer.features.map((feature) => (
+              <li
+                key={feature}
+                className="flex items-center gap-3 rounded-[6px] bg-white/[0.14] px-3.5 py-3 text-[14px] font-medium leading-snug ring-1 ring-inset ring-white/25 backdrop-blur-sm"
+              >
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-white text-[#ea580c] shadow-[0_4px_10px_-4px_rgba(110,30,0,0.6)]">
+                  <Check weight="bold" className="size-3.5" />
+                </span>
+                {feature}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <ul className="mt-5 grid gap-2.5">
+            {offer.features.map((feature) => (
+              <li
+                key={feature}
+                className="flex items-start gap-2.5 text-[14px] leading-snug text-[#141414]/80"
+              >
+                <span className="mt-px flex size-[18px] shrink-0 items-center justify-center rounded-full bg-[#f97316]/[0.13] text-[#ea580c]">
+                  <Check weight="bold" className="size-3" />
+                </span>
+                {feature}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </motion.li>
+  );
+}
+
 export function StoryRows({
   index,
   name = "What we offer",
@@ -482,155 +801,29 @@ export function StoryRows({
   offers: StoryOffer[];
   id?: string;
 }) {
-  const reduceMotion = useReducedMotion();
+  // Three offers sit in a bento: the core offer tall on the left, the other
+  // two stacked beside it. Any other count falls back to an even grid.
+  const bento = offers.length === 3;
   return (
     <Band id={id} index={index} name={name} className="py-12 md:py-16">
       <Container>
         {title ? <SectionHead title={title} description={description} /> : null}
 
-        {/* Three tall cards, the middle one set lower, as on the live site */}
-        <div className="relative mt-12 md:mt-14">
-          <ol className="grid items-start gap-3 md:grid-cols-3">
-            {offers.map((offer, position) => {
-              const OfferIcon = offer.icon;
-              return (
-                <motion.li
-                  key={offer.accent + position}
-                  id={offer.id}
-                  {...cardReveal(reduceMotion, position)}
-                  className={cn(
-                    "group relative isolate flex scroll-mt-28 flex-col overflow-hidden rounded-[6px] p-7 transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 motion-reduce:transform-none md:p-8",
-                    position === 0
-                      ? "text-white shadow-[0_18px_40px_-30px_rgba(20,20,20,0.45)]"
-                      : "bg-white/80 ring-1 ring-inset ring-[#141414]/10 hover:shadow-[0_20px_40px_-30px_rgba(20,20,20,0.35)]",
-                    position % 3 === 1 && "md:mt-16",
-                  )}
-                  style={
-                    position === 0
-                      ? {
-                          background:
-                            "linear-gradient(160deg, #fe3c34 0%, #f97316 45%, #fb8a1e 100%)",
-                        }
-                      : undefined
-                  }
-                >
-                  {position === 0 ? (
-                    <span
-                      aria-hidden
-                      className="pointer-events-none absolute inset-0 -z-10 opacity-30 mix-blend-multiply"
-                      style={{ backgroundImage: GRAIN }}
-                    />
-                  ) : (
-                    /* Orange wash that rises from the bottom on hover */
-                    <span
-                      aria-hidden
-                      className="pointer-events-none absolute inset-0 -z-10 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-                      style={{
-                        background:
-                          "radial-gradient(120% 70% at 50% 110%, rgba(249,115,22,0.22), transparent 70%)",
-                      }}
-                    />
-                  )}
-                  {offer.anchorIds?.map((anchorId) => (
-                    <span
-                      key={anchorId}
-                      id={anchorId}
-                      className="absolute -top-28"
-                    />
-                  ))}
-                  <div className="flex items-start justify-between">
-                    <span
-                      aria-hidden
-                      className={cn(
-                        "flex size-14 items-center justify-center rounded-[6px]",
-                        position === 0
-                          ? "bg-white/15 text-white shadow-[inset_0_3px_10px_rgba(120,30,0,0.35)]"
-                          : "bg-[#f8f6f2] text-[#141414] shadow-[inset_0_5px_14px_rgba(20,20,20,0.13),inset_2px_0_8px_rgba(20,20,20,0.05),inset_0_1px_3px_rgba(20,20,20,0.12)] transition-colors duration-500 group-hover:text-[#ea580c]",
-                      )}
-                    >
-                      <OfferIcon weight="regular" className="size-7" />
-                    </span>
-                    <span
-                      className={cn(
-                        "text-[13px] font-medium tabular-nums",
-                        position === 0 ? "text-white/70" : "text-[#141414]/35",
-                      )}
-                    >
-                      {position === 0 ? "Core service" : pad2(position + 1)}
-                    </span>
-                  </div>
-
-                  <div className="mt-7 flex flex-wrap gap-1.5">
-                    {offer.badges.map((badge) => (
-                      <span
-                        key={badge}
-                        className={cn(
-                          "rounded-full px-2.5 py-1 text-[12px] font-medium",
-                          position === 0
-                            ? "bg-white/20 text-white"
-                            : "bg-[#141414]/[0.05] text-[#141414]/70",
-                        )}
-                      >
-                        {badge}
-                      </span>
-                    ))}
-                  </div>
-
-                  <h3 className="mt-4 text-[34px] font-medium leading-[1.02] tracking-[-0.05em] md:text-[38px]">
-                    <span
-                      className={position === 0 ? undefined : GRADIENT_TEXT}
-                    >
-                      {offer.accent}
-                    </span>
-                    {offer.rest ? (
-                      <>
-                        <br />
-                        {offer.rest}
-                      </>
-                    ) : null}
-                  </h3>
-
-                  <p
-                    className={cn(
-                      "mt-4 text-[15px] leading-[1.6]",
-                      position === 0 ? "text-white/85" : "text-[#141414]/60",
-                    )}
-                  >
-                    {offer.description}
-                  </p>
-
-                  <ul
-                    className={cn(
-                      "mt-6 flex flex-col gap-2.5 border-t pt-6",
-                      position === 0
-                        ? "border-white/25"
-                        : "border-[#141414]/[0.08]",
-                    )}
-                  >
-                    {offer.features.map((feature) => (
-                      <li
-                        key={feature}
-                        className={cn(
-                          "flex items-start gap-3 text-[14.5px] leading-snug",
-                          position === 0 ? "text-white" : "text-[#141414]/80",
-                        )}
-                      >
-                        <span
-                          aria-hidden
-                          className={cn(
-                            "mt-[7px] size-1.5 shrink-0",
-                            position === 0 ? "bg-white" : "bg-[#f97316]",
-                          )}
-                        />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </motion.li>
-              );
-            })}
-          </ol>
-        </div>
+        <ol
+          className={cn(
+            "mt-12 grid gap-3 md:mt-14",
+            bento ? "lg:grid-cols-12" : "md:grid-cols-2 lg:grid-cols-3",
+          )}
+        >
+          {offers.map((offer, position) => (
+            <OfferCard
+              key={offer.accent + position}
+              offer={offer}
+              position={position}
+              bento={bento}
+            />
+          ))}
+        </ol>
       </Container>
     </Band>
   );
@@ -996,7 +1189,8 @@ function MoreProofCard() {
   return (
     <Link
       href="/case-studies"
-      className="group relative isolate flex min-h-[300px] flex-col overflow-hidden rounded-[6px] bg-[#efe8dd] p-7 shadow-[inset_0_3px_10px_rgba(20,20,20,0.08)] ring-1 ring-inset ring-[#141414]/[0.06] sm:p-8"
+      // Same top offset, height, and corners as the case cards beside it.
+      className="group relative isolate mt-8 flex h-full min-h-[300px] flex-col overflow-hidden rounded-[10px] bg-[#efe8dd] p-7 shadow-[inset_0_3px_10px_rgba(20,20,20,0.08)] ring-1 ring-inset ring-[#141414]/[0.06] sm:p-8"
     >
       <p className="text-[13px] font-medium text-[#141414]/50">More proof</p>
       <p className="mt-3 max-w-[260px] text-[26px] font-medium leading-[1.15] tracking-[-0.04em]">
@@ -1014,8 +1208,9 @@ function MoreProofCard() {
         aria-hidden
         className="pointer-events-none absolute -bottom-10 -right-12 w-[58%] rotate-[-6deg] overflow-hidden rounded-[6px] bg-white p-1.5 shadow-[0_30px_60px_-30px_rgba(20,20,20,0.5)] ring-1 ring-[#141414]/[0.06] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-x-2 group-hover:-translate-y-2 group-hover:rotate-[-3deg]"
       >
+        {/* Not used as any case card's art, so it never repeats beside one */}
         <Image
-          src="/case-studies/nebius/workshop-dublin-poster.webp"
+          src="/case-studies/jozu/devfest-pune-2025.webp"
           alt=""
           width={640}
           height={420}
@@ -1132,6 +1327,15 @@ export function StoryProof({
                 <motion.div
                   key={study.href}
                   {...cardReveal(reduceMotion, position % 2)}
+                  // With an odd count below a full row, the last card swaps
+                  // places with "More proof" on desktop so the colours stay
+                  // a checkerboard; on mobile they already alternate.
+                  className={cn(
+                    rest.length % 2 === 1 &&
+                      rest.length > 1 &&
+                      position === rest.length - 1 &&
+                      "md:order-last",
+                  )}
                 >
                   <PaperCaseStudyCard study={study} position={position} />
                 </motion.div>

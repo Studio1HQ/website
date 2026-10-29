@@ -29,6 +29,8 @@ export type BlogPostMeta = {
   date: string;
   updatedDate: string;
   draft: boolean;
+  /** Live at its URL, but kept off /blog, the feed and article suggestions. */
+  unlisted: boolean;
   author: string;
   authors: string[];
   tags: string[];
@@ -48,6 +50,7 @@ type Frontmatter = {
   date?: Date | string;
   updatedDate?: Date | string;
   draft?: boolean;
+  unlisted?: boolean;
   author?: string;
   authors?: string[];
   tags?: string[];
@@ -194,16 +197,39 @@ function visibleReadingContent(
 
 export function extractFaqs(content: string): BlogFaq[] {
   const lines = content.split("\n");
+  // Same chapter names the FAQ accordion in components/blog/mdx.tsx accepts.
   const faqIndex = lines.findIndex((line) =>
-    /^#{2,3}\s+faq\s*$/i.test(line.trim()),
+    /^#{2,3}\s+(faqs?|frequently asked questions)\s*$/i.test(line.trim()),
   );
 
   if (faqIndex < 0) return [];
 
   const faqs: BlogFaq[] = [];
+  // "### Question" items with the answer below, as the accordion renders them.
+  let question = "";
+  let answer: string[] = [];
+  const flush = () => {
+    const text = stripInlineMarkdown(answer.join(" "));
+    if (question && text) faqs.push({ question, answer: text });
+    question = "";
+    answer = [];
+  };
+
   for (const line of lines.slice(faqIndex + 1)) {
     const trimmed = line.trim();
-    if (/^#{2,3}\s+/.test(trimmed)) break;
+    const heading = trimmed.match(/^###\s+(.+)$/);
+    if (heading) {
+      flush();
+      question = stripInlineMarkdown(heading[1]);
+      continue;
+    }
+    if (/^#{1,2}\s+/.test(trimmed)) break;
+    if (question) {
+      answer.push(trimmed);
+      continue;
+    }
+
+    // Or a two-column "| Question | Answer |" table.
     if (!trimmed.startsWith("|") || /^ *\|? *---/.test(trimmed)) continue;
 
     const cells = trimmed
@@ -220,6 +246,7 @@ export function extractFaqs(content: string): BlogFaq[] {
       faqs.push({ question: cells[0], answer: cells[1] });
     }
   }
+  flush();
 
   return faqs;
 }
@@ -253,6 +280,7 @@ function postMetaFromFile(fileName: string): BlogPostMeta {
     date,
     updatedDate: normalizeDate(d.updatedDate, date),
     draft,
+    unlisted: d.unlisted === true,
     author: authors.join(", "),
     authors,
     tags: Array.isArray(d.tags) ? d.tags : [],
@@ -321,6 +349,11 @@ export function getAllPosts(): BlogPostMeta[] {
   );
 }
 
+/** Published posts readers can browse to: getAllPosts minus unlisted ones. */
+export function getListedPosts(): BlogPostMeta[] {
+  return getAllPosts().filter((post) => !post.unlisted);
+}
+
 export type BlogPost = {
   slug: string;
   content: string;
@@ -329,6 +362,7 @@ export type BlogPost = {
   date: string;
   updatedDate: string;
   draft: boolean;
+  unlisted: boolean;
   author: string;
   authors: string[];
   tags: string[];
@@ -388,6 +422,7 @@ export function getPostBySlug(slug: string): BlogPost | null {
     date,
     updatedDate: normalizeDate(d.updatedDate, date),
     draft: false,
+    unlisted: d.unlisted === true,
     author: authors.join(", "),
     authors,
     tags,
@@ -425,7 +460,7 @@ export function getRelatedPosts(
   limit = 3,
 ): BlogPostMeta[] {
   const tagSet = new Set(tags);
-  return getAllPosts()
+  return getListedPosts()
     .filter((post) => post.slug !== slug)
     .map((post) => ({
       post,
@@ -437,13 +472,13 @@ export function getRelatedPosts(
 }
 
 export function getLatestPosts(slug?: string, limit = 5): BlogPostMeta[] {
-  return getAllPosts()
+  return getListedPosts()
     .filter((post) => post.slug !== slug)
     .slice(0, limit);
 }
 
 export function getPostNavigation(slug: string): BlogPostNavigation {
-  const posts = getAllPosts();
+  const posts = getListedPosts();
   const index = posts.findIndex((post) => post.slug === slug);
 
   if (index < 0) {

@@ -15,7 +15,7 @@ import {
   type Locale,
 } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
-import { isPaperPath } from "@/lib/paper";
+import { useIsPaper } from "@/components/paper/paper-chrome-context";
 
 const translationKeys: Record<
   Locale,
@@ -76,7 +76,7 @@ export function LanguageSwitcher({
   };
 
   // Paper pages get a square white menu with ink text.
-  const isPaper = isPaperPath(pathname);
+  const isPaper = useIsPaper();
 
   const optionClassName = (isActive: boolean) =>
     isPaper

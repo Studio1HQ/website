@@ -1,13 +1,16 @@
+import { getTranslations } from "next-intl/server";
 import { products } from "@/constants/products";
 import ProductHero from "@/components/product/product-hero";
-import ProductShowcase from "@/components/product/product-showcase";
-import ProductPipelineCard from "@/components/product/product-pipeline-card";
-import { Container } from "@/components/home/ui";
-import { PaperCta, PaperSection } from "@/components/paper/paper-sections";
+import RaahChapter from "@/components/product/raah-chapter";
+import AssetSnipChapter from "@/components/product/assetsnip-chapter";
+import WhyWeBuild from "@/components/product/why-we-build";
+import NextProduct from "@/components/product/next-product";
+import { PaperCta } from "@/components/paper/paper-sections";
 import { softwareApplicationJsonLd } from "@/lib/seo";
 import { PAPER_SCOPE } from "@/lib/paper";
 
-export default function ProductPage() {
+export default async function ProductPage() {
+  const t = await getTranslations("ProductPage.cta");
   const productSchemas = products
     .filter((p) => p.status !== "upcoming")
     .map((product) =>
@@ -30,19 +33,11 @@ export default function ProductPage() {
         />
       ))}
       <ProductHero />
-
-      <PaperSection tone="paper" className="pb-24 pt-4 md:pb-32 md:pt-6">
-        <Container>
-          <ProductShowcase />
-          <div className="mt-3">
-            <ProductPipelineCard />
-          </div>
-        </Container>
-      </PaperSection>
-      <PaperCta
-        title="Building a Developer Product?"
-        description="We help devtools launch, explain and grow. Let's talk about getting yours in front of developers."
-      />
+      <RaahChapter index={1} />
+      <AssetSnipChapter index={2} />
+      <WhyWeBuild index={3} />
+      <NextProduct index={4} />
+      <PaperCta index={5} title={t("title")} description={t("description")} />
     </main>
   );
 }

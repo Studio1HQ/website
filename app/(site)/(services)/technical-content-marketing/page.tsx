@@ -6,7 +6,7 @@ import type { FAQItem } from "@/components/landing/faq";
 import { PaperSection } from "@/components/paper/paper-sections";
 import { PaperServiceFaq } from "@/components/pages/shared/paper-service-kit";
 import { PAPER_SCOPE } from "@/lib/paper";
-import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
+import { breadcrumbJsonLd, pageMetadata, serviceJsonLd } from "@/lib/seo";
 import {
   StoryCards,
   StoryLogos,
@@ -179,21 +179,13 @@ const contentCaseStudyProofs: CaseStudyResultData[] = [
 ];
 
 export default function Page() {
-  const serviceSchema = {
-    "@context": "https://schema.org",
-    "@type": "Service",
+  const serviceSchema = serviceJsonLd({
     name: "Technical Content Marketing Services",
     description:
       "Technical content marketing for developer products: tutorials, integration guides, SEO articles, and code-rich content that builds trust and drives adoption.",
-    provider: {
-      "@type": "Organization",
-      name: "Studio1",
-      url: "https://studio1hq.com",
-    },
+    path: "/technical-content-marketing",
     serviceType: "Technical Content Writing",
-    areaServed: "Worldwide",
-    url: "https://studio1hq.com/technical-content-marketing",
-  };
+  });
 
   return (
     <div className="overflow-x-clip" style={PAPER_SCOPE}>

@@ -17,7 +17,7 @@ import {
   StoryProof,
 } from "@/components/pages/shared/service-story";
 import { PaperCta } from "@/components/paper/paper-sections";
-import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
+import { breadcrumbJsonLd, pageMetadata, serviceJsonLd } from "@/lib/seo";
 import { getTranslations } from "next-intl/server";
 import { DEFAULT_LOCALE } from "@/lib/i18n";
 
@@ -178,21 +178,13 @@ const nebiusProof = {
 };
 
 export default function DevRel() {
-  const serviceSchema = {
-    "@context": "https://schema.org",
-    "@type": "Service",
+  const serviceSchema = serviceJsonLd({
     name: "Developer Relations & Growth Campaigns",
     description:
       "Developer relations and growth campaigns for developer products: advocacy, community programs, product launches, organic distribution, and influencer management.",
-    provider: {
-      "@type": "Organization",
-      name: "Studio1",
-      url: "https://studio1hq.com",
-    },
+    path: "/developer-relations-growth-campaigns",
     serviceType: "Developer Relations and Growth Campaigns",
-    areaServed: "Worldwide",
-    url: "https://studio1hq.com/developer-relations-growth-campaigns",
-  };
+  });
 
   return (
     <div className="overflow-x-clip" style={PAPER_SCOPE}>

@@ -6,7 +6,7 @@ import Packaging from "@/components/pages/content-creation/packaging";
 import Formats from "@/components/pages/content-creation/formats";
 import Cadence from "@/components/pages/content-creation/cadence";
 // import ProjectDemo from "@/components/pages/content-creation/project-demo";
-import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
+import { breadcrumbJsonLd, pageMetadata, serviceJsonLd } from "@/lib/seo";
 import type { FAQItem } from "@/components/landing/faq";
 import { Container } from "@/components/home/ui";
 import { PaperSection } from "@/components/paper/paper-sections";
@@ -134,21 +134,13 @@ const videoFaqItems: FAQItem[] = [
 ];
 
 export default function Page() {
-  const serviceSchema = {
-    "@context": "https://schema.org",
-    "@type": "Service",
+  const serviceSchema = serviceJsonLd({
     name: "Developer Video Production Services",
     description:
       "Developer video production services for AI and DevTool startups: technical demos, tutorials, scripts, edits, thumbnails, Shorts, and upload-ready assets.",
-    provider: {
-      "@type": "Organization",
-      name: "Studio1",
-      url: "https://studio1hq.com",
-    },
+    path: "/developer-video-production",
     serviceType: "Developer Video Production",
-    areaServed: "Worldwide",
-    url: "https://studio1hq.com/developer-video-production",
-  };
+  });
 
   return (
     <div className="overflow-x-clip" style={PAPER_SCOPE}>
