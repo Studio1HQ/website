@@ -39,7 +39,7 @@ function normalizePath(path: string): string {
   return path.startsWith("/") ? path : `/${path}`;
 }
 
-function pageUrl(path: string): string {
+export function pageUrl(path: string): string {
   const normalized = normalizePath(path);
   return normalized === "" ? baseUrl : `${baseUrl}${normalized}`;
 }

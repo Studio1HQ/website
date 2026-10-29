@@ -15,16 +15,16 @@
     },
     "services": {
       "technicalContent": {
-        "title": "Technical Content Marketing Agency for Devtools",
-        "description": "Technical content marketing agency for devtools and AI products: engineer-written tutorials, integration guides, and SEO articles. 50+ posts for Bright Data."
+        "title": "Technical Content Marketing Agency for Developer Tools",
+        "description": "Technical content marketing agency for developer tools and AI teams: engineer-written tutorials, integration guides, and SEO articles. 50+ posts for Bright Data."
       },
       "docs": {
         "title": "Developer Experience Audit & Docs Services",
         "description": "Developer experience audits and documentation services for devtools: onboarding reviews, quickstarts, API docs, and a faster time to first hello world."
       },
       "video": {
-        "title": "Developer Video Production Agency for Devtools",
-        "description": "Developer video production for devtool and AI teams: technical demo videos, coding tutorials, YouTube series, Shorts, scripts, edits, and thumbnails."
+        "title": "Developer Video and Demo Production Agency for Devtools",
+        "description": "Developer video and demo agency for devtool and AI teams: product demo videos, coding tutorials, demo repos, YouTube series, Shorts, scripts, and edits."
       },
       "devrel": {
         "title": "DevRel as a Service & Developer Growth Campaigns",
@@ -58,8 +58,8 @@
     "technicalContent": {
       "badge": "Services",
       "titleAccent": "Technical",
-      "titleRest": "Content Marketing",
-      "description": "We create developer tutorials, guides, and SEO content that build trust, increase product visibility, and drive technical adoption.",
+      "titleRest": "Content That Converts",
+      "description": "A technical content marketing agency for developer tools: engineer-written tutorials, guides, and SEO content.",
       "primaryCta": "Book a Call",
       "secondaryCta": "Explore Services",
       "stats": {
@@ -98,9 +98,9 @@
     },
     "video": {
       "badge": "Services",
-      "titleAccent": "Developer Video",
-      "titleRest": "Production",
-      "description": "Technical demos, tutorials, scripts, edits, shorts, and upload-ready assets for developer brands.",
+      "titleAccent": "Developer Videos",
+      "titleRest": "That Get Watched",
+      "description": "Product demos, coding tutorials, and Shorts for devtool and AI teams, with demo projects developers can run.",
       "primaryCta": "Book a Call",
       "secondaryCta": "Explore Services"
     }
@@ -129,6 +129,10 @@
       "devrel": "Developer Relations & Growth",
       "docs": "Documentation & DX Audits",
       "githubGrowth": "GitHub Growth",
+      "productLaunch": "Product Launch",
+      "aeo": "AEO Agency",
+      "redditMarketing": "Reddit Marketing",
+      "allServices": "All Services",
       "home": "Home",
       "overview": "Overview",
       "process": "Process",

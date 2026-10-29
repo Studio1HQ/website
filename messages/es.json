@@ -59,7 +59,7 @@
       "badge": "Servicios",
       "titleAccent": "Contenido",
       "titleRest": "técnico marketing",
-      "description": "Creamos tutoriales developer, guías y contenido SEO que construyen confianza, aumentan visibilidad de producto e impulsan adopción técnica.",
+      "description": "Creamos tutoriales, guías y contenido SEO para developers que generan confianza, visibilidad y adopción.",
       "primaryCta": "Reservar llamada",
       "secondaryCta": "Explorar servicios",
       "stats": {
@@ -86,7 +86,7 @@
       "badge": "Servicios",
       "titleAccent": "Developer Relations",
       "titleRest": "y campañas de crecimiento",
-      "description": "Advocacy developer, crecimiento de comunidad, lanzamientos, distribución orgánica y programas con creadores para productos developer.",
+      "description": "Advocacy developer, crecimiento de comunidad, lanzamientos, distribución orgánica y programas con creadores.",
       "primaryCta": "Reservar llamada",
       "secondaryCta": "Explorar servicios",
       "stats": {
@@ -129,6 +129,10 @@
       "devrel": "DevRel y crecimiento",
       "docs": "Documentación y auditorías DX",
       "githubGrowth": "Crecimiento en GitHub",
+      "productLaunch": "Lanzamiento de producto",
+      "aeo": "Agencia AEO",
+      "redditMarketing": "Marketing en Reddit",
+      "allServices": "Todos los servicios",
       "home": "Inicio",
       "overview": "Resumen",
       "process": "Proceso",

@@ -56,6 +56,10 @@ const PAPER_PATHS = new Set([
   "/developer-video-production",
   "/developer-documentation-dx-audit",
   "/github-growth-agency",
+  "/product-launch-service",
+  "/aeo-agency",
+  "/reddit-marketing-agency",
+  "/services",
   "/results",
 ]);
 

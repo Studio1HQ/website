@@ -8,6 +8,20 @@
     "dark": "#f97316"
   },
   "favicon": "/favicon.png",
+  "redirects": [
+    {
+      "source": "/services/blog-as-a-service",
+      "destination": "/services/technical-content"
+    },
+    {
+      "source": "/services/devrel-as-a-service",
+      "destination": "/services/developer-advocacy"
+    },
+    {
+      "source": "/contact",
+      "destination": "/about-us"
+    }
+  ],
   "navigation": {
     "tabs": [
       {

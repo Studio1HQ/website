@@ -49,6 +49,9 @@ export default function Home() {
         <h3>Core Service Pages</h3>
         <ul>
           <li>
+            <a href="/services">All Studio1 services</a>
+          </li>
+          <li>
             <a href="/technical-content-marketing">
               Technical content marketing for developer products
             </a>
@@ -66,6 +69,24 @@ export default function Home() {
           <li>
             <a href="/developer-relations-growth-campaigns">
               Developer relations and growth campaigns
+            </a>
+          </li>
+          <li>
+            <a href="/github-growth-agency">
+              GitHub growth agency for open-source devtools
+            </a>
+          </li>
+          <li>
+            <a href="/product-launch-service">
+              Product launch service for developer tools
+            </a>
+          </li>
+          <li>
+            <a href="/aeo-agency">AEO agency for developer tools</a>
+          </li>
+          <li>
+            <a href="/reddit-marketing-agency">
+              Reddit marketing agency for developer tools
             </a>
           </li>
         </ul>

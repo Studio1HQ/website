@@ -8,10 +8,14 @@ Selected results: Memori grew from launch to 12,000+ GitHub stars. Corsair went 
 
 ## Services
 
+- [All Services](https://www.studio1hq.com/services): Every Studio1 service on one page, grouped into content (technical content, docs, video) and growth (DevRel, GitHub, launches, Reddit, AEO), with where to start.
 - [GitHub Growth Agency](https://www.studio1hq.com/github-growth-agency): Open-source and GitHub growth: README and onboarding fixes, demo projects, launch positioning, community distribution, talks, and hackathons.
-- [Technical Content Marketing](https://www.studio1hq.com/technical-content-marketing): Developer tutorials, integration guides, SEO articles, and code-rich content written by engineers.
+- [Technical Content Marketing Agency for Developer Tools](https://www.studio1hq.com/technical-content-marketing): Developer tutorials, integration guides, comparisons, SEO articles, and code-rich content written by engineers, plus distribution on Reddit, X, LinkedIn, Dev.to, and daily.dev.
 - [Developer Documentation & DX Audits](https://www.studio1hq.com/developer-documentation-dx-audit): Documentation audits, onboarding reviews, API clarity, quickstarts, reference docs, and developer experience improvements.
-- [Developer Video Production](https://www.studio1hq.com/developer-video-production): Technical demos, product walkthroughs, long-form tutorials, Shorts, scripts, edits, thumbnails, and publishing support.
+- [Developer Video and Demo Production](https://www.studio1hq.com/developer-video-production): Product demo videos, demo projects developers can run, technical demos, product walkthroughs, long-form tutorials, Shorts, scripts, edits, thumbnails, and publishing support.
+- [Product Launch Service](https://www.studio1hq.com/product-launch-service): Developer tool launches: launch plan, demo video, launch posts, launch day across Reddit, Hacker News, X, LinkedIn, and Product Hunt, and a launch week that turns the spike into users.
+- [AEO Agency](https://www.studio1hq.com/aeo-agency): Answer engine optimization for developer tools: AI visibility audits across ChatGPT, Perplexity, Gemini, and Google AI, answer-ready pages and docs, crawler access, and third-party citations.
+- [Reddit Marketing Agency](https://www.studio1hq.com/reddit-marketing-agency): Organic Reddit marketing for developer tools: subreddit research, technical posts, launch threads, and community engagement. 304K+ Reddit impressions for Entelligence AI; one r/LLMDevs post reached 205K views.
 - [Developer Relations & Growth Campaigns](https://www.studio1hq.com/developer-relations-growth-campaigns): DevRel as a service: developer advocacy, community programs, product launches, organic growth campaigns, and creator programs.
 
 ## Results and case studies
@@ -35,6 +39,8 @@ Selected results: Memori grew from launch to 12,000+ GitHub stars. Corsair went 
 
 - [How to Launch a Developer Tool on Product Hunt](https://www.studio1hq.com/blog/product-hunt-launch-playbook): A step-by-step launch playbook: prep, the listing, launch day, Show HN and launch week, with results from Webcrumbs and Permit.io.
 - [How to Get More GitHub Stars for Your Open-Source Launch](https://www.studio1hq.com/blog/how-to-get-github-stars-open-source-launch): A step-by-step playbook: prelaunch prep, README, Show HN, Reddit, X, Product Hunt, demos, and community loops, with results from Memori, OpenLore, and Corsair.
+- [How to Distribute Technical Content to Developers on Reddit, X and YouTube](https://www.studio1hq.com/blog/how-to-distribute-technical-content-reddit-x-youtube): A channel-by-channel distribution playbook for Reddit, X, YouTube, daily.dev, Hacker News, LinkedIn, and Dev.to, with a one-week repurposing schedule and results from Entelligence AI, OpenLore, Memori, and Nebius.
+- [Reddit Marketing for Developer Tools](https://www.studio1hq.com/blog/reddit-marketing-for-developer-tools): How to market a developer tool on Reddit: choosing subreddits, posts developers upvote, self-promotion rules, staying in the comments, and measuring, with real post data from Entelligence AI, Memori and Nebius.
 - [How to Get Your Tool Recommended by ChatGPT, Perplexity, and Google](https://www.studio1hq.com/blog/how-to-get-your-tool-recommended-by-chatgpt-perplexity-google): AEO, GEO, crawler access, documentation strategy, comparison pages, community mentions, schema, and llms.txt for developer tools.
 - [How to Measure Your Devtool's Visibility in AI Answers](https://www.studio1hq.com/blog/how-to-measure-devtool-visibility-in-ai-answers): A two-hour spreadsheet audit of how often AI tools mention, recommend, link to, and accurately describe your devtool.
 - [Developer Docs as Your Best AEO Asset](https://www.studio1hq.com/blog/developer-docs-as-aeo-asset): How to structure developer documentation so AI answers cite it.

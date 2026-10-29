@@ -62,7 +62,27 @@ export async function GET() {
 
   const englishOnlyPaths: SitemapEntry[] = [
     {
+      path: "/services",
+      lastModified: GROWTH_PAGES_LAST_MODIFIED,
+      priority: 0.9,
+    },
+    {
       path: "/github-growth-agency",
+      lastModified: GROWTH_PAGES_LAST_MODIFIED,
+      priority: 0.9,
+    },
+    {
+      path: "/product-launch-service",
+      lastModified: GROWTH_PAGES_LAST_MODIFIED,
+      priority: 0.9,
+    },
+    {
+      path: "/aeo-agency",
+      lastModified: GROWTH_PAGES_LAST_MODIFIED,
+      priority: 0.9,
+    },
+    {
+      path: "/reddit-marketing-agency",
       lastModified: GROWTH_PAGES_LAST_MODIFIED,
       priority: 0.9,
     },

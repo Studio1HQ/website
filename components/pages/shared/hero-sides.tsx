@@ -1,8 +1,10 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
 import {
+  ArrowFatUp,
   Barcode,
   Books,
+  ChatCircle,
   DeviceMobile,
   Eye,
   FileText,
@@ -16,6 +18,7 @@ import {
   RedditLogo,
   Star,
   TrendUp,
+  Trophy,
   UsersThree,
   VideoCamera,
   XLogo,
@@ -228,13 +231,40 @@ function SearchCard() {
 /* Docs & DX                                                           */
 /* ------------------------------------------------------------------ */
 
+type DiffLine = [sign: "-" | "+", text: string];
+
+/** Removed lines struck through in red, added lines on an orange wash. */
+function DiffList({ lines }: { lines: DiffLine[] }) {
+  return (
+    <ul className="mt-2 font-mono text-[10.5px] leading-[1.5]">
+      {lines.map(([sign, text]) => (
+        <li
+          key={sign + text}
+          className={cn(
+            "flex gap-1.5 px-1.5 py-0.5",
+            sign === "-"
+              ? "bg-[#e5372e]/[0.07] text-[#141414]/45"
+              : "bg-[#f97316]/[0.09] text-[#141414]",
+          )}
+        >
+          <span style={{ color: sign === "-" ? "#e5372e" : PRINT }}>
+            {sign}
+          </span>
+          <span
+            className={cn(
+              "min-w-0",
+              sign === "-" && "line-through decoration-[#e5372e]/50",
+            )}
+          >
+            {text}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function DiffCard() {
-  const lines: [sign: "-" | "+", text: string][] = [
-    ["-", "Serve your docs to AI agents over SSH"],
-    ["-", "A dense, text-heavy About section"],
-    ["+", "Give every AI agent the same up-to-date knowledge."],
-    ["+", "One diagram: agents sharing one knowledge server"],
-  ];
   return (
     <Shell title="README rewrite" tag="OpenLore" tagIcon={GitDiff}>
       <div className="px-1">
@@ -242,31 +272,14 @@ function DiffCard() {
           <Logo src="/case-studies/openlore/openlore-logo.webp" size={16} />
           aakarim/OpenLore · README.md
         </p>
-        <ul className="mt-2 font-mono text-[10.5px] leading-[1.5]">
-          {lines.map(([sign, text]) => (
-            <li
-              key={text}
-              className={cn(
-                "flex gap-1.5 px-1.5 py-0.5",
-                sign === "-"
-                  ? "bg-[#e5372e]/[0.07] text-[#141414]/45"
-                  : "bg-[#f97316]/[0.09] text-[#141414]",
-              )}
-            >
-              <span style={{ color: sign === "-" ? "#e5372e" : PRINT }}>
-                {sign}
-              </span>
-              <span
-                className={cn(
-                  "min-w-0",
-                  sign === "-" && "line-through decoration-[#e5372e]/50",
-                )}
-              >
-                {text}
-              </span>
-            </li>
-          ))}
-        </ul>
+        <DiffList
+          lines={[
+            ["-", "Serve your docs to AI agents over SSH"],
+            ["-", "A dense, text-heavy About section"],
+            ["+", "Give every AI agent the same up-to-date knowledge."],
+            ["+", "One diagram: agents sharing one knowledge server"],
+          ]}
+        />
       </div>
     </Shell>
   );
@@ -586,6 +599,185 @@ function RepoCard() {
 /* Layout                                                              */
 /* ------------------------------------------------------------------ */
 
+/* ------------------------------------------------------------------ */
+/* Launches                                                            */
+/* ------------------------------------------------------------------ */
+
+function ListingCard() {
+  return (
+    <Shell title="Product Hunt launch" tag="Webcrumbs" tagIcon={Trophy}>
+      <div className="flex items-center gap-2.5 px-1">
+        <Logo src="/assets/webcrumbs.webp" size={30} />
+        <div className="min-w-0">
+          <p className="truncate text-[13.5px] font-medium leading-tight tracking-[-0.02em]">
+            Frontend AI by Webcrumbs
+          </p>
+          <p className="mt-0.5 truncate text-[10.5px] text-[#141414]/55">
+            Your UI generated from prompts or images
+          </p>
+        </div>
+      </div>
+      <div className="mt-2.5 grid grid-cols-2 gap-1.5 px-1">
+        {[
+          ["#3", "Product of the Day"],
+          ["#5", "Product of the Week"],
+        ].map(([rank, award]) => (
+          <span
+            key={award}
+            className="flex items-center gap-1.5 bg-[#f6f3ee] px-2 py-1.5"
+          >
+            <span
+              className="text-[13px] font-medium leading-none tracking-[-0.03em]"
+              style={{ color: PRINT }}
+            >
+              {rank}
+            </span>
+            <span className="text-[9.5px] leading-tight text-[#141414]/60">
+              {award}
+            </span>
+          </span>
+        ))}
+      </div>
+      <p className="px-1 pt-2 text-[10.5px] leading-snug text-[#141414]/55">
+        Its first Product Hunt launch, with almost no prep time.
+      </p>
+    </Shell>
+  );
+}
+
+function HackerNewsCard() {
+  return (
+    <Shell
+      title="Hacker News"
+      tag="Memori"
+      tagIcon={ChatCircle}
+      value="136"
+      note="points on a post framed around a live debate"
+    >
+      <div className="flex gap-2 px-1">
+        <ArrowFatUp
+          weight="fill"
+          className="mt-0.5 size-3.5 shrink-0"
+          style={{ color: PRINT }}
+        />
+        <div className="min-w-0">
+          <p className="text-[12.5px] font-medium leading-snug tracking-[-0.015em]">
+            Everyone&apos;s trying vectors and graphs for AI memory. We went
+            back to SQL
+          </p>
+          <p className="mt-1 text-[10.5px] text-[#141414]/55">
+            136 points · 63 comments
+          </p>
+        </div>
+      </div>
+    </Shell>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* AEO                                                                 */
+/* ------------------------------------------------------------------ */
+
+function RobotsCard() {
+  return (
+    <Shell title="Crawler access" tag="Studio1" tagIcon={GitDiff}>
+      <div className="px-1">
+        <p className="font-mono text-[10.5px] text-[#141414]/50">
+          studio1hq.com · robots.txt
+        </p>
+        <DiffList
+          lines={[
+            ["-", "User-agent: GPTBot  Disallow: /"],
+            ["-", "User-agent: ClaudeBot  Disallow: /"],
+            ["+", "User-agent: GPTBot  Allow: /"],
+            ["+", "User-agent: PerplexityBot  Allow: /"],
+          ]}
+        />
+      </div>
+    </Shell>
+  );
+}
+
+const RUNG_STYLE = {
+  Recommended: { background: PRINT, color: "#fff" },
+  Cited: { background: INK, color: "#fff" },
+  Absent: { background: "#f6f3ee", color: "rgba(20,20,20,0.5)" },
+} as const;
+
+function PromptAuditCard() {
+  const rows: [prompt: string, rung: keyof typeof RUNG_STYLE][] = [
+    ["Best DevRel agency for devtool startups", "Recommended"],
+    ["Studio1 alternatives", "Cited"],
+    ["How do I get more GitHub stars?", "Absent"],
+  ];
+  return (
+    <Shell title="AI answer audit" tag="15 prompts" tagIcon={MagnifyingGlass}>
+      <ul className="divide-y divide-[#141414]/[0.08] px-1">
+        {rows.map(([prompt, rung]) => (
+          <li
+            key={prompt}
+            className="flex items-center justify-between gap-2 py-1.5"
+          >
+            <span className="min-w-0 truncate text-[11px] text-[#141414]/75">
+              {prompt}
+            </span>
+            <span
+              className="shrink-0 px-1.5 py-0.5 text-[9.5px] font-medium"
+              style={RUNG_STYLE[rung]}
+            >
+              {rung}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <p className="px-1 pt-1.5 text-[10.5px] leading-snug text-[#141414]/55">
+        Every answer scored: recommended, cited, mentioned, or absent.
+      </p>
+    </Shell>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Reddit                                                              */
+/* ------------------------------------------------------------------ */
+
+/** Reddit's post insights panel, with the numbers from the screenshot. */
+function InsightsCard({
+  client,
+  place,
+  rows,
+}: {
+  client: string;
+  place: string;
+  rows: [label: string, value: string][];
+}) {
+  return (
+    <Shell title="Post insights" tag={client} tagIcon={RedditLogo}>
+      <p className="flex items-center gap-1.5 px-1 text-[10.5px] text-[#141414]/55">
+        <RedditLogo
+          weight="fill"
+          className="size-4 shrink-0"
+          style={{ color: PRINT }}
+        />
+        {place}
+      </p>
+      <dl className="mt-2 divide-y divide-[#141414]/[0.08] px-1">
+        {rows.map(([label, value]) => (
+          <div
+            key={label}
+            className="flex items-baseline justify-between gap-2 py-1"
+          >
+            <dt className="text-[11px] text-[#141414]/60">{label}</dt>
+            <dd className="text-[12.5px] font-medium tracking-[-0.02em]">
+              {value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </Shell>
+  );
+}
+
 function Framed({
   side,
   labelPosition,
@@ -739,7 +931,7 @@ export const CONTENT_SIDES: HeroSides = {
   stats: [
     {
       label: "stat · reddit",
-      value: "275K+",
+      value: "304K+",
       text: "Reddit impressions from developer distribution",
       client: "Entelligence",
       icon: RedditLogo,
@@ -819,6 +1011,103 @@ export const VIDEO_SIDES: HeroSides = {
       text: "hands-on demo agents built",
       client: "Memori",
       icon: VideoCamera,
+    },
+  ],
+};
+
+export const LAUNCH_SIDES: HeroSides = {
+  cards: [
+    { label: "hacker-news · memori", card: <HackerNewsCard /> },
+    { label: "producthunt · frontend-ai", card: <ListingCard /> },
+  ],
+  stats: [
+    {
+      label: "stat · reddit-launch",
+      value: "50K+",
+      text: "impressions on the Reddit launch post",
+      client: "Memori",
+      icon: RedditLogo,
+    },
+    {
+      label: "stat · upvotes",
+      value: "300+",
+      text: "upvotes on the Permit Share-If launch",
+      client: "Permit.io",
+      icon: ArrowFatUp,
+    },
+  ],
+};
+
+export const AEO_SIDES: HeroSides = {
+  cards: [
+    { label: "aeo-audit · prompts", card: <PromptAuditCard /> },
+    { label: "robots.txt · ai-crawlers", card: <RobotsCard /> },
+  ],
+  stats: [
+    {
+      label: "stat · top-five",
+      value: "12/30",
+      text: "developer queries with a Studio1 post in Google's top five",
+      client: "Bright Data",
+      icon: MagnifyingGlass,
+    },
+    {
+      label: "stat · reddit",
+      value: "304K+",
+      text: "Reddit impressions from developer distribution",
+      client: "Entelligence",
+      icon: RedditLogo,
+    },
+  ],
+};
+
+export const REDDIT_SIDES: HeroSides = {
+  cards: [
+    {
+      label: "r/LLMDevs · post-insights",
+      card: (
+        <InsightsCard
+          client="Entelligence"
+          place="r/LLMDevs"
+          rows={[
+            ["Views", "205K"],
+            ["Upvotes", "278"],
+            ["Upvote ratio", "97.6%"],
+            ["Comments", "36"],
+          ]}
+        />
+      ),
+    },
+    {
+      label: "memori · launch-post",
+      card: (
+        <InsightsCard
+          client="Memori"
+          place="Launch post"
+          rows={[
+            ["Views", "50K"],
+            ["Upvotes", "85"],
+            ["Upvote ratio", "95.6%"],
+            ["Comments", "19"],
+          ]}
+        />
+      ),
+    },
+  ],
+  stats: [
+    {
+      label: "stat · reddit",
+      value: "304K+",
+      text: "Reddit impressions from adapted blog angles",
+      client: "Entelligence",
+      icon: RedditLogo,
+    },
+    {
+      label: "stat · subreddits",
+      value: "12",
+      text: "posts across AI, agent, MCP, and LLM subreddits",
+      client: "Nebius",
+      icon: UsersThree,
     },
   ],
 };

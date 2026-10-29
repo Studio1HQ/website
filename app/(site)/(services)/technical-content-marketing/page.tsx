@@ -34,6 +34,18 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const blogFaqItems: FAQItem[] = [
   {
+    question:
+      "What does a technical content marketing agency for developer tools do?",
+    answer:
+      "It plans, writes, and distributes the content developers use to evaluate a tool: tutorials, integration guides, comparison posts, deep dives, and SEO articles that answer the questions developers search for. Studio1 does this for devtool, AI, and SaaS teams with engineers and technical writers matched to your stack, and can distribute each piece on Reddit, X, LinkedIn, Dev.to, and daily.dev. For Bright Data, that meant 50+ live posts on brightdata.com in a year.",
+  },
+  {
+    question:
+      "Why hire a technical content agency instead of a general content agency?",
+    answer:
+      "Developers check the code before they trust the claim. A technical content agency writes with people who run the code, test every example, and know the stack, so tutorials work on the first try and comparisons hold up to scrutiny. General content agencies usually need your engineers to fix drafts, which is the time you were trying to save.",
+  },
+  {
     question: "What types of technical content do you create?",
     answer:
       "We create developer-focused blog posts, step-by-step tutorials, integration guides, product walkthroughs, comparison articles, technical deep-dives, and campaign content built around real projects or repos. Every piece includes real technical context and is written by engineers or technical writers matched to the stack.",
@@ -138,7 +150,7 @@ const contentCaseStudyProofs: CaseStudyResultData[] = [
     company: "Entelligence AI",
     category: "Technical Content & Distribution",
     href: "/case-studies/entelligence-ai",
-    heroValue: "275K+",
+    heroValue: "304K+",
     heroLabel: "Reddit impressions generated from developer distribution",
     proof:
       "Technical blogs, deep dives, feature-launch content, and social distribution for an AI engineering audience.",
@@ -180,11 +192,11 @@ const contentCaseStudyProofs: CaseStudyResultData[] = [
 
 export default function Page() {
   const serviceSchema = serviceJsonLd({
-    name: "Technical Content Marketing Services",
+    name: "Technical Content Marketing Agency for Developer Tools",
     description:
-      "Technical content marketing for developer products: tutorials, integration guides, SEO articles, and code-rich content that builds trust and drives adoption.",
+      "Technical content marketing agency for developer tools, AI, and SaaS teams: engineer-written tutorials, integration guides, comparisons, and SEO articles that build trust and drive adoption.",
     path: "/technical-content-marketing",
-    serviceType: "Technical Content Writing",
+    serviceType: "Technical Content Marketing",
   });
 
   return (
@@ -200,7 +212,7 @@ export default function Page() {
             breadcrumbJsonLd([
               { name: "Home", path: "/" },
               {
-                name: "Technical Content Marketing Services",
+                name: "Technical Content Marketing Agency",
                 path: "/technical-content-marketing",
               },
             ]),

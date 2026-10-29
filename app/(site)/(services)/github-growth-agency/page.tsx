@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import Hero from "@/components/pages/github-growth/hero";
 import Services from "@/components/pages/github-growth/services";
 import type { FAQItem } from "@/components/landing/faq";
@@ -235,6 +236,16 @@ export default function Page() {
             subtitle="Common questions about growing an open-source project on GitHub."
             items={githubFaqItems}
           />
+          <p className="mt-8 text-center text-[15px] text-[var(--p-muted)]">
+            Want the full playbook? Read{" "}
+            <Link
+              href="/blog/how-to-get-github-stars-open-source-launch"
+              className="font-medium text-[#141414] underline decoration-[#141414]/25 decoration-2 underline-offset-[6px] transition-colors hover:decoration-[#f97316]"
+            >
+              how to get more GitHub stars for your open-source launch
+            </Link>
+            .
+          </p>
         </Container>
       </PaperSection>
       <PaperCta

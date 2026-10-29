@@ -790,7 +790,7 @@ const OFFERING_LINKS = [
   "/developer-video-production#content-creation",
   "/developer-documentation-dx-audit#documentation-dx-audits",
   "/developer-relations-growth-campaigns#organic-growth-campaign",
-  "/developer-relations-growth-campaigns#product-launch-support",
+  "/product-launch-service",
   "/developer-relations-growth-campaigns#influencer-management",
 ];
 
@@ -818,11 +818,7 @@ export function PaperServices() {
               <Accent>find, trust, and adopt</Accent> your product
             </>
           }
-          action={
-            <OutlineLink href="/technical-content-marketing">
-              Explore services
-            </OutlineLink>
-          }
+          action={<OutlineLink href="/services">Explore services</OutlineLink>}
         />
 
         <ul
@@ -881,6 +877,16 @@ export function PaperServices() {
             );
           })}
         </ul>
+
+        <p className={cn("mt-8 text-center text-[15px]", MUTED)}>
+          Growing an open-source project?{" "}
+          <Link
+            href="/github-growth-agency"
+            className="font-medium text-[#141414] underline decoration-[#141414]/25 decoration-2 underline-offset-[6px] transition-colors hover:decoration-[#f97316]"
+          >
+            See our GitHub growth agency work
+          </Link>
+        </p>
       </Container>
     </PaperSection>
   );

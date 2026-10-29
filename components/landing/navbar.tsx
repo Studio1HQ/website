@@ -19,12 +19,17 @@ import { useTranslations } from "next-intl";
 
 const navTitleKeys: Record<string, string> = {
   "About Us": "about",
+  "AEO Agency": "aeo",
+  "All Services": "allServices",
   "Case Studies": "caseStudies",
   "Client Work": "clientWork",
   "Developer Relations & Growth": "devrel",
   "Developer Video Production": "video",
   "Documentation & DX Audits": "docs",
+  "GitHub Growth": "githubGrowth",
   "Our Blog": "blog",
+  "Product Launch": "productLaunch",
+  "Reddit Marketing": "redditMarketing",
   "Technical Content Marketing": "technicalContent",
   Content: "content",
   Home: "home",

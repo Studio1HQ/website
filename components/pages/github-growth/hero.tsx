@@ -10,7 +10,7 @@ export default function Hero() {
       pill="README · Launches · Demos · Community"
       titleAccent="GitHub Growth"
       titleRest="for Open-Source Devtools"
-      description="We grow open-source repos the way developers actually find them: a README and first run that work, demos worth trying, launches in the right communities, and steady distribution after launch day."
+      description="A README and first run that work, demos worth trying, and launches in the communities where developers gather."
       primaryCta="Book a Call"
       secondaryCta="Explore Services"
       stats={[
@@ -19,7 +19,7 @@ export default function Hero() {
         { value: "12x", label: "OpenLore in a month" },
         { value: "2K+", label: "Corsair in 5 weeks" },
       ]}
-      highlights={["a README and first run that work", "launches"]}
+      highlights={["A README and first run that work", "launches"]}
       sides={GITHUB_SIDES}
     />
   );

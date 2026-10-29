@@ -48,6 +48,9 @@ const SERVICE_LINKS = [
   { key: "video", href: "/developer-video-production" },
   { key: "docs", href: "/developer-documentation-dx-audit" },
   { key: "githubGrowth", href: "/github-growth-agency" },
+  { key: "productLaunch", href: "/product-launch-service" },
+  { key: "aeo", href: "/aeo-agency" },
+  { key: "redditMarketing", href: "/reddit-marketing-agency" },
 ] as const;
 
 const COMPANY_LINKS = [

@@ -34,6 +34,8 @@ export async function generateMetadata(): Promise<Metadata> {
     keywords: [
       "content creation",
       "developer video production",
+      "developer demo videos",
+      "developer video agency",
       "DevTool product demos",
       "technical YouTube videos",
       "technical video demos",
@@ -112,6 +114,11 @@ const videoWorkstreams = [
 
 const videoFaqItems: FAQItem[] = [
   {
+    question: "Do you make product demo videos for developer tools?",
+    answer:
+      "Yes. We script, record, and edit demo videos that show your tool working in a real workflow, and we can build the demo project itself so developers can clone the repo and follow along.",
+  },
+  {
     question: "What kind of developer videos do you produce?",
     answer:
       "We produce long-form tutorials, product demos, project walkthroughs, technical explainers, Shorts, cutdowns, and recurring video formats for developer products.",
@@ -135,9 +142,9 @@ const videoFaqItems: FAQItem[] = [
 
 export default function Page() {
   const serviceSchema = serviceJsonLd({
-    name: "Developer Video Production Services",
+    name: "Developer Video and Demo Production",
     description:
-      "Developer video production services for AI and DevTool startups: technical demos, tutorials, scripts, edits, thumbnails, Shorts, and upload-ready assets.",
+      "Developer video and demo production for AI and devtool startups: product demo videos, coding tutorials, demo projects, scripts, edits, thumbnails, Shorts, and upload-ready assets.",
     path: "/developer-video-production",
     serviceType: "Developer Video Production",
   });

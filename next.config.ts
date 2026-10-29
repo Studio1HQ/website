@@ -56,6 +56,22 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/blogs",
+        destination: "/blog",
+        permanent: true,
+      },
+      // AI agents guess at /docs paths; point them at the real files.
+      {
+        source: "/docs/llms.txt",
+        destination: "/llms.txt",
+        permanent: true,
+      },
+      {
+        source: "/docs",
+        destination: "/services",
+        permanent: true,
+      },
+      {
         source:
           "/blog/claude-opus-5-5-what-changed-what-breaks-whether-to-switch",
         destination: "/blog/claude-opus-5-5-review-motion-videos",
