@@ -29,10 +29,10 @@ export const mdxComponents = {
     </p>
   ),
   ol: (props: ListProps) => (
-    <ol className="list-decimal pl-5 space-y-2 text-foreground" {...props} />
+    <ol className="list-decimal space-y-2 pl-6 text-foreground marker:font-medium marker:text-primary" {...props} />
   ),
   ul: (props: ListProps) => (
-    <ul className="list-disc pl-5 space-y-1 text-foreground" {...props} />
+    <ul className="list-none space-y-2 pl-0 text-foreground [&>li]:relative [&>li]:pl-6 [&>li]:before:absolute [&>li]:before:left-1 [&>li]:before:top-[0.72em] [&>li]:before:size-1.5 [&>li]:before:rounded-full [&>li]:before:bg-primary [&>li]:before:content-['']" {...props} />
   ),
   li: (props: ListItemProps) => (
     <li className="pl-1 text-foreground" {...props}>
@@ -47,7 +47,7 @@ export const mdxComponents = {
   ),
   a: ({ href, children, ...props }: AnchorProps) => {
     const className =
-      "text-blue-500 hover:text-blue-700 dark:text-gray-400 hover:dark:text-gray-300 dark:underline dark:underline-offset-2 dark:decoration-gray-800";
+      "font-medium text-primary underline decoration-primary/30 underline-offset-4 transition-colors hover:decoration-primary";
     if (href?.startsWith("/")) {
       return (
         <Link href={href} className={className} {...props}>
@@ -119,35 +119,38 @@ export const mdxComponents = {
   },
   blockquote: (props: BlockquoteProps) => (
     <blockquote
-      className="ml-[0.075em] border-l-3 border-gray-300 pl-4 text-foreground dark:border-zinc-600"
+      className="not-prose my-8 rounded-r-2xl border-l-2 border-primary bg-primary/[0.05] py-4 pl-5 pr-5 text-[17px] italic leading-[1.7] text-[var(--home-ink)]"
       {...props}
     />
   ),
   table: (props: ComponentPropsWithoutRef<"table">) => (
-    <div className="my-6 overflow-x-auto">
+    <div
+      data-lenis-prevent
+      className="not-prose s1-glass-card my-8 overflow-x-auto rounded-[18px]"
+    >
       <table
-        className="w-full border-collapse text-sm text-foreground"
+        className="w-full min-w-[560px] border-collapse text-left text-[14px] leading-[1.55] text-[var(--home-ink)]"
         {...props}
       />
     </div>
   ),
   thead: (props: ComponentPropsWithoutRef<"thead">) => (
-    <thead className="border-b border-border" {...props} />
+    <thead className="bg-black/[0.03] dark:bg-white/[0.04]" {...props} />
   ),
   tbody: (props: ComponentPropsWithoutRef<"tbody">) => (
     <tbody {...props} />
   ),
   tr: (props: ComponentPropsWithoutRef<"tr">) => (
-    <tr className="border-b border-border/60" {...props} />
+    <tr className="border-b border-[var(--home-line)] transition-colors last:border-b-0 hover:bg-primary/[0.04]" {...props} />
   ),
   th: (props: ComponentPropsWithoutRef<"th">) => (
     <th
-      className="border border-border bg-muted/50 p-3 text-left font-medium"
+      className="whitespace-nowrap border-b border-[var(--home-line)] px-5 py-3.5 text-[12px] font-medium uppercase tracking-[0.08em] text-[var(--home-ink-soft)]"
       {...props}
     />
   ),
   td: (props: ComponentPropsWithoutRef<"td">) => (
-    <td className="border border-border/60 p-3 align-top" {...props}>
+    <td className="px-5 py-3.5 align-top text-[var(--home-ink-soft)] first:font-medium first:text-[var(--home-ink)] [&_a]:text-primary" {...props}>
       {withNumericText(props.children)}
     </td>
   ),

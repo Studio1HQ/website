@@ -59,7 +59,7 @@
       "badge": "Servicios",
       "titleAccent": "Contenido",
       "titleRest": "técnico marketing",
-      "description": "Creamos tutoriales developer, guías y contenido SEO que construyen confianza, aumentan visibilidad de producto e impulsan adopción técnica.",
+      "description": "Creamos tutoriales, guías y contenido SEO para developers que generan confianza, visibilidad y adopción.",
       "primaryCta": "Reservar llamada",
       "secondaryCta": "Explorar servicios",
       "stats": {
@@ -86,7 +86,7 @@
       "badge": "Servicios",
       "titleAccent": "Developer Relations",
       "titleRest": "y campañas de crecimiento",
-      "description": "Advocacy developer, crecimiento de comunidad, lanzamientos, distribución orgánica y programas con creadores para productos developer.",
+      "description": "Advocacy developer, crecimiento de comunidad, lanzamientos, distribución orgánica y programas con creadores.",
       "primaryCta": "Reservar llamada",
       "secondaryCta": "Explorar servicios",
       "stats": {
@@ -128,6 +128,13 @@
       "content": "Contenido",
       "devrel": "DevRel y crecimiento",
       "docs": "Documentación y auditorías DX",
+      "githubGrowth": "Crecimiento en GitHub",
+      "productLaunch": "Lanzamiento de producto",
+      "aeo": "Agencia AEO",
+      "redditMarketing": "Marketing en Reddit",
+      "distribution": "Distribución de contenido",
+      "testimonials": "Testimonios",
+      "allServices": "Todos los servicios",
       "home": "Inicio",
       "overview": "Resumen",
       "process": "Proceso",
@@ -161,16 +168,57 @@
   },
   "ProductPage": {
     "visitProduct": "Visitar {name}",
+    "sampleData": "Datos de ejemplo",
+    "copy": "Copiar",
+    "copied": "Copiado",
     "hero": {
-      "badge": "Creado por",
-      "titlePrefix": "Nuestros",
-      "titleHighlight": "productos",
-      "description": "Herramientas que construimos y lanzamos para developers, diseñadores y equipos."
+      "eyebrow": "Productos de Studio1",
+      "count": "{shipped} lanzados, {building} en desarrollo",
+      "titleLineOne": "Promocionamos devtools.",
+      "titleLineTwo": "También <mark>lanzamos</mark> los nuestros.",
+      "description": "Raah y AssetSnip son herramientas que diseñamos, construimos y hacemos crecer internamente. Lanzar nuestros propios productos nos mantiene cerca de lo que viven los developers, y eso es lo que aportamos a cada devtool con la que trabajamos."
     },
-    "pipeline": {
+    "dock": {
+      "jumpTo": "Ir a {name}",
+      "nextName": "Producto 03",
+      "nextTagline": "Algo nuevo está en el taller"
+    },
+    "why": {
+      "indexName": "Por qué construimos",
+      "aside": "Hecho internamente por el equipo de Studio1",
+      "title": "Lanzar nuestras propias herramientas nos hace mejores <accent>lanzando las tuyas</accent>.",
+      "description": "Estamos a ambos lados de un lanzamiento. Lo que aprendemos construyendo Raah y AssetSnip va directo a la documentación, los videos y las campañas que creamos para equipos de devtools.",
+      "points": {
+        "friction": {
+          "title": "Encontramos la fricción primero",
+          "body": "Pasos de instalación, errores confusos, documentación que falta. Los vivimos en nuestros propios productos, así que sabemos dónde mirar en el tuyo."
+        },
+        "launches": {
+          "title": "Ejecutamos lanzamientos, no solo los planeamos",
+          "body": "Landing pages, videos demo, changelogs y publicaciones en comunidades. Cada lanzamiento propio afina el playbook que usamos con clientes."
+        },
+        "builders": {
+          "title": "Contenido de quienes construyen",
+          "body": "Escribimos sobre devtools como builders, así que los tutoriales y la documentación nacen del uso real del producto, no de una lista de funciones."
+        }
+      },
+      "playbook": "El mismo playbook para tu producto"
+    },
+    "next": {
+      "indexName": "En desarrollo",
+      "aside": "Producto 03",
       "category": "SaaS de IA",
       "status": "En progreso",
-      "title": "próximamente ..."
+      "title": "El producto 03 está en el taller.",
+      "codename": "Nombre en clave",
+      "redacted": "Confidencial",
+      "description": "Nuestro próximo producto es una herramienta SaaS de IA, construida igual que Raah y AssetSnip. Compartiremos más en cuanto esté lista para usuarios reales.",
+      "follow": "Sigue el desarrollo",
+      "building": "En construcción"
+    },
+    "cta": {
+      "title": "¿Estás construyendo un producto para developers?",
+      "description": "Ayudamos a las devtools a lanzarse, explicarse y crecer, con el mismo playbook que usamos en nuestros propios productos."
     }
   },
   "CareersPage": {
@@ -357,7 +405,17 @@
     "titleHighlight": "no encontrada",
     "description": "La página que buscas no existe o se ha movido.",
     "homeCta": "Volver al inicio",
-    "servicesCta": "Explorar servicios"
+    "servicesCta": "Explorar servicios",
+    "suggestions": "Prueba con una de estas"
+  },
+  "ErrorPage": {
+    "eyebrow": "Error",
+    "titlePrefix": "Algo salió",
+    "titleHighlight": "mal",
+    "description": "Un error inesperado impidió mostrar esta página. Inténtalo de nuevo o vuelve al inicio.",
+    "retryCta": "Reintentar",
+    "homeCta": "Volver al inicio",
+    "reference": "Ref."
   },
   "Footer": {
     "description": "Socio de contenido técnico y crecimiento developer para equipos devtool y SaaS.",

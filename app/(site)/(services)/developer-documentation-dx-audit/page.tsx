@@ -1,14 +1,20 @@
+import Process from "@/components/pages/docs-as-a-service/process";
 import React from "react";
 import type { Metadata } from "next";
 import Hero from "@/components/pages/docs-as-a-service/hero";
 import Services from "@/components/pages/docs-as-a-service/services";
-import Process from "@/components/pages/docs-as-a-service/process";
-import FAQ, { type FAQItem } from "@/components/landing/faq";
-import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
+import type { FAQItem } from "@/components/landing/faq";
+import { Container } from "@/components/home/ui";
+import { PaperSection } from "@/components/paper/paper-sections";
+import { PaperServiceFaq } from "@/components/pages/shared/paper-service-kit";
+import { PAPER_SCOPE } from "@/lib/paper";
 import {
-  ServiceDetailSection,
-  ServiceProofSection,
-} from "@/components/pages/shared/service-detail-sections";
+  StoryCards,
+  StoryLogos,
+  StoryProof,
+} from "@/components/pages/shared/service-story";
+import { PaperCta } from "@/components/paper/paper-sections";
+import { breadcrumbJsonLd, pageMetadata, serviceJsonLd } from "@/lib/seo";
 import { getTranslations } from "next-intl/server";
 import { DEFAULT_LOCALE } from "@/lib/i18n";
 
@@ -167,24 +173,16 @@ const litellmProof = {
 };
 
 export default function Page() {
-  const serviceSchema = {
-    "@context": "https://schema.org",
-    "@type": "Service",
+  const serviceSchema = serviceJsonLd({
     name: "Developer Documentation & DX Audit Services",
     description:
       "Developer documentation and DX audit services for AI and DevTool products: onboarding reviews, API clarity, quickstarts, reference docs, and a clearer path to first success.",
-    provider: {
-      "@type": "Organization",
-      name: "Studio1",
-      url: "https://studio1hq.com",
-    },
+    path: "/developer-documentation-dx-audit",
     serviceType: "Developer Documentation, Docs Audit, and DX Improvements",
-    areaServed: "Worldwide",
-    url: "https://studio1hq.com/developer-documentation-dx-audit",
-  };
+  });
 
   return (
-    <div className="">
+    <div className="overflow-x-clip" style={PAPER_SCOPE}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
@@ -204,23 +202,36 @@ export default function Page() {
         }}
       />
       <Hero />
+      <StoryLogos />
       <Services />
-      <ServiceDetailSection
-        eyebrow="Documentation and DX scope"
+      <StoryCards
+        index={2}
+        name="Documentation and DX scope"
         title="We improve the full developer path, not just the words"
         description="We edit docs, write missing pages, and audit developer journeys across docs, APIs, SDKs, dashboards, and onboarding."
-        items={docsWorkstreams}
-        columns="three"
+        steps={docsWorkstreams}
+        workflow="docs-dx.yml"
       />
-      <Process />
-      <ServiceProofSection
+      <Process index={3} />
+      <StoryProof
+        index={4}
         title="Docs that became a developer onboarding engine"
         description="LiteLLM focused on docs architecture, quickstarts, integrations, and community feedback."
-        study={litellmProof}
+        studies={[litellmProof]}
       />
-      <FAQ
-        subtitle="Common questions about our developer documentation and DX audit services."
-        items={docsFaqItems}
+      <PaperSection tone="paper">
+        <Container>
+          <PaperServiceFaq
+            index={5}
+            subtitle="Common questions about our developer documentation and DX audit services."
+            items={docsFaqItems}
+          />
+        </Container>
+      </PaperSection>
+      <PaperCta
+        index={6}
+        title="Ready to Get Developers to First Success?"
+        description="Documentation audits, DX reviews, and docs improvements that get developers to first success with your product."
       />
     </div>
   );

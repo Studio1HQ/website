@@ -10,15 +10,12 @@ export function RelatedCaseStudies({ studies }: RelatedCaseStudiesProps) {
   if (studies.length === 0) return null;
 
   return (
-    <section className="mt-16 max-w-4xl">
-      <h2 className="font-inter text-2xl font-normal tracking-tight">
-        More{" "}
-        <span className="serif-accent bg-gradient-to-br from-primary via-primary1 to-primary bg-clip-text font-accent font-normal italic text-transparent">
-          case studies
-        </span>
+    <section className="mt-16 max-w-4xl border-t border-[#141414]/10 pt-12">
+      <h2 className="text-[28px] font-medium tracking-[-0.045em] text-[#141414] md:text-[32px]">
+        More <span className="text-[#f97316]">case studies</span>
       </h2>
 
-      <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {studies.map((study) => (
           <CaseStudyCardCompact key={study.slug} study={study} />
         ))}

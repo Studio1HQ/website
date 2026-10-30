@@ -2,6 +2,7 @@ import { isValidElement } from "react";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { mdxComponents } from "@/mdx-components";
 import { CodeBlock } from "@/components/blog/code-block";
+import { withNumericText } from "@/components/ui/num";
 
 const youtubeLinePattern =
   /^(\s*)(?:(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)\/[^\s<>]+)|::youtube\[([^\]]+)\])\s*$/gm;
@@ -36,14 +37,103 @@ function getYouTubeEmbedUrl(value: string): string | null {
   return `https://www.youtube.com/embed/${videoId}`;
 }
 
-export function transformBlogMdxContent(content: string): string {
-  return content.replace(youtubeLinePattern, (match, indent, url, shortcodeUrl) => {
-    const source = (url || shortcodeUrl || "").trim();
-    const embedUrl = getYouTubeEmbedUrl(source);
-    if (!embedUrl) return match;
+/**
+ * Rewrites the "## Frequently asked questions" chapter (one "### question"
+ * per item) into an accordion; the h2 stays so the chapter keeps its TOC entry.
+ */
+function wrapFaqSection(content: string): string {
+  const lines = content.split(/\r?\n/);
+  const start = lines.findIndex((line) =>
+    /^##\s+(frequently asked questions|faqs?)\s*$/i.test(line.trim()),
+  );
+  if (start < 0) return content;
+  let end = lines.findIndex((line, i) => i > start && /^##\s/.test(line));
+  if (end < 0) end = lines.length;
 
-    return `${indent}<YouTubeEmbed url={${JSON.stringify(embedUrl)}} />`;
-  });
+  const body = lines.slice(start + 1, end);
+  const first = body.findIndex((line) => /^###\s/.test(line));
+  if (first < 0) return content;
+
+  const items: string[] = [];
+  let question = "";
+  let answer: string[] = [];
+  const flush = () => {
+    if (!question) return;
+    items.push(
+      // next-mdx-remote drops {expressions}, so the question goes in as a plain string.
+      `<BlogFaqItem question="${question.replace(/"/g, "”")}">\n\n${answer.join("\n").trim()}\n\n</BlogFaqItem>`,
+    );
+  };
+  for (const line of body.slice(first)) {
+    const match = line.match(/^###\s+(.*)$/);
+    if (match) {
+      flush();
+      question = match[1].trim();
+      answer = [];
+    } else {
+      answer.push(line);
+    }
+  }
+  flush();
+
+  return [
+    ...lines.slice(0, start + 1),
+    ...body.slice(0, first),
+    `<BlogFaq>\n\n${items.join("\n\n")}\n\n</BlogFaq>`,
+    "",
+    ...lines.slice(end),
+  ].join("\n");
+}
+
+export function transformBlogMdxContent(content: string): string {
+  return wrapFaqSection(content).replace(
+    youtubeLinePattern,
+    (match, indent, url, shortcodeUrl) => {
+      const source = (url || shortcodeUrl || "").trim();
+      const embedUrl = getYouTubeEmbedUrl(source);
+      if (!embedUrl) return match;
+
+      return `${indent}<YouTubeEmbed url={${JSON.stringify(embedUrl)}} />`;
+    },
+  );
+}
+
+function BlogFaq({ children }: { children: ReactNode }) {
+  return (
+    <div className="not-prose my-8 border-t border-[#141414]/10">
+      {children}
+    </div>
+  );
+}
+
+/** One question: hairline row, plus that turns into a cross when open. */
+function BlogFaqItem({
+  question,
+  children,
+}: {
+  question: string;
+  children: ReactNode;
+}) {
+  return (
+    <details className="group border-b border-[#141414]/10">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-6 text-[18px] font-medium leading-snug tracking-[-0.02em] text-[#141414] transition-colors duration-200 hover:text-[#f97316] group-open:text-[#f97316] md:text-[20px] [&::-webkit-details-marker]:hidden">
+        {question}
+        <svg
+          aria-hidden
+          viewBox="0 0 20 20"
+          className="size-5 shrink-0 text-[#141414]/45 transition-transform duration-300 ease-out group-open:rotate-45 group-open:text-[#f97316]"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.4"
+        >
+          <path d="M10 2.5v15M2.5 10h15" />
+        </svg>
+      </summary>
+      <div className="pb-6 pr-10 text-[16.5px] leading-[1.75] text-[#141414]/70 [&_a]:font-medium [&_a]:text-[#c2410c] [&_a]:underline [&_a]:decoration-[#f97316]/40 [&_a]:underline-offset-4 [&_p+p]:mt-4">
+        {children}
+      </div>
+    </details>
+  );
 }
 
 function slugify(text: string): string {
@@ -102,15 +192,8 @@ function BlogImage({
   if (!src || typeof src !== "string") return null;
 
   return (
-    <figure
-      className="not-prose mx-auto my-10 w-fit max-w-full overflow-hidden rounded-xl border border-border/70 bg-[linear-gradient(135deg,hsl(var(--muted)/0.5),hsl(var(--background)),hsl(var(--primary)/0.06))] p-2 shadow-[0_18px_52px_-36px_rgba(0,0,0,0.55)] dark:border-white/[0.08] dark:bg-[linear-gradient(135deg,hsl(var(--muted)/0.18),hsl(var(--background)),hsl(var(--primary)/0.08))]"
-    >
-      <div className="mb-2 flex items-center gap-1.5 px-1">
-        <span className="size-2 rounded-full bg-primary/70" />
-        <span className="size-2 rounded-full bg-primary/35" />
-        <span className="size-2 rounded-full bg-muted-foreground/25" />
-      </div>
-      <div className="w-fit max-w-full overflow-hidden rounded-lg border border-border/60 bg-background/80 dark:border-white/[0.08] dark:bg-background/45">
+    <figure className="not-prose mx-auto my-12 w-fit max-w-full overflow-hidden rounded-[6px] bg-white p-2 shadow-[0_24px_50px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08]">
+      <div className="w-fit max-w-full overflow-hidden rounded-[6px] bg-[#f4efe7]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           {...props}
@@ -119,11 +202,11 @@ function BlogImage({
           title={title ?? undefined}
           loading="lazy"
           decoding="async"
-          className="block h-auto w-auto max-w-full bg-muted/20"
+          className="block h-auto w-auto max-w-full"
         />
       </div>
       {title ? (
-        <figcaption className="px-1 pt-3 text-center text-xs leading-relaxed text-muted-foreground">
+        <figcaption className="px-2 pb-1 pt-3 text-center text-[13px] leading-relaxed text-[#141414]/55">
           {title}
         </figcaption>
       ) : null}
@@ -156,12 +239,16 @@ function BlogParagraph(props: ComponentPropsWithoutRef<"p">) {
   return <Paragraph {...props} />;
 }
 
-function BlogCode({ children, className, ...props }: ComponentPropsWithoutRef<"code">) {
+function BlogCode({
+  children,
+  className,
+  ...props
+}: ComponentPropsWithoutRef<"code">) {
   return (
     <code
       className={[
         className,
-        "rounded bg-muted px-1.5 py-0.5 font-mono text-[0.9em] text-foreground",
+        "rounded-[6px] bg-white px-1.5 py-0.5 font-mono text-[0.86em] text-[#c2410c] ring-1 ring-inset ring-[#141414]/[0.08]",
       ]
         .filter(Boolean)
         .join(" ")}
@@ -186,8 +273,8 @@ function BlogPre({ children }: ComponentPropsWithoutRef<"pre">) {
 
 function YouTubeEmbed({ url }: { url: string }) {
   return (
-    <figure className="not-prose mx-auto my-10 w-full overflow-hidden rounded-xl border border-border/70 bg-background shadow-[0_18px_52px_-36px_rgba(0,0,0,0.55)] dark:border-white/[0.08]">
-      <div className="aspect-video w-full bg-muted">
+    <figure className="not-prose mx-auto my-12 w-full overflow-hidden rounded-[6px] bg-white p-2 shadow-[0_24px_50px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08]">
+      <div className="aspect-video w-full overflow-hidden rounded-[6px] bg-[#141414]">
         <iframe
           src={url}
           title="YouTube video player"
@@ -202,6 +289,66 @@ function YouTubeEmbed({ url }: { url: string }) {
   );
 }
 
+/* Tables print like a spec sheet on the paper page: white sheet, cream header
+   ruled off in ink, hairline columns, and a first column that stays put while
+   wide tables scroll sideways. */
+function BlogTable(props: ComponentPropsWithoutRef<"table">) {
+  return (
+    <figure
+      data-blog-table
+      className="not-prose relative my-12 before:absolute before:-top-[22px] before:left-0 before:bg-[#f97316] before:px-1.5 before:py-[3px] before:text-[11px] before:font-medium before:leading-none before:text-white"
+    >
+      <div
+        data-lenis-prevent
+        className="overflow-x-auto rounded-[6px] bg-white ring-1 ring-inset ring-[#141414]/10"
+      >
+        <table
+          className="w-full min-w-[560px] border-collapse text-left text-[14px] leading-[1.55] text-[#141414]"
+          {...props}
+        />
+      </div>
+    </figure>
+  );
+}
+
+function BlogTableHead(props: ComponentPropsWithoutRef<"thead">) {
+  return (
+    <thead
+      className="border-b-[1.5px] border-[#141414] bg-[#f4efe7]"
+      {...props}
+    />
+  );
+}
+
+function BlogTableRow(props: ComponentPropsWithoutRef<"tr">) {
+  return (
+    <tr
+      className="group/row border-b border-[#141414]/10 last:border-b-0 [&>*:first-child]:sticky [&>*:first-child]:left-0 [&>*:first-child]:z-[1]"
+      {...props}
+    />
+  );
+}
+
+function BlogTableHeader(props: ComponentPropsWithoutRef<"th">) {
+  return (
+    <th
+      className="border-l border-[#141414]/10 bg-[#f4efe7] px-4 py-3 align-bottom text-[11px] font-medium uppercase tracking-[0.12em] text-[#141414]/55 first:border-l-0"
+      {...props}
+    />
+  );
+}
+
+function BlogTableCell(props: ComponentPropsWithoutRef<"td">) {
+  return (
+    <td
+      className="border-l border-[#141414]/10 bg-white px-4 py-3.5 align-top tabular-nums text-[#141414]/70 transition-colors first:border-l-0 first:font-medium first:text-[#141414] group-hover/row:bg-[#fdf6ef] [&_a]:text-primary [&_a]:underline [&_a]:decoration-primary/30 [&_a]:underline-offset-4 [&_code]:whitespace-nowrap [&_code]:bg-[#f4efe7] [&_code]:text-[12.5px] [&_strong]:font-medium [&_strong]:text-[#141414]"
+      {...props}
+    >
+      {withNumericText(props.children)}
+    </td>
+  );
+}
+
 export const blogMdxComponents = {
   ...mdxComponents,
   h2: BlogH2,
@@ -210,5 +357,12 @@ export const blogMdxComponents = {
   img: BlogImage,
   code: BlogCode,
   pre: BlogPre,
+  table: BlogTable,
+  thead: BlogTableHead,
+  tr: BlogTableRow,
+  th: BlogTableHeader,
+  td: BlogTableCell,
   YouTubeEmbed,
+  BlogFaq,
+  BlogFaqItem,
 };

@@ -1,4 +1,4 @@
-import { getAllPosts } from "@/lib/blog";
+import { getListedPosts } from "@/lib/blog";
 import { baseUrl } from "@/lib/site";
 
 function escapeXml(value: string) {
@@ -11,7 +11,7 @@ function escapeXml(value: string) {
 }
 
 export async function GET() {
-  const posts = getAllPosts();
+  const posts = getListedPosts();
   const latestPostDate = posts[0]?.updatedDate ?? new Date().toISOString();
 
   const items = posts

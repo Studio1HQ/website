@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif">
+<rect width="1200" height="800" fill="#f4efe7"/>
+<text x="60.0" y="74.0" font-size="32" font-weight="700" fill="#141414" fill-opacity="1" text-anchor="start">The open-source growth flywheel</text><text x="60.0" y="108.0" font-size="18" font-weight="400" fill="#141414" fill-opacity="0.6" text-anchor="start">Stars come from the loop, not from one viral post.</text>
+<circle cx="600" cy="460" r="255" fill="none" stroke="#141414" stroke-opacity="0.18" stroke-width="2" stroke-dasharray="2 9" stroke-linecap="round"/>
+<polygon points="760.4,261.3 738.3,255.0 747.6,242.2" fill="#f97316"/>
+<polygon points="838.5,551.2 837.7,528.2 852.7,533.0" fill="#f97316"/>
+<polygon points="587.0,715.0 608.6,707.1 608.6,722.9" fill="#f97316"/>
+<polygon points="353.5,526.4 367.7,544.6 352.6,549.4" fill="#f97316"/>
+<polygon points="460.6,246.1 447.8,265.2 438.5,252.4" fill="#f97316"/>
+<circle cx="600" cy="460" r="112" fill="#ffffff" stroke="#f97316" stroke-width="3"/>
+<circle cx="600" cy="460" r="126" fill="none" stroke="#f97316" stroke-opacity="0.25" stroke-width="2"/>
+<polygon points="600.0,398.0 605.6,412.3 620.9,413.2 609.0,422.9 612.9,437.8 600.0,429.5 587.1,437.8 591.0,422.9 579.1,413.2 594.4,412.3" fill="#f97316"/>
+<text x="600.0" y="470.0" font-size="26" font-weight="700" fill="#141414" fill-opacity="1" text-anchor="middle">Your repo</text>
+<text x="600.0" y="498.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.6" text-anchor="middle">stars · installs</text>
+<text x="600.0" y="518.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.6" text-anchor="middle">contributors</text>
+<rect x="475.0" y="163.0" width="250" height="84" rx="10" fill="#ffffff" stroke="#141414" stroke-opacity="0.12" stroke-width="1.5"/>
+<circle cx="507.0" cy="205.0" r="15" fill="#f97316"/><text x="507.0" y="210.4" font-size="15" font-weight="700" fill="#ffffff" fill-opacity="1" text-anchor="middle">1</text>
+<text x="533.0" y="200.0" font-size="18" font-weight="700" fill="#141414" fill-opacity="1" text-anchor="start">README &amp; first run</text>
+<text x="533.0" y="223.0" font-size="14" font-weight="400" fill="#141414" fill-opacity="0.6" text-anchor="start">Pitch, demo, quickstart</text>
+<rect x="717.5" y="339.2" width="250" height="84" rx="10" fill="#ffffff" stroke="#141414" stroke-opacity="0.12" stroke-width="1.5"/>
+<circle cx="749.5" cy="381.2" r="15" fill="#f97316"/><text x="749.5" y="386.6" font-size="15" font-weight="700" fill="#ffffff" fill-opacity="1" text-anchor="middle">2</text>
+<text x="775.5" y="376.2" font-size="18" font-weight="700" fill="#141414" fill-opacity="1" text-anchor="start">Launch channels</text>
+<text x="775.5" y="399.2" font-size="14" font-weight="400" fill="#141414" fill-opacity="0.6" text-anchor="start">Show HN, Reddit, X, PH</text>
+<rect x="624.9" y="624.3" width="250" height="84" rx="10" fill="#ffffff" stroke="#141414" stroke-opacity="0.12" stroke-width="1.5"/>
+<circle cx="656.9" cy="666.3" r="15" fill="#f97316"/><text x="656.9" y="671.7" font-size="15" font-weight="700" fill="#ffffff" fill-opacity="1" text-anchor="middle">3</text>
+<text x="682.9" y="661.3" font-size="18" font-weight="700" fill="#141414" fill-opacity="1" text-anchor="start">Demo projects</text>
+<text x="682.9" y="684.3" font-size="14" font-weight="400" fill="#141414" fill-opacity="0.6" text-anchor="start">Real apps people can run</text>
+<rect x="325.1" y="624.3" width="250" height="84" rx="10" fill="#ffffff" stroke="#141414" stroke-opacity="0.12" stroke-width="1.5"/>
+<circle cx="357.1" cy="666.3" r="15" fill="#f97316"/><text x="357.1" y="671.7" font-size="15" font-weight="700" fill="#ffffff" fill-opacity="1" text-anchor="middle">4</text>
+<text x="383.1" y="661.3" font-size="18" font-weight="700" fill="#141414" fill-opacity="1" text-anchor="start">Community loops</text>
+<text x="383.1" y="684.3" font-size="14" font-weight="400" fill="#141414" fill-opacity="0.6" text-anchor="start">Talks, hackathons, feedback</text>
+<rect x="232.5" y="339.2" width="250" height="84" rx="10" fill="#ffffff" stroke="#141414" stroke-opacity="0.12" stroke-width="1.5"/>
+<circle cx="264.5" cy="381.2" r="15" fill="#f97316"/><text x="264.5" y="386.6" font-size="15" font-weight="700" fill="#ffffff" fill-opacity="1" text-anchor="middle">5</text>
+<text x="290.5" y="376.2" font-size="18" font-weight="700" fill="#141414" fill-opacity="1" text-anchor="start">Sustained content</text>
+<text x="290.5" y="399.2" font-size="14" font-weight="400" fill="#141414" fill-opacity="0.6" text-anchor="start">Tutorials, releases, lists</text>
+</svg>

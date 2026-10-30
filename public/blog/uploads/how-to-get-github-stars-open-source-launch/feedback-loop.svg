@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="490" viewBox="0 0 1200 490" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif">
+<rect width="1200" height="490" fill="#f4efe7"/>
+<text x="60.0" y="74.0" font-size="32" font-weight="700" fill="#141414" fill-opacity="1" text-anchor="start">Turn feedback into the next post</text><text x="60.0" y="108.0" font-size="18" font-weight="400" fill="#141414" fill-opacity="0.6" text-anchor="start">Every recurring question is a docs fix, a release, and a reason to post again.</text>
+<rect x="60.0" y="170.0" width="237.0" height="150" rx="10" fill="#ffffff" stroke="#141414" stroke-opacity="0.12" stroke-width="1.5"/>
+<circle cx="94.0" cy="208.0" r="15" fill="#f97316"/><text x="94.0" y="213.4" font-size="15" font-weight="700" fill="#ffffff" fill-opacity="1" text-anchor="middle">1</text>
+<text x="84.0" y="258.0" font-size="19" font-weight="700" fill="#141414" fill-opacity="1" text-anchor="start">Community comment</text>
+<text x="84.0" y="284.0" font-size="14" font-weight="400" fill="#141414" fill-opacity="0.62" text-anchor="start">A Reddit question, an issue,</text>
+<text x="84.0" y="305.0" font-size="14" font-weight="400" fill="#141414" fill-opacity="0.62" text-anchor="start">or a hackathon note</text>
+<line x1="305.0" y1="245.0" x2="327.0" y2="245.0" stroke="#f97316" stroke-width="3" stroke-linecap="round"/>
+<polygon points="338.0,245.0 319.7,251.7 319.7,238.3" fill="#f97316"/>
+<rect x="341.0" y="170.0" width="237.0" height="150" rx="10" fill="#ffffff" stroke="#141414" stroke-opacity="0.12" stroke-width="1.5"/>
+<circle cx="375.0" cy="208.0" r="15" fill="#f97316"/><text x="375.0" y="213.4" font-size="15" font-weight="700" fill="#ffffff" fill-opacity="1" text-anchor="middle">2</text>
+<text x="365.0" y="258.0" font-size="19" font-weight="700" fill="#141414" fill-opacity="1" text-anchor="start">Docs fix or feature</text>
+<text x="365.0" y="284.0" font-size="14" font-weight="400" fill="#141414" fill-opacity="0.62" text-anchor="start">Answer it once, in the</text>
+<text x="365.0" y="305.0" font-size="14" font-weight="400" fill="#141414" fill-opacity="0.62" text-anchor="start">docs or the product</text>
+<line x1="586.0" y1="245.0" x2="608.0" y2="245.0" stroke="#f97316" stroke-width="3" stroke-linecap="round"/>
+<polygon points="619.0,245.0 600.7,251.7 600.7,238.3" fill="#f97316"/>
+<rect x="622.0" y="170.0" width="237.0" height="150" rx="10" fill="#ffffff" stroke="#141414" stroke-opacity="0.12" stroke-width="1.5"/>
+<circle cx="656.0" cy="208.0" r="15" fill="#f97316"/><text x="656.0" y="213.4" font-size="15" font-weight="700" fill="#ffffff" fill-opacity="1" text-anchor="middle">3</text>
+<text x="646.0" y="258.0" font-size="19" font-weight="700" fill="#141414" fill-opacity="1" text-anchor="start">Release note</text>
+<text x="646.0" y="284.0" font-size="14" font-weight="400" fill="#141414" fill-opacity="0.62" text-anchor="start">Ship it and say</text>
+<text x="646.0" y="305.0" font-size="14" font-weight="400" fill="#141414" fill-opacity="0.62" text-anchor="start">what changed</text>
+<line x1="867.0" y1="245.0" x2="889.0" y2="245.0" stroke="#f97316" stroke-width="3" stroke-linecap="round"/>
+<polygon points="900.0,245.0 881.7,251.7 881.7,238.3" fill="#f97316"/>
+<rect x="903.0" y="170.0" width="237.0" height="150" rx="10" fill="#ffffff" stroke="#141414" stroke-opacity="0.12" stroke-width="1.5"/>
+<circle cx="937.0" cy="208.0" r="15" fill="#f97316"/><text x="937.0" y="213.4" font-size="15" font-weight="700" fill="#ffffff" fill-opacity="1" text-anchor="middle">4</text>
+<text x="927.0" y="258.0" font-size="19" font-weight="700" fill="#141414" fill-opacity="1" text-anchor="start">New post</text>
+<text x="927.0" y="284.0" font-size="14" font-weight="400" fill="#141414" fill-opacity="0.62" text-anchor="start">Share the fix where the</text>
+<text x="927.0" y="305.0" font-size="14" font-weight="400" fill="#141414" fill-opacity="0.62" text-anchor="start">question came from</text>
+<path d="M 1021.5 326 V 390 Q 1021.5 410 1001.5 410 H 198.5 Q 178.5 410 178.5 390 V 342" fill="none" stroke="#f97316" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 9"/>
+<polygon points="178.5,326.0 185.8,346.0 171.2,346.0" fill="#f97316"/>
+<rect x="370.0" y="390" width="460" height="40" rx="20" fill="#f4efe7"/>
+<text x="600.0" y="416.0" font-size="16" font-weight="600" fill="#c2410c" fill-opacity="1" text-anchor="middle">More developers try it, and ask the next question</text>
+</svg>

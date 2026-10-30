@@ -1,15 +1,12 @@
 import {
-  ChartBar,
-  Globe,
-  Palette,
-  Code,
-  Eye,
-  WifiHigh,
-  Timer,
-  Path,
-  Browser,
-  Swatches,
-  Export,
+  CurrencyDollar,
+  CursorClick,
+  FileSvg,
+  FolderOpen,
+  Funnel,
+  Gauge,
+  GlobeHemisphereWest,
+  Robot,
 } from "@phosphor-icons/react/dist/ssr";
 import type { Icon } from "@phosphor-icons/react";
 
@@ -28,67 +25,78 @@ export type ProductMedia =
       alt: string;
     };
 
+export type ProductFeature = {
+  /** Stable id, so a product's chapter can pair a feature with its own visual. */
+  key: string;
+  label: string;
+  detail: string;
+  icon: Icon;
+};
+
 export type Product = {
+  slug: "raah" | "assetsnip";
   name: string;
+  /** One line for the hero's product dock. */
   tagline: string;
+  /** Chapter headline: the plain lead, then the part printed in orange. */
+  headline: { lead: string; accent: string };
   description: string;
-  longDescription: string;
-  highlights: string[];
-  features: { label: string; detail: string; icon: Icon }[];
+  features: ProductFeature[];
   url: string;
+  /** Shown in the address bar of the chapter's browser frame. */
+  domain: string;
   category: string;
   status: ProductStatus;
   statusLabel: string;
   media: ProductMedia;
+  /** The product's own app icon. */
+  logo: string;
 };
 
 export const products: Product[] = [
   {
+    slug: "raah",
     name: "Raah",
-    tagline: "Web analytics and network observability for real users",
+    tagline: "Revenue analytics and real-user observability in one script",
+    headline: {
+      lead: "Know what drives revenue.",
+      accent: "See where the experience breaks.",
+    },
     description:
-      "One lightweight script for analytics and observability. Track traffic, journey paths, Web Vitals, API timing, errors, and ISP impact, enriched at the edge with network context.",
-    longDescription:
-      "Most analytics tools stop at pageviews. Most observability tools ignore the frontend. Raah bridges that gap. One script tag gives you user analytics, journey paths, Core Web Vitals, endpoint latency, browser errors, ISP diagnostics, and third-party script impact in a single dashboard. Built for developers and SaaS teams who need to understand real-user experience without stitching three tools together.",
-    highlights: [
-      "Pageviews, sessions, and full user journey paths",
-      "Core Web Vitals, API latency, and browser errors from real users",
-      "ISP and carrier diagnostics by city, country, and connection",
-      "One script tag, no SDK or build steps, live in minutes",
-    ],
+      "One lightweight script connects payments and conversions with page speed, API latency, errors, and ISP performance, so you see what real users go through and where it costs you.",
     features: [
       {
-        label: "User analytics & journeys",
+        key: "revenue",
+        label: "Revenue attribution",
         detail:
-          "Pageviews, sessions, referrers, UTMs, geography, devices, and full journey paths from landing to conversion",
-        icon: Path,
+          "Connect Stripe and see which channels bring paying customers, not just visits.",
+        icon: CurrencyDollar,
       },
       {
-        label: "Real-user observability",
+        key: "funnels",
+        label: "Funnels & journeys",
         detail:
-          "Endpoint latency, error rates, DNS/TCP/TLS/TTFB timing, and browser-side failures from actual users",
-        icon: WifiHigh,
+          "Follow visitors from the landing page to purchase and find the step where they drop.",
+        icon: Funnel,
       },
       {
-        label: "ISP & network diagnostics",
-        detail:
-          "See which carriers and ISPs are hurting real users, broken down by city, country, and connection quality",
-        icon: Globe,
-      },
-      {
+        key: "vitals",
         label: "Core Web Vitals",
         detail:
-          "LCP, INP, and CLS from real users, segmented by page, geography, and device",
-        icon: Timer,
+          "LCP, INP, and CLS from real visits, split by page, country, and device.",
+        icon: Gauge,
       },
       {
-        label: "One-line installation",
+        key: "network",
+        label: "Network observability",
         detail:
-          "Paste one script tag. No SDK sprawl, no build steps, no config files. Live in under a minute",
-        icon: ChartBar,
+          "Real-user API timing by region, ISP, and browser phase, enriched at the edge.",
+        icon: GlobeHemisphereWest,
       },
     ],
     url: "https://raah.dev",
+    domain: "raah.dev",
+    logo: "/products/raah-logo.svg",
     category: "Analytics & Observability",
     status: "launched",
     statusLabel: "Launched",
@@ -100,51 +108,48 @@ export const products: Product[] = [
     },
   },
   {
+    slug: "assetsnip",
     name: "AssetSnip",
-    tagline: "Website asset extraction for design research and handoff",
+    tagline: "Design assets and code, captured from any live website",
+    headline: {
+      lead: "Colors, fonts, SVGs, and code,",
+      accent: "captured from any live page.",
+    },
     description:
-      "Chrome extension that captures colors, fonts, SVGs, videos, gradients, Lottie, and UI details from any live website, without digging through DevTools.",
-    longDescription:
-      "Designers and developers waste hours inspecting websites through DevTools to capture design references. AssetSnip replaces that workflow. Browse any website, and AssetSnip automatically extracts colors, typography, SVGs, images, videos, gradients, Lottie animations, and UI sections. Save everything to a reusable library and export CSS, HTML, or Tailwind-ready code for direct handoff to your codebase.",
-    highlights: [
-      "Extract colors, fonts, SVGs, videos, gradients, and Lottie from any site",
-      "Works on live websites via Chrome, with no source code or Figma files needed",
-      "Save captured assets to a reusable design inspiration library",
-      "Export CSS, HTML, or Tailwind-ready code for direct handoff",
-    ],
+      "A browser extension that pulls reusable design assets out of real websites and turns them into CSS, Tailwind, or DESIGN.md context for your coding agent, without digging through DevTools.",
     features: [
       {
-        label: "Extract from any website",
+        key: "inspect",
+        label: "Inspect live sections",
         detail:
-          "Colors, fonts, SVGs, images, videos, gradients, Lottie files, and UI sections captured automatically",
-        icon: Eye,
+          "Hover any region to capture its HTML, CSS, Tailwind classes, colors, and fonts.",
+        icon: CursorClick,
       },
       {
-        label: "Reusable design library",
+        key: "media",
+        label: "SVGs, video & Lottie",
         detail:
-          "Save captured assets into organized collections for inspiration boards, mood boards, and design systems",
-        icon: Swatches,
+          "Grab images, inline SVGs, video, and Lottie JSON straight from public pages.",
+        icon: FileSvg,
       },
       {
-        label: "Browser extension",
+        key: "library",
+        label: "A tidy asset library",
         detail:
-          "Chrome extension that works on any live website without needing access to source code or Figma files",
-        icon: Browser,
+          "Save captures to a cloud library with tags and folders, ready for references and handoff.",
+        icon: FolderOpen,
       },
       {
-        label: "Color & font identification",
+        key: "agents",
+        label: "DESIGN.md for agents",
         detail:
-          "Capture full color palettes, gradients, and typography stacks with exact values ready for use",
-        icon: Palette,
-      },
-      {
-        label: "Export-ready code",
-        detail:
-          "Export captured design values as CSS, HTML, or Tailwind utility classes directly into your project",
-        icon: Export,
+          "Turn a live page into design context for Cursor, Codex, or Claude Code.",
+        icon: Robot,
       },
     ],
     url: "https://assetsnip.com",
+    domain: "assetsnip.com",
+    logo: "/products/assetsnip-logo.svg",
     category: "Design Tooling",
     status: "live",
     statusLabel: "Live",
@@ -155,3 +160,9 @@ export const products: Product[] = [
     },
   },
 ];
+
+export function getProduct(slug: Product["slug"]) {
+  const product = products.find((item) => item.slug === slug);
+  if (!product) throw new Error(`Unknown product: ${slug}`);
+  return product;
+}

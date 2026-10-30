@@ -2,11 +2,11 @@
 
 import { Code, PencilLine, ShareNetwork } from "@phosphor-icons/react";
 import {
-  ServiceOfferCards,
-  type ServiceOfferCard,
-} from "@/components/pages/shared/service-offer-cards";
+  StoryRows,
+  type StoryOffer,
+} from "@/components/pages/shared/service-story";
 
-const offerings: ServiceOfferCard[] = [
+const offerings: StoryOffer[] = [
   {
     id: "technical-content-writing",
     icon: PencilLine,
@@ -54,9 +54,15 @@ const offerings: ServiceOfferCard[] = [
 
 export default function Services() {
   return (
-    <ServiceOfferCards
-      subtitle="Three connected workstreams for developer content: write technical pieces, build implementation guides, and distribute them where developers already read."
-      cards={offerings}
+    <StoryRows
+      index={1}
+      title={
+        <>
+          What We <span className="text-[#f97316]">Offer</span>
+        </>
+      }
+      description="Three connected workstreams for developer content: write technical pieces, build implementation guides, and distribute them where developers already read."
+      offers={offerings}
     />
   );
 }

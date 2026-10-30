@@ -1,39 +1,22 @@
 "use client";
-import React from "react";
-import { ProcessScroller } from "@/components/sections/process-scroller";
-import { blogAsServiceProcess } from "@/data/service-processes";
-import {
-  serviceProcessInnerClassName,
-  serviceProcessOuterClassName,
-} from "@/components/pages/shared/service-hero-layout";
 
-export default function Process() {
+import { Container } from "@/components/home/ui";
+import { PaperSection } from "@/components/paper/paper-sections";
+import { PaperServiceProcess } from "@/components/pages/shared/paper-service-kit";
+import { blogAsServiceProcess } from "@/data/service-processes";
+
+export default function Process({ index = 4 }: { index?: number }) {
   return (
-    <div
-      id="process"
-      className={`${serviceProcessOuterClassName} pt-10 pb-6 sm:pt-8 sm:pb-8`}
-    >
-      <div
-        className={`${serviceProcessInnerClassName} flex flex-col items-center`}
-      >
-        <ProcessScroller
+    <PaperSection id="process" tone="paper" className="scroll-mt-28">
+      <Container>
+        <PaperServiceProcess
+          index={index}
           steps={blogAsServiceProcess}
-          heading={
-            <div className="w-full text-center">
-              <h2 className="text-4xl text-foreground font-normal mb-3 md:text-5xl lg:text-6xl">
-                How We Deliver <br />
-                <span className="serif-accent font-accent font-normal italic text-transparent bg-clip-text bg-gradient-to-br from-primary via-primary1 to-primary">
-                  Developer-First Content
-                </span>
-              </h2>
-              <p className="text-muted-foreground text-sm md:text-base max-w-2xl mx-auto">
-                A transparent, collaborative content process
-                <br /> built for fast-moving SaaS and devtool teams.
-              </p>
-            </div>
-          }
+          title="How We Deliver"
+          accent="Developer-First Content"
+          description="A transparent, collaborative content process built for fast-moving SaaS and devtool teams."
         />
-      </div>
-    </div>
+      </Container>
+    </PaperSection>
   );
 }

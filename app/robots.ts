@@ -1,12 +1,19 @@
 import { baseUrl } from "@/lib/site";
 
+// AI search and assistant crawlers. These only work once Cloudflare's managed
+// robots.txt and "Block AI bots" settings stop overriding them at the edge.
 const agentUserAgents = [
   "GPTBot",
+  "OAI-SearchBot",
   "ChatGPT-User",
   "ClaudeBot",
-  "Google-Extended",
-  "DeepSeekBot",
+  "Claude-SearchBot",
+  "Claude-User",
   "PerplexityBot",
+  "Perplexity-User",
+  "Google-Extended",
+  "Applebot-Extended",
+  "DeepSeekBot",
   "ora-agent",
 ];
 

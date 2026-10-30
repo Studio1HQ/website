@@ -1,5 +1,7 @@
 "use client";
-import React from "react";
+
+import Link from "next/link";
+import { ArrowUpRight } from "@phosphor-icons/react";
 import {
   IconBrandInstagram,
   IconBrandLinkedin,
@@ -7,172 +9,280 @@ import {
   IconBrandYoutube,
   IconNews,
 } from "@tabler/icons-react";
-import Logo from "../ui/svgs/logo";
-import { motion } from "motion/react";
-import Link from "next/link";
-import {
-  containerVariants,
-  headerVariants,
-  gradientVariants,
-} from "@/lib/animations";
-import { Num } from "@/components/ui/num";
 import { useTranslations } from "next-intl";
+import Logo from "../ui/svgs/logo";
+import { Num } from "@/components/ui/num";
+import { Container, EASE } from "@/components/home/ui";
+import { useRef } from "react";
+import {
+  motion,
+  useInView,
+  useMotionTemplate,
+  useMotionValue,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+  useTransform,
+  type MotionValue,
+} from "motion/react";
+
+const WORDMARK = "Studio1".split("");
+
+/** One letter: rises from below the baseline as `progress` goes from start to end. */
+function WordmarkLetter({
+  letter,
+  progress,
+  start,
+}: {
+  letter: string;
+  progress: MotionValue<number>;
+  start: number;
+}) {
+  const y = useTransform(progress, [start, start + 0.45], ["108%", "0%"]);
+  const rotate = useTransform(progress, [start, start + 0.45], [8, 0]);
+  return (
+    <span className="inline-block overflow-hidden pb-[0.06em] align-top">
+      <motion.span
+        className="inline-block origin-bottom-left"
+        style={{ y, rotate }}
+      >
+        {letter}
+      </motion.span>
+    </span>
+  );
+}
+
+/**
+ * Big footer wordmark, tied to scroll: letters rise in a staggered wave and an
+ * ember gradient fills them from the bottom as the page reaches its end.
+ * Scrolling back reverses it, so it never looks stuck halfway.
+ */
+function FooterWordmark() {
+  const reduceMotion = useReducedMotion();
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end end"],
+  });
+  const progress = useSpring(scrollYProgress, { stiffness: 120, damping: 26 });
+  const still = useMotionValue(1);
+  const p = reduceMotion ? still : progress;
+  const fill = useTransform(p, [0.45, 1], ["100%", "0%"]);
+  const fillMask = useMotionTemplate`linear-gradient(0deg, black 0%, black calc(100% - ${fill}), transparent calc(100% - ${fill}))`;
+
+  const row = (
+    <>
+      {WORDMARK.map((letter, index) => (
+        <WordmarkLetter
+          key={index}
+          letter={letter}
+          progress={p}
+          start={index * 0.06}
+        />
+      ))}
+    </>
+  );
+
+  return (
+    <div
+      ref={ref}
+      aria-hidden
+      className="relative select-none text-center text-[clamp(72px,19vw,290px)] font-medium leading-[0.9] tracking-[-0.025em]"
+    >
+      <div className="text-white/[0.09]">{row}</div>
+      <motion.div
+        className="absolute inset-0 bg-[linear-gradient(180deg,#fdba74_0%,#f97316_45%,#9a3412_100%)] bg-clip-text text-transparent"
+        style={{ WebkitMaskImage: fillMask, maskImage: fillMask }}
+      >
+        {row}
+      </motion.div>
+    </div>
+  );
+}
+
+const SOCIAL_LINKS = [
+  {
+    href: "https://www.linkedin.com/company/studio1hq/",
+    label: "LinkedIn",
+    icon: IconBrandLinkedin,
+  },
+  { href: "https://x.com/Studio1HQ", label: "Twitter", icon: IconBrandX },
+  {
+    href: "https://www.instagram.com/studio1_hq/",
+    label: "Instagram",
+    icon: IconBrandInstagram,
+  },
+  {
+    href: "https://www.youtube.com/@studio1hq/",
+    label: "YouTube",
+    icon: IconBrandYoutube,
+  },
+  { href: "https://dev.to/studio1hq", label: "Blogs", icon: IconNews },
+] as const;
+
+const SERVICE_LINKS = [
+  { key: "technicalContent", href: "/technical-content-marketing" },
+  { key: "devrel", href: "/developer-relations-growth-campaigns" },
+  { key: "video", href: "/developer-video-production" },
+  { key: "docs", href: "/developer-documentation-dx-audit" },
+] as const;
+
+const COMPANY_NAV_LINKS = [
+  { key: "about", href: "/about-us" },
+  { key: "caseStudies", href: "/case-studies" },
+  { key: "blog", href: "/blog" },
+  { key: "product", href: "/product" },
+] as const;
+
+const heading =
+  "text-[11px] font-medium uppercase tracking-[0.14em] text-white/40";
+const linkClass =
+  "text-[15px] text-white/70 transition-colors duration-200 hover:text-white";
 
 export default function Footer() {
   const t = useTranslations("Footer");
+  const nav = useTranslations("Nav");
+  const reduceMotion = useReducedMotion();
+  // One trigger for the wordmark and the copyright row so they never desync.
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const bottomInView = useInView(bottomRef, { once: true, amount: 0.2 });
 
   return (
-    <motion.section
-      className="relative max-h-fit  mt-0"
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.1 }}
-      variants={containerVariants}
-    >
-      <motion.div
-        className="top-[-10rem] md:top-[-30rem] z-[-1] left-[0%] absolute bg-gradient-to-t opacity-30 dark:opacity-100 from-primary dark:to-primary/80 to-primary/80 blur-[8em] rounded-md transition-all translate-x-[-50%] duration-700 ease-out md:size-[30rem] md:h-[40rem] md:w-[10rem] -rotate-[60deg]"
-        variants={gradientVariants}
-      />
-      <motion.div
-        className="top-[-10rem] md:top-[-30rem] z-[-1] right-[0%] absolute bg-gradient-to-t opacity-30 dark:opacity-80 from-primary dark:to-primary/80 to-primary/80 blur-[8em] rounded-md transition-all translate-x-[-50%] duration-700 ease-out md:size-[30rem] md:h-[40rem] md:w-[10rem] rotate-[60deg]"
-        variants={gradientVariants}
+    <footer className="relative overflow-hidden bg-[#07050a] text-white dark:bg-[var(--home-cream)]">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-40 left-1/2 h-[360px] w-[1100px] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(249,115,22,0.18),transparent_65%)] blur-2xl"
       />
 
-      <motion.footer
-        className="border-t max-h-fit overflow-hidden bg-background mt-44 z-[101] relative pb-10"
-        variants={headerVariants}
-      >
-        <div className="bg-gradient-to-b from-foreground/20 via-accent/80 to-transparent dark:from-accent/80 dark:via-accent/60 bg-clip-text text-transparent text-[6rem] sm:text-[8rem] md:text-[12rem] lg:text-[17rem] leading-tight absolute left-1/2 -translate-x-1/2 bottom-[8rem] md:bottom-[5rem] z-20 font-extrabold">
-          STUDIO1
-        </div>
+      <Container className="relative">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-12 pb-12 pt-16 sm:gap-x-10 sm:pt-20 lg:grid-cols-3 xl:grid-cols-[1.5fr_1fr_1fr_1fr] xl:gap-y-14 xl:pb-14 xl:pt-24">
+          {/* Brand + contact */}
+          <div className="col-span-2 lg:col-span-3 xl:col-span-1">
+            <Link href="/" className="inline-flex items-center gap-3">
+              <Logo className="size-8" />
+              <span className="text-[22px] font-medium tracking-[-0.04em]">
+                Studio1
+              </span>
+            </Link>
+            <p className="mt-5 max-w-[320px] text-[15px] leading-[1.6] text-white/55">
+              {t("description")}
+            </p>
 
-        {/* bottom-logo */}
-
-        <div className="absolute hover:border-primary duration-500 drop-shadow-[0_0px_25px_hsl(var(--primary))] bottom-[6rem] md:bottom-[5rem] backdrop-blur-sm z-[30] rounded-3xl bg-background/60 left-1/2 border-2 border-accent/40 flex items-center justify-center p-3 -translate-x-1/2">
-          <Logo className="size-12 sm:size-16 md:size-24" />
-        </div>
-
-        {/* bottom-line */}
-        <div className="absolute bottom-[8rem] sm:bottom-[8.5rem] backdrop-blur-sm z-[25] h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent w-full left-1/2 -translate-x-1/2"></div>
-
-        {/* bottom shadow */}
-        <div className="bg-gradient-to-t from-background via-background/80 blur-[1em] to-background/40 absolute bottom-[7rem] z-[22] w-full h-24"></div>
-
-        <div className="max-w-7xl flex flex-col justify-between mx-auto h-[30rem] sm:h-[35rem] md:h-[40rem] z-[30] p-4 pt-10">
-          <div className="flex flex-col mb-12 sm:mb-20 md:mb-0 w-full">
-            <motion.div
-              className="w-full flex flex-col items-center"
-              variants={headerVariants}
+            <a
+              href="mailto:contact@studio1hq.com"
+              className="s1-glass-btn-light group mt-8 flex max-w-[340px] items-center justify-between gap-4 rounded-[6px] px-5 py-4"
             >
-              <motion.div
-                className="space-y-2 flex flex-col items-center flex-1"
-                variants={headerVariants}
-              >
-                <motion.div
-                  className="flex items-center gap-2"
-                  variants={headerVariants}
-                >
-                  <span className="text-transparent bg-clip-text bg-gradient-to-br from-primary via-primary1 to-primary text-3xl font-bold">
-                    Studio1
-                  </span>
-                </motion.div>
-                <motion.p
-                  className="max-w-sm text-center text-sm font-normal leading-relaxed text-muted-foreground sm:text-base"
-                  variants={headerVariants}
-                >
-                  {t("description")}
-                </motion.p>
-              </motion.div>
-              <motion.div
-                className="flex mb-8 mt-3 gap-4"
-                variants={headerVariants}
-              >
-                <Link
-                  href="https://x.com/Studio1HQ"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <IconBrandX className="size-6 hover:text-primary duration-300" />
-                  <span className="sr-only">Twitter</span>
-                </Link>
-                <Link
-                  href="https://www.linkedin.com/company/studio1hq/"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <IconBrandLinkedin className="size-6 hover:text-primary duration-300" />
-                  <span className="sr-only">LinkedIn</span>
-                </Link>
-                <Link
-                  href="https://www.instagram.com/studio1_hq/"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <IconBrandInstagram className="size-6 hover:text-primary duration-300" />
-                  <span className="sr-only">Instagram</span>
-                </Link>
-                <Link
-                  href="https://www.youtube.com/@studio1hq/"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <IconBrandYoutube className="size-6 hover:text-primary duration-300" />
-                  <span className="sr-only">YouTube</span>
-                </Link>
-                <Link
-                  href="https://dev.to/studio1hq"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <IconNews className="size-6 hover:text-primary duration-300" />
-                  <span className="sr-only">Blogs</span>
-                </Link>
-              </motion.div>
-              <motion.div className="flex flex-wrap gap-4 text-sm font-medium text-neutral-500 dark:text-neutral-400 max-w-full">
-                <Link
-                  className="hover:text-foreground duration-300"
-                  href={"/careers"}
-                >
+              <span>
+                <span className="block text-[11px] font-medium uppercase tracking-[0.12em] text-white/45">
+                  {nav("contact")}
+                </span>
+                <span className="mt-1 block text-[16px] font-medium tracking-[-0.02em]">
+                  contact@studio1hq.com
+                </span>
+              </span>
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white text-[#140e0a] transition-transform duration-300 group-hover:rotate-45">
+                <ArrowUpRight weight="bold" className="size-4" />
+              </span>
+            </a>
+          </div>
+
+          <nav aria-label={nav("items.services")}>
+            <p className={heading}>{nav("items.services")}</p>
+            <ul className="mt-6 space-y-3.5">
+              {SERVICE_LINKS.map((link) => (
+                <li key={link.key}>
+                  <Link href={link.href} className={linkClass}>
+                    {nav(`items.${link.key}`)}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <nav aria-label="Studio1">
+            <p className={heading}>Studio1</p>
+            <ul className="mt-6 space-y-3.5">
+              {COMPANY_NAV_LINKS.map((link) => (
+                <li key={link.key}>
+                  <Link href={link.href} className={linkClass}>
+                    {nav(`items.${link.key}`)}
+                  </Link>
+                </li>
+              ))}
+              <li>
+                <Link href="/careers" className={linkClass}>
                   {t("links.careers")}
                 </Link>
-                <Link
-                  className="hover:text-foreground duration-300"
-                  href={"/devrel-jobs"}
-                >
+              </li>
+              <li>
+                <Link href="/devrel-jobs" className={linkClass}>
                   {t("links.devrelJobs")}
                 </Link>
-              </motion.div>
-            </motion.div>
+              </li>
+            </ul>
+          </nav>
+
+          <div className="col-span-2 lg:col-span-1">
+            <p className={heading}>Follow us</p>
+            {/* Icon row on small screens, labelled list on large ones */}
+            <ul className="mt-6 flex flex-wrap gap-2.5 lg:block lg:space-y-3.5">
+              {SOCIAL_LINKS.map(({ href, label, icon: Icon }) => (
+                <li key={label}>
+                  <Link
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={label}
+                    className={`${linkClass} group inline-flex items-center gap-3`}
+                  >
+                    <span className="flex size-11 items-center justify-center rounded-xl bg-white/[0.06] ring-1 ring-inset ring-white/10 transition-colors duration-300 group-hover:bg-[#f97316] group-hover:text-white group-hover:ring-transparent lg:size-8 lg:rounded-lg">
+                      <Icon className="size-[18px] lg:size-4" />
+                    </span>
+                    <span className="hidden lg:inline">
+                      {label === "Blogs"
+                        ? "DEV"
+                        : label === "Twitter"
+                          ? "X"
+                          : label}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
+        </div>
+
+        <div ref={bottomRef}>
+          <FooterWordmark />
+
           <motion.div
-            className="mt-44 md:mt-12 z-[25] flex flex-col gap-1 items-center justify-center md:flex-row md:items-center md:justify-between"
-            variants={headerVariants}
+            initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+            animate={
+              bottomInView || reduceMotion ? { opacity: 1, y: 0 } : undefined
+            }
+            transition={{ duration: 0.8, ease: EASE, delay: 0.9 }}
+            className="flex flex-col gap-3 pb-8 pr-14 pt-4 sm:pr-16 md:flex-row md:items-center md:justify-between"
           >
-            <p className="text-base text-muted-foreground">
+            <p className="text-[13px] text-white/45">
               ©<Num>{new Date().getFullYear()}</Num> Studio1. {t("rights")}
             </p>
-            <nav className="flex gap-4">
+            <nav className="flex gap-6">
               <Link
                 href="/terms"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="text-[13px] text-white/45 transition-colors hover:text-white"
               >
                 {t("legal.terms")}
               </Link>
               <Link
                 href="/privacy"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="text-[13px] text-white/45 transition-colors hover:text-white"
               >
                 {t("legal.privacy")}
               </Link>
             </nav>
           </motion.div>
         </div>
-      </motion.footer>
-    </motion.section>
+      </Container>
+    </footer>
   );
 }

@@ -1,13 +1,21 @@
 "use client";
 
-import { fadeInUp, staggerChildren } from "@/lib/animations";
+import { motion, useReducedMotion } from "motion/react";
+import { Container, EASE } from "@/components/home/ui";
+import {
+  Accent,
+  CELL,
+  IndexBar,
+  MUTED,
+  PaperSection,
+} from "@/components/paper/paper-sections";
+import { cn } from "@/lib/utils";
 import {
   IconClick,
   IconPhoto,
   IconSearch,
   IconDeviceMobile,
 } from "@tabler/icons-react";
-import { motion } from "motion/react";
 
 const layers = [
   {
@@ -32,59 +40,84 @@ const layers = [
   },
 ];
 
-export default function Packaging() {
+export default function Packaging({ index = 4 }: { index?: number }) {
+  const reduceMotion = useReducedMotion();
   return (
-    <section className="relative py-28 md:py-36">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <motion.div
-          variants={staggerChildren}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-          className="grid gap-14 lg:grid-cols-[0.85fr_1.15fr] lg:gap-24"
-        >
-          <motion.div
-            variants={fadeInUp}
-            className="lg:sticky lg:top-28 lg:self-start"
-          >
-            <p className="font-secondary text-sm font-medium tracking-wide text-primary">
-              The packaging layer
-            </p>
-            <h2 className="mt-4 max-w-md font-inter text-4xl font-normal tracking-tight md:text-5xl">
-              Make the technical idea clear before{" "}
-              <span className="serif-accent bg-gradient-to-br from-primary via-primary1 to-primary bg-clip-text font-accent font-normal italic text-transparent">
-                play
+    <PaperSection tone="paper">
+      <Container>
+        <IndexBar index={index} name="The packaging layer" />
+        <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-16">
+          <div className="lg:sticky lg:top-28 lg:self-start">
+            <h2 className="max-w-md text-[32px] font-medium leading-[1.2] tracking-[-0.045em] sm:text-[40px] lg:text-[46px]">
+              <span>
+                Make the technical idea clear before <Accent>play</Accent>
               </span>
             </h2>
-            <p className="mt-6 max-w-md text-base text-muted-foreground">
+            <p className={cn("mt-6 max-w-md text-[16px] leading-[1.6]", MUTED)}>
               We support the practical details around a video: title, thumbnail,
               description, chapters, clips, and upload-ready assets when needed.
             </p>
-          </motion.div>
-
-          <div className="divide-y border-y">
-            {layers.map((layer) => (
-              <motion.div
-                key={layer.title}
-                variants={fadeInUp}
-                className="grid gap-4 py-10 sm:grid-cols-[auto_1fr] sm:gap-6 md:py-12"
-              >
-                <div className="flex size-11 items-center justify-center rounded-lg border bg-muted/50">
-                  <layer.icon className="size-5 text-primary" aria-hidden="true" />
-                </div>
-                <div>
-                  <h3 className="font-inter text-xl font-medium tracking-tight md:text-2xl">
-                    {layer.title}
-                  </h3>
-                  <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground md:text-base">
-                    {layer.body}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
           </div>
-        </motion.div>
-      </div>
-    </section>
+
+          <ol className="grid gap-2">
+            {layers.map((layer, position) => (
+              <li key={layer.title}>
+                <motion.div
+                  initial={
+                    reduceMotion
+                      ? false
+                      : { opacity: 0, y: 18, filter: "blur(8px)" }
+                  }
+                  whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  viewport={{ once: false, amount: 0.4 }}
+                  transition={{
+                    duration: 0.8,
+                    ease: EASE,
+                    delay: position * 0.06,
+                  }}
+                >
+                  <div
+                    className={cn(
+                      "group relative isolate grid gap-5 overflow-hidden p-6 sm:grid-cols-[auto_1fr] sm:gap-6 md:p-7",
+                      CELL,
+                    )}
+                  >
+                    {/* Orange wash rising from the bottom on hover */}
+                    <span
+                      aria-hidden
+                      className="pointer-events-none absolute inset-0 -z-10 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                      style={{
+                        background:
+                          "radial-gradient(120% 80% at 50% 120%, rgba(249,115,22,0.18), transparent 70%)",
+                      }}
+                    />
+                    <span className="flex size-12 items-center justify-center rounded-[6px] transition-colors duration-500 group-hover:text-[#ea580c] bg-[#f8f6f2] text-[#141414] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10)]">
+                      <layer.icon
+                        className="size-6"
+                        stroke={1.6}
+                        aria-hidden="true"
+                      />
+                    </span>
+                    <div>
+                      <h3 className="text-[20px] font-medium tracking-[-0.03em] md:text-[22px]">
+                        {layer.title}
+                      </h3>
+                      <p
+                        className={cn(
+                          "mt-2.5 max-w-xl text-[15px] leading-[1.6]",
+                          MUTED,
+                        )}
+                      >
+                        {layer.body}
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </Container>
+    </PaperSection>
   );
 }

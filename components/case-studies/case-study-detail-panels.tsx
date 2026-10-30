@@ -11,7 +11,7 @@ type CaseStudyDetailPanelsProps = {
 };
 
 const quietPanel =
-  "rounded-xl border border-border/60 bg-background/55 shadow-[0_18px_48px_-36px_rgba(0,0,0,0.55)] backdrop-blur-sm dark:bg-background/35";
+  "rounded-[6px] bg-white/80 shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08]";
 
 export function CaseStudySnapshot({ study }: CaseStudyDetailPanelsProps) {
   const snapshot = [
@@ -22,13 +22,13 @@ export function CaseStudySnapshot({ study }: CaseStudyDetailPanelsProps) {
 
   return (
     <section className={cn("mt-12 overflow-hidden", quietPanel)}>
-      <div className="grid grid-cols-1 divide-y divide-border/60 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+      <div className="grid grid-cols-1 divide-y divide-[#141414]/10 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
         {snapshot.map(([label, value]) => (
           <div key={label} className="px-4 py-4 sm:px-5">
-            <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+            <p className="text-[12px] font-medium uppercase tracking-[0.12em] text-[#141414]/55">
               {label}
             </p>
-            <p className="mt-2 text-sm font-medium leading-snug text-foreground">
+            <p className="mt-2 text-[15px] font-medium leading-snug text-[#141414]">
               <NumericText>{value}</NumericText>
             </p>
           </div>
@@ -45,10 +45,10 @@ export function CaseStudyScope({ study }: CaseStudyDetailPanelsProps) {
     <section className="mt-8">
       <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-primary">
+          <p className="text-[12px] font-medium uppercase tracking-[0.12em] text-[#c2410c]">
             Studio1 scope
           </p>
-          <h2 className="mt-2 font-inter text-xl font-semibold tracking-tight sm:text-2xl">
+          <h2 className="mt-2 text-[24px] font-medium tracking-[-0.04em] text-[#141414] sm:text-[28px]">
             Engagement focus
           </h2>
         </div>
@@ -57,7 +57,7 @@ export function CaseStudyScope({ study }: CaseStudyDetailPanelsProps) {
             href={study.website}
             target="_blank"
             rel="noopener noreferrer"
-            className="group inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+            className="group inline-flex items-center gap-1.5 text-[14px] font-medium text-[#141414]/60 transition-colors hover:text-[#141414]"
           >
             Visit {study.client}
             <ArrowUpRight className="size-4 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:transform-none" />
@@ -69,8 +69,12 @@ export function CaseStudyScope({ study }: CaseStudyDetailPanelsProps) {
         {study.services.map((service) => (
           <span
             key={service}
-            className="rounded-full border border-border/70 bg-background/60 px-3.5 py-2 text-sm font-medium text-foreground/90 shadow-sm dark:bg-background/35"
+            className="inline-flex items-center gap-2 rounded-full bg-white/80 px-3.5 py-2 text-[13.5px] font-medium text-[#141414] ring-1 ring-inset ring-[#141414]/10"
           >
+            <span
+              aria-hidden
+              className="size-1.5 shrink-0 rounded-full bg-[#f97316]"
+            />
             {service}
           </span>
         ))}
@@ -88,7 +92,7 @@ export function CaseStudyProof({ study }: CaseStudyDetailPanelsProps) {
 
   const quotePanel = quote ? (
     <div className="flex min-h-0 flex-1 flex-col">
-      <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.16em] text-primary">
+      <p className="mb-3 text-[12px] font-medium uppercase tracking-[0.12em] text-[#c2410c]">
         Client testimonial
       </p>
       <CaseStudyQuote
@@ -108,17 +112,17 @@ export function CaseStudyProof({ study }: CaseStudyDetailPanelsProps) {
   const outcomesPanel =
     outcomes.length > 0 ? (
       <div className="flex min-h-0 flex-1 flex-col">
-        <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-primary">
+        <p className="text-[12px] font-medium uppercase tracking-[0.12em] text-[#c2410c]">
           Outcome highlights
         </p>
         <ul className="mt-4 space-y-3">
           {outcomes.map((outcome) => (
             <li key={outcome} className="flex gap-2.5">
               <CheckCircle
-                className="mt-0.5 size-4 shrink-0 text-primary"
+                className="mt-0.5 size-4 shrink-0 text-[#f97316]"
                 weight="fill"
               />
-              <span className="text-sm leading-relaxed text-muted-foreground">
+              <span className="text-[15px] leading-relaxed text-[#141414]/65">
                 <NumericText>{outcome}</NumericText>
               </span>
             </li>
@@ -138,8 +142,8 @@ export function CaseStudyProof({ study }: CaseStudyDetailPanelsProps) {
           "!p-0",
         )}
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 md:divide-x md:divide-border/50 dark:md:divide-white/[0.08]">
-          <div className="flex flex-col border-b border-border/50 p-5 dark:border-white/[0.08] md:border-b-0 md:p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 md:divide-x md:divide-[#141414]/10">
+          <div className="flex flex-col border-b border-[#141414]/10 p-5 md:border-b-0 md:p-6">
             {quotePanel}
           </div>
           <div className="flex flex-col p-5 md:p-6">{outcomesPanel}</div>

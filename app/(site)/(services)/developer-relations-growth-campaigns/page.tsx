@@ -1,17 +1,23 @@
+import Process from "@/components/pages/devrel-as-a-service/process";
 import React from "react";
 import Impact from "@/components/sections/devrel-as-service/impact";
 import Services from "@/components/sections/devrel-as-service/services";
 import Team from "@/components/sections/devrel-as-service/team";
-import Process from "@/components/pages/devrel-as-a-service/process";
 import DevRelPricing from "@/components/sections/devrel-as-service/pricing";
 import type { Metadata } from "next";
 import Hero from "@/components/pages/devrel-as-a-service/hero";
-import FAQ, { type FAQItem } from "@/components/landing/faq";
-import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
+import type { FAQItem } from "@/components/landing/faq";
+import { Container } from "@/components/home/ui";
+import { PaperSection } from "@/components/paper/paper-sections";
+import { PaperServiceFaq } from "@/components/pages/shared/paper-service-kit";
+import { PAPER_SCOPE } from "@/lib/paper";
 import {
-  ServiceDetailSection,
-  ServiceProofSection,
-} from "@/components/pages/shared/service-detail-sections";
+  StoryCards,
+  StoryLogos,
+  StoryProof,
+} from "@/components/pages/shared/service-story";
+import { PaperCta } from "@/components/paper/paper-sections";
+import { breadcrumbJsonLd, pageMetadata, serviceJsonLd } from "@/lib/seo";
 import { getTranslations } from "next-intl/server";
 import { DEFAULT_LOCALE } from "@/lib/i18n";
 
@@ -172,24 +178,16 @@ const nebiusProof = {
 };
 
 export default function DevRel() {
-  const serviceSchema = {
-    "@context": "https://schema.org",
-    "@type": "Service",
+  const serviceSchema = serviceJsonLd({
     name: "Developer Relations & Growth Campaigns",
     description:
       "Developer relations and growth campaigns for developer products: advocacy, community programs, product launches, organic distribution, and influencer management.",
-    provider: {
-      "@type": "Organization",
-      name: "Studio1",
-      url: "https://studio1hq.com",
-    },
+    path: "/developer-relations-growth-campaigns",
     serviceType: "Developer Relations and Growth Campaigns",
-    areaServed: "Worldwide",
-    url: "https://studio1hq.com/developer-relations-growth-campaigns",
-  };
+  });
 
   return (
-    <div className="">
+    <div className="overflow-x-clip" style={PAPER_SCOPE}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
@@ -209,28 +207,36 @@ export default function DevRel() {
         }}
       />
       <Hero />
+      <StoryLogos />
       <Services />
-      <ServiceDetailSection
-        eyebrow="DevRel and growth scope"
+      <StoryCards
+        index={2}
+        name="DevRel and growth scope"
         title="The execution layer behind developer adoption"
         description="We support docs, content, social, open-source, partnerships, hackathons, creator campaigns, launches, and feedback loops."
-        items={devrelScope}
-        columns="three"
+        steps={devrelScope}
+        workflow="devrel-growth.yml"
       />
-      <Process />
-      <ServiceProofSection
-        title="Open-source growth through validation, demos, and meaningful collaborations"
-        description="Memori combined early product validation, demo agents, community education, feedback loops, and relevant developer collaborations."
-        study={memoriProof}
+      <Process index={3} />
+      <StoryProof
+        index={4}
+        title="Case studies from DevRel and growth work"
+        description="Memori combined early product validation, demo agents, community education, feedback loops, and relevant developer collaborations. Nebius paired hands-on workshops, conference talks, and Reddit distribution so every event and post ended with developers using the product."
+        studies={[memoriProof, nebiusProof]}
       />
-      <ServiceProofSection
-        title="Workshops and community distribution that lead to product usage"
-        description="Nebius paired hands-on workshops, conference talks, and Reddit distribution so every event and post ended with developers using the product."
-        study={nebiusProof}
-      />
-      <FAQ
-        subtitle="Common questions about our developer relations and growth campaign services."
-        items={devrelFaqItems}
+      <PaperSection tone="paper">
+        <Container>
+          <PaperServiceFaq
+            index={5}
+            subtitle="Common questions about our developer relations and growth campaign services."
+            items={devrelFaqItems}
+          />
+        </Container>
+      </PaperSection>
+      <PaperCta
+        index={6}
+        title="Ready to Grow Your Developer Community?"
+        description="Developer advocacy, community growth, launch campaigns, organic distribution, and creator programs for developer products."
       />
       {/* <DevRelPricing /> */}
       {/* <PricingSection /> */}

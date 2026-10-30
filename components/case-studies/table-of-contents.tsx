@@ -140,19 +140,19 @@ export function TableOfContents({
             "block w-full",
       )}
     >
-      <p className="mb-4 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+      <p className="mb-4 text-[12px] font-medium uppercase tracking-[0.12em] text-[#141414]/55">
         On this page
       </p>
 
-      <div className="relative max-h-[60vh] overflow-y-auto">
+      <div data-lenis-prevent className="relative max-h-[60vh] overflow-y-auto">
         {indicator ? (
           <span
             aria-hidden
-            className="absolute -left-px w-0.5 rounded-full bg-primary transition-all duration-300 ease-out"
+            className="absolute -left-px w-0.5 rounded-full bg-[#f97316] transition-all duration-300 ease-out motion-reduce:transition-none"
             style={{ top: indicator.top, height: indicator.height }}
           />
         ) : null}
-        <ul ref={listRef} className="space-y-1 border-l border-border">
+        <ul ref={listRef} className="space-y-1 border-l border-[#141414]/12">
           {headings.map((heading) => (
             <li key={heading.id}>
               <a
@@ -169,8 +169,8 @@ export function TableOfContents({
                   "block py-1 text-[13px] leading-snug transition-colors duration-300",
                   heading.level === 2 ? "pl-4" : "pl-7",
                   activeId === heading.id
-                    ? "font-medium text-foreground"
-                    : "text-muted-foreground hover:text-foreground",
+                    ? "font-medium text-[#141414]"
+                    : "text-[#141414]/55 hover:text-[#141414]",
                 )}
               >
                 {heading.text}

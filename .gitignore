@@ -37,6 +37,7 @@ next-env.d.ts
 
 # IDE / local tooling
 .cursor/
+.commandcode/
 
 # pnpm is the package manager (see AGENTS.md); do not commit npm lockfile
 package-lock.json

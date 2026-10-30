@@ -60,7 +60,7 @@ const RoadmapCard: React.FC<CardProps> = ({
       className="top-[80px] sticky flex justify-center pt-[150px] h-screen"
     >
       <motion.div
-        className={`py-10 px-8 rounded-[24px] flex flex-col gap-6 max-w-[450px] max-h-[320px] relative`}
+        className={`py-10 px-8 rounded-[6px] flex flex-col gap-6 max-w-[450px] max-h-[320px] relative`}
         style={{
           background: background,
           rotate,

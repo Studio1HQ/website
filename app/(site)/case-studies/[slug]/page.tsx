@@ -15,6 +15,7 @@ import {
   articlePageMetadata,
   baseUrl,
   localizedBreadcrumbJsonLd,
+  ORGANIZATION_ID,
 } from "@/lib/seo";
 import { DEFAULT_LOCALE, localizedUrl } from "@/lib/i18n";
 
@@ -50,6 +51,10 @@ export default async function CaseStudyPage({ params }: Props) {
   if (!study) notFound();
 
   const related = getRelatedCaseStudies(slug, 3, DEFAULT_LOCALE);
+  // Counts and ranks ("2K+", "#3"), not worded results like "Hackathons".
+  const resultNumbers = study.metrics.filter((metric) =>
+    /^[~#]?\d/.test(metric.value),
+  );
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -57,21 +62,21 @@ export default async function CaseStudyPage({ params }: Props) {
     headline: study.title,
     description: study.description,
     datePublished: study.date,
-    about: study.client,
-    author: {
+    about: {
       "@type": "Organization",
-      name: "Studio1",
-      url: baseUrl,
+      name: study.client,
+      ...(study.website ? { url: study.website } : {}),
     },
-    publisher: {
-      "@type": "Organization",
-      name: "Studio1",
-      url: baseUrl,
-      logo: {
-        "@type": "ImageObject",
-        url: `${baseUrl}/icon.png`,
-      },
-    },
+    // Verified result numbers, so answer engines can quote them directly.
+    ...(resultNumbers.length
+      ? {
+          abstract: resultNumbers
+            .map((metric) => `${metric.value} ${metric.label}`)
+            .join("; "),
+        }
+      : {}),
+    author: { "@id": ORGANIZATION_ID },
+    publisher: { "@id": ORGANIZATION_ID },
     mainEntityOfPage: {
       "@type": "WebPage",
       "@id": localizedUrl(`/case-studies/${slug}`, DEFAULT_LOCALE, baseUrl),

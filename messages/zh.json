@@ -128,6 +128,13 @@
       "content": "内容",
       "devrel": "DevRel 与增长",
       "docs": "文档与 DX 审计",
+      "githubGrowth": "GitHub 增长",
+      "productLaunch": "产品发布",
+      "aeo": "AEO 优化",
+      "redditMarketing": "Reddit 营销",
+      "distribution": "内容分发",
+      "testimonials": "客户评价",
+      "allServices": "全部服务",
       "home": "首页",
       "overview": "概览",
       "process": "流程",
@@ -161,16 +168,57 @@
   },
   "ProductPage": {
     "visitProduct": "访问 {name}",
+    "sampleData": "示例数据",
+    "copy": "复制",
+    "copied": "已复制",
     "hero": {
-      "badge": "由",
-      "titlePrefix": "我们的",
-      "titleHighlight": "产品",
-      "description": "我们为开发者、设计师和团队构建并发布的工具。"
+      "eyebrow": "Studio1 产品",
+      "count": "已发布 {shipped} 款，{building} 款开发中",
+      "titleLineOne": "我们为开发者工具做推广。",
+      "titleLineTwo": "我们也<mark>亲手打造</mark>它们。",
+      "description": "Raah 和 AssetSnip 是我们自主设计、开发并运营的工具。发布自己的产品，让我们始终贴近开发者的真实体验，这也是我们带给每个合作开发者工具的价值。"
     },
-    "pipeline": {
+    "dock": {
+      "jumpTo": "跳转到 {name}",
+      "nextName": "产品 03",
+      "nextTagline": "新产品正在打磨中"
+    },
+    "why": {
+      "indexName": "我们为何做产品",
+      "aside": "由 Studio1 团队自主打造",
+      "title": "发布自己的工具，让我们更懂得如何<accent>发布你的产品</accent>。",
+      "description": "我们同时站在发布的两端。打造 Raah 和 AssetSnip 的经验，会直接用在我们为开发者工具团队制作的文档、视频和推广活动中。",
+      "points": {
+        "friction": {
+          "title": "我们先踩过坑",
+          "body": "安装步骤、含糊的报错、缺失的文档，我们在自己的产品上都遇到过，所以知道在你的产品里该看哪里。"
+        },
+        "launches": {
+          "title": "我们亲自执行发布，而不只是做计划",
+          "body": "落地页、演示视频、更新日志和社区帖子。我们自己的每一次发布，都在打磨为客户执行的方法论。"
+        },
+        "builders": {
+          "title": "来自构建者的内容",
+          "body": "我们以构建者的身份写开发者工具，所以教程和文档源于对产品的真实使用，而不是功能清单。"
+        }
+      },
+      "playbook": "为你的产品使用同一套方法论"
+    },
+    "next": {
+      "indexName": "开发中",
+      "aside": "产品 03",
       "category": "AI SaaS",
       "status": "进行中",
-      "title": "即将推出 ..."
+      "title": "产品 03 正在打磨中。",
+      "codename": "代号",
+      "redacted": "保密",
+      "description": "我们的下一款产品是一款 AI SaaS 工具，延续 Raah 和 AssetSnip 的打造方式。等它准备好迎接真实用户时，我们会第一时间分享。",
+      "follow": "关注开发进展",
+      "building": "开发中"
+    },
+    "cta": {
+      "title": "正在打造开发者产品？",
+      "description": "我们帮助开发者工具发布、讲清价值并持续增长，用的正是我们打磨自己产品的那套方法。"
     }
   },
   "CareersPage": {
@@ -357,7 +405,17 @@
     "titleHighlight": "未找到",
     "description": "你访问的页面不存在或已被移动。",
     "homeCta": "返回首页",
-    "servicesCta": "浏览服务"
+    "servicesCta": "浏览服务",
+    "suggestions": "试试这些页面"
+  },
+  "ErrorPage": {
+    "eyebrow": "错误",
+    "titlePrefix": "出了点",
+    "titleHighlight": "问题",
+    "description": "一个意外错误导致此页面无法显示。请重试，或返回首页。",
+    "retryCta": "重试",
+    "homeCta": "返回首页",
+    "reference": "编号"
   },
   "Footer": {
     "description": "面向 devtool 和 SaaS 团队的技术内容与开发者增长伙伴。",

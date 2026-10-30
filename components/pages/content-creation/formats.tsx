@@ -1,32 +1,34 @@
 "use client";
 
-import { fadeInUp, staggerChildren } from "@/lib/animations";
-import { motion } from "motion/react";
+import { Container } from "@/components/home/ui";
+import { BlurRise, HoverWash } from "@/components/pages/shared/blur-rise";
+import { CELL, MUTED, PaperSection } from "@/components/paper/paper-sections";
+import {
+  PaperChip,
+  ServiceHead,
+} from "@/components/pages/shared/paper-service-kit";
+import { cn } from "@/lib/utils";
 
 const formats = [
   {
-    number: "01",
     meta: "Tutorials",
     title: "Long-form tutorials",
     detail:
       "Step-by-step videos that walk developers through a real workflow in your product.",
   },
   {
-    number: "02",
     meta: "Demos",
     title: "Product deep dives",
     detail:
       "Feature demos and architecture explainers for people deciding whether to adopt you.",
   },
   {
-    number: "03",
     meta: "Shorts",
     title: "Shorts and cutdowns",
     detail:
       "Short clips from the long videos, made to get new viewers into the full watch.",
   },
   {
-    number: "04",
     meta: "Series",
     title: "Channel series",
     detail:
@@ -34,76 +36,47 @@ const formats = [
   },
 ];
 
-export default function Formats() {
+export default function Formats({ index = 5 }: { index?: number }) {
   return (
-    <section id="formats" className="relative scroll-mt-28 py-28 md:py-36">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-border"
-      />
+    <PaperSection id="formats" tone="paper" className="scroll-mt-28">
+      <Container>
+        <ServiceHead
+          index={index}
+          name="Formats"
+          title="The videos we make most often"
+          description="Pick what fits your product and audience. We can support scripting, editing, packaging, and upload-ready assets."
+        />
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <motion.div
-          variants={staggerChildren}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-          className="max-w-2xl"
-        >
-          <motion.p
-            variants={fadeInUp}
-            className="font-secondary text-sm font-medium tracking-wide text-primary"
-          >
-            Formats
-          </motion.p>
-          <motion.h2
-            variants={fadeInUp}
-            className="mt-4 font-inter text-4xl font-normal tracking-tight md:text-5xl"
-          >
-            The videos we make most often
-          </motion.h2>
-          <motion.p
-            variants={fadeInUp}
-            className="mt-6 text-base text-muted-foreground"
-          >
-            Pick what fits your product and audience. We can support scripting,
-            editing, packaging, and upload-ready assets.
-          </motion.p>
-        </motion.div>
-
-        <motion.ul
-          variants={staggerChildren}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.15 }}
+        <ul
           role="list"
           aria-label="Video formats"
-          className="mt-16 grid gap-10 sm:grid-cols-2 md:mt-20 md:gap-x-14 md:gap-y-14"
+          className="mt-10 grid gap-2 sm:grid-cols-2 lg:grid-cols-4"
         >
-          {formats.map((format) => (
-            <motion.li
-              key={format.title}
-              variants={fadeInUp}
-              className="min-w-0 border-l-2 border-primary/40 pl-6 md:pl-8"
-            >
-              <div className="flex items-baseline gap-3">
-                <span className="font-secondary text-sm font-semibold tabular-nums tracking-widest text-primary">
-                  {format.number}
-                </span>
-                <span className="font-secondary text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  {format.meta}
-                </span>
-              </div>
-              <h3 className="mt-3 font-inter text-2xl font-medium tracking-tight md:text-3xl">
-                {format.title}
-              </h3>
-              <p className="mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground md:text-base">
-                {format.detail}
-              </p>
-            </motion.li>
+          {formats.map((format, position) => (
+            <li key={format.title} className="min-w-0">
+              <BlurRise delay={position * 0.06} className="h-full">
+                <div
+                  className={cn(
+                    "group relative isolate flex h-full min-h-[260px] flex-col overflow-hidden p-6",
+                    CELL,
+                  )}
+                >
+                  <HoverWash />
+                  <div>
+                    <PaperChip>{format.meta}</PaperChip>
+                  </div>
+                  <h3 className="mt-auto pt-10 text-[20px] font-medium tracking-[-0.03em] md:text-[22px]">
+                    {format.title}
+                  </h3>
+                  <p className={cn("mt-2.5 text-[15px] leading-[1.6]", MUTED)}>
+                    {format.detail}
+                  </p>
+                </div>
+              </BlurRise>
+            </li>
           ))}
-        </motion.ul>
-      </div>
-    </section>
+        </ul>
+      </Container>
+    </PaperSection>
   );
 }

@@ -8,9 +8,21 @@ import {
   Link as LinkIcon,
 } from "@phosphor-icons/react";
 import { Team } from "@/components/about-us/team";
+import { PageRibbon } from "@/components/about-us/page-ribbon";
+import { SelectedWork } from "@/components/about-us/selected-work";
+import { StudioBento } from "@/components/about-us/studio-bento";
+import {
+  CurvedUnderline,
+  EdgeChips,
+  HoverLine,
+  MarkedDescription,
+} from "@/components/about-us/hero-flourishes";
 import { Companies } from "@/components/about-us/companies";
-import { motion } from "motion/react";
-import { sideBeamGlowLeftMuted, sideBeamGlowRightMuted } from "@/lib/shadows";
+import { motion, useReducedMotion } from "motion/react";
+import { PaperPageHeader } from "@/components/paper/paper-page-header";
+import { HeroArrows } from "@/components/about-us/hero-arrows";
+import { Accent, PaperCta } from "@/components/paper/paper-sections";
+import { PAPER_SCOPE, PRINT } from "@/lib/paper";
 import { useTranslations } from "next-intl";
 
 const tags = [
@@ -36,10 +48,6 @@ const tags = [
   },
 ];
 
-/** Frosted glass pills: translucent fill, primary-tinted border + soft orange shadow. */
-const capsuleClassName =
-  "rounded-full px-3 py-1.5 sm:px-3.5 inline-flex gap-2 items-center text-xs sm:text-sm font-medium text-foreground border border-border/40 dark:border-white/15 bg-white/55 dark:bg-white/[0.08] backdrop-blur-md shadow-[0_6px_18px_-4px_hsl(var(--primary)/0.32)] dark:shadow-[0_6px_18px_-4px_hsl(var(--primary)/0.22)]";
-
 // Animation variants that can be reused across components
 const sectionAnimation = {
   hidden: { opacity: 0, y: 24 },
@@ -53,11 +61,13 @@ const sectionAnimation = {
   },
 };
 
+/** The intro video, mounted on a white card like a print pinned to the sheet. */
 function StudioIntroVideo() {
   return (
-    <section className="mx-auto mt-14 mb-14 w-full max-w-[65rem] md:mt-20 md:mb-20">
-      <div className="overflow-hidden rounded-2xl border border-border/60 bg-muted/20 shadow-[0_24px_80px_-42px_hsl(var(--primary)/0.7)] dark:border-white/[0.08] dark:bg-white/[0.03]">
-        <div className="aspect-video w-full">
+    <section className="relative mx-auto w-full max-w-[65rem]">
+      <EdgeChips />
+      <div className="rounded-[6px] bg-white/80 p-2 shadow-[inset_0_1px_0_#fff,0_40px_80px_-48px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/10 sm:p-2.5">
+        <div className="aspect-video w-full overflow-hidden rounded-[6px] bg-[#fbfaf7] shadow-[inset_0_3px_10px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08)]">
           <iframe
             className="h-full w-full"
             src="https://www.youtube-nocookie.com/embed/86fFNr5Dyqk?rel=0"
@@ -75,104 +85,71 @@ function StudioIntroVideo() {
 
 export default function AboutUs() {
   const t = useTranslations("AboutPage");
+  const reduceMotion = useReducedMotion();
 
   return (
-    <section className="overflow-x-hidden">
-      <div className="max-w-7xl mx-auto h-fit relative">
-        <div className={sideBeamGlowLeftMuted}></div>
-        <div className={sideBeamGlowRightMuted}></div>
-        {/*
+    <div
+      className="relative overflow-x-clip [&>section]:!bg-transparent"
+      style={PAPER_SCOPE}
+    >
+      <PageRibbon />
+      <PaperPageHeader className="pb-24 pt-28 md:pb-28 md:pt-36">
+        <HeroArrows />
         <motion.div
-          className="flex flex-col w-full h-[40rem] max-h-fit mt-20"
-          initial="hidden"
+          className="mx-auto flex max-w-[1300px] flex-col items-center px-4 text-center sm:px-6"
+          initial={reduceMotion ? false : "hidden"}
           animate="visible"
           variants={sectionAnimation}
         >
-          <div className="relative h-full w-full">
-            <AboutRipple mainCircleSize={310} numCircles={10} />
-            <div className="absolute flex flex-col gap-2 inset-0 items-center justify-center">
-              <div className="drop-shadow-[0_0px_25px_hsl(var(--primary))] bottom-[6rem] md:bottom-[5rem] backdrop-blur-sm z-[30] rounded-3xl bg-background/60 border-2 border-accent/40 flex items-center justify-center p-3">
-                <Logo className="size-12 sm:size-16 md:size-24" />
-              </div>
-              <span className="font-primary text-2xl font-semibold tracking-tight">
-                Studio1
-              </span>
-            </div>
-          </div>
-        </motion.div>
-        */}
-
-        <motion.div
-          className="flex flex-col items-center gap-8 px-4 pt-20"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={sectionAnimation}
-        >
-          <StudioIntroVideo />
-          <h1 className="text-3xl md:text-5xl font-primary font-normal tracking-tight text-center leading-tight">
-            {t("titlePrefix")} {" "}
-            <span className="serif-accent font-accent italic font-normal text-primary/75 text-[1.08em]">
-              {t("titleHighlightOne")}
-            </span>{" "}
-            {t("titleMiddle")} {" "}
-            <span className="serif-accent font-accent italic font-normal text-primary/75 text-[1.08em]">
-              {t("titleHighlightTwo")}
-            </span>{" "}
-            <br /> {t("titleSuffix")}
+          {/* Big centred statement first, like a studio intro */}
+          <h1 className="max-w-[1240px] text-[34px] leading-[1.1] tracking-[-0.05em] sm:text-[44px] md:text-[50px] xl:text-[58px]">
+            {/* Two lines on desktop: the promise, then the logo and the how */}
+            <span className="block font-medium lg:whitespace-nowrap">
+              {t("titlePrefix")}{" "}
+              <CurvedUnderline>{t("titleHighlightOne")}</CurvedUnderline>{" "}
+              {t("titleMiddle")} {t("titleHighlightTwo")}
+            </span>
+            <HoverLine>{t("titleSuffix")}</HoverLine>
           </h1>
-          <div className="text-center text-sm md:text-base text-neutral-600 dark:text-neutral-400">
-            {t("descriptionLineOne")}
-            <br className="hidden md:block" /> {t("descriptionLineTwo")}
-          </div>
-
-          <div className="flex flex-wrap max-w-md sm:max-w-xl items-center justify-center gap-2.5 sm:gap-3 mt-10">
+          <p className="mt-9 max-w-[680px] text-[16px] leading-[1.75] text-[#141414]/[0.62] sm:text-[17px]">
+            <MarkedDescription
+              text={`${t("descriptionLineOne")} ${t("descriptionLineTwo")}`}
+            />
+          </p>
+          <div className="mt-8 flex max-w-5xl flex-wrap items-center justify-center gap-2">
             {tags.map((tag, index) => (
-              <motion.div
+              <motion.span
                 key={tag.key}
-                initial={{ opacity: 0, y: 14 }}
+                initial={reduceMotion ? false : { opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.05 * index, duration: 0.25 }}
+                transition={{ delay: 0.2 + 0.05 * index, duration: 0.4 }}
+                className="inline-flex items-center gap-2 rounded-full bg-[#f8f6f2] px-4 py-2 text-[13px] font-medium text-[#141414] shadow-[inset_0_2px_6px_rgba(20,20,20,0.09),inset_0_1px_2px_rgba(20,20,20,0.07)]"
               >
-                <span className={capsuleClassName}>
-                  <tag.icon
-                    weight="fill"
-                    className="size-4 shrink-0 text-primary"
-                  />
-                  {t(`tags.${tag.key}`)}
-                </span>
-              </motion.div>
+                <tag.icon
+                  weight="duotone"
+                  className="size-4 shrink-0"
+                  style={{ color: PRINT }}
+                />
+                {t(`tags.${tag.key}`)}
+              </motion.span>
             ))}
           </div>
+          <div className="relative isolate mt-12 w-full max-w-[1100px]">
+            <StudioIntroVideo />
+          </div>
         </motion.div>
+      </PaperPageHeader>
 
-        <div className="px-4">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={sectionAnimation}
-          >
-            <VisionMission />
-          </motion.div>
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={sectionAnimation}
-          >
-            <Team />
-          </motion.div>
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={sectionAnimation}
-          >
-            <Companies />
-          </motion.div>
-        </div>
-      </div>
-    </section>
+      <StudioBento />
+      <VisionMission />
+      <Team />
+      <SelectedWork />
+      <Companies />
+      <PaperCta
+        index={5}
+        title="Let's Build Your Developer Story Together"
+        description="Tell us about your product and the developers you want to reach. We will shape the plan with you."
+      />
+    </div>
   );
 }
