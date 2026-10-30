@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -16,16 +16,11 @@ import { Num } from "@/components/ui/num";
 import Logo from "@/components/ui/svgs/logo";
 import { PaperCta } from "@/components/paper/paper-sections";
 import type { BlogPostMeta, BlogPostNavigation } from "@/lib/blog";
+import { TEAM_AUTHOR, authorPath, getAuthorByName } from "@/lib/authors";
 import { LatestArticles } from "@/components/blog/latest-articles";
 import { blogCoverUrl } from "@/lib/blog-cover";
 import { tagLabel } from "@/lib/blog-tags";
 import { GRAIN, PAPER_SCOPE, PRINT } from "@/lib/paper";
-
-/** Team photos for named authors; the Studio1 mark for the team byline. */
-const AUTHOR_PHOTO: Record<string, string> = {
-  "Amitesh Anand": "/assets/amitesh.webp",
-  "Arindam Majumder": "/assets/arindam-nobg.webp",
-};
 
 type PostLayoutProps = {
   title: string;
@@ -106,7 +101,6 @@ export function PostLayout({
 }: PostLayoutProps) {
   const showUpdatedDate = updatedDate && updatedDate !== date;
   const authorList = authors?.length ? authors : [author];
-  const byline = authorList.join(", ");
   const summary = tldrSummary || description;
   const takeaways = keyTakeaways.filter(
     (item) => item.trim() !== summary.trim(),
@@ -201,31 +195,54 @@ export function PostLayout({
           <div className="mt-8 flex flex-wrap items-center justify-between gap-x-6 gap-y-4 border-t border-[var(--p-line)] pt-5">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[14px] text-[var(--p-muted)]">
               <span className="flex -space-x-2">
-                {authorList.map((name) => (
-                  <span
-                    key={name}
-                    aria-hidden
-                    className="relative flex size-9 items-center justify-center overflow-hidden rounded-full bg-white ring-2 ring-[#f4efe7]"
-                  >
-                    {AUTHOR_PHOTO[name] ? (
-                      <Image
-                        src={AUTHOR_PHOTO[name]}
-                        alt=""
-                        fill
-                        sizes="36px"
-                        className="object-cover object-top"
-                      />
-                    ) : name === "Studio1 Team" ? (
-                      <Logo className="size-5" />
-                    ) : (
-                      <span className="text-[11px] font-medium">
-                        {initials(name)}
-                      </span>
-                    )}
-                  </span>
-                ))}
+                {authorList.map((name) => {
+                  const profile = getAuthorByName(name);
+                  return (
+                    <span
+                      key={name}
+                      aria-hidden
+                      className="relative flex size-9 items-center justify-center overflow-hidden rounded-full bg-white ring-2 ring-[#f4efe7]"
+                    >
+                      {profile ? (
+                        <Image
+                          src={profile.image}
+                          alt=""
+                          fill
+                          sizes="36px"
+                          className="object-cover object-top"
+                        />
+                      ) : name === TEAM_AUTHOR ? (
+                        <Logo className="size-5" />
+                      ) : (
+                        <span className="text-[11px] font-medium">
+                          {initials(name)}
+                        </span>
+                      )}
+                    </span>
+                  );
+                })}
               </span>
-              <span className="font-medium text-[var(--p-fg)]">{byline}</span>
+              <span className="font-medium text-[var(--p-fg)]">
+                {authorList.map((name, index) => {
+                  const profile = getAuthorByName(name);
+                  return (
+                    <Fragment key={name}>
+                      {index > 0 ? ", " : null}
+                      {profile ? (
+                        <Link
+                          href={authorPath(profile)}
+                          rel="author"
+                          className="underline decoration-[var(--p-line)] decoration-2 underline-offset-4 transition-colors hover:decoration-[#f97316]"
+                        >
+                          {name}
+                        </Link>
+                      ) : (
+                        name
+                      )}
+                    </Fragment>
+                  );
+                })}
+              </span>
               <span aria-hidden className="text-[var(--p-faint)]">
                 ·
               </span>

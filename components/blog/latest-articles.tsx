@@ -4,12 +4,7 @@ import type { BlogPostMeta } from "@/lib/blog";
 import { blogCoverUrl } from "@/lib/blog-cover";
 import { tagLabel } from "@/lib/blog-tags";
 import Logo from "@/components/ui/svgs/logo";
-
-/** Team photos for named authors; the Studio1 mark for the team byline. */
-const AUTHOR_PHOTO: Record<string, string> = {
-  "Amitesh Anand": "/assets/amitesh.webp",
-  "Arindam Majumder": "/assets/arindam-nobg.webp",
-};
+import { getAuthorByName } from "@/lib/authors";
 
 function formatDate(value: string) {
   return new Date(value).toLocaleDateString("en-US", {
@@ -34,6 +29,7 @@ export function LatestArticles({ posts }: { posts: BlogPostMeta[] }) {
       <div className="mt-12 grid gap-8 md:grid-cols-3 md:gap-6">
         {posts.map((post) => {
           const author = post.authors[0] ?? post.author;
+          const photo = getAuthorByName(author)?.image;
           return (
             <Link
               key={post.slug}
@@ -65,9 +61,9 @@ export function LatestArticles({ posts }: { posts: BlogPostMeta[] }) {
 
               <div className="mt-5 flex items-center gap-2.5 text-[13px] text-[#141414]/55">
                 <span className="relative flex size-7 items-center justify-center overflow-hidden rounded-full bg-white ring-2 ring-[#f4efe7]">
-                  {AUTHOR_PHOTO[author] ? (
+                  {photo ? (
                     <Image
-                      src={AUTHOR_PHOTO[author]}
+                      src={photo}
                       alt=""
                       fill
                       sizes="28px"

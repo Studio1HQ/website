@@ -1,3 +1,4 @@
+import { AUTHORS, authorPath } from "@/lib/authors";
 import { getAllPosts } from "@/lib/blog";
 import { getAllCaseStudies } from "@/lib/case-studies";
 import { getJobOpenings } from "@/lib/careers";
@@ -119,6 +120,13 @@ export async function GET() {
       path: `/blog/${post.slug}`,
       lastModified: post.updatedDate,
       priority: 0.7,
+    })),
+    ...AUTHORS.map((author) => ({
+      path: authorPath(author),
+      lastModified:
+        getAllPosts().find((post) => post.authors.includes(author.name))
+          ?.updatedDate ?? STATIC_LAST_MODIFIED,
+      priority: 0.6,
     })),
   ];
 

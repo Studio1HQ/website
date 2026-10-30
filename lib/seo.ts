@@ -1,6 +1,14 @@
 import type { Metadata } from "next";
 import { baseUrl } from "@/lib/site";
 import {
+  AUTHORS,
+  TEAM_AUTHOR,
+  authorPersonId,
+  authorUrl,
+  getAuthorByName,
+  type Author,
+} from "@/lib/authors";
+import {
   DEFAULT_LOCALE,
   hasLocalizedAlternates,
   localeMeta,
@@ -174,11 +182,17 @@ export function articlePageMetadata({
   const ogImageAlt = imageAlt?.trim() || title;
   const brandedTitle = `${title} | Studio1`;
   const authorList = authors?.length ? authors : author ? [author] : [];
+  // Named authors link to their profile page (rel="author", article:author).
+  const authorRefs = authorList.map((name) => {
+    const profile = getAuthorByName(name);
+    return profile ? { name, url: authorUrl(profile) } : { name };
+  });
 
   return {
     title,
     description,
     ...(keywords?.length ? { keywords } : {}),
+    ...(authorRefs.length ? { authors: authorRefs } : {}),
     alternates: {
       canonical: url,
     },
@@ -190,7 +204,9 @@ export function articlePageMetadata({
       type: "article",
       ...(publishedTime ? { publishedTime } : {}),
       ...(modifiedTime ? { modifiedTime } : {}),
-      ...(authorList.length ? { authors: authorList } : {}),
+      ...(authorRefs.length
+        ? { authors: authorRefs.map((ref) => ref.url ?? ref.name) }
+        : {}),
       ...(tags?.length ? { tags } : {}),
       images: [{ url: ogImage, width: 1200, height: 630, alt: ogImageAlt }],
     },
@@ -202,6 +218,48 @@ export function articlePageMetadata({
       creator: "@Studio1HQ",
     },
   };
+}
+
+/** Full Person node for an author, as on their profile page. */
+export function authorPersonJsonLd(author: Author) {
+  return {
+    "@type": "Person",
+    "@id": authorPersonId(author),
+    name: author.name,
+    url: authorUrl(author),
+    image: absoluteImageUrl(author.image),
+    jobTitle: author.jobTitle,
+    description: author.bio,
+    worksFor: { "@id": ORGANIZATION_ID },
+    knowsAbout: author.knowsAbout,
+    sameAs: author.links.map((link) => link.href),
+  };
+}
+
+/**
+ * Article author nodes: named authors point at their profile's Person node,
+ * the team byline at the Studio1 Organization.
+ */
+export function articleAuthorsJsonLd(names: string[]) {
+  return names.map((name) => {
+    if (name === TEAM_AUTHOR) {
+      return {
+        "@type": "Organization",
+        "@id": ORGANIZATION_ID,
+        name: "Studio1",
+        url: baseUrl,
+      };
+    }
+    const author = getAuthorByName(name);
+    return author
+      ? {
+          "@type": "Person",
+          "@id": authorPersonId(author),
+          name: author.name,
+          url: authorUrl(author),
+        }
+      : { "@type": "Person", name };
+  });
 }
 
 export function breadcrumbJsonLd(items: { name: string; path: string }[]) {
@@ -344,27 +402,14 @@ export function organizationJsonLd() {
       "Developer video production",
       "Product launches for developer tools",
     ],
-    founder: [
-      {
-        "@type": "Person",
-        name: "Arindam Majumder",
-        jobTitle: "Co-founder & Content Lead",
-        sameAs: [
-          "https://github.com/Arindam200",
-          "https://www.arindammajumder.com/",
-        ],
-      },
-      {
-        "@type": "Person",
-        name: "Amitesh Anand",
-        jobTitle: "Co-founder & Operations Lead",
-        sameAs: [
-          "https://www.linkedin.com/in/amitesh1208/",
-          "https://x.com/astrodevil_",
-          "https://mranand.com/",
-        ],
-      },
-    ],
+    founder: AUTHORS.map((author) => ({
+      "@type": "Person",
+      "@id": authorPersonId(author),
+      name: author.name,
+      url: authorUrl(author),
+      jobTitle: author.jobTitle,
+      sameAs: author.links.map((link) => link.href),
+    })),
     sameAs: [
       "https://x.com/Studio1HQ",
       "https://www.linkedin.com/company/studio1hq/",

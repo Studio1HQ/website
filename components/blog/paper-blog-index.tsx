@@ -9,6 +9,7 @@ import {
   RssSimple,
 } from "@phosphor-icons/react";
 import type { BlogPostMeta } from "@/lib/blog";
+import { getAuthorByName } from "@/lib/authors";
 import { blogCoverUrl } from "@/lib/blog-cover";
 import { tagLabel } from "@/lib/blog-tags";
 import { cn } from "@/lib/utils";
@@ -185,12 +186,6 @@ function FeaturedPost({
   );
 }
 
-/** Team photos for named authors; the Studio1 mark for the team byline. */
-const AUTHOR_PHOTO: Record<string, string> = {
-  "Amitesh Anand": "/assets/amitesh.webp",
-  "Arindam Majumder": "/assets/arindam-nobg.webp",
-};
-
 function Authors({
   authors,
   prefix = "",
@@ -201,24 +196,27 @@ function Authors({
   return (
     <span className="flex min-w-0 items-center gap-2.5">
       <span className="flex shrink-0 -space-x-1.5">
-        {authors.map((name) => (
-          <span
-            key={name}
-            className="relative flex size-6 items-center justify-center overflow-hidden rounded-full bg-white ring-2 ring-white"
-          >
-            {AUTHOR_PHOTO[name] ? (
-              <Image
-                src={AUTHOR_PHOTO[name]}
-                alt=""
-                fill
-                sizes="24px"
-                className="object-cover object-top"
-              />
-            ) : (
-              <Logo className="size-4" />
-            )}
-          </span>
-        ))}
+        {authors.map((name) => {
+          const photo = getAuthorByName(name)?.image;
+          return (
+            <span
+              key={name}
+              className="relative flex size-6 items-center justify-center overflow-hidden rounded-full bg-white ring-2 ring-white"
+            >
+              {photo ? (
+                <Image
+                  src={photo}
+                  alt=""
+                  fill
+                  sizes="24px"
+                  className="object-cover object-top"
+                />
+              ) : (
+                <Logo className="size-4" />
+              )}
+            </span>
+          );
+        })}
       </span>
       <span className={cn("truncate", MUTED)}>
         {prefix}
@@ -228,7 +226,13 @@ function Authors({
   );
 }
 
-function PostCard({ post, number }: { post: BlogPostMeta; number: number }) {
+export function PostCard({
+  post,
+  number,
+}: {
+  post: BlogPostMeta;
+  number: number;
+}) {
   return (
     <Link
       href={`/blog/${post.slug}`}

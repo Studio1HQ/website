@@ -73,8 +73,8 @@ Selected results: Memori grew from launch to 12,000+ GitHub stars. Corsair went 
 
 ## Team
 
-- **Arindam Majumder**: Co-founder and Content Lead. Developer advocate, open-source contributor, and technical writer who has reached 270k+ developers.
-- **Amitesh Anand**: Co-founder and Operations Lead. Technical writer and developer advocate with 80k+ published words across major tech platforms.
+- **[Arindam Majumder](https://www.studio1hq.com/blog/author/arindam-majumder)**: Co-founder and Content Lead. Developer advocate, open-source contributor, and technical writer who has reached 270k+ developers.
+- **[Amitesh Anand](https://www.studio1hq.com/blog/author/amitesh-anand)**: Co-founder and Operations Lead. Technical writer and developer advocate with 80k+ published words across major tech platforms.
 - **Shivay Lamba**: ML engineer and open-source advocate.
 
 ## Contact

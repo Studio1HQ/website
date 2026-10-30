@@ -16,6 +16,7 @@ import {
 } from "@/components/blog/mdx";
 import {
   absoluteImageUrl,
+  articleAuthorsJsonLd,
   articlePageMetadata,
   baseUrl,
   breadcrumbJsonLd,
@@ -70,11 +71,7 @@ export default async function BlogPostPage({ params }: Props) {
     description: post.description,
     datePublished: post.date,
     dateModified: post.updatedDate,
-    author: post.authors.map((author) => ({
-      "@type": author === "Studio1 Team" ? "Organization" : "Person",
-      name: author,
-      url: baseUrl,
-    })),
+    author: articleAuthorsJsonLd(post.authors),
     publisher: {
       "@type": "Organization",
       name: "Studio1",

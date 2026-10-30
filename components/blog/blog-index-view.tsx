@@ -1,7 +1,11 @@
 import { PaperBlogIndex } from "@/components/blog/paper-blog-index";
 import { getListedPosts } from "@/lib/blog";
 import { baseUrl } from "@/lib/site";
-import { absoluteImageUrl, breadcrumbJsonLd } from "@/lib/seo";
+import {
+  absoluteImageUrl,
+  articleAuthorsJsonLd,
+  breadcrumbJsonLd,
+} from "@/lib/seo";
 
 export const POSTS_PER_BLOG_PAGE = 10;
 
@@ -61,10 +65,7 @@ export function BlogIndexView({ currentPage = 1 }: BlogIndexViewProps) {
       url: `${baseUrl}/blog/${post.slug}`,
       datePublished: post.date,
       dateModified: post.updatedDate,
-      author: post.authors.map((author) => ({
-        "@type": author === "Studio1 Team" ? "Organization" : "Person",
-        name: author,
-      })),
+      author: articleAuthorsJsonLd(post.authors),
       image: absoluteImageUrl(post.socialImage),
       keywords: post.tags.join(", "),
     })),
