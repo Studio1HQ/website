@@ -7,7 +7,7 @@ export function postMarkdownUrl(slug: string) {
 }
 
 /** Make site-relative links and images absolute so the file stands alone. */
-function absolutize(markdown: string) {
+export function absolutize(markdown: string) {
   return markdown.replace(
     /(!?\[[^\]]*\]\()(\/[^)\s]*)/g,
     (_, prefix: string, path: string) => `${prefix}${baseUrl}${path}`,

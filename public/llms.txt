@@ -8,7 +8,7 @@ Selected results: Memori grew from launch to 12,000+ GitHub stars. Corsair went 
 
 ## Services
 
-- [All Services](https://www.studio1hq.com/services): Every Studio1 service on one page, grouped into content (technical content, docs, video) and growth (DevRel, GitHub, launches, Reddit, AEO), with where to start.
+- [All Services](https://www.studio1hq.com/services): Every Studio1 service on one page, grouped into content (technical content, docs, video) and growth (DevRel, GitHub, launches, Reddit, distribution, AEO), with where to start.
 - [GitHub Growth Agency](https://www.studio1hq.com/github-growth-agency): Open-source and GitHub growth: README and onboarding fixes, demo projects, launch positioning, community distribution, talks, and hackathons.
 - [Technical Content Marketing Agency for Developer Tools](https://www.studio1hq.com/technical-content-marketing): Developer tutorials, integration guides, comparisons, SEO articles, and code-rich content written by engineers, plus distribution on Reddit, X, LinkedIn, Dev.to, and daily.dev.
 - [Developer Documentation & DX Audits](https://www.studio1hq.com/developer-documentation-dx-audit): Documentation audits, onboarding reviews, API clarity, quickstarts, reference docs, and developer experience improvements.
@@ -16,7 +16,14 @@ Selected results: Memori grew from launch to 12,000+ GitHub stars. Corsair went 
 - [Product Launch Service](https://www.studio1hq.com/product-launch-service): Developer tool launches: launch plan, demo video, launch posts, launch day across Reddit, Hacker News, X, LinkedIn, and Product Hunt, and a launch week that turns the spike into users.
 - [AEO Agency](https://www.studio1hq.com/aeo-agency): Answer engine optimization for developer tools: AI visibility audits across ChatGPT, Perplexity, Gemini, and Google AI, answer-ready pages and docs, crawler access, and third-party citations.
 - [Reddit Marketing Agency](https://www.studio1hq.com/reddit-marketing-agency): Organic Reddit marketing for developer tools: subreddit research, technical posts, launch threads, and community engagement. 304K+ Reddit impressions for Entelligence AI; one r/LLMDevs post reached 205K views.
+- [Developer Content Distribution](https://www.studio1hq.com/developer-content-distribution): Every piece rebuilt for Reddit, X, LinkedIn, daily.dev, Dev.to, and YouTube, with community engagement and measurement. 304K+ Reddit impressions for Entelligence AI; 100K+ impressions in one month for OpenLore.
 - [Developer Relations & Growth Campaigns](https://www.studio1hq.com/developer-relations-growth-campaigns): DevRel as a service: developer advocacy, community programs, product launches, organic growth campaigns, and creator programs.
+
+## Comparisons
+
+- [Best Developer Marketing Agencies in 2026](https://www.studio1hq.com/best-developer-marketing-agencies): Studio1, Draft.dev, Hackmamba, Infrasity, Catchy, EveryDeveloper, Literally.dev, and Argot, with services, clients, and public pricing from each agency's own site.
+- [Studio1 vs Draft.dev](https://www.studio1hq.com/compare/studio1-vs-draft-dev): Services, GitHub and open-source growth, DevRel, pricing, and clients compared.
+- [Studio1 vs Infrasity](https://www.studio1hq.com/compare/studio1-vs-infrasity): Technical content, GitHub growth, launches, DevRel, and pricing compared.
 
 ## Results and case studies
 
@@ -57,10 +64,12 @@ Selected results: Memori grew from launch to 12,000+ GitHub stars. Corsair went 
 
 - [Homepage](https://www.studio1hq.com/)
 - [Case Studies](https://www.studio1hq.com/case-studies): Outcomes from GitHub growth, technical content, docs, DevRel, and video work.
+- [Testimonials](https://www.studio1hq.com/testimonials): Named quotes from founders, DevRel leads, and marketers at client teams.
 - [About Us](https://www.studio1hq.com/about-us)
 - [Blog](https://www.studio1hq.com/blog): All articles, including AI model reviews and news.
 - [RSS Feed](https://www.studio1hq.com/feed.xml): Machine-readable feed of Studio1 blog posts.
 - Blog posts as Markdown: every post at https://www.studio1hq.com/blog/<slug> is also available as clean Markdown at https://www.studio1hq.com/blog/<slug>.md.
+- [llms-full.txt](https://www.studio1hq.com/llms-full.txt): This file plus the full text of every case study and guide listed here.
 - [Products](https://www.studio1hq.com/product): Studio1-built tools, including Raah and AssetSnip.
 - [Careers](https://www.studio1hq.com/careers)
 - [Terms of Use](https://www.studio1hq.com/terms)

@@ -1,3 +1,5 @@
+import { AGENCIES_CHECKED } from "@/data/agencies";
+import { COMPARISONS } from "@/data/comparisons";
 import { AUTHORS, authorPath } from "@/lib/authors";
 import { getAllPosts } from "@/lib/blog";
 import { getAllCaseStudies } from "@/lib/case-studies";
@@ -86,6 +88,26 @@ export async function GET() {
       path: "/reddit-marketing-agency",
       lastModified: GROWTH_PAGES_LAST_MODIFIED,
       priority: 0.9,
+    },
+    {
+      path: "/developer-content-distribution",
+      lastModified: GROWTH_PAGES_LAST_MODIFIED,
+      priority: 0.9,
+    },
+    {
+      path: "/best-developer-marketing-agencies",
+      lastModified: AGENCIES_CHECKED,
+      priority: 0.7,
+    },
+    ...COMPARISONS.map((comparison) => ({
+      path: `/compare/${comparison.slug}`,
+      lastModified: comparison.checked,
+      priority: 0.7,
+    })),
+    {
+      path: "/testimonials",
+      lastModified: GROWTH_PAGES_LAST_MODIFIED,
+      priority: 0.6,
     },
     {
       path: "/results",

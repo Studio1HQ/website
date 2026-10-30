@@ -89,6 +89,19 @@ export default function Home() {
               Reddit marketing agency for developer tools
             </a>
           </li>
+          <li>
+            <a href="/developer-content-distribution">
+              Developer content distribution for developer tools
+            </a>
+          </li>
+          <li>
+            <a href="/best-developer-marketing-agencies">
+              Best developer marketing agencies, compared
+            </a>
+          </li>
+          <li>
+            <a href="/testimonials">Client testimonials</a>
+          </li>
         </ul>
         <h3>Proof, Products, and Company Information</h3>
         <p>

@@ -59,8 +59,11 @@ const PAPER_PATHS = new Set([
   "/product-launch-service",
   "/aeo-agency",
   "/reddit-marketing-agency",
+  "/developer-content-distribution",
   "/services",
   "/results",
+  "/testimonials",
+  "/best-developer-marketing-agencies",
 ]);
 
 /** Drops the locale prefix, so "/fr/careers" reads as "/careers". */
@@ -75,6 +78,7 @@ export function isPaperPath(pathname: string) {
     PAPER_PATHS.has(path) ||
     /^\/blog(\/|$)/.test(path) ||
     /^\/careers\/[^/]+\/?$/.test(path) ||
-    /^\/case-studies\/[^/]+\/?$/.test(path)
+    /^\/case-studies\/[^/]+\/?$/.test(path) ||
+    /^\/compare\/[^/]+\/?$/.test(path)
   );
 }

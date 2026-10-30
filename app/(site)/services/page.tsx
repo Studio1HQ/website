@@ -7,16 +7,14 @@ import {
   PenNib,
   RedditLogo,
   RocketLaunch,
+  ShareNetwork,
   Sparkle,
-  SquaresFour,
   UsersThree,
   VideoCamera,
 } from "@phosphor-icons/react/dist/ssr";
 import type { Icon } from "@phosphor-icons/react";
-import {
-  PaperEyebrow,
-  PaperPageHeader,
-} from "@/components/paper/paper-page-header";
+import Hero from "@/components/pages/services-hub/hero";
+import { StoryLogos } from "@/components/pages/shared/service-story";
 import {
   Accent,
   IndexBar,
@@ -31,7 +29,7 @@ import { breadcrumbJsonLd, pageMetadata, pageUrl } from "@/lib/seo";
 
 const TITLE = "Developer Marketing Services for Devtools";
 const DESCRIPTION =
-  "Studio1 services for devtool, AI, and open-source teams: technical content, docs, video, DevRel, GitHub growth, launches, Reddit marketing, and AEO.";
+  "Studio1 services for devtool, AI, and open-source teams: technical content, docs, video, DevRel, GitHub growth, launches, Reddit, distribution, and AEO.";
 
 export async function generateMetadata(): Promise<Metadata> {
   return pageMetadata({
@@ -115,6 +113,14 @@ const GROWTH: Service[] = [
     description:
       "Subreddit research, technical posts, and launch threads developers upvote.",
     proof: { value: "304K+", label: "Reddit impressions for Entelligence" },
+  },
+  {
+    name: "Content Distribution",
+    href: "/developer-content-distribution",
+    icon: ShareNetwork,
+    description:
+      "Every piece rebuilt for Reddit, X, LinkedIn, daily.dev, Dev.to, and YouTube.",
+    proof: { value: "100K+", label: "OpenLore impressions in one month" },
   },
   {
     name: "AEO Agency",
@@ -245,22 +251,8 @@ export default function ServicesPage() {
         }}
       />
 
-      <PaperPageHeader className="pb-4 pt-36 md:pb-8 md:pt-44">
-        <div className="mx-auto flex max-w-[1100px] flex-col items-center px-4 text-center sm:px-6">
-          <PaperEyebrow
-            icon={<SquaresFour weight="duotone" className="size-4" />}
-          >
-            Services
-          </PaperEyebrow>
-          <h1 className="mt-7 text-[40px] font-medium leading-[1.06] tracking-[-0.05em] sm:text-[60px] lg:text-[76px]">
-            Services for <span style={{ color: PRINT }}>developer tools</span>
-          </h1>
-          <p className="mt-6 max-w-[640px] text-[16px] leading-[1.6] text-[#141414]/60 sm:text-[18px]">
-            Eight services for devtool, AI, and open-source teams: content,
-            docs, video, DevRel, GitHub, launches, Reddit, and AEO.
-          </p>
-        </div>
-      </PaperPageHeader>
+      <Hero />
+      <StoryLogos />
 
       <PaperSection tone="paper" className="!pt-10 md:!pt-14">
         <Container>
@@ -296,7 +288,7 @@ export default function ServicesPage() {
         </Container>
       </PaperSection>
 
-      <PaperSection tone="paper" className="!pt-0">
+      <PaperSection id="where-to-start" tone="paper" className="!pt-0">
         <Container>
           <IndexBar index={3} name="Where to start" />
           <ul

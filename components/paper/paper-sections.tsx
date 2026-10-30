@@ -41,6 +41,7 @@ import {
 import { useTranslations } from "next-intl";
 import { trustedbyLogo } from "@/constants/data";
 import { homeFeatures, homeTestimonials } from "@/data/home";
+import { COMPANY_MARKS, companyOf } from "@/lib/testimonials";
 import { NumericText } from "@/components/ui/num";
 import Logo from "@/components/ui/svgs/logo";
 import { cn } from "@/lib/utils";
@@ -2267,30 +2268,6 @@ export function PaperReasons() {
 /* ------------------------------------------------------------------ */
 
 /** Company marks for the testimonial picker, keyed by the company in each role. */
-const COMPANY_MARKS: Record<string, string> = {
-  Jozu: "/assets/jozu.webp",
-  "Nebius AI": "/assets/nebius.webp",
-  Ittybit: "/assets/ittybit.webp",
-  "Entelligence.AI": "/assets/enteligence.webp",
-  "Readyset.io": "/assets/readyset.webp",
-  CopilotKit: "/assets/copilotkit.webp",
-  Crawlee: "/assets/crawlee.webp",
-  Opire: "/assets/opire.webp",
-  "Permit.io": "/assets/permit.webp",
-  "VDK(VMware)": "/assets/vmware.webp",
-  Tolgee: "/assets/tolgee.webp",
-  WebCrumbs: "/assets/webcrumbs.webp",
-  "Pieces.app": "/assets/pieces.webp",
-  Latitude: "/assets/latitude.webp",
-  "Novita AI": "/assets/novita-ai-mark-green.webp",
-};
-
-/** "CEO & Founder Opire" / "COO, Tolgee" -> the company name. */
-function companyOf(role: string) {
-  if (role.includes(",")) return role.slice(role.lastIndexOf(",") + 1).trim();
-  return role.split(" ").pop() ?? role;
-}
-
 export function PaperTestimonials() {
   const t = useTranslations("Testimonials");
   const [index, setIndex] = useState(0);

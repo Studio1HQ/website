@@ -51,12 +51,14 @@ const SERVICE_LINKS = [
   { key: "productLaunch", href: "/product-launch-service" },
   { key: "aeo", href: "/aeo-agency" },
   { key: "redditMarketing", href: "/reddit-marketing-agency" },
+  { key: "distribution", href: "/developer-content-distribution" },
 ] as const;
 
 const COMPANY_LINKS = [
   { key: "about", href: "/about-us" },
   { key: "caseStudies", href: "/case-studies" },
   { key: "results", href: "/results" },
+  { key: "testimonials", href: "/testimonials" },
   { key: "blog", href: "/blog" },
   { key: "product", href: "/product" },
 ] as const;

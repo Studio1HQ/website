@@ -1112,6 +1112,67 @@ export const REDDIT_SIDES: HeroSides = {
   ],
 };
 
+/** The services hub: growth on one side, content on the other. */
+export const SERVICES_SIDES: HeroSides = {
+  cards: [
+    { label: "openlore · star-history", card: <StarsCard /> },
+    { label: "tensorlake/toon-vs-json.mdx", card: <ArticleCard /> },
+  ],
+  stats: [
+    {
+      label: "stat · github",
+      value: "12,000+",
+      text: "GitHub stars, launch to today",
+      client: "Memori",
+      icon: Star,
+    },
+    {
+      label: "stat · reddit",
+      value: "304K+",
+      text: "Reddit impressions from developer distribution",
+      client: "Entelligence",
+      icon: RedditLogo,
+    },
+  ],
+};
+
+export const DISTRIBUTION_SIDES: HeroSides = {
+  cards: [
+    {
+      label: "r/LLMDevs · post-insights",
+      card: (
+        <InsightsCard
+          client="Entelligence"
+          place="r/LLMDevs"
+          rows={[
+            ["Views", "205K"],
+            ["Upvotes", "278"],
+            ["Upvote ratio", "97.6%"],
+            ["Comments", "36"],
+          ]}
+        />
+      ),
+    },
+    { label: "tensorlake/toon-vs-json.mdx", card: <ArticleCard /> },
+  ],
+  stats: [
+    {
+      label: "stat · reddit",
+      value: "304K+",
+      text: "Reddit impressions from adapted blog angles",
+      client: "Entelligence",
+      icon: RedditLogo,
+    },
+    {
+      label: "stat · daily.dev",
+      value: "50K",
+      text: "organic impressions on one daily.dev post",
+      client: "OpenLore",
+      icon: Eye,
+    },
+  ],
+};
+
 export const GITHUB_SIDES: HeroSides = {
   cards: [
     { label: "openlore · star-history", card: <StarsCard /> },
