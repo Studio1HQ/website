@@ -5,6 +5,8 @@ import { baseUrl } from "@/lib/seo";
 export default function DevRelJobs() {
   const jobs = getDevRelJobs();
 
+  // Plain list entries, not JobPosting: Google only accepts JobPosting on a
+  // job's own detail page, and these jobs live on other companies' sites.
   const itemListJsonLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
@@ -14,21 +16,8 @@ export default function DevRelJobs() {
     itemListElement: jobs.map((job, index) => ({
       "@type": "ListItem",
       position: index + 1,
-      item: {
-        "@type": "JobPosting",
-        title: job.title,
-        description: `${job.title} at ${job.company} - ${job.location}.`,
-        datePosted: job.postedDate,
-        employmentType: "FULL_TIME",
-        hiringOrganization: {
-          "@type": "Organization",
-          name: job.company,
-        },
-        ...(job.workplace === "Remote"
-          ? { jobLocationType: "TELECOMMUTE" }
-          : {}),
-        url: job.url,
-      },
+      name: `${job.title} at ${job.company}`,
+      url: job.url,
     })),
   };
 
