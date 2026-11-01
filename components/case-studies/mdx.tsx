@@ -33,17 +33,13 @@ function Frame({
   caption?: string;
 }) {
   return (
-    <figure className="not-prose my-10 w-fit max-w-full overflow-hidden rounded-[6px] bg-white/80 p-2 shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08]">
-      <div className="mb-2 flex items-center gap-1.5 px-1">
-        <span className="size-2 rounded-full bg-[#f97316]" />
-        <span className="size-2 rounded-full bg-[#f97316]/40" />
-        <span className="size-2 rounded-full bg-[#141414]/15" />
-      </div>
-      <div className="w-fit max-w-full overflow-hidden rounded-[6px] bg-[#fbf8f3] ring-1 ring-[#141414]/[0.08]">
+    // A glassy rim with the image set into it, like the cards around it
+    <figure className="not-prose my-10 w-fit max-w-full rounded-[6px] bg-white/55 p-2 shadow-[0_30px_60px_-44px_rgba(20,20,20,0.5),inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-inset ring-white/80 backdrop-blur-xl backdrop-saturate-150">
+      <div className="w-fit max-w-full overflow-hidden rounded-[6px] bg-[#f1ece4] shadow-[inset_0_0_0_1px_rgba(20,20,20,0.06)] [&_img]:block">
         {children}
       </div>
       {caption ? (
-        <figcaption className="px-1 pt-2 text-center text-[12.5px] font-medium text-[#141414]/55">
+        <figcaption className="px-2 pb-1 pt-2.5 text-center text-[12.5px] font-medium text-[#141414]/55">
           {caption}
         </figcaption>
       ) : null}

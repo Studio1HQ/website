@@ -114,11 +114,22 @@ export function PageRibbon() {
   useEffect(() => {
     if (!geometry) return;
     track();
-    window.addEventListener("scroll", track, { passive: true });
-    window.addEventListener("resize", track);
+    // At most one measurement per frame, however fast the page scrolls.
+    let frame = 0;
+    const onScroll = () => {
+      if (!frame) {
+        frame = requestAnimationFrame(() => {
+          frame = 0;
+          track();
+        });
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
     return () => {
-      window.removeEventListener("scroll", track);
-      window.removeEventListener("resize", track);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (frame) cancelAnimationFrame(frame);
     };
   }, [geometry, track]);
 

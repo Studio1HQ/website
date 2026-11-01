@@ -50,7 +50,7 @@ export default async function CaseStudyPage({ params }: Props) {
   const study = getCaseStudyBySlug(slug, DEFAULT_LOCALE);
   if (!study) notFound();
 
-  const related = getRelatedCaseStudies(slug, 3, DEFAULT_LOCALE);
+  const related = getRelatedCaseStudies(slug, 4, DEFAULT_LOCALE);
   // Counts and ranks ("2K+", "#3"), not worded results like "Hackathons".
   const resultNumbers = study.metrics.filter((metric) =>
     /^[~#]?\d/.test(metric.value),
@@ -90,11 +90,14 @@ export default async function CaseStudyPage({ params }: Props) {
     articleSection: "Case Studies",
   };
 
-  const breadcrumbSchema = localizedBreadcrumbJsonLd([
-    { name: "Home", path: "/" },
-    { name: "Case Studies", path: "/case-studies" },
-    { name: study.title, path: `/case-studies/${slug}` },
-  ], DEFAULT_LOCALE);
+  const breadcrumbSchema = localizedBreadcrumbJsonLd(
+    [
+      { name: "Home", path: "/" },
+      { name: "Case Studies", path: "/case-studies" },
+      { name: study.title, path: `/case-studies/${slug}` },
+    ],
+    DEFAULT_LOCALE,
+  );
 
   return (
     <>

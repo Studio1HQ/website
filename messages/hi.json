@@ -167,7 +167,7 @@
     }
   },
   "ProductPage": {
-    "visitProduct": "{name} देखें",
+    "visitProduct": "{name} आज़माएँ",
     "sampleData": "Sample data",
     "copy": "Copy करें",
     "copied": "Copied",

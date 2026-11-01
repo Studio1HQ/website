@@ -5,7 +5,7 @@ import { ArrowLeft, ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
 import { NumericText } from "@/components/ui/num";
 import { PaperPageHeader } from "@/components/paper/paper-page-header";
 import { GRAIN, PAPER_SCOPE, PRINT } from "@/lib/paper";
-import { CaseStudyHighlights } from "@/components/case-studies/case-study-highlights";
+import { ResultsPanel } from "@/components/case-studies/results-panel";
 import {
   CaseStudyProof,
   CaseStudyScope,
@@ -13,6 +13,7 @@ import {
 } from "@/components/case-studies/case-study-detail-panels";
 import { TableOfContents } from "@/components/case-studies/table-of-contents";
 import { getClientLogo } from "@/components/case-studies/client-logos";
+import { CaseStory } from "@/components/case-studies/case-story";
 import { RelatedCaseStudies } from "@/components/case-studies/related-case-studies";
 import type { CaseStudyMeta } from "@/lib/case-studies";
 
@@ -42,15 +43,14 @@ export function CaseStudyLayout({
   children,
 }: CaseStudyLayoutProps) {
   const logo = getClientLogo(study.slug);
-  const meta = [study.industry, study.category].filter(Boolean);
   const hasMetrics = study.metrics.length > 0;
 
   return (
     <div style={PAPER_SCOPE}>
-      <TableOfContents />
+      <TableOfContents client={{ name: study.client, logo: logo?.icon }} />
 
       <article>
-        <PaperPageHeader className="pb-12 pt-32 md:pb-16 md:pt-40">
+        <PaperPageHeader className="pb-10 pt-32 md:pb-12 md:pt-40">
           <div className="mx-auto w-full max-w-7xl px-4">
             <Link
               href="/case-studies"
@@ -63,43 +63,61 @@ export function CaseStudyLayout({
               All case studies
             </Link>
 
-            <div className={`${COLUMN} mt-10`}>
-              <div className="flex items-center gap-3">
-                {logo ? (
-                  <div className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-[6px] bg-[#f8f6f2] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10)] p-2">
-                    <Image
-                      src={logo.icon}
-                      alt={`${study.client} logo`}
-                      width={28}
-                      height={28}
-                      className="size-full rounded-lg object-contain mix-blend-multiply"
-                    />
-                  </div>
-                ) : null}
-                <div className="min-w-0">
-                  <p className="text-[15px] font-semibold tracking-[-0.01em] text-[#141414]">
-                    {study.client}
-                  </p>
-                  {meta.length > 0 ? (
-                    <p
-                      className="mt-0.5 text-[12px] font-medium"
-                      style={{ color: PRINT }}
-                    >
-                      {meta.join(" · ")}
-                    </p>
+            <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,52rem)_minmax(0,300px)] lg:items-end lg:justify-between">
+              <div className={COLUMN}>
+                {/* Client: the exact mark, name, and where the work sat */}
+                <div className="inline-flex items-center gap-3 rounded-[6px] bg-white/55 p-1.5 pr-4 shadow-[0_14px_30px_-24px_rgba(20,20,20,0.45),inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-inset ring-white/80 backdrop-blur-xl">
+                  {logo ? (
+                    <span className="relative size-10 shrink-0 overflow-hidden rounded-[6px] bg-white ring-1 ring-inset ring-[#141414]/[0.06]">
+                      <Image
+                        src={logo.icon}
+                        alt={`${study.client} logo`}
+                        fill
+                        sizes="40px"
+                        className="object-cover"
+                      />
+                    </span>
                   ) : null}
+                  <div className="min-w-0">
+                    <p className="text-[14.5px] font-semibold leading-tight tracking-[-0.01em] text-[#141414]">
+                      {study.client}
+                    </p>
+                    {study.industry ? (
+                      <p className="mt-0.5 text-[12px] text-[#141414]/55">
+                        {study.industry}
+                      </p>
+                    ) : null}
+                  </div>
                 </div>
+
+                {study.category ? (
+                  <p
+                    className="mt-8 text-[12px] font-medium uppercase tracking-[0.14em]"
+                    style={{ color: PRINT }}
+                  >
+                    {study.category}
+                  </p>
+                ) : null}
+
+                <h1 className="mt-3 text-[34px] font-medium leading-[1.14] tracking-[-0.05em] md:text-[46px] lg:text-[56px]">
+                  <span>
+                    <NumericText>{study.title}</NumericText>
+                  </span>
+                </h1>
+
+                <p className="mt-6 max-w-[680px] text-[17px] leading-[1.6] text-[#141414]/60 sm:text-[18px]">
+                  {study.description}
+                </p>
               </div>
 
-              <h1 className="mt-8 text-[34px] font-medium leading-[1.14] tracking-[-0.05em] md:text-[46px] lg:text-[56px]">
-                <span>
-                  <NumericText>{study.title}</NumericText>
-                </span>
-              </h1>
-
-              <p className="mt-6 max-w-[680px] text-[17px] leading-[1.6] text-[#141414]/60 sm:text-[18px]">
-                {study.description}
-              </p>
+              {/* The results, beside the headline */}
+              {hasMetrics ? (
+                <ResultsPanel
+                  client={study.client}
+                  metrics={study.metrics}
+                  logo={logo?.icon}
+                />
+              ) : null}
             </div>
           </div>
         </PaperPageHeader>
@@ -119,16 +137,13 @@ export function CaseStudyLayout({
             stay after the narrative. Without metrics: testimonial + outcomes
             move up so the page still opens with proof, not a blank gap.
           */}
-              {hasMetrics ? (
-                <div>
-                  <CaseStudyHighlights study={study} />
-                </div>
-              ) : (
-                <CaseStudyProof study={study} />
-              )}
+              {hasMetrics ? null : <CaseStudyProof study={study} />}
 
               <CaseStudySnapshot study={study} />
               <CaseStudyScope study={study} />
+
+              {/* The engagement as a four-chapter story */}
+              <CaseStory study={study} />
 
               {/* Narrative: max-w-none so width comes from the column wrapper, not prose defaults. */}
               <div
@@ -178,9 +193,10 @@ export function CaseStudyLayout({
             aside for the related strip, which isn't part of the study.
           */}
               <div aria-hidden data-mdx-end />
-
-              <RelatedCaseStudies studies={related} />
             </div>
+
+            {/* More studies run the full width of the page */}
+            <RelatedCaseStudies studies={related} />
           </div>
         </div>
       </article>

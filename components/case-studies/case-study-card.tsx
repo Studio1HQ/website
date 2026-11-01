@@ -25,7 +25,7 @@ export type CardVariant = "featured" | "default" | "compact";
 /** Shared frame: white paper sheet + one hover language across all sizes. */
 export function cardFrame(extra?: string) {
   return cn(
-    "group relative isolate flex min-w-0 overflow-hidden rounded-[6px] bg-white/80 text-[#141414] ring-1 ring-inset ring-[#141414]/[0.08]",
+    "group relative isolate flex min-w-0 overflow-hidden rounded-[6px] bg-white text-[#141414] ring-1 ring-inset ring-[#141414]/[0.08]",
     "shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)]",
     "transition-[transform,box-shadow,background-color] duration-500 ease-out hover:-translate-y-1 hover:bg-white hover:shadow-[inset_0_1px_0_#fff,0_30px_60px_-34px_rgba(249,115,22,0.45)]",
     "motion-reduce:transform-none motion-reduce:transition-none",
@@ -178,9 +178,7 @@ export function CaseStudyCardCompact({ study }: { study: CaseStudyMeta }) {
   return (
     <Link
       href={`/case-studies/${study.slug}`}
-      className={cardFrame(
-        "h-full flex-col items-stretch rounded-[6px] p-2.5",
-      )}
+      className={cardFrame("h-full flex-col items-stretch rounded-[6px] p-2.5")}
     >
       <CardHairline />
       <CardMedia study={study} variant="compact" />

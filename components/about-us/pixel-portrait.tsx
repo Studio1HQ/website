@@ -61,29 +61,41 @@ export function PixelPortrait({
     const draw = () => {
       const { img, w, h } = s;
       if (!img) return;
+      // The whole portrait in one call; only tiles near the cursor move.
       ctx.clearRect(0, 0, w, h);
+      ctx.drawImage(img, 0, 0, w, h);
+      if (s.strength <= 0.001) return;
       const sx = img.naturalWidth / w;
       const sy = img.naturalHeight / h;
-      const cols = Math.ceil(w / TILE);
-      const rows = Math.ceil(h / TILE);
-      for (let j = 0; j < rows; j += 1) {
-        for (let i = 0; i < cols; i += 1) {
+      const reach = RADIUS + PUSH;
+      const i0 = Math.max(0, Math.floor((s.px - reach) / TILE));
+      const i1 = Math.min(
+        Math.ceil(w / TILE),
+        Math.ceil((s.px + reach) / TILE),
+      );
+      const j0 = Math.max(0, Math.floor((s.py - reach) / TILE));
+      const j1 = Math.min(
+        Math.ceil(h / TILE),
+        Math.ceil((s.py + reach) / TILE),
+      );
+      // Lift the affected area, then lay its tiles back down, displaced.
+      ctx.clearRect(i0 * TILE, j0 * TILE, (i1 - i0) * TILE, (j1 - j0) * TILE);
+      for (let j = j0; j < j1; j += 1) {
+        for (let i = i0; i < i1; i += 1) {
           const x = i * TILE;
           const y = j * TILE;
           let dx = 0;
           let dy = 0;
-          if (s.strength > 0.001) {
-            const cx = x + TILE / 2 - s.px;
-            const cy = y + TILE / 2 - s.py;
-            const d = Math.hypot(cx, cy);
-            if (d < RADIUS) {
-              const f = (1 - d / RADIUS) ** 2 * s.strength;
-              const n = noise(i, j);
-              const push = PUSH * f * (0.7 + n * 0.6);
-              const k = d > 0.001 ? push / d : 0;
-              dx = Math.round(cx * k + (n - 0.5) * 1.2 * f);
-              dy = Math.round(cy * k + (noise(j, i) - 0.5) * 1.2 * f);
-            }
+          const cx = x + TILE / 2 - s.px;
+          const cy = y + TILE / 2 - s.py;
+          const d = Math.hypot(cx, cy);
+          if (d < RADIUS) {
+            const f = (1 - d / RADIUS) ** 2 * s.strength;
+            const n = noise(i, j);
+            const push = PUSH * f * (0.7 + n * 0.6);
+            const k = d > 0.001 ? push / d : 0;
+            dx = cx * k + (n - 0.5) * 1.2 * f;
+            dy = cy * k + (noise(j, i) - 0.5) * 1.2 * f;
           }
           ctx.drawImage(
             img,

@@ -10,9 +10,9 @@ type CaseStudyHighlightQuotesProps = {
   className?: string;
 };
 
-/** Shared surface with CaseStudyHighlightStats: the paper white sheet. */
+/** Shared surface with CaseStudyHighlightStats: an engraved well in a glassy rim. */
 export const caseStudyHighlightCardClassName =
-  "relative rounded-[6px] bg-white/80 shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08] px-5 py-5 text-[#141414] md:px-7 md:py-7";
+  "relative rounded-[6px] bg-[#f1ece4] shadow-[0_0_0_6px_rgba(255,255,255,0.62),0_0_0_7px_rgba(20,20,20,0.04),0_30px_60px_-40px_rgba(20,20,20,0.45),inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)] px-5 py-5 text-[#141414] md:px-7 md:py-7";
 
 /**
  * Single editorial pull quote when a study has no verified metrics.

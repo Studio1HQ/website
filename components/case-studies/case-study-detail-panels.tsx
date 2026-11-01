@@ -10,8 +10,9 @@ type CaseStudyDetailPanelsProps = {
   study: CaseStudyMeta;
 };
 
+// Engraved: a recessed well set inside a thin glassy rim
 const quietPanel =
-  "rounded-[6px] bg-white/80 shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08]";
+  "rounded-[6px] bg-[#f1ece4] shadow-[0_0_0_6px_rgba(255,255,255,0.62),0_0_0_7px_rgba(20,20,20,0.04),0_30px_60px_-40px_rgba(20,20,20,0.45),inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)]";
 
 export function CaseStudySnapshot({ study }: CaseStudyDetailPanelsProps) {
   const snapshot = [
@@ -69,7 +70,7 @@ export function CaseStudyScope({ study }: CaseStudyDetailPanelsProps) {
         {study.services.map((service) => (
           <span
             key={service}
-            className="inline-flex items-center gap-2 rounded-full bg-white/80 px-3.5 py-2 text-[13.5px] font-medium text-[#141414] ring-1 ring-inset ring-[#141414]/10"
+            className="inline-flex items-center gap-2 rounded-full bg-[#f1ece4] px-3.5 py-2 text-[13.5px] font-medium text-[#141414] shadow-[0_0_0_4px_rgba(255,255,255,0.62),inset_0_2px_5px_rgba(20,20,20,0.08),inset_0_-1px_0_rgba(255,255,255,0.8)]"
           >
             <span
               aria-hidden

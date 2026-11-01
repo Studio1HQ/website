@@ -167,7 +167,7 @@
     }
   },
   "ProductPage": {
-    "visitProduct": "Visit {name}",
+    "visitProduct": "Try {name}",
     "sampleData": "Sample data",
     "copy": "Copy",
     "copied": "Copied",

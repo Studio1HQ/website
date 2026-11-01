@@ -42,15 +42,16 @@ export function CaseStudyResult({
     return (
       <Link
         href={study.href}
-        className={cn("flex flex-col md:flex-row md:items-stretch", cardSurface, className)}
+        className={cn(
+          "flex flex-col md:flex-row md:items-stretch",
+          cardSurface,
+          className,
+        )}
       >
-
         <div
           className={cn(
             "relative z-[2] flex flex-col justify-between border-b border-[var(--home-line)] md:w-[42%] md:border-b-0 md:border-r",
-            isDense
-              ? "gap-4 p-5 md:p-6 lg:p-7"
-              : "gap-6 p-6 md:p-8 lg:p-10",
+            isDense ? "gap-4 p-5 md:p-6 lg:p-7" : "gap-6 p-6 md:p-8 lg:p-10",
           )}
         >
           <div>
@@ -82,9 +83,7 @@ export function CaseStudyResult({
         <div
           className={cn(
             "relative z-[2] flex flex-1 flex-col justify-between",
-            isDense
-              ? "gap-5 p-5 md:p-6 lg:p-7"
-              : "gap-8 p-6 md:p-8 lg:p-10",
+            isDense ? "gap-5 p-5 md:p-6 lg:p-7" : "gap-8 p-6 md:p-8 lg:p-10",
           )}
         >
           <div>
@@ -141,7 +140,6 @@ export function CaseStudyResult({
       href={study.href}
       className={cn("flex h-full flex-col p-6 sm:p-7", cardSurface, className)}
     >
-
       <div className="relative z-[1] mb-5 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="truncate text-[17px] font-medium tracking-[-0.02em] text-[var(--home-ink)]">
@@ -161,7 +159,9 @@ export function CaseStudyResult({
         <p className="font-numeric text-4xl font-medium tabular-nums leading-none tracking-tight text-primary sm:text-[2.75rem]">
           <Num>{study.heroValue}</Num>
         </p>
-        <p className="mt-2 text-sm text-[var(--home-ink-soft)]">{study.heroLabel}</p>
+        <p className="mt-2 text-sm text-[var(--home-ink-soft)]">
+          {study.heroLabel}
+        </p>
         <p className="mt-4 text-sm leading-relaxed text-[var(--home-ink-soft)]">
           {study.proof}
         </p>

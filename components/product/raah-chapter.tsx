@@ -315,10 +315,10 @@ function VitalsWidget() {
 }
 
 const ROUTES = [
-  { where: "Frankfurt · Fiber", seconds: 0.4 },
-  { where: "Virginia · Cable", seconds: 0.7 },
-  { where: "São Paulo · Mobile", seconds: 1.3 },
-  { where: "Mumbai · Mobile", seconds: 2.1 },
+  { where: "Frankfurt · Fiber", country: "de", seconds: 0.4 },
+  { where: "Virginia · Cable", country: "us", seconds: 0.7 },
+  { where: "São Paulo · Mobile", country: "br", seconds: 1.3 },
+  { where: "Mumbai · Mobile", country: "in", seconds: 2.1 },
 ];
 const SLOW = 1.5;
 
@@ -336,8 +336,17 @@ function NetworkWidget() {
           return (
             <li key={route.where} className="text-[11px]">
               <div className="flex justify-between gap-2">
-                <span className="truncate text-[#141414]/65">
-                  {route.where}
+                <span className="flex min-w-0 items-center gap-1.5 text-[#141414]/65">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`https://flagcdn.com/${route.country}.svg`}
+                    alt=""
+                    width={16}
+                    height={12}
+                    loading="lazy"
+                    className="h-3 w-4 shrink-0 rounded-[2px] object-cover shadow-[0_0_0_1px_rgba(20,20,20,0.08)]"
+                  />
+                  <span className="truncate">{route.where}</span>
                 </span>
                 <span
                   className={cn(

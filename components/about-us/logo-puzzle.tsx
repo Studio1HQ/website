@@ -3,17 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRef, type ReactNode } from "react";
-import {
-  motion,
-  useReducedMotion,
-  useScroll,
-  useSpring,
-  useTransform,
-} from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import Logo from "@/components/ui/svgs/logo";
 import { companies } from "@/data/companies";
 import { EASE } from "@/components/home/ui";
 import { cn } from "@/lib/utils";
+import { tick } from "@/lib/tick";
 
 /*
  * Partner logos as a white jigsaw: one logo per piece, the pieces locked
@@ -143,22 +138,52 @@ function Piece({
         target={external ? "_blank" : undefined}
         rel={external ? "noopener noreferrer" : undefined}
         aria-label={label}
+        onPointerEnter={() => tick(1 + ((r + c) % 5) * 0.04)}
         className="absolute inset-0 block transition-transform duration-300 ease-out group-hover:-translate-y-2"
       >
-        {/* No filter at rest; the lift shadow only appears on hover */}
+        {/* A real piece: a darker copy forms its thickness, drawn on a
+            lower layer so it never covers a neighbour */}
         <svg
           aria-hidden
           viewBox="0 0 100 100"
-          className="absolute inset-0 size-full overflow-visible group-hover:[filter:drop-shadow(0_18px_20px_rgba(20,20,20,0.22))]"
+          className="absolute inset-0 -z-[1] size-full overflow-visible"
+        >
+          <path
+            d={piecePath(r, c, total)}
+            transform="translate(0 5)"
+            fill="url(#puzzle-side)"
+            stroke="#141414"
+            strokeOpacity="0.18"
+            strokeWidth="1"
+            vectorEffect="non-scaling-stroke"
+            strokeLinejoin="round"
+          />
+        </svg>
+        {/* The face, with a light bevel along its top edge */}
+        <svg
+          aria-hidden
+          viewBox="0 0 100 100"
+          className="absolute inset-0 size-full overflow-visible"
         >
           <path
             d={piecePath(r, c, total)}
             fill="url(#puzzle-paper)"
             stroke="#141414"
-            strokeOpacity="0.28"
+            strokeOpacity="0.22"
             strokeWidth="1"
             vectorEffect="non-scaling-stroke"
             strokeLinejoin="round"
+          />
+          <path
+            d={piecePath(r, c, total)}
+            fill="none"
+            stroke="#ffffff"
+            strokeOpacity="0.9"
+            strokeWidth="1.2"
+            vectorEffect="non-scaling-stroke"
+            strokeLinejoin="round"
+            transform="translate(0 -0.6)"
+            clipPath="inset(0 0 50% 0)"
           />
         </svg>
         <span className="absolute inset-[18%] flex flex-col items-center justify-center gap-1.5">
@@ -169,15 +194,21 @@ function Piece({
   );
 }
 
-/** One column of pieces. */
+/** One column of pieces; columns drop into place one after another. */
 function Column({ c, children }: { c: number; children: ReactNode }) {
+  const reduceMotion = useReducedMotion();
   return (
-    <div
+    <motion.div
       className="absolute inset-y-0"
       style={{ left: pct((c / COLS) * 100), width: pct(100 / COLS) }}
+      initial={reduceMotion ? false : { opacity: 0, y: -36 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-120px" }}
+      transition={{ duration: 0.55, ease: EASE, delay: c * 0.08 }}
+      onAnimationComplete={() => tick(1 + c * 0.03)}
     >
       {children}
-    </div>
+    </motion.div>
   );
 }
 
@@ -220,13 +251,6 @@ export function LogoPuzzle({ className }: { className?: string }) {
   // Every partner, then one Studio1 piece that completes the board.
   const total = companies.length + 1;
   const rows = Math.ceil(total / COLS);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"],
-  });
-  const wave = useSpring(scrollYProgress, { stiffness: 60, damping: 20 });
-  const reduceMotion = useReducedMotion();
-  const tilt = useTransform(wave, [0, 0.5, 1], [32, 22, 16]);
 
   const pieces: { c: number; node: ReactNode }[] = companies.map(
     (item, index) => {
@@ -296,7 +320,11 @@ export function LogoPuzzle({ className }: { className?: string }) {
           {/* Paper: light from the top, a touch darker below */}
           <linearGradient id="puzzle-paper" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0" stopColor="#ffffff" />
-            <stop offset="1" stopColor="#f1ede6" />
+            <stop offset="1" stopColor="#efe9e0" />
+          </linearGradient>
+          <linearGradient id="puzzle-side" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#d9d1c5" />
+            <stop offset="1" stopColor="#bfb5a7" />
           </linearGradient>
         </defs>
       </svg>
@@ -304,7 +332,7 @@ export function LogoPuzzle({ className }: { className?: string }) {
         className="relative mx-auto w-[min(1280px,92vw)] [transform-origin:50%_0%]"
         style={{
           aspectRatio: `${COLS} / ${rows}`,
-          rotateX: reduceMotion ? 22 : tilt,
+          rotateX: 24,
           scale: 0.94,
         }}
         initial={{ opacity: 0 }}

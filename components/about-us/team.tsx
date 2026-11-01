@@ -1,7 +1,13 @@
 "use client";
-import Image from "next/image";
 import Link from "next/link";
-import { motion, useReducedMotion } from "motion/react";
+import {
+  motion,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+  useTransform,
+} from "motion/react";
+import { useRef } from "react";
 import {
   GlobeSimple,
   LinkedinLogo,
@@ -10,7 +16,6 @@ import {
 import { teamMembers } from "@/constants/data";
 import { cn } from "@/lib/utils";
 import { PixelPortrait } from "@/components/about-us/pixel-portrait";
-import { PrintBlock } from "@/components/paper/paper-hero";
 import { Container, EASE } from "@/components/home/ui";
 import {
   Accent,
@@ -109,6 +114,22 @@ function LeaderCard({ member }: { member: Member }) {
 /** Speaker-style portrait cards: a B&W photo on a print-orange panel. */
 function TeamPanel() {
   const reduceMotion = useReducedMotion();
+  const panelRef = useRef<HTMLDivElement>(null);
+  // Across the section's pass through the screen: hands glide in, rest,
+  // then glide back out the way they came.
+  const { scrollYProgress } = useScroll({
+    target: panelRef,
+    offset: ["start end", "end start"],
+  });
+  const pass = useSpring(scrollYProgress, {
+    stiffness: 60,
+    damping: 24,
+    mass: 0.8,
+  });
+  const reach = useTransform(pass, [0.05, 0.32, 0.68, 0.95], [1, 0, 0, 1]);
+  const handLeftX = useTransform(reach, (v) => `${-v * 70}%`);
+  const handRightX = useTransform(reach, (v) => `${v * 70}%`);
+  const handOpacity = useTransform(reach, [0, 1], [1, 0]);
   const enter = (delay: number) => ({
     initial: reduceMotion ? false : { opacity: 0, y: 24 },
     whileInView: { opacity: 1, y: 0 },
@@ -117,29 +138,52 @@ function TeamPanel() {
   });
 
   return (
-    <div className="relative isolate">
-      {/* The reaching hands from the home hero, one each side */}
+    <div ref={panelRef} className="relative isolate">
+      {/* The reaching hands from the home hero: they slide in from the
+          screen edges as the founders scroll into view */}
       {(["left", "right"] as const).map((side) => (
-        <PrintBlock
+        <motion.span
           key={side}
+          aria-hidden
+          style={
+            reduceMotion
+              ? undefined
+              : {
+                  x: side === "left" ? handLeftX : handRightX,
+                  opacity: handOpacity,
+                }
+          }
           className={cn(
-            "absolute top-[34%] hidden h-[150px] xl:block",
+            "pointer-events-none absolute top-[24%] -z-10 hidden h-[260px] xl:block",
             side === "left"
-              ? "left-[calc(50%-50vw)] right-[calc(50%+452px)]"
-              : "left-[calc(50%+452px)] right-[calc(50%-50vw)]",
+              ? "left-[calc(50%-50vw)] right-[calc(50%+446px)]"
+              : "left-[calc(50%+446px)] right-[calc(50%-50vw)]",
           )}
         >
-          <Image
-            src={`/assets/hand-${side}.png`}
-            alt=""
-            fill
-            sizes="30vw"
-            className={cn(
-              "object-contain p-[10%] [filter:brightness(0)_invert(96%)_sepia(8%)]",
-              side === "left" ? "object-right" : "object-left",
-            )}
+          {/* The hero's reaching hand, in its peach print colour */}
+          <motion.span
+            className="absolute inset-0 will-change-transform"
+            animate={reduceMotion ? undefined : { y: [0, -6, 0] }}
+            transition={{
+              duration: 7,
+              ease: "easeInOut",
+              repeat: Infinity,
+              delay: side === "left" ? 0 : 0.9,
+            }}
+            style={{
+              background: "linear-gradient(90deg, #f7b98e, #f39a5f)",
+              maskImage: `url(/assets/hand-${side}.png)`,
+              WebkitMaskImage: `url(/assets/hand-${side}.png)`,
+              maskSize: "contain",
+              WebkitMaskSize: "contain",
+              maskRepeat: "no-repeat",
+              WebkitMaskRepeat: "no-repeat",
+              maskPosition: side === "left" ? "right center" : "left center",
+              WebkitMaskPosition:
+                side === "left" ? "right center" : "left center",
+            }}
           />
-        </PrintBlock>
+        </motion.span>
       ))}
       <ul className="mx-auto grid max-w-[880px] grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6">
         {LEADERS.map((member, index) => (

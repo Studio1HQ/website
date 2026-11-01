@@ -60,7 +60,7 @@ export default function WhyWeBuild({ index }: { index: number }) {
             return (
               <article
                 key={point.key}
-                className="group relative flex flex-col overflow-hidden rounded-[6px] bg-[var(--p-card)] p-6 ring-1 ring-inset ring-white/[0.08] md:p-7"
+                className="group relative flex flex-col overflow-hidden rounded-[18px] bg-white/[0.04] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_30px_60px_-40px_rgba(0,0,0,0.8)] ring-1 ring-inset ring-white/[0.08] backdrop-blur-xl"
               >
                 {/* Warm light that gathers in the corner on hover */}
                 <span
@@ -68,33 +68,35 @@ export default function WhyWeBuild({ index }: { index: number }) {
                   className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100"
                   style={{ background: "rgba(249,115,22,0.22)" }}
                 />
-                <div className="relative flex items-center justify-between">
-                  <span
-                    className="text-[13px] font-medium tabular-nums"
-                    style={{ color: PRINT }}
-                  >
-                    {String(position + 1).padStart(2, "0")}
-                  </span>
-                  <span className="flex size-10 items-center justify-center rounded-[8px] bg-white/[0.05] ring-1 ring-inset ring-white/[0.08]">
-                    <PointIcon
-                      aria-hidden
-                      weight="duotone"
-                      className="size-5"
+                <div className="relative flex h-full flex-col rounded-[13px] bg-black/30 p-5 shadow-[inset_0_2px_8px_rgba(0,0,0,0.55),inset_0_1px_2px_rgba(0,0,0,0.4),inset_0_-1px_0_rgba(255,255,255,0.05)] md:p-6">
+                  <div className="relative flex items-center justify-between">
+                    <span
+                      className="text-[13px] font-medium tabular-nums"
                       style={{ color: PRINT }}
-                    />
-                  </span>
+                    >
+                      {String(position + 1).padStart(2, "0")}
+                    </span>
+                    <span className="flex size-10 items-center justify-center rounded-[10px] bg-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_6px_14px_-8px_rgba(0,0,0,0.8)] ring-1 ring-inset ring-white/[0.08]">
+                      <PointIcon
+                        aria-hidden
+                        weight="duotone"
+                        className="size-5"
+                        style={{ color: PRINT }}
+                      />
+                    </span>
+                  </div>
+                  <h3 className="relative mt-10 text-[22px] font-medium leading-[1.2] tracking-[-0.035em] md:mt-14">
+                    {t(`points.${point.key}.title`)}
+                  </h3>
+                  <p
+                    className={cn(
+                      "relative mt-3 text-[15px] leading-[1.6]",
+                      MUTED,
+                    )}
+                  >
+                    {t(`points.${point.key}.body`)}
+                  </p>
                 </div>
-                <h3 className="relative mt-10 text-[22px] font-medium leading-[1.2] tracking-[-0.035em] md:mt-14">
-                  {t(`points.${point.key}.title`)}
-                </h3>
-                <p
-                  className={cn(
-                    "relative mt-3 text-[15px] leading-[1.6]",
-                    MUTED,
-                  )}
-                >
-                  {t(`points.${point.key}.body`)}
-                </p>
               </article>
             );
           })}

@@ -167,7 +167,7 @@
     }
   },
   "ProductPage": {
-    "visitProduct": "Visitar {name}",
+    "visitProduct": "Probar {name}",
     "sampleData": "Datos de ejemplo",
     "copy": "Copiar",
     "copied": "Copiado",

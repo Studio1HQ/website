@@ -1,5 +1,6 @@
 "use client";
 
+import { MachineToggle } from "@/components/paper/machine-view";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -242,6 +243,7 @@ export default function PaperFooter() {
           <p className="text-[13px] text-[#141414]/55">
             © {new Date().getFullYear()} Studio1. {t("rights")}
           </p>
+          <MachineToggle />
           <nav className="flex gap-6 text-[13px] text-[#141414]/55">
             <Link href="/terms" className="hover:text-[#141414]">
               {t("legal.terms")}

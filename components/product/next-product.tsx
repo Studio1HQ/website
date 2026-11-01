@@ -1,8 +1,8 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
 import { ArrowUpRight, LinkedinLogo } from "@phosphor-icons/react";
-import { motion, useReducedMotion } from "motion/react";
+import { motion, useInView, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { Container } from "@/components/home/ui";
 import { Construction, Cursor } from "@/components/paper/paper-hero";
@@ -45,7 +45,14 @@ function Sketch({
 }
 
 /** A card's contents, roughed in: an icon, a chart, two lines of copy. */
-function CardSketch({ tint = "rgba(20,20,20,0.08)" }: { tint?: string }) {
+function CardSketch({
+  tint = "rgba(20,20,20,0.08)",
+  grow,
+}: {
+  tint?: string;
+  /** Changes whenever the bars should rebuild. */
+  grow?: number;
+}) {
   return (
     <span className="flex h-full flex-col gap-1.5 p-2.5">
       <span
@@ -53,13 +60,28 @@ function CardSketch({ tint = "rgba(20,20,20,0.08)" }: { tint?: string }) {
         style={{ borderColor: tint }}
       />
       <span className="mt-auto flex h-[38%] items-end gap-1">
-        {[45, 70, 55, 90, 65].map((height) => (
-          <span
-            key={height}
-            className="flex-1 rounded-t-[2px]"
-            style={{ height: `${height}%`, background: tint }}
-          />
-        ))}
+        {[45, 70, 55, 90, 65].map((height, i) =>
+          grow === undefined ? (
+            <span
+              key={height}
+              className="flex-1 rounded-t-[2px]"
+              style={{ height: `${height}%`, background: tint }}
+            />
+          ) : (
+            <motion.span
+              key={`${height}-${grow}`}
+              className="flex-1 origin-bottom rounded-t-[2px]"
+              style={{ height: `${height}%`, background: tint }}
+              initial={{ scaleY: 0.15 }}
+              animate={{ scaleY: 1 }}
+              transition={{
+                duration: 0.6,
+                ease: [0.16, 1, 0.3, 1],
+                delay: 0.85 + i * 0.07,
+              }}
+            />
+          ),
+        )}
       </span>
       <span
         className="mt-1 h-1.5 w-4/5 rounded-full"
@@ -73,8 +95,17 @@ function CardSketch({ tint = "rgba(20,20,20,0.08)" }: { tint?: string }) {
 function Blueprint() {
   const t = useTranslations("ProductPage.next");
   const reduceMotion = useReducedMotion();
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { margin: "-80px" });
+  const [slot, setSlot] = useState(1);
+  useEffect(() => {
+    if (reduceMotion || !inView) return;
+    const id = window.setInterval(() => setSlot((v) => (v + 1) % 3), 3200);
+    return () => window.clearInterval(id);
+  }, [reduceMotion, inView]);
   return (
     <div
+      ref={ref}
       aria-hidden
       className="relative min-h-[340px] overflow-hidden bg-[#fbfaf7] shadow-[inset_0_3px_10px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08)] [background-image:radial-gradient(rgba(20,20,20,0.16)_1px,transparent_1px)] [background-size:18px_18px] lg:min-h-0"
     >
@@ -100,62 +131,67 @@ function Blueprint() {
           </div>
           <div className="flex flex-1 flex-col gap-3">
             <Sketch className="h-5 w-1/2" />
+            {/* The cursor drags product-03 from slot to slot; its chart
+                rebuilds each time it lands */}
             <div className="grid flex-1 grid-cols-3 gap-2">
-              <Sketch>
-                <CardSketch />
-              </Sketch>
-              {/* The block being moved: selected, in print orange */}
-              <motion.div
-                className="relative rounded-[4px] border-[1.5px] bg-[#f97316]/10"
-                style={{ borderColor: PRINT }}
-                animate={reduceMotion ? undefined : { y: [0, -6, 0] }}
-                transition={{
-                  duration: 3.2,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              >
-                {[
-                  "-left-[4px] -top-[4px]",
-                  "-right-[4px] -top-[4px]",
-                  "-bottom-[4px] -left-[4px]",
-                  "-bottom-[4px] -right-[4px]",
-                ].map((corner) => (
-                  <span
-                    key={corner}
-                    className={cn(
-                      "absolute size-[7px] border-[1.5px] bg-[#fbfaf7]",
-                      corner,
-                    )}
-                    style={{ borderColor: PRINT }}
-                  />
-                ))}
-                <span
-                  className="absolute -top-[20px] left-[-1.5px] whitespace-nowrap px-1.5 py-[3px] text-[10px] font-medium leading-none text-white"
-                  style={{ background: PRINT }}
-                >
-                  product-03
-                </span>
-                <motion.span
-                  className="absolute -bottom-5 -right-5"
-                  animate={
-                    reduceMotion
-                      ? undefined
-                      : { x: [0, 10, -4, 0], y: [0, 6, 12, 0] }
-                  }
-                  transition={{
-                    duration: 6,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }}
-                >
-                  <Cursor color={INK} className="size-6" />
-                </motion.span>
-                <CardSketch tint="rgba(249,115,22,0.35)" />
-              </motion.div>
-              <Sketch>
-                <CardSketch />
-              </Sketch>
+              {[0, 1, 2].map((i) =>
+                i === slot ? (
+                  <Fragment key="picked">
+                    {/* The block being moved: selected, in print orange */}
+                    <motion.div
+                      key="picked"
+                      layout
+                      className="relative z-10 rounded-[4px] border-[1.5px] bg-[#f97316]/10"
+                      style={{ borderColor: PRINT }}
+                      transition={{
+                        layout: { duration: 0.9, ease: [0.65, 0, 0.35, 1] },
+                      }}
+                    >
+                      {[
+                        "-left-[4px] -top-[4px]",
+                        "-right-[4px] -top-[4px]",
+                        "-bottom-[4px] -left-[4px]",
+                        "-bottom-[4px] -right-[4px]",
+                      ].map((corner) => (
+                        <span
+                          key={corner}
+                          className={cn(
+                            "absolute size-[7px] border-[1.5px] bg-[#fbfaf7]",
+                            corner,
+                          )}
+                          style={{ borderColor: PRINT }}
+                        />
+                      ))}
+                      <span
+                        className="absolute -top-[20px] left-[-1.5px] whitespace-nowrap px-1.5 py-[3px] text-[10px] font-medium leading-none text-white"
+                        style={{ background: PRINT }}
+                      >
+                        product-03
+                      </span>
+                      <motion.span
+                        className="absolute -bottom-5 -right-5"
+                        animate={
+                          reduceMotion
+                            ? undefined
+                            : { x: [0, 10, -4, 0], y: [0, 6, 12, 0] }
+                        }
+                        transition={{
+                          duration: 6,
+                          repeat: Infinity,
+                          ease: "easeInOut",
+                        }}
+                      >
+                        <Cursor color={INK} className="size-6" />
+                      </motion.span>
+                      <CardSketch tint="rgba(249,115,22,0.35)" grow={slot} />
+                    </motion.div>
+                  </Fragment>
+                ) : (
+                  <Sketch key={`slot-${i}`}>
+                    <CardSketch />
+                  </Sketch>
+                ),
+              )}
             </div>
             <Sketch className="h-8" />
           </div>
