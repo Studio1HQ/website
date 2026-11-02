@@ -3,6 +3,7 @@ import Image from "next/image";
 import { ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
 import { getClientLogo } from "@/components/case-studies/client-logos";
 import { NumericText } from "@/components/ui/num";
+import { Reveal } from "@/components/case-studies/case-visual";
 import type { CaseStudyMeta } from "@/lib/case-studies";
 
 type RelatedCaseStudiesProps = {
@@ -118,8 +119,10 @@ export function RelatedCaseStudies({ studies }: RelatedCaseStudiesProps) {
       </div>
 
       <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {studies.map((study) => (
-          <RelatedCard key={study.slug} study={study} />
+        {studies.map((study, i) => (
+          <Reveal key={study.slug} index={i} className="h-full">
+            <RelatedCard study={study} />
+          </Reveal>
         ))}
       </div>
     </section>

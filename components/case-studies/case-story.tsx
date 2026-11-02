@@ -206,6 +206,7 @@ export function CaseStory({ study }: { study: CaseStudyMeta }) {
   return (
     <section
       aria-label={`The ${study.client} story`}
+      id="case-story"
       data-story-start
       className="mt-16 rounded-[6px] bg-white/55 p-6 shadow-[0_30px_60px_-46px_rgba(20,20,20,0.5),inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-inset ring-white/80 backdrop-blur-xl backdrop-saturate-150 md:p-10"
     >

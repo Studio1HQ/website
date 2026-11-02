@@ -1,11 +1,8 @@
-import Link from "next/link";
-import Image from "next/image";
 import {
   PaperEyebrow,
   PaperPageHeader,
 } from "@/components/paper/paper-page-header";
 import {
-  CELL,
   IndexBar,
   PaperCta,
   PaperSection,
@@ -14,10 +11,7 @@ import { Container } from "@/components/home/ui";
 import { PAPER_SCOPE, PRINT } from "@/lib/paper";
 import { Trophy } from "@phosphor-icons/react/dist/ssr";
 import { getAllCaseStudies } from "@/lib/case-studies";
-import {
-  getClientLogo,
-  trustedClientMarks,
-} from "@/components/case-studies/client-logos";
+import { getClientLogo } from "@/components/case-studies/client-logos";
 import { baseUrl } from "@/lib/site";
 import { absoluteImageUrl } from "@/lib/seo";
 import { getTranslations } from "next-intl/server";

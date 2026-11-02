@@ -1,8 +1,9 @@
 "use client";
 
-import Image, { type StaticImageData } from "next/image";
+import type { StaticImageData } from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { animate, motion, useInView, useReducedMotion } from "motion/react";
+import { Star } from "@phosphor-icons/react";
 import { GRAIN } from "@/lib/paper";
 
 type Metric = { value: string; label: string };
@@ -75,7 +76,7 @@ export function ResultsPanel({
   return (
     <motion.aside
       aria-label={`Results with ${client}`}
-      className="relative isolate overflow-hidden rounded-[6px] bg-[linear-gradient(155deg,#fb923c_0%,#f97316_45%,#ea580c_100%)] p-6 text-white shadow-[0_34px_60px_-30px_rgba(234,88,12,0.6),inset_0_1px_0_rgba(255,255,255,0.35)]"
+      className="relative isolate flex h-full flex-col overflow-hidden rounded-[6px] bg-[linear-gradient(155deg,#fb923c_0%,#f97316_45%,#ea580c_100%)] p-6 text-white shadow-[0_34px_60px_-30px_rgba(234,88,12,0.6),inset_0_1px_0_rgba(255,255,255,0.35)]"
       initial={reduceMotion ? false : { opacity: 0, y: 24, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.9, ease: EASE, delay: 0.15 }}
@@ -90,54 +91,39 @@ export function ResultsPanel({
         aria-hidden
         className="pointer-events-none absolute -left-1/4 -top-1/3 -z-10 h-2/3 w-[90%] rounded-full bg-white/25 blur-3xl"
       />
-      {logo ? (
-        <span
-          aria-hidden
-          className="pointer-events-none absolute -bottom-6 -right-6 -z-10 size-24 rotate-[-12deg] overflow-hidden rounded-[6px]"
-        >
-          <Image
-            src={logo}
-            alt=""
-            fill
-            sizes="128px"
-            className="object-cover"
-          />
-        </span>
-      ) : null}
 
       <motion.p
-        className="flex items-center gap-2 text-[11.5px] font-medium uppercase tracking-[0.16em] text-white/80"
+        className="text-[11.5px] font-medium uppercase tracking-[0.16em] text-white/80"
         {...rise(0.3)}
       >
-        <span className="relative flex size-1.5">
-          <span className="absolute inset-0 animate-ping rounded-full bg-white/70 motion-reduce:hidden" />
-          <span className="relative size-1.5 rounded-full bg-white" />
-        </span>
         The results
       </motion.p>
 
-      <motion.div className="mt-5" {...rise(0.4)}>
+      <motion.div className="mb-6 mt-5" {...rise(0.4)}>
         <p className="text-[56px] font-medium leading-[0.9] tracking-[-0.06em] md:text-[64px]">
           <CountUp value={lead.value} />
         </p>
-        <p className="mt-3 max-w-[240px] text-[14px] leading-snug text-white/90">
+        <p className="mt-3 flex max-w-[260px] items-start gap-2 text-[14px] leading-snug text-white/90">
+          {/star/i.test(lead.label) ? (
+            <Star weight="bold" className="mt-px size-4 shrink-0" />
+          ) : null}
           {lead.label}
         </p>
       </motion.div>
 
       {rest.length ? (
-        <motion.dl
-          className="mt-6 grid grid-cols-2 gap-4 border-t border-white/25 pt-5 pr-14"
-          {...rise(0.55)}
-        >
+        <motion.dl className="mt-auto grid grid-cols-2 gap-2" {...rise(0.55)}>
           {rest.map((metric) => (
-            <div key={metric.label} className="min-w-0">
-              <dd className="text-[26px] font-medium leading-none tracking-[-0.05em]">
-                <CountUp value={metric.value} />
-              </dd>
+            <div
+              key={metric.label}
+              className="flex min-w-0 flex-col-reverse justify-end rounded-[6px] bg-white/10 p-3.5 shadow-[inset_0_2px_6px_rgba(124,45,18,0.35),inset_0_1px_2px_rgba(124,45,18,0.25),inset_0_-1px_0_rgba(255,255,255,0.3)] ring-1 ring-inset ring-white/20 backdrop-blur-md"
+            >
               <dt className="mt-2 text-[12px] leading-snug text-white/80">
                 {metric.label}
               </dt>
+              <dd className="text-[28px] font-medium leading-none tracking-[-0.05em]">
+                <CountUp value={metric.value} />
+              </dd>
             </div>
           ))}
         </motion.dl>
