@@ -22,6 +22,16 @@ const nextConfig: NextConfig = {
         hostname: "**",
       },
     ],
+    localPatterns: [
+      // Any local image without a query string, as before.
+      { pathname: "/**", search: "" },
+      // Blog covers carry a ?v= version so cache updates reach readers.
+      { pathname: "/blog-cover/**" },
+    ],
+  },
+  async rewrites() {
+    // Markdown version of every blog post, for LLMs and AI tools.
+    return [{ source: "/blog/:slug.md", destination: "/blog-md/:slug" }];
   },
   async headers() {
     return [
@@ -43,6 +53,22 @@ const nextConfig: NextConfig = {
       {
         source: "/sitemap",
         destination: "/sitemap.xml",
+        permanent: true,
+      },
+      {
+        source: "/blogs",
+        destination: "/blog",
+        permanent: true,
+      },
+      // AI agents guess at /docs paths; point them at the real files.
+      {
+        source: "/docs/llms.txt",
+        destination: "/llms.txt",
+        permanent: true,
+      },
+      {
+        source: "/docs",
+        destination: "/services",
         permanent: true,
       },
       {

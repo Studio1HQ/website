@@ -103,7 +103,12 @@ function toMeta(slug: string, data: Frontmatter, content: string): CaseStudyMeta
     cover: data.cover ?? "/opengraph-image.png",
     tags: Array.isArray(data.tags) ? data.tags : [],
     metrics: Array.isArray(data.metrics) ? data.metrics : [],
-    quotes: Array.isArray(data.quotes) ? data.quotes : [],
+    // Drafts mark unapproved quotes with "[PLACEHOLDER"; never render those.
+    quotes: Array.isArray(data.quotes)
+      ? data.quotes.filter(
+          (quote) => !`${quote.text} ${quote.author}`.includes("[PLACEHOLDER"),
+        )
+      : [],
     outcomes: Array.isArray(data.outcomes) ? data.outcomes : [],
     ctaHook: data.ctaHook ?? "",
     readingTimeMinutes: estimateReadingMinutes(content),

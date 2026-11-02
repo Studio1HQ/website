@@ -86,6 +86,14 @@ collections:
           default: false,
         }
       - {
+          name: unlisted,
+          label: Hide from /blog,
+          widget: boolean,
+          required: false,
+          default: false,
+          hint: "Turn on for posts that aren't about Studio1's services. The post stays live at its URL and in search engines, but is left off /blog, the RSS feed, and the latest and next-article links.",
+        }
+      - {
           name: authors,
           label: Authors,
           widget: list,
@@ -107,18 +115,18 @@ collections:
         }
       - {
           name: bannerImage,
-          label: Optional Social Share Image,
+          label: Banner Image,
           widget: image,
           required: false,
           choose_url: false,
-          hint: "Optional. Used for this blog card and LinkedIn/Twitter preview. Leave empty to use the default Studio1 image.",
+          hint: "Optional. Shown on the blog card and at the top of the post. Use a 1600x900 (16:9) image in the Studio1 paper style; leave empty to use the generated Studio1 cover.",
         }
       - {
           name: bannerImageAlt,
-          label: Social Share Image Alt Text,
+          label: Banner Image Alt Text,
           widget: string,
           required: false,
-          hint: "Optional. Only needed when a custom social share image is uploaded.",
+          hint: "Optional. Only needed when a banner image is set.",
         }
       - {
           name: body,

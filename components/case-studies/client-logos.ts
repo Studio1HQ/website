@@ -56,5 +56,4 @@ export const trustedClientMarks: {
   name: string;
   href: string;
   icon: StaticImageData;
-}[] = [
-];
+}[] = [];

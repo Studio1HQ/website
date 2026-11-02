@@ -2,11 +2,11 @@
 
 import { Rocket, UsersThree, ShareNetwork } from "@phosphor-icons/react";
 import {
-  ServiceOfferCards,
-  type ServiceOfferCard,
-} from "@/components/pages/shared/service-offer-cards";
+  StoryRows,
+  type StoryOffer,
+} from "@/components/pages/shared/service-story";
 
-const offerings: ServiceOfferCard[] = [
+const offerings: StoryOffer[] = [
   {
     id: "developer-advocacy",
     icon: UsersThree,
@@ -57,9 +57,15 @@ const offerings: ServiceOfferCard[] = [
 
 export default function Services() {
   return (
-    <ServiceOfferCards
-      subtitle="Three connected workstreams for developer growth: run the DevRel motion, package launches into campaigns, and manage meaningful partner and creator collaborations."
-      cards={offerings}
+    <StoryRows
+      index={1}
+      title={
+        <>
+          What We <span className="text-[#f97316]">Offer</span>
+        </>
+      }
+      description="Three connected workstreams for developer growth: run the DevRel motion, package launches into campaigns, and manage meaningful partner and creator collaborations."
+      offers={offerings}
     />
   );
 }

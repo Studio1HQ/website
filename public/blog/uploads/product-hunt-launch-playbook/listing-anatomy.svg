@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif">
+<rect width="1200" height="800" fill="#f4efe7"/>
+<text x="60.0" y="74.0" font-size="32" font-weight="700" fill="#141414" fill-opacity="1.0" text-anchor="start">Anatomy of a Product Hunt listing</text><text x="60.0" y="108.0" font-size="18" font-weight="400" fill="#141414" fill-opacity="0.6" text-anchor="start">Each part has a job, and Product Hunt publishes the specs.</text>
+<rect x="60.0" y="150.0" width="660.0" height="600" rx="12" fill="#ffffff" stroke="#141414" stroke-opacity="0.12" stroke-width="1.5"/>
+<circle cx="92.0" cy="232.0" r="15" fill="#f97316"/><text x="92.0" y="237.4" font-size="15" font-weight="700" fill="#ffffff" fill-opacity="1.0" text-anchor="middle">1</text>
+<rect x="130" y="196" width="72" height="72" rx="14" fill="#f97316"/>
+<path d="M 152 246 L 166 218 L 180 246 Z" fill="#ffffff"/>
+<circle cx="230.0" cy="202.0" r="13" fill="#f97316"/><text x="230.0" y="206.7" font-size="13" font-weight="700" fill="#ffffff" fill-opacity="1.0" text-anchor="middle">2</text>
+<text x="252.0" y="226.0" font-size="26" font-weight="700" fill="#141414" fill-opacity="1.0" text-anchor="start">yourtool</text>
+<text x="252.0" y="254.0" font-size="17" font-weight="400" fill="#141414" fill-opacity="0.65" text-anchor="start">Add auth to any API in five minutes</text>
+<rect x="484" y="288" width="96" height="40" rx="20" fill="#ffffff" stroke="#141414" stroke-opacity="0.18" stroke-width="1.5"/>
+<text x="532.0" y="313.0" font-size="15" font-weight="600" fill="#141414" fill-opacity="1.0" text-anchor="middle">Visit</text>
+<rect x="592" y="288" width="104" height="40" rx="20" fill="#f97316"/>
+<text x="644.0" y="313.0" font-size="15" font-weight="700" fill="#ffffff" fill-opacity="1.0" text-anchor="middle">Upvote</text>
+<circle cx="92.0" cy="410.0" r="15" fill="#f97316"/><text x="92.0" y="415.4" font-size="15" font-weight="700" fill="#ffffff" fill-opacity="1.0" text-anchor="middle">3</text>
+<rect x="130" y="340" width="250" height="150" rx="8" fill="#141414" fill-opacity="0.85"/>
+<rect x="392" y="340" width="250" height="150" rx="8" fill="#141414" fill-opacity="0.06"/>
+<circle cx="255" cy="415" r="26" fill="#f97316"/>
+<polygon points="247,401 247,429 269,415" fill="#ffffff"/>
+<circle cx="148.0" cy="358.0" r="13" fill="#f97316"/><text x="148.0" y="362.7" font-size="13" font-weight="700" fill="#ffffff" fill-opacity="1.0" text-anchor="middle">4</text>
+<text x="517.0" y="422.0" font-size="15" font-weight="600" fill="#141414" fill-opacity="0.45" text-anchor="middle">1270 × 760</text>
+<rect x="654" y="340" width="40" height="150" rx="8" fill="#141414" fill-opacity="0.04"/>
+<circle cx="92.0" cy="580.0" r="15" fill="#f97316"/><text x="92.0" y="585.4" font-size="15" font-weight="700" fill="#ffffff" fill-opacity="1.0" text-anchor="middle">5</text>
+<rect x="130" y="530" width="560" height="110" rx="10" fill="#f97316" fill-opacity="0.08" stroke="#f97316" stroke-opacity="0.35" stroke-width="1.5"/>
+<circle cx="156" cy="558" r="14" fill="#141414" fill-opacity="0.2"/>
+<text x="180.0" y="563.0" font-size="15" font-weight="700" fill="#141414" fill-opacity="1.0" text-anchor="start">Maker</text>
+<rect x="232" y="549" width="52" height="20" rx="10" fill="#f97316"/>
+<text x="258.0" y="563.0" font-size="10" font-weight="700" fill="#ffffff" fill-opacity="1.0" text-anchor="middle">MAKER</text>
+<text x="150.0" y="596.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.75" text-anchor="start">Hey Product Hunt! We built yourtool because…</text>
+<text x="150.0" y="620.0" font-size="15" font-weight="600" fill="#c2410c" fill-opacity="1.0" text-anchor="start">What would you want it to do next?</text>
+<circle cx="92.0" cy="694.0" r="15" fill="#f97316"/><text x="92.0" y="699.4" font-size="15" font-weight="700" fill="#ffffff" fill-opacity="1.0" text-anchor="middle">6</text>
+<rect x="130" y="680" width="142" height="30" rx="15" fill="#141414" fill-opacity="0.07"/>
+<text x="201.0" y="700.0" font-size="13" font-weight="600" fill="#141414" fill-opacity="0.72" text-anchor="middle">Developer Tools</text>
+<rect x="282" y="680" width="60" height="30" rx="15" fill="#141414" fill-opacity="0.07"/>
+<text x="312.0" y="700.0" font-size="13" font-weight="600" fill="#141414" fill-opacity="0.72" text-anchor="middle">API</text>
+<rect x="352" y="680" width="118" height="30" rx="15" fill="#141414" fill-opacity="0.07"/>
+<text x="411.0" y="700.0" font-size="13" font-weight="600" fill="#141414" fill-opacity="0.72" text-anchor="middle">Open Source</text>
+<circle cx="786.0" cy="198.0" r="16" fill="#f97316"/><text x="786.0" y="203.4" font-size="15" font-weight="700" fill="#ffffff" fill-opacity="1.0" text-anchor="middle">1</text>
+<text x="816.0" y="204.0" font-size="19" font-weight="700" fill="#141414" fill-opacity="1.0" text-anchor="start">Thumbnail</text>
+<text x="816.0" y="230.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.62" text-anchor="start">Square, 240 × 240.</text>
+<text x="816.0" y="252.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.62" text-anchor="start">GIFs work if under 3 MB.</text>
+<circle cx="786.0" cy="304.0" r="16" fill="#f97316"/><text x="786.0" y="309.4" font-size="15" font-weight="700" fill="#ffffff" fill-opacity="1.0" text-anchor="middle">2</text>
+<text x="816.0" y="310.0" font-size="19" font-weight="700" fill="#141414" fill-opacity="1.0" text-anchor="start">Name and tagline</text>
+<text x="816.0" y="336.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.62" text-anchor="start">Tagline up to 60 characters.</text>
+<text x="816.0" y="358.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.62" text-anchor="start">Say what it does, plainly.</text>
+<circle cx="786.0" cy="410.0" r="16" fill="#f97316"/><text x="786.0" y="415.4" font-size="15" font-weight="700" fill="#ffffff" fill-opacity="1.0" text-anchor="middle">3</text>
+<text x="816.0" y="416.0" font-size="19" font-weight="700" fill="#141414" fill-opacity="1.0" text-anchor="start">Gallery</text>
+<text x="816.0" y="442.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.62" text-anchor="start">At least 2 images,</text>
+<text x="816.0" y="464.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.62" text-anchor="start">1270 × 760 recommended.</text>
+<circle cx="786.0" cy="516.0" r="16" fill="#f97316"/><text x="786.0" y="521.4" font-size="15" font-weight="700" fill="#ffffff" fill-opacity="1.0" text-anchor="middle">4</text>
+<text x="816.0" y="522.0" font-size="19" font-weight="700" fill="#141414" fill-opacity="1.0" text-anchor="start">Demo video</text>
+<text x="816.0" y="548.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.62" text-anchor="start">A YouTube link. Show the</text>
+<text x="816.0" y="570.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.62" text-anchor="start">product working, fast.</text>
+<circle cx="786.0" cy="622.0" r="16" fill="#f97316"/><text x="786.0" y="627.4" font-size="15" font-weight="700" fill="#ffffff" fill-opacity="1.0" text-anchor="middle">5</text>
+<text x="816.0" y="628.0" font-size="19" font-weight="700" fill="#141414" fill-opacity="1.0" text-anchor="start">Maker comment</text>
+<text x="816.0" y="654.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.62" text-anchor="start">Why you built it, what's new,</text>
+<text x="816.0" y="676.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.62" text-anchor="start">and a request for feedback.</text>
+<circle cx="786.0" cy="728.0" r="16" fill="#f97316"/><text x="786.0" y="733.4" font-size="15" font-weight="700" fill="#ffffff" fill-opacity="1.0" text-anchor="middle">6</text>
+<text x="816.0" y="734.0" font-size="19" font-weight="700" fill="#141414" fill-opacity="1.0" text-anchor="start">Topics</text>
+<text x="816.0" y="760.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.62" text-anchor="start">The categories developers</text>
+<text x="816.0" y="782.0" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.62" text-anchor="start">browse, like Developer Tools.</text>
+</svg>

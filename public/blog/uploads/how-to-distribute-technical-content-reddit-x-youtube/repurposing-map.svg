@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif">
+<rect width="1200" height="630" fill="#f4efe7"/>
+<text x="60" y="74" font-size="32" font-weight="700" fill="#141414" fill-opacity="1" text-anchor="start">One technical piece, cut for each channel</text>
+<text x="60" y="108" font-size="18" font-weight="400" fill="#141414" fill-opacity="0.6" text-anchor="start">Publish once on your blog, then rebuild the piece for how each channel reads.</text>
+<rect x="60" y="160" width="330" height="418" rx="10" fill="#ffffff" stroke="#141414" stroke-opacity="0.12" stroke-width="1.5"/>
+<rect x="60" y="160" width="330" height="8" rx="4" fill="#f97316"/>
+<text x="90" y="204" font-size="13" font-weight="700" fill="#141414" fill-opacity="0.55" text-anchor="start" letter-spacing="2">SOURCE</text>
+<text x="90" y="240" font-size="24" font-weight="700" fill="#141414" fill-opacity="1" text-anchor="start">Technical article</text>
+<text x="90" y="270" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.62" text-anchor="start">Published first on your blog,</text>
+<text x="90" y="292" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.62" text-anchor="start">the canonical home for the piece</text>
+<line x1="90" y1="322" x2="360" y2="322" stroke="#141414" stroke-opacity="0.12" stroke-width="1.5"/>
+<rect x="90" y="350" width="12" height="12" rx="2" fill="#f97316"/>
+<text x="114" y="362" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.85" text-anchor="start">Code that runs as written</text>
+<rect x="90" y="390" width="12" height="12" rx="2" fill="#f97316"/>
+<text x="114" y="402" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.85" text-anchor="start">One diagram of the idea</text>
+<rect x="90" y="430" width="12" height="12" rx="2" fill="#f97316"/>
+<text x="114" y="442" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.85" text-anchor="start">A demo, repo, or recording</text>
+<rect x="90" y="470" width="12" height="12" rx="2" fill="#f97316"/>
+<text x="114" y="482" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.85" text-anchor="start">A takeaway in one sentence</text>
+<rect x="90" y="510" width="12" height="12" rx="2" fill="#f97316"/>
+<text x="114" y="522" font-size="15" font-weight="400" fill="#141414" fill-opacity="0.85" text-anchor="start">A question to ask readers</text>
+<path d="M390,369.0 C435,369.0 425,186 470,186" fill="none" stroke="#f97316" stroke-opacity="0.7" stroke-width="2"/>
+<polygon points="480,186 468,180 468,192" fill="#f97316"/>
+<rect x="482" y="160" width="658" height="52" rx="8" fill="#ffffff" stroke="#141414" stroke-opacity="0.12" stroke-width="1.5"/>
+<circle cx="510" cy="186" r="13" fill="#f97316"/>
+<text x="510" y="191" font-size="14" font-weight="700" fill="#ffffff" fill-opacity="1" text-anchor="middle">1</text>
+<text x="534" y="192" font-size="17" font-weight="700" fill="#141414" fill-opacity="1" text-anchor="start">Reddit</text>
+<text x="700" y="191" font-size="14" font-weight="400" fill="#141414" fill-opacity="0.62" text-anchor="start">Problem-first discussion post for one subreddit</text>
+<path d="M390,369.0 C435,369.0 425,247 470,247" fill="none" stroke="#f97316" stroke-opacity="0.7" stroke-width="2"/>
+<polygon points="480,247 468,241 468,253" fill="#f97316"/>
+<rect x="482" y="221" width="658" height="52" rx="8" fill="#ffffff" stroke="#141414" stroke-opacity="0.12" stroke-width="1.5"/>
+<circle cx="510" cy="247" r="13" fill="#f97316"/>
+<text x="510" y="252" font-size="14" font-weight="700" fill="#ffffff" fill-opacity="1" text-anchor="middle">2</text>
+<text x="534" y="253" font-size="17" font-weight="700" fill="#141414" fill-opacity="1" text-anchor="start">X</text>
+<text x="700" y="252" font-size="14" font-weight="400" fill="#141414" fill-opacity="0.62" text-anchor="start">Thread or Article, plus a short screen recording</text>
+<path d="M390,369.0 C435,369.0 425,308 470,308" fill="none" stroke="#f97316" stroke-opacity="0.7" stroke-width="2"/>
+<polygon points="480,308 468,302 468,314" fill="#f97316"/>
+<rect x="482" y="282" width="658" height="52" rx="8" fill="#ffffff" stroke="#141414" stroke-opacity="0.12" stroke-width="1.5"/>
+<circle cx="510" cy="308" r="13" fill="#f97316"/>
+<text x="510" y="313" font-size="14" font-weight="700" fill="#ffffff" fill-opacity="1" text-anchor="middle">3</text>
+<text x="534" y="314" font-size="17" font-weight="700" fill="#141414" fill-opacity="1" text-anchor="start">YouTube</text>
+<text x="700" y="313" font-size="14" font-weight="400" fill="#141414" fill-opacity="0.62" text-anchor="start">Walkthrough with chapters, cut into Shorts</text>
+<path d="M390,369.0 C435,369.0 425,369 470,369" fill="none" stroke="#f97316" stroke-opacity="0.7" stroke-width="2"/>
+<polygon points="480,369 468,363 468,375" fill="#f97316"/>
+<rect x="482" y="343" width="658" height="52" rx="8" fill="#ffffff" stroke="#141414" stroke-opacity="0.12" stroke-width="1.5"/>
+<circle cx="510" cy="369" r="13" fill="#f97316"/>
+<text x="510" y="374" font-size="14" font-weight="700" fill="#ffffff" fill-opacity="1" text-anchor="middle">4</text>
+<text x="534" y="375" font-size="17" font-weight="700" fill="#141414" fill-opacity="1" text-anchor="start">daily.dev</text>
+<text x="700" y="374" font-size="14" font-weight="400" fill="#141414" fill-opacity="0.62" text-anchor="start">Direct post with a clear title and cover</text>
+<path d="M390,369.0 C435,369.0 425,430 470,430" fill="none" stroke="#f97316" stroke-opacity="0.7" stroke-width="2"/>
+<polygon points="480,430 468,424 468,436" fill="#f97316"/>
+<rect x="482" y="404" width="658" height="52" rx="8" fill="#ffffff" stroke="#141414" stroke-opacity="0.12" stroke-width="1.5"/>
+<circle cx="510" cy="430" r="13" fill="#f97316"/>
+<text x="510" y="435" font-size="14" font-weight="700" fill="#ffffff" fill-opacity="1" text-anchor="middle">5</text>
+<text x="534" y="436" font-size="17" font-weight="700" fill="#141414" fill-opacity="1" text-anchor="start">Hacker News</text>
+<text x="700" y="435" font-size="14" font-weight="400" fill="#141414" fill-opacity="0.62" text-anchor="start">Original link, plain title, stay in the thread</text>
+<path d="M390,369.0 C435,369.0 425,491 470,491" fill="none" stroke="#f97316" stroke-opacity="0.7" stroke-width="2"/>
+<polygon points="480,491 468,485 468,497" fill="#f97316"/>
+<rect x="482" y="465" width="658" height="52" rx="8" fill="#ffffff" stroke="#141414" stroke-opacity="0.12" stroke-width="1.5"/>
+<circle cx="510" cy="491" r="13" fill="#f97316"/>
+<text x="510" y="496" font-size="14" font-weight="700" fill="#ffffff" fill-opacity="1" text-anchor="middle">6</text>
+<text x="534" y="497" font-size="17" font-weight="700" fill="#141414" fill-opacity="1" text-anchor="start">LinkedIn</text>
+<text x="700" y="496" font-size="14" font-weight="400" fill="#141414" fill-opacity="0.62" text-anchor="start">One takeaway and one diagram, in the post</text>
+<path d="M390,369.0 C435,369.0 425,552 470,552" fill="none" stroke="#f97316" stroke-opacity="0.7" stroke-width="2"/>
+<polygon points="480,552 468,546 468,558" fill="#f97316"/>
+<rect x="482" y="526" width="658" height="52" rx="8" fill="#ffffff" stroke="#141414" stroke-opacity="0.12" stroke-width="1.5"/>
+<circle cx="510" cy="552" r="13" fill="#f97316"/>
+<text x="510" y="557" font-size="14" font-weight="700" fill="#ffffff" fill-opacity="1" text-anchor="middle">7</text>
+<text x="534" y="558" font-size="17" font-weight="700" fill="#141414" fill-opacity="1" text-anchor="start">Dev.to / Medium</text>
+<text x="700" y="557" font-size="14" font-weight="400" fill="#141414" fill-opacity="0.62" text-anchor="start">Full republish with a canonical link home</text>
+</svg>

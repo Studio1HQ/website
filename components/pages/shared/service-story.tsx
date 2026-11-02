@@ -1,0 +1,914 @@
+"use client";
+
+import {
+  useEffect,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
+} from "react";
+import { createPortal } from "react-dom";
+import Image from "next/image";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { motion, useReducedMotion } from "motion/react";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  CaretRight,
+  Check,
+  type Icon,
+} from "@phosphor-icons/react";
+import { Container, EASE } from "@/components/home/ui";
+import { DitherField } from "@/components/home/dither-field";
+import {
+  CELL,
+  IndexBar,
+  InkLogo,
+  SectionHead,
+} from "@/components/paper/paper-sections";
+import { PaperPageHeader } from "@/components/paper/paper-page-header";
+import {
+  HeroFlanks,
+  HeroWorkRow,
+  type HeroSides,
+} from "@/components/pages/shared/hero-sides";
+import { PaperCaseStudyCard } from "@/components/pages/shared/paper-service-kit";
+import {
+  StoryPipeline,
+  type StoryStep,
+} from "@/components/pages/shared/story-pipeline";
+import type { CaseStudyResultData } from "@/components/case-studies/case-study-result";
+import { trustedbyLogo } from "@/constants/data";
+import { GRAIN, INK, PAPER, PRINT } from "@/lib/paper";
+import { cn } from "@/lib/utils";
+
+/*
+ * Service page blocks, laid out as one quiet product story: a centred hero
+ * with an arch, a logo strip, alternating offer rows beside product-style
+ * visuals, the workflow as a pipeline run, one proof panel and a closing
+ * prompt. All copy comes from the page.
+ */
+
+const pad2 = (value: number) => String(value).padStart(2, "0");
+
+/** Brand gradient for the accent words in headlines. */
+const GRADIENT_TEXT =
+  "bg-[linear-gradient(100deg,#fe3c34_0%,#f97316_45%,#fb8a1e_100%)] bg-clip-text text-transparent";
+
+/**
+ * Card reveal: each card rises out of a soft blur as it enters the screen,
+ * staggered across a row, and plays again whenever it comes back into view.
+ */
+function cardReveal(reduceMotion: boolean | null, column: number) {
+  return {
+    initial: reduceMotion
+      ? false
+      : { opacity: 0, y: 48, scale: 0.97, filter: "blur(12px)" },
+    whileInView: { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" },
+    viewport: { once: false, margin: "0px 0px -12% 0px" },
+    transition: { duration: 0.9, ease: EASE, delay: column * 0.08 },
+  } as const;
+}
+
+type Indexed = { index?: number; name?: string };
+
+/** Paper section: grain, and the landing's printed index line on top. */
+function Band({
+  id,
+  index,
+  name,
+  className,
+  children,
+}: Indexed & {
+  id?: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  const reduceMotion = useReducedMotion();
+  return (
+    <section
+      id={id}
+      className={cn(
+        "relative isolate scroll-mt-24 overflow-clip text-[#141414]",
+        className,
+      )}
+    >
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 opacity-30 mix-blend-multiply"
+        style={{ backgroundImage: GRAIN }}
+      />
+      {/* One reveal per section, the same as the landing's PaperSection */}
+      <motion.div
+        initial={reduceMotion ? false : { opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: false, margin: "0px 0px -10% 0px" }}
+        transition={{ duration: 0.6, ease: EASE }}
+      >
+        {index && name ? (
+          <Container>
+            <IndexBar index={index} name={name} />
+          </Container>
+        ) : null}
+        {children}
+      </motion.div>
+    </section>
+  );
+}
+
+/**
+ * Marks the given phrases with an orange highlighter that sweeps in from the
+ * left, a beat after the headline lands.
+ */
+function Highlighted({ text, phrases }: { text: string; phrases: string[] }) {
+  const reduceMotion = useReducedMotion();
+  if (!phrases.length) return <>{text}</>;
+  const pattern = new RegExp(
+    `(${phrases.map((p) => p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`,
+  );
+  return (
+    <>
+      {text.split(pattern).map((part, index) =>
+        phrases.includes(part) ? (
+          <motion.span
+            key={index}
+            className="rounded-[3px] bg-no-repeat px-0.5 font-medium text-[#141414] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]"
+            style={{
+              backgroundImage:
+                "linear-gradient(transparent 55%, rgba(249,115,22,0.28) 55%, rgba(249,115,22,0.28) 92%, transparent 92%)",
+              backgroundPosition: "0 0",
+            }}
+            initial={reduceMotion ? false : { backgroundSize: "0% 100%" }}
+            animate={{ backgroundSize: "100% 100%" }}
+            transition={{
+              duration: 0.9,
+              ease: EASE,
+              delay: 0.6 + index * 0.12,
+            }}
+          >
+            {part}
+          </motion.span>
+        ) : (
+          part
+        ),
+      )}
+    </>
+  );
+}
+
+function BookCall({
+  label,
+  tone = "ink",
+}: {
+  label: string;
+  tone?: "ink" | "white";
+}) {
+  return (
+    <a
+      href="https://cal.com/studio1/collab"
+      target="_blank"
+      rel="noopener noreferrer"
+      className={cn(
+        "group relative isolate inline-flex h-12 items-center gap-3 whitespace-nowrap rounded-full py-1.5 pl-6 pr-1.5 text-[15px] font-medium transition-transform duration-300 hover:-translate-y-0.5 motion-reduce:transform-none",
+        tone === "ink"
+          ? "shadow-[0_14px_30px_-16px_rgba(20,20,20,0.6)]"
+          : "shadow-[0_14px_30px_-14px_rgba(120,40,0,0.55)]",
+      )}
+      style={
+        tone === "ink"
+          ? { background: INK, color: PAPER }
+          : { background: "#fff", color: INK }
+      }
+    >
+      {/* Light sweep that crosses the pill now and then */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 overflow-hidden rounded-full"
+      >
+        <span className="s1-cta-sheen absolute inset-y-0 -left-1/2 w-1/3 -skew-x-12 bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+      </span>
+      <span className="relative">{label}</span>
+      <span
+        className="relative flex size-9 items-center justify-center overflow-hidden rounded-full text-white shadow-[0_0_0_0_rgba(249,115,22,0.45)] transition-shadow duration-500 group-hover:shadow-[0_0_0_6px_rgba(249,115,22,0.18)]"
+        style={{ background: PRINT }}
+      >
+        <ArrowUpRight
+          weight="bold"
+          className="size-4 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-5 group-hover:translate-x-5"
+        />
+        <ArrowUpRight
+          weight="bold"
+          className="absolute size-4 -translate-x-5 translate-y-5 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-0 group-hover:translate-y-0"
+        />
+      </span>
+    </a>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Hero: the pitch centred on the sheet, real work on either side      */
+/* ------------------------------------------------------------------ */
+
+export type StoryStat = { value: string; label: string };
+
+export function StoryHero({
+  eyebrow,
+  pill,
+  titleAccent,
+  titleRest,
+  description,
+  primaryCta,
+  secondaryCta,
+  secondaryHref = "#work",
+  stats = [],
+  sides,
+  highlights = [],
+}: {
+  eyebrow: string;
+  /** Short line in the pill beside the eyebrow tag. */
+  pill: string;
+  titleAccent: string;
+  titleRest: string;
+  description: string;
+  primaryCta: string;
+  secondaryCta: string;
+  secondaryHref?: string;
+  stats?: StoryStat[];
+  /** Case-study work shown on either side of the headline. */
+  sides: HeroSides;
+  /** Phrases in the description to mark with the orange highlighter. */
+  highlights?: string[];
+}) {
+  return (
+    <PaperPageHeader className="pb-14 pt-[112px] md:pb-20 md:pt-[140px]">
+      <ScrollEdgeBlur />
+      <HeroFlanks sides={sides} />
+      <Container>
+        {/* Tall enough on large screens for the flanks, whatever the copy */}
+        <div
+          id="overview"
+          className="relative mx-auto flex max-w-[820px] flex-col items-center justify-center text-center xl:min-h-[560px]"
+        >
+          <a
+            href={secondaryHref}
+            className="group inline-flex items-center gap-2.5 rounded-full bg-white/70 py-1 pl-1 pr-3.5 text-[13px] font-medium text-[#141414] shadow-[inset_0_1px_0_#fff] ring-1 ring-inset ring-[#141414]/[0.08] transition-colors hover:bg-white"
+          >
+            <span
+              className="rounded-full px-2.5 py-1 text-[12px] text-white"
+              style={{ background: PRINT }}
+            >
+              {eyebrow}
+            </span>
+            {pill}
+            <CaretRight
+              weight="bold"
+              className="size-3 text-[#f97316] transition-transform group-hover:translate-x-0.5"
+            />
+          </a>
+
+          {/* The headline on white blocks, as on the home sheet */}
+          <h1 className="mt-8 max-w-[760px] text-balance text-[38px] font-medium leading-[1.12] tracking-[-0.045em] sm:text-[52px] lg:text-[60px] 2xl:text-[64px]">
+            <span className="bg-white px-[0.18em] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]">
+              <span style={{ color: PRINT }}>{titleAccent}</span> {titleRest}
+            </span>
+          </h1>
+          <p className="mt-7 max-w-[560px] text-[16px] leading-[1.6] text-[#141414]/70 sm:text-[17px]">
+            <Highlighted text={description} phrases={highlights} />
+          </p>
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-x-7 gap-y-4">
+            <BookCall label={primaryCta} />
+            <a
+              href={secondaryHref}
+              className="text-[15px] font-medium underline decoration-[#141414]/25 decoration-2 underline-offset-[6px] transition-colors hover:decoration-[#f97316]"
+            >
+              {secondaryCta}
+            </a>
+          </div>
+
+          {stats.length ? (
+            <dl className="mt-12 flex flex-wrap justify-center gap-x-10 gap-y-5 border-t border-[#141414]/[0.1] pt-7">
+              {stats.slice(0, 4).map((stat) => {
+                const plus = stat.value.endsWith("+");
+                return (
+                  <div key={stat.label} className="min-w-[96px]">
+                    <dd className="whitespace-nowrap text-[28px] font-medium leading-none tracking-[-0.05em]">
+                      {plus ? stat.value.slice(0, -1) : stat.value}
+                      {plus ? <span style={{ color: PRINT }}>+</span> : null}
+                    </dd>
+                    <dt className="mt-2 text-[12.5px] leading-snug text-[#141414]/55">
+                      {stat.label}
+                    </dt>
+                  </div>
+                );
+              })}
+            </dl>
+          ) : null}
+        </div>
+        <HeroWorkRow sides={sides} />
+      </Container>
+    </PaperPageHeader>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Logo strip                                                          */
+/* ------------------------------------------------------------------ */
+
+const STRIP = [
+  "InsForge",
+  "Weaviate",
+  "Maxim AI",
+  "Permit",
+  "Memori",
+  "CopilotKit",
+  "Crawlee",
+  "Tolgee",
+];
+
+export function StoryLogos() {
+  const logos = STRIP.map((name) =>
+    trustedbyLogo.find((item) => item.name === name),
+  ).filter((item): item is (typeof trustedbyLogo)[number] => Boolean(item));
+
+  return (
+    <Band className="py-6">
+      <Container>
+        <p className="mb-6 text-center text-[13px] font-medium text-[#141414]/45">
+          Trusted by developer-first teams we have worked with
+        </p>
+        <ul className="flex flex-wrap items-center justify-center gap-x-12 gap-y-6">
+          {logos.map((item) => (
+            <li key={item.name}>
+              <InkLogo item={item} />
+            </li>
+          ))}
+        </ul>
+      </Container>
+    </Band>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Offer rows: copy on one side, a product visual on the other          */
+/* ------------------------------------------------------------------ */
+
+export type StoryOffer = {
+  icon: Icon;
+  accent: string;
+  rest?: string;
+  badges: string[];
+  description: string;
+  features: string[];
+  id?: string;
+  anchorIds?: string[];
+};
+
+/** Raised 3D key that holds an offer's icon; it lifts and tilts on hover. */
+function OfferKey({
+  icon: OfferIcon,
+  core,
+  large,
+}: {
+  icon: Icon;
+  core: boolean;
+  large: boolean;
+}) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "relative flex shrink-0 items-center justify-center transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:[transform:translateY(-6px)_rotateX(12deg)_rotateY(-16deg)] motion-reduce:transform-none",
+        large ? "size-[92px] rounded-[22px]" : "size-[68px] rounded-[18px]",
+      )}
+      style={{
+        background: core
+          ? "linear-gradient(150deg, #ffffff 0%, #fff1e4 55%, #ffd9b8 100%)"
+          : "linear-gradient(150deg, #ffffff 0%, #f7f2ea 60%, #ece3d6 100%)",
+        boxShadow: core
+          ? "inset 0 2px 0 #ffffff, inset 0 -5px 0 rgba(160,60,0,0.16), 0 5px 0 #f3b98c, 0 26px 40px -16px rgba(110,30,0,0.6)"
+          : "inset 0 2px 0 #ffffff, inset 0 -5px 0 rgba(20,20,20,0.07), 0 5px 0 #e2d7c7, 0 24px 36px -18px rgba(20,20,20,0.4)",
+      }}
+    >
+      <OfferIcon
+        weight="duotone"
+        className={cn("text-[#ea580c]", large ? "size-11" : "size-8")}
+      />
+    </span>
+  );
+}
+
+/**
+ * One offer: a recessed stage (dither, icon key, outlined number) above or
+ * beside the copy. The core offer prints on orange with its features as tiles.
+ */
+function OfferCard({
+  offer,
+  position,
+  bento,
+}: {
+  offer: StoryOffer;
+  position: number;
+  bento: boolean;
+}) {
+  const reduceMotion = useReducedMotion();
+  const ref = useRef<HTMLLIElement>(null);
+  const core = position === 0;
+  // Side cards in the bento lay the stage beside the copy.
+  const beside = bento && !core;
+  const number = pad2(position + 1);
+
+  // A soft spotlight follows the cursor, written straight to CSS variables.
+  const trackPointer = (event: ReactPointerEvent<HTMLLIElement>) => {
+    const card = ref.current;
+    if (!card) return;
+    const box = card.getBoundingClientRect();
+    card.style.setProperty("--mx", `${event.clientX - box.left}px`);
+    card.style.setProperty("--my", `${event.clientY - box.top}px`);
+  };
+
+  return (
+    <motion.li
+      ref={ref}
+      id={offer.id}
+      onPointerMove={trackPointer}
+      {...cardReveal(reduceMotion, position)}
+      className={cn(
+        "group relative isolate flex scroll-mt-28 flex-col gap-1 rounded-[6px] p-2.5 transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 motion-reduce:transform-none",
+        core
+          ? "text-white shadow-[0_30px_60px_-36px_rgba(160,50,0,0.7)]"
+          : "bg-white/80 ring-1 ring-inset ring-[#141414]/10 hover:shadow-[0_24px_48px_-32px_rgba(20,20,20,0.4)]",
+        bento && (core ? "lg:col-span-7 lg:row-span-2" : "lg:col-span-5"),
+        beside && "sm:grid sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]",
+      )}
+      style={
+        core
+          ? {
+              background:
+                "linear-gradient(160deg, #fe3c34 0%, #f97316 45%, #fb8a1e 100%)",
+            }
+          : undefined
+      }
+    >
+      {core ? (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10 rounded-[6px] opacity-30 mix-blend-multiply"
+          style={{ backgroundImage: GRAIN }}
+        />
+      ) : null}
+      {/* Spotlight under the content, following the cursor */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 rounded-[6px] opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+        style={{
+          background: `radial-gradient(360px circle at var(--mx, 50%) var(--my, 0%), ${
+            core ? "rgba(255,255,255,0.22)" : "rgba(249,115,22,0.14)"
+          }, transparent 65%)`,
+        }}
+      />
+      {offer.anchorIds?.map((anchorId) => (
+        <span key={anchorId} id={anchorId} className="absolute -top-28" />
+      ))}
+
+      {/* Stage: a recessed window with drifting dither and the icon key */}
+      <div
+        className={cn(
+          "relative isolate overflow-hidden rounded-[4px] [perspective:700px]",
+          core ? "min-h-[230px] flex-1 md:min-h-[270px]" : "min-h-[170px]",
+          beside && "sm:min-h-full",
+          core
+            ? "bg-[#9a3412]/20 shadow-[inset_0_3px_14px_rgba(110,30,0,0.35),inset_0_1px_2px_rgba(110,30,0,0.25)]"
+            : "bg-[#f6f1ea] shadow-[inset_0_3px_12px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08)]",
+        )}
+      >
+        <DitherField
+          seed={position * 2.7 + 1}
+          strength={core ? 1.4 : 1}
+          colors={core ? ["#ffffff", "#ffe4cc"] : undefined}
+          className="absolute inset-0 -z-10 size-full"
+        />
+        <p
+          className={cn(
+            "absolute left-4 top-3.5 text-[12px] font-medium tracking-[0.02em]",
+            core ? "text-white/80" : "text-[#141414]/45",
+          )}
+        >
+          {core ? "Core service" : `Service ${number}`}
+        </p>
+        {/* Outlined index number, cropped by the stage edge */}
+        <span
+          aria-hidden
+          className={cn(
+            "pointer-events-none absolute right-3 select-none font-medium leading-none tracking-[-0.06em] text-transparent",
+            core
+              ? "-bottom-7 text-[132px] [-webkit-text-stroke:1.5px_rgba(255,255,255,0.5)]"
+              : "-bottom-5 text-[96px] [-webkit-text-stroke:1.5px_rgba(20,20,20,0.14)]",
+          )}
+        >
+          {number}
+        </span>
+        <div
+          className={cn(
+            "absolute inset-0 flex items-center",
+            core ? "pl-12 md:pl-[17%]" : "justify-center",
+          )}
+        >
+          <div className="relative">
+            {/* Orbit rings around the key, each with a dot circling slowly */}
+            <span aria-hidden className="absolute left-1/2 top-1/2">
+              {(core ? [200, 310, 430] : [128, 196]).map((size, ring) => (
+                <span
+                  key={size}
+                  className={cn(
+                    "absolute rounded-full border",
+                    core ? "border-white/30" : "border-[#141414]/[0.09]",
+                    ring === 1 && "border-dashed",
+                  )}
+                  style={{
+                    width: size,
+                    height: size,
+                    left: -size / 2,
+                    top: -size / 2,
+                  }}
+                >
+                  <span
+                    className="absolute inset-0 animate-spin motion-reduce:animate-none"
+                    style={{
+                      animationDuration: `${18 + ring * 9}s`,
+                      animationDirection: ring % 2 ? "reverse" : "normal",
+                    }}
+                  >
+                    <span
+                      className={cn(
+                        "absolute left-1/2 top-0 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full",
+                        core
+                          ? "bg-white shadow-[0_0_10px_rgba(255,255,255,0.8)]"
+                          : "bg-[#f97316]",
+                      )}
+                    />
+                  </span>
+                </span>
+              ))}
+            </span>
+            <OfferKey icon={offer.icon} core={core} large={core} />
+            {/* The core card's badges sit on the outer rings */}
+            {core
+              ? offer.badges.slice(0, 2).map((badge, slot) => (
+                  <span
+                    key={badge}
+                    // Too wide for a phone's stage; the copy shows them there.
+                    className="absolute hidden -translate-x-1/2 -translate-y-1/2 sm:block"
+                    style={
+                      slot === 0
+                        ? { left: "calc(50% + 132px)", top: "calc(50% - 80px)" }
+                        : { left: "calc(50% + 196px)", top: "calc(50% + 78px)" }
+                    }
+                  >
+                    <span
+                      className={cn(
+                        "block whitespace-nowrap rounded-full bg-white/25 px-3.5 py-1.5 text-[13px] font-medium text-white shadow-[0_10px_24px_-12px_rgba(110,30,0,0.6)] ring-1 ring-inset ring-white/40 backdrop-blur-md transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
+                        slot === 0
+                          ? "rotate-[4deg] group-hover:-translate-y-1.5"
+                          : "-rotate-[3deg] group-hover:translate-x-1.5",
+                      )}
+                    >
+                      {badge}
+                    </span>
+                  </span>
+                ))
+              : null}
+          </div>
+        </div>
+      </div>
+
+      {/* Copy */}
+      <div
+        className={cn(
+          "flex flex-col px-4 pb-4 pt-5 md:px-5",
+          core && "md:pb-5 md:pt-7",
+          beside && "sm:justify-center sm:pl-6 sm:pt-4",
+        )}
+      >
+        <div className={cn("flex flex-wrap gap-1.5", core && "mb-4 sm:hidden")}>
+          {offer.badges.map((badge) => (
+            <span
+              key={badge}
+              className={cn(
+                "rounded-full px-2.5 py-1 text-[12px] font-medium",
+                core
+                  ? "bg-white/20 text-white"
+                  : "bg-[#141414]/[0.05] text-[#141414]/70",
+              )}
+            >
+              {badge}
+            </span>
+          ))}
+        </div>
+
+        <h3
+          className={cn(
+            "font-medium leading-[1.02] tracking-[-0.05em]",
+            core
+              ? "text-[38px] md:text-[48px]"
+              : "mt-4 text-[28px] md:text-[32px]",
+          )}
+        >
+          <span className={core ? undefined : GRADIENT_TEXT}>
+            {offer.accent}
+          </span>
+          {offer.rest ? (
+            <>
+              {core ? " " : <br />}
+              {offer.rest}
+            </>
+          ) : null}
+        </h3>
+
+        <p
+          className={cn(
+            "mt-3 leading-[1.6]",
+            core
+              ? "max-w-[540px] text-[16px] text-white/85"
+              : "text-[14.5px] text-[#141414]/60",
+          )}
+        >
+          {offer.description}
+        </p>
+
+        {core ? (
+          <ul className="mt-6 grid gap-2 sm:grid-cols-2">
+            {offer.features.map((feature) => (
+              <li
+                key={feature}
+                className="flex items-center gap-3 rounded-[6px] bg-white/[0.14] px-3.5 py-3 text-[14px] font-medium leading-snug ring-1 ring-inset ring-white/25 backdrop-blur-sm"
+              >
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-white text-[#ea580c] shadow-[0_4px_10px_-4px_rgba(110,30,0,0.6)]">
+                  <Check weight="bold" className="size-3.5" />
+                </span>
+                {feature}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <ul className="mt-5 grid gap-2.5">
+            {offer.features.map((feature) => (
+              <li
+                key={feature}
+                className="flex items-start gap-2.5 text-[14px] leading-snug text-[#141414]/80"
+              >
+                <span className="mt-px flex size-[18px] shrink-0 items-center justify-center rounded-full bg-[#f97316]/[0.13] text-[#ea580c]">
+                  <Check weight="bold" className="size-3" />
+                </span>
+                {feature}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </motion.li>
+  );
+}
+
+export function StoryRows({
+  index,
+  name = "What we offer",
+  title,
+  description,
+  offers,
+  id = "work",
+}: Indexed & {
+  title?: ReactNode;
+  description?: string;
+  offers: StoryOffer[];
+  id?: string;
+}) {
+  // Three offers sit in a bento: the core offer tall on the left, the other
+  // two stacked beside it. Any other count falls back to an even grid.
+  const bento = offers.length === 3;
+  return (
+    <Band id={id} index={index} name={name} className="py-12 md:py-16">
+      <Container>
+        {title ? <SectionHead title={title} description={description} /> : null}
+
+        <ol
+          className={cn(
+            "mt-12 grid gap-3 md:mt-14",
+            bento ? "lg:grid-cols-12" : "md:grid-cols-2 lg:grid-cols-3",
+          )}
+        >
+          {offers.map((offer, position) => (
+            <OfferCard
+              key={offer.accent + position}
+              offer={offer}
+              position={position}
+              bento={bento}
+            />
+          ))}
+        </ol>
+      </Container>
+    </Band>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Workflow: the engagement as a pipeline run (see story-pipeline)     */
+/* ------------------------------------------------------------------ */
+
+export function StoryCards({
+  index,
+  name = "How it works",
+  title,
+  description,
+  steps,
+  workflow,
+  id = "workflow",
+}: Indexed & {
+  title: ReactNode;
+  description?: string;
+  steps: StoryStep[];
+  /** File name in the run window's title bar, e.g. `docs-dx.yml`. */
+  workflow?: string;
+  id?: string;
+}) {
+  return (
+    <Band id={id} index={index} name={name} className="py-12 md:py-16">
+      <Container>
+        <SectionHead title={title} description={description} />
+      </Container>
+      <StoryPipeline id={id} steps={steps} workflow={workflow} />
+    </Band>
+  );
+}
+
+/**
+ * Fills the empty half of a proof row: a link to every case study, with a
+ * case-study screenshot tilted and half cropped off the card's corner.
+ */
+function MoreProofCard() {
+  return (
+    <Link
+      href="/case-studies"
+      // Same top offset, height, and corners as the case cards beside it.
+      className="group relative isolate mt-8 flex h-full min-h-[300px] flex-col overflow-hidden rounded-[10px] bg-[#efe8dd] p-7 shadow-[inset_0_3px_10px_rgba(20,20,20,0.08)] ring-1 ring-inset ring-[#141414]/[0.06] sm:p-8"
+    >
+      <p className="text-[13px] font-medium text-[#141414]/50">More proof</p>
+      <p className="mt-3 max-w-[260px] text-[26px] font-medium leading-[1.15] tracking-[-0.04em]">
+        Developer adoption, <span className={GRADIENT_TEXT}>case by case</span>
+      </p>
+      <span className="mt-auto inline-flex items-center gap-2 pt-8 text-[14px] font-medium text-[#141414]">
+        View all case studies
+        <ArrowRight
+          weight="bold"
+          className="size-4 text-[#f97316] transition-transform duration-500 group-hover:translate-x-1"
+        />
+      </span>
+      {/* Half-cropped screenshot sliding out of the corner */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -bottom-10 -right-12 w-[58%] rotate-[-6deg] overflow-hidden rounded-[6px] bg-white p-1.5 shadow-[0_30px_60px_-30px_rgba(20,20,20,0.5)] ring-1 ring-[#141414]/[0.06] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-x-2 group-hover:-translate-y-2 group-hover:rotate-[-3deg]"
+      >
+        {/* Not used as any case card's art, so it never repeats beside one */}
+        <Image
+          src="/case-studies/jozu/devfest-pune-2025.webp"
+          alt=""
+          width={640}
+          height={420}
+          className="aspect-[4/3] w-full rounded-[4px] object-cover object-top"
+        />
+      </span>
+    </Link>
+  );
+}
+
+/**
+ * Soft blur along the bottom of the screen: content coming up from below
+ * sharpens as it scrolls into view. Stacked layers make the blur ramp up
+ * smoothly toward the edge.
+ */
+export function ScrollEdgeBlur() {
+  // Hidden over the hero; fades in once the page has scrolled past it.
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    const update = () => setShown(window.scrollY > window.innerHeight * 0.7);
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, []);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const layers = [
+    { blur: 1, from: 0, to: 30 },
+    { blur: 3, from: 15, to: 50 },
+    { blur: 6, from: 35, to: 75 },
+    { blur: 12, from: 55, to: 100 },
+  ];
+  if (!mounted) return null;
+  return createPortal(
+    <div
+      aria-hidden
+      className={cn(
+        "pointer-events-none fixed inset-x-0 bottom-0 z-40 h-28 transition-opacity duration-700 md:h-36",
+        shown ? "opacity-100" : "opacity-0",
+      )}
+    >
+      {layers.map((layer) => (
+        <div
+          key={layer.blur}
+          className="absolute inset-0"
+          style={{
+            backdropFilter: `blur(${layer.blur}px)`,
+            WebkitBackdropFilter: `blur(${layer.blur}px)`,
+            maskImage: `linear-gradient(to bottom, transparent ${layer.from}%, #000 ${layer.to}%)`,
+            WebkitMaskImage: `linear-gradient(to bottom, transparent ${layer.from}%, #000 ${layer.to}%)`,
+          }}
+        />
+      ))}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#f4efe7]/20 to-[#f4efe7]/70" />
+    </div>,
+    document.body,
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Proof: one featured case study, then the rest in pairs              */
+/* ------------------------------------------------------------------ */
+
+export function StoryProof({
+  index,
+  name = "Proof",
+  label = "View all case studies",
+  title,
+  description,
+  studies,
+  id = "proof",
+}: Indexed & {
+  label?: string;
+  title: string;
+  description?: string;
+  studies: CaseStudyResultData[];
+  id?: string;
+}) {
+  const reduceMotion = useReducedMotion();
+  const [featured, ...rest] = studies;
+  return (
+    <Band id={id} index={index} name={name} className="py-12 md:py-16">
+      <Container>
+        <SectionHead
+          title={title}
+          description={description}
+          action={
+            <Link
+              href="/case-studies"
+              className="group inline-flex h-12 items-center gap-2 rounded-full px-6 text-[15px] font-medium transition-transform duration-300 hover:-translate-y-0.5"
+              style={{ background: INK, color: PAPER }}
+            >
+              {label}
+              <ArrowRight
+                weight="bold"
+                className="size-4 transition-transform group-hover:translate-x-0.5"
+              />
+            </Link>
+          }
+        />
+        <div className="mt-10 grid gap-2">
+          {featured ? (
+            <motion.div {...cardReveal(reduceMotion, 0)}>
+              <PaperCaseStudyCard
+                study={featured}
+                variant="featured"
+                density="dense"
+              />
+            </motion.div>
+          ) : null}
+          {rest.length ? (
+            <div className="grid gap-2 md:grid-cols-2">
+              {rest.map((study, position) => (
+                <motion.div
+                  key={study.href}
+                  {...cardReveal(reduceMotion, position % 2)}
+                  // With an odd count below a full row, the last card swaps
+                  // places with "More proof" on desktop so the colours stay
+                  // a checkerboard; on mobile they already alternate.
+                  className={cn(
+                    rest.length % 2 === 1 &&
+                      rest.length > 1 &&
+                      position === rest.length - 1 &&
+                      "md:order-last",
+                  )}
+                >
+                  <PaperCaseStudyCard study={study} position={position} />
+                </motion.div>
+              ))}
+              {rest.length % 2 === 1 ? (
+                <motion.div {...cardReveal(reduceMotion, 1)}>
+                  <MoreProofCard />
+                </motion.div>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      </Container>
+    </Band>
+  );
+}

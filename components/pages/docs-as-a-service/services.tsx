@@ -2,11 +2,11 @@
 
 import { Books, MagnifyingGlass, Path } from "@phosphor-icons/react";
 import {
-  ServiceOfferCards,
-  type ServiceOfferCard,
-} from "@/components/pages/shared/service-offer-cards";
+  StoryRows,
+  type StoryOffer,
+} from "@/components/pages/shared/service-story";
 
-const offerings: ServiceOfferCard[] = [
+const offerings: StoryOffer[] = [
   {
     icon: MagnifyingGlass,
     badges: ["Onboarding", "API docs"],
@@ -52,9 +52,15 @@ const offerings: ServiceOfferCard[] = [
 
 export default function Services() {
   return (
-    <ServiceOfferCards
-      subtitle="Three connected workstreams for AI and DevTool products: audit the docs, write what is missing, then improve the developer path."
-      cards={offerings}
+    <StoryRows
+      index={1}
+      title={
+        <>
+          What We <span className="text-[#f97316]">Offer</span>
+        </>
+      }
+      description="Three connected workstreams for AI and DevTool products: audit the docs, write what is missing, then improve the developer path."
+      offers={offerings}
     />
   );
 }

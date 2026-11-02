@@ -22,7 +22,7 @@ export default function ProjectDemo() {
         className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:px-8"
       >
         <motion.div variants={fadeInUp}>
-          <div className="flex size-12 items-center justify-center rounded-2xl border bg-background text-primary shadow-sm">
+          <div className="flex size-12 items-center justify-center rounded-[6px] border bg-background text-primary shadow-sm">
             <PlayCircle className="size-6" aria-hidden="true" />
           </div>
           <p className="mt-6 font-secondary text-sm font-medium tracking-wide text-primary">
@@ -49,7 +49,7 @@ export default function ProjectDemo() {
 
         <motion.div
           variants={fadeInUp}
-          className="mx-auto w-full max-w-[560px] overflow-hidden rounded-[8px] border bg-[#050505] shadow-sm"
+          className="mx-auto w-full max-w-[560px] overflow-hidden rounded-[6px] border bg-[#050505] shadow-sm"
         >
           <div className="aspect-[4/5] w-full bg-[#050505]">
             <iframe

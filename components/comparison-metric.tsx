@@ -22,7 +22,7 @@ export const ComparisonMetric = ({ className }: { className?: string }) => {
           </div>
           <div className="text-xs text-center">
             Build Better <br />
-            <span className="serif-accent font-accent italic font-normal text-primary/75 mr-1">
+            <span className="serif-accent font-accent font-normal text-primary/75 mr-1">
               Developer
             </span>
             Experiences
@@ -38,7 +38,7 @@ export const ComparisonMetric = ({ className }: { className?: string }) => {
           </div>
           <div className="text-xs text-center">
             Content that <br />
-            <span className="serif-accent font-accent italic font-normal text-primary/75 mr-1">
+            <span className="serif-accent font-accent font-normal text-primary/75 mr-1">
               ranks for developer
             </span>
             <br />
@@ -54,7 +54,7 @@ export const ComparisonMetric = ({ className }: { className?: string }) => {
           </div>
           <div className="text-xs text-center">
             Tutorials and guides <br />
-            <span className="serif-accent font-accent italic font-normal text-primary/75 mr-1">
+            <span className="serif-accent font-accent font-normal text-primary/75 mr-1">
               developers trust
             </span>
           </div>

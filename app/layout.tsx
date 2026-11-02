@@ -2,8 +2,20 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { baseUrl } from "@/lib/site";
+import { organizationJsonLd } from "@/lib/seo";
 import Script from "next/script";
 import { cn } from "@/lib/utils";
+import localFont from "next/font/local";
+
+const studio1Sans = localFont({
+  src: [
+    { path: "./fonts/Studio1Sans-Regular.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/Studio1Sans-Medium.woff2", weight: "500", style: "normal" },
+  ],
+  variable: "--font-studio1-sans",
+  display: "swap",
+  fallback: ["Inter", "Arial", "sans-serif"],
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
@@ -16,11 +28,11 @@ export const metadata: Metadata = {
     apple: [{ url: "/icon.png", type: "image/png" }],
   },
   title: {
-    default: "Technical Content & Developer Growth Agency for DevTools | Studio1",
+    default: "DevRel & Developer Marketing Agency for Devtools | Studio1",
     template: "%s | Studio1",
   },
   description:
-    "Studio1 is a technical content and developer growth partner for SaaS and devtool teams. We produce tutorials, docs, videos, launches, and developer programs that drive adoption.",
+    "Studio1 is a DevRel and developer marketing agency for devtool, AI, and open-source teams: technical content, docs, video, launches, and GitHub growth.",
   keywords: [
     "technical content",
     "developer relations",
@@ -32,6 +44,8 @@ export const metadata: Metadata = {
     "developer community",
     "technical content agency",
     "devrel agency",
+    "GitHub growth agency",
+    "open source marketing agency",
     "developer tutorials",
     "developer documentation",
     "developer advocacy",
@@ -40,9 +54,9 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Studio1" }],
   openGraph: {
-    title: "Technical Content & Developer Growth Agency for DevTools | Studio1",
+    title: "DevRel & Developer Marketing Agency for Devtools | Studio1",
     description:
-      "Studio1 is a technical content and developer growth partner for SaaS and devtool teams. We produce tutorials, docs, videos, launches, and developer programs that drive adoption.",
+      "Studio1 is a DevRel and developer marketing agency for devtool, AI, and open-source teams: technical content, docs, video, launches, and GitHub growth.",
     url: baseUrl,
     siteName: "Studio1",
     locale: "en",
@@ -57,10 +71,10 @@ export const metadata: Metadata = {
     ],
   },
   twitter: {
-    title: "Technical Content & Developer Growth Agency for DevTools | Studio1",
+    title: "DevRel & Developer Marketing Agency for Devtools | Studio1",
     card: "summary_large_image",
     description:
-      "Studio1 is a technical content and developer growth partner for SaaS and devtool teams. We produce tutorials, docs, videos, launches, and developer programs that drive adoption.",
+      "Studio1 is a DevRel and developer marketing agency for devtool, AI, and open-source teams: technical content, docs, video, launches, and GitHub growth.",
     images: [`${baseUrl}/opengraph-image.png`],
     creator: "@Studio1HQ",
   },
@@ -74,6 +88,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
+      className={studio1Sans.variable}
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
@@ -87,6 +102,9 @@ export default async function RootLayout({
           attribute="class"
           defaultTheme="system"
           enableSystem
+          // No theme switch on the site: always follow the system theme and
+          // ignore any choice saved by the old switch under the default key.
+          storageKey="s1-theme-system"
           disableTransitionOnChange
         >
           {children}
@@ -95,19 +113,7 @@ export default async function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Organization",
-              name: "Studio1",
-              url: baseUrl,
-              logo: `${baseUrl}/icon.png`,
-              description:
-                "Studio1 is a technical content and developer growth partner for SaaS and devtool teams. We produce tutorials, docs, videos, launches, and developer programs that drive adoption.",
-              sameAs: [
-                "https://twitter.com/Studio1HQ",
-                "https://linkedin.com/company/studio1hq",
-              ],
-            }),
+            __html: JSON.stringify(organizationJsonLd()),
           }}
         />
 

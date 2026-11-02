@@ -1,12 +1,15 @@
 "use client";
 
-import { fadeInUp, staggerChildren } from "@/lib/animations";
+import { Container } from "@/components/home/ui";
+import { BlurRise, HoverWash } from "@/components/pages/shared/blur-rise";
+import { CELL, MUTED, PaperSection } from "@/components/paper/paper-sections";
+import { ServiceHead } from "@/components/pages/shared/paper-service-kit";
+import { cn } from "@/lib/utils";
 import {
   IconCalendarEvent,
   IconListCheck,
   IconMessageCircle,
 } from "@tabler/icons-react";
-import { motion } from "motion/react";
 
 const loop = [
   {
@@ -26,74 +29,48 @@ const loop = [
   },
 ];
 
-export default function Cadence() {
+export default function Cadence({ index = 6 }: { index?: number }) {
   return (
-    <section id="process" className="relative scroll-mt-28 py-28 md:py-36">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <motion.div
-          variants={staggerChildren}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-          className="max-w-2xl"
-        >
-          <motion.p
-            variants={fadeInUp}
-            className="font-secondary text-sm font-medium tracking-wide text-primary"
-          >
-            Video workflow
-          </motion.p>
-          <motion.h2
-            variants={fadeInUp}
-            className="mt-4 font-inter text-4xl font-normal tracking-tight md:text-5xl"
-          >
-            Repeatable video work beats{" "}
-            <span className="serif-accent bg-gradient-to-br from-primary via-primary1 to-primary bg-clip-text font-accent font-normal italic text-transparent">
-              one-off drops
-            </span>
-          </motion.h2>
-          <motion.p
-            variants={fadeInUp}
-            className="mt-6 text-base text-muted-foreground"
-          >
-            We turn product topics into clear videos, supporting clips, and
-            publish-ready assets when your team needs them.
-          </motion.p>
-        </motion.div>
+    <PaperSection id="process" tone="paper" className="scroll-mt-28">
+      <Container>
+        <ServiceHead
+          index={index}
+          name="Video workflow"
+          title="Repeatable video work beats"
+          accent="one-off drops"
+          description="We turn product topics into clear videos, supporting clips, and publish-ready assets when your team needs them."
+        />
 
-        <motion.ol
-          variants={staggerChildren}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-          className="relative mt-16 grid gap-10 md:mt-20 md:grid-cols-3 md:gap-6"
-        >
-          <div
-            aria-hidden
-            className="absolute left-7 top-7 hidden h-px -translate-y-1/2 bg-border md:block md:right-[calc((100%-3rem)/3-1.75rem)]"
-          />
-          {loop.map((step, index) => (
-            <motion.li
-              key={step.title}
-              variants={fadeInUp}
-              className="relative flex flex-col items-start"
-            >
-              <div className="relative z-10 flex size-14 items-center justify-center rounded-full border bg-background shadow-sm">
-                <step.icon className="size-6 text-primary" aria-hidden="true" />
-              </div>
-              <p className="mt-5 font-secondary text-xs font-medium tracking-widest text-muted-foreground">
-                Step {index + 1}
-              </p>
-              <h3 className="mt-2 font-inter text-xl font-medium tracking-tight">
-                {step.title}
-              </h3>
-              <p className="mt-2 max-w-xs text-sm text-muted-foreground">
-                {step.body}
-              </p>
-            </motion.li>
+        <ol className="mt-10 grid gap-2 md:grid-cols-3">
+          {loop.map((step, position) => (
+            <li key={step.title} className="relative">
+              <BlurRise delay={position * 0.08} className="h-full">
+                <div
+                  className={cn(
+                    "group relative isolate flex h-full flex-col items-start overflow-hidden p-6 md:p-7",
+                    CELL,
+                  )}
+                >
+                  <HoverWash />
+                  <span className="flex size-12 items-center justify-center rounded-[6px] bg-[#f8f6f2] text-[#141414] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10)] transition-colors duration-500 group-hover:text-[#ea580c]">
+                    <step.icon
+                      className="size-6"
+                      stroke={1.6}
+                      aria-hidden="true"
+                    />
+                  </span>
+                  <h3 className="mt-6 text-[22px] font-medium tracking-[-0.035em]">
+                    {step.title}
+                  </h3>
+                  <p className={cn("mt-3 text-[15px] leading-[1.6]", MUTED)}>
+                    {step.body}
+                  </p>
+                </div>
+              </BlurRise>
+            </li>
           ))}
-        </motion.ol>
-      </div>
-    </section>
+        </ol>
+      </Container>
+    </PaperSection>
   );
 }

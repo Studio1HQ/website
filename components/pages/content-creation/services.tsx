@@ -2,11 +2,11 @@
 
 import { Code, Scissors, YoutubeLogo } from "@phosphor-icons/react";
 import {
-  ServiceOfferCards,
-  type ServiceOfferCard,
-} from "@/components/pages/shared/service-offer-cards";
+  StoryRows,
+  type StoryOffer,
+} from "@/components/pages/shared/service-story";
 
-const offerings: ServiceOfferCard[] = [
+const offerings: StoryOffer[] = [
   {
     id: "tech-video-production",
     icon: YoutubeLogo,
@@ -55,9 +55,15 @@ const offerings: ServiceOfferCard[] = [
 
 export default function Services() {
   return (
-    <ServiceOfferCards
-      subtitle="Three connected video workstreams for developer brands: teach the workflow, cut it for social, and package demos developers can inspect."
-      cards={offerings}
+    <StoryRows
+      index={1}
+      title={
+        <>
+          What We <span className="text-[#f97316]">Offer</span>
+        </>
+      }
+      description="Three connected video workstreams for developer brands: teach the workflow, cut it for social, and package demos developers can inspect."
+      offers={offerings}
     />
   );
 }

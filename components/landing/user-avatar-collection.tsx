@@ -5,7 +5,7 @@ import { IconUser } from "@tabler/icons-react";
 export default function UserAvatarCollection() {
   return (
     <>
-      <div className="flex z-[120] border-2 border-primary/20 flex-col items-center justify-center">
+      <div className="flex z-[120] flex-col items-center justify-center">
         <div className="absolute z-[20] size-16 top-1/2 right-6 flex items-center justify-center rounded-full p-2 backdrop-blur-md bg-primary/20">
           <Avatar className="w-full h-full">
             <AvatarImage src={DylanImg.src} />

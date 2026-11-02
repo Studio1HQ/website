@@ -6,9 +6,17 @@ import Packaging from "@/components/pages/content-creation/packaging";
 import Formats from "@/components/pages/content-creation/formats";
 import Cadence from "@/components/pages/content-creation/cadence";
 // import ProjectDemo from "@/components/pages/content-creation/project-demo";
-import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
-import { ServiceDetailSection } from "@/components/pages/shared/service-detail-sections";
-import FAQ, { type FAQItem } from "@/components/landing/faq";
+import { breadcrumbJsonLd, pageMetadata, serviceJsonLd } from "@/lib/seo";
+import type { FAQItem } from "@/components/landing/faq";
+import { Container } from "@/components/home/ui";
+import { PaperSection } from "@/components/paper/paper-sections";
+import { PaperServiceFaq } from "@/components/pages/shared/paper-service-kit";
+import { PAPER_SCOPE } from "@/lib/paper";
+import {
+  StoryCards,
+  StoryLogos,
+} from "@/components/pages/shared/service-story";
+import { PaperCta } from "@/components/paper/paper-sections";
 import { getTranslations } from "next-intl/server";
 import { DEFAULT_LOCALE } from "@/lib/i18n";
 
@@ -26,6 +34,8 @@ export async function generateMetadata(): Promise<Metadata> {
     keywords: [
       "content creation",
       "developer video production",
+      "developer demo videos",
+      "developer video agency",
       "DevTool product demos",
       "technical YouTube videos",
       "technical video demos",
@@ -104,6 +114,11 @@ const videoWorkstreams = [
 
 const videoFaqItems: FAQItem[] = [
   {
+    question: "Do you make product demo videos for developer tools?",
+    answer:
+      "Yes. We script, record, and edit demo videos that show your tool working in a real workflow, and we can build the demo project itself so developers can clone the repo and follow along.",
+  },
+  {
     question: "What kind of developer videos do you produce?",
     answer:
       "We produce long-form tutorials, product demos, project walkthroughs, technical explainers, Shorts, cutdowns, and recurring video formats for developer products.",
@@ -126,24 +141,16 @@ const videoFaqItems: FAQItem[] = [
 ];
 
 export default function Page() {
-  const serviceSchema = {
-    "@context": "https://schema.org",
-    "@type": "Service",
-    name: "Developer Video Production Services",
+  const serviceSchema = serviceJsonLd({
+    name: "Developer Video and Demo Production",
     description:
-      "Developer video production services for AI and DevTool startups: technical demos, tutorials, scripts, edits, thumbnails, Shorts, and upload-ready assets.",
-    provider: {
-      "@type": "Organization",
-      name: "Studio1",
-      url: "https://studio1hq.com",
-    },
+      "Developer video and demo production for AI and devtool startups: product demo videos, coding tutorials, demo projects, scripts, edits, thumbnails, Shorts, and upload-ready assets.",
+    path: "/developer-video-production",
     serviceType: "Developer Video Production",
-    areaServed: "Worldwide",
-    url: "https://studio1hq.com/developer-video-production",
-  };
+  });
 
   return (
-    <div className="">
+    <div className="overflow-x-clip" style={PAPER_SCOPE}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
@@ -163,22 +170,33 @@ export default function Page() {
         }}
       />
       <Hero />
+      <StoryLogos />
       <Services />
-      <ServiceDetailSection
-        id="work"
-        eyebrow="Video production scope"
+      <StoryCards
+        index={2}
+        name="Video production scope"
         title="Technical videos that developers can actually learn from"
         description="We produce walkthroughs, shorts, demo projects, repo-led videos, and supporting assets for developer brands."
-        items={videoWorkstreams}
-        columns="three"
+        steps={videoWorkstreams}
+        workflow="video-production.yml"
       />
       {/* <ProjectDemo /> */}
-      <Packaging />
-      <Formats />
-      <Cadence />
-      <FAQ
-        subtitle="Common questions about our developer video production services."
-        items={videoFaqItems}
+      <Packaging index={3} />
+      <Formats index={4} />
+      <Cadence index={5} />
+      <PaperSection tone="paper">
+        <Container>
+          <PaperServiceFaq
+            index={6}
+            subtitle="Common questions about our developer video production services."
+            items={videoFaqItems}
+          />
+        </Container>
+      </PaperSection>
+      <PaperCta
+        index={7}
+        title="Ready to Make Videos Developers Learn From?"
+        description="Technical demos, tutorials, scripts, edits, shorts, and upload-ready assets for developer brands."
       />
     </div>
   );

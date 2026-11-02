@@ -1,3 +1,6 @@
+import { AGENCIES_CHECKED } from "@/data/agencies";
+import { COMPARISONS } from "@/data/comparisons";
+import { AUTHORS, authorPath } from "@/lib/authors";
 import { getAllPosts } from "@/lib/blog";
 import { getAllCaseStudies } from "@/lib/case-studies";
 import { getJobOpenings } from "@/lib/careers";
@@ -19,6 +22,7 @@ type SitemapEntry = {
 
 const STATIC_LAST_MODIFIED = "2026-08-12";
 const LEGAL_LAST_MODIFIED = "2025-01-15";
+const GROWTH_PAGES_LAST_MODIFIED = "2026-10-29";
 
 function escapeXml(value: string) {
   return value
@@ -61,6 +65,56 @@ export async function GET() {
 
   const englishOnlyPaths: SitemapEntry[] = [
     {
+      path: "/services",
+      lastModified: GROWTH_PAGES_LAST_MODIFIED,
+      priority: 0.9,
+    },
+    {
+      path: "/github-growth-agency",
+      lastModified: GROWTH_PAGES_LAST_MODIFIED,
+      priority: 0.9,
+    },
+    {
+      path: "/product-launch-service",
+      lastModified: GROWTH_PAGES_LAST_MODIFIED,
+      priority: 0.9,
+    },
+    {
+      path: "/aeo-agency",
+      lastModified: GROWTH_PAGES_LAST_MODIFIED,
+      priority: 0.9,
+    },
+    {
+      path: "/reddit-marketing-agency",
+      lastModified: GROWTH_PAGES_LAST_MODIFIED,
+      priority: 0.9,
+    },
+    {
+      path: "/developer-content-distribution",
+      lastModified: GROWTH_PAGES_LAST_MODIFIED,
+      priority: 0.9,
+    },
+    {
+      path: "/best-developer-marketing-agencies",
+      lastModified: AGENCIES_CHECKED,
+      priority: 0.7,
+    },
+    ...COMPARISONS.map((comparison) => ({
+      path: `/compare/${comparison.slug}`,
+      lastModified: comparison.checked,
+      priority: 0.7,
+    })),
+    {
+      path: "/testimonials",
+      lastModified: GROWTH_PAGES_LAST_MODIFIED,
+      priority: 0.6,
+    },
+    {
+      path: "/results",
+      lastModified: GROWTH_PAGES_LAST_MODIFIED,
+      priority: 0.8,
+    },
+    {
       path: "/case-studies",
       lastModified: STATIC_LAST_MODIFIED,
       priority: 0.8,
@@ -88,6 +142,13 @@ export async function GET() {
       path: `/blog/${post.slug}`,
       lastModified: post.updatedDate,
       priority: 0.7,
+    })),
+    ...AUTHORS.map((author) => ({
+      path: authorPath(author),
+      lastModified:
+        getAllPosts().find((post) => post.authors.includes(author.name))
+          ?.updatedDate ?? STATIC_LAST_MODIFIED,
+      priority: 0.6,
     })),
   ];
 

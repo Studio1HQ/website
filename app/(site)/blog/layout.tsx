@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { PageSideBeamGlows } from "@/components/shared/page-side-beam-glows";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
@@ -27,7 +26,6 @@ export default function BlogLayout({
 }) {
   return (
     <div className="min-h-screen overflow-x-clip">
-      <PageSideBeamGlows />
       {children}
     </div>
   );

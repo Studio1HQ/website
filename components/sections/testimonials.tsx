@@ -57,7 +57,7 @@ const Testimonial6: React.FC = () => {
                     <CarouselItem>
                       <div className="flex flex-col items-center justify-center text-center h-[400px] sm:h-[400px] px-4 sm:px-8">
                         <div className="max-w-4xl mx-auto">
-                          <div className="mb-8 text-md sm:text-xl lg:text-3xl font-medium overflow-y-auto max-h-[300px] sm:max-h-[250px] scrollbar-hide">
+                          <div data-lenis-prevent className="mb-8 text-md sm:text-xl lg:text-3xl font-medium overflow-y-auto max-h-[300px] sm:max-h-[250px] scrollbar-hide">
                             {currentTestimonial.content
                               .split("\n")
                               .map((line, lineIndex) => (

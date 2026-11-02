@@ -4,8 +4,6 @@ import { serviceNavItems } from "@/constants/data";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { elevatedCardShadow } from "@/lib/shadows";
 import { cn } from "@/lib/utils";
 
 type BottomNavItem = {
@@ -191,33 +189,26 @@ export default function BottomNavbar() {
     <nav className="fixed bottom-[5rem] z-[101] left-0 w-full">
       {isBottomNavValidPage && (
         <div className="absolute top-0 left-0 w-full">
-          <nav
-            className={cn(
-              "mx-auto flex max-w-fit items-center justify-center gap-1.5 rounded-xl border border-border/80 bg-background/95 px-1.5 py-1.5 backdrop-blur-md",
-              elevatedCardShadow,
-            )}
-          >
+          <nav className="s1-glass-dark mx-auto flex max-w-fit items-center justify-center gap-1 rounded-full p-1.5">
             {navItems.map((item) => {
               const isActive = activeHash === item.path;
 
               return (
-                <Button
+                <Link
                   key={item.title}
-                  variant={isActive ? "gradient" : "outline-subtle"}
-                  size="sm"
-                  className="min-w-[5rem]"
-                  asChild
+                  href={`${pathnameWithoutLocale}${item.path}`}
+                  aria-current={isActive ? "true" : undefined}
+                  onClick={() => {
+                    activeHashRef.current = item.path;
+                    setActiveHash(item.path);
+                  }}
+                  className={cn(
+                    "inline-flex h-9 min-w-[5rem] items-center justify-center rounded-full px-4 text-[13px] font-medium transition-colors duration-300",
+                    isActive ? "s1-glass-btn text-white" : "text-white/65 hover:text-white",
+                  )}
                 >
-                  <Link
-                    href={`${pathnameWithoutLocale}${item.path}`}
-                    onClick={() => {
-                      activeHashRef.current = item.path;
-                      setActiveHash(item.path);
-                    }}
-                  >
-                    {item.title}
-                  </Link>
-                </Button>
+                  {item.title}
+                </Link>
               );
             })}
           </nav>

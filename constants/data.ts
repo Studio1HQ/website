@@ -45,10 +45,14 @@ import {
   Briefcase,
   CheckCircle,
   Files,
+  GithubLogo,
   Lightbulb,
   Newspaper,
   Pen,
+  RedditLogo,
   RocketLaunch,
+  Sparkle,
+  SquaresFour,
   Star,
   YoutubeLogo,
 } from "@phosphor-icons/react/dist/ssr";
@@ -70,6 +74,11 @@ export const navItems = [
     path: "#",
     children: [
       {
+        title: "All Services",
+        path: "/services",
+        icon: SquaresFour,
+      },
+      {
         title: "Technical Content Marketing",
         path: "/technical-content-marketing",
         icon: Pen,
@@ -88,6 +97,26 @@ export const navItems = [
         title: "Documentation & DX Audits",
         path: "/developer-documentation-dx-audit",
         icon: Books,
+      },
+      {
+        title: "GitHub Growth",
+        path: "/github-growth-agency",
+        icon: GithubLogo,
+      },
+      {
+        title: "Product Launch",
+        path: "/product-launch-service",
+        icon: RocketLaunch,
+      },
+      {
+        title: "AEO Agency",
+        path: "/aeo-agency",
+        icon: Sparkle,
+      },
+      {
+        title: "Reddit Marketing",
+        path: "/reddit-marketing-agency",
+        icon: RedditLogo,
       },
     ],
   },

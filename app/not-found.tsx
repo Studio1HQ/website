@@ -1,10 +1,8 @@
-import Link from "next/link";
-import { getTranslations } from "next-intl/server";
-import { ArrowRight, Home } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import { NotFoundGlow } from "@/components/not-found-glow";
-import { DEFAULT_LOCALE, localizePathname } from "@/lib/i18n";
+import { NextIntlClientProvider } from "next-intl";
+import { SiteChrome } from "@/components/site-chrome";
+import { PaperNotFound } from "@/components/paper/paper-error-pages";
+import { DEFAULT_LOCALE } from "@/lib/i18n";
+import { getMessages } from "@/lib/i18n-messages";
 
 const agentRecoveryMarkdown = `# Page not found
 
@@ -18,58 +16,23 @@ Useful machine-readable links:
 - Case studies: /case-studies
 - Careers: /careers`;
 
+/**
+ * Renders under the root layout only (unmatched URLs and notFound() both land
+ * here), so it brings its own messages and chrome, forced into the paper style.
+ * No intro curtain: a dead end should get out of the way, and the curtain's
+ * boot script can't run when the 404 renders on the client.
+ */
 export default async function NotFound() {
-  const t = await getTranslations({
-    locale: DEFAULT_LOCALE,
-    namespace: "NotFound",
-  });
+  const messages = await getMessages(DEFAULT_LOCALE);
 
   return (
-    <div className="relative -mb-10">
-      <section className="relative z-10 flex min-h-[calc(100dvh-5rem-18rem)] items-center justify-center overflow-visible px-4 pt-24 pb-10 sm:px-6 sm:pt-28 sm:pb-12">
-        <NotFoundGlow />
-
-        <div className="relative z-10 mx-auto flex w-full max-w-2xl flex-col items-center text-center">
-          <p className="font-numeric text-sm font-semibold uppercase tracking-[0.28em] text-primary">
-            {t("eyebrow")}
-          </p>
-
-          <h1 className="mt-6 text-balance font-inter text-4xl font-medium leading-tight tracking-tight text-foreground sm:text-6xl">
-            {t("titlePrefix")}{" "}
-            <span className="bg-gradient-to-br from-primary via-primary1 to-primary bg-clip-text text-transparent">
-              {t("titleHighlight")}
-            </span>
-          </h1>
-
-          <p className="mt-6 max-w-md text-balance text-base leading-7 text-muted-foreground sm:text-lg">
-            {t("description")}
-          </p>
-
-          <div className="mt-10 flex w-full flex-col items-center justify-center gap-3 sm:w-auto sm:flex-row">
-            <Button variant="gradient" size="cta" className="w-full sm:w-auto" asChild>
-              <Link href={localizePathname("/", DEFAULT_LOCALE)}>
-                <Home className="size-5" />
-                {t("homeCta")}
-              </Link>
-            </Button>
-            <Button
-              variant="outline-subtle"
-              size="cta"
-              className="w-full sm:w-auto"
-              asChild
-            >
-              <Link href={localizePathname("/technical-content-marketing", DEFAULT_LOCALE)}>
-                {t("servicesCta")}
-                <ArrowRight className="size-5" />
-              </Link>
-            </Button>
-          </div>
-
-          <pre className="sr-only" data-agent-404-recovery>
-            {agentRecoveryMarkdown}
-          </pre>
-        </div>
-      </section>
-    </div>
+    <NextIntlClientProvider locale={DEFAULT_LOCALE} messages={messages}>
+      <SiteChrome paper preloader={false}>
+        <PaperNotFound />
+        <pre className="sr-only" data-agent-404-recovery>
+          {agentRecoveryMarkdown}
+        </pre>
+      </SiteChrome>
+    </NextIntlClientProvider>
   );
 }

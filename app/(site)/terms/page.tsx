@@ -1,8 +1,7 @@
 import { Metadata } from "next";
-import { MDXRemote } from "next-mdx-remote/rsc";
-import remarkGfm from "remark-gfm";
 import { getLegalPage } from "@/lib/legal";
 import { pageMetadata } from "@/lib/seo";
+import { LegalPage } from "@/components/legal/legal-page";
 
 export async function generateMetadata(): Promise<Metadata> {
   const page = getLegalPage("terms");
@@ -15,23 +14,5 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function TermsPage() {
-  const page = getLegalPage("terms");
-
-  return (
-    <section className="mx-auto max-w-4xl px-4 py-24 font-inter tabular-nums [&_h1]:font-inter [&_h2]:font-inter [&_strong]:font-inter">
-      <h1 className="mb-8 text-4xl font-semibold tracking-tight">
-        {page.title}
-      </h1>
-
-      <div className="prose prose-neutral max-w-none dark:prose-invert prose-headings:font-inter prose-headings:font-semibold prose-headings:tracking-tight prose-strong:font-inter">
-        <p className="mb-8 text-muted-foreground">
-          Last updated: {page.lastUpdated}
-        </p>
-        <MDXRemote
-          source={page.content}
-          options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
-        />
-      </div>
-    </section>
-  );
+  return <LegalPage page={getLegalPage("terms")} />;
 }

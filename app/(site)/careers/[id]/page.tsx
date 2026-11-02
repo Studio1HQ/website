@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
 import { JobDetailPage } from "@/components/careers/job-detail-page";
-import { getJobById, getJobIds } from "@/lib/careers";
+import { getJobById, getJobIds, getJobOpenings } from "@/lib/careers";
 import {
   jobPostingJsonLd,
   localizedBreadcrumbJsonLd,
@@ -62,7 +62,10 @@ export default async function CareerJobPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jobSchema) }}
       />
-      <JobDetailPage job={job}>
+      <JobDetailPage
+        job={job}
+        otherJobs={getJobOpenings("en").filter((other) => other.id !== id)}
+      >
         <MDXRemote
           source={job.content}
           options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
