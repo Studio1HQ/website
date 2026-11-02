@@ -264,29 +264,6 @@ function Chapter({
 const RIBBON =
   "M 32 0 C 32 80, 60 120, 60 200 S 8 320, 8 420 S 62 560, 62 640 S 14 780, 14 860 S 32 960, 32 1000";
 
-/** The ribbon's x (0-80) at a given height (0-1000), for the tip dot. */
-function ribbonX(y: number) {
-  // Same sway as RIBBON, sampled as a smooth curve
-  const points: [number, number][] = [
-    [0, 32],
-    [200, 60],
-    [420, 8],
-    [640, 62],
-    [860, 14],
-    [1000, 32],
-  ];
-  for (let i = 1; i < points.length; i += 1) {
-    const [y1, x1] = points[i];
-    const [y0, x0] = points[i - 1];
-    if (y <= y1) {
-      const t = (y - y0) / (y1 - y0);
-      const ease = (1 - Math.cos(t * Math.PI)) / 2;
-      return x0 + (x1 - x0) * ease;
-    }
-  }
-  return 32;
-}
-
 export function CaseChapters({ acts }: { acts: Act[] }) {
   const ref = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
@@ -305,10 +282,6 @@ export function CaseChapters({ acts }: { acts: Act[] }) {
   // Reveal the orange copy from the top down to the current point
   const clip = useTransform(fill, (v) => `inset(0 0 ${(1 - v) * 100}% 0)`);
   const tipTop = useTransform(fill, (v) => `${v * 100}%`);
-  const tipLeft = useTransform(
-    fill,
-    (v) => `${(ribbonX(v * 1000) / 80) * 100}%`,
-  );
   let number = 0;
 
   // The study being read: the last chapter whose top has passed mid-screen
@@ -384,8 +357,10 @@ export function CaseChapters({ acts }: { acts: Act[] }) {
         {/* Studio1 + the study being read, riding the leading edge */}
         {reduceMotion ? null : (
           <motion.span
-            className="absolute -ml-[46px] -mt-[22px] flex items-center gap-1.5 rounded-[6px] bg-white p-1.5 shadow-[0_14px_30px_-14px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/[0.06]"
-            style={{ top: tipTop, left: tipLeft }}
+            // Fixed across the rail, so it covers the ribbon wherever it sways and
+            // never reaches the cards; only its height follows the scroll
+            className="absolute left-[36px] -ml-[46px] -mt-[22px] flex items-center gap-1.5 rounded-[6px] bg-white/70 p-1.5 shadow-[0_14px_30px_-14px_rgba(20,20,20,0.5),inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-inset ring-white/80 backdrop-blur-xl backdrop-saturate-150"
+            style={{ top: tipTop }}
           >
             <span className="relative flex size-8 items-center justify-center rounded-[6px] bg-white ring-1 ring-[#141414]/[0.08]">
               <Image
