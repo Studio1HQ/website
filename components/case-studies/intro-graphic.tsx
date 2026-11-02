@@ -6,82 +6,77 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 
 /** Developers waiting to be found, on a 360 x 240 board. */
 const PEOPLE = [
-  { x: 270, y: 50 },
-  { x: 322, y: 96 },
-  { x: 258, y: 132 },
-  { x: 314, y: 176 },
-  { x: 246, y: 208 },
+  { x: 292, y: 40, photo: "/assets/Dylan.webp" },
+  { x: 292, y: 84, photo: "/assets/Gabriel.webp" },
+  { x: 292, y: 128, photo: "/assets/Julia.webp" },
+  { x: 292, y: 172, photo: "/assets/krish-dholakia.webp" },
+  { x: 292, y: 216, photo: "/assets/sakshi-sen.webp" },
 ];
-const R = 19;
+const R = 16;
 
-/** The line from the product to one developer, ending at its rim. */
+/** The line from the product to one developer, stopping at the portrait. */
 const route = (to: { x: number; y: number }) =>
-  `M 106 128 C 170 128, 172 ${to.y}, ${to.x - R - 3} ${to.y}`;
+  `M 120 128 C 190 128, 200 ${to.y}, ${to.x - R - 3} ${to.y}`;
 
-/** One full send: the lines draw out, land, hold and fade. */
-const CYCLE = 3.6;
-/** The first send waits for the guides to finish drawing. */
-const START = 1.8;
-const STAGGER = 0.14;
-
-/** Head and shoulders, centred on 0,0. */
-const FIGURE =
-  "M 0 -9 a 4.4 4.4 0 1 1 0 8.8 a 4.4 4.4 0 1 1 0 -8.8 Z M -8 9.5 a 8 7 0 0 1 16 0 Z";
+/** One round: every line draws out together, lands, holds, and fades. */
+const ROUND = 3.6;
+/** The first round waits for the guides to finish drawing. */
+const START = 1.6;
 
 /**
- * The intro's idea, drawn: a product on the left, developers who haven't
- * found it on the right, and lines that reach them one after another.
+ * The intro's idea, drawn quietly: a product on the left, the developers it
+ * should reach on the right, and lines that reach them all at once.
  */
 export function IntroGraphic() {
   const reduceMotion = useReducedMotion();
-  const loop = (i: number) => ({
-    dur: `${CYCLE}s`,
-    begin: `${(START + i * STAGGER).toFixed(2)}s`,
+  const loop = {
+    dur: `${ROUND}s`,
+    begin: `${START}s`,
     repeatCount: "indefinite" as const,
-  });
+  };
 
   return (
     <svg
-      viewBox="0 0 360 240"
+      viewBox="0 0 360 256"
       role="img"
       aria-label="A product reaching the developers who had not found it yet"
       className="h-auto w-full overflow-visible"
     >
       <defs>
-        <radialGradient id="intro-rim" cx="35%" cy="28%" r="80%">
-          <stop offset="0" stopColor="#ffffff" />
-          <stop offset="0.55" stopColor="#ffffff" />
-          <stop offset="1" stopColor="#ece6dc" />
-        </radialGradient>
-        <filter id="intro-shadow" x="-50%" y="-50%" width="200%" height="200%">
+        {PEOPLE.map((person, i) => (
+          <clipPath key={i} id={`intro-face-${i}`}>
+            <circle cx={person.x} cy={person.y} r={R} />
+          </clipPath>
+        ))}
+        <filter id="intro-lift" x="-50%" y="-50%" width="200%" height="200%">
           <feDropShadow
             dx="0"
-            dy="6"
-            stdDeviation="6"
+            dy="4"
+            stdDeviation="4"
             floodColor="#141414"
-            floodOpacity="0.14"
+            floodOpacity="0.18"
           />
         </filter>
       </defs>
 
-      {/* Guides: quiet grey lines, drawn once */}
+      {/* Guides: hairline grey, drawn once */}
       {PEOPLE.map((person, i) => (
         <motion.path
           key={i}
           d={route(person)}
           fill="none"
           stroke="#141414"
-          strokeOpacity="0.14"
-          strokeWidth="1.25"
+          strokeOpacity="0.12"
+          strokeWidth="1"
           strokeLinecap="round"
           initial={reduceMotion ? false : { pathLength: 0 }}
           whileInView={{ pathLength: 1 }}
           viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 1, ease: EASE, delay: 0.25 + i * 0.1 }}
+          transition={{ duration: 1, ease: EASE, delay: 0.2 + i * 0.08 }}
         />
       ))}
 
-      {/* Reach: each line draws out in orange, holds, then fades, on a loop */}
+      {/* Reach: all lines draw out together, hold, then flow on into the portraits */}
       {reduceMotion
         ? null
         : PEOPLE.map((person, i) => (
@@ -91,108 +86,101 @@ export function IntroGraphic() {
               pathLength={100}
               fill="none"
               stroke="#f97316"
-              strokeWidth="1.75"
+              strokeWidth="1.25"
               strokeLinecap="round"
               strokeDasharray="100 100"
               strokeDashoffset="100"
             >
               <animate
                 attributeName="stroke-dashoffset"
-                values="100;0;0;0"
-                keyTimes="0;0.35;0.8;1"
+                values="100;0;0;-100"
+                keyTimes="0;0.35;0.62;0.92"
                 calcMode="spline"
-                keySplines="0.45 0 0.25 1;0 0 1 1;0 0 1 1"
-                {...loop(i)}
-              />
-              <animate
-                attributeName="opacity"
-                values="1;1;1;0"
-                keyTimes="0;0.35;0.7;0.95"
-                {...loop(i)}
+                keySplines="0.45 0 0.25 1;0 0 1 1;0.45 0 0.25 1"
+                {...loop}
               />
             </path>
           ))}
 
       {/* The product */}
       <motion.g
-        initial={reduceMotion ? false : { opacity: 0, scale: 0.85 }}
+        initial={reduceMotion ? false : { opacity: 0, scale: 0.9 }}
         whileInView={{ opacity: 1, scale: 1 }}
         viewport={{ once: true, margin: "-80px" }}
         transition={{ duration: 0.8, ease: EASE }}
-        style={{ transformOrigin: "70px 128px" }}
+        style={{ transformOrigin: "92px 128px" }}
       >
         <rect
-          x="34"
-          y="92"
-          width="72"
-          height="72"
+          x="64"
+          y="100"
+          width="56"
+          height="56"
           rx="6"
           fill="#141414"
-          filter="url(#intro-shadow)"
+          filter="url(#intro-lift)"
         />
-        {/* </> */}
         <path
-          d="M 60 117 L 49 128 L 60 139 M 80 117 L 91 128 L 80 139 M 74 113 L 66 143"
+          d="M 85 119 L 77 128 L 85 137 M 99 119 L 107 128 L 99 137 M 95 115 L 89 141"
           fill="none"
           stroke="#ffffff"
-          strokeWidth="3"
+          strokeWidth="2.25"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
-        <circle cx="96" cy="102" r="3" fill="#f97316" />
       </motion.g>
 
-      {/* Developers: white glass, briefly orange as a line reaches them */}
+      {/* Developers: portraits, ringed in orange as the lines land */}
       {PEOPLE.map((person, i) => (
         <motion.g
           key={i}
           initial={reduceMotion ? false : { opacity: 0, scale: 0.85 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.7, ease: EASE, delay: 0.5 + i * 0.1 }}
+          transition={{ duration: 0.7, ease: EASE, delay: 0.5 + i * 0.08 }}
           style={{ transformOrigin: `${person.x}px ${person.y}px` }}
         >
-          <g transform={`translate(${person.x} ${person.y})`}>
-            <circle r={R} fill="url(#intro-rim)" filter="url(#intro-shadow)" />
-            <circle r={R} fill="none" stroke="#141414" strokeOpacity="0.08" />
-            <path d={FIGURE} fill="#141414" fillOpacity="0.3" />
-
-            {reduceMotion ? null : (
-              <g opacity="0">
-                <animate
-                  attributeName="opacity"
-                  values="0;0;1;1;0"
-                  keyTimes="0;0.33;0.38;0.72;0.9"
-                  {...loop(i)}
-                />
-                <circle r={R} fill="#f97316" />
-                <path d={FIGURE} fill="#ffffff" />
-              </g>
-            )}
-            {reduceMotion ? null : (
-              // A ripple as the line lands
-              <circle
-                r={R}
-                fill="none"
-                stroke="#f97316"
-                strokeWidth="1.25"
-                opacity="0"
-              >
-                <animate
-                  attributeName="r"
-                  values={`${R};${R};${R};${R + 10};${R + 10}`}
-                  keyTimes="0;0.34;0.36;0.6;1"
-                  {...loop(i)}
-                />
-                <animate
-                  attributeName="opacity"
-                  values="0;0;0.6;0;0"
-                  keyTimes="0;0.34;0.36;0.6;1"
-                  {...loop(i)}
-                />
-              </circle>
-            )}
-          </g>
+          <circle
+            cx={person.x}
+            cy={person.y}
+            r={R + 2}
+            fill="#ffffff"
+            filter="url(#intro-lift)"
+          />
+          <image
+            href={person.photo}
+            x={person.x - R}
+            y={person.y - R}
+            width={R * 2}
+            height={R * 2}
+            preserveAspectRatio="xMidYMid slice"
+            clipPath={`url(#intro-face-${i})`}
+          />
+          {reduceMotion ? null : (
+            <circle
+              cx={person.x}
+              cy={person.y}
+              r={R + 2}
+              fill="none"
+              stroke="#f97316"
+              strokeWidth="1.75"
+              opacity="0"
+            >
+              <animate
+                attributeName="opacity"
+                values="0;0;1;0.8;0"
+                keyTimes="0;0.33;0.38;0.7;0.92"
+                {...loop}
+              />
+              <animate
+                attributeName="r"
+                values={`${R + 2};${R + 2};${R + 2};${R + 7};${R + 7}`}
+                keyTimes="0;0.33;0.6;0.92;1"
+                calcMode="spline"
+                keySplines="0 0 1 1;0 0 1 1;0.22 1 0.36 1;0 0 1 1"
+                {...loop}
+              />
+            </circle>
+          )}
         </motion.g>
       ))}
     </svg>
