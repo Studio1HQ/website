@@ -83,7 +83,13 @@ type Frontmatter = {
   quotes?: CaseStudyQuote[];
   outcomes?: string[];
   ctaHook?: string;
+  /** Draft studies stay in the repo but are excluded from every public surface. */
+  draft?: boolean;
 };
+
+function isDraft(data: Frontmatter) {
+  return data.draft === true;
+}
 
 function toMeta(slug: string, data: Frontmatter, content: string): CaseStudyMeta {
   return {
@@ -149,14 +155,15 @@ export function getAllCaseStudies(locale: Locale = DEFAULT_LOCALE): CaseStudyMet
   const fileNames = fs
     .readdirSync(directory)
     .filter((fileName) => caseStudyFilePattern.test(fileName));
-  const studies = fileNames.map((fileName) => {
+  const studies = fileNames.flatMap((fileName) => {
     const slug = fileName.replace(/\.mdx$/, "");
     const fileContents = fs.readFileSync(
       path.join(directory, fileName),
       "utf8",
     );
     const { data, content } = matter(fileContents);
-    return toMeta(slug, data as Frontmatter, content);
+    if (isDraft(data as Frontmatter)) return [];
+    return [toMeta(slug, data as Frontmatter, content)];
   });
   return studies.sort((a, b) => a.order - b.order);
 }
@@ -193,6 +200,7 @@ export function getCaseStudyBySlug(
   if (!fs.existsSync(fullPath)) return null;
   const fileContents = fs.readFileSync(fullPath, "utf8");
   const { data, content } = matter(fileContents);
+  if (isDraft(data as Frontmatter)) return null;
   return { ...toMeta(slug, data as Frontmatter, content), content };
 }
 
