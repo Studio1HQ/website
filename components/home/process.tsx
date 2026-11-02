@@ -10,7 +10,12 @@ import {
   useTransform,
   type MotionValue,
 } from "motion/react";
-import { Compass, PenNib, RocketLaunch, type IconProps } from "@phosphor-icons/react";
+import {
+  Compass,
+  PenNib,
+  RocketLaunch,
+  type IconProps,
+} from "@phosphor-icons/react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { Container, Eyebrow, Rise } from "./ui";
@@ -31,7 +36,14 @@ const STAGES: {
 }[] = [
   { key: "discover", icon: Compass, at: 0.08, left: "4%", top: "5%", tilt: -3 },
   { key: "engage", icon: PenNib, at: 0.58, left: "47%", top: "38%", tilt: 2.5 },
-  { key: "adopt", icon: RocketLaunch, at: 0.86, left: "6%", top: "71%", tilt: -2.5 },
+  {
+    key: "adopt",
+    icon: RocketLaunch,
+    at: 0.86,
+    left: "6%",
+    top: "71%",
+    tilt: -2.5,
+  },
 ];
 
 /**
@@ -55,7 +67,7 @@ function Sticker({
       aria-hidden
       style={{ rotate }}
       className={cn(
-        "inline-flex shrink-0 items-center justify-center rounded-[26%] bg-gradient-to-b from-[#fb923c] to-[#c2410c] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_14px_30px_-14px_rgba(194,65,12,0.75)]",
+        "inline-flex shrink-0 items-center justify-center rounded-[6px] bg-gradient-to-b from-[#fb923c] to-[#c2410c] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_14px_30px_-14px_rgba(194,65,12,0.75)]",
         className,
       )}
     >
@@ -69,9 +81,19 @@ const MOBILE_PATH =
   "M18 0 C 34 111, 2 222, 18 333 C 34 444, 2 555, 18 666 C 34 777, 2 888, 18 1000";
 
 /** Stage marker that lights up when the drawing line reaches it. */
-function StageDot({ progress, at }: { progress: MotionValue<number>; at: number }) {
+function StageDot({
+  progress,
+  at,
+}: {
+  progress: MotionValue<number>;
+  at: number;
+}) {
   const lit = useTransform(progress, [at - 0.02, at + 0.04], [0, 1]);
-  const scale = useTransform(progress, [at - 0.02, at + 0.04, at + 0.1], [0.8, 1.2, 1]);
+  const scale = useTransform(
+    progress,
+    [at - 0.02, at + 0.04, at + 0.1],
+    [0.8, 1.2, 1],
+  );
   return (
     <motion.span
       aria-hidden
@@ -156,7 +178,12 @@ function CanvasStage({
       className="absolute"
       style={{ left: stage.left, top: stage.top, opacity, y }}
     >
-      <StageTitle index={index} label={label} icon={stage.icon} rotate={rotate} />
+      <StageTitle
+        index={index}
+        label={label}
+        icon={stage.icon}
+        rotate={rotate}
+      />
       <div className="pl-[clamp(60px,9vw,130px)]">
         <Caption tilt={stage.tilt}>{description}</Caption>
       </div>
@@ -178,8 +205,16 @@ export default function Process() {
     target: listRef,
     offset: ["start 80%", "end 60%"],
   });
-  const canvasProgress = useSpring(canvasScroll, { stiffness: 70, damping: 24, mass: 0.6 });
-  const listProgress = useSpring(listScroll, { stiffness: 70, damping: 24, mass: 0.6 });
+  const canvasProgress = useSpring(canvasScroll, {
+    stiffness: 70,
+    damping: 24,
+    mass: 0.6,
+  });
+  const listProgress = useSpring(listScroll, {
+    stiffness: 70,
+    damping: 24,
+    mass: 0.6,
+  });
   const drawn = reduceMotion ? 1 : canvasProgress;
   const endDot = useTransform(canvasProgress, [0.94, 1], [0, 1]);
   const fullProgress = useMotionValue(1);
@@ -194,7 +229,9 @@ export default function Process() {
           <Eyebrow>{t("eyebrow")}</Eyebrow>
           <h2 className="mt-6 text-[38px] font-medium leading-[1.04] tracking-[-0.05em] sm:text-[56px] lg:text-[68px]">
             {t("titlePrefix")}{" "}
-            <span className="font-editorial text-primary">{t("titleHighlight")}</span>{" "}
+            <span className="font-editorial text-primary">
+              {t("titleHighlight")}
+            </span>{" "}
             {t("titleSuffix")}
           </h2>
           <p className="mx-auto mt-6 max-w-[560px] text-[16px] leading-[1.6] text-[var(--home-ink-soft)] sm:text-[17px]">
@@ -214,15 +251,33 @@ export default function Process() {
             fill="none"
           >
             <defs>
-              <linearGradient id="process-stroke" x1="0" y1="0" x2="1300" y2="900" gradientUnits="userSpaceOnUse">
+              <linearGradient
+                id="process-stroke"
+                x1="0"
+                y1="0"
+                x2="1300"
+                y2="900"
+                gradientUnits="userSpaceOnUse"
+              >
                 <stop offset="0" stopColor="#fb923c" />
                 <stop offset="1" stopColor="#c2410c" />
               </linearGradient>
-              <filter id="process-glow" x="-10%" y="-10%" width="120%" height="120%">
+              <filter
+                id="process-glow"
+                x="-10%"
+                y="-10%"
+                width="120%"
+                height="120%"
+              >
                 <feGaussianBlur stdDeviation="6" />
               </filter>
             </defs>
-            <path d={PATH} stroke="var(--home-trail)" strokeWidth="5" strokeLinecap="round" />
+            <path
+              d={PATH}
+              stroke="var(--home-trail)"
+              strokeWidth="5"
+              strokeLinecap="round"
+            />
             {/* soft glow under the drawn line */}
             <motion.path
               d={PATH}
@@ -242,7 +297,13 @@ export default function Process() {
             />
             <circle cx="1250" cy="60" r="7" fill="#fb923c" />
             <motion.g style={{ opacity: reduceMotion ? 1 : endDot }}>
-              <circle cx="1245" cy="820" r="18" fill="#f97316" fillOpacity="0.18" />
+              <circle
+                cx="1245"
+                cy="820"
+                r="18"
+                fill="#f97316"
+                fillOpacity="0.18"
+              />
               <circle cx="1245" cy="820" r="9" fill="#c2410c" />
             </motion.g>
           </svg>
@@ -260,7 +321,10 @@ export default function Process() {
         </div>
 
         {/* Phones and tablets: the same journey running down the page */}
-        <div ref={listRef} className="relative mx-auto mt-14 max-w-[640px] xl:hidden">
+        <div
+          ref={listRef}
+          className="relative mx-auto mt-14 max-w-[640px] xl:hidden"
+        >
           {/* The same winding line as desktop, snaking down the gutter */}
           <svg
             aria-hidden
@@ -269,7 +333,13 @@ export default function Process() {
             className="absolute bottom-0 left-0 top-[12px] h-[calc(100%-12px)] w-9 overflow-visible"
             fill="none"
           >
-            <path d={MOBILE_PATH} stroke="var(--home-trail)" strokeWidth="4" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+            <path
+              d={MOBILE_PATH}
+              stroke="var(--home-trail)"
+              strokeWidth="4"
+              strokeLinecap="round"
+              vectorEffect="non-scaling-stroke"
+            />
             <motion.path
               d={MOBILE_PATH}
               stroke="#f97316"
@@ -289,11 +359,24 @@ export default function Process() {
               style={{ pathLength: reduceMotion ? 1 : listProgress }}
             />
             <defs>
-              <linearGradient id="process-stroke-m" x1="0" y1="0" x2="0" y2="1000" gradientUnits="userSpaceOnUse">
+              <linearGradient
+                id="process-stroke-m"
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1000"
+                gradientUnits="userSpaceOnUse"
+              >
                 <stop offset="0" stopColor="#fb923c" />
                 <stop offset="1" stopColor="#c2410c" />
               </linearGradient>
-              <filter id="process-glow-m" x="-200%" y="-10%" width="500%" height="120%">
+              <filter
+                id="process-glow-m"
+                x="-200%"
+                y="-10%"
+                width="500%"
+                height="120%"
+              >
                 <feGaussianBlur stdDeviation="4" />
               </filter>
             </defs>
@@ -312,7 +395,9 @@ export default function Process() {
                     <Sticker icon={stage.icon} className="size-[0.82em]" />
                     <span>{t(`stages.${stage.key}.title`)}</span>
                   </h3>
-                  <Caption tilt={stage.tilt}>{t(`stages.${stage.key}.description`)}</Caption>
+                  <Caption tilt={stage.tilt}>
+                    {t(`stages.${stage.key}.description`)}
+                  </Caption>
                 </Rise>
               </li>
             ))}

@@ -52,7 +52,7 @@ const JOBS_PER_PAGE = 12;
 /** White pill on the paper header, holding one hero stat. */
 /** Frosted glass card, the outer layer of every block on the page. */
 const GLASS_CARD =
-  "rounded-[16px] bg-white/60 shadow-[0_20px_44px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.06] backdrop-blur-xl backdrop-saturate-150 transition-[transform,background-color,box-shadow] duration-500 ease-out";
+  "rounded-[6px] bg-white/60 shadow-[0_20px_44px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.06] backdrop-blur-xl backdrop-saturate-150 transition-[transform,background-color,box-shadow] duration-500 ease-out";
 
 /** Engraved well, set into a glass card. */
 const WELL =
@@ -149,7 +149,7 @@ function FilterDropdown({
         aria-expanded={isOpen}
         onClick={() => setIsOpen((open) => !open)}
         className={cn(
-          "flex h-11 w-full items-center justify-between gap-3 rounded-[11px] px-4 text-[13px] font-medium transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316]/50",
+          "flex h-11 w-full items-center justify-between gap-3 rounded-[6px] px-4 text-[13px] font-medium transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316]/50",
           isActive
             ? "bg-[#141414] text-[#f4efe7]"
             : "bg-[#f1ece4] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)] text-[#141414] hover:text-[#141414]",
@@ -171,7 +171,7 @@ function FilterDropdown({
         <div
           role="listbox"
           aria-label={label}
-          className="absolute left-0 top-[calc(100%+0.5rem)] z-50 max-h-72 w-full min-w-48 overflow-y-auto rounded-[12px] bg-white/90 p-1.5 shadow-[0_24px_40px_-24px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-white backdrop-blur-xl"
+          className="absolute left-0 top-[calc(100%+0.5rem)] z-50 max-h-72 w-full min-w-48 overflow-y-auto rounded-[6px] bg-white/90 p-1.5 shadow-[0_24px_40px_-24px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-white backdrop-blur-xl"
         >
           <button
             type="button"
@@ -264,7 +264,7 @@ function JobRow({ job, locale }: { job: DevRelJob; locale: string }) {
 
         <span
           aria-hidden
-          className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-[#f1ece4] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)] p-2"
+          className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-[6px] bg-[#f1ece4] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)] p-2"
         >
           {job.logo && !hasLogoError ? (
             <span className="relative block size-7">
@@ -521,7 +521,7 @@ export function DevRelJobsPage({ jobs }: DevRelJobsPageProps) {
                     }}
                     placeholder={t("searchPlaceholder")}
                     aria-label={t("searchLabel")}
-                    className="h-11 rounded-[11px] border-0 bg-[#f1ece4] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)] pl-10 pr-10 text-[14px] text-[#141414] ring-0 placeholder:text-[#141414]/45 focus-visible:ring-2 focus-visible:ring-[#f97316]/50 focus-visible:ring-offset-0"
+                    className="h-11 rounded-[6px] border-0 bg-[#f1ece4] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)] pl-10 pr-10 text-[14px] text-[#141414] ring-0 placeholder:text-[#141414]/45 focus-visible:ring-2 focus-visible:ring-[#f97316]/50 focus-visible:ring-offset-0"
                   />
                   {query ? (
                     <button
@@ -703,7 +703,7 @@ export function DevRelJobsPage({ jobs }: DevRelJobsPageProps) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.8, ease: EASE }}
-            className="relative isolate mt-16 overflow-hidden rounded-[20px] bg-white/60 shadow-[0_20px_44px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.06] backdrop-blur-xl backdrop-saturate-150 p-7 sm:p-10 md:mt-20 lg:p-12"
+            className="relative isolate mt-16 overflow-hidden rounded-[6px] bg-white/60 shadow-[0_20px_44px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.06] backdrop-blur-xl backdrop-saturate-150 p-7 sm:p-10 md:mt-20 lg:p-12"
           >
             <span
               aria-hidden

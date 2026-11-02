@@ -9,6 +9,9 @@ import { cn } from "@/lib/utils";
 
 type Mode = "human" | "machine";
 
+/** The wipe between views: slow in the middle, settled at both ends. */
+const WIPE = { duration: 0.75, ease: [0.76, 0, 0.24, 1] } as const;
+
 const SITE = "https://www.studio1hq.com";
 
 /** An absolute link to the live site, without query strings. */
@@ -29,6 +32,39 @@ const clean = (value: string | null | undefined) =>
  * lists, quotes, code, figures and links, in reading order. Navigation, the
  * footer, decoration and anything hidden are left out.
  */
+/** What the page's own structured data says about it (JSON-LD). */
+function pageFacts() {
+  const facts: Record<string, string> = {};
+  const nodes: Record<string, unknown>[] = [];
+  document
+    .querySelectorAll('script[type="application/ld+json"]')
+    .forEach((script) => {
+      try {
+        const data = JSON.parse(script.textContent ?? "");
+        const list = Array.isArray(data) ? data : (data["@graph"] ?? [data]);
+        nodes.push(...list);
+      } catch {
+        // Ignore malformed blocks
+      }
+    });
+  const main =
+    nodes.find((n) =>
+      /Article|BlogPosting|CaseStudy|Service|CollectionPage|AboutPage|WebPage/.test(
+        String(n["@type"]),
+      ),
+    ) ?? nodes[0];
+  if (!main) return facts;
+  const author = main.author as
+    { name?: string } | { name?: string }[] | undefined;
+  const authorName = Array.isArray(author) ? author[0]?.name : author?.name;
+  if (main["@type"]) facts.type = String(main["@type"]);
+  if (authorName) facts.author = authorName;
+  if (main.datePublished)
+    facts.published = String(main.datePublished).slice(0, 10);
+  if (main.dateModified) facts.updated = String(main.dateModified).slice(0, 10);
+  return facts;
+}
+
 function pageToMarkdown(pathname: string) {
   const root =
     document.querySelector<HTMLElement>("main") ??
@@ -95,33 +131,106 @@ function pageToMarkdown(pathname: string) {
     document.querySelector('meta[name="description"]')?.getAttribute("content"),
   );
   const url = `${SITE}${pathname}`;
+  const facts = pageFacts();
+  const body = lines.join(" ");
+  const words = body.split(/\s+/).filter(Boolean).length;
+  const sections = lines.filter((line) => /^#{2} /.test(line)).length;
 
-  return [
+  // What kind of page this is, from its address
+  const kind =
+    pathname === "/"
+      ? "Home page"
+      : /^\/case-studies\/./.test(pathname)
+        ? "Case study"
+        : /^\/case-studies/.test(pathname)
+          ? "Case study index"
+          : /^\/blog\/./.test(pathname)
+            ? "Article"
+            : /^\/blog/.test(pathname)
+              ? "Blog index"
+              : /services|marketing|devrel|seo|launch|aeo|reddit|content/.test(
+                    pathname,
+                  )
+                ? "Service"
+                : "Page";
+
+  // The page's main sections, and the lines that carry its numbers
+  const outline = lines
+    .filter((line) => /^## /.test(line))
+    .map((line) => `- ${line.replace(/^## /, "")}`);
+  const keyFacts = lines
+    .filter(
+      (line) =>
+        !/^#/.test(line) &&
+        /(?<![a-zA-Z])\d[\d,.]*\s?(?:[KMB%x]|\+)/.test(line) &&
+        line.length > 12 &&
+        line.length < 180,
+    )
+    .slice(0, 8)
+    .map((line) => (line.startsWith("- ") ? line : `- ${line}`));
+
+  const block = (heading: string, rows: string[]) =>
+    rows.length ? `## ${heading}\n\n${rows.join("\n")}` : "";
+
+  const content = lines
+    .map((line, k) =>
+      k > 0 && line.startsWith("- ") && lines[k - 1].startsWith("- ")
+        ? `\n${line}`
+        : `\n\n${line}`,
+    )
+    .join("")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
+  const frontMatter = [
     "---",
     `title: ${title}`,
     `url: ${url}`,
+    `page_type: ${kind}`,
     description ? `description: ${description}` : "",
-    "source: Studio1 (studio1hq.com)",
+    facts.type ? `schema_type: ${facts.type}` : "",
+    facts.author ? `author: ${facts.author}` : "",
+    facts.published ? `published: ${facts.published}` : "",
+    facts.updated && facts.updated !== facts.published
+      ? `updated: ${facts.updated}`
+      : "",
+    sections ? `sections: ${sections}` : "",
+    `words: ${words.toLocaleString("en-US")}`,
+    `reading_time: ${Math.max(1, Math.round(words / 230))} min`,
+    "publisher: Studio1 (https://www.studio1hq.com)",
     "site_index: https://www.studio1hq.com/llms.txt",
     "sitemap: https://www.studio1hq.com/sitemap.xml",
     "---",
-    "",
-    lines
-      .map((line, k) =>
-        k > 0 && line.startsWith("- ") && lines[k - 1].startsWith("- ")
-          ? `\n${line}`
-          : `\n\n${line}`,
-      )
-      .join("")
-      .replace(/\n{3,}/g, "\n\n")
-      .trim(),
+  ].filter(Boolean);
+
+  return [
+    frontMatter.join("\n"),
+    description ? block("Summary", [description]) : "",
+    block("On this page", outline),
+    block("Key facts", keyFacts),
+    content,
+    block("About Studio1", [
+      "Studio1 is a developer marketing and technical content agency for devtool, AI and infrastructure companies.",
+      "- Services: technical content, SEO and AEO, developer relations, documentation, product launches and community growth",
+      "- Clients include Memori, Nebius, LiteLLM, Bright Data, Permit.io, Jozu, OpenLore and ScrapeGraph",
+      "- Contact: contact@studio1hq.com · https://cal.com/studio1/collab",
+    ]),
+    block("Cite this page", [`${title}. Studio1. ${url}`]),
   ]
-    .filter((line, i) => line !== "" || i > 7)
-    .join("\n");
+    .filter(Boolean)
+    .join("\n\n");
 }
 
 /** Professional syntax colouring for the machine/LLM markdown view. */
-function MarkdownLine({ line, index, mt }: { line: string; index: number; mt: string }) {
+function MarkdownLine({
+  line,
+  index,
+  mt,
+}: {
+  line: string;
+  index: number;
+  mt: string;
+}) {
   const node = (() => {
     // YAML front-matter divider
     if (/^---/.test(line))
@@ -300,59 +409,89 @@ export function MachineToggle() {
         ? createPortal(
             <AnimatePresence>
               {mode === "machine" ? (
+                // A scan line sweeps up the screen, leading the wipe
                 <motion.div
+                  key="machine-scan"
+                  aria-hidden
+                  className="pointer-events-none fixed inset-x-0 z-[2001] h-px bg-[#f97316] shadow-[0_0_12px_2px_rgba(249,115,22,0.45)]"
+                  initial={{ top: "100%", opacity: 1 }}
+                  animate={{ top: "0%", opacity: [1, 1, 0] }}
+                  exit={{ top: "100%", opacity: [0, 1, 1] }}
+                  transition={WIPE}
+                />
+              ) : null}
+              {mode === "machine" ? (
+                <motion.div
+                  key="machine-view"
                   data-machine-view
                   role="dialog"
                   aria-modal="true"
                   aria-label="Machine-readable version of this page"
                   className="fixed inset-0 z-[2000] flex flex-col bg-[#f8f7f5] text-neutral-800"
-                  initial={{ opacity: 0, scale: 0.98 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.99 }}
-                  transition={{
-                    duration: 0.32,
-                    ease: [0.22, 1, 0.36, 1],
-                  }}
+                  initial={{ clipPath: "inset(100% 0% 0% 0%)" }}
+                  animate={{ clipPath: "inset(0% 0% 0% 0%)" }}
+                  exit={{ clipPath: "inset(100% 0% 0% 0%)" }}
+                  transition={WIPE}
                 >
                   {/* The page, as plain text */}
                   <div
                     data-lenis-prevent
-                    className="flex-1 overflow-y-auto px-6 pb-28 pt-12 sm:px-10 [&::-webkit-scrollbar]:w-[5px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-neutral-200 hover:[&::-webkit-scrollbar-thumb]:bg-neutral-300"
+                    className="flex-1 overflow-y-auto px-6 pb-28 pt-12 [scrollbar-width:none] sm:px-10 [&::-webkit-scrollbar]:hidden"
                   >
                     <pre className="mx-auto max-w-[760px] whitespace-pre-wrap break-words font-mono text-[13.5px] leading-[1.85]">
                       {(() => {
-                        const isHeading  = (l: string) => /^#{1,6} /.test(l);
-                        const isFront    = (l: string) => /^(---|[a-z_]+: )/.test(l);
-                        const isList     = (l: string) => /^- /.test(l);
-                        const isBlank    = (l: string) => !l.trim();
+                        const isHeading = (l: string) => /^#{1,6} /.test(l);
+                        const isFront = (l: string) =>
+                          /^(---|[a-z_]+: )/.test(l);
+                        const isList = (l: string) => /^- /.test(l);
+                        const isBlank = (l: string) => !l.trim();
 
                         let animIdx = 0;
-                        return lines.reduce<React.ReactNode[]>((acc, line, i) => {
-                          // Skip blank lines — they drive spacing on the next token
-                          if (isBlank(line)) return acc;
+                        return lines.reduce<React.ReactNode[]>(
+                          (acc, line, i) => {
+                            // Skip blank lines — they drive spacing on the next token
+                            if (isBlank(line)) return acc;
 
-                          const prev     = lines.slice(0, i).reverse().find(l => !isBlank(l)) ?? "";
-                          const prevRaw  = i > 0 ? lines[i - 1] : "";
-                          const afterGap = isBlank(prevRaw);
+                            const prev =
+                              lines
+                                .slice(0, i)
+                                .reverse()
+                                .find((l) => !isBlank(l)) ?? "";
+                            const prevRaw = i > 0 ? lines[i - 1] : "";
+                            const afterGap = isBlank(prevRaw);
 
-                          let mt = "";
-                          if (i === 0 || (isFront(line) && isFront(prev) && !afterGap)) {
-                            mt = "mt-[3px]";                  // tight front-matter rows
-                          } else if (isHeading(line)) {
-                            mt = acc.length === 0 ? "" : "mt-10"; // big breath before headings
-                          } else if (isList(line) && isList(prev) && !afterGap) {
-                            mt = "mt-[5px]";                  // snug list items
-                          } else if (afterGap) {
-                            mt = "mt-5";                      // paragraph gap
-                          } else {
-                            mt = "mt-[3px]";                  // consecutive body
-                          }
+                            let mt = "";
+                            if (
+                              i === 0 ||
+                              (isFront(line) && isFront(prev) && !afterGap)
+                            ) {
+                              mt = "mt-[3px]"; // tight front-matter rows
+                            } else if (isHeading(line)) {
+                              mt = acc.length === 0 ? "" : "mt-10"; // big breath before headings
+                            } else if (
+                              isList(line) &&
+                              isList(prev) &&
+                              !afterGap
+                            ) {
+                              mt = "mt-[5px]"; // snug list items
+                            } else if (afterGap) {
+                              mt = "mt-5"; // paragraph gap
+                            } else {
+                              mt = "mt-[3px]"; // consecutive body
+                            }
 
-                          acc.push(
-                            <MarkdownLine key={i} line={line} index={animIdx++} mt={mt} />
-                          );
-                          return acc;
-                        }, []);
+                            acc.push(
+                              <MarkdownLine
+                                key={i}
+                                line={line}
+                                index={animIdx++}
+                                mt={mt}
+                              />,
+                            );
+                            return acc;
+                          },
+                          [],
+                        );
                       })()}
                     </pre>
                   </div>
@@ -360,7 +499,16 @@ export function MachineToggle() {
                   {/* Bottom fade + floating toggle */}
                   <div className="pointer-events-none absolute inset-x-0 bottom-0">
                     <div className="h-28 bg-gradient-to-t from-[#f8f7f5] via-[#f8f7f5]/80 to-transparent" />
-                    <div className="flex justify-center pb-8 -mt-20 pointer-events-auto">
+                    <motion.div
+                      className="pointer-events-auto -mt-20 flex justify-center pb-8"
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        duration: 0.5,
+                        ease: [0.16, 1, 0.3, 1],
+                        delay: 0.55,
+                      }}
+                    >
                       <div className="inline-flex items-center rounded-full bg-[#eeebe6] p-[3px] shadow-[inset_0_1px_2px_rgba(0,0,0,0.08),0_1px_0_rgba(255,255,255,0.9),0_8px_32px_rgba(0,0,0,0.10)]">
                         <button
                           type="button"
@@ -380,7 +528,7 @@ export function MachineToggle() {
                           Machine
                         </span>
                       </div>
-                    </div>
+                    </motion.div>
                   </div>
                 </motion.div>
               ) : null}

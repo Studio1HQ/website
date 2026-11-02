@@ -15,6 +15,7 @@ import {
   PaperTestimonials,
   PaperWork,
 } from "@/components/paper/paper-sections";
+import { PaperAskAi } from "@/components/paper/ask-ai";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations({
@@ -142,7 +143,8 @@ export default function Home() {
         <PaperTestimonials />
         <PaperProcess />
         <PaperReach />
-        <PaperCta />
+        <PaperAskAi index={9} />
+        <PaperCta index={10} />
       </div>
     </>
   );

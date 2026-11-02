@@ -379,7 +379,7 @@ function OfferKey({
       aria-hidden
       className={cn(
         "relative flex shrink-0 items-center justify-center transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:[transform:translateY(-6px)_rotateX(12deg)_rotateY(-16deg)] motion-reduce:transform-none",
-        large ? "size-[92px] rounded-[22px]" : "size-[68px] rounded-[18px]",
+        large ? "size-[92px] rounded-[6px]" : "size-[68px] rounded-[6px]",
       )}
       style={{
         background: core
@@ -750,7 +750,7 @@ function MoreProofCard() {
     <Link
       href="/case-studies"
       // Same top offset, height, and corners as the case cards beside it.
-      className="group relative isolate mt-8 flex h-full min-h-[300px] flex-col overflow-hidden rounded-[10px] bg-[#efe8dd] p-7 shadow-[inset_0_3px_10px_rgba(20,20,20,0.08)] ring-1 ring-inset ring-[#141414]/[0.06] sm:p-8"
+      className="group relative isolate mt-8 flex h-full min-h-[300px] flex-col overflow-hidden rounded-[6px] bg-[#efe8dd] p-7 shadow-[inset_0_3px_10px_rgba(20,20,20,0.08)] ring-1 ring-inset ring-[#141414]/[0.06] sm:p-8"
     >
       <p className="text-[13px] font-medium text-[#141414]/50">More proof</p>
       <p className="mt-3 max-w-[260px] text-[26px] font-medium leading-[1.15] tracking-[-0.04em]">

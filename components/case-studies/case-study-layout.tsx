@@ -9,6 +9,7 @@ import { CaseStudyProof } from "@/components/case-studies/case-study-detail-pane
 import { TableOfContents } from "@/components/case-studies/table-of-contents";
 import { getClientLogo } from "@/components/case-studies/client-logos";
 import { CaseStory } from "@/components/case-studies/case-story";
+import { CaseTestimonials } from "@/components/case-studies/case-testimonials";
 import { RelatedCaseStudies } from "@/components/case-studies/related-case-studies";
 import type { CaseStudyMeta } from "@/lib/case-studies";
 
@@ -74,6 +75,11 @@ export function CaseStudyLayout({
                   <CaseStory study={study} />
                 </Reveal>
 
+                {/* The client's own voice */}
+                <Reveal>
+                  <CaseTestimonials study={study} logo={logo?.icon} />
+                </Reveal>
+
                 {/* Narrative: max-w-none so width comes from the column wrapper, not prose defaults. */}
                 <div
                   data-mdx-content
@@ -83,7 +89,7 @@ export function CaseStudyLayout({
                 </div>
 
                 <Reveal>
-                  <CaseStudyProof study={study} />
+                  <CaseStudyProof study={study} withQuote={false} />
                 </Reveal>
 
                 {/* Credentials */}

@@ -62,7 +62,9 @@ export default function CTA() {
   // Continuous loop: the ring slowly circles on its own (paused for
   // reduced-motion users), on top of scroll and drag.
   const time = useTime();
-  const autoRotate = useTransform(time, (ms) => (reduceMotion ? 0 : ms * -0.004));
+  const autoRotate = useTransform(time, (ms) =>
+    reduceMotion ? 0 : ms * -0.004,
+  );
   const rotate = useTransform(
     [scrollRotate, dragRotate, autoRotate],
     ([s, d, a]: number[]) => s + d + a,
@@ -132,7 +134,7 @@ export default function CTA() {
               }}
             >
               <motion.div
-                className="relative aspect-[16/10] w-[var(--card-w)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl bg-white shadow-[0_30px_60px_-24px_rgba(60,20,0,0.45)] ring-1 ring-black/5 dark:ring-white/10"
+                className="relative aspect-[16/10] w-[var(--card-w)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[6px] bg-white shadow-[0_30px_60px_-24px_rgba(60,20,0,0.45)] ring-1 ring-black/5 dark:ring-white/10"
                 initial={reduceMotion ? false : { opacity: 0, scale: 0.85 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}

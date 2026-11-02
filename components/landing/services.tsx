@@ -32,7 +32,10 @@ export default function Services() {
       >
         <div className={servicesSectionGlowBottom}></div>
         <div className={servicesSectionGlowTop}></div>
-        <motion.div variants={serviceItemVariants} className="w-full z-[20] mb-12 md:mb-16">
+        <motion.div
+          variants={serviceItemVariants}
+          className="w-full z-[20] mb-12 md:mb-16"
+        >
           <HeroStatsStrip
             highlightValues
             className="max-w-5xl"
@@ -64,7 +67,7 @@ export default function Services() {
             <Link
               href={"/technical-content-marketing"}
               className={cn(
-                "border-2 dark:border transition-all duration-700 hover:-translate-y-4 h-[30rem] relative w-full max-w-[23rem] group rounded-lg overflow-hidden flex flex-col items-start bg-background/80 backdrop-blur-md justify-start p-8 mb-8 md:mb-0",
+                "border-2 dark:border transition-all duration-700 hover:-translate-y-4 h-[30rem] relative w-full max-w-[23rem] group rounded-[6px] overflow-hidden flex flex-col items-start bg-background/80 backdrop-blur-md justify-start p-8 mb-8 md:mb-0",
                 elevatedCardShadow,
               )}
             >
@@ -73,7 +76,7 @@ export default function Services() {
               <div className={serviceCardHoverGlow}></div>
 
               <div className="flex-1 flex items-start justify-between w-full">
-                <div className="flex items-center bg-accent dark:bg-accent/50 justify-center size-16 p-3 rounded-lg">
+                <div className="flex items-center bg-accent dark:bg-accent/50 justify-center size-16 p-3 rounded-[6px]">
                   <Pen className="size-10" />
                 </div>
               </div>
@@ -101,7 +104,7 @@ export default function Services() {
             <Link
               href={"/developer-relations-growth-campaigns"}
               className={cn(
-                "border-2 dark:border transition-all duration-700 hover:translate-y-4 relative overflow-hidden group flex flex-col items-start p-8 bg-background/80 backdrop-blur-2xl h-[30rem] w-full  max-w-[23rem] md:translate-y-20 rounded-lg",
+                "border-2 dark:border transition-all duration-700 hover:translate-y-4 relative overflow-hidden group flex flex-col items-start p-8 bg-background/80 backdrop-blur-2xl h-[30rem] w-full  max-w-[23rem] md:translate-y-20 rounded-[6px]",
                 elevatedCardShadow,
               )}
             >
@@ -110,7 +113,7 @@ export default function Services() {
               <div className={serviceCardHoverGlow}></div>
 
               <div className="flex-1 flex items-start justify-between w-full">
-                <div className="flex items-center bg-accent dark:bg-accent/50 justify-center size-16 p-3 rounded-lg">
+                <div className="flex items-center bg-accent dark:bg-accent/50 justify-center size-16 p-3 rounded-[6px]">
                   <Users className="size-10" />
                 </div>
               </div>

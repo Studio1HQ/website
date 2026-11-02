@@ -176,12 +176,12 @@ function Folder({
           {/* Back of the folder, with its tab */}
           <span
             aria-hidden
-            className="absolute -top-[14px] left-0 h-[18px] w-[38%] rounded-t-[10px] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] after:absolute after:-right-3 after:bottom-0 after:size-3 after:bg-[radial-gradient(circle_at_100%_0,transparent_11px,var(--tab)_12px)]"
+            className="absolute -top-[14px] left-0 h-[18px] w-[38%] rounded-t-[6px] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] after:absolute after:-right-3 after:bottom-0 after:size-3 after:bg-[radial-gradient(circle_at_100%_0,transparent_11px,var(--tab)_12px)]"
             style={{ background: colors.tab, ["--tab" as string]: colors.tab }}
           />
           <span
             aria-hidden
-            className="absolute inset-0 rounded-[14px] rounded-tl-none shadow-[inset_0_1px_0_#fff,inset_0_0_0_1px_rgba(255,255,255,0.7),0_12px_24px_-20px_rgba(20,20,20,0.25)] ring-1 ring-[#141414]/[0.06]"
+            className="absolute inset-0 rounded-[6px] rounded-tl-none shadow-[inset_0_1px_0_#fff,inset_0_0_0_1px_rgba(255,255,255,0.7),0_12px_24px_-20px_rgba(20,20,20,0.25)] ring-1 ring-[#141414]/[0.06]"
             style={{
               background: `linear-gradient(180deg, ${colors.from}, ${colors.to})`,
             }}
@@ -206,7 +206,7 @@ function Folder({
 
           {/* Glass front pocket with the writing */}
           <div
-            className="absolute inset-x-0 bottom-0 h-[56%] overflow-hidden rounded-[14px] shadow-[0_-1px_0_rgba(20,20,20,0.04)]"
+            className="absolute inset-x-0 bottom-0 h-[56%] overflow-hidden rounded-[6px] shadow-[0_-1px_0_rgba(20,20,20,0.04)]"
             style={{ background: colors.glass }}
           >
             {/* the pocket's lip: a light edge and a faint orange hairline */}
@@ -226,7 +226,7 @@ function Folder({
             <div className="relative flex h-full flex-col p-5">
               <div className="flex items-center gap-2.5">
                 {logo ? (
-                  <span className="relative size-8 shrink-0 overflow-hidden rounded-[8px] shadow-[0_4px_10px_-6px_rgba(20,20,20,0.35)]">
+                  <span className="relative size-8 shrink-0 overflow-hidden rounded-[6px] shadow-[0_4px_10px_-6px_rgba(20,20,20,0.35)]">
                     <Image
                       src={logo.icon}
                       alt=""
@@ -285,7 +285,7 @@ function GroupRow({
   return (
     <div className="grid gap-6 border-t border-[#141414]/[0.1] pt-8 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-6">
       {/* Group panel: a frosted card the height of the folders */}
-      <div className="relative flex flex-col overflow-hidden rounded-[16px] bg-[linear-gradient(180deg,rgba(255,255,255,0.78),rgba(254,232,214,0.75))] p-6 shadow-[inset_0_1px_0_#fff,0_12px_24px_-20px_rgba(20,20,20,0.25)] ring-1 ring-[#141414]/[0.06] lg:mt-10 lg:h-[324px] lg:self-start">
+      <div className="relative flex flex-col overflow-hidden rounded-[6px] bg-[linear-gradient(180deg,rgba(255,255,255,0.78),rgba(254,232,214,0.75))] p-6 shadow-[inset_0_1px_0_#fff,0_12px_24px_-20px_rgba(20,20,20,0.25)] ring-1 ring-[#141414]/[0.06] lg:mt-10 lg:h-[324px] lg:self-start">
         <div className="flex items-center justify-end">
           <span className="rounded-full bg-white/80 px-2.5 py-1 text-[11.5px] font-medium tabular-nums text-[#141414]/60 ring-1 ring-[#141414]/[0.06]">
             {items.length} projects
@@ -306,7 +306,7 @@ function GroupRow({
               <span
                 key={project.slug}
                 title={project.client}
-                className="relative size-8 overflow-hidden rounded-[8px] shadow-[0_4px_10px_-6px_rgba(20,20,20,0.35)]"
+                className="relative size-8 overflow-hidden rounded-[6px] shadow-[0_4px_10px_-6px_rgba(20,20,20,0.35)]"
               >
                 <Image
                   src={logo.icon}

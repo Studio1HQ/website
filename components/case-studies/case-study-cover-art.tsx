@@ -36,7 +36,7 @@ function CoverTile({
     <div
       className={cn(
         TILE_SIZE[variant],
-        "relative flex shrink-0 items-center justify-center overflow-hidden rounded-[22%] [filter:drop-shadow(0_10px_14px_rgba(20,20,20,0.22))]",
+        "relative flex shrink-0 items-center justify-center overflow-hidden rounded-[6px] [filter:drop-shadow(0_10px_14px_rgba(20,20,20,0.22))]",
       )}
     >
       {children}

@@ -83,7 +83,7 @@ function MapNode({ node, delay }: { node: Node; delay: number }) {
   const NodeIcon = node.icon;
   return (
     <motion.div
-      className="rounded-[8px] bg-[#141414]/80 p-3 text-white shadow-[0_18px_34px_-18px_rgba(20,20,20,0.6)] backdrop-blur-md"
+      className="rounded-[6px] bg-[#141414]/80 p-3 text-white shadow-[0_18px_34px_-18px_rgba(20,20,20,0.6)] backdrop-blur-md"
       initial={reduceMotion ? false : { opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -191,7 +191,7 @@ export function StudioBento() {
           {/* Wide statement card */}
           <motion.div
             {...enter(0)}
-            className="relative grid overflow-hidden rounded-[14px] p-7 md:p-12 lg:col-span-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center"
+            className="relative grid overflow-hidden rounded-[6px] p-7 md:p-12 lg:col-span-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center"
             style={{
               background:
                 "linear-gradient(180deg, #e6ddd2 0%, #f3cfa8 70%, #f9b77c 100%)",
@@ -209,7 +209,7 @@ export function StudioBento() {
                 href="https://cal.com/studio1/collab"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group mt-8 inline-flex h-11 items-center gap-2 rounded-[8px] px-5 text-[14px] font-medium transition-transform duration-300 hover:-translate-y-0.5"
+                className="group mt-8 inline-flex h-11 items-center gap-2 rounded-[6px] px-5 text-[14px] font-medium transition-transform duration-300 hover:-translate-y-0.5"
                 style={{ background: "#2a0f00", color: PAPER }}
               >
                 Book a call
@@ -226,7 +226,7 @@ export function StudioBento() {
                 labelPosition="top-left"
                 className="p-3"
               >
-                <PrintBlock className="flex size-[200px] rotate-[-3deg] items-center justify-center rounded-[28px] shadow-[0_30px_60px_-30px_rgba(120,40,0,0.7)] sm:size-[260px]">
+                <PrintBlock className="flex size-[200px] rotate-[-3deg] items-center justify-center rounded-[6px] shadow-[0_30px_60px_-30px_rgba(120,40,0,0.7)] sm:size-[260px]">
                   <Logo className="relative size-[58%] brightness-0 invert" />
                 </PrintBlock>
               </SelectionFrame>
@@ -271,7 +271,7 @@ export function StudioBento() {
           {/* How the services connect */}
           <motion.div
             {...enter(0.1)}
-            className="relative overflow-hidden rounded-[14px] p-6 md:p-10"
+            className="relative overflow-hidden rounded-[6px] p-6 md:p-10"
             style={{
               background:
                 "linear-gradient(180deg, #ebe5dc 0%, #f6dcbf 55%, #fbc28a 100%)",
@@ -283,7 +283,7 @@ export function StudioBento() {
           {/* Developer-first card */}
           <motion.div
             {...enter(0.18)}
-            className="relative min-h-[420px] overflow-hidden rounded-[14px] bg-[#ebe7e1] p-6 md:p-10"
+            className="relative min-h-[420px] overflow-hidden rounded-[6px] bg-[#ebe7e1] p-6 md:p-10"
           >
             <span className="inline-flex rounded-full bg-[#f97316] px-5 py-2 font-mono text-[15px] uppercase tracking-[0.06em] text-white">
               Developer-first

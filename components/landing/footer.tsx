@@ -235,7 +235,7 @@ export default function Footer() {
                     aria-label={label}
                     className={`${linkClass} group inline-flex items-center gap-3`}
                   >
-                    <span className="flex size-11 items-center justify-center rounded-xl bg-white/[0.06] ring-1 ring-inset ring-white/10 transition-colors duration-300 group-hover:bg-[#f97316] group-hover:text-white group-hover:ring-transparent lg:size-8 lg:rounded-lg">
+                    <span className="flex size-11 items-center justify-center rounded-[6px] bg-white/[0.06] ring-1 ring-inset ring-white/10 transition-colors duration-300 group-hover:bg-[#f97316] group-hover:text-white group-hover:ring-transparent lg:size-8 lg:rounded-[6px]">
                       <Icon className="size-[18px] lg:size-4" />
                     </span>
                     <span className="hidden lg:inline">

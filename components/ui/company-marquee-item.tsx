@@ -74,7 +74,7 @@ function CompanyPreviewCard({
   return (
     <div
       className={cn(
-        "w-[min(92vw,22rem)] overflow-hidden rounded-xl border border-border/80 bg-card/95 text-card-foreground backdrop-blur-xl",
+        "w-[min(92vw,22rem)] overflow-hidden rounded-[6px] border border-border/80 bg-card/95 text-card-foreground backdrop-blur-xl",
         elevatedCardShadow,
       )}
     >
@@ -110,9 +110,13 @@ function CompanyPreviewCard({
 
       <div className="space-y-2.5 p-4">
         <div>
-          <p className="text-base font-semibold tracking-tight">{company.name}</p>
+          <p className="text-base font-semibold tracking-tight">
+            {company.name}
+          </p>
           {company.designation ? (
-            <p className="text-sm text-muted-foreground">{company.designation}</p>
+            <p className="text-sm text-muted-foreground">
+              {company.designation}
+            </p>
           ) : null}
         </div>
         {company.description ? (

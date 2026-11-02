@@ -17,7 +17,7 @@ const DevRelPricing = () => {
         </div>
 
         <CardWithGrid>
-          <div className="flex flex-col p-8 rounded-lg border border-orange-400 bg-black/50 backdrop-blur-sm hover:shadow-lg transition-all">
+          <div className="flex flex-col p-8 rounded-[6px] border border-orange-400 bg-black/50 backdrop-blur-sm hover:shadow-lg transition-all">
             <div className="text-center mb-6">
               <p className="text-lg text-muted-foreground">
                 Every organization has unique requirements for their DevRel

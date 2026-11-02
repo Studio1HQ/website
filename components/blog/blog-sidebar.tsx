@@ -35,7 +35,7 @@ export function BlogSidebar({ currentSlug }: { currentSlug: string }) {
                     href={`/blog/${post.slug}`}
                     aria-current={isCurrent ? "page" : undefined}
                     className={cn(
-                      "group flex items-start gap-2.5 rounded-lg py-1.5 text-[13.5px] leading-snug transition-colors duration-200",
+                      "group flex items-start gap-2.5 rounded-[6px] py-1.5 text-[13.5px] leading-snug transition-colors duration-200",
                       isCurrent
                         ? "font-medium text-[var(--home-ink)]"
                         : "text-[var(--home-ink-soft)] hover:text-[var(--home-ink)]",

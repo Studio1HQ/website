@@ -191,7 +191,7 @@ function PoppingMark({ href }: { href: string }) {
     <span className="absolute -top-7 right-7 rotate-[6deg] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1 group-hover:rotate-[2deg]">
       <ClientMark
         href={href}
-        className="size-16 rounded-[14px] bg-white p-2.5 shadow-[0_18px_34px_-16px_rgba(20,20,20,0.55)]"
+        className="size-16 rounded-[6px] bg-white p-2.5 shadow-[0_18px_34px_-16px_rgba(20,20,20,0.55)]"
       />
     </span>
   );
@@ -211,7 +211,7 @@ function CaseFrame({
   imageHeight: string;
 }) {
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-[10px] bg-white p-1.5 text-[#141414] shadow-[0_30px_60px_-34px_rgba(60,20,0,0.55)] ring-1 ring-[#141414]/[0.05] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1">
+    <div className="flex h-full flex-col overflow-hidden rounded-[6px] bg-white p-1.5 text-[#141414] shadow-[0_30px_60px_-34px_rgba(60,20,0,0.55)] ring-1 ring-[#141414]/[0.05] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1">
       <div className="flex items-center gap-2 px-2 pb-2 pt-1">
         <ClientMark href={study.href} className="size-6 rounded-[5px] p-0.5" />
         <span className="truncate text-[12.5px] font-medium">
@@ -327,7 +327,7 @@ export function PaperCaseStudyCard({
     return (
       <Link
         href={study.href}
-        className="group relative isolate mt-8 grid overflow-visible rounded-[10px] text-white md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]"
+        className="group relative isolate mt-8 grid overflow-visible rounded-[6px] text-white md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]"
         style={{
           background:
             "linear-gradient(140deg, #fe3c34 0%, #f97316 55%, #fb8a1e 100%)",
@@ -335,14 +335,14 @@ export function PaperCaseStudyCard({
       >
         <span
           aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10 rounded-[10px] opacity-30 mix-blend-multiply"
+          className="pointer-events-none absolute inset-0 -z-10 rounded-[6px] opacity-30 mix-blend-multiply"
           style={{ backgroundImage: GRAIN }}
         />
         {/* Large, faint Reddit marks in the background, where the reach came from */}
         {/reddit/i.test(study.heroLabel) ? (
           <span
             aria-hidden
-            className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-[10px]"
+            className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-[6px]"
           >
             <RedditLogo
               weight="fill"
@@ -379,7 +379,7 @@ export function PaperCaseStudyCard({
 
         {/* Case image, running off the card's right edge */}
         <div className="relative min-h-[320px] md:min-h-0">
-          <div className="absolute inset-0 overflow-hidden rounded-b-[10px] md:rounded-l-none md:rounded-r-[10px]">
+          <div className="absolute inset-0 overflow-hidden rounded-b-[6px] md:rounded-l-none md:rounded-r-[6px]">
             <div className="absolute inset-y-10 left-5 w-[118%] md:left-2">
               <CaseFrame study={study} art={art} imageHeight="100%" />
             </div>
@@ -395,12 +395,12 @@ export function PaperCaseStudyCard({
   return (
     <Link
       href={study.href}
-      className="group relative isolate mt-8 flex h-full min-h-[420px] flex-col gap-6 overflow-visible rounded-[10px] p-7 ring-1 ring-inset ring-[#141414]/[0.06] md:p-9"
+      className="group relative isolate mt-8 flex h-full min-h-[420px] flex-col gap-6 overflow-visible rounded-[6px] p-7 ring-1 ring-inset ring-[#141414]/[0.06] md:p-9"
       style={{ background: tone.bg, color: tone.ink }}
     >
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 rounded-[10px] opacity-25 mix-blend-multiply"
+        className="pointer-events-none absolute inset-0 -z-10 rounded-[6px] opacity-25 mix-blend-multiply"
         style={{ backgroundImage: GRAIN }}
       />
 
@@ -432,7 +432,7 @@ export function PaperCaseStudyCard({
           </div>
         </div>
         <div className="relative hidden lg:block">
-          <div className="relative -mr-9 overflow-hidden rounded-r-[10px]">
+          <div className="relative -mr-9 overflow-hidden rounded-r-[6px]">
             <div className="w-[108%]">
               <CaseFrame study={study} art={art} imageHeight="210px" />
             </div>
@@ -739,7 +739,7 @@ function ProcessStory({
           </div>
 
           {/* Centre: a blurred event photo holding the working card */}
-          <div className="relative isolate h-full overflow-hidden rounded-[10px] bg-[#1b120c] shadow-[0_50px_90px_-50px_rgba(60,20,0,0.65)]">
+          <div className="relative isolate h-full overflow-hidden rounded-[6px] bg-[#1b120c] shadow-[0_50px_90px_-50px_rgba(60,20,0,0.65)]">
             <AnimatePresence initial={false}>
               <motion.div
                 key={`photo-${active}`}
@@ -772,7 +772,7 @@ function ProcessStory({
                 <motion.div
                   key={active}
                   {...swap}
-                  className="col-start-1 row-start-1 w-full max-w-[400px] overflow-hidden rounded-[8px] bg-white text-[#141414] shadow-[0_30px_60px_-24px_rgba(0,0,0,0.55)]"
+                  className="col-start-1 row-start-1 w-full max-w-[400px] overflow-hidden rounded-[6px] bg-white text-[#141414] shadow-[0_30px_60px_-24px_rgba(0,0,0,0.55)]"
                 >
                   <ul className="flex flex-col gap-2 px-5 pb-4 pt-5">
                     {step.details.map((detail, detailIndex) => (

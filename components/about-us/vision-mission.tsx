@@ -103,7 +103,7 @@ const ContentBlock = ({
 
   return (
     <motion.article
-      className="group relative isolate flex h-full flex-col overflow-hidden rounded-[16px] bg-[#f9f6f2] p-7 text-[#141414] shadow-[inset_0_1px_0_#fff,0_20px_40px_-34px_rgba(20,20,20,0.4)] ring-1 ring-inset ring-[#141414]/[0.06] md:p-9"
+      className="group relative isolate flex h-full flex-col overflow-hidden rounded-[6px] bg-[#f9f6f2] p-7 text-[#141414] shadow-[inset_0_1px_0_#fff,0_20px_40px_-34px_rgba(20,20,20,0.4)] ring-1 ring-inset ring-[#141414]/[0.06] md:p-9"
       initial={reduceMotion ? false : { opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -134,11 +134,11 @@ const ContentBlock = ({
             <li
               key={point.text}
               className={
-                "group/tile flex items-start gap-3 rounded-[12px] bg-[#f1ece4] p-4 shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)] transition-colors duration-300 hover:bg-white" +
+                "group/tile flex items-start gap-3 rounded-[6px] bg-[#f1ece4] p-4 shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)] transition-colors duration-300 hover:bg-white" +
                 (last ? " sm:col-span-2" : "")
               }
             >
-              <span className="flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-white text-[#f97316] shadow-[0_4px_10px_-6px_rgba(20,20,20,0.35)] transition-colors duration-300 group-hover/tile:bg-[#f97316] group-hover/tile:text-white">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-[6px] bg-white text-[#f97316] shadow-[0_4px_10px_-6px_rgba(20,20,20,0.35)] transition-colors duration-300 group-hover/tile:bg-[#f97316] group-hover/tile:text-white">
                 <PointIcon weight="bold" className="size-4" />
               </span>
               <span className="pt-[7px] text-[14px] font-medium leading-[18px] tracking-[-0.01em] text-[#141414]/85">

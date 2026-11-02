@@ -90,7 +90,7 @@ function PostCover({
     <div
       className={cn(
         "relative aspect-[16/9] w-full overflow-hidden ring-1 ring-inset ring-[#141414]/10",
-        bleed ? "lg:h-full lg:self-stretch" : "rounded-[12px]",
+        bleed ? "lg:h-full lg:self-stretch" : "rounded-[6px]",
         post.bannerImage && !bleed ? "bg-[#0b0b0b]" : "bg-[#f4efe7]",
       )}
     >
@@ -150,7 +150,7 @@ function FeaturedPost({
     <div className="relative mt-14">
       <Link
         href={`/blog/${post.slug}`}
-        className="group grid overflow-hidden rounded-[16px] bg-white shadow-[0_30px_60px_-44px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/[0.06] lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]"
+        className="group grid overflow-hidden rounded-[6px] bg-white shadow-[0_30px_60px_-44px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/[0.06] lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]"
       >
         <PostCover
           post={post}
@@ -236,7 +236,7 @@ export function PostCard({
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className={cn("group flex min-w-0 flex-col p-2", CELL, "rounded-[16px]")}
+      className={cn("group flex min-w-0 flex-col p-2", CELL, "rounded-[6px]")}
     >
       <PostCover
         post={post}
@@ -371,9 +371,7 @@ export function PaperBlogIndex({
           />
           <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:items-end lg:gap-16">
             <h1 className="text-[44px] font-medium leading-[1.08] tracking-[-0.055em] sm:text-[60px] lg:text-[76px]">
-              <span>
-                Developer marketing
-              </span>
+              <span>Developer marketing</span>
               <br />& tech <Accent>blog</Accent>
             </h1>
             <div className="flex flex-col items-start gap-6 lg:pb-3">

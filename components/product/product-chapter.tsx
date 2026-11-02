@@ -52,7 +52,7 @@ export function ProductLogo({
   return (
     <span
       className={cn(
-        "relative shrink-0 overflow-hidden rounded-[12px] shadow-[0_10px_20px_-12px_rgba(20,20,20,0.55)]",
+        "relative shrink-0 overflow-hidden rounded-[6px] shadow-[0_10px_20px_-12px_rgba(20,20,20,0.55)]",
         className,
       )}
     >
@@ -146,7 +146,7 @@ export function BrowserFrame({ product }: { product: Product }) {
   const reduceMotion = useReducedMotion();
   const media = product.media;
   return (
-    <div className="flex min-w-0 flex-col rounded-[8px] bg-white/80 p-1.5 shadow-[inset_0_1px_0_#fff,0_40px_80px_-48px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/10">
+    <div className="flex min-w-0 flex-col rounded-[6px] bg-white/80 p-1.5 shadow-[inset_0_1px_0_#fff,0_40px_80px_-48px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/10">
       <div className="flex h-9 items-center gap-3 px-2.5">
         <span aria-hidden className="flex gap-1.5">
           {["#ff5f57", "#febc2e", "#28c840"].map((dot) => (

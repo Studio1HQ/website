@@ -287,7 +287,7 @@ export function EdgeChips() {
           style={{ top }}
         >
           <motion.span
-            className="flex items-center gap-3 whitespace-nowrap rounded-[10px] bg-white/85 py-2.5 pl-2.5 pr-4 shadow-[inset_0_1px_0_#fff,0_18px_36px_-20px_rgba(20,20,20,0.5)] ring-1 ring-[#141414]/[0.07] backdrop-blur-xl"
+            className="flex items-center gap-3 whitespace-nowrap rounded-[6px] bg-white/85 py-2.5 pl-2.5 pr-4 shadow-[inset_0_1px_0_#fff,0_18px_36px_-20px_rgba(20,20,20,0.5)] ring-1 ring-[#141414]/[0.07] backdrop-blur-xl"
             initial={
               reduceMotion
                 ? false
@@ -301,7 +301,7 @@ export function EdgeChips() {
               delay: 0.3 + index * 0.1,
             }}
           >
-            <span className="flex size-9 items-center justify-center rounded-[8px] bg-[linear-gradient(150deg,#fdba74_0%,#f97316_45%,#ea580c_100%)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_8px_16px_-8px_rgba(194,65,12,0.6)]">
+            <span className="flex size-9 items-center justify-center rounded-[6px] bg-[linear-gradient(150deg,#fdba74_0%,#f97316_45%,#ea580c_100%)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_8px_16px_-8px_rgba(194,65,12,0.6)]">
               <Glyph weight="bold" className="size-4" />
             </span>
             <span className="text-left leading-tight">

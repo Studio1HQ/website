@@ -26,20 +26,20 @@ const Features = () => {
           {reasons.map((reason, i) => {
             const IconComponent = reason.icon;
             return (
-            <div key={i} className="flex flex-col">
-              <div className="flex max-sm:justify-center">
-                <div className="mb-5 flex size-16 items-center justify-center rounded-lg bg-zinc-900">
-                  <IconComponent className="size-8 text-orange-400" />
+              <div key={i} className="flex flex-col">
+                <div className="flex max-sm:justify-center">
+                  <div className="mb-5 flex size-16 items-center justify-center rounded-[6px] bg-zinc-900">
+                    <IconComponent className="size-8 text-orange-400" />
+                  </div>
                 </div>
-              </div>
 
-              <h3 className="mb-2 text-xl font-semibold text-orange-400 max-sm:text-center">
-                {reason?.title}
-              </h3>
-              <p className="text-muted-foreground max-sm:text-center">
-                {reason?.description}
-              </p>
-            </div>
+                <h3 className="mb-2 text-xl font-semibold text-orange-400 max-sm:text-center">
+                  {reason?.title}
+                </h3>
+                <p className="text-muted-foreground max-sm:text-center">
+                  {reason?.description}
+                </p>
+              </div>
             );
           })}
         </div>

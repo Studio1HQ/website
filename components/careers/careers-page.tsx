@@ -58,7 +58,7 @@ export function availabilityOf(status: string): Availability {
 /** Departments grouped into the teams a candidate would join. */
 /** Glass card and engraved well, shared by this page's blocks. */
 const GLASS_CARD =
-  "rounded-[18px] bg-white/70 shadow-[0_20px_44px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.06] backdrop-blur-xl";
+  "rounded-[6px] bg-white/70 shadow-[0_20px_44px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.06] backdrop-blur-xl";
 const WELL =
   "bg-[#f1ece4] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)]";
 
@@ -400,7 +400,7 @@ function CareersHero({ jobs }: { jobs: JobOpening[] }) {
             {facts.map(([value, label], index) => (
               <motion.div
                 key={label}
-                className={cn("rounded-[12px] px-4 py-4", WELL)}
+                className={cn("rounded-[6px] px-4 py-4", WELL)}
                 variants={{
                   hidden: { opacity: 0, y: 14, scale: 0.97 },
                   visible: {
@@ -691,11 +691,11 @@ function OpenRoles({
                   <Link
                     href={`/careers/${job.id}`}
                     className={cn(
-                      "group flex items-center gap-3 rounded-[12px] p-3 transition-colors",
+                      "group flex items-center gap-3 rounded-[6px] p-3 transition-colors",
                       WELL,
                     )}
                   >
-                    <span className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-white text-[#f97316] shadow-[0_4px_10px_-6px_rgba(20,20,20,0.35)]">
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-[6px] bg-white text-[#f97316] shadow-[0_4px_10px_-6px_rgba(20,20,20,0.35)]">
                       <RoleIcon title={job.title} className="size-4" />
                     </span>
                     <span className="min-w-0 flex-1 leading-tight">
@@ -804,13 +804,13 @@ function WhyStudio1() {
               >
                 <div
                   className={cn(
-                    "grid grid-cols-[48px_minmax(0,1fr)] gap-x-4 rounded-[12px] p-5 md:grid-cols-[60px_minmax(0,1fr)] md:p-6",
+                    "grid grid-cols-[48px_minmax(0,1fr)] gap-x-4 rounded-[6px] p-5 md:grid-cols-[60px_minmax(0,1fr)] md:p-6",
                     "bg-white shadow-[inset_0_2px_6px_rgba(20,20,20,0.06),inset_0_1px_2px_rgba(20,20,20,0.05)]",
                   )}
                 >
                   <span
                     className={cn(
-                      "flex size-12 items-center justify-center rounded-[12px] text-[15px] font-medium tabular-nums text-[#141414]/40 transition-colors duration-500 group-hover:text-[#f97316] md:size-[52px]",
+                      "flex size-12 items-center justify-center rounded-[6px] text-[15px] font-medium tabular-nums text-[#141414]/40 transition-colors duration-500 group-hover:text-[#f97316] md:size-[52px]",
                       WELL,
                     )}
                   >
@@ -905,12 +905,12 @@ function HiringProcess() {
                 },
               }}
             >
-              <div className="flex h-full flex-col rounded-[12px] bg-white p-5 shadow-[inset_0_2px_6px_rgba(20,20,20,0.06),inset_0_1px_2px_rgba(20,20,20,0.05)]">
+              <div className="flex h-full flex-col rounded-[6px] bg-white p-5 shadow-[inset_0_2px_6px_rgba(20,20,20,0.06),inset_0_1px_2px_rgba(20,20,20,0.05)]">
                 <div className="flex items-center justify-between">
                   {/* Number tile: engraved, then lit orange in turn */}
                   <span
                     className={cn(
-                      "relative flex size-11 items-center justify-center overflow-hidden rounded-[12px] text-[14px] font-semibold tabular-nums",
+                      "relative flex size-11 items-center justify-center overflow-hidden rounded-[6px] text-[14px] font-semibold tabular-nums",
                       WELL,
                     )}
                   >

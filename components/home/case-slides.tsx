@@ -330,7 +330,7 @@ export default function CaseSlides() {
   return (
     <section id="results" className="relative bg-[var(--home-cream)]">
       {/* The dark slides rise over the cream as one rounded sheet */}
-      <div className="relative overflow-clip rounded-t-[28px] bg-[#07050a] shadow-[0_-30px_80px_-40px_rgba(60,20,0,0.45)] sm:rounded-t-[44px]">
+      <div className="relative overflow-clip rounded-t-[6px] bg-[#07050a] shadow-[0_-30px_80px_-40px_rgba(60,20,0,0.45)] sm:rounded-t-[6px]">
         {SLIDES.map((slide, index) => (
           <Slide
             key={slide.client}

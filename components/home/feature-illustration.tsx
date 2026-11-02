@@ -54,7 +54,7 @@ const defaultCards = [
     titleClassName:
       "text-primary transition-colors duration-300 hover:text-primary",
     className:
-      "[grid-area:stack] hover:-translate-y-10 before:absolute before:w-[100%] before:outline-1 before:rounded-xl before:outline-border before:h-[100%] before:content-[''] before:bg-blend-overlay before:bg-background/50 grayscale-[100%] hover:before:opacity-0 before:transition-opacity before:duration-700 hover:grayscale-0 before:left-0 before:top-0",
+      "[grid-area:stack] hover:-translate-y-10 before:absolute before:w-[100%] before:outline-1 before:rounded-[6px] before:outline-border before:h-[100%] before:content-[''] before:bg-blend-overlay before:bg-background/50 grayscale-[100%] hover:before:opacity-0 before:transition-opacity before:duration-700 hover:grayscale-0 before:left-0 before:top-0",
   },
   {
     icon: <PenTool className="size-4 text-primary" />, // Content & writing
@@ -65,7 +65,7 @@ const defaultCards = [
     titleClassName:
       "text-primary transition-colors duration-300 hover:text-primary",
     className:
-      "[grid-area:stack] translate-x-12 translate-y-10 hover:-translate-y-1 before:absolute before:w-[100%] before:outline-1 before:rounded-xl before:outline-border before:h-[100%] before:content-[''] before:bg-blend-overlay before:bg-background/50 grayscale-[100%] hover:before:opacity-0 before:transition-opacity before:duration-700 hover:grayscale-0 before:left-0 before:top-0",
+      "[grid-area:stack] translate-x-12 translate-y-10 hover:-translate-y-1 before:absolute before:w-[100%] before:outline-1 before:rounded-[6px] before:outline-border before:h-[100%] before:content-[''] before:bg-blend-overlay before:bg-background/50 grayscale-[100%] hover:before:opacity-0 before:transition-opacity before:duration-700 hover:grayscale-0 before:left-0 before:top-0",
   },
   {
     icon: <Users className="size-4 text-primary" />, // DevRel success
@@ -87,9 +87,7 @@ function ResultsFeatureCards() {
       year: "numeric",
     });
     return defaultCards.map((card, index) =>
-      index === 2
-        ? { ...card, date: `Updated ${monthYear}` }
-        : card,
+      index === 2 ? { ...card, date: `Updated ${monthYear}` } : card,
     );
   }, []);
 

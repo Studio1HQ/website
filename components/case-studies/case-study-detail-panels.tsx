@@ -84,8 +84,12 @@ export function CaseStudyScope({ study }: CaseStudyDetailPanelsProps) {
   );
 }
 
-export function CaseStudyProof({ study }: CaseStudyDetailPanelsProps) {
-  const quote = study.quotes[0];
+export function CaseStudyProof({
+  study,
+  withQuote = true,
+}: CaseStudyDetailPanelsProps & { withQuote?: boolean }) {
+  // The quote can be shown on its own elsewhere (CaseTestimonials)
+  const quote = withQuote ? study.quotes[0] : undefined;
   const outcomes = study.outcomes.slice(0, 5);
   const hasBoth = Boolean(quote) && outcomes.length > 0;
 

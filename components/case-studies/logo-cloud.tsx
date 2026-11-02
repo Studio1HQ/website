@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { ArrowUpRight, Plus } from "@phosphor-icons/react";
+import { cn } from "@/lib/utils";
 
 export type CloudLogo = {
   slug: string;
@@ -69,25 +70,24 @@ function Piece({
       style={{ left: pctX(x), top: pctY(y), width: pctX(size) }}
     >
       <motion.div
-        className={className}
+        className={cn("will-change-[transform,opacity]", className)}
         initial={
           reduceMotion
             ? false
             : {
                 opacity: 0,
-                scale: 0.5,
+                scale: 0.85,
                 x: `${from?.x ?? 0}%`,
                 y: `${from?.y ?? 0}%`,
               }
         }
         whileInView={{ opacity: 1, scale: 1, x: "0%", y: "0%" }}
         viewport={{ once: true, margin: "-80px" }}
+        // A long, soft ease: no bounce, so the joins settle calmly
         transition={{
-          type: "spring",
-          stiffness: 120,
-          damping: 20,
-          mass: 0.9,
-          delay: 0.15 + index * 0.08,
+          duration: 1.2,
+          ease: [0.22, 1, 0.36, 1],
+          delay: 0.1 + index * 0.07,
         }}
       >
         {children}
@@ -113,7 +113,7 @@ export function LogoCloud({ logos }: { logos: CloudLogo[] }) {
     const dx = spot.x - prev.x;
     const dy = spot.y - prev.y;
     const length = Math.hypot(dx, dy) || 1;
-    return { x: (dx / length) * 70, y: (dy / length) * 70 };
+    return { x: (dx / length) * 35, y: (dy / length) * 35 };
   });
 
   return (
@@ -200,13 +200,12 @@ export function LogoCloud({ logos }: { logos: CloudLogo[] }) {
           return (
             <motion.li
               key={spot.slug}
-              initial={reduceMotion ? false : { opacity: 0, scale: 0.6 }}
+              initial={reduceMotion ? false : { opacity: 0, scale: 0.85 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true, margin: "-40px" }}
               transition={{
-                type: "spring",
-                stiffness: 200,
-                damping: 20,
+                duration: 0.9,
+                ease: [0.22, 1, 0.36, 1],
                 delay: i * 0.05,
               }}
             >

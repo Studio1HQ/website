@@ -178,7 +178,7 @@ export function WorldReachMap({
                   transition={{ type: "spring", stiffness: 420, damping: 26 }}
                 >
                   <span
-                    className="flex size-8 items-center justify-center rounded-[9px] shadow-[0_10px_22px_-8px_rgba(249,115,22,0.75)] ring-2 ring-white"
+                    className="flex size-8 items-center justify-center rounded-[6px] shadow-[0_10px_22px_-8px_rgba(249,115,22,0.75)] ring-2 ring-white"
                     style={{ background: PRINT }}
                   >
                     <Logo className="size-[18px] brightness-0 invert" />

@@ -113,7 +113,7 @@ export function OnThisPage() {
   return (
     <nav
       aria-label="On this page"
-      className={`rounded-[14px] ${WELL} px-4 py-4`}
+      className={`rounded-[6px] ${WELL} px-4 py-4`}
     >
       <p className="mb-3 text-[11.5px] text-[#141414]/50">On this page</p>
 

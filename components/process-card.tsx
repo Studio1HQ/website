@@ -20,11 +20,11 @@ export default function ProcessCard({
   return (
     <div
       key={step.name}
-      className="relative rounded-[2rem] h-[25rem] p-1 bg-accent"
+      className="relative rounded-[6px] h-[25rem] p-1 bg-accent"
     >
-      <div className="relative rounded-[1.8rem] bg-background w-full h-full">
+      <div className="relative rounded-[6px] bg-background w-full h-full">
         <div className="flex flex-col h-full items-start w-full justify-start">
-          <div className="flex flex-1 max-h-fit border-b-4 border-accent w-full items-center gap-4 p-4 rounded-t-[1.8rem] justify-start">
+          <div className="flex flex-1 max-h-fit border-b-4 border-accent w-full items-center gap-4 p-4 rounded-t-[6px] justify-start">
             <div className="flex items-center justify-center !size-16 min-w-16 min-h-16 rounded-[6px] text-xl font-extrabold bg-primarySurface text-primary-foreground dark:bg-primary">
               {/* {stepIdx + 1} */}
 
@@ -43,7 +43,7 @@ export default function ProcessCard({
               </div>
             </div>
           </div>
-          <div className="flex-1 grid grid-cols-2 gap-4 w-full rounded-b-[1.5rem] p-4">
+          <div className="flex-1 grid grid-cols-2 gap-4 w-full rounded-b-[6px] p-4">
             {step.details.map((detail, detailIdx) => (
               <div
                 key={detailIdx}

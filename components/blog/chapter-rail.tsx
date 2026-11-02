@@ -157,7 +157,7 @@ export function ChapterRail({
             {isActive ? (
               <motion.span
                 layoutId={onPick ? "chapter-active-sheet" : "chapter-active"}
-                className="absolute inset-0 rounded-xl bg-white/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_8px_20px_-12px_rgba(90,30,0,0.45)] ring-1 ring-[var(--home-line)]"
+                className="absolute inset-0 rounded-[6px] bg-white/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_8px_20px_-12px_rgba(90,30,0,0.45)] ring-1 ring-[var(--home-line)]"
                 transition={{ type: "spring", stiffness: 380, damping: 34 }}
               />
             ) : null}
@@ -168,7 +168,7 @@ export function ChapterRail({
                 scrollToChapter(chapter.id);
                 onPick?.();
               }}
-              className="relative flex gap-3 rounded-xl py-2.5 pl-2.5 pr-3"
+              className="relative flex gap-3 rounded-[6px] py-2.5 pl-2.5 pr-3"
             >
               {/* Per-chapter progress line */}
               <span

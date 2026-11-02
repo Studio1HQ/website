@@ -222,7 +222,7 @@ export default function NextProduct({ index }: { index: number }) {
         <div className="mt-8 grid overflow-hidden rounded-[6px] bg-white/80 shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
           <div className="flex flex-col p-6 sm:p-8 md:p-10">
             <div className="flex items-center gap-3">
-              <span className="flex size-12 items-center justify-center rounded-[12px] border-[1.5px] border-dashed border-[#141414]/25">
+              <span className="flex size-12 items-center justify-center rounded-[6px] border-[1.5px] border-dashed border-[#141414]/25">
                 <span
                   aria-hidden
                   className="h-5 w-[2px] animate-pulse rounded-full"

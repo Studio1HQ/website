@@ -108,7 +108,10 @@ export default function ServicesColumns() {
             <AsciiHands />
             {logoNear ? (
               <SceneBoundary fallback={<GlassLogo />}>
-                <GlassLogo3D running={logoVisible} reduceMotion={!!reduceMotion} />
+                <GlassLogo3D
+                  running={logoVisible}
+                  reduceMotion={!!reduceMotion}
+                />
               </SceneBoundary>
             ) : null}
           </div>
@@ -159,7 +162,7 @@ export default function ServicesColumns() {
                         <span className="flex items-center gap-4">
                           <span
                             aria-hidden
-                            className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-[var(--home-line)] bg-[var(--home-paper)] text-[var(--home-ink)] shadow-[0_6px_16px_-10px_rgba(60,20,0,0.35)] transition-[background-color,border-color,color,transform] duration-300 group-hover:-translate-y-0.5 group-hover:border-primary/30 group-hover:bg-primary group-hover:text-white"
+                            className="flex size-11 shrink-0 items-center justify-center rounded-[6px] border border-[var(--home-line)] bg-[var(--home-paper)] text-[var(--home-ink)] shadow-[0_6px_16px_-10px_rgba(60,20,0,0.35)] transition-[background-color,border-color,color,transform] duration-300 group-hover:-translate-y-0.5 group-hover:border-primary/30 group-hover:bg-primary group-hover:text-white"
                           >
                             <OfferingIcon
                               weight="duotone"

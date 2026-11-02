@@ -81,11 +81,11 @@ export function LanguageSwitcher({
   const optionClassName = (isActive: boolean) =>
     isPaper
       ? cn(
-          "group/item flex w-full items-center gap-3 rounded-[12px] px-3 py-2.5 text-sm font-medium text-[#141414] transition-colors duration-200 hover:bg-[#f4efe7]",
+          "group/item flex w-full items-center gap-3 rounded-[6px] px-3 py-2.5 text-sm font-medium text-[#141414] transition-colors duration-200 hover:bg-[#f4efe7]",
           isActive && "bg-[#f4efe7]",
         )
       : cn(
-          "group/item flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
+          "group/item flex w-full items-center gap-3 rounded-[6px] px-3 py-2.5 text-sm font-medium transition-all duration-200",
           "text-[var(--home-ink-soft)] hover:bg-primary/10 hover:text-[var(--home-ink)]",
           isActive &&
             "bg-primary/10 text-[var(--home-ink)] hover:bg-primary/15",
@@ -123,7 +123,7 @@ export function LanguageSwitcher({
 
   if (inline) {
     return (
-      <div className="rounded-xl border border-border/70 bg-background/70 p-1.5 shadow-sm backdrop-blur">
+      <div className="rounded-[6px] border border-border/70 bg-background/70 p-1.5 shadow-sm backdrop-blur">
         <div className="mb-1 flex items-center gap-2 px-2 py-1 text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
           <Globe className="size-3.5" weight="duotone" />
           {t("label")}
@@ -169,8 +169,8 @@ export function LanguageSwitcher({
         <div
           className={
             isPaper
-              ? "min-w-[15rem] space-y-0.5 rounded-[18px] bg-white p-2 shadow-[0_24px_50px_-28px_rgba(20,20,20,0.35)] ring-1 ring-[#141414]/10"
-              : "s1-glass-card s1-glass-raised min-w-[15rem] space-y-0.5 rounded-2xl p-1.5"
+              ? "min-w-[15rem] space-y-0.5 rounded-[6px] bg-white p-2 shadow-[0_24px_50px_-28px_rgba(20,20,20,0.35)] ring-1 ring-[#141414]/10"
+              : "s1-glass-card s1-glass-raised min-w-[15rem] space-y-0.5 rounded-[6px] p-1.5"
           }
         >
           {options}

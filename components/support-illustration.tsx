@@ -38,7 +38,7 @@ export default function SupportIllustration({
               )}
             >
               {message.from === "studio" ? (
-                <span className="flex size-6 shrink-0 items-center justify-center rounded-lg bg-[#1a1412] ring-1 ring-white/10">
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-[6px] bg-[#1a1412] ring-1 ring-white/10">
                   <Logo className="size-3.5" />
                 </span>
               ) : null}

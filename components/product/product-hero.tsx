@@ -128,7 +128,7 @@ function DockTile({ product, index }: { product: Product; index: number }) {
           label={`${String(index + 1).padStart(2, "0")} · ${product.name}`}
         />
       </span>
-      <ProductLogo product={product} className="size-14 rounded-[14px]" />
+      <ProductLogo product={product} className="size-14 rounded-[6px]" />
       <span className="min-w-0 flex-1 text-left">
         <span className="flex flex-wrap items-center gap-2">
           <span className="text-[16px] font-semibold tracking-[-0.02em]">
@@ -157,7 +157,7 @@ function NextTile() {
       aria-label={t("jumpTo", { name: t("nextName") })}
       className="group relative flex items-center gap-4 rounded-[6px] border-[1.5px] border-dashed border-[#141414]/20 bg-white/30 p-4 transition-colors duration-300 hover:border-[#f97316]/60 hover:bg-white/50"
     >
-      <span className="flex size-14 shrink-0 items-center justify-center rounded-[14px] border-[1.5px] border-dashed border-[#141414]/25">
+      <span className="flex size-14 shrink-0 items-center justify-center rounded-[6px] border-[1.5px] border-dashed border-[#141414]/25">
         <Sparkle
           weight="duotone"
           className="size-6 transition-transform duration-500 group-hover:rotate-90"

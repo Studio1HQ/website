@@ -24,9 +24,9 @@ export function Icon3D({
   return (
     <span aria-hidden className={cn("relative block aspect-square", className)}>
       {/* thin extruded base and a soft contact shadow */}
-      <span className="absolute inset-0 translate-y-[6%] rounded-[30%] bg-[#c2410c] shadow-[0_18px_26px_-14px_rgba(120,40,0,0.5)]" />
+      <span className="absolute inset-0 translate-y-[6%] rounded-[6px] bg-[#c2410c] shadow-[0_18px_26px_-14px_rgba(120,40,0,0.5)]" />
       {/* lit face: gentle top-left light, hairline highlight on the rim */}
-      <span className="absolute inset-0 flex items-center justify-center rounded-[30%] bg-[linear-gradient(150deg,#fdba74_0%,#f97316_45%,#ea580c_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.6),inset_0_0_0_1px_rgba(255,255,255,0.18),inset_0_-6px_10px_rgba(124,45,18,0.22)]">
+      <span className="absolute inset-0 flex items-center justify-center rounded-[6px] bg-[linear-gradient(150deg,#fdba74_0%,#f97316_45%,#ea580c_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.6),inset_0_0_0_1px_rgba(255,255,255,0.18),inset_0_-6px_10px_rgba(124,45,18,0.22)]">
         <Glyph
           weight="bold"
           className="size-[42%] text-white drop-shadow-[0_1px_1px_rgba(124,45,18,0.35)]"
@@ -67,12 +67,12 @@ export function GlassTab({
   return (
     <span
       className={cn(
-        "flex items-center gap-2.5 rounded-[14px] bg-white/45 py-2 pl-2 pr-4 text-[13px] font-medium text-[#141414] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),inset_0_0_0_1px_rgba(255,255,255,0.55),0_16px_32px_-20px_rgba(20,20,20,0.45)] ring-1 ring-[#141414]/[0.06] backdrop-blur-xl backdrop-saturate-150",
+        "flex items-center gap-2.5 rounded-[6px] bg-white/45 py-2 pl-2 pr-4 text-[13px] font-medium text-[#141414] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),inset_0_0_0_1px_rgba(255,255,255,0.55),0_16px_32px_-20px_rgba(20,20,20,0.45)] ring-1 ring-[#141414]/[0.06] backdrop-blur-xl backdrop-saturate-150",
         className,
       )}
     >
       <span
-        className="flex size-7 items-center justify-center rounded-[8px] text-[#f4efe7]"
+        className="flex size-7 items-center justify-center rounded-[6px] text-[#f4efe7]"
         style={{ background: ink ? "#141414" : "#f97316" }}
       >
         <Glyph weight="regular" className="size-4" />
@@ -97,7 +97,7 @@ export function HeroArrows() {
           labelPosition="top-left"
           className="p-1.5"
         >
-          <PrintBlock className="flex size-[104px] items-center justify-center rounded-[14px] xl:size-[120px]">
+          <PrintBlock className="flex size-[104px] items-center justify-center rounded-[6px] xl:size-[120px]">
             <Logo className="size-[62%] brightness-0 invert" />
           </PrintBlock>
         </SelectionFrame>

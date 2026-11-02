@@ -24,7 +24,7 @@ export default function Team() {
               <div className="flex justify-center items-center">
                 <div className="relative h-[300px] w-[300px]">
                   <Image
-                    className="object-cover shadow-lg rounded-lg"
+                    className="object-cover shadow-lg rounded-[6px]"
                     src={member.image}
                     alt={member.name}
                     fill

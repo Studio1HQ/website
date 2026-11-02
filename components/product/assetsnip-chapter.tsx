@@ -68,7 +68,7 @@ function CapturePanel() {
   const code = [...before, ...colours, ...after].join("\n");
 
   return (
-    <div className="flex min-w-0 flex-col rounded-[20px] bg-white/65 p-5 shadow-[inset_0_1px_0_#fff,0_40px_80px_-48px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/[0.07] backdrop-blur-xl sm:p-6">
+    <div className="flex min-w-0 flex-col rounded-[6px] bg-white/65 p-5 shadow-[inset_0_1px_0_#fff,0_40px_80px_-48px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/[0.07] backdrop-blur-xl sm:p-6">
       {/* Scan summary */}
       <div className="flex items-end justify-between gap-4">
         <div>
@@ -133,7 +133,7 @@ function CapturePanel() {
       <div
         role="radiogroup"
         aria-label="Captured palette"
-        className="mt-5 grid grid-cols-6 gap-1.5 rounded-[14px] p-2.5 bg-[#f1ece4] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)]"
+        className="mt-5 grid grid-cols-6 gap-1.5 rounded-[6px] p-2.5 bg-[#f1ece4] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)]"
       >
         {PALETTE.map((colour, index) => {
           const active = picked === index;
@@ -148,14 +148,14 @@ function CapturePanel() {
               className="group flex min-w-0 flex-col items-center gap-1.5"
             >
               <span
-                className="relative block aspect-square w-full rounded-[8px] shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_6px_12px_-8px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-black/[0.06] transition-transform duration-300 group-hover:-translate-y-0.5 motion-reduce:transform-none"
+                className="relative block aspect-square w-full rounded-[6px] shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_6px_12px_-8px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-black/[0.06] transition-transform duration-300 group-hover:-translate-y-0.5 motion-reduce:transform-none"
                 style={{ background: colour.hex }}
               >
                 {active ? (
                   <motion.span
                     layoutId="assetsnip-pick"
                     aria-hidden
-                    className="absolute -inset-[4px] rounded-[10px] border-[1.5px]"
+                    className="absolute -inset-[4px] rounded-[6px] border-[1.5px]"
                     style={{ borderColor: PRINT }}
                     transition={{ duration: 0.35, ease: EASE }}
                   />
@@ -207,7 +207,7 @@ function CapturePanel() {
       </div>
 
       <div
-        className="relative mt-2.5 flex-1 rounded-[14px] text-[#f4efe7] shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)]"
+        className="relative mt-2.5 flex-1 rounded-[6px] text-[#f4efe7] shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)]"
         style={{ background: NIGHT }}
       >
         <CopyButton text={code} className="absolute right-2.5 top-2.5 z-[1]" />

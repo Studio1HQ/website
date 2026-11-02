@@ -231,7 +231,7 @@ function CompanyMark({ item }: { item: Company }) {
             sizes={wide ? "80px" : "32px"}
             className={cn(
               "object-contain mix-blend-multiply",
-              !wide && "rounded-lg",
+              !wide && "rounded-[6px]",
               lightOnly(logoClassName),
             )}
           />

@@ -41,7 +41,7 @@ export function PaperAuthorProfile({ author, posts }: PaperAuthorProfileProps) {
           <div className="mt-10 grid gap-8 md:grid-cols-[minmax(0,260px)_minmax(0,1fr)] md:items-end md:gap-14">
             <div
               className={cn(
-                "relative aspect-square w-44 overflow-hidden rounded-[16px] sm:w-52 md:w-full",
+                "relative aspect-square w-44 overflow-hidden rounded-[6px] sm:w-52 md:w-full",
                 CELL,
               )}
             >

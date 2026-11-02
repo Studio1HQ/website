@@ -13,7 +13,7 @@ export const ComparisonMetric = ({ className }: { className?: string }) => {
           className,
         )}
       >
-        <div className="flex translate-y-10 flex-col -rotate-12 items-center gap-4 px-2 justify-center aspect-square rounded-xl h-[11rem] bg-accent/50 border dark:bg-accent/40">
+        <div className="flex translate-y-10 flex-col -rotate-12 items-center gap-4 px-2 justify-center aspect-square rounded-[6px] h-[11rem] bg-accent/50 border dark:bg-accent/40">
           <Badge className="flex items-center gap-1.5 bg-primary/10 text-foreground py-0.5 px-2.5 text-[10px]">
             <Users className="size-3" /> Devrel
           </Badge>
@@ -28,7 +28,7 @@ export const ComparisonMetric = ({ className }: { className?: string }) => {
             Experiences
           </div>
         </div>
-        <div className="flex flex-col items-center gap-4 px-2 justify-center aspect-square rounded-xl h-[11rem] scale-110 bg-accent/50 border dark:bg-accent/40">
+        <div className="flex flex-col items-center gap-4 px-2 justify-center aspect-square rounded-[6px] h-[11rem] scale-110 bg-accent/50 border dark:bg-accent/40">
           <Badge className="flex items-center gap-1.5 bg-primary/10 text-foreground py-0.5 px-2.5 text-[10px]">
             <Logo className="size-3" />{" "}
             <span className="font-primary">Studio1</span>
@@ -45,7 +45,7 @@ export const ComparisonMetric = ({ className }: { className?: string }) => {
             search intent
           </div>
         </div>
-        <div className="flex translate-y-10 rotate-12 flex-col items-center gap-4 px-2 justify-center aspect-square rounded-xl h-[11rem] bg-accent/50 border dark:bg-accent/40">
+        <div className="flex translate-y-10 rotate-12 flex-col items-center gap-4 px-2 justify-center aspect-square rounded-[6px] h-[11rem] bg-accent/50 border dark:bg-accent/40">
           <Badge className="flex items-center gap-1.5 bg-primary/10 text-foreground py-0.5 px-2.5 text-[10px]">
             <Pencil className="size-3" /> Blogs
           </Badge>

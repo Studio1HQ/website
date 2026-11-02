@@ -2,15 +2,16 @@
 
 import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
+  AnimatePresence,
   motion,
   useReducedMotion,
   useScroll,
   useSpring,
   useTransform,
 } from "motion/react";
-import { ArrowUpRight } from "@phosphor-icons/react";
+import { ArrowUpRight, X } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 export type ChapterStudy = {
@@ -59,6 +60,7 @@ function Chapter({
   const reduceMotion = useReducedMotion();
   return (
     <motion.article
+      data-chapter={number - 1}
       initial={reduceMotion ? false : { opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
@@ -136,13 +138,13 @@ function Chapter({
             flip && "md:order-1",
             study.metric
               ? "bg-[linear-gradient(155deg,#fb923c_0%,#f97316_45%,#ea580c_100%)] text-white"
-              : WELL,
+              : "bg-[#141414] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]",
           )}
         >
           <p
             className={cn(
               "text-[11.5px] font-medium uppercase tracking-[0.14em]",
-              study.metric ? "text-white/75" : "text-[#c2410c]",
+              study.metric ? "text-white/75" : "text-[#fb923c]",
             )}
           >
             {study.metric
@@ -168,13 +170,19 @@ function Chapter({
               </p>
             </div>
           ) : study.quote ? (
-            <blockquote>
-              <p className="line-clamp-6 text-[17px] font-medium leading-[1.5] tracking-[-0.015em] text-[#141414]">
-                &ldquo;{study.quote.text}&rdquo;
+            <blockquote className="relative">
+              <span
+                aria-hidden
+                className="font-accent block text-[64px] leading-[0.6] text-[#f97316]"
+              >
+                &ldquo;
+              </span>
+              <p className="mt-2 line-clamp-6 text-[17px] font-medium leading-[1.5] tracking-[-0.015em] text-white">
+                {study.quote.text}
               </p>
               <footer className="mt-5 flex items-center gap-3">
                 {study.quote.avatar ? (
-                  <span className="relative size-10 shrink-0 overflow-hidden rounded-full shadow-[0_6px_14px_-8px_rgba(20,20,20,0.55)] ring-2 ring-white">
+                  <span className="relative size-10 shrink-0 overflow-hidden rounded-full shadow-[0_6px_14px_-8px_rgba(20,20,20,0.55)] ring-2 ring-white/20">
                     <Image
                       src={study.quote.avatar}
                       alt={study.quote.author}
@@ -184,7 +192,7 @@ function Chapter({
                     />
                   </span>
                 ) : (
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#141414] text-[13px] font-semibold text-white ring-2 ring-white">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-[13px] font-semibold text-white ring-2 ring-white/20">
                     {study.quote.author
                       .split(/\s+/)
                       .map((part) => part[0])
@@ -194,10 +202,10 @@ function Chapter({
                   </span>
                 )}
                 <span className="min-w-0">
-                  <span className="block text-[13.5px] font-semibold text-[#141414]">
+                  <span className="block text-[13.5px] font-semibold text-white">
                     {study.quote.author}
                   </span>
-                  <span className="block truncate text-[12px] text-[#141414]/55">
+                  <span className="block truncate text-[12px] text-white/55">
                     {study.quote.role ?? study.client}
                   </span>
                 </span>
@@ -208,7 +216,7 @@ function Chapter({
               {study.outcomes.slice(0, 3).map((outcome) => (
                 <li
                   key={outcome}
-                  className="flex gap-3 text-[14.5px] leading-[1.5] text-[#141414]/80"
+                  className="flex gap-3 text-[14.5px] leading-[1.5] text-white/85"
                 >
                   <span className="mt-[0.55em] size-1.5 shrink-0 rounded-full bg-[#f97316]" />
                   {outcome}
@@ -216,7 +224,7 @@ function Chapter({
               ))}
             </ul>
           ) : (
-            <p className="text-[18px] font-medium leading-[1.45] tracking-[-0.015em] text-[#141414]/80">
+            <p className="text-[18px] font-medium leading-[1.45] tracking-[-0.015em] text-white/85">
               {study.category}
             </p>
           )}
@@ -227,6 +235,16 @@ function Chapter({
                 alt=""
                 fill
                 sizes="160px"
+                className="object-cover"
+              />
+            </span>
+          ) : study.logo ? (
+            <span className="pointer-events-none absolute -right-6 -top-6 size-28 rotate-[12deg] overflow-hidden rounded-[6px] opacity-25">
+              <Image
+                src={study.logo}
+                alt=""
+                fill
+                sizes="112px"
                 className="object-cover"
               />
             </span>
@@ -293,6 +311,32 @@ export function CaseChapters({ acts }: { acts: Act[] }) {
   );
   let number = 0;
 
+  // The study being read: the last chapter whose top has passed mid-screen
+  const studies = acts.flatMap((act) => act.studies);
+  const [current, setCurrent] = useState(0);
+  useEffect(() => {
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const cards = ref.current?.querySelectorAll("[data-chapter]") ?? [];
+      let at = 0;
+      cards.forEach((card, i) => {
+        if (card.getBoundingClientRect().top <= window.innerHeight / 2) at = i;
+      });
+      setCurrent(at);
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
+  const reading = studies[current];
+
   const band = (stroke: string, opacity: number, width: number) => (
     <svg
       aria-hidden
@@ -337,20 +381,45 @@ export function CaseChapters({ acts }: { acts: Act[] }) {
         >
           {band("url(#chapter-ribbon)", 1, 6)}
         </motion.div>
-        {/* The Studio1 mark riding the leading edge */}
+        {/* Studio1 + the study being read, riding the leading edge */}
         {reduceMotion ? null : (
           <motion.span
-            className="absolute -ml-[17px] -mt-[17px] flex size-[36px] items-center justify-center rounded-[6px] bg-white/55 shadow-[0_12px_28px_-14px_rgba(20,20,20,0.5),inset_0_1px_0_rgba(255,255,255,0.95),inset_0_-1px_0_rgba(20,20,20,0.04)] ring-1 ring-inset ring-white/70 backdrop-blur-xl backdrop-saturate-150"
+            className="absolute -ml-[46px] -mt-[22px] flex items-center gap-1.5 rounded-[6px] bg-white p-1.5 shadow-[0_14px_30px_-14px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/[0.06]"
             style={{ top: tipTop, left: tipLeft }}
           >
-            <Image
-              src="/assets/studio1-logo.svg"
-              alt=""
-              width={20}
-              height={20}
-              unoptimized
-              className="size-5"
-            />
+            <span className="relative flex size-8 items-center justify-center rounded-[6px] bg-white ring-1 ring-[#141414]/[0.08]">
+              <Image
+                src="/assets/studio1-logo.svg"
+                alt=""
+                width={20}
+                height={20}
+                unoptimized
+                className="size-5"
+              />
+            </span>
+            <X aria-hidden weight="bold" className="size-3 text-[#f97316]" />
+            <span className="relative size-8 overflow-hidden rounded-[6px] bg-white ring-1 ring-[#141414]/[0.08]">
+              <AnimatePresence initial={false}>
+                {reading?.logo ? (
+                  <motion.span
+                    key={reading.slug}
+                    className="absolute inset-0"
+                    initial={{ opacity: 0, scale: 0.7 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.7 }}
+                    transition={{ duration: 0.35, ease: EASE }}
+                  >
+                    <Image
+                      src={reading.logo}
+                      alt=""
+                      fill
+                      sizes="32px"
+                      className="object-cover"
+                    />
+                  </motion.span>
+                ) : null}
+              </AnimatePresence>
+            </span>
           </motion.span>
         )}
       </div>

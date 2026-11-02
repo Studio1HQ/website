@@ -175,7 +175,7 @@ export default function Navbar() {
       >
         <nav
           className={cn(
-            "z-20 mx-auto flex h-16 max-w-7xl items-center justify-between rounded-2xl px-4",
+            "z-20 mx-auto flex h-16 max-w-7xl items-center justify-between rounded-[6px] px-4",
           )}
         >
           <Link href={"/"} className="flex justify-between gap-2 items-center">
@@ -222,8 +222,8 @@ export default function Navbar() {
                       className={cn(
                         isPaper
                           ? // Paper menu: the hero's white card, square, hairline ring.
-                            "rounded-[18px] bg-white p-2 text-[#141414] shadow-[0_24px_50px_-28px_rgba(20,20,20,0.35)] ring-1 ring-[#141414]/10"
-                          : "rounded-lg border bg-background/95 px-1 py-1.5 shadow-lg backdrop-blur-xl",
+                            "rounded-[6px] bg-white p-2 text-[#141414] shadow-[0_24px_50px_-28px_rgba(20,20,20,0.35)] ring-1 ring-[#141414]/10"
+                          : "rounded-[6px] border bg-background/95 px-1 py-1.5 shadow-lg backdrop-blur-xl",
                         item.children.some(
                           (child) =>
                             "description" in child &&
@@ -246,12 +246,12 @@ export default function Navbar() {
                             "group/item flex w-full items-start gap-2.5 px-3 py-2.5 transition-colors duration-200",
                             isPaper && "min-w-[19rem]",
                             isPaper
-                              ? "items-center gap-3 rounded-[12px] py-2 text-[14px] text-[#141414] hover:bg-[#f4efe7]/60"
+                              ? "items-center gap-3 rounded-[6px] py-2 text-[14px] text-[#141414] hover:bg-[#f4efe7]/60"
                               : "text-muted-foreground hover:text-foreground",
                           )}
                         >
                           {isPaper ? (
-                            <span className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-[#f6f3ee] text-[#141414]/75 shadow-[inset_0_2px_6px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08)] transition-colors duration-200 group-hover/item:text-[#f97316]">
+                            <span className="flex size-9 shrink-0 items-center justify-center rounded-[6px] bg-[#f6f3ee] text-[#141414]/75 shadow-[inset_0_2px_6px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08)] transition-colors duration-200 group-hover/item:text-[#f97316]">
                               <child.icon
                                 weight="duotone"
                                 className="size-[18px]"
@@ -410,7 +410,7 @@ export default function Navbar() {
             <div className="pt-2">
               <LanguageSwitcher inline />
             </div>
-            <div className="mt-4 flex items-center justify-end gap-2 rounded-3xl bg-accent/50 p-2">
+            <div className="mt-4 flex items-center justify-end gap-2 rounded-[6px] bg-accent/50 p-2">
               <Button
                 asChild
                 className="group s1-glass-btn h-10 rounded-full border-0 px-5 font-medium text-white hover:bg-transparent"

@@ -370,7 +370,7 @@ function PipelineRun({
         <Container>
           <div
             aria-hidden
-            className="overflow-hidden rounded-[10px] bg-white/85 shadow-[inset_0_1px_0_#fff,0_50px_90px_-60px_rgba(60,20,0,0.55)] ring-1 ring-inset ring-[#141414]/10"
+            className="overflow-hidden rounded-[6px] bg-white/85 shadow-[inset_0_1px_0_#fff,0_50px_90px_-60px_rgba(60,20,0,0.55)] ring-1 ring-inset ring-[#141414]/10"
           >
             {/* Title bar: workflow file, jobs passed, run status */}
             <div className="relative flex h-12 items-center gap-4 border-b border-[#141414]/[0.08] px-4">
@@ -496,7 +496,7 @@ function PipelineRun({
                 className="flex min-h-0 flex-col p-5 pr-2"
               >
                 <div className="flex items-center gap-3">
-                  <span className="flex size-11 items-center justify-center rounded-[8px] bg-[#f6f1e9] shadow-[inset_0_2px_5px_rgba(20,20,20,0.10),inset_0_1px_1px_rgba(20,20,20,0.08)]">
+                  <span className="flex size-11 items-center justify-center rounded-[6px] bg-[#f6f1e9] shadow-[inset_0_2px_5px_rgba(20,20,20,0.10),inset_0_1px_1px_rgba(20,20,20,0.08)]">
                     <StepGlyph title={step.title} className="size-6" />
                   </span>
                   <span className="text-[13px] font-medium tabular-nums text-[#141414]/50">
@@ -540,7 +540,7 @@ function PipelineRun({
                 </div>
               </motion.div>
 
-              <div className="flex min-h-0 flex-col overflow-hidden rounded-[8px] bg-[#0d0d0d] p-5 font-mono text-[14px] leading-[1.5] shadow-[0_24px_50px_-30px_rgba(20,20,20,0.7)]">
+              <div className="flex min-h-0 flex-col overflow-hidden rounded-[6px] bg-[#0d0d0d] p-5 font-mono text-[14px] leading-[1.5] shadow-[0_24px_50px_-30px_rgba(20,20,20,0.7)]">
                 <div className="flex items-center justify-between text-[11.5px] text-white/40">
                   <span>logs</span>
                   {jobComplete ? (

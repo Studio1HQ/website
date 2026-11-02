@@ -21,6 +21,7 @@ import {
   type ChapterStudy,
 } from "@/components/case-studies/case-chapters";
 import { LogoCloud } from "@/components/case-studies/logo-cloud";
+import { IntroGraphic } from "@/components/case-studies/intro-graphic";
 import {
   CaseMosaic,
   type MosaicLogo,
@@ -177,17 +178,22 @@ export default async function CaseStudiesPage() {
       {/* The work, told as one story in three acts */}
       <PaperSection tone="paper" className="!pt-16 md:!pt-24">
         <Container>
-          <div className="mb-16 max-w-[780px] md:mb-24">
-            <p className="text-[12px] font-medium uppercase tracking-[0.16em] text-[#141414]/45">
-              {studies.length} engagements · one story
-            </p>
-            <p className="mt-4 text-[26px] font-medium leading-[1.3] tracking-[-0.035em] md:text-[34px]">
-              Every product here had the same problem: something worth using,
-              and developers who hadn&apos;t found it yet.{" "}
-              <span className="text-[#141414]/40">
-                This is how each one got there.
-              </span>
-            </p>
+          <div className="mb-16 grid items-center gap-10 md:mb-24 lg:grid-cols-[minmax(0,780px)_minmax(0,360px)] lg:justify-between">
+            <div>
+              <p className="text-[12px] font-medium uppercase tracking-[0.16em] text-[#141414]/45">
+                {studies.length} engagements · one story
+              </p>
+              <p className="mt-4 text-[26px] font-medium leading-[1.3] tracking-[-0.035em] md:text-[34px]">
+                Every product here had the same problem: something worth using,
+                and developers who hadn&apos;t found it yet.{" "}
+                <span className="text-[#141414]/40">
+                  This is how each one got there.
+                </span>
+              </p>
+            </div>
+            <div className="mx-auto w-full max-w-[360px] lg:mx-0">
+              <IntroGraphic />
+            </div>
           </div>
           <CaseChapters acts={acts} />
         </Container>

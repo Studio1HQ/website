@@ -57,10 +57,20 @@ const TILE: Record<string, { bg: string; scale?: number }> = {
   tensorlake: { bg: "#1d1f1c" },
 };
 
-/** On hover: a small name pill floating just above the tile. */
-function HoverLabel({ name }: { name: string }) {
+/**
+ * On hover: a small name pill beside the tile. Above it normally; below it
+ * on the top row, where the navbar would cover it.
+ */
+function HoverLabel({ name, below }: { name: string; below?: boolean }) {
   return (
-    <span className="pointer-events-none absolute -top-3 left-1/2 z-20 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-full bg-[#141414] px-2.5 py-1 text-[11px] font-medium text-white opacity-0 shadow-[0_8px_18px_-8px_rgba(20,20,20,0.6)] transition-[opacity,transform] duration-300 group-hover:-translate-y-[calc(100%+4px)] group-hover:opacity-100">
+    <span
+      className={cn(
+        "pointer-events-none absolute left-1/2 z-40 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#141414] px-2.5 py-1 text-[11px] font-medium text-white opacity-0 shadow-[0_8px_18px_-8px_rgba(20,20,20,0.6)] transition-[opacity,transform] duration-300 group-hover:opacity-100",
+        below
+          ? "-bottom-3 translate-y-full group-hover:translate-y-[calc(100%+4px)]"
+          : "-top-3 -translate-y-full group-hover:-translate-y-[calc(100%+4px)]",
+      )}
+    >
       {name}
       <span className="ml-1.5 text-[#fb923c]">↗</span>
     </span>
@@ -192,7 +202,7 @@ export function CaseMosaic({
           ) : (
             body
           )}
-          {hoverName ? <HoverLabel name={hoverName} /> : null}
+          {hoverName ? <HoverLabel name={hoverName} below={r === 0} /> : null}
         </motion.div>,
       );
     });
@@ -222,7 +232,7 @@ export function CaseMosaic({
               href={`/case-studies/${item.slug}`}
               aria-label={`${item.client} case study`}
               className={cn(
-                "relative size-[64px] shrink-0 overflow-hidden rounded-[16px] shadow-[0_10px_20px_-12px_rgba(20,20,20,0.5)]",
+                "relative size-[64px] shrink-0 overflow-hidden rounded-[6px] shadow-[0_10px_20px_-12px_rgba(20,20,20,0.5)]",
               )}
             >
               <Image

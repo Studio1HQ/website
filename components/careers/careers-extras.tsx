@@ -159,7 +159,7 @@ export function Hanging({ children }: { children: ReactNode }) {
           <span className="relative h-[18px] w-[26px] rounded-[4px] bg-[linear-gradient(180deg,#2c2724,#0d0b0a)] shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_2px_4px_rgba(0,0,0,0.35)]">
             <span className="absolute left-1/2 top-1/2 size-[6px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_35%_35%,#ffffff,#a8a29a)]" />
           </span>
-          <span className="-mt-[3px] h-[36px] w-[18px] rounded-[9px] border-[2.5px] border-[#c9c3bb] shadow-[inset_0_1px_1px_rgba(0,0,0,0.25),0_1px_2px_rgba(0,0,0,0.3)]" />
+          <span className="-mt-[3px] h-[36px] w-[18px] rounded-[6px] border-[2.5px] border-[#c9c3bb] shadow-[inset_0_1px_1px_rgba(0,0,0,0.25),0_1px_2px_rgba(0,0,0,0.3)]" />
         </span>
         <span
           aria-hidden
