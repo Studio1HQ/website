@@ -162,21 +162,6 @@ const memoriProof = {
   ],
 };
 
-const nebiusProof = {
-  company: "Nebius",
-  category: "Developer Events & Community Distribution",
-  href: "/case-studies/nebius",
-  heroValue: "630K+",
-  heroLabel: "views across Reddit posts",
-  proof:
-    "Studio1 maintains an open-source library of 130+ agent examples on Nebius models, got Nebius into 29 developer frameworks, ran workshops with the product inside the exercise, and adapted technical posts for the communities where each topic was already being discussed.",
-  stats: [
-    { value: "300+", label: "deliverables" },
-    { value: "90+", label: "product activations" },
-    { value: "16K+", label: "GitHub stars on examples repo" },
-  ],
-};
-
 export default function DevRel() {
   const serviceSchema = serviceJsonLd({
     name: "Developer Relations & Growth Campaigns",
@@ -221,8 +206,8 @@ export default function DevRel() {
       <StoryProof
         index={4}
         title="Case studies from DevRel and growth work"
-        description="Memori combined early product validation, demo agents, community education, feedback loops, and relevant developer collaborations. Nebius paired hands-on workshops, conference talks, and Reddit distribution so every event and post ended with developers using the product."
-        studies={[memoriProof, nebiusProof]}
+        description="Memori combined early product validation, demo agents, community education, feedback loops, and relevant developer collaborations."
+        studies={[memoriProof]}
       />
       <PaperSection tone="paper">
         <Container>
