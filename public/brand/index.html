@@ -34,6 +34,33 @@
     <meta property="og:image" content="https://www.studio1hq.com/brand/og-image.png">
     <meta name="twitter:image" content="https://www.studio1hq.com/brand/og-image.png">
     <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Studio1 Sans: the Studio1 typeface and brand assets","description":"Studio1 Sans is the Studio1 brand typeface, based on Inter and free under the SIL OFL. Explore its glyphs, colors and logo, and download the fonts and kit.","inLanguage":"en","url":"https://www.studio1hq.com/brand/","publisher":{"@type":"Organization","name":"Studio1","url":"https://www.studio1hq.com","logo":"https://www.studio1hq.com/brand/icon-512.png"},"mainEntity":{"@type":"CreativeWork","name":"Studio1 Sans","description":"The Studio1 brand typeface, Regular and Medium, based on Inter by Rasmus Andersson.","license":"https://openfontlicense.org","creator":{"@type":"Organization","name":"Studio1","url":"https://www.studio1hq.com","logo":"https://www.studio1hq.com/brand/icon-512.png"}}}</script>
+    <style>
+      /* Paper navbar: a solid cream bar, so content never shows through */
+      .nav { background: rgba(244, 239, 231, 0.96) !important; box-shadow: 0 1px 0 rgba(20, 20, 20, 0.06); }
+      /* Downloads: one item per folder, styled like the other columns */
+      .dl-row { color: inherit; text-decoration: none; transition: color .2s; }
+      .dl-row:hover { color: #141414; }
+      .dl-new { margin-left: 6px; padding: 1px 7px; border-radius: 999px; background: #f97316; color: #fff; font-size: 11px; font-weight: 500; letter-spacing: 0; }
+      /* Type tester: a dashed baseline under every line, not just the first */
+      .tester-baseline { display: none; }
+      .tester-text::before {
+        content: "";
+        position: absolute;
+        inset: 0 -100vw;
+        z-index: -1;
+        pointer-events: none;
+        /* Studio1 Sans sits its baseline ~0.889em into each 1.05em line */
+        background: repeating-linear-gradient(
+          to bottom,
+          transparent 0 calc(0.889em - 1px),
+          rgba(20, 20, 20, 0.22) calc(0.889em - 1px) 0.889em,
+          transparent 0.889em 1.05em
+        );
+        -webkit-mask: repeating-linear-gradient(90deg, #000 0 4px, transparent 4px 8px);
+        mask: repeating-linear-gradient(90deg, #000 0 4px, transparent 4px 8px);
+      }
+      .tester-text { isolation: isolate; }
+    </style>
   </head>
   <body>
     <!-- Nav -->
@@ -420,14 +447,11 @@ Follow design-system/DESIGN.md for all styling.</code></pre>
         </div>
         <div class="footer-col">
           <h3>Downloads</h3>
-          <ul>
-            <li><a href="/brand/downloads/studio1-sans.zip" download>Studio1 Sans</a><span class="tag-new">New</span></li>
-            <li><a href="/brand/downloads/studio1-design-system.zip" download>Full brand kit</a></li>
-            <li><a data-asset="logo-dark" download="studio1-logo-on-dark.svg">Logo SVG, on dark</a></li>
-            <li><a data-asset="logo-light" download="studio1-logo-on-light.svg">Logo SVG, on light</a></li>
-            <li><a data-asset="mark-gradient" download="studio1-mark-gradient.svg">Mark SVG, color</a></li>
-            <li><a data-asset="mark-white" download="studio1-mark-white.svg">Mark SVG, white</a></li>
-            <li><a data-asset="mark-black" download="studio1-mark-black.svg">Mark SVG, black</a></li>
+          <ul class="dl-list">
+            <li><a class="dl-row" href="/brand/downloads/studio1-sans.zip" download>Studio1 Sans</a><span class="dl-new">New</span></li>
+            <li><a class="dl-row" href="/brand/downloads/studio1-design-system.zip" download>Full brand kit</a></li>
+            <li><a class="dl-row" href="/brand/downloads/studio1-logos.zip" download>Logos</a></li>
+            <li><a class="dl-row" href="/brand/downloads/studio1-marks.zip" download>Marks</a></li>
           </ul>
         </div>
         <div class="footer-col">
@@ -472,6 +496,7 @@ Follow design-system/DESIGN.md for all styling.</code></pre>
         <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M0 35C0 16.6807 14.0744 1.64844 32 0.126953V141H51.0523C52.4308 137.344 54.7446 133.689 57.9938 130.033C61.1446 126.508 64.6892 123.44 68.6277 120.829C72.5662 118.349 76.3569 116.782 80 116.129V86.7544C75.4708 87.9292 71.3846 89.6919 67.7415 92.0415C64 94.5225 60.7508 97.46 57.9938 100.854C56.5345 102.72 55.2545 104.659 54.1539 106.671V0H125C144.33 0 160 15.6699 160 35V125C160 144.33 144.33 160 125 160H124V18H104.948C103.569 21.6816 101.255 25.3628 98.0062 29.0444C94.8554 32.5942 91.3108 35.6841 87.3723 38.314C83.4338 40.812 79.6431 42.3896 76 43.0474V72.6304C80.5292 71.4473 84.6154 69.6724 88.2585 67.3057C92 64.8076 95.2492 61.8491 98.0062 58.4307C99.4655 56.5513 100.745 54.5986 101.846 52.5723V160H35C15.67 160 0 144.33 0 125V35Z" />
       </symbol>
     </svg>
-
+
+
   </body>
 </html>

@@ -183,7 +183,7 @@ export function TrackRecord({
                       "bg-[#ebe6de] shadow-[inset_0_2px_6px_rgba(20,20,20,0.09),inset_0_1px_2px_rgba(20,20,20,0.07),inset_0_-1px_0_rgba(255,255,255,0.8)]",
                     )}
                   >
-                    <CityIcon city={item.city} className="size-7" />
+                    <CityIcon city={item.city} className="size-9" />
                   </span>
                   <span className="min-w-0">
                     <span className="block truncate text-[16px] font-medium tracking-[-0.015em]">
