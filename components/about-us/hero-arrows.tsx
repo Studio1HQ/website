@@ -3,6 +3,7 @@
 import { motion, useReducedMotion } from "motion/react";
 import { PlayCircle, type Icon } from "@phosphor-icons/react";
 import Logo from "@/components/ui/svgs/logo";
+import { GRAIN } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 import {
   Cursor,
@@ -11,27 +12,36 @@ import {
 } from "@/components/paper/paper-hero";
 
 /**
- * A 3D icon tile in the brand orange: a lit rounded face on an extruded base,
- * with a white glyph for what Studio1 makes (videos, docs, DevRel).
+ * An icon tile printed on paper: a square in brand orange (or ink) with a
+ * fine print grid and grain, a light top edge, and a white glyph.
  */
 export function Icon3D({
   icon: Glyph,
   className,
+  ink = false,
 }: {
   icon: Icon;
   className?: string;
+  ink?: boolean;
 }) {
   return (
-    <span aria-hidden className={cn("relative block aspect-square", className)}>
-      {/* thin extruded base and a soft contact shadow */}
-      <span className="absolute inset-0 translate-y-[6%] rounded-[6px] bg-[#c2410c] shadow-[0_18px_26px_-14px_rgba(120,40,0,0.5)]" />
-      {/* lit face: gentle top-left light, hairline highlight on the rim */}
-      <span className="absolute inset-0 flex items-center justify-center rounded-[6px] bg-[linear-gradient(150deg,#fdba74_0%,#f97316_45%,#ea580c_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.6),inset_0_0_0_1px_rgba(255,255,255,0.18),inset_0_-6px_10px_rgba(124,45,18,0.22)]">
-        <Glyph
-          weight="bold"
-          className="size-[42%] text-white drop-shadow-[0_1px_1px_rgba(124,45,18,0.35)]"
-        />
-      </span>
+    <span
+      aria-hidden
+      className={cn(
+        "relative isolate flex aspect-square items-center justify-center overflow-hidden rounded-[6px] shadow-[0_18px_30px_-16px_rgba(20,20,20,0.5),0_0_0_3px_rgba(255,255,255,0.8),inset_0_1px_0_rgba(255,255,255,0.35)]",
+        ink
+          ? "bg-[linear-gradient(150deg,#3a3a3a,#141414)]"
+          : "bg-[linear-gradient(150deg,#fb923c,#f97316_50%,#ea580c)]",
+        className,
+      )}
+    >
+      {/* Print grid and grain */}
+      <span className="absolute inset-0 -z-10 bg-[linear-gradient(rgba(255,255,255,0.14)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.14)_1px,transparent_1px)] [background-size:16.66%_16.66%]" />
+      <span
+        className="absolute inset-0 -z-10 opacity-30 mix-blend-multiply"
+        style={{ backgroundImage: GRAIN }}
+      />
+      <Glyph weight="bold" className="size-[46%] text-white" />
     </span>
   );
 }

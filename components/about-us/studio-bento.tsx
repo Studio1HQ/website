@@ -5,16 +5,19 @@ import { motion, useReducedMotion } from "motion/react";
 import {
   ArrowUpRight,
   BookOpenText,
+  BracketsCurly,
   Code,
+  GitBranch,
   Megaphone,
   PenNib,
+  Sparkle,
+  TerminalWindow,
   VideoCamera,
   type Icon,
 } from "@phosphor-icons/react";
 import { Container, EASE } from "@/components/home/ui";
 import { PaperSection } from "@/components/paper/paper-sections";
 import { PrintBlock, SelectionFrame } from "@/components/paper/paper-hero";
-import { Icon3D } from "@/components/about-us/hero-arrows";
 import Logo from "@/components/ui/svgs/logo";
 import { homeTestimonials } from "@/data/home";
 import { PAPER, PRINT } from "@/lib/paper";
@@ -175,6 +178,66 @@ const VOICES = homeTestimonials
   )
   .map((item) => ({ name: item.name, role: item.role, image: item.avatar }));
 
+/** The work behind the principle. */
+const PROOF = [
+  { label: "Tutorials & guides", value: "300+" },
+  { label: "Docs audits", value: "15+" },
+  { label: "Developer events", value: "10+" },
+];
+
+/** The craft's tools, as an even icon grid that fades into the card. */
+const SKETCH: Icon[] = [
+  BookOpenText,
+  PenNib,
+  BracketsCurly,
+  Code,
+  Megaphone,
+  Sparkle,
+  GitBranch,
+  VideoCamera,
+  BookOpenText,
+  PenNib,
+  BracketsCurly,
+  TerminalWindow,
+  Megaphone,
+  Sparkle,
+  GitBranch,
+  VideoCamera,
+  BookOpenText,
+  PenNib,
+  BracketsCurly,
+  TerminalWindow,
+  Megaphone,
+  Sparkle,
+  GitBranch,
+  VideoCamera,
+];
+
+function Sketches() {
+  const reduceMotion = useReducedMotion();
+  return (
+    <motion.div
+      aria-hidden
+      className="pointer-events-none absolute right-6 top-6 hidden grid-cols-4 gap-x-7 gap-y-6 [mask-image:radial-gradient(ellipse_130%_110%_at_top_right,black_40%,transparent_95%)] sm:grid md:right-10 md:top-10"
+      initial={reduceMotion ? false : { opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 1.2, ease: EASE, delay: 0.2 }}
+    >
+      {SKETCH.map((SketchIcon, i) => (
+        <SketchIcon
+          key={i}
+          weight="light"
+          className={cn(
+            "size-6",
+            SketchIcon === Code ? "text-[#ea580c]" : "text-[#141414]/30",
+          )}
+        />
+      ))}
+    </motion.div>
+  );
+}
+
 export function StudioBento() {
   const reduceMotion = useReducedMotion();
   const enter = (delay: number) => ({
@@ -280,20 +343,41 @@ export function StudioBento() {
             <ServiceMap />
           </motion.div>
 
-          {/* Developer-first card */}
+          {/* Developer-first card: the principle, then the proof */}
           <motion.div
             {...enter(0.18)}
-            className="relative min-h-[420px] overflow-hidden rounded-[6px] bg-[#ebe7e1] p-6 md:p-10"
+            className="relative flex min-h-[420px] flex-col justify-between overflow-hidden rounded-[6px] bg-[#ebe7e1] p-6 md:p-10"
           >
-            <span className="inline-flex rounded-full bg-[#f97316] px-5 py-2 font-mono text-[15px] uppercase tracking-[0.06em] text-white">
-              Developer-first
-            </span>
-            <p className="mt-5 max-w-[300px] text-[15px] leading-[1.6] text-[#141414]/65">
-              Deliver clear, technical content that developers value.
-            </p>
-            <div className="absolute -bottom-[12%] -right-[6%] w-[62%] rotate-[-12deg]">
-              <Icon3D icon={Code} className="w-full" />
+            <div className="relative z-[1]">
+              <span className="inline-flex rounded-full bg-[#f97316] px-4 py-1.5 font-mono text-[13px] uppercase tracking-[0.08em] text-white">
+                Developer-first
+              </span>
+              <p className="mt-6 max-w-[440px] text-[32px] font-medium leading-[1.08] tracking-[-0.045em] text-[#141414] md:text-[40px]">
+                Content developers{" "}
+                <span style={{ color: PRINT }}>actually read.</span>
+              </p>
+              <p className="mt-4 max-w-[360px] text-[15px] leading-[1.6] text-[#141414]/60">
+                Deliver clear, technical content that developers value.
+              </p>
             </div>
+
+            {/* The proof, each number engraved into its own well */}
+            <Sketches />
+            <dl className="relative z-[1] mt-10 grid grid-cols-3 gap-2">
+              {PROOF.map((item) => (
+                <div
+                  key={item.label}
+                  className="relative flex min-w-0 flex-col-reverse justify-end rounded-[6px] bg-[#e3ddd3] px-4 py-4 shadow-[inset_0_2px_6px_rgba(20,20,20,0.1),inset_0_1px_2px_rgba(20,20,20,0.08),inset_0_-1px_0_rgba(255,255,255,0.8)] md:px-5 md:py-5"
+                >
+                  <dt className="mt-2 text-[12.5px] leading-snug text-[#141414]/60 md:text-[13px]">
+                    {item.label}
+                  </dt>
+                  <dd className="text-[28px] font-medium leading-none tracking-[-0.05em] tabular-nums text-[#ea580c] md:text-[34px]">
+                    {item.value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
           </motion.div>
         </div>
       </Container>

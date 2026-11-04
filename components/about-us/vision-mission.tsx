@@ -100,6 +100,7 @@ const ContentBlock = ({
   // "Our Vision" -> accent the second word, keep "Our" in ink.
   const accent = rest.join(" ");
   const TileIcon = index === 0 ? Target : Rocket;
+  const SecondIcon = index === 0 ? Lightbulb : Flag;
 
   return (
     <motion.article
@@ -109,16 +110,24 @@ const ContentBlock = ({
       viewport={{ once: true }}
       transition={{ duration: 0.55, delay: 0.08 * index, ease: "easeOut" }}
     >
-      {/* Header: the 3D tile beside the title and lede */}
-      <div className="flex items-start gap-5">
-        <div className="mt-0.5 w-14 shrink-0 transition-transform duration-700 ease-out group-hover:-translate-y-0.5 md:w-16">
-          <Icon3D icon={TileIcon} className="w-full" />
+      {/* Header: two printed tiles resting on a tabbed panel */}
+      <div className="relative pt-14">
+        <div className="absolute left-4 top-0 z-[2] flex items-end">
+          <span className="block w-16 -rotate-6 transition-transform duration-700 ease-out group-hover:-translate-y-1 group-hover:-rotate-[9deg] md:w-[72px]">
+            <Icon3D icon={TileIcon} className="w-full" />
+          </span>
+          <span className="-ml-3 mb-[-6px] block w-14 rotate-[8deg] transition-transform duration-700 ease-out group-hover:-translate-y-0.5 group-hover:rotate-[11deg] md:w-16">
+            <Icon3D icon={SecondIcon} ink className="w-full" />
+          </span>
         </div>
-        <div>
+        <div className="relative rounded-[6px] rounded-tl-none bg-[#f1ece4] p-6 pt-10 shadow-[inset_0_2px_6px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)]">
+          {/* The tab the tiles sit on */}
+          <span className="absolute -top-5 left-0 h-5 w-[46%] rounded-t-[6px] bg-[#f1ece4]" />
           <h3 className="text-[30px] font-medium leading-[1.05] tracking-[-0.045em] md:text-[36px]">
             {first} <span style={{ color: PRINT }}>{accent}</span>
           </h3>
-          <p className="mt-2 max-w-[420px] text-[14.5px] leading-[1.55] text-[#141414]/60">
+          <div className="my-4 h-px bg-[#141414]/10" />
+          <p className="max-w-[440px] text-[14.5px] leading-[1.55] text-[#141414]/60">
             {lede}
           </p>
         </div>
