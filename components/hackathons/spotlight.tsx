@@ -194,69 +194,54 @@ export function LiveSpotlight({ spotlight }: { spotlight: Spotlight }) {
       <style>{`@keyframes s1-tick{from{transform:translateY(-60%);opacity:0}to{transform:translateY(0);opacity:1}}@keyframes s1-halo{0%,100%{box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(249,115,22,.25),0 6px 18px -6px rgba(249,115,22,.35),0 0 22px rgba(251,146,60,.18)}50%{box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(249,115,22,.4),0 8px 24px -6px rgba(249,115,22,.5),0 0 40px rgba(251,146,60,.35)}}@keyframes s1-meter{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}`}</style>
 
       {live ? (
-        // The Live tag, taped flat onto the card's corner
+        // The Live ribbon, folded over the card's top edge
         <div
           aria-hidden
-          className="pointer-events-none absolute -top-3 right-8 z-10 rotate-[3deg] sm:right-10"
+          className="pointer-events-none absolute -top-[7px] right-8 z-10 sm:right-10"
         >
           <svg
-            viewBox="0 0 72 96"
-            className="h-[96px] w-[72px] drop-shadow-[0_10px_12px_rgba(124,45,18,0.22)]"
+            viewBox="0 0 64 92"
+            className="h-[92px] w-16 drop-shadow-[0_8px_10px_rgba(124,45,18,0.25)]"
           >
             <defs>
-              <linearGradient id="s1-cloth" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stopColor="#fb923c" />
-                <stop offset="0.55" stopColor="#f97316" />
+              <linearGradient id="s1-ribbon" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stopColor="#ea580c" />
+                <stop offset="0.5" stopColor="#f97316" />
                 <stop offset="1" stopColor="#ea580c" />
               </linearGradient>
-              <linearGradient id="s1-sheen" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stopColor="#fff" stopOpacity="0.28" />
-                <stop offset="0.4" stopColor="#fff" stopOpacity="0" />
-              </linearGradient>
             </defs>
-            {/* The tag, with a swallowtail hem */}
-            <path d="M8 10 H64 V94 L36 80 L8 94 Z" fill="url(#s1-cloth)" />
-            <path d="M8 10 H64 V94 L36 80 L8 94 Z" fill="url(#s1-sheen)" />
+            {/* The fold where it tucks over the edge */}
+            <path d="M0 7 L6 0 V7 Z" fill="#9a3412" />
+            <path d="M64 7 L58 0 V7 Z" fill="#9a3412" />
+            {/* The ribbon */}
+            <path d="M6 0 H58 V90 L32 76 L6 90 Z" fill="url(#s1-ribbon)" />
+            {/* A fine inset line */}
             <path
-              d="M13 16 H59 V85 L36 73 L13 85 Z"
+              d="M11 0 V80 L32 69 L53 80 V0"
               fill="none"
               stroke="#fff"
-              strokeOpacity="0.5"
-              strokeDasharray="2 2.5"
+              strokeOpacity="0.35"
+              strokeWidth="1"
             />
+            <circle cx="32" cy="28" r="3" fill="#fff">
+              <animate
+                attributeName="opacity"
+                values="1;0.3;1"
+                dur="1.6s"
+                repeatCount="indefinite"
+              />
+            </circle>
             <text
-              x="36"
-              y="54"
+              x="32"
+              y="52"
               textAnchor="middle"
-              fontSize="14"
-              fontWeight="700"
-              letterSpacing="3"
+              fontSize="12"
+              fontWeight="600"
+              letterSpacing="2.5"
               fill="#fff"
-              fontFamily="ui-monospace, monospace"
             >
               LIVE
             </text>
-            {/* Two strips of translucent tape holding it down */}
-            <rect
-              x="2"
-              y="2"
-              width="24"
-              height="10"
-              rx="1"
-              fill="#f5efe4"
-              opacity="0.85"
-              transform="rotate(-24 14 7)"
-            />
-            <rect
-              x="46"
-              y="2"
-              width="24"
-              height="10"
-              rx="1"
-              fill="#f5efe4"
-              opacity="0.85"
-              transform="rotate(24 58 7)"
-            />
           </svg>
         </div>
       ) : null}
