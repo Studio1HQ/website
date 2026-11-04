@@ -44,6 +44,7 @@ export function FlapClock({
   tone = "default",
   unitClassName = "text-[#f4efe7]/40",
   dotClassName = "bg-[#f4efe7]/25",
+  glass = false,
   className,
 }: {
   units: [string, string][];
@@ -52,6 +53,8 @@ export function FlapClock({
   tone?: FlapTone;
   unitClassName?: string;
   dotClassName?: string;
+  /** Light tiles, for a glass surface. */
+  glass?: boolean;
   className?: string;
 }) {
   return (
@@ -84,7 +87,13 @@ export function FlapClock({
           <span aria-hidden className="flex flex-col items-center">
             <span className="flex gap-[2px]">
               {Array.from(value).map((char, i) => (
-                <FlapTile key={i} char={char} tone={tone} flipOnChange />
+                <FlapTile
+                  key={i}
+                  char={char}
+                  tone={tone}
+                  glass={glass}
+                  flipOnChange
+                />
               ))}
             </span>
             <span

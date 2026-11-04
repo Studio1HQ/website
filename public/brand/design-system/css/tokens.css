@@ -1,0 +1,127 @@
+/* Studio1 design tokens as CSS custom properties. Mirrors tokens/tokens.json. */
+:root {
+  /* Type */
+  --s1-font-sans: "Studio1 Sans", "Inter", Arial, sans-serif;
+  --s1-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; /* system font, code only */
+  --s1-weight-regular: 400;
+  --s1-weight-medium: 500;
+
+  --s1-text-caption: 12px;
+  --s1-text-body: 14px;
+  --s1-text-body-lg: 16px;
+  --s1-text-subhead: 18px;
+  --s1-text-heading: 24px;
+  --s1-text-title: 32px;
+  --s1-text-display: 48px;
+  --s1-text-hero: 64px;
+  --s1-text-code: 13px;
+
+  --s1-leading-tight: 1.1;
+  --s1-leading-base: 1.3;
+  --s1-leading-relaxed: 1.55;
+
+  --s1-tracking-tight: -0.04em;
+  --s1-tracking-base: -0.03em;
+  --s1-tracking-none: 0em;
+  --s1-tracking-caps: 0.06em;
+
+  /* Palette */
+  --s1-neutral-0: #ffffff;
+  --s1-neutral-50: #fafafa;
+  --s1-neutral-100: #f2f2f2;
+  --s1-neutral-200: #e8e8e8;
+  --s1-neutral-300: #d4d4d4;
+  --s1-neutral-400: #a3a3a3;
+  --s1-neutral-500: #707070;
+  --s1-neutral-600: #525252;
+  --s1-neutral-700: #3a3a3a;
+  --s1-neutral-800: #1f1f1f;
+  --s1-neutral-900: #141414;
+  --s1-neutral-950: #0a0a0a;
+
+  --s1-sky-50: #f0faff;
+  --s1-sky-100: #ddf4ff;
+  --s1-sky-200: #b6e3ff;
+  --s1-sky-400: #58a6ff;
+  --s1-sky-600: #0969da;
+  --s1-sky-800: #0a3069;
+
+  /* Studio1 logo colors: the mark and brand moments only */
+  --s1-brand-red: #fe3c34;
+  --s1-brand-orange: #fe8b4b;
+  --s1-brand-gradient: linear-gradient(90deg, var(--s1-brand-red), var(--s1-brand-orange));
+
+  --s1-success: #1a7f37;
+  --s1-success-bg: #dafbe1;
+  --s1-warning: #9a6700;
+  --s1-warning-bg: #fff8c5;
+  --s1-danger: #cf222e;
+  --s1-danger-bg: #ffebe9;
+
+  /* Semantic (light) */
+  --s1-bg: var(--s1-neutral-0);
+  --s1-surface: var(--s1-neutral-100);
+  --s1-border: var(--s1-neutral-200);
+  --s1-text: var(--s1-neutral-950);
+  --s1-text-secondary: var(--s1-neutral-500);
+  --s1-text-muted: var(--s1-neutral-400);
+  --s1-accent: var(--s1-sky-100);
+  --s1-link: var(--s1-sky-600);
+  --s1-inverse-bg: var(--s1-neutral-950);
+  --s1-inverse-text: var(--s1-neutral-0);
+
+  /* Space, 4px base */
+  --s1-space-1: 4px;
+  --s1-space-2: 8px;
+  --s1-space-3: 12px;
+  --s1-space-4: 16px;
+  --s1-space-6: 24px;
+  --s1-space-8: 32px;
+  --s1-space-12: 48px;
+  --s1-space-16: 64px;
+  --s1-space-24: 96px;
+
+  /* Shape */
+  --s1-radius-sm: 4px;
+  --s1-radius-md: 6px;
+  --s1-radius-lg: 10px;
+  --s1-radius-full: 999px;
+  --s1-border-width: 1px;
+  --s1-shadow-raised: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --s1-shadow-overlay: 0 8px 32px rgba(0, 0, 0, 0.08);
+
+  /* Motion */
+  --s1-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --s1-duration-fast: 150ms;
+  --s1-duration-base: 200ms;
+  --s1-duration-slow: 400ms;
+}
+
+/* Semantic (dark): follows the OS unless a page forces light */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --s1-bg: var(--s1-neutral-950);
+    --s1-surface: var(--s1-neutral-900);
+    --s1-border: var(--s1-neutral-800);
+    --s1-text: var(--s1-neutral-100);
+    --s1-text-secondary: var(--s1-neutral-400);
+    --s1-text-muted: var(--s1-neutral-600);
+    --s1-accent: var(--s1-sky-800);
+    --s1-link: var(--s1-sky-400);
+    --s1-inverse-bg: var(--s1-neutral-0);
+    --s1-inverse-text: var(--s1-neutral-950);
+  }
+}
+
+:root[data-theme="dark"] {
+  --s1-bg: var(--s1-neutral-950);
+  --s1-surface: var(--s1-neutral-900);
+  --s1-border: var(--s1-neutral-800);
+  --s1-text: var(--s1-neutral-100);
+  --s1-text-secondary: var(--s1-neutral-400);
+  --s1-text-muted: var(--s1-neutral-600);
+  --s1-accent: var(--s1-sky-800);
+  --s1-link: var(--s1-sky-400);
+  --s1-inverse-bg: var(--s1-neutral-0);
+  --s1-inverse-text: var(--s1-neutral-950);
+}

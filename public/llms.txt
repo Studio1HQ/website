@@ -74,6 +74,9 @@ Selected results: Memori grew from launch to 12,000+ GitHub stars. Corsair went 
 - [Products](https://www.studio1hq.com/product): Studio1-built tools, including Raah and AssetSnip.
 - [Careers](https://www.studio1hq.com/careers)
 - [DevRel Cohort](https://www.studio1hq.com/devrel-cohort): A four-week, hands-on program by Studio1 for people breaking into developer relations; top participants get interviews at Studio1 and partner referrals.
+- [Brand Assets](https://www.studio1hq.com/brand): The Studio1 brand page: the Studio1 Sans typeface (free under the SIL OFL), colors, logo files, and the design system with tokens, CSS, a Tailwind preset, and DESIGN.md rules for designers, developers, and AI tools. Downloads for the fonts and the full kit.
+- [Hackathons](https://www.studio1hq.com/hackathons): Studio1-run hackathons with devtool, AI, and open-source partner teams: online, in-person, and hybrid events with tracks, prizes, judging criteria, and online registration. Companies can also partner with Studio1 to host or sponsor one.
+- [DevRel Jobs](https://www.studio1hq.com/devrel-jobs): A curated board of developer relations, developer advocacy, and community roles.
 - [Terms of Use](https://www.studio1hq.com/terms)
 - [Privacy Policy](https://www.studio1hq.com/privacy)
 

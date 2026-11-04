@@ -31,7 +31,12 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     // Markdown version of every blog post, for LLMs and AI tools.
-    return [{ source: "/blog/:slug.md", destination: "/blog-md/:slug" }];
+    return [
+      { source: "/blog/:slug.md", destination: "/blog-md/:slug" },
+      // The brand page (Studio1 Sans, design system, downloads): a static
+      // build in public/brand, refreshed with scripts/sync-brand.mjs.
+      { source: "/brand", destination: "/brand/index.html" },
+    ];
   },
   async headers() {
     return [
@@ -134,15 +139,13 @@ const nextConfig: NextConfig = {
         destination: "/developer-video-production",
         permanent: true,
       },
-      ...[
-        "/product-launch",
-        "/organic-campaign",
-        "/influencer-management",
-      ].map((source) => ({
-        source,
-        destination: "/developer-relations-growth-campaigns",
-        permanent: true,
-      })),
+      ...["/product-launch", "/organic-campaign", "/influencer-management"].map(
+        (source) => ({
+          source,
+          destination: "/developer-relations-growth-campaigns",
+          permanent: true,
+        }),
+      ),
     ];
   },
 };

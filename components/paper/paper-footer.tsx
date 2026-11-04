@@ -68,9 +68,19 @@ const COMPANY_LINKS = [
 const heading =
   "text-[12px] font-medium uppercase tracking-[0.14em] text-[#141414]/45";
 /** Footer link: a curved arrow slides in on hover to show it redirects. */
-function FooterLink({ href, children }: { href: string; children: ReactNode }) {
+function FooterLink({
+  href,
+  children,
+  native = false,
+}: {
+  href: string;
+  children: ReactNode;
+  /** A page outside the Next app (served from public/), so a full load. */
+  native?: boolean;
+}) {
+  const Anchor = native ? "a" : Link;
   return (
-    <Link
+    <Anchor
       href={href}
       className="group inline-flex items-center gap-1.5 text-[15px] transition-colors duration-200 hover:text-[#f97316]"
     >
@@ -83,7 +93,7 @@ function FooterLink({ href, children }: { href: string; children: ReactNode }) {
       <span className="transition-transform duration-300 group-hover:translate-x-0.5">
         {children}
       </span>
-    </Link>
+    </Anchor>
   );
 }
 
@@ -199,6 +209,11 @@ export default function PaperFooter() {
               <li>
                 <FooterLink href="/devrel-cohort">
                   {t("links.devrelCohort")}
+                </FooterLink>
+              </li>
+              <li>
+                <FooterLink href="/brand" native>
+                  {t("links.brandAssets")}
                 </FooterLink>
               </li>
             </ul>

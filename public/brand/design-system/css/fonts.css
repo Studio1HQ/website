@@ -1,0 +1,16 @@
+/* Studio1 Sans, the Studio1 brand typeface (renamed Inter, SIL OFL 1.1). */
+@font-face {
+  font-family: "Studio1 Sans";
+  src: url("../fonts/Studio1Sans-Regular.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Studio1 Sans";
+  src: url("../fonts/Studio1Sans-Medium.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}

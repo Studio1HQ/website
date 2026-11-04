@@ -1,0 +1,68 @@
+/* Studio1 Tailwind v4 theme. Mirrors tokens/tokens.json.
+   app.css:
+     @import "tailwindcss";
+     @import "./design-system/css/fonts.css";
+     @import "./design-system/tailwind/theme.css";
+*/
+@theme {
+  --font-sans: "Studio1 Sans", "Inter", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+
+  --text-caption: 12px;
+  --text-body: 14px;
+  --text-body-lg: 16px;
+  --text-subhead: 18px;
+  --text-heading: 24px;
+  --text-title: 32px;
+  --text-display: 48px;
+  --text-hero: 64px;
+  --text-code: 13px;
+
+  --tracking-tight-s1: -0.04em;
+  --tracking-s1: -0.03em;
+  --tracking-caps: 0.06em;
+
+  --color-neutral-0: #ffffff;
+  --color-neutral-50: #fafafa;
+  --color-neutral-100: #f2f2f2;
+  --color-neutral-200: #e8e8e8;
+  --color-neutral-300: #d4d4d4;
+  --color-neutral-400: #a3a3a3;
+  --color-neutral-500: #707070;
+  --color-neutral-600: #525252;
+  --color-neutral-700: #3a3a3a;
+  --color-neutral-800: #1f1f1f;
+  --color-neutral-900: #141414;
+  --color-neutral-950: #0a0a0a;
+
+  --color-sky-50: #f0faff;
+  --color-sky-100: #ddf4ff;
+  --color-sky-200: #b6e3ff;
+  --color-sky-400: #58a6ff;
+  --color-sky-600: #0969da;
+  --color-sky-800: #0a3069;
+
+  --color-brand-red: #fe3c34;
+  --color-brand-orange: #fe8b4b;
+
+  --color-ink: #0a0a0a;
+  --color-surface: #f2f2f2;
+  --color-success: #1a7f37;
+  --color-success-bg: #dafbe1;
+  --color-warning: #9a6700;
+  --color-warning-bg: #fff8c5;
+  --color-danger: #cf222e;
+  --color-danger-bg: #ffebe9;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+
+  --shadow-raised: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-overlay: 0 8px 32px rgba(0, 0, 0, 0.08);
+
+  --ease-s1: cubic-bezier(0.16, 1, 0.3, 1);
+}

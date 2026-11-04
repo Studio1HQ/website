@@ -12,6 +12,7 @@ import {
   SectionHead,
 } from "@/components/paper/paper-sections";
 import { pad } from "@/components/hackathons/hackathon-ui";
+import { CityIcon } from "@/components/hackathons/city-icons";
 import type { PastPartnership } from "@/data/hackathons";
 import type { IndiaMap } from "@/lib/india-map";
 import { PRINT } from "@/lib/paper";
@@ -31,7 +32,7 @@ const PROOF = [
   },
 ];
 
-const DOT = 0.32;
+const DOT = 0.36;
 
 /**
  * Hackathons Studio1 has backed across India: a dot map with a pin per
@@ -84,7 +85,7 @@ export function TrackRecord({
               role="img"
               aria-label={`Map of India with ${cities} cities where we've partnered on hackathons`}
             >
-              <g fill="#141414" fillOpacity={0.16}>
+              <g fill="#141414" fillOpacity={0.2}>
                 {map.dots.map(([x, y]) => (
                   <circle key={`${x},${y}`} cx={x} cy={y} r={DOT} />
                 ))}
@@ -104,29 +105,29 @@ export function TrackRecord({
                       <circle
                         cx={pin[0]}
                         cy={pin[1]}
-                        r={2.6}
+                        r={4.6}
                         fill={PRINT}
-                        fillOpacity={0.18}
+                        fillOpacity={0.16}
                       />
                     ) : null}
                     <circle
                       cx={pin[0]}
                       cy={pin[1]}
-                      r={active === i ? 1.15 : 0.85}
+                      r={active === i ? 1.9 : 1.4}
                       fill={PRINT}
                       fillOpacity={lit ? 1 : 0.35}
                       className="transition-all duration-300"
                     />
                     {active === i ? (
                       <text
-                        x={pin[0] + 2.2}
-                        y={pin[1] + 0.9}
-                        fontSize={2.6}
+                        x={pin[0] + 3.6}
+                        y={pin[1] + 1.5}
+                        fontSize={4.4}
                         fontWeight={600}
                         fill="#141414"
                         // A paper-coloured halo keeps the name readable over the dots
                         stroke="#f4efe7"
-                        strokeWidth={0.9}
+                        strokeWidth={1.6}
                         paintOrder="stroke"
                       >
                         {item.city}
@@ -139,12 +140,15 @@ export function TrackRecord({
           </div>
 
           <div>
-            <div className="flex items-baseline gap-8">
+            <div className="grid max-w-[420px] grid-cols-2 gap-2">
               {[
                 [partnerships.length, "hackathons"],
                 [cities, "cities"],
               ].map(([value, label]) => (
-                <p key={label} className="flex items-baseline gap-2">
+                <p
+                  key={label}
+                  className="flex items-baseline gap-2 rounded-[6px] px-5 py-4 bg-[#ebe6de] shadow-[inset_0_2px_6px_rgba(20,20,20,0.09),inset_0_1px_2px_rgba(20,20,20,0.07),inset_0_-1px_0_rgba(255,255,255,0.8)]"
+                >
                   <span className="text-[44px] font-medium leading-none tracking-[-0.05em] tabular-nums sm:text-[56px]">
                     {value}
                   </span>
@@ -162,7 +166,7 @@ export function TrackRecord({
                   key={`${item.name}-${i}`}
                   onMouseEnter={() => setActive(i)}
                   className={cn(
-                    "grid grid-cols-[32px_minmax(0,1fr)_auto] items-baseline gap-x-3 border-b border-[#141414]/[0.14] py-3.5 transition-colors",
+                    "group grid grid-cols-[32px_44px_minmax(0,1fr)_auto_auto] items-center gap-x-3 border-b border-[#141414]/[0.14] py-3.5 transition-colors",
                     active !== null && active !== i && "text-[#141414]/45",
                   )}
                 >
@@ -171,6 +175,15 @@ export function TrackRecord({
                     style={{ color: PRINT }}
                   >
                     {pad(i + 1)}
+                  </span>
+                  {/* The city's landmark, engraved into a small tile */}
+                  <span
+                    className={cn(
+                      "flex size-11 items-center justify-center rounded-[6px] text-[#141414]/70 transition-colors duration-300 group-hover:text-[#ea580c]",
+                      "bg-[#ebe6de] shadow-[inset_0_2px_6px_rgba(20,20,20,0.09),inset_0_1px_2px_rgba(20,20,20,0.07),inset_0_-1px_0_rgba(255,255,255,0.8)]",
+                    )}
+                  >
+                    <CityIcon city={item.city} className="size-7" />
                   </span>
                   <span className="min-w-0">
                     <span className="block truncate text-[16px] font-medium tracking-[-0.015em]">
@@ -194,6 +207,12 @@ export function TrackRecord({
                   <span className="text-right text-[12.5px] font-medium text-[#141414]/60">
                     {item.role}
                   </span>
+                  {/* Points to the city on the map; turns orange with it */}
+                  <ArrowUpRight
+                    aria-hidden
+                    weight="bold"
+                    className="size-3.5 text-[#141414]/30 transition-[color,transform] duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#f97316]"
+                  />
                 </li>
               ))}
             </ol>

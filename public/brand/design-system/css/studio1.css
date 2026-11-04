@@ -1,0 +1,155 @@
+/* ========================================================
+   Studio1 Design System: one import for fonts, tokens,
+   base typography and core components.
+   Usage: <link rel="stylesheet" href="design-system/css/studio1.css">
+   ======================================================== */
+@import "./fonts.css";
+@import "./tokens.css";
+
+:root {
+  font-synthesis: none;
+}
+
+/* Base typography: Studio1 Sans, 14px, -0.03em, 1.3. Put class="s1" on <body>. */
+.s1 {
+  font-family: var(--s1-font-sans);
+  font-size: var(--s1-text-body);
+  font-weight: var(--s1-weight-regular);
+  line-height: var(--s1-leading-base);
+  letter-spacing: var(--s1-tracking-base);
+  color: var(--s1-text);
+  background: var(--s1-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Type roles */
+.s1-hero     { font-size: var(--s1-text-hero);    font-weight: 500; line-height: var(--s1-leading-tight); letter-spacing: var(--s1-tracking-tight); }
+.s1-display  { font-size: var(--s1-text-display); font-weight: 500; line-height: var(--s1-leading-tight); letter-spacing: var(--s1-tracking-tight); }
+.s1-title    { font-size: var(--s1-text-title);   font-weight: 500; line-height: var(--s1-leading-tight); letter-spacing: var(--s1-tracking-tight); }
+.s1-heading  { font-size: var(--s1-text-heading); font-weight: 500; line-height: var(--s1-leading-base); }
+.s1-subhead  { font-size: var(--s1-text-subhead); font-weight: 500; line-height: var(--s1-leading-base); }
+.s1-body-lg  { font-size: var(--s1-text-body-lg); font-weight: 400; line-height: var(--s1-leading-relaxed); }
+.s1-body     { font-size: var(--s1-text-body);    font-weight: 400; line-height: var(--s1-leading-base); }
+.s1-caption  { font-size: var(--s1-text-caption); font-weight: 400; color: var(--s1-text-secondary); }
+.s1-label    { font-size: var(--s1-text-caption); font-weight: 500; letter-spacing: var(--s1-tracking-caps); text-transform: uppercase; color: var(--s1-text-muted); }
+.s1-muted    { color: var(--s1-text-secondary); }
+
+.s1-link {
+  color: var(--s1-link);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+}
+
+/* Code */
+.s1-code,
+.s1 code,
+.s1 pre {
+  font-family: var(--s1-font-mono);
+  font-size: var(--s1-text-code);
+  letter-spacing: var(--s1-tracking-none);
+}
+
+.s1 :not(pre) > code {
+  padding: 1px 5px;
+  border-radius: var(--s1-radius-sm);
+  background: var(--s1-surface);
+}
+
+.s1-codeblock {
+  font-family: var(--s1-font-mono);
+  font-size: var(--s1-text-code);
+  line-height: 1.6;
+  letter-spacing: 0;
+  padding: var(--s1-space-4) var(--s1-space-6);
+  border-radius: var(--s1-radius-lg);
+  background: var(--s1-neutral-950);
+  color: var(--s1-neutral-100);
+  overflow-x: auto;
+}
+
+/* Buttons */
+.s1-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s1-space-2);
+  height: 36px;
+  padding: 0 var(--s1-space-4);
+  font: 500 var(--s1-text-body) / 1 var(--s1-font-sans);
+  letter-spacing: var(--s1-tracking-base);
+  border-radius: var(--s1-radius-md);
+  border: var(--s1-border-width) solid var(--s1-inverse-bg);
+  background: var(--s1-inverse-bg);
+  color: var(--s1-inverse-text);
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity var(--s1-duration-base) var(--s1-ease), background var(--s1-duration-base) var(--s1-ease);
+}
+
+.s1-btn:hover { opacity: 0.85; }
+
+.s1-btn--secondary {
+  background: var(--s1-bg);
+  color: var(--s1-text);
+  border-color: var(--s1-border);
+}
+
+.s1-btn--secondary:hover {
+  opacity: 1;
+  border-color: var(--s1-text);
+}
+
+.s1-btn:focus-visible,
+.s1-input:focus-visible {
+  outline: 2px solid var(--s1-link);
+  outline-offset: 2px;
+}
+
+/* Inputs */
+.s1-input {
+  height: 36px;
+  padding: 0 var(--s1-space-3);
+  font: 400 var(--s1-text-body) / 1 var(--s1-font-sans);
+  letter-spacing: var(--s1-tracking-base);
+  color: var(--s1-text);
+  background: var(--s1-bg);
+  border: var(--s1-border-width) solid var(--s1-border);
+  border-radius: var(--s1-radius-md);
+}
+
+/* Surfaces */
+.s1-card {
+  padding: var(--s1-space-6);
+  background: var(--s1-bg);
+  border: var(--s1-border-width) solid var(--s1-border);
+  border-radius: var(--s1-radius-lg);
+}
+
+.s1-panel {
+  padding: var(--s1-space-6);
+  background: var(--s1-surface);
+  border-radius: var(--s1-radius-lg);
+}
+
+.s1-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 var(--s1-space-2);
+  font-size: var(--s1-text-caption);
+  font-weight: 500;
+  border-radius: var(--s1-radius-sm);
+  background: var(--s1-accent);
+  color: var(--s1-text);
+}
+
+.s1-divider {
+  border: 0;
+  border-top: var(--s1-border-width) solid var(--s1-border);
+}
+
+::selection {
+  background: var(--s1-text);
+  color: var(--s1-bg);
+}

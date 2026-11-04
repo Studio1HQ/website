@@ -1,5 +1,6 @@
 import DottedMap from "dotted-map/without-countries";
-// Grid precomputed with getMapJSON({ height: 64, grid: "diagonal", countries: ["IND"] }).
+// Grid precomputed with getMapJSON({ height: 124, grid: "vertical", countries: ["IND"] })
+// over a wider region, plus the northern outline (J&K, Ladakh) the library omits.
 import indiaGrid from "@/data/india-dotted-map.json";
 
 export type IndiaMap = {

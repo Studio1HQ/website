@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<!-- Studio1 featured image / OG card, 1200x630.
+     Edit the text, open in a browser, screenshot the .og element at 1200x630
+     (or render headless: chromium --screenshot --window-size=1200,630). -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Studio1 OG Image</title>
+    <link rel="stylesheet" href="../css/studio1.css" />
+    <style>
+      body.s1 { margin: 0; background: var(--s1-neutral-200); }
+      .og {
+        width: 1200px;
+        height: 630px;
+        box-sizing: border-box;
+        padding: 72px 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        background: var(--s1-neutral-0);
+        color: var(--s1-neutral-950);
+      }
+      .og--dark { background: var(--s1-neutral-950); color: var(--s1-neutral-0); }
+      .og--dark .og-meta { color: var(--s1-neutral-400); }
+      .og-top { display: flex; align-items: center; justify-content: space-between; }
+      .og-brand { display: flex; align-items: center; gap: 16px; font-size: 28px; font-weight: 500; letter-spacing: -0.04em; }
+      .og-brand img { width: 40px; height: 40px; }
+      .og-tag { font-size: 18px; font-weight: 500; padding: 8px 14px; border-radius: 6px; background: var(--s1-sky-100); color: var(--s1-neutral-950); letter-spacing: -0.02em; }
+      .og-title { font-size: 72px; font-weight: 500; line-height: 1.05; letter-spacing: -0.045em; max-width: 960px; margin: 0; }
+      .og-meta { font-size: 22px; color: var(--s1-neutral-500); letter-spacing: -0.03em; display: flex; gap: 24px; }
+    </style>
+  </head>
+  <body class="s1">
+    <!-- Light variant -->
+    <div class="og">
+      <div class="og-top">
+        <div class="og-brand"><img src="../logo/studio1-mark-black.svg" alt="" />Studio1</div>
+        <span class="og-tag">Guide</span>
+      </div>
+      <h1 class="og-title">How to write API docs developers actually finish reading</h1>
+      <div class="og-meta"><span>studio1hq.com</span><span>8 min read</span></div>
+    </div>
+
+    <!-- Dark variant: add og--dark and swap the logo -->
+    <div class="og og--dark">
+      <div class="og-top">
+        <div class="og-brand"><img src="../logo/studio1-mark-white.svg" alt="" />Studio1</div>
+        <span class="og-tag">Launch</span>
+      </div>
+      <h1 class="og-title">Shipping a developer tool? Make the docs part of the launch.</h1>
+      <div class="og-meta"><span>studio1hq.com</span><span>DevRel</span></div>
+    </div>
+  </body>
+</html>

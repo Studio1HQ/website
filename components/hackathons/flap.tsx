@@ -30,28 +30,36 @@ export function FlapTile({
   tone = "default",
   /** Flip the new character down from the hinge whenever it changes. */
   flipOnChange = false,
+  /** Light paper-and-glass tile for light surfaces, instead of black. */
+  glass = false,
   className,
 }: {
   char: string;
   tone?: FlapTone;
   flipOnChange?: boolean;
+  glass?: boolean;
   className?: string;
 }) {
   return (
     <span
       className={cn(
-        "relative flex h-[calc(var(--cw)*1.5)] w-[calc(var(--cw)-2px)] shrink-0 items-center justify-center overflow-hidden rounded-[2px] bg-[#1c1c1c] font-mono text-[length:calc(var(--cw)*0.8)] font-semibold leading-none shadow-[inset_0_1px_0_rgba(255,255,255,0.07),inset_0_-1px_0_rgba(0,0,0,0.7)] [perspective:240px]",
+        "relative flex h-[calc(var(--cw)*1.5)] w-[calc(var(--cw)-2px)] shrink-0 items-center justify-center overflow-hidden rounded-[3px] font-mono text-[length:calc(var(--cw)*0.8)] font-semibold leading-none [perspective:240px]",
+        glass
+          ? "bg-[linear-gradient(180deg,#ffffff_0%,#faf8f4_50%,#f1ede6_50%,#ebe6de_100%)] shadow-[0_8px_14px_-10px_rgba(20,20,20,0.4),inset_0_1px_0_#fff] ring-1 ring-inset ring-[#141414]/[0.08]"
+          : "bg-[linear-gradient(180deg,#2b2b2b_0%,#232323_50%,#1b1b1b_50%,#151515_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.09),inset_0_-1px_0_rgba(0,0,0,0.8),0_2px_3px_-1px_rgba(0,0,0,0.6)]",
         className,
       )}
     >
-      {/* Upper flap catches a little more light */}
-      <span className="absolute inset-x-0 top-0 h-1/2 bg-white/[0.035]" />
       {/* Keyed by character, so each change remounts and replays the flip */}
       <span
         key={flipOnChange ? char : undefined}
         className={cn(
           "relative",
-          TONE_TEXT[tone],
+          glass
+            ? tone === "live"
+              ? "text-[#ea580c]"
+              : "text-[#141414]"
+            : TONE_TEXT[tone],
           flipOnChange &&
             "inline-block [animation:s1-flap_280ms_cubic-bezier(0.3,1.4,0.5,1)_both] [transform-origin:50%_0%] motion-reduce:[animation:none]",
         )}
@@ -59,7 +67,12 @@ export function FlapTile({
         {char}
       </span>
       {/* The hinge between the two flaps */}
-      <span className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-black/80" />
+      <span
+        className={cn(
+          "absolute inset-x-0 top-1/2 h-px -translate-y-1/2",
+          glass ? "bg-[#141414]/10" : "bg-black",
+        )}
+      />
     </span>
   );
 }

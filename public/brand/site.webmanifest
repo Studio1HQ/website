@@ -1,0 +1,14 @@
+{
+  "name": "Studio1 Sans",
+  "short_name": "Studio1",
+  "description": "The Studio1 brand typeface and brand assets.",
+  "start_url": "/brand/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "icons": [
+    { "src": "/brand/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/brand/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/brand/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

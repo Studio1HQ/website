@@ -126,15 +126,10 @@ function HackathonsHero({ cards, spotlight, openPrizes }: HackathonsPageProps) {
       <div aria-hidden className={RULED_LINES} />
 
       <Container className="pb-20 pt-32 md:pt-40 lg:pb-24">
-        <div
-          className={cn(
-            "grid gap-x-16 gap-y-12",
-            spotlight &&
-              "lg:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)] lg:items-center",
-          )}
-        >
-          <div>
-            <p className="flex items-center gap-3 text-[13px] font-medium">
+        {/* Centred heading */}
+        <div className="relative">
+          <div className="mx-auto flex max-w-[720px] flex-col items-center text-center">
+            <p className="flex items-center justify-center gap-3 text-[13px] font-medium">
               <span className="relative flex size-2">
                 <span
                   className="absolute inset-0 animate-ping rounded-full opacity-70 motion-reduce:hidden"
@@ -159,12 +154,12 @@ function HackathonsHero({ cards, spotlight, openPrizes }: HackathonsPageProps) {
               is <Underlined>boarding</Underlined>
               <span style={{ color: PRINT }}>.</span>
             </h1>
-            <p className="mt-8 max-w-[460px] text-[16px] leading-[1.7] text-[#141414]/70 sm:text-[17px]">
+            <p className="mt-8 mx-auto max-w-[520px] text-[16px] leading-[1.7] text-[#141414]/70 sm:text-[17px]">
               Weekend sprints and month-long challenges with devtool, AI, and
               open-source teams. Pick a departure, register, finish the pre-hack
               tasks, and you&apos;re ready to ship.
             </p>
-            <div className="mt-8 flex flex-wrap items-center gap-x-7 gap-y-5">
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-x-7 gap-y-5">
               <BrowseButton />
               <a
                 href="#partners"
@@ -178,9 +173,13 @@ function HackathonsHero({ cards, spotlight, openPrizes }: HackathonsPageProps) {
               </a>
             </div>
           </div>
-
-          {spotlight ? <LiveSpotlight spotlight={spotlight} /> : null}
         </div>
+
+        {spotlight ? (
+          <div className="mt-14 md:mt-16">
+            <LiveSpotlight spotlight={spotlight} />
+          </div>
+        ) : null}
 
         <motion.div
           className="mt-14 md:mt-16"
