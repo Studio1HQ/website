@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { COHORT } from "@/data/devrel-cohort";
 import { validateApplication } from "@/lib/devrel-cohort-application";
 import { looksAutomated } from "@/lib/form-guard";
+import { readJsonBody } from "@/lib/read-body";
 import { insertRow, isSupabaseConfigured } from "@/lib/supabase-server";
 
 /**
@@ -18,19 +19,16 @@ export async function POST(request: Request) {
     );
   }
 
-  if (Number(request.headers.get("content-length") ?? 0) > 32 * 1024) {
-    return NextResponse.json(
-      { error: "That application is too long." },
-      { status: 413 },
-    );
+  const parsed = await readJsonBody(request, 32 * 1024);
+  if (!parsed.ok) {
+    return parsed.reason === "too-large"
+      ? NextResponse.json(
+          { error: "That application is too long." },
+          { status: 413 },
+        )
+      : NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
-
-  let body: Record<string, unknown>;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid request." }, { status: 400 });
-  }
+  const body = parsed.value;
 
   // Bots get a normal-looking success and nothing is saved.
   if (looksAutomated({ honeypot: body.website, fillMs: body.fillMs })) {
@@ -80,15 +78,9 @@ export async function POST(request: Request) {
 
   const saved = await insertRow("devrel_cohort_applications", row);
   if (!saved.ok) {
-    if (saved.duplicate) {
-      return NextResponse.json(
-        {
-          error: `${values.email} has already applied to ${COHORT.edition}. We'll reply by email.`,
-          fields: { email: "Already applied with this email." },
-        },
-        { status: 409 },
-      );
-    }
+    // A repeat answers like a first application, so the response never
+    // reveals whether an email has applied. The first application stands.
+    if (saved.duplicate) return NextResponse.json({ ok: true });
     console.error("[devrel-cohort] application insert failed", saved.message);
     return NextResponse.json(
       { error: "We couldn't save your application. Try again in a minute." },

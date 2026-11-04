@@ -2,6 +2,7 @@ import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
 import { getJobById, getJobIds } from "@/lib/careers";
 import { looksAutomated } from "@/lib/form-guard";
+import { readFormBody } from "@/lib/read-body";
 import {
   APPLICATION_LIMITS,
   isJobOpen,
@@ -32,24 +33,23 @@ export async function POST(request: Request) {
     );
   }
 
-  // Résumé cap plus room for the text fields.
-  const length = Number(request.headers.get("content-length") ?? 0);
-  if (length > APPLICATION_LIMITS.resumeBytes + 256 * 1024) {
-    return NextResponse.json(
-      {
-        error: "That upload is too large.",
-        fields: { resume: "Keep the PDF under 4 MB." },
-      },
-      { status: 413 },
-    );
+  // Résumé cap plus room for the text fields, counted on the bytes read.
+  const body = await readFormBody(
+    request,
+    APPLICATION_LIMITS.resumeBytes + 256 * 1024,
+  );
+  if (!body.ok) {
+    return body.reason === "too-large"
+      ? NextResponse.json(
+          {
+            error: "That upload is too large.",
+            fields: { resume: "Keep the PDF under 4 MB." },
+          },
+          { status: 413 },
+        )
+      : NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
-
-  let form: FormData;
-  try {
-    form = await request.formData();
-  } catch {
-    return NextResponse.json({ error: "Invalid request." }, { status: 400 });
-  }
+  const form = body.value;
   const field = (name: string) => {
     const value = form.get(name);
     return typeof value === "string" ? value : "";
@@ -141,15 +141,9 @@ export async function POST(request: Request) {
 
   if (!saved.ok) {
     await removeFiles(BUCKET, [path]);
-    if (saved.duplicate) {
-      return NextResponse.json(
-        {
-          error: `You've already applied for ${job.title} with ${values.email}. We'll be in touch if there's a fit.`,
-          fields: { email: "Already applied with this email." },
-        },
-        { status: 409 },
-      );
-    }
+    // A repeat answers like a first application, so the response never
+    // reveals whether an email has applied. The first application stands.
+    if (saved.duplicate) return NextResponse.json({ ok: true });
     console.error("[careers] application insert failed", saved.message);
     return NextResponse.json(
       { error: "We couldn't save your application. Try again in a minute." },

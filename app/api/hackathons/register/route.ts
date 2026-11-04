@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getHackathon } from "@/data/hackathons";
 import { looksAutomated } from "@/lib/form-guard";
+import { readJsonBody } from "@/lib/read-body";
 import { validateRegistration } from "@/lib/hackathon-registration";
 import { isRegistrationOpen } from "@/lib/hackathons";
 import { insertRow, isSupabaseConfigured } from "@/lib/supabase-server";
@@ -12,12 +13,16 @@ import { insertRow, isSupabaseConfigured } from "@/lib/supabase-server";
  * refuses, so no registration is ever silently dropped.
  */
 export async function POST(request: Request) {
-  let body: Record<string, unknown>;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid request." }, { status: 400 });
+  const parsed = await readJsonBody(request, 32 * 1024);
+  if (!parsed.ok) {
+    return parsed.reason === "too-large"
+      ? NextResponse.json(
+          { error: "That registration is too long." },
+          { status: 413 },
+        )
+      : NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
+  const body = parsed.value;
 
   const hackathon =
     typeof body.slug === "string" ? getHackathon(body.slug) : undefined;
@@ -86,15 +91,9 @@ export async function POST(request: Request) {
 
   const saved = await insertRow("hackathon_registrations", row);
   if (!saved.ok) {
-    if (saved.duplicate) {
-      return NextResponse.json(
-        {
-          error: `${values.email} is already registered for ${hackathon.name}.`,
-          fields: { email: "This email is already registered." },
-        },
-        { status: 409 },
-      );
-    }
+    // A repeat answers like a first registration, so the response never
+    // reveals whether an email is registered. The first registration stands.
+    if (saved.duplicate) return NextResponse.json({ ok: true });
     console.error("[hackathons] registration insert failed", saved.message);
     return NextResponse.json(
       { error: "We couldn't save your registration. Try again in a minute." },
