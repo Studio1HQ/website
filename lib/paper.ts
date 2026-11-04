@@ -52,6 +52,7 @@ const PAPER_PATHS = new Set([
   "/case-studies",
   "/devrel-jobs",
   "/devrel-cohort",
+  "/oss",
   "/technical-content-marketing",
   "/developer-relations-growth-campaigns",
   "/developer-video-production",

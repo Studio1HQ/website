@@ -212,6 +212,9 @@ export default function PaperFooter() {
                 </FooterLink>
               </li>
               <li>
+                <FooterLink href="/oss">{t("links.openSource")}</FooterLink>
+              </li>
+              <li>
                 <FooterLink href="/brand" native>
                   {t("links.brandAssets")}
                 </FooterLink>

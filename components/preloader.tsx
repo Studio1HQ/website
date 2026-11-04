@@ -17,6 +17,7 @@ const PAGE_LABELS: [RegExp, string][] = [
   [/^\/careers/, "Careers"],
   [/^\/devrel-jobs/, "DevRel Jobs"],
   [/^\/devrel-cohort/, "DevRel Cohort"],
+  [/^\/oss/, "Open Source"],
   [/^\/hackathons/, "Hackathons"],
   [/^\/product/, "Product"],
   [/^\/services/, "Services"],

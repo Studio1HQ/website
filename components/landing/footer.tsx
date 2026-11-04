@@ -224,6 +224,11 @@ export default function Footer() {
                   {t("links.devrelCohort")}
                 </Link>
               </li>
+              <li>
+                <Link href="/oss" className={linkClass}>
+                  {t("links.openSource")}
+                </Link>
+              </li>
             </ul>
           </nav>
 

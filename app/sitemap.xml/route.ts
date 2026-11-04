@@ -1,5 +1,6 @@
 import { AGENCIES_CHECKED } from "@/data/agencies";
 import { COMPARISONS } from "@/data/comparisons";
+import { OSS_SNAPSHOT_DATE } from "@/data/oss";
 import { AUTHORS, authorPath } from "@/lib/authors";
 import { getAllPosts } from "@/lib/blog";
 import { getAllCaseStudies } from "@/lib/case-studies";
@@ -137,6 +138,7 @@ export async function GET() {
       lastModified: DEVREL_COHORT_LAST_MODIFIED,
       priority: 0.8,
     },
+    { path: "/oss", lastModified: OSS_SNAPSHOT_DATE, priority: 0.8 },
     { path: "/blog", lastModified: STATIC_LAST_MODIFIED, priority: 0.8 },
     { path: "/brand", lastModified: STATIC_LAST_MODIFIED, priority: 0.6 },
     { path: "/terms", lastModified: LEGAL_LAST_MODIFIED, priority: 0.5 },
