@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="app/opengraph-image.png" alt="Studio1" width="100%" />
+<img src="brand/readme-banner.webp" alt="Studio1: Technical Content and DevRel Partner for DevTools" width="100%" />
 
 <br />
 <br />
@@ -16,6 +16,8 @@ We help SaaS and devtool teams publish content, docs, and DevRel programs<br />t
 [![Website](https://img.shields.io/badge/studio1hq.com-0b0807?style=for-the-badge&logo=googlechrome&logoColor=white)](https://studio1hq.com)
 [![Book a call](https://img.shields.io/badge/Book_a_strategy_call-f97316?style=for-the-badge&logo=googlecalendar&logoColor=white)](https://cal.com/studio1/collab)
 [![Email](https://img.shields.io/badge/contact@studio1hq.com-1c1917?style=for-the-badge&logo=gmail&logoColor=white)](mailto:contact@studio1hq.com)
+[![X](https://img.shields.io/badge/@Studio1HQ-141414?style=for-the-badge&logo=x&logoColor=white)](https://x.com/Studio1HQ)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0a66c2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/company/studio1hq/)
 
 [Case studies](https://studio1hq.com/case-studies) &nbsp;·&nbsp; [Blog](https://studio1hq.com/blog) &nbsp;·&nbsp; [About us](https://studio1hq.com/about-us) &nbsp;·&nbsp; [Careers](https://studio1hq.com/careers)
 
@@ -141,8 +143,43 @@ pnpm build     # production build
 | `content/case-studies/` | Case studies (MDX, per locale) |
 | `messages/` | UI strings for en, fr, es, hi, zh |
 | `public/admin/` | Decap CMS; needs the variables in `.env.example` |
+| `brand/` | Logo and social banners |
 
 Every blog post is also available as Markdown at `/blog/<slug>.md` for LLMs and AI tools. Contribution guidelines are in [`AGENTS.md`](AGENTS.md).
+
+</details>
+
+<details>
+<summary><strong>Brand kit</strong></summary>
+
+<br />
+
+<p><img src="brand/studio1-logo-on-light.svg" alt="Studio1 main logo" width="240" /></p>
+
+The main logo is the gradient mark with the wordmark: a rounded square with an **S** and a **1** cut out of it. On dark backgrounds and profile pictures it switches to the dark-mode version: the same gradient mark with white cut-outs and a white wordmark.
+
+**The full style guide is in [`brand/README.md`](brand/README.md).** It covers logo rules, colours, type, graphic elements, imagery, motion, video, safe zones, writing voice, and prompts for AI image, video and design tools.
+
+| File | Size | Use it for |
+| :--- | :--- | :--- |
+| [`studio1-logo-on-light.svg`](brand/studio1-logo-on-light.svg) | vector | **The main logo**: gradient mark with the wordmark, for light backgrounds |
+| [`studio1-logo-on-dark.svg`](brand/studio1-logo-on-dark.svg) | vector | The dark-mode logo: gradient mark with white cut-outs, white wordmark |
+| [`studio1-mark-orange-tile.png`](brand/studio1-mark-orange-tile.png) | 800 × 800 | X and LinkedIn profile picture (X crops it to a circle; the mark stays inside) |
+| [`studio1-mark-orange-tile-400.png`](brand/studio1-mark-orange-tile-400.png) | 400 × 400 | Places that want the exact 400 px upload |
+| [`studio1-mark-orange-tile.svg`](brand/studio1-mark-orange-tile.svg) | vector | The orange-tile mark for print and stickers |
+| [`studio1-mark-on-paper.png`](brand/studio1-mark-on-paper.png) | 800 × 800 | Alternative profile picture on light platforms |
+| [`x-header.png`](brand/x-header.png) · [`2x`](brand/x-header-2x.png) | 1500 × 500 | X header; the bottom left is left empty for the profile picture |
+| [`linkedin-cover.png`](brand/linkedin-cover.png) · [`2x`](brand/linkedin-cover-2x.png) | 1128 × 191 | LinkedIn company page cover; the left is left empty for the page logo |
+| [`readme-banner.webp`](brand/readme-banner.webp) | 3000 × 1000 | The banner at the top of this README |
+
+| Colour | Hex | Role |
+| :--- | :--- | :--- |
+| Paper | `#F4EFE7` | Background |
+| Ink | `#141414` | Type |
+| Print orange | `#F97316` | Accents, block prints, selection frames |
+| Mark gradient | `#FE3C34` → `#FE8B4B` | The main logo's mark, in the site navbar and favicon |
+
+**Typeface:** Studio1 Sans, Regular and Medium only ([`app/fonts/`](app/fonts)).
 
 </details>
 

@@ -1,18 +1,18 @@
 # Studio1 Design System
 
-Studio1's fonts, colors, tokens, components and templates in one place. It works for websites, SaaS products, docs, code snippets and featured images. Any AI tool (Claude, Cursor, Copilot, v0, Lovable and others) can read it and produce on-brand work.
+Studio1's fonts, colours, tokens, components, logos and templates in one place: the **paper design** used on studio1hq.com. It works for websites, SaaS products, docs, code snippets, featured images, social posts and slides. Any AI tool (Claude, Cursor, Copilot, v0, Lovable and others) can read it and produce on-brand work.
 
-Typography is set in **Studio1 Sans**, our renamed cut of Inter: Regular and Medium only, tight -0.03em letter spacing, 14px body text. Code uses the system monospace font, so there is nothing extra to load.
+The look: warm paper (`#f4efe7`), ink type (`#141414`) and one print orange (`#f97316`), with selection frames, cursors and dithered block prints. Type is **Studio1 Sans**, our renamed cut of Inter: Regular and Medium only, tight -0.03em letter spacing, 16px body text. Code uses the system monospace font, so there is nothing extra to load.
 
 ## Quick start
 
 ```html
 <link rel="stylesheet" href="design-system/css/studio1.css">
-<body class="s1">
+<body class="s1 s1-grain">
   <span class="s1-label">Case study</span>
-  <h1 class="s1-display">Docs developers finish reading</h1>
+  <h1 class="s1-hero">Docs developers <span class="s1-accent">finish</span> reading</h1>
   <p class="s1-body-lg s1-muted">Technical content for developer tools.</p>
-  <a class="s1-btn" href="#">Work with us</a>
+  <a class="s1-btn" href="#">Book a Strategy Call <span class="s1-btn__dot">↗</span></a>
 </body>
 ```
 
@@ -24,7 +24,7 @@ Copy this folder into any project, or add it as a git submodule. Then tell the A
 
 > Follow `design-system/DESIGN.md` for all styling.
 
-Claude Code picks up `CLAUDE.md` automatically, and tools that read `AGENTS.md` or `llms.txt` find the rules on their own.
+Claude Code picks up `CLAUDE.md` automatically, and tools that read `AGENTS.md` or `llms.txt` find the rules on their own. For AI images and video, paste the style block from section 8 of DESIGN.md into your prompt.
 
 ## Contents
 
@@ -38,7 +38,7 @@ design-system/
 ├── css/               fonts.css · tokens.css · studio1.css
 ├── tailwind/          preset.cjs (v3) · theme.css (v4)
 ├── fonts/             Studio1 Sans 400/500 (WOFF2 + TTF) + license
-├── logo/              mark in black and white
+├── logo/              main logo (gradient mark + wordmark), dark-mode logo (gradient mark, white cut-outs), the mark in gradient, dark mode, black and white
 └── templates/         og-image.html · code-snippet.html
 ```
 

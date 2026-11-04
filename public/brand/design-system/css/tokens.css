@@ -1,4 +1,4 @@
-/* Studio1 design tokens as CSS custom properties. Mirrors tokens/tokens.json. */
+/* Studio1 design tokens as CSS custom properties: the paper design. Mirrors tokens/tokens.json. */
 :root {
   /* Type */
   --s1-font-sans: "Studio1 Sans", "Inter", Arial, sans-serif;
@@ -6,51 +6,73 @@
   --s1-weight-regular: 400;
   --s1-weight-medium: 500;
 
+  --s1-text-frame: 11px;
   --s1-text-caption: 12px;
-  --s1-text-body: 14px;
-  --s1-text-body-lg: 16px;
-  --s1-text-subhead: 18px;
+  --s1-text-body-sm: 14px;
+  --s1-text-body: 16px;
+  --s1-text-body-lg: 18px;
+  --s1-text-subhead: 20px;
   --s1-text-heading: 24px;
   --s1-text-title: 32px;
-  --s1-text-display: 48px;
-  --s1-text-hero: 64px;
+  --s1-text-display: 46px;
+  --s1-text-hero: 68px;
   --s1-text-code: 13px;
 
   --s1-leading-tight: 1.1;
+  --s1-leading-snug: 1.2;
   --s1-leading-base: 1.3;
-  --s1-leading-relaxed: 1.55;
+  --s1-leading-relaxed: 1.6;
 
-  --s1-tracking-tight: -0.04em;
+  --s1-tracking-tight: -0.045em;
   --s1-tracking-base: -0.03em;
   --s1-tracking-none: 0em;
-  --s1-tracking-caps: 0.06em;
+  --s1-tracking-caps: 0.1em;
 
-  /* Palette */
+  /* Core palette */
+  --s1-paper: #f4efe7;
+  --s1-ink: #141414;
+  --s1-night: #0d0d0d;
+  --s1-white: #ffffff;
+
+  /* Ink and paper at reduced opacity */
+  --s1-ink-70: rgba(20, 20, 20, 0.7);
+  --s1-ink-60: rgba(20, 20, 20, 0.6);
+  --s1-ink-32: rgba(20, 20, 20, 0.32);
+  --s1-ink-14: rgba(20, 20, 20, 0.14);
+  --s1-ink-05: rgba(20, 20, 20, 0.05);
+  --s1-paper-70: rgba(244, 239, 231, 0.7);
+  --s1-paper-60: rgba(244, 239, 231, 0.6);
+  --s1-paper-14: rgba(244, 239, 231, 0.14);
+
+  /* Warm neutrals, solid */
   --s1-neutral-0: #ffffff;
-  --s1-neutral-50: #fafafa;
-  --s1-neutral-100: #f2f2f2;
-  --s1-neutral-200: #e8e8e8;
-  --s1-neutral-300: #d4d4d4;
-  --s1-neutral-400: #a3a3a3;
-  --s1-neutral-500: #707070;
-  --s1-neutral-600: #525252;
-  --s1-neutral-700: #3a3a3a;
-  --s1-neutral-800: #1f1f1f;
+  --s1-neutral-100: #f4efe7;
+  --s1-neutral-200: #ece6dc;
+  --s1-neutral-300: #ddd5c8;
+  --s1-neutral-400: #c4bbad;
+  --s1-neutral-500: #8f877b;
+  --s1-neutral-600: #7a7268;
+  --s1-neutral-700: #5e574e;
+  --s1-neutral-800: #3a352f;
   --s1-neutral-900: #141414;
-  --s1-neutral-950: #0a0a0a;
+  --s1-neutral-950: #0d0d0d;
 
-  --s1-sky-50: #f0faff;
-  --s1-sky-100: #ddf4ff;
-  --s1-sky-200: #b6e3ff;
-  --s1-sky-400: #58a6ff;
-  --s1-sky-600: #0969da;
-  --s1-sky-800: #0a3069;
+  /* Print orange: 500 is the accent */
+  --s1-print-50: #fdf0e4;
+  --s1-print-200: #fbd9bd;
+  --s1-print-300: #f9bb8c;
+  --s1-print-400: #f89a5c;
+  --s1-print-500: #f97316;
+  --s1-print-600: #e2620d;
+  --s1-print-700: #c2410c;
+  --s1-print-800: #9a3412;
 
-  /* Studio1 logo colors: the mark and brand moments only */
+  /* The mark's gradient: inside the mark only */
   --s1-brand-red: #fe3c34;
   --s1-brand-orange: #fe8b4b;
   --s1-brand-gradient: linear-gradient(90deg, var(--s1-brand-red), var(--s1-brand-orange));
 
+  /* Status: product UI only, real states */
   --s1-success: #1a7f37;
   --s1-success-bg: #dafbe1;
   --s1-warning: #9a6700;
@@ -58,17 +80,25 @@
   --s1-danger: #cf222e;
   --s1-danger-bg: #ffebe9;
 
-  /* Semantic (light) */
-  --s1-bg: var(--s1-neutral-0);
-  --s1-surface: var(--s1-neutral-100);
-  --s1-border: var(--s1-neutral-200);
-  --s1-text: var(--s1-neutral-950);
-  --s1-text-secondary: var(--s1-neutral-500);
-  --s1-text-muted: var(--s1-neutral-400);
-  --s1-accent: var(--s1-sky-100);
-  --s1-link: var(--s1-sky-600);
-  --s1-inverse-bg: var(--s1-neutral-950);
-  --s1-inverse-text: var(--s1-neutral-0);
+  /* Semantic (light, on paper) */
+  --s1-bg: var(--s1-paper);
+  --s1-surface: var(--s1-neutral-200);
+  --s1-card: var(--s1-white);
+  --s1-border: var(--s1-ink-14);
+  --s1-text: var(--s1-ink);
+  --s1-text-secondary: var(--s1-ink-70);
+  --s1-text-muted: var(--s1-ink-60);
+  --s1-accent: var(--s1-print-500);
+  --s1-on-accent: var(--s1-ink);
+  --s1-accent-soft: var(--s1-print-50);
+  --s1-link: var(--s1-ink);
+  --s1-link-hover: var(--s1-print-700);
+  --s1-focus: var(--s1-ink);
+  --s1-inverse-bg: var(--s1-ink);
+  --s1-inverse-text: var(--s1-paper);
+
+  /* Paper grain: multiply over paper at 30%, over print orange at 40% */
+  --s1-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.1  0 0 0 0 0.08  0 0 0 0 0.06  0 0 0 0.55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 
   /* Space, 4px base */
   --s1-space-1: 4px;
@@ -82,46 +112,59 @@
   --s1-space-24: 96px;
 
   /* Shape */
+  --s1-radius-none: 0px;
   --s1-radius-sm: 4px;
   --s1-radius-md: 6px;
-  --s1-radius-lg: 10px;
   --s1-radius-full: 999px;
   --s1-border-width: 1px;
-  --s1-shadow-raised: 0 2px 8px rgba(0, 0, 0, 0.04);
-  --s1-shadow-overlay: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --s1-border-frame: 1.5px;
+  --s1-shadow-card: 0 1px 0 rgba(27, 23, 20, 0.06);
+  --s1-shadow-raised: 0 8px 30px -10px rgba(0, 0, 0, 0.12);
+  --s1-shadow-print: 0 30px 60px -30px rgba(90, 30, 0, 0.55);
 
   /* Motion */
   --s1-ease: cubic-bezier(0.16, 1, 0.3, 1);
-  --s1-duration-fast: 150ms;
-  --s1-duration-base: 200ms;
-  --s1-duration-slow: 400ms;
+  --s1-duration-fast: 300ms;
+  --s1-duration-base: 500ms;
+  --s1-duration-slow: 900ms;
+  --s1-duration-reveal: 1200ms;
 }
 
-/* Semantic (dark): follows the OS unless a page forces light */
+/* Semantic (dark, on Night): follows the OS unless a page forces light */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --s1-bg: var(--s1-neutral-950);
-    --s1-surface: var(--s1-neutral-900);
-    --s1-border: var(--s1-neutral-800);
-    --s1-text: var(--s1-neutral-100);
-    --s1-text-secondary: var(--s1-neutral-400);
-    --s1-text-muted: var(--s1-neutral-600);
-    --s1-accent: var(--s1-sky-800);
-    --s1-link: var(--s1-sky-400);
-    --s1-inverse-bg: var(--s1-neutral-0);
-    --s1-inverse-text: var(--s1-neutral-950);
+    --s1-bg: var(--s1-night);
+    --s1-surface: #1b1b1a;
+    --s1-card: var(--s1-ink);
+    --s1-border: var(--s1-paper-14);
+    --s1-text: var(--s1-paper);
+    --s1-text-secondary: var(--s1-paper-70);
+    --s1-text-muted: var(--s1-paper-60);
+    --s1-accent: var(--s1-print-500);
+    --s1-on-accent: var(--s1-ink);
+    --s1-accent-soft: #3a2416;
+    --s1-link: var(--s1-paper);
+    --s1-link-hover: var(--s1-print-500);
+    --s1-focus: var(--s1-paper);
+    --s1-inverse-bg: var(--s1-paper);
+    --s1-inverse-text: var(--s1-ink);
   }
 }
 
 :root[data-theme="dark"] {
-  --s1-bg: var(--s1-neutral-950);
-  --s1-surface: var(--s1-neutral-900);
-  --s1-border: var(--s1-neutral-800);
-  --s1-text: var(--s1-neutral-100);
-  --s1-text-secondary: var(--s1-neutral-400);
-  --s1-text-muted: var(--s1-neutral-600);
-  --s1-accent: var(--s1-sky-800);
-  --s1-link: var(--s1-sky-400);
-  --s1-inverse-bg: var(--s1-neutral-0);
-  --s1-inverse-text: var(--s1-neutral-950);
+  --s1-bg: var(--s1-night);
+  --s1-surface: #1b1b1a;
+  --s1-card: var(--s1-ink);
+  --s1-border: var(--s1-paper-14);
+  --s1-text: var(--s1-paper);
+  --s1-text-secondary: var(--s1-paper-70);
+  --s1-text-muted: var(--s1-paper-60);
+  --s1-accent: var(--s1-print-500);
+  --s1-on-accent: var(--s1-ink);
+  --s1-accent-soft: #3a2416;
+  --s1-link: var(--s1-paper);
+  --s1-link-hover: var(--s1-print-500);
+  --s1-focus: var(--s1-paper);
+  --s1-inverse-bg: var(--s1-paper);
+  --s1-inverse-text: var(--s1-ink);
 }
