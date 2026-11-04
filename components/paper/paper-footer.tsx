@@ -53,6 +53,7 @@ const SERVICE_LINKS = [
   { key: "aeo", href: "/aeo-agency" },
   { key: "redditMarketing", href: "/reddit-marketing-agency" },
   { key: "distribution", href: "/developer-content-distribution" },
+  { key: "influencer", href: "/influencer-marketing-agency" },
 ] as const;
 
 const COMPANY_LINKS = [

@@ -133,6 +133,7 @@
       "aeo": "AEO 优化",
       "redditMarketing": "Reddit 营销",
       "distribution": "内容分发",
+      "influencer": "KOL 营销管理",
       "testimonials": "客户评价",
       "allServices": "全部服务",
       "home": "首页",
@@ -148,6 +149,20 @@
     "descriptions": {
       "blog": "Studio1 团队的文章和观点",
       "caseStudies": "来自文档、DevRel、发布和内容工作的证明"
+    },
+    "groups": {
+      "content": {
+        "title": "内容",
+        "description": "教程、文档和视频"
+      },
+      "growth": {
+        "title": "增长",
+        "description": "DevRel、开源和创作者"
+      },
+      "distribution": {
+        "title": "分发",
+        "description": "发布、Reddit 和 AI 答案"
+      }
     }
   },
   "AboutPage": {

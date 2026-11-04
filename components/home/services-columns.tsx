@@ -59,7 +59,7 @@ const OFFERING_LINKS = [
   "/developer-documentation-dx-audit#documentation-dx-audits",
   "/developer-relations-growth-campaigns#organic-growth-campaign",
   "/developer-relations-growth-campaigns#product-launch-support",
-  "/developer-relations-growth-campaigns#influencer-management",
+  "/influencer-marketing-agency",
 ];
 
 /** Offerings split into the two disciplines the services pages cover. */

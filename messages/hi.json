@@ -133,6 +133,7 @@
       "aeo": "AEO Agency",
       "redditMarketing": "Reddit Marketing",
       "distribution": "कंटेंट डिस्ट्रीब्यूशन",
+      "influencer": "Influencer Management",
       "testimonials": "प्रशंसापत्र",
       "allServices": "All Services",
       "home": "होम",
@@ -148,6 +149,20 @@
     "descriptions": {
       "blog": "Studio1 टीम के लेख और विचार",
       "caseStudies": "डॉक्स, DevRel, लॉन्च और कंटेंट वर्क से प्रमाण"
+    },
+    "groups": {
+      "content": {
+        "title": "कंटेंट",
+        "description": "Tutorials, docs और video"
+      },
+      "growth": {
+        "title": "ग्रोथ",
+        "description": "DevRel, open source और creators"
+      },
+      "distribution": {
+        "title": "डिस्ट्रीब्यूशन",
+        "description": "Launches, Reddit और AI answers"
+      }
     }
   },
   "AboutPage": {

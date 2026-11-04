@@ -8,7 +8,7 @@ Selected results: Memori grew from launch to 12,000+ GitHub stars. Corsair went 
 
 ## Services
 
-- [All Services](https://www.studio1hq.com/services): Every Studio1 service on one page, grouped into content (technical content, docs, video) and growth (DevRel, GitHub, launches, Reddit, distribution, AEO), with where to start.
+- [All Services](https://www.studio1hq.com/services): Every Studio1 service on one page, grouped into content (technical content, docs, video) and growth (DevRel, GitHub, influencer management, launches, Reddit, distribution, AEO), with where to start.
 - [GitHub Growth Agency](https://www.studio1hq.com/github-growth-agency): Open-source and GitHub growth: README and onboarding fixes, demo projects, launch positioning, community distribution, talks, and hackathons.
 - [Technical Content Marketing Agency for Developer Tools](https://www.studio1hq.com/technical-content-marketing): Developer tutorials, integration guides, comparisons, SEO articles, and code-rich content written by engineers, plus distribution on Reddit, X, LinkedIn, Dev.to, and daily.dev.
 - [Developer Documentation & DX Audits](https://www.studio1hq.com/developer-documentation-dx-audit): Documentation audits, onboarding reviews, API clarity, quickstarts, reference docs, and developer experience improvements.
@@ -17,6 +17,7 @@ Selected results: Memori grew from launch to 12,000+ GitHub stars. Corsair went 
 - [AEO Agency](https://www.studio1hq.com/aeo-agency): Answer engine optimization for developer tools: AI visibility audits across ChatGPT, Perplexity, Gemini, and Google AI, answer-ready pages and docs, crawler access, and third-party citations.
 - [Reddit Marketing Agency](https://www.studio1hq.com/reddit-marketing-agency): Organic Reddit marketing for developer tools: subreddit research, technical posts, launch threads, and community engagement. 304K+ Reddit impressions for Entelligence AI; one r/LLMDevs post reached 205K views.
 - [Developer Content Distribution](https://www.studio1hq.com/developer-content-distribution): Every piece rebuilt for Reddit, X, LinkedIn, daily.dev, Dev.to, and YouTube, with community engagement and measurement. 304K+ Reddit impressions for Entelligence AI; 100K+ impressions in one month for OpenLore.
+- [Influencer Marketing Agency](https://www.studio1hq.com/influencer-marketing-agency): Influencer management for developer tools and AI: creator campaigns on X, YouTube, LinkedIn, Instagram, and TikTok, UGC programs, launch amplification, and campaign reporting.
 - [Developer Relations & Growth Campaigns](https://www.studio1hq.com/developer-relations-growth-campaigns): DevRel as a service: developer advocacy, community programs, product launches, organic growth campaigns, and creator programs.
 
 ## Comparisons

@@ -96,6 +96,11 @@ export default function Home() {
             </a>
           </li>
           <li>
+            <a href="/influencer-marketing-agency">
+              Influencer marketing agency for developer tools
+            </a>
+          </li>
+          <li>
             <a href="/best-developer-marketing-agencies">
               Best developer marketing agencies, compared
             </a>

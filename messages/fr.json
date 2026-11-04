@@ -133,6 +133,7 @@
       "aeo": "Agence AEO",
       "redditMarketing": "Marketing Reddit",
       "distribution": "Distribution de contenu",
+      "influencer": "Gestion d’influenceurs",
       "testimonials": "Témoignages",
       "allServices": "Tous les services",
       "home": "Accueil",
@@ -148,6 +149,20 @@
     "descriptions": {
       "blog": "Articles et idées de l’équipe Studio1",
       "caseStudies": "Preuves issues de nos travaux docs, DevRel, lancement et contenu"
+    },
+    "groups": {
+      "content": {
+        "title": "Contenu",
+        "description": "Tutoriels, docs et vidéo"
+      },
+      "growth": {
+        "title": "Croissance",
+        "description": "DevRel, open source et créateurs"
+      },
+      "distribution": {
+        "title": "Distribution",
+        "description": "Lancements, Reddit et réponses IA"
+      }
     }
   },
   "AboutPage": {

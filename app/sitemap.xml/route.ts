@@ -23,6 +23,7 @@ type SitemapEntry = {
 const STATIC_LAST_MODIFIED = "2026-08-12";
 const LEGAL_LAST_MODIFIED = "2025-01-15";
 const GROWTH_PAGES_LAST_MODIFIED = "2026-10-29";
+const INFLUENCER_PAGE_LAST_MODIFIED = "2026-11-03";
 
 function escapeXml(value: string) {
   return value
@@ -92,6 +93,11 @@ export async function GET() {
     {
       path: "/developer-content-distribution",
       lastModified: GROWTH_PAGES_LAST_MODIFIED,
+      priority: 0.9,
+    },
+    {
+      path: "/influencer-marketing-agency",
+      lastModified: INFLUENCER_PAGE_LAST_MODIFIED,
       priority: 0.9,
     },
     {

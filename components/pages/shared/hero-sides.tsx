@@ -10,13 +10,17 @@ import {
   FileText,
   GitDiff,
   GithubLogo,
+  InstagramLogo,
   LinkedinLogo,
   MagnifyingGlass,
   MapPin,
+  Megaphone,
   PenNib,
   Play,
   RedditLogo,
+  SealCheck,
   Star,
+  TiktokLogo,
   TrendUp,
   Trophy,
   UsersThree,
@@ -778,6 +782,83 @@ function InsightsCard({
   );
 }
 
+/* ------------------------------------------------------------------ */
+/* Influencer management                                               */
+/* ------------------------------------------------------------------ */
+
+/** A vetted shortlist: who the creator is, where they post, their tier. */
+function ShortlistCard() {
+  const rows: [platform: Icon, creator: string, tier: string][] = [
+    [XLogo, "AI engineer · build threads", "Mid-tier"],
+    [YoutubeLogo, "Indie hacker · reviews", "Micro"],
+    [LinkedinLogo, "Devtool founder · posts", "Macro"],
+    [TiktokLogo, "Vibe coder · Shorts", "Nano"],
+  ];
+  return (
+    <Shell title="Creator shortlist" tag="Vetted" tagIcon={SealCheck}>
+      <ul className="divide-y divide-[#141414]/[0.08] px-1">
+        {rows.map(([Platform, creator, tier]) => (
+          <li key={creator} className="flex items-center gap-2 py-1.5">
+            <Platform
+              weight="fill"
+              className="size-3.5 shrink-0 text-[#141414]/70"
+            />
+            <span className="min-w-0 flex-1 truncate text-[11px] text-[#141414]/75">
+              {creator}
+            </span>
+            <span className="shrink-0 bg-[#f6f3ee] px-1.5 py-0.5 text-[9.5px] font-medium text-[#141414]/60">
+              {tier}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <p className="px-1 pt-1.5 text-[10.5px] leading-snug text-[#141414]/55">
+        Creators matched to your audience.
+      </p>
+    </Shell>
+  );
+}
+
+/** What a campaign delivers on each platform. */
+function PlatformPlanCard() {
+  const rows: [platform: Icon, name: string, deliverable: string][] = [
+    [XLogo, "X", "Posts and quote posts"],
+    [YoutubeLogo, "YouTube", "Reviews and Shorts"],
+    [LinkedinLogo, "LinkedIn", "Founder-led posts"],
+    [InstagramLogo, "Instagram", "Short-form video"],
+  ];
+  return (
+    <Shell title="Campaign plan" tag="Deliverables" tagIcon={Megaphone}>
+      <ul className="divide-y divide-[#141414]/[0.08] px-1">
+        {rows.map(([Platform, name, deliverable]) => (
+          <li key={name} className="flex items-center gap-2 py-1.5">
+            <Platform
+              weight="fill"
+              className="size-3.5 shrink-0 text-[#141414]/70"
+            />
+            <span className="w-[62px] shrink-0 text-[11px] font-medium text-[#141414]/80">
+              {name}
+            </span>
+            <span className="min-w-0 flex-1 truncate text-right text-[11px] text-[#141414]/60">
+              {deliverable}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <p className="flex flex-wrap gap-1 px-1 pt-2">
+        {["Reach", "Engagement", "Signups"].map((kpi) => (
+          <span
+            key={kpi}
+            className="bg-[#f6f3ee] px-1.5 py-0.5 text-[9.5px] font-medium text-[#141414]/60"
+          >
+            {kpi}
+          </span>
+        ))}
+      </p>
+    </Shell>
+  );
+}
+
 function Framed({
   side,
   labelPosition,
@@ -1192,6 +1273,33 @@ export const GITHUB_SIDES: HeroSides = {
       text: "impressions across platforms",
       client: "OpenLore",
       icon: Eye,
+    },
+  ],
+};
+
+/**
+ * Influencer management is a new service, so the flanks show what it
+ * delivers (a shortlist and a campaign plan) rather than client results.
+ */
+export const INFLUENCER_SIDES: HeroSides = {
+  cards: [
+    { label: "creators · shortlist.csv", card: <ShortlistCard /> },
+    { label: "campaign-plan · platforms", card: <PlatformPlanCard /> },
+  ],
+  stats: [
+    {
+      label: "stat · services",
+      value: "3",
+      text: "ways to work with creators: campaigns, UGC, and launches",
+      client: "Influencer management",
+      icon: Megaphone,
+    },
+    {
+      label: "stat · platforms",
+      value: "5",
+      text: "platforms in one plan, from X to TikTok",
+      client: "Creator mix",
+      icon: UsersThree,
     },
   ],
 };

@@ -59,6 +59,7 @@ const PAPER_PATHS = new Set([
   "/product-launch-service",
   "/aeo-agency",
   "/reddit-marketing-agency",
+  "/influencer-marketing-agency",
   "/developer-content-distribution",
   "/services",
   "/results",

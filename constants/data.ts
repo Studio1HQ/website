@@ -47,17 +47,44 @@ import {
   Files,
   GithubLogo,
   Lightbulb,
+  Megaphone,
   Newspaper,
   Pen,
   RedditLogo,
   RocketLaunch,
+  ShareNetwork,
   Sparkle,
   SquaresFour,
   Star,
+  UsersThree,
   YoutubeLogo,
 } from "@phosphor-icons/react/dist/ssr";
+import type { Icon } from "@phosphor-icons/react";
 
-export const navItems = [
+export type NavLink = {
+  title: string;
+  path: string;
+  icon: Icon;
+  description?: string;
+};
+
+/** A set of services in the two-pane menu; `key` names its Nav.groups copy. */
+export type NavGroup = {
+  key: "content" | "growth" | "distribution";
+  icon: Icon;
+  children: NavLink[];
+};
+
+export type NavItem = {
+  title: string;
+  path: string;
+  children?: NavLink[];
+  groups?: NavGroup[];
+  /** Pinned under the groups, e.g. "All Services". */
+  allLink?: NavLink;
+};
+
+export const navItems: NavItem[] = [
   {
     title: "Home",
     path: "/",
@@ -71,54 +98,83 @@ export const navItems = [
   { title: "About Us", path: "/about-us" },
   {
     title: "Services",
-    path: "#",
-    children: [
+    path: "/services",
+    /** Two-pane menu: hover a group on the left, its services show on the right. */
+    groups: [
       {
-        title: "All Services",
-        path: "/services",
-        icon: SquaresFour,
-      },
-      {
-        title: "Technical Content Marketing",
-        path: "/technical-content-marketing",
+        key: "content",
         icon: Pen,
+        children: [
+          {
+            title: "Technical Content Marketing",
+            path: "/technical-content-marketing",
+            icon: Pen,
+          },
+          {
+            title: "Developer Video Production",
+            path: "/developer-video-production",
+            icon: YoutubeLogo,
+          },
+          {
+            title: "Documentation & DX Audits",
+            path: "/developer-documentation-dx-audit",
+            icon: Books,
+          },
+        ],
       },
       {
-        title: "Developer Relations & Growth",
-        path: "/developer-relations-growth-campaigns",
-        icon: CheckCircle,
+        key: "growth",
+        icon: UsersThree,
+        children: [
+          {
+            title: "Developer Relations & Growth",
+            path: "/developer-relations-growth-campaigns",
+            icon: CheckCircle,
+          },
+          {
+            title: "GitHub Growth",
+            path: "/github-growth-agency",
+            icon: GithubLogo,
+          },
+          {
+            title: "Influencer Management",
+            path: "/influencer-marketing-agency",
+            icon: Megaphone,
+          },
+        ],
       },
       {
-        title: "Developer Video Production",
-        path: "/developer-video-production",
-        icon: YoutubeLogo,
-      },
-      {
-        title: "Documentation & DX Audits",
-        path: "/developer-documentation-dx-audit",
-        icon: Books,
-      },
-      {
-        title: "GitHub Growth",
-        path: "/github-growth-agency",
-        icon: GithubLogo,
-      },
-      {
-        title: "Product Launch",
-        path: "/product-launch-service",
-        icon: RocketLaunch,
-      },
-      {
-        title: "AEO Agency",
-        path: "/aeo-agency",
-        icon: Sparkle,
-      },
-      {
-        title: "Reddit Marketing",
-        path: "/reddit-marketing-agency",
-        icon: RedditLogo,
+        key: "distribution",
+        icon: ShareNetwork,
+        children: [
+          {
+            title: "Product Launch",
+            path: "/product-launch-service",
+            icon: RocketLaunch,
+          },
+          {
+            title: "Reddit Marketing",
+            path: "/reddit-marketing-agency",
+            icon: RedditLogo,
+          },
+          {
+            title: "Content Distribution",
+            path: "/developer-content-distribution",
+            icon: ShareNetwork,
+          },
+          {
+            title: "AEO Agency",
+            path: "/aeo-agency",
+            icon: Sparkle,
+          },
+        ],
       },
     ],
+    allLink: {
+      title: "All Services",
+      path: "/services",
+      icon: SquaresFour,
+    },
   },
   { title: "Product", path: "/product" },
   {

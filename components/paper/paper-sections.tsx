@@ -792,7 +792,7 @@ const OFFERING_LINKS = [
   "/developer-documentation-dx-audit#documentation-dx-audits",
   "/developer-relations-growth-campaigns#organic-growth-campaign",
   "/product-launch-service",
-  "/developer-relations-growth-campaigns#influencer-management",
+  "/influencer-marketing-agency",
 ];
 
 /** Content first, then growth, matching the two service disciplines. */

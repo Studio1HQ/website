@@ -4,6 +4,7 @@ import {
   ArrowUpRight,
   BookOpenText,
   GithubLogo,
+  Megaphone,
   PenNib,
   RedditLogo,
   RocketLaunch,
@@ -29,7 +30,7 @@ import { breadcrumbJsonLd, pageMetadata, pageUrl } from "@/lib/seo";
 
 const TITLE = "Developer Marketing Services for Devtools";
 const DESCRIPTION =
-  "Studio1 services for devtool, AI, and open-source teams: technical content, docs, video, DevRel, GitHub growth, launches, Reddit, distribution, and AEO.";
+  "Studio1 services for devtool, AI, and open-source teams: content, docs, video, DevRel, GitHub growth, creators, launches, Reddit, distribution, and AEO.";
 
 export async function generateMetadata(): Promise<Metadata> {
   return pageMetadata({
@@ -99,6 +100,13 @@ const GROWTH: Service[] = [
     proof: { value: "12,000+", label: "GitHub stars for Memori" },
   },
   {
+    name: "Influencer Management",
+    href: "/influencer-marketing-agency",
+    icon: Megaphone,
+    description:
+      "Developer creator campaigns, UGC programs, and launch amplification across social platforms.",
+  },
+  {
     name: "Product Launch",
     href: "/product-launch-service",
     icon: RocketLaunch,
@@ -151,6 +159,11 @@ const STARTING_POINTS: { situation: string; name: string; href: string }[] = [
     situation: "You're launching in the next two months",
     name: "Product Launch",
     href: "/product-launch-service",
+  },
+  {
+    situation: "You want trusted developer voices behind a launch",
+    name: "Influencer Management",
+    href: "/influencer-marketing-agency",
   },
   {
     situation: "AI answers name your competitors, not you",
@@ -274,7 +287,7 @@ export default function ServicesPage() {
           <IndexBar
             index={2}
             name="Growth"
-            aside="Community · GitHub · Launches · AI answers"
+            aside="Community · GitHub · Creators · Launches · AI answers"
           />
           <SectionHead
             title={
@@ -282,7 +295,7 @@ export default function ServicesPage() {
                 Growth where developers <Accent>already look</Accent>
               </>
             }
-            description="Communities, GitHub, launches, Reddit, and AI answers: the places developers find and choose tools."
+            description="Communities, GitHub, creators, launches, Reddit, and AI answers: the places developers find and choose tools."
           />
           <ServiceGrid services={GROWTH} />
         </Container>
