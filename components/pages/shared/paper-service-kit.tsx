@@ -1010,10 +1010,13 @@ export function PaperServiceFaq({
   index,
   items,
   subtitle,
+  action,
 }: {
   index: number;
   items: FaqEntry[];
   subtitle?: string;
+  /** Replaces the default "Book a call" button beside the heading. */
+  action?: ReactNode;
 }) {
   const schema = {
     "@context": "https://schema.org",
@@ -1047,21 +1050,23 @@ export function PaperServiceFaq({
         }
         actionEnd
         action={
-          <a
-            href="https://cal.com/studio1/collab"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group inline-flex h-12 items-center gap-3 rounded-full py-1.5 pl-6 pr-1.5 text-[15px] font-medium transition-transform duration-300 hover:-translate-y-0.5 motion-reduce:transform-none"
-            style={{ background: INK, color: PAPER }}
-          >
-            Book a call
-            <span
-              className="flex size-9 items-center justify-center rounded-full text-white transition-transform duration-300 group-hover:rotate-45"
-              style={{ background: PRINT }}
+          action ?? (
+            <a
+              href="https://cal.com/studio1/collab"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex h-12 items-center gap-3 rounded-full py-1.5 pl-6 pr-1.5 text-[15px] font-medium transition-transform duration-300 hover:-translate-y-0.5 motion-reduce:transform-none"
+              style={{ background: INK, color: PAPER }}
             >
-              <ArrowUpRight weight="bold" className="size-4" />
-            </span>
-          </a>
+              Book a call
+              <span
+                className="flex size-9 items-center justify-center rounded-full text-white transition-transform duration-300 group-hover:rotate-45"
+                style={{ background: PRINT }}
+              >
+                <ArrowUpRight weight="bold" className="size-4" />
+              </span>
+            </a>
+          )
         }
       />
       <div className="mt-10">

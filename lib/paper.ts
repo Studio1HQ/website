@@ -51,6 +51,7 @@ const PAPER_PATHS = new Set([
   "/product",
   "/case-studies",
   "/devrel-jobs",
+  "/devrel-cohort",
   "/technical-content-marketing",
   "/developer-relations-growth-campaigns",
   "/developer-video-production",
@@ -80,6 +81,7 @@ export function isPaperPath(pathname: string) {
     /^\/blog(\/|$)/.test(path) ||
     /^\/careers\/[^/]+\/?$/.test(path) ||
     /^\/case-studies\/[^/]+\/?$/.test(path) ||
-    /^\/compare\/[^/]+\/?$/.test(path)
+    /^\/compare\/[^/]+\/?$/.test(path) ||
+    /^\/hackathons(\/[^/]+)?\/?$/.test(path)
   );
 }

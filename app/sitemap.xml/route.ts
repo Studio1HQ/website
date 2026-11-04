@@ -23,6 +23,7 @@ type SitemapEntry = {
 const STATIC_LAST_MODIFIED = "2026-08-12";
 const LEGAL_LAST_MODIFIED = "2025-01-15";
 const GROWTH_PAGES_LAST_MODIFIED = "2026-10-29";
+const DEVREL_COHORT_LAST_MODIFIED = "2026-11-02";
 const INFLUENCER_PAGE_LAST_MODIFIED = "2026-11-03";
 
 function escapeXml(value: string) {
@@ -129,6 +130,11 @@ export async function GET() {
     {
       path: "/devrel-jobs",
       lastModified: STATIC_LAST_MODIFIED,
+      priority: 0.8,
+    },
+    {
+      path: "/devrel-cohort",
+      lastModified: DEVREL_COHORT_LAST_MODIFIED,
       priority: 0.8,
     },
     { path: "/blog", lastModified: STATIC_LAST_MODIFIED, priority: 0.8 },

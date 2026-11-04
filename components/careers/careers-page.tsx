@@ -145,12 +145,18 @@ export function StatusChip({ availability }: { availability: Availability }) {
  * Primary CTA, built like the home page's call button: on hover the
  * orange dot behind the arrow floods the whole pill and the arrow drops.
  */
-function SeeRolesButton({ label }: { label: string }) {
+export function SeeRolesButton({
+  label,
+  href = "#open-roles",
+}: {
+  label: string;
+  href?: string;
+}) {
   const reduceMotion = useReducedMotion();
   const ease = [0.65, 0, 0.35, 1] as const;
   return (
     <motion.a
-      href="#open-roles"
+      href={href}
       initial="rest"
       animate="rest"
       whileHover={reduceMotion ? undefined : "hover"}
@@ -185,7 +191,7 @@ function SeeRolesButton({ label }: { label: string }) {
 }
 
 /** A word underlined by a hand-drawn orange stroke that draws in once. */
-function Underlined({ children }: { children: string }) {
+export function Underlined({ children }: { children: string }) {
   const reduceMotion = useReducedMotion();
   return (
     <span className="relative inline-block">

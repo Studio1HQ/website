@@ -8,8 +8,10 @@ import {
   jobPostingJsonLd,
   localizedBreadcrumbJsonLd,
   pageMetadata,
+  pageUrl,
 } from "@/lib/seo";
 import { getJobApplicationMailto } from "@/lib/careers-mailto";
+import { isSupabaseConfigured } from "@/lib/supabase-server";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -47,9 +49,13 @@ export default async function CareerJobPage({ params }: Props) {
     ],
     "en",
   );
+  // The on-page form replaces email once Supabase is configured.
+  const applicationsEnabled = isSupabaseConfigured();
   const jobSchema = jobPostingJsonLd({
     ...job,
-    applyUrl: getJobApplicationMailto(job),
+    applyUrl: applicationsEnabled
+      ? pageUrl(`/careers/${id}#apply`)
+      : getJobApplicationMailto(job),
   });
 
   return (
@@ -65,6 +71,7 @@ export default async function CareerJobPage({ params }: Props) {
       <JobDetailPage
         job={job}
         otherJobs={getJobOpenings("en").filter((other) => other.id !== id)}
+        applicationsEnabled={applicationsEnabled}
       >
         <MDXRemote
           source={job.content}

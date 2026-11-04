@@ -14,6 +14,7 @@ const PAGE_LABELS: [RegExp, string][] = [
   [/^\/blog/, "Blog"],
   [/^\/careers/, "Careers"],
   [/^\/devrel-jobs/, "DevRel Jobs"],
+  [/^\/devrel-cohort/, "DevRel Cohort"],
   [/^\/product/, "Product"],
   [/^\/technical-content-marketing/, "Technical Content"],
   [/^\/developer-relations-growth-campaigns/, "DevRel & Growth"],

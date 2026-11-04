@@ -73,6 +73,7 @@ Selected results: Memori grew from launch to 12,000+ GitHub stars. Corsair went 
 - [llms-full.txt](https://www.studio1hq.com/llms-full.txt): This file plus the full text of every case study and guide listed here.
 - [Products](https://www.studio1hq.com/product): Studio1-built tools, including Raah and AssetSnip.
 - [Careers](https://www.studio1hq.com/careers)
+- [DevRel Cohort](https://www.studio1hq.com/devrel-cohort): A four-week, hands-on program by Studio1 for people breaking into developer relations; top participants get interviews at Studio1 and partner referrals.
 - [Terms of Use](https://www.studio1hq.com/terms)
 - [Privacy Policy](https://www.studio1hq.com/privacy)
 

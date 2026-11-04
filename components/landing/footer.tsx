@@ -219,6 +219,11 @@ export default function Footer() {
                   {t("links.devrelJobs")}
                 </Link>
               </li>
+              <li>
+                <Link href="/devrel-cohort" className={linkClass}>
+                  {t("links.devrelCohort")}
+                </Link>
+              </li>
             </ul>
           </nav>
 

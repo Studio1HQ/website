@@ -196,6 +196,11 @@ export default function PaperFooter() {
                   {t("links.devrelJobs")}
                 </FooterLink>
               </li>
+              <li>
+                <FooterLink href="/devrel-cohort">
+                  {t("links.devrelCohort")}
+                </FooterLink>
+              </li>
             </ul>
           </nav>
 

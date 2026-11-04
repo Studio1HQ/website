@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowUpRight, Check, Copy } from "@phosphor-icons/react";
 import { motion, useReducedMotion } from "motion/react";
 import { Container, EASE } from "@/components/home/ui";
+import { ApplicationForm } from "@/components/careers/application-form";
 import {
   IndexBar,
   MUTED,
@@ -30,6 +31,8 @@ type JobDetailPageProps = {
   job: JobDetail;
   /** Every other role, for the "more open roles" list. */
   otherJobs: JobOpening[];
+  /** Take applications through the on-page form instead of email. */
+  applicationsEnabled?: boolean;
   children: ReactNode;
 };
 
@@ -59,10 +62,12 @@ const WHAT_TO_SEND = [
 /** Ink pill with the orange arrow dot, as on the careers page. */
 function ApplyButton({
   href,
+  label,
   availability,
   className,
 }: {
   href: string;
+  label: string;
   availability: Availability;
   className?: string;
 }) {
@@ -88,7 +93,7 @@ function ApplyButton({
       )}
       style={{ background: INK, color: PAPER }}
     >
-      Apply by email
+      {label}
       <span
         className="flex size-9 items-center justify-center rounded-full text-white transition-transform duration-300 group-hover:rotate-45"
         style={{ background: PRINT }}
@@ -108,10 +113,12 @@ function ApplicationTicket({
   job,
   availability,
   href,
+  label,
 }: {
   job: JobDetail;
   availability: Availability;
   href: string;
+  label: string;
 }) {
   const reduceMotion = useReducedMotion();
   const word = { open: "Apply.", soon: "Soon.", closed: "Closed." }[
@@ -146,10 +153,13 @@ function ApplicationTicket({
             {word}
           </p>
           <dl className="mt-6 space-y-2 text-[12px]">
-            <div className="flex gap-3">
-              <dt className="w-14 shrink-0 text-white/65">Subject</dt>
-              <dd className="font-medium">Application: {job.applySubject}</dd>
-            </div>
+            {/* The email subject only matters when applying by email */}
+            {href.startsWith("mailto:") ? (
+              <div className="flex gap-3">
+                <dt className="w-14 shrink-0 text-white/65">Subject</dt>
+                <dd className="font-medium">Application: {job.applySubject}</dd>
+              </div>
+            ) : null}
             <div className="flex gap-3">
               <dt className="w-14 shrink-0 text-white/65">Ref.</dt>
               <dd className="break-all font-medium tabular-nums">
@@ -177,7 +187,7 @@ function ApplicationTicket({
               href={href}
               className="group flex h-12 items-center justify-between rounded-full bg-white py-1.5 pl-5 pr-1.5 text-[15px] font-medium text-[#141414] transition-transform duration-300 hover:-translate-y-0.5"
             >
-              Apply by email
+              {label}
               <span
                 className="flex size-9 items-center justify-center rounded-full text-white transition-transform duration-300 group-hover:rotate-45"
                 style={{ background: INK }}
@@ -245,10 +255,14 @@ const BRIEF_PROSE = cn(
 export function JobDetailPage({
   job,
   otherJobs,
+  applicationsEnabled = false,
   children,
 }: JobDetailPageProps) {
-  const applyMailto = getJobApplicationMailto(job);
   const availability = availabilityOf(job.status);
+  // With the form on, every apply button jumps to it; otherwise email.
+  const useForm = applicationsEnabled && availability === "open";
+  const applyHref = useForm ? "#apply" : getJobApplicationMailto(job);
+  const applyLabel = useForm ? "Apply now" : "Apply by email";
   const subject = `Application: ${job.applySubject}`;
   const moreRoles = otherJobs
     .filter((other) => availabilityOf(other.status) !== "closed")
@@ -330,7 +344,8 @@ export function JobDetailPage({
           <ApplicationTicket
             job={job}
             availability={availability}
-            href={applyMailto}
+            href={applyHref}
+            label={applyLabel}
           />
         </Container>
       </section>
@@ -356,16 +371,24 @@ export function JobDetailPage({
                 </div>
 
                 <div className="px-5 py-5">
-                  <p className="text-[12px] text-[#141414]/55">
-                    Email {CAREERS_CONTACT_EMAIL} with this subject
-                  </p>
-                  <div className="mt-2">
-                    <SubjectLine subject={subject} />
-                  </div>
+                  {useForm ? (
+                    <p className="text-[12px] text-[#141414]/55">
+                      Apply with the form below. Have these ready
+                    </p>
+                  ) : (
+                    <>
+                      <p className="text-[12px] text-[#141414]/55">
+                        Email {CAREERS_CONTACT_EMAIL} with this subject
+                      </p>
+                      <div className="mt-2">
+                        <SubjectLine subject={subject} />
+                      </div>
 
-                  <p className="mt-6 text-[12px] text-[#141414]/55">
-                    And include
-                  </p>
+                      <p className="mt-6 text-[12px] text-[#141414]/55">
+                        And include
+                      </p>
+                    </>
+                  )}
                   <ol className="mt-3 space-y-3">
                     {WHAT_TO_SEND.map((item, index) => (
                       <li
@@ -386,7 +409,8 @@ export function JobDetailPage({
 
                 <div className="border-t border-[#141414]/10 p-5">
                   <ApplyButton
-                    href={applyMailto}
+                    href={applyHref}
+                    label={applyLabel}
                     availability={availability}
                     className="w-full"
                   />
@@ -400,12 +424,43 @@ export function JobDetailPage({
         </Container>
       </PaperSection>
 
-      {/* ----- 02 — More open roles ----- */}
+      {/* ----- 02 — Apply (when the form is on) ----- */}
+      {useForm ? (
+        <PaperSection id="apply" tone="paper" className="scroll-mt-24">
+          <Container>
+            <IndexBar
+              index={2}
+              name="Apply"
+              aside={`Ref. ${job.requisitionId}`}
+            />
+            <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:items-end lg:gap-16">
+              <h2 className="text-[32px] font-medium leading-[1.2] tracking-[-0.045em] sm:text-[40px] lg:text-[46px]">
+                Apply for {job.title}
+                <span style={{ color: PRINT }}>.</span>
+              </h2>
+              <p
+                className={cn(
+                  "max-w-[440px] text-[16px] leading-[1.6] lg:pb-2",
+                  MUTED,
+                )}
+              >
+                One application per role. It takes about ten minutes if your
+                links and plan are ready.
+              </p>
+            </div>
+            <div className="mt-10 max-w-[880px] rounded-[6px] bg-white/80 ring-1 ring-inset ring-[#141414]/10">
+              <ApplicationForm jobId={job.id} jobTitle={job.title} />
+            </div>
+          </Container>
+        </PaperSection>
+      ) : null}
+
+      {/* ----- More open roles ----- */}
       {moreRoles.length > 0 ? (
         <PaperSection id="more-roles" tone="paper">
           <Container>
             <IndexBar
-              index={2}
+              index={useForm ? 3 : 2}
               name="More open roles"
               aside={`${moreRoles.length} of ${
                 otherJobs.filter(
