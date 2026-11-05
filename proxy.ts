@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import {
   DEFAULT_LOCALE,
+  isLocalizedPublicPath,
   localizePathname,
   shouldBypassLocale,
   splitLocaleFromPathname,
@@ -34,6 +35,14 @@ export function proxy(request: NextRequest) {
   if (redirectTarget) {
     const url = nextUrl.clone();
     url.pathname = localizePathname(redirectTarget, activeLocale);
+    return NextResponse.redirect(url, 308);
+  }
+
+  // Only a few pages are translated. Send other locale-prefixed URLs (old
+  // links like /fr/careers) to the English page instead of a 404.
+  if (locale && !isLocalizedPublicPath(unprefixedPathname)) {
+    const url = nextUrl.clone();
+    url.pathname = unprefixedPathname;
     return NextResponse.redirect(url, 308);
   }
 
