@@ -104,7 +104,7 @@ function PersonCard({ member }: { member: TeamMember }) {
         />
       </div>
 
-      <div className="mt-4 flex items-center justify-between gap-3">
+      <div className="mt-4 grid grid-cols-1 gap-y-1 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-x-3">
         <p
           className={cn(
             "min-w-0 text-[15px] font-medium leading-[1.3] tracking-[-0.01em]",
@@ -113,7 +113,7 @@ function PersonCard({ member }: { member: TeamMember }) {
         >
           {member.open ? "Coming soon" : member.name}
         </p>
-        <div className="flex shrink-0 items-center gap-2.5">
+        <div className="order-3 mt-1.5 flex items-center gap-3 sm:order-none sm:col-start-2 sm:row-start-1 sm:mt-0 sm:gap-2.5">
           {socials(member.links).map(({ href, label, Icon, weight }) =>
             href ? (
               <Link
@@ -139,10 +139,10 @@ function PersonCard({ member }: { member: TeamMember }) {
             ),
           )}
         </div>
+        <p className="text-[13px] leading-[1.4] text-[#141414]/50 sm:col-span-2">
+          {member.role}
+        </p>
       </div>
-      <p className="mt-1 text-[13px] leading-[1.4] text-[#141414]/50">
-        {member.role}
-      </p>
     </>
   );
 }
@@ -178,7 +178,7 @@ export function TeamPage() {
             </motion.p>
           </div>
           {/* Who we are, how we work, and the open seats: three glass panels */}
-          <div className="mt-14 grid gap-3 md:mt-20 md:grid-cols-3 md:gap-4">
+          <div className="mt-12 grid gap-3 sm:grid-cols-2 md:mt-20 md:gap-4 lg:grid-cols-3">
             {[
               {
                 body: (
@@ -220,7 +220,7 @@ export function TeamPage() {
             ].map((panel, i) => (
               <motion.div
                 key={i}
-                className="flex"
+                className={cn("flex", i === 0 && "sm:col-span-2 lg:col-span-1")}
                 initial={reduceMotion ? false : { opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-40px" }}
@@ -262,7 +262,7 @@ export function TeamPage() {
                 // Fewer, larger cards at the top of the hierarchy
                 t === 0
                   ? "mx-auto max-w-[880px] sm:grid-cols-2"
-                  : "md:grid-cols-4",
+                  : "md:grid-cols-3 lg:grid-cols-4",
               )}
             >
               {tier.members.map((member, i) => (

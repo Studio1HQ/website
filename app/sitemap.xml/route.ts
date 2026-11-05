@@ -142,6 +142,8 @@ export async function GET() {
     { path: "/blog", lastModified: STATIC_LAST_MODIFIED, priority: 0.8 },
     { path: "/brand", lastModified: STATIC_LAST_MODIFIED, priority: 0.6 },
     { path: "/team", lastModified: STATIC_LAST_MODIFIED, priority: 0.7 },
+    { path: "/events", lastModified: STATIC_LAST_MODIFIED, priority: 0.7 },
+    { path: "/calendar", lastModified: STATIC_LAST_MODIFIED, priority: 0.5 },
     { path: "/terms", lastModified: LEGAL_LAST_MODIFIED, priority: 0.5 },
     { path: "/privacy", lastModified: LEGAL_LAST_MODIFIED, priority: 0.5 },
     ...getJobOpenings("en").map((job) => ({

@@ -5,7 +5,7 @@ are kept here, not deleted, and are not served. To bring one back, move it into
 the right folder under `public/assets/` and reference it from there.
 
 - Client and partner logos no longer shown: amazon, fabric, flyte, gibson,
-  kitops, lambdatest, meilisearch, unacademy, uploadcare.
+  lambdatest, meilisearch, unacademy, uploadcare.
 - Testimonial headshots no longer shown: Alexandr, Dani, Eddie, Jim, Rosie,
   philip-vollet.
 - Older team images: arindam-nobg / arindam_nobg (old cut-outs),

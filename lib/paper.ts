@@ -45,6 +45,7 @@ export const PAPER_SCOPE = {
 const PAPER_PATHS = new Set([
   "/",
   "/careers",
+  "/events",
   "/terms",
   "/privacy",
   "/about-us",

@@ -20,6 +20,7 @@ const PAGE_LABELS: [RegExp, string][] = [
   [/^\/oss/, "Open Source"],
   [/^\/hackathons/, "Hackathons"],
   [/^\/team/, "Team"],
+  [/^\/events/, "Events"],
   [/^\/product/, "Product"],
   [/^\/services/, "Services"],
   [/^\/compare/, "Compare"],
