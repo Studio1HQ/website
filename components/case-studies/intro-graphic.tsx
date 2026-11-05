@@ -6,11 +6,11 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 
 /** Developers waiting to be found, on a 360 x 240 board. */
 const PEOPLE = [
-  { x: 292, y: 40, photo: "/assets/Dylan.webp" },
-  { x: 292, y: 84, photo: "/assets/Gabriel.webp" },
-  { x: 292, y: 128, photo: "/assets/Julia.webp" },
-  { x: 292, y: 172, photo: "/assets/krish-dholakia.webp" },
-  { x: 292, y: 216, photo: "/assets/sakshi-sen.webp" },
+  { x: 292, y: 40, photo: "/assets/people/Dylan.webp" },
+  { x: 292, y: 84, photo: "/assets/people/Gabriel.webp" },
+  { x: 292, y: 128, photo: "/assets/people/Julia.webp" },
+  { x: 292, y: 172, photo: "/assets/people/krish-dholakia.webp" },
+  { x: 292, y: 216, photo: "/assets/people/sakshi-sen.webp" },
 ];
 const R = 16;
 

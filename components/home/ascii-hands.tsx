@@ -102,7 +102,7 @@ function Hand({
       >
         <ParticleHand
           src={
-            side === "left" ? "/assets/hand-left.png" : "/assets/hand-right.png"
+            side === "left" ? "/assets/site/hand-left.png" : "/assets/site/hand-right.png"
           }
           width={width}
           height={height}

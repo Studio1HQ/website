@@ -68,7 +68,7 @@ export function CaseVisual({
         >
           <span className="flex size-full items-center justify-center rounded-full bg-white">
             <Image
-              src="/assets/studio1-logo.svg"
+              src="/assets/site/studio1-logo.svg"
               alt=""
               width={44}
               height={44}

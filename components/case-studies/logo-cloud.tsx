@@ -274,7 +274,7 @@ export function LogoCloud({ logos }: { logos: CloudLogo[] }) {
               transition={{ type: "spring", stiffness: 260, damping: 22 }}
             >
               <Image
-                src="/assets/studio1-logo.svg"
+                src="/assets/site/studio1-logo.svg"
                 alt=""
                 width={16}
                 height={16}

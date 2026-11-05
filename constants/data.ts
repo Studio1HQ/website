@@ -96,6 +96,7 @@ export const navItems: NavItem[] = [
     ],
   },
   { title: "About Us", path: "/about-us" },
+  { title: "Team", path: "/team" },
   {
     title: "Services",
     path: "/services",
@@ -239,8 +240,7 @@ export const trustedbyLogo = [
     name: "Weaviate",
     image: WeaviateFull,
     isWhite: true,
-    className:
-      "h-7 sm:h-8 md:h-8 w-auto max-w-[150px] object-contain",
+    className: "h-7 sm:h-8 md:h-8 w-auto max-w-[150px] object-contain",
     alt: "Weaviate",
   },
   {
@@ -272,8 +272,7 @@ export const trustedbyLogo = [
     name: "Interact AI",
     image: InteractAiLogo,
     isWhite: false,
-    className:
-      "h-7 sm:h-8 md:h-8 w-auto max-w-[150px] object-contain",
+    className: "h-7 sm:h-8 md:h-8 w-auto max-w-[150px] object-contain",
     alt: "Interact AI",
   },
   {

@@ -26,7 +26,7 @@ export const AUTHORS: Author[] = [
     name: "Arindam Majumder",
     jobTitle: "Co-founder & Content Lead",
     bio: "Arindam Majumder is the co-founder of Studio1, where he leads content. He's a developer, technical writer, and community builder, and writes about developer relations, technical content, and getting developer tools in front of the developers who need them.",
-    image: "/assets/arindam_nobg.webp",
+    image: "/assets/team/arindam-majumder-cutout.webp",
     knowsAbout: [
       "Developer relations",
       "Technical writing",
@@ -47,7 +47,7 @@ export const AUTHORS: Author[] = [
     name: "Amitesh Anand",
     jobTitle: "Co-founder & Operations Lead",
     bio: "Amitesh Anand is the co-founder of Studio1, where he leads operations. Known online as Astrodevil, he builds AI demos, agent projects, tutorials, and developer education for SaaS, AI, and devtool teams.",
-    image: "/assets/amitesh-profile-square.webp",
+    image: "/assets/team/amitesh-profile-square.webp",
     knowsAbout: [
       "AI agents",
       "Developer education",

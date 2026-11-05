@@ -364,7 +364,7 @@ export function CaseChapters({ acts }: { acts: Act[] }) {
           >
             <span className="relative flex size-8 items-center justify-center rounded-[6px] bg-white ring-1 ring-[#141414]/[0.08]">
               <Image
-                src="/assets/studio1-logo.svg"
+                src="/assets/site/studio1-logo.svg"
                 alt=""
                 width={20}
                 height={20}

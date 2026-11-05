@@ -6,21 +6,21 @@
 
 /** Logo mark for each testimonial's company, keyed as companyOf() returns it. */
 export const COMPANY_MARKS: Record<string, string> = {
-  Jozu: "/assets/jozu.webp",
-  "Nebius AI": "/assets/nebius.webp",
-  Ittybit: "/assets/ittybit.webp",
-  "Entelligence.AI": "/assets/enteligence.webp",
-  "Readyset.io": "/assets/readyset.webp",
-  CopilotKit: "/assets/copilotkit.webp",
-  Crawlee: "/assets/crawlee.webp",
-  Opire: "/assets/opire.webp",
-  "Permit.io": "/assets/permit.webp",
-  "VDK(VMware)": "/assets/vmware.webp",
-  Tolgee: "/assets/tolgee.webp",
-  WebCrumbs: "/assets/webcrumbs.webp",
-  "Pieces.app": "/assets/pieces.webp",
-  Latitude: "/assets/latitude.webp",
-  "Novita AI": "/assets/novita-ai-mark-green.webp",
+  Jozu: "/assets/logos/jozu.webp",
+  "Nebius AI": "/assets/logos/nebius.webp",
+  Ittybit: "/assets/logos/ittybit.webp",
+  "Entelligence.AI": "/assets/logos/enteligence.webp",
+  "Readyset.io": "/assets/logos/readyset.webp",
+  CopilotKit: "/assets/logos/copilotkit.webp",
+  Crawlee: "/assets/logos/crawlee.webp",
+  Opire: "/assets/logos/opire.webp",
+  "Permit.io": "/assets/logos/permit.webp",
+  "VDK(VMware)": "/assets/logos/vmware.webp",
+  Tolgee: "/assets/logos/tolgee.webp",
+  WebCrumbs: "/assets/logos/webcrumbs.webp",
+  "Pieces.app": "/assets/logos/pieces.webp",
+  Latitude: "/assets/logos/latitude.webp",
+  "Novita AI": "/assets/logos/novita-ai-mark-green.webp",
 };
 
 /** "CEO & Founder Opire" / "COO, Tolgee" -> the company name. */

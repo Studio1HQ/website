@@ -167,7 +167,7 @@ These are what make a piece look like Studio1. Use two or three per piece, not a
 | **Layer names** | kebab-case, like real Figma layers: `card-metrics`, `button-filled-enabled`, `studio1-mark`, `print-swatches`. Blog covers use ink frames with `.fig` names (`content.fig`, `pricing.fig`). |
 | **Cursor** | A solid ink arrow (SVG path `M3.5 2.5 21 10.2l-7.6 2.3-3.3 7.8z` on a 24px grid), just outside a frame corner, as if someone is about to click. One or two per canvas. |
 | **Block print** | A flat orange rectangle with grain, holding a cream dithered image or the cream mark. It often bleeds off the edge of the canvas. |
-| **The reaching hands** | Dithered hands after Michelangelo's *Creation of Adam*: `public/assets/hand-right.png` and `hand-left.png`. White on transparent. Tint them cream inside an orange block. |
+| **The reaching hands** | Dithered hands after Michelangelo's *Creation of Adam*: `public/assets/site/hand-right.png` and `hand-left.png`. White on transparent. Tint them cream inside an orange block. |
 | **White card** | Square corners and a 1px soft bottom shadow (`0 1px 0 rgba(27,23,20,0.06)`). Inside: eyebrow, big number, sparkline with an orange end dot, a row of three stats. |
 | **Primary button** | An ink pill, fully rounded, 56px tall, with Medium label in paper and an orange circle holding the arrow or icon. |
 | **Secondary button** | An outline pill with a 1.5px ink border and ink label. |

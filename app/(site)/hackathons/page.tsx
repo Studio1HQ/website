@@ -21,7 +21,7 @@ export const revalidate = 3600;
 export async function generateMetadata(): Promise<Metadata> {
   return {
     ...pageMetadata({
-      title: "Studio1 Hackathons",
+      title: "Hackathons for Developer Tools",
       description:
         "Hackathons with devtool, AI, and open-source teams. Register, finish the pre-hack tasks, and build with the people who make the tools.",
       path: "/hackathons",

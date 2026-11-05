@@ -11,7 +11,7 @@ show_preview_links: true
 
 site_url: https://www.studio1hq.com
 display_url: https://www.studio1hq.com
-logo_url: /assets/logo.webp
+logo_url: /assets/site/logo.webp
 
 media_folder: public/blog/uploads
 public_folder: /blog/uploads

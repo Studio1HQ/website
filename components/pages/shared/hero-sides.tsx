@@ -352,7 +352,7 @@ function PassCard() {
           </p>
         </div>
         <div className="flex items-center gap-2.5 px-3 py-3">
-          <Logo src="/assets/jozu.webp" size={34} />
+          <Logo src="/assets/logos/jozu.webp" size={34} />
           <span className="min-w-0">
             <span className="block text-[15px] font-medium leading-tight">
               Jozu
@@ -391,7 +391,7 @@ function WorkshopCard() {
           8 April 2025 · Baseline, Dublin
         </p>
         <p className="mt-2 flex items-center gap-1.5">
-          <Logo src="/assets/nebius.webp" size={20} />
+          <Logo src="/assets/logos/nebius.webp" size={20} />
           <span className="text-[10.5px] text-[#141414]/60">
             Nebius with Couchbase and CrewAI
           </span>
@@ -581,7 +581,7 @@ function RepoCard() {
           </span>
         </p>
         <p className="mt-1.5 flex items-center gap-1.5 text-[10.5px] text-[#141414]/55">
-          <Logo src="/assets/nebius.webp" size={16} />
+          <Logo src="/assets/logos/nebius.webp" size={16} />
           Powered by Nebius · maintained by Studio1
         </p>
         <p className="mt-2 flex flex-wrap gap-1">
@@ -611,7 +611,7 @@ function ListingCard() {
   return (
     <Shell title="Product Hunt launch" tag="Webcrumbs" tagIcon={Trophy}>
       <div className="flex items-center gap-2.5 px-1">
-        <Logo src="/assets/webcrumbs.webp" size={30} />
+        <Logo src="/assets/logos/webcrumbs.webp" size={30} />
         <div className="min-w-0">
           <p className="truncate text-[13.5px] font-medium leading-tight tracking-[-0.02em]">
             Frontend AI by Webcrumbs

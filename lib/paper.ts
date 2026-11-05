@@ -67,6 +67,7 @@ const PAPER_PATHS = new Set([
   "/results",
   "/testimonials",
   "/best-developer-marketing-agencies",
+  "/team",
 ]);
 
 /** Drops the locale prefix, so "/fr/careers" reads as "/careers". */

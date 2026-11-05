@@ -542,17 +542,17 @@ export default function PaperHero() {
                   [
                     "KubeCon India 2025",
                     "Booth & talks · Jozu",
-                    "/assets/jozu.webp",
+                    "/assets/logos/jozu.webp",
                   ],
                   [
                     "DevFest Pune 2025",
                     "Community booth · Jozu",
-                    "/assets/jozu.webp",
+                    "/assets/logos/jozu.webp",
                   ],
                   [
                     "Workshop, Dublin",
                     "Hands-on AI agents · Nebius",
-                    "/assets/nebius.webp",
+                    "/assets/logos/nebius.webp",
                   ],
                 ].map(([event, detail, logo]) => (
                   <li
@@ -596,7 +596,7 @@ export default function PaperHero() {
         {/* Block print: the reaching hand, right */}
         <PrintBlock className="absolute -right-[2%] top-[51%] h-[17%] w-[12%]">
           <Image
-            src="/assets/hand-right.png"
+            src="/assets/site/hand-right.png"
             alt=""
             fill
             sizes="20vw"

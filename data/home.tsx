@@ -1,19 +1,19 @@
-import IvanImg from "@/public/assets/Ivan.webp";
-import GabrielImg from "@/public/assets/Gabriel.webp";
-import JuliaImg from "@/public/assets/Julia.webp";
-import DavidImg from "@/public/assets/David.webp";
-import ColeImg from "@/public/assets/Cole.webp";
-import FerranImg from "@/public/assets/Ferran.webp";
-import AgitaImg from "@/public/assets/Agita.webp";
-import SauravImg from "@/public/assets/Saurav.webp";
-import NathanImg from "@/public/assets/Nathan.webp";
-import MarketaImg from "@/public/assets/Marketa.webp";
-import JesseImg from "@/public/assets/Jesse.webp";
-import PaulImg from "@/public/assets/Paul.webp";
-import DylanImg from "@/public/assets/Dylan.webp";
-import SakshiImg from "@/public/assets/sakshi-sen.webp";
-import TanmayImg from "@/public/assets/Tanmay.webp";
-import NovitaAiMarkGreen from "@/public/assets/novita-ai-mark-green.webp";
+import IvanImg from "@/public/assets/people/Ivan.webp";
+import GabrielImg from "@/public/assets/people/Gabriel.webp";
+import JuliaImg from "@/public/assets/people/Julia.webp";
+import DavidImg from "@/public/assets/people/David.webp";
+import ColeImg from "@/public/assets/people/Cole.webp";
+import FerranImg from "@/public/assets/people/Ferran.webp";
+import AgitaImg from "@/public/assets/people/Agita.webp";
+import SauravImg from "@/public/assets/people/Saurav.webp";
+import NathanImg from "@/public/assets/people/Nathan.webp";
+import MarketaImg from "@/public/assets/people/Marketa.webp";
+import JesseImg from "@/public/assets/people/Jesse.webp";
+import PaulImg from "@/public/assets/people/Paul.webp";
+import DylanImg from "@/public/assets/people/Dylan.webp";
+import SakshiImg from "@/public/assets/people/sakshi-sen.webp";
+import TanmayImg from "@/public/assets/people/Tanmay.webp";
+import NovitaAiMarkGreen from "@/public/assets/logos/novita-ai-mark-green.webp";
 import {
   ChartBar,
   ChatCenteredDots,

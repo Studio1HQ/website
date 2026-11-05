@@ -5,11 +5,11 @@ import type { StaticImageData } from "next/image";
  * background; a CSS filter would turn those into white blocks.
  */
 export const WHITE_LOGOS: Record<string, string> = {
-  Nebius: "/assets/logos-white/nebius.webp",
-  Velt: "/assets/logos-white/velt.webp",
-  CodeRabbit: "/assets/logos-white/coderabbit.webp",
-  LiteLLM: "/assets/logos-white/litellm.webp",
-  Jozu: "/assets/logos-white/jozu.webp",
+  Nebius: "/assets/logos/white/nebius.webp",
+  Velt: "/assets/logos/white/velt.webp",
+  CodeRabbit: "/assets/logos/white/coderabbit.webp",
+  LiteLLM: "/assets/logos/white/litellm.webp",
+  Jozu: "/assets/logos/white/jozu.webp",
 };
 
 /** Source and filter that render a client logo solid white on dark/brand surfaces. */

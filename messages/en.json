@@ -33,15 +33,15 @@
     },
     "pages": {
       "about": {
-        "title": "About Studio1",
+        "title": "About Us: The DevRel Agency for Devtools",
         "description": "Learn about Studio1, a developer-focused content agency helping devtool and SaaS companies grow through technical writing, DevRel strategy, video, and community work."
       },
       "product": {
-        "title": "Studio1 Products for Developer Teams",
+        "title": "Products: Tools We Build for Developers",
         "description": "Studio1-built tools for developers and SaaS teams, including Raah for web analytics and AssetSnip for website asset extraction."
       },
       "careers": {
-        "title": "Careers at Studio1",
+        "title": "Careers: Join the Team",
         "description": "Join Studio1 across content, DevRel, engineering, and founder's office roles that help developer-focused products reach the right audience."
       },
       "caseStudies": {

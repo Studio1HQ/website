@@ -248,7 +248,7 @@ export function TableOfContents({
                 className="absolute left-0 z-[2] flex size-8 translate-x-[22px] scale-75 items-center justify-center rounded-full bg-white opacity-0 shadow-[0_0_0_2px_#141414] transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-[14px] group-hover:scale-100 group-hover:opacity-100 motion-reduce:transition-none"
               >
                 <Image
-                  src="/assets/studio1-logo.svg"
+                  src="/assets/site/studio1-logo.svg"
                   alt=""
                   width={18}
                   height={18}
