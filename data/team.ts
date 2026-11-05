@@ -92,7 +92,7 @@ export const TEAM: TeamTier[] = [
       },
       {
         name: "Souradeep Pradhan",
-        role: "Design Engineer",
+        role: "Developer",
         portrait: "/assets/team/souradeep-pradhan.webp?v=9",
       },
       { role: "Technical Writer", open: true },
