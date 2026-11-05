@@ -29,7 +29,7 @@ export const TEAM: TeamTier[] = [
       {
         name: "Arindam Majumder",
         role: "Co-founder & Content Lead",
-        portrait: "/assets/team/arindam-majumder.webp?v=9",
+        portrait: "/assets/team/arindam-majumder.webp?v=10",
         links: {
           x: "https://dub.sh/arindam-x",
           linkedin: "https://dub.sh/arindam-linkedin",
@@ -39,7 +39,7 @@ export const TEAM: TeamTier[] = [
       {
         name: "Amitesh Anand",
         role: "Co-founder & Operations Lead",
-        portrait: "/assets/team/amitesh-anand.webp?v=9",
+        portrait: "/assets/team/amitesh-anand.webp?v=10",
         links: {
           x: "https://x.com/astrodevil_",
           linkedin: "https://www.linkedin.com/in/amitesh1208/",
@@ -55,7 +55,7 @@ export const TEAM: TeamTier[] = [
       {
         name: "Shivay Lamba",
         role: "Founding Team",
-        portrait: "/assets/team/shivay-lamba.webp?v=9",
+        portrait: "/assets/team/shivay-lamba.webp?v=10",
         links: {
           x: "https://x.com/HowDevelop",
           linkedin: "https://in.linkedin.com/in/shivaylamba",
@@ -83,17 +83,17 @@ export const TEAM: TeamTier[] = [
       {
         name: "Kathank Raithatha",
         role: "Developer Advocate",
-        portrait: "/assets/team/kathank-raithatha.webp?v=9",
+        portrait: "/assets/team/kathank-raithatha.webp?v=10",
       },
       {
         name: "Bhavya Bhardwaj",
         role: "Social Media",
-        portrait: "/assets/team/bhavya-bhardwaj.webp?v=2",
+        portrait: "/assets/team/bhavya-bhardwaj.webp?v=10",
       },
       {
         name: "Souradeep Pradhan",
         role: "Developer",
-        portrait: "/assets/team/souradeep-pradhan.webp?v=9",
+        portrait: "/assets/team/souradeep-pradhan.webp?v=10",
       },
       { role: "Technical Writer", open: true },
       { role: "Video Producer", open: true },

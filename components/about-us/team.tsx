@@ -57,9 +57,9 @@ const socials = (member: Member) => [
 
 /* Pixel-dithered portraits, ink dots on a transparent ground. */
 const DITHER: Record<string, string> = {
-  "Arindam Majumder": "/assets/team/arindam-majumder.webp?v=9",
-  "Amitesh Anand": "/assets/team/amitesh-anand.webp?v=9",
-  "Shivay Lamba": "/assets/team/shivay-lamba.webp?v=9",
+  "Arindam Majumder": "/assets/team/arindam-majumder.webp?v=10",
+  "Amitesh Anand": "/assets/team/amitesh-anand.webp?v=10",
+  "Shivay Lamba": "/assets/team/shivay-lamba.webp?v=10",
 };
 
 function LeaderCard({ member }: { member: Member }) {
