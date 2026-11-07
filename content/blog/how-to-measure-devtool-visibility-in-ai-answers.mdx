@@ -19,6 +19,11 @@ updatedDate: 2026-10-16
 draft: false
 authors:
   - Studio1 Team
+tags:
+  - geo
+  - aeo
+  - ai
+  - analytics
 bannerImage: /blog/uploads/how-to-measure-devtool-visibility-in-ai-answers/cover.png
 ---
 ## TL;DR
@@ -34,7 +39,7 @@ A lot of developers now ask an AI before they ask Google. JetBrains surveyed mor
 
 When one of those developers asks which tool to use, they don't get ten blue links. They get a short list of names. If yours isn't on it, they never see your docs, your pricing page or your launch post. And once the answer is on the page, fewer people click through. Pew Research tracked 900 US adults and found that in regular Google search, users clicked a result link in [8% of visits when an AI summary appeared, versus 15% when it didn't](https://www.pewresearch.org/short-reads/2025/07/22/google-users-are-less-likely-to-click-on-links-when-an-ai-summary-appears-in-the-results/). That's general search, not developer search, but the direction is clear.
 
-![](/blog/uploads/image-3-.png)
+![Pew Research Center chart: on Google searches with an AI summary, 8% of users clicked a search result link and 1% clicked a link in the summary, versus 15% on pages without one](/blog/uploads/image-3-.png)
 
 Most devtool teams have no idea whether this is happening to them. Dashboards show traffic, GitHub stars, and signups. None of them show what an AI says when someone asks about your category. This guide gives you a simple way to find out.
 
@@ -50,7 +55,7 @@ If you want the full fix list after your audit, Studio1 has a separate guide on 
 
 You might be tempted to ask ChatGPT one question, see your name, and call it a day. Don't.
 
-SparkToro and [Gumshoe.ai](http://Gumshoe.ai) had 600 volunteers run 12 prompts through ChatGPT, Claude, and Google's AI nearly 3,000 times. The odds of getting the same list of brands twice were [under 1 in 100, and the odds of the same order were closer to 1 in 1,000](https://searchengineland.com/ai-recommendation-lists-rarely-repeat-study-468076). Two fair warnings: [the study wasn't peer-reviewed, and Gumshoe sells AI tracking](https://www.warc.com/content/feed/llms-produce-random-results-when-listing-brand-recommendations/en-GB/11352). Still, it matches what you'll see yourself in ten minutes of testing.
+SparkToro and [Gumshoe.ai](https://gumshoe.ai) had 600 volunteers run 12 prompts through ChatGPT, Claude, and Google's AI nearly 3,000 times. The odds of getting the same list of brands twice were [under 1 in 100, and the odds of the same order were closer to 1 in 1,000](https://searchengineland.com/ai-recommendation-lists-rarely-repeat-study-468076). Two fair warnings: [the study wasn't peer-reviewed, and Gumshoe sells AI tracking](https://www.warc.com/content/feed/llms-produce-random-results-when-listing-brand-recommendations/en-GB/11352). Still, it matches what you'll see yourself in ten minutes of testing.
 
 The useful part is what stayed steady. The three most mentioned brands in each category [showed up in about 64% of ChatGPT answers, 73% of Claude answers, and 68% of Google AI answers](https://communicateonline.me/news/ai-brand-recommendations-vary-marketers-warned-on-tracking-tools/). The order bounces around, but the same names keep coming back. That gives us the rule for this whole audit: **count how often you appear, not where you appear.**
 
@@ -102,7 +107,7 @@ A few tips:
 * **Spend your effort on Discover and How-to.** That's where someone hasn't picked a tool yet. Check prompts mostly test whether the AI describes you correctly.
 * **Swap the placeholders for your real category, languages, and rivals.** The same template works for any devtool, and it makes it easy to repeat the audit for each language or framework you support.
 
-![](/blog/uploads/image-4-.png)
+![Pew Research Center chart: 18% of Google searches produced an AI Overview, rising to 60% for searches that start with a question word and 53% for searches of 10 or more words](/blog/uploads/image-4-.png)
 
 ### 2. Run every prompt three times in three tools
 

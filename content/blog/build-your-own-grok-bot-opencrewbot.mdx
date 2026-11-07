@@ -10,6 +10,11 @@ updatedDate: 2026-10-28
 draft: false
 authors:
   - Studio1 Team
+tags:
+  - open-source
+  - ai
+  - agent
+  - tutorial
 bannerImage: /blog/uploads/build-your-own-grok-bot-opencrewbot/cover.png
 ---
 ## TL;DR
@@ -26,7 +31,7 @@ We liked the idea but wanted something we could run ourselves, on open models, w
 
 ## What is OpenCrewBot?
 
-OpenCrewBot is an open-source chat app for your own team of AI bots. It looks like a messaging app. Each contact in the sidebar is a bot with its own name, role, instructions, open-source model, tools, and memory. You can talk to one bot directly, or put a few in a room and let them share the work.
+[OpenCrewBot](https://github.com/Studio1-OSS/OpenCrewBot) is an open-source chat app for your own team of AI bots. It looks like a messaging app. Each contact in the sidebar is a bot with its own name, role, instructions, open-source model, tools, and memory. You can talk to one bot directly, or put a few in a room and let them share the work.
 
 On first run, you get three bots and one room:
 
@@ -344,6 +349,6 @@ If you want to take the project further, these are the extensions we've listed i
 - Add sign-in and multiple users before you deploy it anywhere shared.
 - Add voice, so you can speak to a bot and hear replies.
 
-The code is on GitHub. Issues and pull requests are welcome. Before you open a pull request, run `pnpm exec tsc --noEmit` and `pnpm lint`, and say whether you tested it with live services or the mock model.
+The code is on GitHub at [Studio1-OSS/OpenCrewBot](https://github.com/Studio1-OSS/OpenCrewBot), next to our [other open-source projects](/oss). Issues and pull requests are welcome. Before you open a pull request, run `pnpm exec tsc --noEmit` and `pnpm lint`, and say whether you tested it with live services or the mock model.
 
 In the next post, we'll open up the code and explain how we built it: why we used Mastra instead of writing our own agent loop, how rooms decide who answers, and why each bot's memory is a plain Markdown file.
