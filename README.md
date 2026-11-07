@@ -158,7 +158,7 @@ Every blog post is also available as Markdown at `/blog/<slug>.md` for LLMs and 
 
 The main logo is the gradient mark with the wordmark: a rounded square with an **S** and a **1** cut out of it. On dark backgrounds and profile pictures it switches to the dark-mode version: the same gradient mark with white cut-outs and a white wordmark.
 
-**The full style guide is in [`brand/README.md`](brand/README.md).** It covers logo rules, colours, type, graphic elements, imagery, motion, video, safe zones, writing voice, and prompts for AI image, video and design tools.
+**The full style guide is in [`brand/README.md`](brand/README.md).** It covers logo rules, colours, type, graphic elements, imagery, motion, video, safe zones, writing voice, and prompts for AI image, video and design tools. To set up an AI tool or agent, paste the system prompt in [`brand/AI-SYSTEM-PROMPT.md`](brand/AI-SYSTEM-PROMPT.md) into its instructions.
 
 | File | Size | Use it for |
 | :--- | :--- | :--- |
