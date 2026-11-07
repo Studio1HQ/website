@@ -62,18 +62,6 @@ export const TEAM: TeamTier[] = [
           website: "https://shivaylamba.me",
         },
       },
-      { role: "Head of Developer Relations", open: true },
-      { role: "Head of Content", open: true },
-    ],
-  },
-  {
-    title: "Leads",
-    description: "Own a craft and the people practising it.",
-    members: [
-      { role: "Technical Content Lead", open: true },
-      { role: "DevRel Lead", open: true },
-      { role: "Video Lead", open: true },
-      { role: "Design Lead", open: true },
     ],
   },
   {
@@ -100,11 +88,6 @@ export const TEAM: TeamTier[] = [
           website: "https://souradeep.me/",
         },
       },
-      { role: "Technical Writer", open: true },
-      { role: "Video Producer", open: true },
-      { role: "Community Manager", open: true },
-      { role: "Growth Marketer", open: true },
-      { role: "Operations", open: true },
     ],
   },
 ];
