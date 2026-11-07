@@ -314,19 +314,29 @@ function Funnel() {
   );
 }
 
-function Checklist() {
-  const items: [string, boolean][] = [
-    ["Docs before launch", false],
-    ["Quickstart that works", true],
-    ["Clear pricing page", false],
-    ["Real code examples", true],
-    ["A feedback loop", false],
-  ];
+const LAUNCH_CHECKLIST: [string, boolean][] = [
+  ["Docs before launch", false],
+  ["Quickstart that works", true],
+  ["Clear pricing page", false],
+  ["Real code examples", true],
+  ["A feedback loop", false],
+];
+
+/** Rows are [label, passed]; a failed row is struck through in print orange. */
+function Checklist({
+  caption = "LAUNCH CHECKLIST",
+  tag = "3 misses",
+  items = LAUNCH_CHECKLIST,
+}: {
+  caption?: string;
+  tag?: string;
+  items?: [string, boolean][];
+}) {
   return (
     <div style={card({ width: 540, padding: "30px 32px" })}>
       <div style={flex({ justifyContent: "space-between", alignItems: "center" })}>
-        <Caption>LAUNCH CHECKLIST</Caption>
-        <Tag>3 misses</Tag>
+        <Caption>{caption}</Caption>
+        <Tag>{tag}</Tag>
       </div>
       <div style={flex({ flexDirection: "column", marginTop: 14 })}>
         {items.map(([label, done]) => (
@@ -643,6 +653,24 @@ function artFor(post: BlogPostMeta): Art {
   if (/chatgpt|perplexity/i.test(title)) return { label: "answer.fig", node: <Answer /> };
   if (/visibility/i.test(title)) return { label: "audit.fig", node: <Scorecard /> };
   if (/\broi\b/i.test(title)) return { label: "funnel.fig", node: <Funnel /> };
+  if (/\baudit\b/i.test(title)) {
+    return {
+      label: "dx-audit.fig",
+      node: (
+        <Checklist
+          caption="DX AUDIT"
+          tag="3 findings"
+          items={[
+            ["First result in minutes", false],
+            ["Quickstart up to date", true],
+            ["Errors say what to do", false],
+            ["Access in a few steps", true],
+            ["Docs AI can cite", false],
+          ]}
+        />
+      ),
+    };
+  }
   if (/\bcosts?\b/i.test(title)) return { label: "pricing.fig", node: <Pricing /> };
   if (/mistake/i.test(title)) return { label: "checklist.fig", node: <Checklist /> };
   if (/communit/i.test(title)) return { label: "community.fig", node: <Network />, scale: 1.05 };
