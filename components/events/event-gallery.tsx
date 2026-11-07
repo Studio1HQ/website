@@ -5,10 +5,11 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   AnimatePresence,
   motion,
+  useMotionValue,
   useReducedMotion,
   useScroll,
 } from "motion/react";
-import { ArrowUpRight, MapPin } from "@phosphor-icons/react";
+import { ArrowUpRight, CalendarDots, MapPin } from "@phosphor-icons/react";
 import { Container, EASE } from "@/components/home/ui";
 import { EventMark } from "@/components/events/events-page";
 import type { EventKind, StudioEvent } from "@/data/events";
@@ -47,20 +48,46 @@ const sortKey = (e: StudioEvent) =>
   e.year * 10000 + e.month * 100 + (e.day ?? 15);
 
 /** A plain line for events without their own write-up yet. */
-const FALLBACK: Record<EventKind, (e: StudioEvent) => string> = {
-  Conference: (e) =>
-    `On stage at ${e.name}, sharing what we learn building and growing developer tools.`,
-  Hackathon: (e) =>
-    `With the builders at ${e.name}, from first idea to final demo.`,
-  Meetup: (e) =>
-    `In the room at the ${e.name}, with the local developer community.`,
-  Community: (e) =>
-    `Part of ${e.name}, alongside the student developer community.`,
-  Podcast: (e) => `In conversation on the ${e.name}.`,
-  Livestream: (e) => `Live on the ${e.name}, building and answering questions.`,
-  Webinar: (e) => `A live session for developers: ${e.name}.`,
+const FALLBACK: Record<EventKind, string> = {
+  Conference:
+    "On stage with the community, sharing what we learn building and growing developer tools.",
+  Hackathon:
+    "On the floor with the builders, mentoring teams from first idea to final demo.",
+  Meetup: "In the room with the local developer community.",
+  Community: "Alongside the student developer community.",
+  Podcast: "A conversation on developer tools and how teams grow them.",
+  Livestream: "Live, building and answering questions from the audience.",
+  Webinar: "A live session for developers, with demos and Q&A.",
 };
-const story = (e: StudioEvent) => e.summary ?? FALLBACK[e.kind](e);
+const story = (e: StudioEvent) => e.summary ?? FALLBACK[e.kind];
+
+/** A line that writes itself in, word by word, as it comes into view. */
+function WriteIn({ text, className }: { text: string; className?: string }) {
+  return (
+    <motion.span
+      className={className}
+      initial="hidden"
+      whileInView="shown"
+      viewport={{ once: true, amount: 0.8 }}
+      transition={{ staggerChildren: 0.06 }}
+    >
+      {text.split(" ").map((w, i) => (
+        <motion.span
+          key={i}
+          className="inline-block"
+          variants={{
+            hidden: { opacity: 0, y: 12 },
+            shown: { opacity: 1, y: 0 },
+          }}
+          transition={{ duration: 0.55, ease: EASE }}
+        >
+          {w}
+          {" "}
+        </motion.span>
+      ))}
+    </motion.span>
+  );
+}
 
 /** The write-up, with quoted titles (the point of it) underlined. */
 function Story({
@@ -70,19 +97,43 @@ function Story({
   event: StudioEvent;
   className?: string;
 }) {
-  const parts = story(event).split(/("[^"]+")/);
+  // Words, with quoted titles kept bold
+  const words = story(event)
+    .split(/("[^"]+")/)
+    .flatMap((part) =>
+      part.startsWith('"')
+        ? part
+            .slice(1, -1)
+            .split(" ")
+            .map((w) => ({ w, bold: true }))
+        : part
+            .split(" ")
+            .filter(Boolean)
+            .map((w) => ({ w, bold: false })),
+    );
   return (
-    <p className={className}>
-      {parts.map((part, i) =>
-        part.startsWith('"') ? (
-          <span key={i} className="font-medium text-[#141414]">
-            {part.slice(1, -1)}
-          </span>
-        ) : (
-          part
-        ),
-      )}
-    </p>
+    <motion.p
+      className={className}
+      initial="hidden"
+      whileInView="shown"
+      viewport={{ once: true, amount: 0.6 }}
+      transition={{ staggerChildren: 0.035 }}
+    >
+      {words.map(({ w, bold }, i) => (
+        <motion.span
+          key={i}
+          className={cn("inline-block", bold && "font-medium text-[#141414]")}
+          variants={{
+            hidden: { opacity: 0, y: 8, filter: "blur(4px)" },
+            shown: { opacity: 1, y: 0, filter: "blur(0px)" },
+          }}
+          transition={{ duration: 0.5, ease: EASE }}
+        >
+          {w}
+          {" "}
+        </motion.span>
+      ))}
+    </motion.p>
   );
 }
 
@@ -94,7 +145,11 @@ function WatchLink({ href }: { href: string }) {
       rel="noreferrer"
       className="inline-flex w-fit items-center gap-1.5 text-[14px] font-medium underline decoration-[#141414]/25 decoration-2 underline-offset-[5px] transition-colors hover:decoration-[#f97316]"
     >
-      {/youtube\.com|youtu\.be/.test(href) ? "Watch the session" : "View"}
+      {/youtube\.com|youtu\.be/.test(href)
+        ? "Watch the session"
+        : /linkedin\.com/.test(href)
+          ? "View post"
+          : "Event site"}
       <ArrowUpRight weight="bold" className="size-4" />
     </a>
   );
@@ -168,10 +223,11 @@ function Slideshow({ event }: { event: StudioEvent }) {
         <motion.div
           key={photos[i]}
           className="absolute inset-0"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.9, ease: EASE }}
+          // A soft dissolve: the next photo fades in through a light blur
+          initial={{ opacity: 0, filter: "blur(10px)", scale: 1.02 }}
+          animate={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
+          exit={{ opacity: 0, filter: "blur(10px)" }}
+          transition={{ duration: 1.2, ease: [0.4, 0, 0.2, 1] }}
         >
           <Image
             src={photos[i]}
@@ -223,8 +279,10 @@ function Feature({
   return (
     <article
       id={event.slug}
+      // The open lane beside the card, where the ribbon passes
+      data-ribbon={flip ? "left" : "right"}
       className={cn(
-        "relative grid scroll-mt-28 overflow-hidden rounded-[14px] md:w-[92%] md:grid-cols-2",
+        "relative grid scroll-mt-28 overflow-hidden rounded-[14px] md:w-[86%] md:grid-cols-2",
         // Staggered: one leaning left, the next leaning right
         flip && "md:ml-auto",
         GLASS,
@@ -256,13 +314,13 @@ function Feature({
               {event.year}
             </span>
           </p>
-          <h3 className="mt-6 flex items-start gap-3 text-[26px] font-medium leading-[1.15] tracking-[-0.03em] md:text-[30px]">
+          <h3 className="mt-6 flex items-start gap-3 text-[22px] font-medium leading-[1.2] tracking-[-0.025em] md:text-[24px]">
             <EventMark
               event={event}
               bare
               className="mt-[3px] size-8 rounded-[6px]"
             />
-            <span className="min-w-0">{event.name}</span>
+            <WriteIn text={event.name} className="min-w-0" />
           </h3>
           <div className="mt-2">
             <Place event={event} />
@@ -308,7 +366,7 @@ function Brief({
       </div>
       <h3 className="mt-6 flex items-start gap-2.5 text-[17px] font-medium leading-[1.3] tracking-[-0.02em]">
         <EventMark event={event} bare className="mt-px size-6 rounded-[5px]" />
-        <span className="min-w-0">{event.name}</span>
+        <WriteIn text={event.name} className="min-w-0" />
       </h3>
       <div className="mt-1.5">
         <Place event={event} />
@@ -405,7 +463,7 @@ function NextUp({
         )}
       >
         <span className="flex shrink-0 items-center gap-2 rounded-full bg-white/70 px-3 py-1 text-[12px] font-medium text-[#141414] shadow-[0_1px_2px_rgba(20,20,20,0.08)]">
-          <span className="size-1.5 rounded-full bg-[#f97316]" />
+          <CalendarDots weight="bold" className="size-3.5 text-[#f97316]" />
           Coming up
         </span>
         <EventMark
@@ -464,18 +522,38 @@ export function EventGallery({
 }) {
   const reduceMotion = !!useReducedMotion();
   const wrapRef = useRef<HTMLDivElement>(null);
-  const [box, setBox] = useState({ w: 0, h: 0, vw: 0, left: 0 });
+  const [box, setBox] = useState({
+    w: 0,
+    h: 0,
+    vw: 0,
+    left: 0,
+    stops: [] as { x: number; y: number }[],
+  });
 
   useLayoutEffect(() => {
     const el = wrapRef.current;
     if (!el) return;
-    const measure = () =>
+    const measure = () => {
+      const r = el.getBoundingClientRect();
+      const w = el.clientWidth;
+      // The middle of the open lane beside each photo card
+      const stops = [...el.querySelectorAll<HTMLElement>("[data-ribbon]")].map(
+        (n) => {
+          const c = n.getBoundingClientRect();
+          const l = c.left - r.left;
+          const rt = c.right - r.left;
+          const x = n.dataset.ribbon === "left" ? l / 2 : rt + (w - rt) / 2;
+          return { x, y: c.top - r.top + c.height / 2 };
+        },
+      );
       setBox({
-        w: el.clientWidth,
+        w,
         h: el.scrollHeight,
         vw: document.documentElement.clientWidth,
-        left: el.getBoundingClientRect().left,
+        left: r.left,
+        stops,
       });
+    };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);
@@ -486,11 +564,34 @@ export function EventGallery({
     };
   }, [events]);
 
-  // Tied straight to the scroll, no easing: the ribbon's head sits mid-screen
-  const { scrollYProgress } = useScroll({
-    target: wrapRef,
-    offset: ["start 85%", "end 60%"],
-  });
+  // Real time: the ribbon is revealed down to just past mid-screen, read
+  // straight from the scroll position on every frame, no easing
+  const { scrollY } = useScroll();
+  // How much of the ribbon to draw (0..1): along the path up to the point
+  // level with 65% of the screen, read on every scroll frame
+  const drawn = useMotionValue(0);
+  const pathRef = useRef<SVGPathElement>(null);
+  const table = useRef<{ total: number; ys: number[] }>({ total: 0, ys: [] });
+  useEffect(() => {
+    const path = pathRef.current;
+    const el = wrapRef.current;
+    if (!path || !el) return;
+    // The ribbon's height at each step along it
+    const total = path.getTotalLength();
+    const ys: number[] = [];
+    for (let l = 0; l <= total; l += 8) ys.push(path.getPointAtLength(l).y);
+    table.current = { total, ys };
+    const update = (y: number) => {
+      const top = el.getBoundingClientRect().top + window.scrollY;
+      const target = y + window.innerHeight * 0.65 - top;
+      const { ys: list } = table.current;
+      let i = list.findIndex((v) => v > target);
+      if (i < 0) i = list.length;
+      drawn.set(Math.min(1, (i * 8) / Math.max(1, total)));
+    };
+    update(window.scrollY);
+    return scrollY.on("change", update);
+  }, [scrollY, drawn, box]);
 
   const startOfToday = new Date(new Date(now).toDateString()).getTime();
   const isUpcoming = (e: StudioEvent) =>
@@ -505,23 +606,34 @@ export function EventGallery({
     .sort((a, b) => sortKey(b) - sortKey(a));
   const years = [...new Set(past.map((e) => e.year))];
 
-  // In from off the left edge of the screen, side to side, out off the right
-  const { w, h, vw, left } = box;
+  // In from off the left edge of the screen, through the lane beside each
+  // photo card, out off the right; a smooth curve through those points
+  const { w, h, vw, left, stops } = box;
   const offL = -left - 160;
   const offR = vw - left + 160;
-  const turns = Math.max(2, Math.round(h / 950));
-  const step = h / turns;
-  let d = `M ${offL} -40`;
-  let x = offL;
-  for (let k = 0; k < turns; k++) {
-    const last = k === turns - 1;
-    // Swing out past the cards into the side margins, so it shows the whole way
-    const to = last ? offR : k % 2 === 0 ? w + 30 : -30;
-    const y0 = k * step;
-    // The last turn leaves the screen well before the section ends
-    const end = last ? y0 + step * 0.7 : y0 + step;
-    d += ` C ${x} ${y0 + (end - y0) * 0.45}, ${to} ${y0 + (end - y0) * 0.55}, ${to} ${end}`;
-    x = to;
+  const n = Math.max(2, Math.round(h / 700));
+  const zigzag = Array.from({ length: n }, (_, k) => ({
+    x: k % 2 === 0 ? w * 0.85 : w * 0.15,
+    y: ((k + 1) / (n + 1)) * h,
+  }));
+  const pts: { x: number; y: number }[] = [
+    { x: offL, y: -40 },
+    ...(stops.length && vw >= 768 ? stops : zigzag),
+  ];
+  const lastY = pts[pts.length - 1].y;
+  pts.push({ x: offR, y: Math.min(h - 120, lastY + 420) });
+  // Catmull-Rom through the points, as cubic Béziers
+  let d = `M ${pts[0].x} ${pts[0].y}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[Math.max(0, i - 1)];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[Math.min(pts.length - 1, i + 2)];
+    const c1x = p1.x + (p2.x - p0.x) / 6;
+    const c1y = p1.y + (p2.y - p0.y) / 6;
+    const c2x = p2.x - (p3.x - p1.x) / 6;
+    const c2y = p2.y - (p3.y - p1.y) / 6;
+    d += ` C ${c1x} ${c1y}, ${c2x} ${c2y}, ${p2.x} ${p2.y}`;
   }
 
   const block = (title: string, list: StudioEvent[]) => {
@@ -583,12 +695,13 @@ export function EventGallery({
               </linearGradient>
             </defs>
             <motion.path
+              ref={pathRef}
               d={d}
+              style={{ pathLength: reduceMotion ? 1 : drawn }}
               fill="none"
               stroke="url(#events-ribbon)"
               strokeWidth={vw < 768 ? 40 : 84}
               strokeLinecap="round"
-              style={{ pathLength: reduceMotion ? 1 : scrollYProgress }}
             />
           </svg>
         ) : null}

@@ -376,7 +376,7 @@ export const EVENTS: StudioEvent[] = [
     logoFill: true,
     image: "/assets/events/cncf-projects-tour-kitops/01.webp",
     summary:
-      "Episode 5 of the CNCF Projects Tour: reproducible AI/ML with KitOps, the CNCF-hosted open-source project.",
+      "A walkthrough of KitOps, the CNCF-hosted open-source project for packaging models, data and code into one versioned, reproducible artifact.",
   },
   {
     slug: "nebius-webinar",

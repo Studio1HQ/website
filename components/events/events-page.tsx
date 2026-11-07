@@ -43,6 +43,8 @@ export function EventMark({
   /** Just the logo, no tile: sits straight on the page. */
   bare?: boolean;
 }) {
+  // No logo of its own: show nothing rather than a stand-in
+  if (!event.logo) return null;
   return (
     <span
       className={cn(
@@ -74,16 +76,7 @@ export function EventMark({
               : cn("object-contain", !bare && "p-[16%]")
           }
         />
-      ) : (
-        // No logo of its own: a Studio1 appearance, so the Studio1 mark
-        <Image
-          src="/assets/site/studio1-logo.svg"
-          alt=""
-          fill
-          sizes="36px"
-          className={cn("object-contain", !bare && "p-[18%]")}
-        />
-      )}
+      ) : null}
     </span>
   );
 }
