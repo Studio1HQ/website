@@ -279,16 +279,17 @@ function Scorecard() {
   );
 }
 
-function Funnel() {
-  const stages: [string, number][] = [
-    ["Pageviews", 400],
-    ["Signups", 318],
-    ["Activated", 250],
-    ["Revenue", 190],
-  ];
+function Funnel({
+  caption = "BEYOND PAGEVIEWS",
+  labels = ["Pageviews", "Signups", "Activated", "Revenue"],
+}: {
+  caption?: string;
+  labels?: [string, string, string, string];
+}) {
+  const stages: [string, number][] = labels.map((label, index) => [label, [400, 318, 250, 190][index]]);
   return (
     <div style={card({ width: 560, padding: "30px 32px" })}>
-      <Caption>BEYOND PAGEVIEWS</Caption>
+      <Caption>{caption}</Caption>
       <div style={flex({ flexDirection: "column", gap: 14, marginTop: 24 })}>
         {stages.map(([label, width], index) => (
           <div key={label} style={flex({ alignItems: "center", gap: 18 })}>
@@ -587,6 +588,304 @@ function StarHistory() {
   );
 }
 
+const PLAY_PATH = "M7 4.5v15l12.5-7.5z";
+const UPVOTE_PATH = "M12 5l7.5 10h-15z";
+
+/** A video frame with a play button, progress bar and chapter chips. */
+function Player({ file, chapters }: { file: string; chapters: string[] }) {
+  return (
+    <div style={card({ width: 580 })}>
+      <div style={flex({ alignItems: "center", justifyContent: "space-between", padding: "14px 20px", borderBottom: `1px solid ${LINE}`, background: CREAM })}>
+        <div style={flex({ fontSize: 17, fontWeight: 500 })}>{file}</div>
+        <Tag>demo</Tag>
+      </div>
+      <div style={flex({ position: "relative", height: 260, margin: "20px 22px 0", alignItems: "center", justifyContent: "center", background: INK })}>
+        <div style={flex({ position: "absolute", left: 24, top: 24, flexDirection: "column", gap: 12 })}>
+          <Bar width={220} height={10} color="rgba(244,239,231,0.3)" />
+          <Bar width={150} height={10} color={PRINT} />
+          <Bar width={250} height={10} color="rgba(244,239,231,0.3)" />
+        </div>
+        <div style={flex({ width: 96, height: 96, borderRadius: 999, alignItems: "center", justifyContent: "center", background: PRINT })}>
+          <svg width={40} height={40} viewBox="0 0 24 24">
+            <path d={PLAY_PATH} fill="#fff" />
+          </svg>
+        </div>
+      </div>
+      <div style={flex({ flexDirection: "column", gap: 16, padding: "18px 22px 24px" })}>
+        <div style={flex({ height: 8, background: CREAM })}>
+          <div style={flex({ width: "42%", background: PRINT })} />
+        </div>
+        <div style={flex({ gap: 8 })}>
+          {chapters.map((chapter, index) => (
+            <div
+              key={chapter}
+              style={flex({ padding: "5px 11px", border: `${index === 1 ? 2 : 1}px solid ${index === 1 ? PRINT : LINE}`, fontSize: 15, color: index === 1 ? INK : MUTED })}
+            >
+              {chapter}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** A launch timeline from prep to the week after, launch day in print orange. */
+function LaunchPlan() {
+  const rows: [string, string][] = [
+    ["6 weeks out", "Pick what is new"],
+    ["2 weeks out", "Quickstart, demo, listing"],
+    ["Launch day", "Reply to every comment"],
+    ["Week 2", "Turn the spike into users"],
+  ];
+  return (
+    <div style={card({ width: 560, padding: "30px 32px" })}>
+      <div style={flex({ justifyContent: "space-between", alignItems: "center" })}>
+        <Caption>LAUNCH PLAN</Caption>
+        <Tag dark>T-0</Tag>
+      </div>
+      <div style={flex({ flexDirection: "column", marginTop: 14 })}>
+        {rows.map(([when, what], index) => {
+          const today = index === 2;
+          return (
+            <div key={when} style={flex({ alignItems: "center", gap: 18, padding: "16px 0", borderBottom: index < rows.length - 1 ? `1px solid ${LINE}` : "none" })}>
+              <div style={flex({ width: 18, height: 18, background: today ? PRINT : index < 2 ? INK : CREAM, border: index > 2 ? `2px solid ${INK}` : "none" })} />
+              <div style={flex({ width: 136, fontSize: 17, color: MUTED })}>{when}</div>
+              <div style={flex({ fontSize: 22, fontWeight: today ? 500 : 400 })}>{what}</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/** A ranked link list with a Show HN post on top. */
+function RankedList() {
+  const upvote = (color: string) => (
+    <svg width={18} height={18} viewBox="0 0 24 24">
+      <path d={UPVOTE_PATH} fill={color} />
+    </svg>
+  );
+  return (
+    <div style={card({ width: 580, padding: "28px 30px" })}>
+      <div style={flex({ justifyContent: "space-between", alignItems: "center" })}>
+        <Caption>FRONT PAGE</Caption>
+        <Tag dark>show</Tag>
+      </div>
+      <div style={flex({ flexDirection: "column", gap: 6, marginTop: 18 })}>
+        <div style={flex({ flexDirection: "column", gap: 10, padding: "16px 18px", background: "#fdf0e4", border: `2px solid ${PRINT}` })}>
+          <div style={flex({ alignItems: "center", gap: 12 })}>
+            <span style={{ fontSize: 20, color: MUTED }}>1.</span>
+            {upvote(PRINT)}
+            <span style={{ fontSize: 22, fontWeight: 500 }}>Show HN: Your tool, in one line</span>
+          </div>
+          <div style={flex({ gap: 10, paddingLeft: 62 })}>
+            <Bar width={90} height={9} color="rgba(20,20,20,0.2)" />
+            <Bar width={120} height={9} color="rgba(20,20,20,0.2)" />
+          </div>
+        </div>
+        {[2, 3, 4].map((rank) => (
+          <div key={rank} style={flex({ alignItems: "center", gap: 12, padding: "14px 18px" })}>
+            <span style={{ fontSize: 20, color: MUTED }}>{rank}.</span>
+            {upvote("rgba(20,20,20,0.3)")}
+            <Bar width={[300, 250, 330][rank - 2]} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** A daily trending list with your repo first. */
+function Trending() {
+  const star = (fill: string) => (
+    <svg width={18} height={18} viewBox="0 0 24 24">
+      <path d={STAR_PATH} fill={fill} />
+    </svg>
+  );
+  const github = (
+    <svg width={26} height={26} viewBox="0 0 24 24">
+      <path d={GITHUB_PATH} fill="none" stroke={INK} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+  return (
+    <div style={card({ width: 580, padding: "28px 30px" })}>
+      <div style={flex({ justifyContent: "space-between", alignItems: "center" })}>
+        <Caption>TRENDING TODAY</Caption>
+        <Tag dark>daily</Tag>
+      </div>
+      <div style={flex({ flexDirection: "column", marginTop: 16 })}>
+        <div style={flex({ alignItems: "center", gap: 14, padding: "16px 18px", background: "#fdf0e4", border: `2px solid ${PRINT}` })}>
+          {github}
+          <span style={{ fontSize: 22, color: MUTED }}>your-org /</span>
+          <span style={{ fontSize: 22, fontWeight: 500 }}>launch</span>
+          <div style={flex({ marginLeft: "auto", alignItems: "center", gap: 6, padding: "5px 10px", background: PRINT, color: "#fff", fontSize: 16, fontWeight: 500 })}>
+            {star("#fff")}
+            today
+          </div>
+        </div>
+        {[260, 210, 290].map((width, index) => (
+          <div key={index} style={flex({ alignItems: "center", gap: 14, padding: "16px 18px", borderBottom: index < 2 ? `1px solid ${LINE}` : "none" })}>
+            {star("rgba(20,20,20,0.25)")}
+            <Bar width={width} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Adoption metrics, with raw stars struck off the top of the list. */
+function Metrics() {
+  const rows: [string, number][] = [
+    ["Stars", 92],
+    ["Weekly installs", 74],
+    ["Active contributors", 52],
+    ["Issues closed", 64],
+    ["Returning users", 46],
+  ];
+  return (
+    <div style={card({ width: 560, padding: "30px 32px" })}>
+      <div style={flex({ justifyContent: "space-between", alignItems: "center" })}>
+        <Caption>BEYOND STARS</Caption>
+        <Tag>adoption</Tag>
+      </div>
+      <div style={flex({ flexDirection: "column", gap: 18, marginTop: 24 })}>
+        {rows.map(([label, value], index) => (
+          <div key={label} style={flex({ alignItems: "center", gap: 18 })}>
+            <div style={flex({ width: 210, fontSize: 18, color: index === 0 ? MUTED : INK, textDecoration: index === 0 ? "line-through" : "none" })}>
+              {label}
+            </div>
+            <div style={flex({ flex: 1, height: 16, background: CREAM })}>
+              <div style={flex({ width: `${value}%`, background: index === 0 ? "rgba(20,20,20,0.16)" : index === 1 ? PRINT : INK })} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** A month of planned posts on a weekday grid. */
+function Calendar() {
+  const days = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+  // One planned piece a few times a week; the rest stay open.
+  const cells: (string | null)[] = [
+    "Tutorial", null, "Clip", null, null,
+    null, "Compare", null, "Video", null,
+    "Launch", null, null, "Docs", null,
+    null, "Guide", null, null, "Recap",
+  ];
+  const tone = (label: string) => (label === "Launch" ? PRINT : label === "Compare" || label === "Video" ? INK : "#fdf0e4");
+  return (
+    <div style={card({ width: 600, padding: "28px 30px" })}>
+      <div style={flex({ justifyContent: "space-between", alignItems: "center" })}>
+        <Caption>CONTENT CALENDAR</Caption>
+        <Tag dark>month</Tag>
+      </div>
+      <div style={flex({ gap: 8, marginTop: 18 })}>
+        {days.map((day) => (
+          <div key={day} style={flex({ width: 100, fontSize: 15, color: MUTED })}>
+            {day}
+          </div>
+        ))}
+      </div>
+      <div style={flex({ flexWrap: "wrap", gap: 8, marginTop: 10, width: 540 })}>
+        {cells.map((label, index) => (
+          <div
+            key={index}
+            style={flex({
+              width: 100,
+              height: 64,
+              alignItems: "flex-end",
+              padding: "8px 10px",
+              background: label ? tone(label) : CREAM,
+              color: label && tone(label) !== "#fdf0e4" ? "#fff" : INK,
+              fontSize: 16,
+              fontWeight: 500,
+            })}
+          >
+            {label ?? ""}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** A creator's sponsored post: avatar, media with a play button, and link chips. */
+function Creator() {
+  return (
+    <div style={card({ width: 560, padding: "26px 28px" })}>
+      <div style={flex({ alignItems: "center", gap: 14 })}>
+        <div style={flex({ width: 56, height: 56, borderRadius: 999, alignItems: "center", justifyContent: "center", background: INK, color: CREAM, fontSize: 20, fontWeight: 500 })}>
+          DV
+        </div>
+        <div style={flex({ flexDirection: "column", gap: 8 })}>
+          <Bar width={160} height={12} color="rgba(20,20,20,0.5)" />
+          <Bar width={110} height={10} />
+        </div>
+        <div style={flex({ marginLeft: "auto" })}>
+          <Tag>sponsored</Tag>
+        </div>
+      </div>
+      <div style={flex({ flexDirection: "column", gap: 10, marginTop: 18 })}>
+        <Bar width="94%" />
+        <Bar width="72%" />
+      </div>
+      <div style={flex({ height: 230, marginTop: 18, alignItems: "center", justifyContent: "center", background: PRINT })}>
+        <div style={flex({ width: 84, height: 84, borderRadius: 999, alignItems: "center", justifyContent: "center", background: CREAM })}>
+          <svg width={36} height={36} viewBox="0 0 24 24">
+            <path d={PLAY_PATH} fill={PRINT} />
+          </svg>
+        </div>
+      </div>
+      <div style={flex({ gap: 8, marginTop: 16 })}>
+        {["demo", "repo link", "docs link"].map((chip) => (
+          <div key={chip} style={flex({ padding: "5px 11px", border: `1px solid ${LINE}`, fontSize: 15, color: MUTED })}>
+            {chip}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** One canonical post fanning out to the platforms it is republished on. */
+function CrossPost() {
+  const targets: [string, number][] = [
+    ["DEV", 40],
+    ["Hashnode", 190],
+    ["Medium", 340],
+  ];
+  return (
+    <div style={flex({ position: "relative", width: 620, height: 440 })}>
+      <svg width="620" height="440" viewBox="0 0 620 440" style={{ position: "absolute", left: 0, top: 0 }}>
+        {targets.map(([name, y]) => (
+          <line key={name} x1="300" y1="220" x2="398" y2={y + 40} stroke={INK} strokeOpacity="0.45" strokeWidth="3" strokeDasharray="8 8" />
+        ))}
+      </svg>
+      <div style={card({ position: "absolute", left: 0, top: 100, width: 300, padding: "22px 24px", gap: 14 })}>
+        <div style={flex({ justifyContent: "space-between", alignItems: "center" })}>
+          <Caption>YOUR BLOG</Caption>
+          <Tag>canonical</Tag>
+        </div>
+        <div style={flex({ height: 70, background: PRINT })} />
+        <Bar width="92%" height={14} color={INK} />
+        <Bar width="80%" />
+        <Bar width="64%" />
+      </div>
+      {targets.map(([name, y]) => (
+        <div key={name} style={card({ position: "absolute", left: 398, top: y, width: 220, height: 80, flexDirection: "row", alignItems: "center", gap: 14, padding: "0 20px" })}>
+          <div style={flex({ width: 16, height: 16, background: INK })} />
+          <span style={{ fontSize: 24, fontWeight: 500 }}>{name}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function PrintMark() {
   return (
     <div style={flex({ width: 380, height: 380, alignItems: "center", justifyContent: "center", background: CREAM })}>
@@ -609,6 +908,27 @@ function artFor(post: BlogPostMeta): Art {
   if (/\breviews?\b/i.test(title)) {
     return { label: "benchmarks.fig", node: <Bench name={lead.replace(/\s+review$/i, "")} /> };
   }
+  if (/\breadme\b/i.test(title)) {
+    return {
+      label: "README.md",
+      node: (
+        <Doc
+          file="README.md"
+          lines={[
+            { text: "# your-tool", accent: true },
+            { text: "> What it does, in one line" },
+            { text: "## Quickstart", accent: true },
+            { text: "npm install your-tool", indent: true },
+            { bar: 300, indent: true },
+            { bar: 220, accent: true },
+          ]}
+        />
+      ),
+    };
+  }
+  if (/trending|trendshift/i.test(title)) return { label: "trending.fig", node: <Trending /> };
+  if (/\bmetrics\b/i.test(title) && /open[- ]source|github|stars/i.test(title)) return { label: "metrics.fig", node: <Metrics /> };
+  if (/hacker news|show hn/i.test(title)) return { label: "show-hn.fig", node: <RankedList /> };
   if (/github|open[- ]source/i.test(title) || post.tags.some((tag) => /^(github|open-source)$/i.test(tag))) {
     return { label: "star-history.fig", node: <StarHistory /> };
   }
@@ -626,6 +946,24 @@ function artFor(post: BlogPostMeta): Art {
             { text: "- [Quickstart](/docs/start)", indent: true },
             { text: "- [API reference](/docs/api)", indent: true },
             { bar: 260, indent: true },
+          ]}
+        />
+      ),
+    };
+  }
+  if (/documentation best practices/i.test(title)) {
+    return {
+      label: "docs/index.md",
+      node: (
+        <Doc
+          file="docs/index.md"
+          lines={[
+            { text: "# Docs", accent: true },
+            { text: "Tutorials: learn by doing", indent: true },
+            { text: "How-to guides: finish a task", indent: true },
+            { text: "Reference: look it up", indent: true },
+            { text: "Explanation: understand why", indent: true },
+            { bar: 300, accent: true },
           ]}
         />
       ),
@@ -652,7 +990,12 @@ function artFor(post: BlogPostMeta): Art {
   }
   if (/chatgpt|perplexity/i.test(title)) return { label: "answer.fig", node: <Answer /> };
   if (/visibility/i.test(title)) return { label: "audit.fig", node: <Scorecard /> };
-  if (/\broi\b/i.test(title)) return { label: "funnel.fig", node: <Funnel /> };
+  if (/\broi\b/i.test(title)) {
+    if (/devrel/i.test(title)) {
+      return { label: "devrel-roi.fig", node: <Funnel caption="DEVREL ROI" labels={["Reach", "Engaged", "Activated", "Revenue"]} /> };
+    }
+    return { label: "funnel.fig", node: <Funnel /> };
+  }
   if (/\baudit\b/i.test(title)) {
     return {
       label: "dx-audit.fig",
@@ -671,11 +1014,35 @@ function artFor(post: BlogPostMeta): Art {
       ),
     };
   }
+  if (/influencer/i.test(title)) return { label: "creator-post.fig", node: <Creator /> };
   if (/\bcosts?\b/i.test(title)) return { label: "pricing.fig", node: <Pricing /> };
   if (/mistake/i.test(title)) return { label: "checklist.fig", node: <Checklist /> };
   if (/communit/i.test(title)) return { label: "community.fig", node: <Network />, scale: 1.05 };
   if (/projects/i.test(title)) return { label: "projects.fig", node: <Tiles /> };
+  if (/calendar/i.test(title)) return { label: "calendar.fig", node: <Calendar /> };
+  if (/alternatives?\b|comparison/i.test(title)) return { label: "alternatives.fig", node: <Versus left="Incumbent" right="Your tool" /> };
+  if (/cross-post|hashnode/i.test(title)) return { label: "cross-post.fig", node: <CrossPost /> };
   if (/content/i.test(title)) return { label: "content.fig", node: <Pages />, scale: 1.05 };
+  if (/\bscript\b/i.test(title)) {
+    return {
+      label: "demo-script.md",
+      node: (
+        <Doc
+          file="demo-script.md"
+          lines={[
+            { text: "0:00  The problem, in one line", accent: true },
+            { bar: 380 },
+            { text: "0:20  Install and first call", accent: true },
+            { bar: 320 },
+            { text: "1:30  The real result", accent: true },
+            { bar: 260, accent: true },
+          ]}
+        />
+      ),
+    };
+  }
+  if (/\bvideos?\b/i.test(title)) return { label: "demo.fig", node: <Player file="demo.mp4" chapters={["Install", "First call", "Deploy"]} /> };
+  if (/youtube/i.test(title)) return { label: "channel.fig", node: <Player file="youtube / tutorial" chapters={["Intro", "Build", "Ship"]} /> };
   if (/^what is/i.test(title)) {
     const name = lead.replace(/^what is\s+/i, "").replace(/\?.*$/, "");
     return { label: "terminal", node: <Terminal command={`${name.toLowerCase()} --explain`} /> };
@@ -683,6 +1050,11 @@ function artFor(post: BlogPostMeta): Art {
   if (/^build\b|step-by-step/i.test(title)) {
     return { label: "terminal", node: <Terminal command="pnpm install && pnpm dev" result="→ running locally" /> };
   }
+  if (/hello world/i.test(title)) {
+    return { label: "terminal", node: <Terminal command="npx create-your-app" result="→ Hello, world!" /> };
+  }
+  if (/devrel for startups/i.test(title)) return { label: "devrel.fig", node: <Network />, scale: 1.05 };
+  if (/\blaunch/i.test(title)) return { label: "launch-plan.fig", node: <LaunchPlan /> };
   return { label: "studio1-mark", node: <PrintMark /> };
 }
 

@@ -1,0 +1,285 @@
+---
+title: "Developer Influencer Marketing: Costs, Formats, and Results"
+seoTitle: "Developer Influencer Marketing: Costs, Formats, Results"
+slug: developer-influencer-marketing
+description: "Developer influencer marketing for devtools: when paying creators works, formats and costs, how to vet them, a brief template, disclosure rules and tracking."
+tldrSummary: "Pay developer influencers only when a developer can try your product the same day and the creator's audience already uses your stack. Buy formats that show the product working, let the creator write the script, put the disclosure inside the content, and judge each creator by tracked signups, not views."
+tldrBullets:
+  - "Check readiness first: a free tier or open-source repo, a quickstart that works on a clean machine, and a creator whose viewers use your stack."
+  - "Match the format to the goal: tutorials teach, 60 to 90 second integrations and X posts build awareness, newsletters drive clicks."
+  - "Vet creators on comment quality, technical depth, past sponsored reads and audience geography, then send a fact sheet, not a script."
+  - "Disclose in the video or post itself, not only the description, and track every creator with a UTM link, a signup code and a 'how did you hear about us' field."
+date: 2026-11-07
+updatedDate: 2026-11-07
+draft: false
+authors:
+  - Arindam Majumder
+tags:
+  - influencer-marketing
+  - developer-marketing
+  - distribution
+  - devrel
+bannerImage: /blog/uploads/developer-influencer-marketing/cover.png
+---
+**The short answer:** Pay developer influencers only if three things are true: a developer can try your product the same day (a free tier, self-serve trial or open-source repo with a working quickstart), you can name the stack you want to reach, and the creator's viewers already use it. Then pay for formats that show the product working, like a tutorial or a 60 to 90 second integration. Let the creator write the script, require disclosure inside the content, and judge each creator by tracked signups, not views.
+
+## When does paying developer creators work?
+
+What developers find after they click decides the result. Run this check first.
+
+| Check | Ready | Not ready yet |
+| --- | --- | --- |
+| Can a developer try it today? | Free tier, self-serve trial or open-source repo | Waitlist, "book a demo" or sales-only pricing |
+| Quickstart | Works on a clean machine, tested this week | Breaks on a fresh install |
+| Audience | A named language, framework or role | "Developers" in general |
+| Something to show | A demo the creator can build on camera | A feature list |
+| Follow-up | Docs, a sample repo and someone answering comments | Nobody watching the comments |
+
+PostHog's public handbook says ["Long-form YouTube is still our strongest acquisition channel"](https://posthog.com/handbook/marketing/influencers) and "we'd rather work with someone who genuinely likes PostHog." Fit beats audience size.
+
+Fail two rows and you should start with organic channels instead, such as our [Reddit playbook for developer tools](/blog/reddit-marketing-for-developer-tools).
+
+**Key pointers:**
+- Run your quickstart on a clean machine the week before anything goes live, and fix every broken step.
+- Write down the one stack and role you want to reach before you shortlist a creator.
+- If signup needs a sales call, fix the trial path before you buy reach.
+
+## Which formats should you pay for?
+
+PostHog's handbook is blunt: "Don't expect direct sign ups from every format," and "short-form often does more for awareness, education, or reaching audiences we wouldn't get in front of otherwise." Pick the format from the goal. If you would rather build your own channel, read [YouTube for developer tools](/blog/youtube-for-developer-tools).
+
+| Format | Good for | Weak at |
+| --- | --- | --- |
+| Dedicated tutorial video (10 to 30 minutes) | Teaching end to end, with search traffic that lasts | Costs the most |
+| 60 to 90 second integration in a regular video | Awareness with viewers who already trust the creator | Too short to teach |
+| Livestream build | Real use, including errors, with live questions | Small live audience |
+| Newsletter sponsorship | Clicks from readers who chose the topic | No demo, and other sponsors share the issue |
+| X thread or post | Launch-day reach | Short life in the feed |
+| Blog tutorial | Search and AI answer traffic, with code readers can copy | Slow to build traffic |
+
+Pin down the slot before you talk price. PostHog's rule for YouTube: "Make sure you know what type of slot it is: pre-roll, mid-roll, end-roll, integration." Newsletters sell positions too: TLDR's [sponsorship page](https://advertise.tldr.tech/sponsorship-opportunities) offers 100 words at the top, 50 in the middle or 30 at the bottom, with at most 3 advertisers per issue.
+
+For a launch, run integrations and X posts on the day of your [Product Hunt launch](/blog/product-hunt-launch-playbook) and the dedicated tutorial the week after.
+
+**Key pointers:**
+- Get the slot type or newsletter position in writing before you agree a price.
+- Book at least one dedicated tutorial per launch, because it keeps working after launch week.
+
+## How much do developer influencers cost?
+
+There is no reliable public rate card for developer YouTube creators, and rates vary by audience and niche. Some newsletters do publish prices. As of November 2026:
+
+* **iOS Dev Weekly:** [EUR 2,500 for a single issue](https://iosdevweekly.com/sponsorship), one sponsor per issue, reaching "more than 40,000 Swift and Apple platform developers".
+* **Next.js Weekly:** [290€ for the first sponsor slot and 150€ for the second](https://nextjsweekly.com/sponsors), for 7,100 subscribers. Four issues of the first slot cost 990€.
+* **TLDR:** no public prices. It sends a custom proposal based on the newsletters and placement you choose.
+
+![Next.js Weekly sponsor page listing 7,100 subscribers, a 54.3% open rate, 2 to 5% sponsored link click-through and per-slot prices in euros](/blog/uploads/developer-influencer-marketing/nextjs-weekly-sponsor-rates.webp "One of the few developer newsletters that publishes its rates and audience stats.")
+
+That is an almost ninefold gap for one issue. Creator quotes have no public benchmark at all, so compare them on these levers:
+
+| Lever | What to ask |
+| --- | --- |
+| Deliverable | "What does a 60-second integration cost compared with a dedicated video?" |
+| Usage rights | "Can we reuse the footage in ads, on our site or as Shorts, and for how many months?" |
+| Exclusivity | "Which competitors are excluded, and for how many days?" |
+| Volume | "What is the price for three videos over a quarter?" |
+| Fee model | "Would you take a lower flat fee plus a bonus per tracked signup?" |
+
+PostHog notes that ["For creators we've never worked with, the initial quote is often negotiable,"](https://posthog.com/handbook/marketing/influencers) and tracks CPM (cost per thousand views) for each video.
+
+**Key pointers:**
+- Ask for an integration price and a dedicated video price in the same email.
+- Negotiate usage rights separately. A clip you can reuse in ads is worth more than the post.
+- Work out the CPM of every quote from the creator's real average views, not their subscriber count.
+
+## How to vet a developer creator before you pay
+
+**Creator vetting scorecard (copy this)**
+
+| Check | How to check it | Green flag | Red flag |
+| --- | --- | --- | --- |
+| Comment quality | Read the comments on their last 3 videos | Questions about versions, errors and code | "Great video" and emoji |
+| Engagement | Comments per view | 0.002 or more | High views, almost no comments |
+| Technical depth | Watch one full video | Runs code, hits an error and fixes it | Slides and voiceover only |
+| Past sponsored reads | Ask for 2 or 3 examples | Sounds like the creator, discloses at the start | A read-out script, or a competitor last month |
+| Audience geography | Ask for their Top geographies screenshot | Watch time from regions you sell to | Most watch time elsewhere |
+| Audience overlap | Ask for "Channels that your audience watches" | Coding channels in your niche | Gaming or general tech news |
+
+The engagement bar comes from PostHog, which rates [0.002 to 0.005 comments per view and 0.03 to 0.05 likes per view as good](https://posthog.com/handbook/marketing/influencers), wants "Above 5k views per video", and asks for "examples of other ad slots they've run to judge the quality of ad read." A video with 40,000 views and 120 comments scores 0.003: good.
+
+![PostHog handbook criteria for vetting a creator: relevant audience, a growing channel, engagement per view bands and above 5k views per video](/blog/uploads/developer-influencer-marketing/posthog-creator-vetting.webp "PostHog publishes its creator bar: engagement per view and a 5k-view floor.")
+
+Both audience reports live in YouTube Studio under Analytics, then [Audience](https://support.google.com/youtube/answer/9314416). "Channels that your audience watches" also hands you your next shortlist.
+
+**Key pointers:**
+- Read 50 comments before you read a media kit.
+- Get both audience screenshots before you discuss price.
+- Watch a past sponsored read to the end. If it sounds scripted, yours will too.
+
+## Creative freedom vs control: developers can tell when it's scripted
+
+Developers skip a read that sounds like a press release. An example, with a made-up product called Acme:
+
+**Weak (written by the brand):** "Acme is the leading enterprise-grade observability platform that helps teams ship faster with AI-powered insights."
+
+**Strong (written by the creator from a fact sheet):** "I added Acme to this Next.js app in about four minutes. It caught the slow query from earlier in the video. The catch: the free tier keeps logs for 7 days."
+
+PostHog says ["We generally let influencers decide what the ad read is like so it best fits their audience,"](https://posthog.com/handbook/marketing/influencers) and asks them to "Be specific rather than benefits-y." The FTC's [endorsement guides FAQ](https://www.ftc.gov/business-guidance/resources/ftcs-endorsement-guides-what-people-are-asking) adds a legal reason: "an endorsement has to represent the accurate experience and opinion of the endorser."
+
+| You control | The creator controls |
+| --- | --- |
+| Facts: what it does, limits, price, install command | Script, structure and tone |
+| Claims they must not make, like "fastest" without a benchmark | Their opinion, including criticism |
+| One review pass for factual accuracy | The use case they build on screen |
+
+**Key pointers:**
+- Send a fact sheet, not a script. Three facts and one honest limitation are enough.
+- Review for factual errors only, never tone.
+- Give the creator a working account at least a week before recording.
+
+## A creator brief template (copy and paste)
+
+Send this with the contract. It gives the creator facts, not lines.
+
+```text
+CREATOR BRIEF: [Product] x [Creator]
+
+WHO WATCHES     Role and stack, e.g. backend developers on Python and Postgres
+THE ONE TASK    What a viewer can do after watching, in their words
+START HERE      Quickstart URL, repo and version or tag to use
+PROOF MOMENT    The output on screen that shows it worked
+FACTS           What it does (one sentence)
+                Free tier limits: [...]
+                Price after the free tier: [...]
+                What it doesn't do yet: [...]
+DON'T SAY       "Fastest", "best", "replaces X", unreleased features
+YOUR CALL       Script, structure, tone, opinions and criticism
+DISCLOSURE      Say it's sponsored by [Product] near the start, turn on
+                YouTube's paid promotion setting, start X posts with "Ad:"
+                or "Sponsored by [Product]"
+LINK            [UTM link], in the first 3 lines of the description
+CODE            [CREATORNAME] for [offer], valid until [date]
+DELIVERABLES    [Format, length, platform], draft by [date], live on [date]
+REVIEW          One factual accuracy pass by [engineer], within 48 hours
+CONTACT         [Engineer name and handle] for questions while recording
+```
+
+**Key pointers:**
+- Fill in "What it doesn't do yet" honestly. It saves the creator a correction in the comments.
+- Name a real engineer as the contact, with a reply time.
+
+## What are the disclosure rules for sponsored developer content?
+
+In the US, the FTC's [Disclosures 101 for Social Media Influencers](https://www.ftc.gov/business-guidance/resources/disclosures-101-social-media-influencers) covers any "financial, employment, personal, or family relationship with a brand". Free credits count, because "Financial relationships aren't limited to money."
+
+| Format | Where the disclosure goes |
+| --- | --- |
+| YouTube video or integration | Spoken near the start, because it "should be in the video and not just in the description." Also turn on paid promotion in YouTube Studio, which [adds a label at the start](https://support.google.com/youtube/answer/154235) |
+| Livestream | "Repeated periodically so viewers who only see part of the stream will get the disclosure" |
+| X post or thread | Start with "Ad:" or "Sponsored by [Product]", and add X's [Paid Partnership label](https://www.engadget.com/social-media/x-adds-paid-partnership-labels-so-users-can-more-easily-identify-ads-183528227.html), launched in March 2026 |
+| Newsletter or blog | "Sponsored" or "Ad", placed with the mention itself |
+
+Avoid "sp", "spon" and "collab", which the FTC calls vague, and "#ambassador" or "partner", which it calls "ambiguous and confusing". And "Don't assume that a platform's disclosure tool is good enough," so X posts need the written disclosure as well as the label.
+
+The brand carries risk too: "Your company is ultimately responsible for what others do on your behalf." And "U.S. law applies if it's reasonably foreseeable that the post will affect U.S. consumers," wherever the creator lives. This is a summary, not legal advice.
+
+**Key pointers:**
+- Put the exact disclosure wording in the brief and the contract.
+- Before anything goes live, check the spoken disclosure, the YouTube setting and the first word of each X post.
+- Keep the brief and review notes: the FTC expects brands to train and monitor the creators they pay.
+
+## How to track a developer influencer campaign
+
+A viewer who watches on a phone or TV and signs up later on a laptop never touches your link, so a link alone undercounts. The creator's Device type report in YouTube Studio shows how much watch time that is. Use three layers.
+
+1. **A UTM link per creator and format.** Google Analytics says `utm_source`, `utm_medium` and `utm_campaign` are the parameters you ["should always use"](https://support.google.com/analytics/answer/10917952). PostHog puts the link in the top 3 lines of the description.
+2. **A unique signup code** for something real, like extra credits, said out loud in the video.
+3. **A free-text "How did you hear about us?" field** at signup. PostHog asks creators to tell viewers to "mention them on sign up".
+
+```text
+https://yourproduct.dev/start?utm_source=creatorname&utm_medium=creator&utm_campaign=launch-2026-11&utm_content=youtube-integration
+```
+
+**Creator tracking sheet (copy this)**
+
+| Creator | Format | Cost | Views | Link sessions | Code uses | Self-reported | Activated users | Cost per activated user |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| | | | | | | | | |
+
+Count "activated" at the first real action, like a first API call. For the wider picture, see [how to measure developer content ROI beyond pageviews](/blog/developer-tool-content-roi-beyond-pageviews).
+
+**Key pointers:**
+- Set up the link, the code and the signup field before the first creator records.
+- Remove duplicates where one signup used both a link and a code.
+
+## Contract checklist for paid creator content
+
+Copy this into the agreement.
+
+- [ ] **Deliverables:** format, length, platform and slot type
+- [ ] **Timeline:** draft date, go-live date and time zone, and what happens if your launch moves
+- [ ] **Review rounds:** how many, how long, factual accuracy only
+- [ ] **Usage rights:** where you can reuse the content, and for how many months
+- [ ] **Exclusivity:** which competitors, for how many days before and after
+- [ ] **Disclosure:** exact wording, placement near the start, platform settings on
+- [ ] **Links and codes:** link position, how long it stays live, when the code expires
+- [ ] **Corrections:** how fast factual errors get fixed in a pinned comment or the description
+- [ ] **Reporting:** screenshots of views, retention and geography at 7 and 30 days
+- [ ] **Payment terms:** amount, currency, deposit, invoice terms (PostHog pays net 30), and what happens if the content never goes live
+
+**Key pointers:**
+- Settle usage rights and exclusivity before the price, because both change it.
+- Put the 30-day screenshots in the contract. You need them to decide on a second round.
+
+## What results should you expect, and how do you judge them?
+
+Expect uneven results, even with a good brief. Published benchmarks are rare: Next.js Weekly reports a [2 to 5% click-through rate on sponsored links](https://nextjsweekly.com/sponsors), and PostHog judges each video on CPM, sessions from the custom link, and signups.
+
+Judge each creator at 30 days on cost per activated user, against your other channels, then read the pattern:
+
+| What you see | What it usually means | What to do |
+| --- | --- | --- |
+| High views, few link sessions | Audience mismatch or a weak call to action | Don't rebook |
+| Modest views, strong signups per view | The audience fits | Rebook for a dedicated tutorial |
+| Many signups, few activated | An onboarding problem | Fix the quickstart before spending more |
+| Comments full of setup questions | A docs gap | Write the page, then reply with the link |
+
+Creators are one channel in a wider plan, which our [distribution playbook](/blog/how-to-distribute-technical-content-reddit-x-youtube) covers.
+
+**Key pointers:**
+- Judge at 30 days, not day one, because tutorials keep getting search views.
+- Rebook on cost per activated user, not views.
+
+## How Studio1 runs creator campaigns
+
+**Memori.** For this open-source memory layer for AI agents, Studio1 supported developer creator collaborations "with technical fit and audience quality as the filter," alongside 12 hands-on demo agents and a Reddit launch post with 85+ upvotes and 50K+ impressions. Memori grew from launch to 12,000+ GitHub stars. [Read the Memori case study](/case-studies/memori).
+
+**ScrapeGraphAI.** Studio1 helped ship practical AI agent demos, such as an agentic deep researcher built with ScrapeGraphAI, DeepSeek R1 and an MCP server, and the campaign reached 265K+ developers across social and community channels. A working demo is also what makes a sponsored video worth watching. [Read the ScrapeGraphAI case study](/case-studies/scrapegraph).
+
+Our creator campaigns run on X, YouTube, LinkedIn, Instagram and TikTok: a shortlist you approve before any outreach, a brief for every creator, content reviews, launch-day coordination, and a report by creator and platform. See our [influencer marketing service](/influencer-marketing-agency) if you want that run for your product.
+
+## FAQ
+
+### Should I pay developer influencers?
+
+Yes, if developers can try your product the same day and the creator's viewers already use your stack. If signup needs a sales call or the quickstart breaks, fix that first.
+
+### How much does a developer influencer cost?
+
+There is no reliable public rate card for developer YouTube creators. Price depends on audience, niche, deliverable, usage rights and exclusivity. Published newsletter rates run from 290€ for Next.js Weekly's first slot to EUR 2,500 for an iOS Dev Weekly issue.
+
+### Should I sponsor big or small developer creators?
+
+Pick on fit, not size. PostHog wants more than 5,000 views per video and prefers creators who genuinely like the product. A small channel with code questions in the comments beats a big general one.
+
+### Do developer creators have to disclose sponsored content?
+
+Yes. The FTC says the disclosure belongs in the video, not only the description, and should repeat during livestreams. On YouTube, also turn on the paid promotion setting. On X, start the post with "Ad:" or "Sponsored by".
+
+### Should I write the script for a sponsored developer video?
+
+No. Send a fact sheet with what the product does, its limits, its price and what not to claim, then review only for factual accuracy.
+
+### How do I measure a developer influencer campaign?
+
+Give each creator a UTM link, a signup code and a "How did you hear about us?" field, since many viewers sign up later on another device. Judge each creator on cost per activated user after 30 days.

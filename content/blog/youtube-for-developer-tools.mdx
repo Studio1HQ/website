@@ -1,0 +1,254 @@
+---
+title: "YouTube for Developer Tools: How Devtools Grow a Channel"
+seoTitle: "YouTube for Developer Tools: How to Grow a Devtool Channel"
+slug: youtube-for-developer-tools
+description: "A devtool YouTube strategy that works: what to publish, picking topics from search, titles, chapters, Shorts, creators, metrics and a 90-day channel plan."
+tldrSummary: "Devtools grow on YouTube with a library of search-led tutorials and integration videos, not launch announcements. Pick topics from YouTube search suggestions, docs searches and support questions, link every video to the matching docs page and repo, and cut Shorts from each long video. Judge the channel by click-through rate, view duration and signups from tagged links, not subscribers."
+tldrBullets:
+  - "Publish what developers search for: one tutorial per task, integration videos with the tools your users already run, and a video for each release."
+  - "Choose topics from YouTube search suggestions, the Trends tab in YouTube Studio, your docs search queries and repeated support questions."
+  - "Give every video a task-first title, chapters and a description that links to one docs page and one repo with UTM tags, then cut 2 or 3 Shorts from it."
+  - "Run a 90-day plan of about 10 long videos and 20 Shorts, then keep the formats that send viewers to your docs and signups."
+date: 2026-11-07
+updatedDate: 2026-11-07
+draft: false
+authors:
+  - Arindam Majumder
+tags:
+  - youtube
+  - developer-video
+  - developer-marketing
+  - devrel
+bannerImage: /blog/uploads/youtube-for-developer-tools/cover.png
+---
+**The short answer:** Devtools grow on YouTube by publishing the videos developers already search for, not launch announcements. Build a library of task-led tutorials and integration walkthroughs, chosen from YouTube search suggestions, docs search queries and repeated support questions. Give each a title that names the task and the stack, chapters, and a description linking to the matching docs page and repo. Cut Shorts from every long video, add livestreams and talks only when you can sustain them, and judge the channel by click-through rate, view duration and signups, not subscribers.
+
+## What do devtool channels that work actually publish?
+
+We studied three devtool channels in November 2026. [Supabase](https://www.youtube.com/@Supabase/videos) is built around a [Getting Started playlist](https://www.youtube.com/playlist?list=PL5S4mPUpp4OsWK_UHmQK41DEgqefYeTPN) of eight tutorials, from a first project to auth, storage, realtime and Edge Functions. [Vercel](https://www.youtube.com/@VercelHQ/streams) leans on events: most of its playlists are Ship and Next.js Conf, plus livestreamed Community Sessions. [Prisma](https://www.youtube.com/@PrismaData/playlists) sorts by what the viewer needs, with a "New to Prisma" playlist of 12 how-to videos and a Releases playlist. Between them, they use six formats. For where YouTube fits among other video formats, read our [developer video marketing guide](/blog/developer-video-marketing); for writing each video, see [how to script a technical demo video](/blog/how-to-script-a-technical-demo-video).
+
+![Supabase's Getting Started playlist on YouTube: numbered tutorials for the database, auth, storage, realtime and Edge Functions](/blog/uploads/youtube-for-developer-tools/supabase-getting-started-playlist.webp "Supabase's Getting Started playlist: one episode for each part of the product.")
+
+| Format | What it does | Real example |
+| --- | --- | --- |
+| Search-led tutorial | Answers a task people type into YouTube, and keeps getting found | Supabase's "Getting Started with Supabase Auth" |
+| Integration video | Reaches the other tool's users, who search for both names | Supabase's [How to Use Supabase with n8n](https://www.youtube.com/watch?v=YR30uzwWoDM) |
+| Launch or release video | Tells users what changed, and doubles as your [Product Hunt demo video](/blog/product-hunt-launch-playbook) | Prisma's "What's New in Prisma 6.13" |
+| Livestream build or AMA | Builds a returning audience and surfaces questions | Supabase's Weekly Changelog, Vercel's Community Sessions |
+| Conference talk | Explains the idea behind the product | Vercel's Ship SF 2026 playlist |
+| Shorts cut from long videos | Reaches viewers who aren't searching yet | Supabase's "RLS explained in less than 40s" |
+
+Tutorials and integrations are the library search keeps finding. The other formats bring spikes.
+
+**Key pointers:**
+- Build a "Get started" playlist with one video per product area before anything else.
+- Make one integration video for each of the three tools your users most often pair with yours.
+
+## How do you choose topics developers search for?
+
+YouTube search weighs [relevance, engagement and quality](https://support.google.com/youtube/answer/16090438), and judges relevance by "how well the title, tags, description, and video content match your search query." So find the words people actually type, in four places:
+
+1. **YouTube search suggestions.** In a private window, type a task with your stack, such as "postgres pagination", and write down every autocomplete suggestion.
+2. **The Trends tab.** In YouTube Studio, open Analytics, then Trends. It shows [top searches from your audience over the last 28 days](https://support.google.com/youtube/answer/11962757) and flags content gaps, where "viewers can't find enough quality search results on YouTube for a specific search."
+3. **Your docs search.** Algolia, for example, lists your most popular searches and every search without results. As [Algolia puts it](https://www.algolia.com/doc/guides/search-analytics/concepts/metrics): "Either your users are searching for something you don't offer, or they can't find it." Both are video topics.
+4. **Support questions.** Export 90 days of tickets, Discord threads and GitHub issues labeled as questions, and group them by task.
+
+**Worksheet: score each topic** (one point per yes)
+
+| Topic, in the searcher's words | In YouTube suggestions? | In docs searches? | Asked 3+ times in support this quarter? | Has a docs page? | Result shown in the first minute? | Score |
+| --- | --- | --- | --- | --- | --- | --- |
+| add auth to a next.js app | | | | | | /5 |
+| cursor pagination in postgres | | | | | | /5 |
+
+Make the 5s first. A topic that scores 1 is a docs fix, not a video.
+
+**Key pointers:**
+- Spend one hour this week collecting suggestions for your five core tasks.
+- Pull your top 50 docs searches and every no-result search from the last 90 days.
+
+## How should a devtool title and package its videos?
+
+YouTube says tags ["play a minimal role"](https://support.google.com/youtube/answer/146402) in discovery and that the "title, thumbnail, and description are more important." The title does the search work.
+
+**Before and after: devtool video titles** (Acme is a placeholder)
+
+| Before | After | What changed |
+| --- | --- | --- |
+| Introducing Acme Realtime | Add live updates to a Next.js app with Postgres | The task and the stack people search |
+| Acme x LangChain | Store LangChain agent memory in Postgres (step by step) | The other tool's name, plus the job |
+| Acme 2.3 is here! | What's new in Acme 2.3: local dev without Docker | The version, then the change that matters |
+| Our CEO at DevConf | Moving auth checks into the database (DevConf 2026 talk) | The idea first, the event as context |
+
+Supabase's [SQL Pagination With Offset Might Be Making Your App 400x Slower](https://www.youtube.com/watch?v=WIaf17mdQE4) names a problem developers have. Prisma's "How to use Prisma 7 with Bun (step by step)" names both tools.
+
+**Template: title formulas**
+
+```text
+Tutorial:     [Do the task] in [framework] with [your tool]
+Integration:  [Your tool] + [other tool]: [what you build together]
+Problem:      Why [symptom developers see], and how to fix it
+Release:      What's new in [tool] [version]: [the change that matters]
+```
+
+On the thumbnail, show the error, the before and after number or the running app, in four words at most. YouTube recommends [3840 x 2160 pixels, a minimum width of 640 pixels and a 16:9 ratio, as JPG or PNG](https://support.google.com/youtube/answer/72431), from a verified account. Then [test up to 3 titles and thumbnails](https://support.google.com/youtube/answer/13861714) on your best video. Tests run on a computer only, not on Shorts, and YouTube picks the winner by watch time, not click-through rate.
+
+**Key pointers:**
+- Rename your five oldest tutorials so the task and the stack come first.
+- Put the error text or the result on the thumbnail, not your logo.
+
+## How do chapters and descriptions send viewers to docs and repos?
+
+Our [distribution playbook](/blog/how-to-distribute-technical-content-reddit-x-youtube) covers the basic chapter rules. Two more details: chapters you write override automatic ones, and they ["may appear in the transcripts"](https://support.google.com/youtube/answer/9884579). Name each after a step someone might search for, as Supabase's [Getting Started with Supabase Auth](https://www.youtube.com/watch?v=Ufx6fdRMxjU) does with "RLS anatomy" and "Three RLS policy examples".
+
+Supabase also tags description links with `utm_source=youtube` and, in most videos we checked, the video's ID as `utm_content`, so it can tell which video sent each visitor. Copy that, but point the first link at the docs page for the task, not your homepage.
+
+**Template: a devtool video description**
+
+```text
+Build [the task] with [your tool] and [framework]. [Who it's for and what they need first.]
+
+Docs for this video: https://docs.acme.dev/[page]?utm_source=youtube&utm_medium=video&utm_campaign=[video-slug]&utm_content=description
+Code: https://github.com/acme/[example-repo]
+Try it free: https://acme.dev/signup?utm_source=youtube&utm_medium=video&utm_campaign=[video-slug]&utm_content=description
+
+CHAPTERS
+00:00 What we're building
+00:40 [Step one, in search words]
+03:15 [Step two]
+07:50 [The common error and its fix]
+10:30 Deploy
+
+Versions: acme-js 2.3.1, Next.js 16, Node 22
+More tutorials: [playlist link]
+```
+
+Inside the video, add up to [5 cards](https://support.google.com/youtube/answer/6140493) and an end screen, which runs in the last 5 to 20 seconds of a video at least 25 seconds long, with [up to four elements](https://support.google.com/youtube/answer/6388789). External links in both need the YouTube Partner Program, so until then the description carries your docs link.
+
+**Key pointers:**
+- Make the first description link the docs page for the exact task in the video.
+- Give each placement its own `utm_content` value: description, pinned-comment, card.
+- Group videos into "Get started", "Integrations" and "Releases" playlists, and end each video on the next one.
+
+## What upload cadence can a small team sustain?
+
+Tie video to things that already happen. Supabase's Weekly Changelog livestream had reached [episode 15](https://www.youtube.com/@Supabase/streams) when we checked, and Prisma made a "What's New" video per version. A schedule tied to your release cycle survives busy months.
+
+| Team | Long videos | Shorts | Live and talks |
+| --- | --- | --- | --- |
+| A founder or engineer, part time | 2 a month: a tutorial and an integration or release video | 2 per long video | Upload talk recordings |
+| One DevRel person plus a freelance editor | 1 a week, alternating tutorials and integrations | 2 or 3 per long video | One live build or AMA a month |
+| A DevRel team or a video partner | 1 or 2 a week, plus one per release | 3 per long video | A weekly show, like a changelog stream |
+
+YouTube can archive streams under 12 hours automatically, warns that longer ones ["may not be captured at all"](https://support.google.com/youtube/answer/6247592), and recommends recording a local copy. Do that anyway, so you have a clean file to cut Shorts from.
+
+**Key pointers:**
+- Pick the row you can keep for 90 days, not the one you can manage for a month.
+- Put the next four video dates on your release calendar, next to the versions they cover.
+
+## How do you turn one long video into Shorts, clips and a blog post?
+
+In March 2026, Supabase published the 4:37 pagination video above. Three weeks later it posted the same point as a 49-second Short, [SQL making your app 400x slower](https://www.youtube.com/shorts/JEFwq04IGaM), reusing the same one-line summary. In November 2026, the long video showed about 43K views and the Short about 324K. Shorts reach people who weren't searching. The long video is what search keeps finding.
+
+YouTube Studio's [Clips and Shorts tool](https://support.google.com/youtube/answer/15824265) cuts a segment from the transcript or timeline and sets the source video as the new Short's related video. Shorts can run [up to three minutes, square or vertical](https://support.google.com/youtube/answer/15424877). For Shorts edited elsewhere, set the [Related Video field](https://support.google.com/youtube/answer/14075157), which gives viewers "a clickable link below your channel handle."
+
+**Template: one 12-minute tutorial, four assets**
+
+| Asset | Cut from | Where it goes | Link back |
+| --- | --- | --- | --- |
+| The full tutorial | The whole recording | YouTube, embedded on the matching docs page | Docs link and repo first in the description |
+| 2 or 3 Shorts | The result, an error and its fix, one surprising number | YouTube Shorts | Related video set to the tutorial |
+| 1 or 2 captioned clips | The same moments | X and LinkedIn | Tutorial link in the post or first reply |
+| Written tutorial | The transcript, cleaned up, with code blocks | Your blog | The video embedded at the top |
+
+**Key pointers:**
+- Mark the Short moments in the script outline before you record.
+- Set the related video on every Short to its long tutorial.
+
+## Should you work with developer creators or build your own channel?
+
+Both, for different jobs. Your channel holds the library that search and your docs keep sending people to. Creators lend an audience that already trusts them. Our guide to [developer influencer marketing](/blog/developer-influencer-marketing) covers vetting, briefs and disclosure.
+
+| Option | Best for | What you control | Watch out for |
+| --- | --- | --- | --- |
+| Your own channel | Tutorials, integrations, releases, docs embeds | Topics, titles, links | Few impressions until the library grows |
+| Sponsored creator video | Launches, reaching a new stack or community | The brief, not the script | Their viewers must use your stack. Disclosure is required |
+| YouTube Collab | Joint tutorials and live builds | Shared with the creator | Both channels must agree on the video |
+
+YouTube's Collaborations feature lets you [invite up to 10 creators](https://support.google.com/youtube/answer/16554898) to a video or a Short, with the stated goal "to recommend the video to the audiences of both the collaborators and the channel where the video was posted." Paid videos need the [Paid Promotion setting](https://support.google.com/youtube/answer/154235), which adds a disclosure label at the start.
+
+Pick creators by audience, not size. When Studio1 supported developer creator collaborations for Memori, the filter was "technical fit and audience quality." Then match the format: on a channel of tool tests, like Arindam's [@Arindam_1729](https://www.youtube.com/@Arindam_1729), your product fits as the subject of a real test, not an ad read.
+
+**Key pointers:**
+- Shortlist creators whose last ten videos use your stack.
+- Give each creator your docs link with their own `utm_content` value.
+- Collect creator videos in a playlist on your channel, as Prisma does with "Prisma Videos We Love, Spotted on YouTube".
+
+## What should you measure in YouTube Analytics?
+
+Subscriber count tells you who asked to hear from you, not whether a video taught anyone your product. Measure the chain from impression to signup.
+
+| Metric | Where to find it | If it's weak |
+| --- | --- | --- |
+| Impressions click-through rate | Reach tab | Rewrite the title in search words, then test thumbnails |
+| YouTube search terms | Reach tab, YouTube search card | Make the next video for a query you rank for but didn't target |
+| Average view duration | Engagement tab | Cut the setup and show the result first |
+| Intro (share still watching at 30 seconds) | Key moments for audience retention | Move the result into the first 10 seconds |
+| Docs visits from YouTube | Web analytics, by UTM | Make the docs link first and say it aloud |
+| Signups or API keys from YouTube | Product analytics, by UTM | Fix the docs page the video points to |
+
+YouTube says [half of all channels and videos have an impressions CTR between 2% and 10%](https://support.google.com/youtube/answer/7628154), and that widely shown videos, such as those on the Home page, naturally get lower rates. [Average view duration](https://support.google.com/youtube/answer/1715144) is "average minutes watched among those who stayed to watch," and the [retention report](https://support.google.com/youtube/answer/9314415) compares each video with your 10 latest of similar length. The [YouTube search traffic source](https://support.google.com/youtube/answer/9314355) shows the exact terms viewers used.
+
+For docs visits and signups, Google Analytics says you ["should always use utm_source, utm_medium, and utm_campaign"](https://support.google.com/analytics/answer/10917952). Our guide to [measuring content ROI beyond pageviews](/blog/developer-tool-content-roi-beyond-pageviews) covers the rest of that chain.
+
+**Key pointers:**
+- Check the search terms for every tutorial 28 days after it goes live.
+- Report docs visits and signups per video next to views every month.
+- Compare CTR only between your own videos from the same traffic source.
+
+## Template: a 90-day devtool YouTube plan
+
+This is the middle row of the cadence table. A part-time founder can halve it.
+
+| Weeks | Publish | Set up or repurpose | Check |
+| --- | --- | --- | --- |
+| 1 to 2 | Nothing yet | Score 20 topics. Create three playlists. Save the description template and UTM names | Baseline views and docs visits |
+| 3 to 4 | Tutorials 1 and 2 | 2 Shorts each. Embed both on their docs pages | CTR and Intro after 7 days |
+| 5 to 6 | Tutorial 3, integration video 1 | Written tutorial from tutorial 1 | Search terms for tutorials 1 and 2 |
+| 7 to 8 | Tutorial 4, a release video | Title test on the best tutorial | Docs visits per video |
+| 9 to 10 | Integration video 2, a live build | Shorts from the stream. One creator video | Live questions go into the topic sheet |
+| 11 to 12 | Tutorials 5 and 6 | Written tutorials from the two best videos | Signups by video |
+| 13 | Review | Drop the format with the fewest docs visits. Re-score topics | Every metric against weeks 3 to 4 |
+
+That's about 10 long videos and 20 Shorts, each tied to a docs page.
+
+## How Studio1 has done this
+
+Studio1's video work for devtools has mostly sat inside wider programs, so these results belong to the programs, not to one channel.
+
+* **Nebius.** Across nearly two years with Nebius Token Factory, Studio1 shipped 40+ videos and shorts alongside 45+ articles, so most technical topics had both a written and a video version.
+* **Corsair.** Studio1 built [Brieflane](https://github.com/Studio1HQ/brieflane), which turns meeting transcripts into Linear issues and Slack updates, and shared it as an open-source demo with a walkthrough video. With onboarding audits, hackathons and posts, the repo grew from about 300 to 2,000 GitHub stars in roughly five weeks. [Read the Corsair case study](/case-studies/corsair).
+* **Memori and OpenLore.** Memori's 12 demo agents were packaged into formats like a launch video on X, with developer creator collaborations alongside, on the way from launch to 12,000+ GitHub stars. For OpenLore, a launch video on X ran next to talks, and stars jumped after each session. Read the [Memori](/case-studies/memori) and [OpenLore](/case-studies/openlore) case studies.
+
+If your team knows what developers search for but has no time to build the demo and produce the video, our [developer video production](/developer-video-production) team plans the topic calendar, builds demo projects, and handles scripts, edits, thumbnails, titles, descriptions and chapters. For creator campaigns, see our [influencer marketing service](/influencer-marketing-agency).
+
+## FAQ
+
+### How long does it take a devtool YouTube channel to grow?
+
+There's no reliable timeline, so publish steadily for at least 90 days before judging. YouTube benchmarks retention against your 10 latest videos of similar length, so your own numbers only mean much once you have a library.
+
+### Should a devtool make Shorts or long videos?
+
+Both, from the same recording. Long tutorials are what search and docs embeds keep finding, and Shorts reach people who aren't searching yet. Supabase's 49-second Short on OFFSET pagination drew far more views than the video it came from.
+
+### Do tags help devtool videos rank on YouTube?
+
+Barely. YouTube says tags play a minimal role in discovery, except for commonly misspelled terms, and that the title, thumbnail and description matter more. Put the task and the stack in the title instead.
+
+### What is a good click-through rate for a developer video?
+
+YouTube says half of all channels and videos have an impressions CTR between 2% and 10%, and that widely shown videos get lower rates. Compare each video with your own past videos from the same traffic source.
+
+### Should we build our own channel or pay developer creators?
+
+Build your own channel for the tutorial library, because it keeps working in search and on docs pages. Use creators for launches and for reaching a stack you don't reach yet, chosen by whether their viewers use your stack.

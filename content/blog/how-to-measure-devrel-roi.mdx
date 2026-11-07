@@ -1,0 +1,297 @@
+---
+title: "How to Measure DevRel ROI: Metrics That Show Real Developer Adoption"
+seoTitle: "How to Measure DevRel ROI: Metrics That Show Adoption"
+slug: how-to-measure-devrel-roi
+description: "DevRel metrics that prove ROI: a metric tree from reach to revenue, attribution that works for developers, and a monthly scorecard template for your board."
+tldrSummary: "Measure DevRel ROI as a chain: reach, engagement, activation, retention and revenue influence, with two or three metrics at each level. Attribute signups with UTM links, a \"How did you hear about us?\" field, stored signup source and influenced pipeline, then report leading indicators monthly and revenue quarterly."
+tldrBullets:
+  - "Build a metric tree from reach to revenue influence and pick two or three metrics per level, so every number on the report connects to adoption."
+  - "Combine four attribution methods, because no single one survives dark social: UTM links, self-reported attribution at signup, stored first-touch source and influenced pipeline."
+  - "Report leading indicators like quickstart completion every month and lagging ones like influenced pipeline every quarter, using the same one-page scorecard each time."
+  - "Stop reporting followers, raw GitHub stars and event headcount on their own; pair each with a downstream number such as activations or feedback shipped."
+date: 2026-11-07
+updatedDate: 2026-11-07
+draft: false
+authors:
+  - Arindam Majumder
+tags:
+  - devrel
+  - analytics
+  - developer-marketing
+  - community
+bannerImage: /blog/uploads/how-to-measure-devrel-roi/cover.png
+---
+**The short answer:** Measure DevRel ROI as a chain, not one number. Track two or three metrics at each level: reach (who saw the work), engagement (who responded), activation (who signed up and made a first successful call), retention (who is still active weeks later) and revenue influence (pipeline and deals with a DevRel touch). Attribute with UTM links, a "How did you hear about us?" field, stored signup source and influenced pipeline. Report leading indicators monthly, revenue quarterly, and never report followers, stars or event headcount alone.
+
+## Why is DevRel ROI so hard to measure?
+
+1. **Long cycles.** A developer tries your free tier on a side project and brings it to work months later, often under a different email address.
+2. **Many touches.** In Studio1's [one-month OpenLore engagement](/case-studies/openlore), developers could meet the product through a talk, a hackathon, an X Article, a daily.dev post, a Reddit thread or one of 200+ LinkedIn posts and comments by other developers. Which one gets credit for a star?
+3. **Dark social.** Developers share links in Slack, Discord and DMs, and those visits arrive with no referrer. Google Analytics shows [missing campaign parameters as "(not set)"](https://support.google.com/analytics/answer/10917952), and GitHub's [traffic page keeps only 14 days of data and leaves search engines out of referring sites](https://docs.github.com/en/repositories/viewing-activity-and-data-for-your-repository/viewing-traffic-to-a-repository).
+
+Most teams haven't solved this. In the [2024 State of Developer Relations report](https://www.stateofdeveloperrelations.com/2024devrelreport) (310 respondents), the top success metric was active users at 44.3%. Only 17.5% measured revenue influenced, 6.5% revenue generated, and 7.3% didn't measure their program at all.
+
+![State of DevRel 2024 chart of DevRel success metrics by stage, with active users on top at 44.3% and 7.3% not measuring](/blog/uploads/how-to-measure-devrel-roi/state-of-devrel-2024-metrics.webp "How DevRel teams measure success. Only 6.5% picked revenue generated (State of DevRel 2024).")
+
+**Key pointers:**
+- Every two weeks, open your repo's Insights tab, then Traffic, and paste the referring sites into a sheet before GitHub drops them.
+- Combine several attribution methods, because some credit will always stay unknown.
+
+## Which DevRel measurement frameworks are worth borrowing?
+
+### AAARRRP: pick goals before metrics
+
+Phil Leggetter adapted [AAARRRP](https://www.leggetter.co.uk/aaarrrp/) in 2016 from the AARRR "pirate metrics." Its seven stages are Awareness, Acquisition, Activation, Retention, Referral, Revenue and Product, where Product means users and the DevRel team "help define and build the product." You pick your goal stages, then map activities to them. At Nexmo, his team scored activities with `(Product weighting + Awareness weighting) * Goal alignment`, which pointed them at docs-to-tutorials, sample apps, blog tutorials and hackathons.
+
+### The Orbit Model: measure community depth
+
+The [Orbit Model](https://orbit-model.joshed.io/) rates members by love (involvement and responsibility) and reach (connectedness and influence), and sorts them into four levels from the outside in: Explorers, Participants, Contributors and Advocates. Its [GitHub repo](https://github.com/orbit-love/orbit-model) says it is no longer actively developed, but the idea holds: count who moves one level inward each month, not who joined.
+
+### DevRel Qualified Leads: count the handoffs
+
+Mary Thengvall [introduced DevRel Qualified Leads](https://marythengvall.com/blog/2019/12/14/devrel-qualified-leads-repurposing-a-common-business-metrics-to-prove-value) in 2019. A DQL is anyone from the community who can "contribute value to the company in some way," passed to the team that owns the next step: Marketing, Product, Engineering, Partnerships, Recruiting or Sales. A buyer goes to Sales, and a member who found a hard bug and will help fix it goes to Engineering. She recommends logging each one and reviewing the log monthly, quarterly or yearly.
+
+**Key pointers:**
+- Write down which AAARRRP stages are this year's goals before choosing any metric. If Revenue isn't one, say so in the report.
+- Start a DQL log this week (template below), so DevRel's handoffs to Sales and Product stop being invisible.
+
+## The DevRel metric tree: from reach to revenue
+
+Pick two or three metrics per level, or nobody reads the report.
+
+| Level | Question | Example DevRel metrics | Data source |
+| --- | --- | --- | --- |
+| **Reach** | Did the right developers see it? | Visitors to tutorials and docs entry pages, talk and video views, community post impressions | Web analytics, platform insights, GitHub Traffic |
+| **Engagement** | Did they respond? | Questions, non-staff replies in Discord or Slack, clicks from content to docs | Community tools, web analytics, event notes |
+| **Activation** | Did they get a first result? | Signups with a DevRel first touch, quickstart completion, first successful API call within 7 days | Product analytics, signup database |
+| **Retention** | Did they stay? | DevRel-sourced developers active in week 4, returning community members, contributors with a second merged PR | Product analytics, GitHub |
+| **Revenue influence** | Did it help the business? | Sourced and influenced pipeline, DQLs handed to Sales, expansion in community accounts | CRM, DQL log |
+| **Product** (side branch) | Did developers shape the product? | Feedback items filed and shipped, bugs reported by the community | Issue tracker, DQL log |
+
+For per-asset content metrics, read [how to measure developer content ROI beyond pageviews](/blog/developer-tool-content-roi-beyond-pageviews).
+
+**Key pointers:**
+- Put one owner and one data source next to every metric. A metric with no source gets guessed at by month three.
+- Define "activated" in one sentence your engineers agree with, such as "made a first successful API call."
+
+## Leading vs lagging DevRel metrics
+
+Lagging metrics prove ROI but arrive late. Leading metrics move within weeks and predict them. Report both, on different clocks.
+
+| Leading indicator (review monthly) | Lagging outcome it predicts (review quarterly) |
+| --- | --- |
+| Quickstart completion and time to first successful call | Week-4 active developers |
+| Clicks from DevRel content to docs or signup | DevRel-sourced signups |
+| Share of community questions answered by non-staff | Retention and support load |
+| Hackathon attendees who run the demo | Activated developers from events |
+| DQLs handed to Sales | Influenced pipeline and closed revenue |
+
+A good leading indicator moves as soon as a fix ships. After Studio1's first onboarding audit for [Corsair](/case-studies/corsair), the team reworked the hosted app and shipped a quick start that reaches a working example in under a minute. You can measure time to first working call that week, long before revenue moves.
+
+**Key pointers:**
+- Pair one leading indicator with each lagging outcome and print the pairs at the top of your scorecard.
+- In a program's first quarter, judge it on whether the leading indicators moved.
+
+## How do you attribute developer signups to DevRel?
+
+Use four methods together. Each covers a gap in the others.
+
+### 1. UTM links and referral codes
+
+Google Analytics says to [always use utm_source, utm_medium and utm_campaign](https://support.google.com/analytics/answer/10917952), and values are case-sensitive, so `Reddit` and `reddit` become two sources. Fix the naming once.
+
+**Template: DevRel UTM convention**
+
+```text
+utm_source   = reddit | x | linkedin | dailydev | youtube | github | <event-slug>
+utm_medium   = community | social | video | talk | hackathon | partner | creator
+utm_campaign = 2026-11-<campaign-slug>
+utm_content  = <post-or-asset-id>
+
+https://yourtool.dev/docs/quickstart?utm_source=devfest-pune&utm_medium=talk&utm_campaign=2026-11-agent-memory&utm_content=slide-qr
+```
+
+Put a QR code on every talk's last slide, give each event its own credit code, and give each creator a referral link.
+
+### 2. Self-reported attribution
+
+One optional signup question catches the Slack thread, the friend and the AI assistant that UTMs miss.
+
+| | The question |
+| --- | --- |
+| **Before (weak)** | "How did you hear about us?" with a dropdown: Search, Social media, Friend, Other |
+| **After (strong)** | "Where did you first hear about [product]? A post, a person, a talk, an AI tool, anything helps." Free text, optional |
+
+Each week, tag the answers into your utm_medium buckets. Free text names the exact thread or talk. "Social media" never will.
+
+### 3. Signup source on the user record
+
+Save the first touch on landing and send it with the signup form, so it lives in your database, not only in analytics. Check it against your cookie consent setup first.
+
+```js
+// Save the first touch once, then add it to the signup payload
+const params = new URLSearchParams(window.location.search);
+if (!localStorage.getItem("first_touch")) {
+  localStorage.setItem(
+    "first_touch",
+    JSON.stringify({
+      source: params.get("utm_source") || document.referrer || "direct",
+      medium: params.get("utm_medium"),
+      campaign: params.get("utm_campaign"),
+      landing: window.location.pathname,
+      at: new Date().toISOString(),
+    })
+  );
+}
+```
+
+### 4. Sourced and influenced pipeline
+
+**Template: pipeline rules to agree with Sales**
+
+```text
+DevRel-sourced: the account's first known touch was DevRel
+  (DevRel UTM on first visit, or a self-reported answer mapped to a DevRel channel).
+DevRel-influenced: any contact at the account had a DevRel touch in the 90 days
+  before the opportunity was created (event check-in, community question,
+  DevRel UTM visit, DQL handoff).
+Report both. Never add influenced pipeline across teams: several teams touch one deal.
+```
+
+Start with 90 days and adjust the window to your sales cycle.
+
+**Template: DQL log**
+
+| Date | Person and company | Where you met | Handed to | Why | Outcome |
+| --- | --- | --- | --- | --- | --- |
+| [date] | [name, company] | [Discord, talk, GitHub issue] | [Sales, Product, Engineering, Partnerships, Marketing, Recruiting] | [one line] | [call booked, beta, PR merged, none yet] |
+
+**Key pointers:**
+- Paste the UTM convention into your team wiki and add "every link tagged" to your launch checklist.
+- Ship the free-text "Where did you first hear about us?" field this sprint. It is one input and one database column.
+
+## What should DevRel measure at each company stage?
+
+The State of DevRel report found that small companies (fewer than 201 employees) are mainly developer tools and report DevRel directly to the CEO. At that stage, the founder is the audience for every number. Our [DevRel for startups](/blog/devrel-for-startups) plan covers who owns DevRel at each stage.
+
+| Stage | DevRel's main job | Primary metric | Supporting metrics | Too early to headline |
+| --- | --- | --- | --- | --- |
+| Pre-seed | Learn who the product is for | Named developers using it weekly | Feedback items, time to first call | Pipeline, revenue |
+| Seed | Get developers to a first success | Activation rate of new signups | Quickstart completion, week-4 retention, signups by source | Influenced revenue |
+| Series A | Find a repeatable channel | Activated developers by source | Cost per activated developer by channel, DQLs, sourced pipeline | Brand awareness |
+| Series B and later | Tie DevRel to revenue | Sourced and influenced pipeline | Retention by cohort, expansion in community accounts | Raw reach |
+| Open-source project | Grow users and contributors | Monthly installs or active users, plus returning contributors | Orbit level movement, time to first merged PR | Stars |
+
+Still deciding who runs the program? Compare a [DevRel agency with an in-house hire](/blog/devrel-agency-vs-in-house-devrel-hire).
+
+**Key pointers:**
+- Pick one primary metric for the next two quarters and drop work that doesn't move it.
+- At seed stage, put activation rate on the founder's weekly dashboard instead of impressions.
+
+## A monthly DevRel scorecard template
+
+**Template, not real data.** Replace every X and keep the rows identical each month so trends show. Our [fractional DevRel guide](/blog/fractional-devrel) gives the same advice: one page, same numbers every month.
+
+| Level | Metric | This month | Last month | 3-month trend | Owner |
+| --- | --- | --- | --- | --- | --- |
+| Reach | Visitors to tutorials, docs entry pages and talk videos | X | X | up, flat or down | DevRel |
+| Engagement | Clicks from DevRel content to docs or signup | X | X | up, flat or down | DevRel |
+| Engagement | Non-staff replies in community channels | X | X | up, flat or down | Community |
+| Activation | Signups with a DevRel first touch | X | X | up, flat or down | Growth |
+| Activation | Share of those with a first successful call in 7 days | X% | X% | up, flat or down | Product |
+| Retention | DevRel-sourced developers active in week 4 | X% | X% | up, flat or down | Product |
+| Revenue influence | Sourced and influenced pipeline | $X and $X | $X and $X | up, flat or down | Sales |
+| Product | Feedback items filed and shipped | X and X | X and X | up, flat or down | Product |
+| DQLs | Handed to Sales, Product, Engineering, Partnerships | X | X | up, flat or down | DevRel |
+
+Under the table, add five lines:
+
+```text
+Headline:   the one number that moved, and why.
+Shipped:    3 to 5 items (talks, tutorials, demos, launches), each linked.
+Learned:    the top 3 developer questions or complaints, and who owns each fix.
+Next month: 2 bets, each tied to one row above.
+Asks:       what DevRel needs from Product, Engineering or Sales.
+```
+
+**Key pointers:**
+- Send it on the same day each month with the same rows, even when a number drops.
+- Fill in the Asks line every time. It is how docs fixes get engineering time.
+
+## How to report DevRel ROI to founders and the board
+
+In the 2024 State of DevRel report, 62.3% of respondents said DevRel's value was communicated up to founders or the C-level, but only 33.1% said it reached Sales teams. Close that gap by reporting in the terms Sales already uses.
+
+| | Board update |
+| --- | --- |
+| **Before (activity)** | "This quarter: X.XM impressions, +X,XXX followers, 3 conferences, XXX booth scans." |
+| **After (adoption)** | "This quarter: X developers activated from DevRel channels (X% of all activations). Their week-4 retention was X% vs X% for paid signups. X of X new opportunities had a DevRel touch in the 90 days before they opened. Next quarter we double the hackathon track, because it produced the best-retained cohort." |
+
+**Template: one board slide**
+
+1. Title: the outcome in one line, such as "DevRel-sourced developers retain better than paid."
+2. Three numbers: activated developers from DevRel, their week-4 retention, influenced pipeline.
+3. One chart: activations by source over six months.
+4. One line on what you will stop, and one on what you will double.
+
+**Key pointers:**
+- Lead with activation and retention. Put reach in the appendix.
+- Show DQLs by receiving team, which turns "community work" into handoffs a board recognizes.
+
+## Which vanity metrics should you stop reporting alone?
+
+Each of these misleads without a number from further down the tree.
+
+| Vanity metric | Why it misleads alone | Report it with |
+| --- | --- | --- |
+| Followers | Measures audience size, not product interest | Clicks to docs and signups from that channel |
+| Raw GitHub stars | A star is a bookmark, and stars can be bought. One study flagged about [six million suspected fake stars](https://arxiv.org/abs/2412.13459) and found they only have a short-term promotion effect | Installs, active users, returning contributors |
+| Event headcount | A full room isn't a room of users | Conversations logged, demo runs, signups on the event code |
+| Impressions | Platforms count them differently, and a scroll past counts | Clicks to docs and comments with real questions |
+| Discord or Slack members | Joining is one click, and most members go quiet | Weekly non-staff posters, questions answered by the community |
+
+Memori shows the difference. Its MongoDB Kolkata meetup talk drew 150+ attendees, but the value was what came back: "sharp technical questions from developers evaluating memory architectures in real time."
+
+**Key pointers:**
+- Move followers, member counts and impressions to the bottom of the report.
+- Never put a star count on a slide without installs or active users beside it.
+
+## What Studio1's DevRel case studies measured
+
+| Client | What was measured | Level |
+| --- | --- | --- |
+| [OpenLore](/case-studies/openlore) | About 135 to 1,700+ stars in one month; 100K+ impressions; 200+ LinkedIn posts and comments; feature requests fed back to the founders | Reach, engagement, product |
+| [Corsair](/case-studies/corsair) | About 300 to 2,000 stars in roughly five weeks; a quick start that reaches a working example in under a minute | Engagement, activation |
+| [Memori](/case-studies/memori) | 0 to 12,000+ stars; 50K+ Reddit launch impressions; 100+ developer comments that shaped onboarding, docs and the v2 roadmap | Reach, engagement, product |
+| [Entelligence AI](/case-studies/entelligence-ai) | 304K+ impressions from Reddit | Reach |
+| [Jozu](/case-studies/jozu) | Booth conversations at KubeCon India and DevFest Pune 2025 that showed where docs or demos could become clearer | Engagement, product |
+
+Two lessons. First, timing does much of the attribution. OpenLore's stars "jumped after each session," and many of Corsair's hackathon builders "starred it afterward," next to a dated climb from about 300 stars in mid-May to 2,000 by mid-June. Annotating events on a star or signup chart is the cheapest attribution there is. Second, none of these public numbers is revenue. That data sits in each client's product analytics and CRM, which is why the scorecard has owners outside DevRel.
+
+> "We've used Studio1 to lead our open source and closed source community building and developer awareness work for just over a year. Their contributions and work has helped us drive adoption and awareness with our audience. Their team has deep experience in our space, interfacing with our team perfectly, and going above to help us grow."
+>
+> **Jesse Williams**, Co-Founder & COO, Jozu
+
+If you want a team to run the community programs, launches and demos, with growth and adoption reporting included, see our [developer relations and growth campaigns](/developer-relations-growth-campaigns) service. For the community side of the tree, read [why developer communities matter for early-stage startups](/blog/why-developer-communities-matter).
+
+## FAQ
+
+### What are the most important DevRel metrics?
+
+Pick two or three per level: reach, engagement, activation, retention and revenue influence. For most devtool startups, activation (signups that make a first successful call) and week-4 retention of DevRel-sourced developers matter most.
+
+### How do you calculate DevRel ROI?
+
+Take the gross margin from DevRel-sourced accounts over 12 months, subtract the program's full cost (salaries, fees, events, tools), and divide by that cost. Show influenced pipeline next to that figure, never added to it, because several teams touch the same deal.
+
+### How long does it take to see DevRel ROI?
+
+Leading indicators can move within weeks, since a quickstart fix shows up in time to first call as soon as it ships. Pipeline and revenue need a few quarters of data, so set separate milestones for each.
+
+### What is a DevRel Qualified Lead?
+
+It is a community member who can add value to the company, handed to the team that owns the next step, such as Sales for a buyer or Product for a beta tester. Mary Thengvall introduced the term in 2019.
+
+### Should DevRel be measured on revenue?
+
+On revenue influence, yes, once you have a sales motion and Sales has agreed to the sourced and influenced rules. Before that, measure activation and retention, which predict revenue and which DevRel can move directly.

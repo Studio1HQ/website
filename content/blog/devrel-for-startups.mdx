@@ -1,0 +1,276 @@
+---
+title: "DevRel for Startups: A Stage-by-Stage Plan and When to Make Your First DevRel Hire"
+seoTitle: "DevRel for Startups: Stage-by-Stage Plan and First Hire"
+slug: devrel-for-startups
+description: "DevRel for startups: what DevRel owns from pre-PMF to Series A, why founder-led DevRel works early, when to make your first DevRel hire, and how to measure it."
+tldrSummary: "A startup should run DevRel in stages. The founder runs it personally before product-market fit, the founder plus outside help covers it at seed, and a dedicated owner takes over around Series A. Make the first DevRel hire when strangers succeed without your help and the founder has become the bottleneck, and for most devtools, hire an engineer who writes."
+tldrBullets:
+  - "DevRel at a startup is four jobs: education and content, community, the product feedback loop, and distribution and advocacy. What each job owns changes with the stage."
+  - "Before product-market fit, founder-led DevRel works best, because a founder can answer the hardest question in a thread and change the product the same day."
+  - "Hire the first DevRel person when strangers succeed without help, the founder is the bottleneck, you know which channels work, and the role can have its own budget and goals."
+  - "Measure active users and activation, not followers. Active users was the top success metric (44.3%) in the 2024 State of DevRel report."
+date: 2026-11-07
+updatedDate: 2026-11-07
+draft: false
+authors:
+  - Arindam Majumder
+tags:
+  - devrel
+  - startups
+  - community
+  - developer-marketing
+bannerImage: /blog/uploads/devrel-for-startups/cover.png
+---
+**The short answer:** A startup should do DevRel in stages. Before product-market fit, the founder runs it personally: onboarding early users, answering developer threads and carrying feedback into the product. At seed, the founder keeps the feedback loop and adds fractional or agency help for content, demos and launches. Around Series A, a dedicated owner takes over. Make the first DevRel hire when strangers succeed without your help and the founder has become the bottleneck. For most devtools, that first hire should be an engineer who writes.
+
+## What does DevRel mean at a startup?
+
+At a large company, DevRel is a department. At a startup, it is four jobs:
+
+1. **Education and content.** The quickstart, README, tutorials, sample repos and comparison pages that get a developer to a working result.
+2. **Community.** One public place where developers get answers, and later, programs that let your best users teach others.
+3. **The product feedback loop.** Turning what developers ask into docs fixes, issues and roadmap items, then telling them when the fix ships.
+4. **Distribution and advocacy.** Putting the product where developers already talk: Reddit, Hacker News, X, YouTube, meetups, talks and integrations.
+
+That matches where practitioners spend their time. The [2024 State of DevRel report](https://stateofdeveloperrelations.com/2024devrelreport), a survey of 310 practitioners, found content development for education was the top job activity (50.3%), followed by documentation (43.5%) and advocacy (43.2%). Sales support came last at 4.2%. For where DevRel ends and marketing begins, see [DevRel vs developer marketing](/blog/devrel-vs-developer-marketing).
+
+You don't need a DevRel title to start. Our playbook on [getting developer adoption without a DevRel team](/blog/developer-adoption-without-devrel-team) shows how to split these jobs across a founder and engineers. This guide covers what comes next: how the jobs change by stage, and when and whom to hire.
+
+**Key pointers:**
+- Write the four jobs on one page with a single name next to each. A job with no name isn't happening.
+- For each job, name one artifact it ships this month, such as "a quickstart that reaches a first API call."
+
+## Why founder-led DevRel works before product-market fit
+
+Before product-market fit, the founder is usually the best DevRel person the company has. A developer asking "why not just use Postgres?" in a Reddit thread wants an answer from the person who made that call, and a founder can change the product the same day.
+
+Paul Graham called this [doing things that don't scale](https://paulgraham.com/ds.html): the most common unscalable thing founders do at the start is recruit users manually. PostHog is the devtool version. Co-founder James Hawkins [describes their first 1,000 users](https://newsletter.posthog.com/p/how-we-got-our-first-1000-users): onboarding early users by hand over chat and in person, cold outreach, and talking to every existing user. They launched on Hacker News only once users could sign up and use the product without the team's help, and reached 300 deployments within a couple of days, five weeks after they started building. Supabase built the same idea into its launches: [the person who implements a feature writes its launch content](https://supabase.com/blog/2021/11/26/supabase-how-we-launch).
+
+The survey data agrees. DevRel at small companies (under 201 employees) [mainly reports directly to the CEO](https://stateofdeveloperrelations.com/2024devrelreport), and the share of programs reporting to the CEO rose from 12% in 2020 to 20.3% in 2024.
+
+### Template: the founder's 5-hour DevRel week
+
+```text
+Monday     30 min  Run the quickstart on a fresh machine. Note every step where you had to guess.
+Tuesday    60 min  Reply in the threads where your users talk (Reddit, HN, GitHub Discussions, Discord).
+Wednesday  90 min  Write or review one post that answers a question developers ask when evaluating tools like yours.
+Thursday   60 min  Two 30-minute calls with developers who signed up this week.
+Friday     30 min  Feedback triage: anything asked twice becomes a docs fix, an issue or a roadmap item.
+```
+
+Framing matters as much as the channel. **Before:** Memori's plain Show HN post earned 17 points. **After:** a post framed around a debate developers were already having, ["Everyone's trying vectors and graphs for AI memory. We went back to SQL"](https://news.ycombinator.com/item?id=45329322), reached 136 points and 63 comments. Our [Product Hunt launch playbook](/blog/product-hunt-launch-playbook) covers that launch.
+
+**Key pointers:**
+- Block the five hours on the founder's calendar before anything else lands there.
+- Reply fast. Hawkins tells founders to aim for a reply within 30 seconds when an early user messages back.
+- Open posts with the tradeoff you made and why, not with what the product is.
+- Don't launch on Hacker News until a stranger can reach a working result without you.
+
+## A stage-by-stage DevRel plan: pre-PMF, seed and Series A
+
+The four jobs stay the same. What each one owns, and who does it, changes as the product settles. This table is our recommendation, not survey data.
+
+| | Pre-product-market fit | Seed | Series A |
+| --- | --- | --- | --- |
+| **Main goal** | Find developers who get value without your help | Make the path to first success repeatable | Scale the channels that work under a dedicated owner |
+| **Education and content** | Quickstart, README, 3 to 5 answers to evaluation questions | One tutorial, demo or comparison page a week | Docs program, integration guides, launch weeks |
+| **Community** | Founder DMs and a small Slack or Discord | One public home, answered within a day by an engineer rotation | Champions program, meetups, events |
+| **Product feedback loop** | Founder takes every call and ships fixes that week | Repeated questions triaged in the weekly product meeting | DevRel sends product a monthly feedback report |
+| **Distribution and advocacy** | Founder posts and launches: Show HN, Reddit, X | A version of every post for each channel, first talks and hackathons | Conference talks, partner integrations, creator collaborations |
+| **Who does it** | Founder plus engineers | Founder plus fractional or agency help | First full-time hire, often with outside production help |
+| **What to measure** | Who reached a working result, and what they asked | Activation rate by channel | Active users, retention, revenue influenced |
+
+"Seed" and "Series A" here describe how settled the product is, not the funding round. Open-source projects move faster, because GitHub issues give you a public feedback loop from day one (see our [open-source growth guide](/blog/how-to-grow-an-open-source-project)).
+
+### Checklist: are you ready for the next column?
+
+- **Pre-PMF to seed:** a developer you have never spoken to reached a working result, and you know the question most new users ask first.
+- **Seed to Series A:** you can name the two channels that bring in developers who activate, and the founder misses replies or posts most weeks.
+- **Beyond Series A:** the DevRel owner runs a quarterly plan with its own budget, and the founder only covers the threads and talks that need them.
+
+**Key pointers:**
+- Place yourself by behavior, not funding: can a stranger reach a working result without you?
+- At seed, hand off content first. It is the easiest job to delegate and the one founders drop first.
+- At Series A, keep the founder in the feedback loop after the hire starts.
+
+## When should a startup make its first DevRel hire?
+
+Make the first full-time DevRel hire when all four of these are true:
+
+1. **Strangers succeed without you.** Developers you have never met sign up and reach a working result, the same test PostHog used before its launch.
+2. **The founder is the bottleneck.** Threads go unanswered for days, the weekly post slips, and demos sit half-built.
+3. **You know what works.** You can name the channels and content that bring in developers who activate. A hire should scale a playbook, not invent one alone.
+4. **The role gets its own budget and goals.** Ronda Scott's [guide for Dell Technologies Capital](https://www.delltechnologiescapital.com/resources/devrel-day-one) puts it plainly: "Developer relations should have its own budget and its own success metrics." In the State of DevRel report, [51.3% of practitioners had no set budget (17.8%) or weren't sure of it (33.5%)](https://stateofdeveloperrelations.com/2024devrelreport).
+
+If only the first signal is true, you need more hours, not a hire, which is where fractional or agency help fits. You are hiring too early if the quickstart still needs a call to get through, or the plan is "hire someone and they'll figure out DevRel."
+
+**Key pointers:**
+- Score yourself on the four signals. If fewer than three are true, buy hours instead of hiring.
+- Write the budget and two success metrics into the job description before you post it.
+- If you can't describe your target developer in one sentence, fix that before opening the role.
+
+## Who should your first DevRel hire be?
+
+| Profile | What they do best | Hire first when | Risk as hire #1 |
+| --- | --- | --- | --- |
+| **Engineer who writes** | Tutorials, sample apps, docs fixes, answers in technical threads | The product is technical and adoption stalls at the first run | Needs someone to set direction on audience and channels |
+| **Developer advocate** | Talks, content, community presence | The first run works and you need reach in a known community | Without a strategy, turns into a content and travel budget |
+| **Community manager** | Programs, moderation, champions, events | An active community already needs daily care | Can't answer deep technical questions, which costs trust early |
+| **DevRel lead** | Audience, channels, metrics, hiring | You can't yet say who your developer is or where they spend time | Costs more, and needs execution help from day one |
+
+For most devtool startups, the engineer who writes is the safest first hire, because the early bottleneck is usually the first run. Tessa Kriesel argues in [Developer advocate vs developer relations leader: who to hire first](https://dev.to/tessak22/developer-advocate-vs-developer-relations-leader-who-to-hire-first-4pam) that many early-stage startups hire an advocate first and the role fails, because nobody has defined the audience, where they spend time, or how to spend a $10k budget. If you can't answer those questions, get strategy first, from a lead or a [fractional DevRel](/blog/fractional-devrel) engagement.
+
+Whichever profile you pick, the Dell Technologies Capital guide quotes James Parton: "Developer relations hires must always be technical leaders!" The 2024 State of DevRel survey put the [median base salary at $150,000](https://stateofdeveloperrelations.com/2024devrelreport). Our [DevRel agency vs in-house hire comparison](/blog/devrel-agency-vs-in-house-devrel-hire) covers the full cost.
+
+### Template: the take-home task for DevRel candidates
+
+```text
+You have 48 hours and our public docs.
+1. Run our quickstart from scratch. Send a friction log: each step, what you expected,
+   what happened, and minutes lost.
+2. Pick the one fix that would help new developers most, and explain why in 5 sentences.
+3. Outline one tutorial (title, audience, steps, final code) that answers a question
+   developers ask before choosing a tool like ours.
+4. Name two places where our target developers already talk, and draft the opening
+   paragraph of a post for one of them.
+```
+
+**Key pointers:**
+- Default to an engineer who writes unless the product is already easy to start and you need reach.
+- Give every finalist the same take-home task so you can compare the work side by side.
+- Look for public tutorials, repos or talks that other developers still use.
+
+## The first 90 days of your first DevRel hire
+
+Whether the owner is a new hire, a fractional lead or a founder formalizing the job, day 90 should end with evidence and a plan.
+
+### Checklist: days 1 to 90
+
+- **Days 1 to 30, learn and set a baseline.** Run the quickstart and three core tutorials from scratch, with a friction log for each. Talk to 10 developers: five who activated and five who went quiet. List the 10 most repeated questions from recent tickets, issues and threads. Record the scorecard baseline.
+- **Days 31 to 60, ship fixes and first content.** Ship fixes for the top three friction points with engineering, and tell the users who reported them. Publish three pieces that answer the most repeated questions, with code that runs. Take over the community home with a one-business-day reply target. Join one meetup or hackathon where your developers already are.
+- **Days 61 to 90, report and plan.** Compare the scorecard with the baseline by channel. Send product a one-page report: top requests, what shipped, what is blocked. Propose two channels to double down on, one to drop, and the budget needed.
+
+### Template: friction log
+
+```text
+Friction log: [product] quickstart, [date], run by [name]
+Setup: fresh container, no saved credentials, docs open in one tab
+Goal: first successful API call (or first deploy)
+Start: ____   Finish: ____
+
+Step | What I did | What I expected | What happened | Minutes lost | Fix owner
+1    |            |                 |               |              |
+2    |            |                 |               |              |
+```
+
+A friction log turns vague docs into clear ones. **Before:** "Configure your environment and authenticate." **After:** "Copy your key from Settings → API keys, run `export ACME_API_KEY=your-key`, then run `acme whoami`. You should see your email address."
+
+This step is often skipped: [31.2% of programs never run developer experience or friction audits](https://stateofdeveloperrelations.com/2024devrelreport). For an outside read, a [developer documentation and DX audit](/developer-documentation-dx-audit) covers the same ground.
+
+**Key pointers:**
+- Put the day-90 review on the calendar on day one, with the founder and head of product invited.
+- Make the friction log the first deliverable, before any blog post.
+- Treat "asked twice" as the trigger for a docs fix, every time.
+
+## Founder-led, fractional, agency or first hire: which fits?
+
+| Option | Who does the work | Fits best at | Watch out for |
+| --- | --- | --- | --- |
+| **Founder-led** | Founder, plus engineers on rotation | Pre-PMF and early seed | Stops when the founder's calendar fills up |
+| **Fractional DevRel** | One senior person, part-time | Seed, when you need direction more than hands | Can't produce daily output |
+| **DevRel agency** | Writers, engineers and community people | Seed to Series A with a clear plan but short hours; launches | Needs an internal owner and a deliberate feedback process |
+| **First in-house hire** | One full-time employee | Series A, once the four hiring signals are true | Months to hire and ramp; one person's calendar |
+
+Costs depend on scope. Our [fractional DevRel guide](/blog/fractional-devrel) covers part-time pricing and hours, and the [agency vs in-house comparison](/blog/devrel-agency-vs-in-house-devrel-hire) covers retainers, salaries and timelines.
+
+Most startups combine options: the founder stays in the feedback loop, a fractional lead or first hire owns the plan, and an agency adds production capacity. Small teams are the norm. In the 2024 State of DevRel report, [the most common team size was 2 to 5 people (35.2%), and 18.2% of practitioners worked alone](https://stateofdeveloperrelations.com/2024devrelreport).
+
+**Key pointers:**
+- Need direction: fractional. Need output: agency. Need daily community ownership: hire.
+- Keep docs, repos and community accounts in your own organization, whoever does the work.
+- Name one internal owner for any outside help before the contract starts.
+
+## How to measure DevRel at a startup
+
+Measure the path from reach to use, not reach alone. In the 2024 State of DevRel report, [active users was the top success metric (44.3%), ahead of content engagement (37.8%)](https://stateofdeveloperrelations.com/2024devrelreport), and product usage was the most common way to define an active community member (36.2%). Proving impact with data was still the practice's biggest challenge, named by 60.7%. For the full metric tree, attribution methods and a board-ready report, read [how to measure DevRel ROI](/blog/how-to-measure-devrel-roi).
+
+![State of DevRel 2024 chart of DevRel success metrics by stage, with active users on top at 44.3% and 7.3% not measuring](/blog/uploads/how-to-measure-devrel-roi/state-of-devrel-2024-metrics.webp "How DevRel teams measure success. Only 6.5% picked revenue generated (State of DevRel 2024).")
+
+### Template: monthly DevRel scorecard
+
+| Metric | Definition (write your own) | Baseline | Month 1 | Month 2 | Month 3 |
+| --- | --- | --- | --- | --- | --- |
+| Reach by channel | Visits from Reddit, HN, X, YouTube and talks | | | | |
+| First run | Share of new sign-ups who finish the quickstart | | | | |
+| Activation | Share who make a first API call or deploy within 7 days | | | | |
+| Retention | Developers still active after 30 days | | | | |
+| Community | Questions asked, answered within a day, answered by other users | | | | |
+| Feedback shipped | Fixes shipped that developers asked for | | | | |
+
+Judge the first month on fixes shipped and content published, and adoption over a few quarters. For signals by content type, see [measuring developer content beyond pageviews](/blog/developer-tool-content-roi-beyond-pageviews).
+
+**Key pointers:**
+- Record the baseline before the first post goes out.
+- Add a UTM tag for the channel to every link you post, so activation traces back to it.
+- Report the same six rows every month, even when a number goes down.
+
+## Common startup DevRel mistakes
+
+### Hiring DevRel before there is a product to try
+
+A hire with no working first run spends the first quarter fixing docs or promoting something developers can't use yet. **Before:** hire an advocate, then build the quickstart together. **After:** fix the quickstart with your engineers, then hire someone to scale what works.
+
+### Measuring only followers
+
+**Before:** "We gained followers on X this month." **After:** "Sign-ups from the Reddit post: [n]. Of those, first API call within 7 days: [n]. Next month we move two hours a week from X to Reddit." Only the second leads to a decision.
+
+### No feedback loop to the product
+
+If questions don't turn into changes, developers stop asking. PostHog builds the loop into its structure: [every week, one person in each engineering team is the Support Hero](https://posthog.com/handbook/engineering/support-hero), working the team's tickets and shipping fixes. Ian Vanagas writes in [PostHog's newsletter](https://posthog.com/newsletter/engineers-do-support) that engineers who do support shortcut the handoff from support to product manager to engineer. For Memori, 100+ detailed comments on one Reddit post shaped onboarding, docs and the Memori v2 roadmap. For the product side of these problems, see [common mistakes in developer-first products](/blog/common-mistakes-developer-products).
+
+**Key pointers:**
+- Don't post a DevRel job until a stranger can finish the quickstart alone.
+- Replace follower counts in the monthly update with first-run and activation numbers.
+- Make "what developers asked this week" a standing item in the weekly product meeting.
+
+## How Studio1 has run DevRel for startups
+
+### Jozu: community, advocacy and events for KitOps
+
+Studio1 has worked with [Jozu](/case-studies/jozu) since October 2024 on developer advocacy, community work for its open-source project KitOps, technical blogs, the Jozu Champions program and events. Studio1 was the main on-ground presence at Jozu's booth at KubeCon + CloudNativeCon India 2025 and DevFest Pune 2025, and those conversations showed where docs or demos needed to be clearer.
+
+> "We've used Studio1 to lead our open source and closed source community building and developer awareness work for just over a year. Their contributions and work has helped us drive adoption and awareness with our audience. Their team has deep experience in our space, interfacing with our team perfectly, and going above to help us grow."
+>
+> **Jesse Williams**, Co-Founder & COO, Jozu
+
+### Memori, OpenLore and Corsair: launches with a feedback loop
+
+For [Memori](/case-studies/memori), Studio1 combined community-led launches, 12 hands-on demo agents, live talks and feedback loops, and the project grew from launch to 12,000+ GitHub stars. [OpenLore](/case-studies/openlore) ran a one-month DevRel engagement covering a DX audit, positioning, talks and hackathons, daily distribution, and feature requests passed straight to the founders. Its stars went from about 135 to 1,700+. For [Corsair](/case-studies/corsair), the first onboarding audit led the team to build a quick start that reaches a working example in under a minute, student hackathons with a Corsair track followed, and stars grew from about 300 to 2,000 in roughly five weeks.
+
+If you're at seed with a clear plan but no hours to run it, our [developer relations service](/developer-relations-growth-campaigns) is the embedded option: content, demos, community programs, events, partnerships and launches, run alongside your engineers. It starts with an audit of your existing developer programs, and you get an assessment and a DevRel roadmap within the first two weeks.
+
+## FAQ
+
+### How should a startup do DevRel?
+
+In stages. Before product-market fit, the founder runs DevRel personally, with engineers fixing the first run. At seed, add fractional or agency help for content, demos and launches while the founder keeps the feedback loop. Around Series A, hand the program to a dedicated owner with its own budget and goals.
+
+### When should a startup hire its first DevRel?
+
+When strangers sign up and succeed without your help, the founder has become the bottleneck, you know which channels bring in developers who activate, and the role can have its own budget and metrics. If only the first is true, buy hours from a fractional lead or an agency instead.
+
+### Should the first DevRel hire be a developer advocate or a community manager?
+
+For most devtool startups, neither. Hire an engineer who writes, who can fix docs, build demos and answer hard questions in technical threads. Hire an advocate once the first run works and you need reach, and a community manager once an active community needs daily care.
+
+### What is founder-led DevRel?
+
+The founder personally onboards early users, replies in developer threads, writes launch posts and takes feedback into the product. It works early because founders can answer the hardest questions and change the product the same day.
+
+### How do you measure DevRel at an early-stage startup?
+
+Track the path from reach to use: visits by channel, quickstart completion, activation, 30-day retention and feedback shipped. Active users was the most common success metric in the 2024 State of DevRel report. Record a baseline first, so you can see what moved.
+
+### Is fractional DevRel or an agency better for a seed-stage startup?
+
+Fractional DevRel fits when you need direction: a plan, a first program and a hiring brief. An agency fits when you know what to do but nobody has the hours for content, demos, launches and events.

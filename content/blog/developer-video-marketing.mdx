@@ -1,0 +1,332 @@
+---
+title: "Developer Video Marketing: How Devtools Use Demos, Tutorials and YouTube to Grow"
+seoTitle: "Developer Video Marketing: A Guide for Devtool Teams"
+slug: developer-video-marketing
+description: "Developer video marketing for devtools: the formats that work, who makes demo videos, a script template, repurposing, and the metrics that show it works."
+tldrSummary: "Developer demo videos are made by founders and engineers, in-house DevRel teams, developer creators, or specialist agencies such as Studio1, and most devtools combine two of them. The videos that work show one real task in a real terminal, reach the result early, and get cut into clips, GIFs and posts. Judge them by retention, clicks to docs and signups, not views."
+tldrBullets:
+  - "Match the format to the job: a short product demo for launches and the homepage, tutorials for YouTube and docs, a GIF for the README, and talks or workshops for depth."
+  - "Script one task, record it in a clean environment at a font size viewers can read, cut the waiting, and check every caption against the script."
+  - "Cut each recording into a long walkthrough, Shorts, captioned clips for X and LinkedIn, a README GIF and a written tutorial."
+  - "Track how many viewers are still watching at 30 seconds, where they drop off, and how many reach your docs or sign up through tagged links."
+date: 2026-11-07
+updatedDate: 2026-11-07
+draft: false
+authors:
+  - Arindam Majumder
+tags:
+  - developer-video
+  - developer-marketing
+  - devrel
+  - youtube
+bannerImage: /blog/uploads/developer-video-marketing/cover.png
+---
+**The short answer:** Four groups make developer demo videos. Founders and engineers make the first ones, because developers trust the people who built the product. In-house DevRel teams take over for a steady series, workshops and talks. Developer creators lend an audience you don't have yet, which suits launches when their viewers match your users. Specialist developer video agencies such as Studio1 build the demo project, then script, record and edit the video when your team has no time. Most devtools pair engineers on camera with a partner for production.
+
+## Why do developers trust video that shows the product working?
+
+In Stack Overflow's [2025 Developer Survey](https://survey.stackoverflow.co/2025/developers), 50% of the 33,454 developers who answered had learned to code from videos in the past year. Among 18 to 24 year olds it was 55.2%, ahead of Stack Overflow itself (53.3%). Technical documentation still came first, at 67.8%. So treat a video as the front door to your docs, not a replacement for them.
+
+What developers trust in a video is evidence: a real terminal, real output and code they could copy. As we argued in [why software companies invest in content](/blog/why-software-companies-invest-in-content), content that helps developers do something beats content that tells them about something. The ScrapeGraphAI case study puts it plainly: developers "need to see it solving real problems in production, not read a feature list, before they trust it inside their own stack."
+
+**Before and after: the same launch video** (Acme is a placeholder)
+
+| | Before | After |
+| --- | --- | --- |
+| First 10 seconds | Logo animation over a city skyline | The finished output, then the command that produced it |
+| Footage | Stock clips of hands on a keyboard | Your real terminal, editor and browser |
+| Script | "Acme is the future of data pipelines" | "Load a CSV into Postgres with one Acme command" |
+| Ending | "Learn more at acme.dev" | The quickstart URL, on screen and first in the description |
+
+**Checklist: trust signals for any developer video**
+
+- [ ] The result appears in the first 10 seconds.
+- [ ] Every command on screen is one a viewer can copy and run.
+- [ ] Versions are visible in the install command or `--version` output.
+- [ ] Any sped-up wait is labelled on screen, not hidden.
+- [ ] No secrets on screen, and any key that appeared is revoked after recording.
+
+**Key pointers:**
+- Open every video on the output, not the logo.
+- Show the version you recorded with, so viewers can spot a stale video.
+- End on one link: the docs page that continues the task the video started.
+
+## Which video formats work for devtools?
+
+Each format answers a different question. Pick by the viewer's question, not by what is easiest to produce.
+
+| Format | Where it lives | What it's for | Starting length |
+| --- | --- | --- | --- |
+| Product demo | Homepage, Product Hunt, launch posts, sales follow-ups | Show the product doing one real task | 1 to 3 minutes |
+| Tutorial or walkthrough | YouTube, embedded on the matching docs page | Teach a workflow end to end | As long as the task takes |
+| Launch video | X, LinkedIn, Product Hunt, the launch blog post | Show what is new, working | Under 2 minutes |
+| Short clips | X, LinkedIn, YouTube Shorts | One moment or tip that points to the full video | 15 to 60 seconds |
+| README GIF | Top of the GitHub README, the docs quickstart | Prove the install and first command work | A 5 to 15 second loop |
+| Livestreams and workshops | YouTube Live, community calls, webinars | Build live and answer questions | 45 to 90 minutes |
+| Conference and meetup talks | The event, then the recording on YouTube | Explain the idea behind the product to builders | 20 to 40 minutes |
+| Long-form YouTube deep dive | YouTube | Architecture, benchmarks and comparisons for evaluators | 15 to 40 minutes |
+
+The lengths are starting points, not platform rules. These are the rules worth checking before you export:
+
+| Platform | What to check | Source |
+| --- | --- | --- |
+| YouTube Shorts | Up to three minutes, square or vertical. Wider videos count as long-form | [YouTube Help](https://support.google.com/youtube/answer/15424877) |
+| LinkedIn | 3 seconds (desktop upload) to 15 minutes, up to 5 GB | [LinkedIn Help](https://www.linkedin.com/help/linkedin/answer/a548372) |
+| GitHub | Attached images and GIFs up to 10 MB. Videos up to 10 MB on free plans, 100 MB on paid plans | [GitHub Docs](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/attaching-files) |
+| Product Hunt | YouTube links only, not private, full URL rather than a shortened one | [Product Hunt launch guide](https://www.producthunt.com/launch/preparing-for-launch) |
+
+If you only make one video this quarter, make a demo of your quickstart, the task every new user has to finish anyway. Our [Product Hunt launch playbook](/blog/product-hunt-launch-playbook) shows where a demo fits in a launch.
+
+**Key pointers:**
+- Make the quickstart demo first, and embed it on the first docs page as well as the homepage.
+- Frame the recording so the important part survives a square or vertical crop.
+- Put a GIF of the first command above the fold in your README.
+
+## How do you make a developer demo video?
+
+### 1. Pick one task and script it
+
+One video, one task a developer would search for. **Before:** "Acme platform overview." **After:** "Turn meeting transcripts into Linear issues and Slack updates," the job of Brieflane, the demo Studio1 built on Corsair. Script it with the template in the next section, and have the engineer who built the feature check every command.
+
+### 2. Prepare a clean environment
+
+**Checklist: before you press record**
+
+- [ ] A fresh OS user or browser profile, notifications off, unrelated tabs closed.
+- [ ] A throwaway API key, revoked after recording.
+- [ ] A terminal font you can read on a phone. The example in the [VHS README](https://github.com/charmbracelet/vhs) uses a 46px font on a 1200 × 600 terminal.
+- [ ] The repo at a tagged release, so the video matches the code viewers clone.
+- [ ] Dependencies installed off camera, unless installing is the point.
+
+### 3. Record screen and audio
+
+[OBS Studio](https://obsproject.com/) is free, open source, and runs on Windows, macOS and Linux. Record one step per take, so a mistake costs one step, not the whole video. For terminal-only demos, [asciinema](https://asciinema.org/) records sessions as text that viewers can copy.
+
+### 4. Edit for pace and honesty
+
+Cut dead air and installs, and label every speed-up. Zoom in on the line that matters. Keep the "it works" moment as one uncut take, and put every command on screen as text so the video works with the sound off.
+
+### 5. Caption every video
+
+YouTube warns that [automatic captions "might misrepresent the spoken content"](https://support.google.com/youtube/answer/6373554) and tells creators: "Always review automatic captions and edit any parts that haven't been properly transcribed." Check product names, flags and commands against the script. Captions are also an accessibility baseline: [WCAG success criterion 1.2.2](https://www.w3.org/WAI/WCAG22/Understanding/captions-prerecorded.html), at Level A, requires captions for prerecorded audio in synchronized media.
+
+### 6. Package and publish
+
+Title the video as the task, make the thumbnail show the result, and put a tagged docs link first in the description. For chapters, repo links and Shorts, follow the YouTube section of our [channel-by-channel distribution playbook](/blog/how-to-distribute-technical-content-reddit-x-youtube).
+
+**Key pointers:**
+- Tag a release before you record and put the tag name in the description.
+- Record one step per take, and keep the proof as one continuous shot.
+- Read every caption against the script before you publish.
+
+## How do you script a technical demo video?
+
+YouTube's [audience retention report](https://support.google.com/youtube/answer/9314415) has a measure called Intro: the percentage of viewers still watching after the first 30 seconds. So the result goes first and the backstory goes last, if at all.
+
+**Template: a one-task demo script**
+
+```text
+TITLE    How to [task] with [product] ([stack], [version])
+
+0:00     RESULT. Show the finished output. "This is [result], built with [product]."
+0:10     PROBLEM. One sentence in the viewer's words: what was slow, broken or manual.
+0:25     STARTING POINT. Repo and tag, runtime version, what is already installed.
+0:40     STEP 1. Say the action, run it, point at the output.
+         STEPS 2 TO 4. One action per step. Output after every step.
+END-0:30 PROOF. Run it end to end in one uncut take.
+END-0:15 RECAP. One sentence per step.
+END      NEXT STEP. One link (docs page or repo), said aloud and shown on screen.
+
+ON SCREEN   Every command as text. A label on every speed-up.
+CHECKED BY  [engineer name], [date]
+```
+
+**Before and after: the opening line**
+
+- **Before:** "Hey everyone, welcome back! Today I'm really excited to show you our new platform, which helps teams work smarter with their data..."
+- **After:** "This agent just turned a meeting transcript into Linear issues and a Slack update. Here's the code, using Corsair."
+
+The first says nothing a viewer can check. The second shows the result, names the stack and promises the code. Read the script aloud once and cut anything you stumble over. The full template, with a filled-in example and a pre-record checklist, is in [how to script a technical demo video](/blog/how-to-script-a-technical-demo-video).
+
+**Key pointers:**
+- Put the output in the first 10 seconds, before your name or the product's.
+- Keep the problem statement to one sentence.
+- End with one link, not a list of five.
+
+## How do you turn one recording into a week of assets?
+
+One recording session should feed every channel you use.
+
+**Template: one recording, seven assets**
+
+| Asset | Cut from | Where it goes | Check before posting |
+| --- | --- | --- | --- |
+| Full walkthrough | The whole recording | YouTube, the matching docs page | Chapters, tagged link in the description |
+| Product demo | The opening result plus the proof take | Homepage, Product Hunt, launch post | YouTube link for Product Hunt |
+| 2 or 3 Shorts | The "it works" moment, or one tip each | YouTube Shorts | Up to three minutes, square or vertical |
+| Captioned clips | The same moments, recut | X and LinkedIn | Captions burned in, link in the post text |
+| README GIF | The first command and its output | Top of the README | 10 MB limit for attached GIFs, or script it with VHS |
+| Written tutorial | The transcript and the code | Your blog, then republished with a canonical link | Code runs as written |
+| Workshop | The tutorial, built live | YouTube Live, community calls | [Live automatic captions](https://support.google.com/youtube/answer/6373554) are English only |
+
+For terminal demos, script the README GIF instead of recording it. [VHS](https://github.com/charmbracelet/vhs) describes itself as a way to "Write terminal GIFs as code for integration testing and demoing your CLI tools." Its official GitHub Action can regenerate GIFs in CI, so the README never drifts from the CLI. Save this as `demo.tape`, replace `your-cli`, and run `vhs demo.tape`. The `Hide` block runs setup off camera.
+
+![VHS GitHub README with the tagline Write terminal GIFs as code and a terminal demo GIF generated from a tape file](/blog/uploads/developer-video-marketing/vhs-readme-gif.webp "VHS's own README opens with a GIF built from a tape file, so it can be regenerated whenever the CLI changes.")
+
+**Template: a VHS tape file for a README GIF**
+
+```text
+Output demo.gif
+Require your-cli
+
+Set Shell bash
+Set FontSize 32
+Set Width 1200
+Set Height 600
+Set Theme "Catppuccin Frappe"
+Set TypingSpeed 50ms
+
+Hide
+Type "cd examples/quickstart && clear"
+Enter
+Show
+
+Type "your-cli init --template api"
+Sleep 500ms
+Enter
+Sleep 3s
+
+Type "your-cli run"
+Sleep 500ms
+Enter
+Sleep 5s
+```
+
+Post the assets across the week, not in one hour. The [distribution playbook](/blog/how-to-distribute-technical-content-reddit-x-youtube) has a day-by-day schedule.
+
+**Key pointers:**
+- Write the clip list, with rough timestamps, on the script before recording.
+- Commit the tape file and regenerate the GIF whenever the CLI output changes.
+- Turn every walkthrough transcript into a written tutorial with the same code.
+
+## How should a devtool grow on YouTube?
+
+Treat YouTube as a series people come back to, not a folder for launch videos.
+
+1. **Run one series.** A recurring format, such as "build X with Y" or a monthly release walkthrough, gives viewers a reason to subscribe.
+2. **Title for search.** **Before:** "Acme v2.4 deep dive." **After:** "How to stream LLM responses in Next.js with Acme." Developers search for the task, not your version number.
+3. **Test titles and thumbnails.** YouTube lets you [test up to 3 titles and thumbnails](https://support.google.com/youtube/answer/13861714) and picks the winner by watch time, not click-through rate. It runs in YouTube Studio on a computer, needs advanced features, and isn't available for Shorts.
+4. **Read CTR against your own baseline.** YouTube says [half of all channels and videos have an impressions CTR between 2% and 10%](https://support.google.com/youtube/answer/7628154), and videos shown widely, such as on the Home page, often have a lower one.
+
+For topics, packaging, a 90-day plan and what to measure, read [YouTube for developer tools](/blog/youtube-for-developer-tools). For chapter and Shorts basics, see the [distribution playbook](/blog/how-to-distribute-technical-content-reddit-x-youtube).
+
+**Key pointers:**
+- Pick one series format and publish it on a fixed schedule for a quarter before you judge it.
+- Start tutorial titles with "How to," then the task and the stack.
+- Run a title test on your three most important videos first.
+
+## Who makes developer demo videos, and which option fits?
+
+Most mistakes here come from handing a technical demo to someone who can't run the product.
+
+| Who makes it | Best fit | Strength | Tradeoff |
+| --- | --- | --- | --- |
+| Founders and engineers | The first demo, launch videos, README GIFs | Credibility and accuracy. They can answer the comments | Time away from the product. Cadence slips near a release |
+| In-house DevRel | A steady series, workshops, livestreams, talks | Product depth and a regular schedule | Hiring takes months, and one person rarely covers scripting, recording, editing and distribution |
+| Developer creators and influencers | Launches, reaching an audience you don't have | Their viewers already trust them | Fit matters more than size, disclosure rules apply, and you control less of the script |
+| Specialist developer video agency | Volume, launch campaigns, repo-led videos | Builds the demo project, then scripts, records, edits and packages | Still needs an engineer on your side to review accuracy |
+| General video studio | A polished brand or launch film | Production quality | Your engineers usually write the demo and check every frame |
+
+Our [DevRel agency vs in-house hire breakdown](/blog/devrel-agency-vs-in-house-devrel-hire) compares their costs and time to start.
+
+With creators, disclosure is specific. The FTC says [the disclosure "should be in the video and not just in the description"](https://www.ftc.gov/business-guidance/resources/disclosures-101-social-media-influencers), and on YouTube creators also [turn on the paid promotion setting](https://support.google.com/youtube/answer/154235). When Studio1 supported developer creator collaborations for Memori, the filter was "technical fit and audience quality," not reach. Our [influencer marketing service](/influencer-marketing-agency) runs that matching.
+
+**Template: a video brief for any maker**
+
+```text
+TASK            The one thing the viewer will do, in their words
+VIEWER          Role, stack, and what they already know
+STARTING POINT  Repo, tag or branch, runtime and package versions
+PROOF MOMENT    The output that shows it worked
+MUST SHOW       Commands, config files or screens that have to appear
+MUST NOT SHOW   Secrets, internal dashboards, unreleased features
+CALL TO ACTION  One link, with UTM tags
+WHERE IT RUNS   YouTube, README, docs page, launch post, social clips
+ACCURACY CHECK  [Engineer name] reviews the script and the final cut by [date]
+```
+
+**Key pointers:**
+- Put a named engineer on every video as the accuracy reviewer, whoever records it.
+- Judge creators by whether their viewers use your stack, not by subscriber count.
+- Ask any agency whether they build and run the demo project themselves.
+
+## What should you measure in developer video marketing?
+
+Views tell you a video was served, not whether anyone learned the product. Track a short ladder instead.
+
+| Metric | What it tells you | Where to find it | If it's low |
+| --- | --- | --- | --- |
+| Intro retention | Share still watching at 30 seconds | YouTube Studio, audience retention | Show the result in the first 10 seconds |
+| Dips and spikes | Where viewers skip, rewatch or share | The same report | Cut or clarify that step. A spike can mean confusion |
+| Impressions CTR | Whether the title and thumbnail earn the click | YouTube Analytics | Test new titles and thumbnails |
+| Clicks to docs or repo | Whether viewers took the next step | Web analytics, by UTM tag | Put one link first and say it aloud |
+| Signups and first API calls | Whether the video created users | Product analytics, by UTM tag | Fix the docs page the video sends people to |
+| Questions in comments | What is still unclear | The comments | Make the next video or fix the docs |
+
+Compare retention with your own 10 latest videos of similar length, which YouTube shows in the same report. The data usually takes 1 to 2 days to process.
+
+**Template: one tagged link per placement**
+
+```text
+https://docs.yourtool.dev/quickstart?utm_source=youtube&utm_medium=video&utm_campaign=quickstart-demo&utm_content=description
+https://docs.yourtool.dev/quickstart?utm_source=youtube&utm_medium=video&utm_campaign=quickstart-demo&utm_content=pinned-comment
+https://docs.yourtool.dev/quickstart?utm_source=x&utm_medium=video&utm_campaign=quickstart-demo&utm_content=launch-clip
+https://docs.yourtool.dev/quickstart?utm_source=linkedin&utm_medium=video&utm_campaign=quickstart-demo&utm_content=launch-clip
+```
+
+**Key pointers:**
+- Check the Intro number for every new video in its first week.
+- Give every placement its own `utm_content` value.
+- Turn the three most repeated comment questions into the next video or a docs fix.
+
+## How Studio1 has used video and demos for devtools
+
+### Nebius: a video version of most technical topics
+
+Across nearly two years with Nebius Token Factory, Studio1 shipped 40+ videos and shorts alongside 45+ articles, so most technical topics had both a written and a video version. Studio1 also supported a launch webinar and workshops.
+
+### Memori: 12 demo agents, a launch video and a meetup talk
+
+For Memori, an open-source memory layer for AI agents, Studio1 built 12 hands-on demo agents, amplified them through Studio1's [Awesome AI Apps](https://github.com/Arindam200/awesome-ai-apps) repository, and packaged them into formats like a project launch video on X. A MongoDB Kolkata Meetup talk on agentic memory drew 150+ attendees. Across the engagement, which also covered Reddit launches and creator support, Memori grew from launch to 12,000+ GitHub stars. [Read the Memori case study](/case-studies/memori).
+
+### Corsair: a demo repo with a walkthrough video
+
+For Corsair, an open-source integration layer for AI agents, Studio1 built [Brieflane](https://github.com/Studio1HQ/brieflane), which turns meeting transcripts into Linear issues, risks, decisions and Slack updates, and shared it with a walkthrough video. Studio1 also improved the README so it shows the product in action. With a second demo, onboarding audits, hackathons and posts, the repo grew from about 300 to 2,000 GitHub stars in roughly five weeks. [Read the Corsair case study](/case-studies/corsair).
+
+### ScrapeGraphAI and OpenLore: demos, GIFs and talks
+
+For ScrapeGraphAI, Studio1 built AI agent demos, such as an agentic deep researcher with DeepSeek R1 and an MCP server launched on X with a demo video, plus GIFs of agent workflows. The campaign reached 265K+ developers. For OpenLore, a launch video on X ran alongside talks and hackathons, and stars jumped after each session. Read the [ScrapeGraphAI](/case-studies/scrapegraph) and [OpenLore](/case-studies/openlore) case studies.
+
+If your team knows what to show but has no time to build the demo and produce the video, our [developer video production](/developer-video-production) team builds the demo project first, then scripts, records, edits and packages tutorials, product demos, Shorts and repo-led videos for devtool and AI teams.
+
+## FAQ
+
+### Who makes developer demo videos?
+
+Founders and engineers usually make the first ones, because developers trust the people who built the product. In-house DevRel teams take over for a regular series, workshops and talks. Developer creators help with launches when their audience matches your users, and specialist developer video agencies such as Studio1 build the demo and produce the video when your team lacks time.
+
+### How long should a developer demo video be?
+
+As long as one task takes to show, and no longer. A product demo for a homepage or launch usually works at 1 to 3 minutes, while a tutorial runs as long as the workflow needs. YouTube Shorts can run up to three minutes.
+
+### Do developers actually watch videos to learn tools?
+
+Yes. In Stack Overflow's 2025 Developer Survey, 50% of respondents had learned to code from videos in the past year. Technical documentation was still the top resource at 67.8%, so every video should lead to a docs page.
+
+### Should an early devtool start a YouTube channel?
+
+Start with a quickstart demo, a README GIF and a launch video. Start a series once you can publish on a steady schedule for at least a quarter. No studio is needed: a readable screen, clear audio and an honest edit matter more than cameras.
+
+### Do developer creators have to disclose sponsored videos?
+
+Yes. The FTC says the disclosure should be in the video itself, not only in the description, and repeated periodically during live streams. On YouTube, creators should also turn on the paid promotion setting, which adds a label at the start of the video.

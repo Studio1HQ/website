@@ -1,0 +1,311 @@
+---
+title: "Dev.to, Hashnode, or Medium: Where to Cross-Post Technical Articles"
+seoTitle: "Dev.to vs Hashnode vs Medium: Where to Cross-Post Articles"
+slug: cross-posting-dev-to-hashnode-medium
+description: "Cross-posting developer blogs to Dev.to, Hashnode and Medium: which platform fits, canonical setup on each, safe timing, and a copy-paste checklist."
+tldrSummary: "Publish on your own domain first, wait until Google has indexed the original, then republish the full article on DEV, Hashnode or Medium with a canonical link pointing back to it. DEV suits most devtool tutorials, Hashnode adds a second developer feed, and Medium works best through a publication such as DevGenius."
+tldrBullets:
+  - "DEV takes a canonical URL per post or on RSS import, Hashnode saves the original article URL as the canonical, and Medium's import tool adds the canonical link for you."
+  - "Check the original in Search Console's URL Inspection tool before you cross-post, then space the copies across a week or two instead of posting them all at once."
+  - "Adapt the wrapper, not the body: a feed-friendly title, four tags on DEV and up to five topics on Medium, a 1000 x 420 cover on DEV, and one UTM-tagged link back."
+  - "Google treats a canonical link as a strong signal, not a rule, so keep the original the most complete version and check which URL Google picked."
+date: 2026-11-07
+updatedDate: 2026-11-07
+draft: false
+authors:
+  - Arindam Majumder
+tags:
+  - distribution
+  - technical-content
+  - content-marketing
+  - seo
+bannerImage: /blog/uploads/cross-posting-dev-to-hashnode-medium/cover.png
+---
+**The short answer:** Republish technical articles on DEV (Dev.to) first. Its readers are developers, and it lets you set a canonical URL on every post or on RSS import. Add Hashnode if you want a second developer feed, and Medium when a technical publication such as DevGenius will run the piece. Publish on your own domain first and wait until Google has indexed it. Then cross-post the full article with a canonical link back to the original, and share the original link, tagged with UTM parameters, everywhere else.
+
+## Which platform should you cross-post technical articles to?
+
+Our post on [why software companies invest in content](/blog/why-software-companies-invest-in-content) lists cross-posting to Dev.to, Medium and Hashnode as part of distribution, and the [distribution playbook](/blog/how-to-distribute-technical-content-reddit-x-youtube) covers the other channels. Here is what each platform gives you.
+
+| | DEV (Dev.to) | Hashnode | Medium |
+| --- | --- | --- | --- |
+| Audience | Developers browsing a feed and tag pages | Developers in the Hashnode feed | General readers across every topic |
+| Canonical support | `canonical_url` field, or automatic on RSS import | Original article URL saved as the canonical | Automatic on import, or set by hand |
+| Custom domain | No: dev.to/your-name or dev.to/your-org | Pro plan, $5 a month | Needs a paid Medium membership |
+| Distribution reach | Home feed, up to four tag pages, followers | The Hashnode feed, ranked by a hot score | Curators assign Network, General or Boost; a publication adds its followers |
+| Formatting | Markdown, front matter, Liquid embeds | Markdown, LaTeX and Mermaid | Visual editor, code blocks, no native tables |
+| Analytics | Per-post stats; organizations add CTA click tracking | Built-in, plus GA, Plausible and others | Views, reads, traffic sources; no Google Analytics or scripts |
+| Best for | Tutorials and comparisons with code | A second feed, or your main blog on a custom domain | Opinion and architecture pieces in a publication |
+
+Sources: DEV's [editor guide](https://dev.to/p/editor_guide) and [organizations page](https://dev.to/help/organizations), Hashnode's [feature list](https://hashnode.com), [Pro plan](https://hashnode.com/pro) and [changelog](https://hashnode.com/changelog), and Medium's [distribution guidelines](https://help.medium.com/hc/en-us/articles/360006362473-Medium-s-Distribution-Guidelines-How-curators-review-stories-for-Boost-General-and-Network-Distribution), [custom domain help](https://help.medium.com/hc/en-us/articles/115003053487-Setting-up-a-custom-domain-for-your-profile-or-publication) and [story stats help](https://help.medium.com/hc/en-us/articles/34831991136151-Story-s-detailed-stats-page).
+
+* **Code-heavy tutorial or comparison:** DEV first.
+* **Your blog already runs on Hashnode:** skip Hashnode. It is your home.
+* **Opinion or architecture piece:** Medium, inside a publication that covers the topic.
+* **Product announcement:** your DEV organization at most. Medium's Boost guidelines don't want readers to feel "their time has been used to read a sales pitch".
+
+**Key pointers:**
+- Start with one copy, on DEV for anything with code, and add the others after it is live.
+- Choose the Medium publication before you write the Medium version.
+
+## What is the safe order of operations?
+
+1. **Publish on your own domain** with a canonical tag pointing at itself, which Google calls "a self-referential canonical", using an absolute URL ([Google Search Central](https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls)). Check it: `curl -s https://yourtool.dev/blog/your-post | grep -io '<link[^>]*canonical[^>]*>'`.
+2. **Check indexing.** Paste the URL into Search Console's URL Inspection. "URL is on Google" means it "is eligible to appear in Search results". If not, click Request indexing, which has a daily limit ([Search Console Help](https://support.google.com/webmasters/answer/9012289)).
+3. **Cross-post with a canonical link back,** one platform at a time.
+4. **Share the original, not the copies,** with UTM tags, on daily.dev, Reddit, X and LinkedIn.
+
+daily.dev is a share step, not a republishing platform. Corporate and personal blogs are excluded as sources, but anyone can post an article directly or in a Squad ([daily.dev docs](https://docs.daily.dev/how-to-get-featured/)). A paid Verified Company Squad auto-posts from your RSS feed, and links inside posts are nofollow ([Verified Company Squads](https://docs.daily.dev/verified-company-squads/)).
+
+![daily.dev docs table of ways to get featured: Squads and direct posting are open to all, corporate and personal blogs are excluded as sources](/blog/uploads/cross-posting-dev-to-hashnode-medium/daily-dev-eligibility.webp "daily.dev is a share step: company blogs post through Squads or direct posts, not as sources.")
+
+One exception to "blog first": a first-person take can start on DEV. Webcrumbs' flagship comparison, [I Found a Tool Even Better than v0](https://dev.to/arindam_1729/i-found-a-tool-even-better-than-v0-you-wont-believe-what-it-can-do-igf), was written for DEV from a developer's own account, and its canonical URL is the DEV page itself.
+
+**Key pointers:**
+- Run the `curl` canonical check on the original before anything else.
+- Start step 3 only when URL Inspection shows "URL is on Google" and the Google-selected canonical is your URL.
+- Share the original URL on daily.dev and social, never the DEV or Medium copy.
+
+## When should you cross-post?
+
+Let indexing, not a fixed number of days, decide when the first copy goes out, then pace the rest. DEV tells organizations importing a blog to "avoid posting all articles at once; gradually publish a few per week for better visibility" ([DEV Help](https://dev.to/help/organizations/importing-your-organizations-content)). To plan republishing alongside new pieces, use the repurposing schedule in our [devtool content calendar](/blog/devtool-content-calendar).
+
+| When | What to do |
+| --- | --- |
+| Day 0 | Publish the original, inspect it, request indexing |
+| Once it shows "URL is on Google" | Publish the DEV copy |
+| 2 to 3 days later | Publish the Hashnode copy |
+| The week after | Import to Medium and submit to a publication |
+| With each copy | Share the original on daily.dev, Reddit, X and LinkedIn |
+| 2 to 4 weeks later | Re-inspect the original: is the Google-selected canonical still yours? |
+
+Older posts are already indexed, so backfill them at one or two a week. Medium's import tool backdates "the post to the original date" ([Medium Help](https://help.medium.com/hc/en-us/articles/214550207-Importing-a-post-to-Medium)).
+
+**Key pointers:**
+- Add a calendar reminder 2 to 4 weeks after each publish to re-inspect the original.
+- Backfill your 10 best older posts first, starting with the ones that already rank.
+
+## How do you set the canonical URL on DEV, Hashnode and Medium?
+
+### DEV
+
+* **Rich + Markdown editor:** click the gear icon next to "Save draft" and enter the original URL in the "Canonical URL" field ([DEV Help](https://dev.to/help/writing-editing-scheduling)).
+* **Basic Markdown editor:** add `canonical_url` to the front matter below.
+* **RSS import:** in Settings, then Extensions, enter your feed under "Publishing to DEV Community from RSS" and tick "Mark the RSS source as canonical URL". Posts arrive as drafts, in the Basic editor only.
+* **Organization:** use the drop-down at the top of each draft to post under your organization.
+
+![DEV Help steps for specifying a canonical URL: tick the RSS option on import, or use the Canonical URL field or canonical_url front matter](/blog/uploads/cross-posting-dev-to-hashnode-medium/dev-canonical-url-help.webp "DEV's own steps for pointing a republished post back to the original.")
+
+Tags are capped at four, and the best cover size is 1000 x 420 ([DEV editor guide](https://dev.to/p/editor_guide)). Copy this front matter:
+
+```yaml
+---
+title: Why our webhook retries made outages worse, and the backoff that fixed it
+published: false
+description: A retry loop with exponential backoff and jitter in Node.js, with tests.
+tags: node, javascript, webdev, tutorial
+canonical_url: https://yourtool.dev/blog/webhook-retries-exponential-backoff
+cover_image: https://yourtool.dev/blog/webhook-retries/cover-1000x420.png
+series: Webhooks in production
+ai_disclosure_level: no_ai   # or not_disclosed, some_ai, fully_autonomous
+---
+```
+
+### Hashnode
+
+* **Editor:** before publishing, open the draft's settings and add the original article's URL as the republishing source. Hashnode saves it as the post's canonical.
+* **API:** set `originalArticleURL`, the "canonical URL for republished articles" ([Hashnode API reference](https://github.com/Hashnode/gql-skill/blob/main/skills/gql-api/references/mutations.md)). API publishing has needed a Pro plan since May 2026 ([changelog](https://hashnode.com/changelog)).
+* **Back catalog:** [Pro's](https://hashnode.com/pro) bulk Markdown import maps canonical URLs from front matter.
+
+### Medium
+
+* **Import:** click Stories in the left rail, then Import a story, paste the original URL, click Import, then See your story. "Imported stories will automatically apply a canonical URL referencing the original source material" ([Medium Help](https://help.medium.com/hc/en-us/articles/214550207-Importing-a-post-to-Medium)).
+* **By hand, if the import fails:** in edit mode, open the three-dot menu, then More settings, then Advanced Settings, select "This story was originally published elsewhere", enter the link, click Save canonical link and Publish ([Medium Help](https://help.medium.com/hc/en-us/articles/360033930293-Set-a-canonical-link)).
+
+### Check every copy
+
+```bash
+for url in \
+  https://dev.to/your-name/your-post-slug \
+  https://your-name.hashnode.dev/your-post-slug; do
+  echo "$url"; curl -sL "$url" | grep -io '<link[^>]*canonical[^>]*>'
+done
+```
+
+Each line should show your original URL. Medium blocks scripted requests, so open the story, choose View page source and search for "canonical", as Medium's help suggests.
+
+**Key pointers:**
+- Copy the canonical URL from your original's own canonical tag, not the address bar, so the host and trailing slash match.
+- Never put UTM parameters in a canonical URL.
+
+## Will a canonical link protect your rankings?
+
+Usually, but it can't force Google. Google calls `rel="canonical"` "a strong signal" ([Google Search Central](https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls)), also says "indicating a canonical preference is a hint, not a rule", and picks the page that is "objectively the most complete and useful for search users" ([canonicalization](https://developers.google.com/search/docs/crawling-indexing/canonicalization)). For syndication partners, Google says "the most effective solution is for partners to block indexing of your content" ([troubleshooting](https://developers.google.com/search/docs/crawling-indexing/canonicalization-troubleshooting)). DEV's and Medium's help pages point you to the canonical link instead, so make it strong:
+
+* **Keep the body identical.** Change the title, first line and tags, not the sections.
+* **Keep the original the most complete version.** Fix code and add diagrams there first.
+* **Link to the original in the copy's first line** as well as in the canonical tag.
+
+**Key pointers:**
+- If URL Inspection shows a copy as the Google-selected canonical, improve the original and request indexing again.
+- Never publish a shortened copy. Near-duplicates are harder for Google to cluster.
+
+## How should you adapt the post for each platform?
+
+| Element | DEV | Hashnode | Medium |
+| --- | --- | --- | --- |
+| Title | The problem, in a developer's words | Same as DEV | Title plus subtitle; not "sensationalistic", not "overly generic, mysterious, or formulaic" |
+| Tags | Exactly four | Reuse the DEV four | Up to five topics |
+| Cover | 1000 x 420 | Your blog cover | Optional: "using no cover image can be better than using a poorly chosen one" |
+| First line | "This post first appeared on the Acme blog." | Same | Same |
+| Call to action | One UTM link; organizations get a CTA box | One UTM link | One UTM link |
+| Formatting | Embeds via `{% embed URL %}` | Mermaid renders | Tables become images; gists embed by URL |
+
+Medium details come from its [distribution guidelines](https://help.medium.com/hc/en-us/articles/360006362473-Medium-s-Distribution-Guidelines-How-curators-review-stories-for-Boost-General-and-Network-Distribution), [topics help](https://help.medium.com/hc/en-us/articles/214741038-Using-topics) and [embeds help](https://help.medium.com/hc/en-us/articles/214981378-Using-embeds), which lists Airtable for tables.
+
+**Example: one article, four titles.**
+
+* Weak, pasted everywhere: "Announcing Acme v2.3: Faster Webhooks"
+* Blog, for search: "How to Retry Failed Webhooks With Exponential Backoff in Node.js"
+* DEV and Hashnode, for the feed: "Why our webhook retries made outages worse, and the backoff that fixed it"
+* Medium publication: "Exponential Backoff for Webhooks: What Most Retry Loops Get Wrong", subtitled "Jitter, caps and idempotency keys, with a working Node.js example"
+
+**Key pointers:**
+- Turn every GFM table into an image with alt text before importing to Medium.
+- Use one call to action per copy, pointing at the docs page that continues the task.
+
+## Should you publish on Medium under a publication or your profile?
+
+| | Your profile | A publication |
+| --- | --- | --- |
+| URL | medium.com/@your-username | Changes "to include the publication name or domain" |
+| Who sees it | Your followers | "Your followers, plus the followers of the publication" |
+| Control | Full | Editors can edit your story |
+| Limits | None | Open-to-all publications allow three active submissions per guest writer, and can require an image, subtitle, minimum read time or paywall |
+
+Sources: Medium's [submission help](https://help.medium.com/hc/en-us/articles/213904978-How-to-submit-a-story-to-a-publication) and [profile vs publication](https://help.medium.com/hc/en-us/articles/360051364454-Differences-between-a-profile-and-a-publication) pages.
+
+Without a Medium following, an established publication is the better bet. To submit, choose Edit story from the story's three-dot menu, open the three-dot menu again, choose Submit to publication and click Send for review. Pick one: the [No Duplicate Content rule](https://help.medium.com/hc/en-us/articles/360039513913-About-the-No-Duplicate-Content-rule) forbids putting a story already in one publication into another.
+
+Webcrumbs shows the adaptation. The DEV piece used a first-person hook, and the version repurposed into DevGenius ran as "v0 and Webcrumbs are Transforming AI Powered Web Development", subtitled "Webcrumbs's Flexible Customization vs. Vercel v0's Framework-Driven Approach".
+
+**Key pointers:**
+- Read the publication's submission guidelines and its last 10 stories before writing the Medium title.
+- Publish from an engineer's profile into the publication, not from a new company account with no followers.
+
+## How do you track traffic back to the original?
+
+Google Analytics says to "always use `utm_source`, `utm_medium`, and `utm_campaign`", and values are case sensitive ([Analytics Help](https://support.google.com/analytics/answer/10917952)). Tag the links in each copy's body:
+
+```text
+https://yourtool.dev/blog/webhook-retries-exponential-backoff?utm_source=devto&utm_medium=crosspost&utm_campaign=webhook-retries
+https://yourtool.dev/blog/webhook-retries-exponential-backoff?utm_source=hashnode&utm_medium=crosspost&utm_campaign=webhook-retries
+https://yourtool.dev/blog/webhook-retries-exponential-backoff?utm_source=medium&utm_medium=crosspost&utm_campaign=webhook-retries
+https://yourtool.dev/blog/webhook-retries-exponential-backoff?utm_source=dailydev&utm_medium=community&utm_campaign=webhook-retries
+```
+
+Then read each platform's numbers. On DEV, open the "..." menu beside a post on your dashboard ([DEV Help](https://dev.to/help/writing-editing-scheduling)). On Medium, a view counts after 5 seconds and a read after 30 ([Medium Stats](https://help.medium.com/hc/en-us/articles/215108608-Stats)). daily.dev shows impressions and unique reach per post ([post analytics](https://docs.daily.dev/post-and-squad-analytics/)).
+
+**Tracking sheet, one row per copy:**
+
+| Copy URL | Canonical checked | Views or reads | UTM sessions to original | Signups or docs visits |
+| --- | --- | --- | --- | --- |
+| dev.to/... | | | | |
+| ...hashnode.dev/... | | | | |
+| medium.com/... | | | | |
+
+The last two columns matter most. Our guide to [measuring content ROI beyond pageviews](/blog/developer-tool-content-roi-beyond-pageviews) covers what to do with them.
+
+**Key pointers:**
+- Use lowercase UTM values, written down once, so `devto` never becomes `DevTo`.
+- After 30 days, drop the platform whose copies send no UTM sessions.
+
+## What are the most common cross-posting mistakes?
+
+| Mistake | What goes wrong | Fix |
+| --- | --- | --- |
+| No canonical on the copy | Google may pick the copy as the more complete page | Set it everywhere and run the check |
+| Cross-posting before the original is indexed | The copy can be crawled first | Wait for "URL is on Google" |
+| Pasting from a Notion export or a rendered page | Links, code languages and alt text can get lost | Import by URL or RSS, or paste Markdown, then count links |
+| UTMs or the wrong host in the canonical | It points at a URL that isn't your canonical | Copy the href from the original's tag |
+| One story in two Medium publications | Breaks the No Duplicate Content rule | One publication per story |
+| A sales post on DEV | DEV "strongly discourage[s] posting purely promotional articles" ([DEV Help](https://dev.to/help/organizations/importing-your-organizations-content)) | Cross-post tutorials and comparisons |
+
+To catch dropped links, compare your source Markdown with the DEV copy, using DEV's public API:
+
+```bash
+grep -o '](http' content/blog/webhook-retries.mdx | wc -l
+curl -s https://dev.to/api/articles/your-name/your-post-slug | jq -r .body_markdown | grep -o '](http' | wc -l
+```
+
+If the second number is lower, find the missing links before you share.
+
+**Key pointers:**
+- On DEV's RSS import, tick "Mark the RSS source as canonical URL" before the first sync.
+- Run the link count on every copy that started as a paste.
+
+## The cross-posting checklist (copy and paste)
+
+```markdown
+Original
+- [ ] Published on our domain with a self-referencing canonical tag
+- [ ] URL Inspection: "URL is on Google", Google-selected canonical is our URL
+- [ ] Platform titles, tags and a 1000 x 420 cover ready
+
+DEV
+- [ ] canonical_url set, or RSS import with "Mark the RSS source as canonical URL"
+- [ ] Four specific tags; posted under our organization if we have one
+- [ ] First line says where the post first appeared; one UTM link in the body
+
+Hashnode
+- [ ] Original URL set in the draft settings, or originalArticleURL via the API
+
+Medium
+- [ ] Imported with Import a story, or canonical set by hand
+- [ ] Tables converted to images; up to five topics; subtitle written
+- [ ] Submitted to one publication only
+
+After publishing
+- [ ] Canonical check passes on DEV and Hashnode; Medium checked in page source
+- [ ] Link count matches the source Markdown
+- [ ] Original shared on daily.dev, Reddit, X and LinkedIn with UTM tags
+- [ ] Re-inspect the original in 2 to 4 weeks
+```
+
+## How Studio1 has done this
+
+**[Webcrumbs](/case-studies/webcrumbs):** the flagship DEV piece compared Vercel v0 with Webcrumbs and "achieved sustained visibility through search and community discovery". The same narrative was then repurposed into DevGenius on Medium, "extending reach beyond a single platform".
+
+> "He wrote great technical texts that reached an impressive audience."
+>
+> **Julia Machado**, Founder & CEO, WebCrumbs
+
+**[Tensorlake](/case-studies/tensorlake):** the blog held the durable search content, and "Dev.to publishing gave Tensorlake another durable developer-discovery channel". The [Claude Cowork overview on DEV](https://dev.to/tensorlake/claude-cowork-architecture-capabilities-and-usage-overview-1ofn) sits under Tensorlake's organization, uses four tags, and its canonical tag points to the [original on tensorlake.ai](https://www.tensorlake.ai/blog/claude-cowork-architecture-overview).
+
+**[Permit.io](/case-studies/permit):** Studio1 syndicated Permit.io's content across Dev.to and Medium to extend each asset's reach. Most posts on [Permit.io's DEV organization](https://dev.to/permit_io) point their canonical URL at permit.io.
+
+**[Entelligence AI](/case-studies/entelligence-ai):** published blogs became DEV cross-posts, social posts and community posts.
+
+If you want this handled for you, our [developer content distribution](/developer-content-distribution) service runs the copies, canonical checks, shares and tracking for each piece, and our [technical content marketing](/technical-content-marketing) team writes the originals.
+
+## FAQ
+
+### Does cross-posting to Dev.to hurt SEO?
+
+Not when the DEV copy sets `canonical_url` to your original and the original was indexed first. Google treats the canonical as a strong signal, not a rule, so keep the original the most complete version.
+
+### Should I cross-post to Dev.to, Hashnode and Medium on the same day?
+
+No. Publish the DEV copy once the original is indexed, then add Hashnode and Medium over the following days. Medium publications also need time to review a submission.
+
+### Does Medium's import tool set a canonical link?
+
+Yes. Imported stories automatically get a canonical URL pointing at the original and are backdated to its date. If the import fails, set the canonical by hand under Advanced Settings.
+
+### Is Hashnode still free for cross-posting?
+
+Yes. The free plan includes a hosted blog on hashnode.dev and a place in the Hashnode feed. Custom domains, API publishing and bulk import are on the Pro plan.
+
+### Can a company blog be a source on daily.dev?
+
+No, daily.dev excludes corporate and personal blogs as sources. You can still post articles directly or in a free Squad, and a paid Verified Company Squad can auto-post from your RSS feed.

@@ -1,0 +1,265 @@
+---
+title: "How to Launch on Hacker News: A Show HN Guide for Developer Tools"
+seoTitle: "How to Launch on Hacker News: Show HN Tips for Dev Tools"
+slug: how-to-launch-on-hacker-news-show-hn
+description: "Show HN tips for developer tools: what qualifies, how to write the title and first comment, how to behave on launch day, reposts, and how to measure results."
+tldrSummary: "To launch on Hacker News, post a Show HN for something people can try right away, with a plain title, a hand-written first comment, and a link to the repo or a live demo. Then stay in the thread all day, answer technical questions in depth, and never ask anyone to upvote."
+tldrBullets:
+  - "Show HN is only for things people can try: a repo, a live demo or a free tier, ideally with no signup. Landing pages, waitlists and blog posts don't qualify."
+  - "Use a plain title in the form Show HN: Name, what it does, and a first comment that covers who you are, why you built it, how it works, what is rough and what feedback you want."
+  - "No posting time has been shown to reliably win, so post when someone who can answer technical questions is free to stay in the thread for the whole day."
+  - "If the post sinks, don't delete and repost. HN allows a few reposts of a story that got no real attention, and a new Show HN only for a major new version."
+date: 2026-11-07
+updatedDate: 2026-11-07
+draft: false
+authors:
+  - Arindam Majumder
+tags:
+  - launches
+  - hacker-news
+  - open-source
+  - developer-marketing
+bannerImage: /blog/uploads/how-to-launch-on-hacker-news-show-hn/cover.png
+---
+**The short answer:** To launch on Hacker News, post a Show HN for something people can try right away, ideally a GitHub repo or a live demo with no signup. Give it a plain title ("Show HN:", the name, and what it does in plain words) and a hand-written first comment that says who you are, why you built it, how it works, what is still rough and what feedback you want. Then stay in the thread all day, answer every technical question, take criticism well, and never ask anyone to upvote.
+
+This guide covers Hacker News in depth. For Product Hunt, read our [Product Hunt launch playbook](/blog/product-hunt-launch-playbook). For how HN fits into a full launch week, see [how to get more GitHub stars for your open-source launch](/blog/how-to-get-github-stars-open-source-launch). For the full plan around launch day, read [how to launch a developer tool](/blog/how-to-launch-a-developer-tool).
+
+## Does your product qualify for Show HN?
+
+The [Show HN guidelines](https://news.ycombinator.com/showhn.html) say Show HN is "for something you've made that other people can play with." Blog posts, sign-up pages, newsletters and lists are off topic because they "can't be tried out." The project should be non-trivial ("Don't post quickly-generated one-offs"), and it must be your own work that you're "around to discuss." Landing pages, fundraisers and minor releases like "Foo 1.3.1 is out" don't qualify.
+
+![Hacker News Show HN guidelines listing what is on topic and off topic, from things people can try to landing pages and fundraisers](/blog/uploads/how-to-launch-on-hacker-news-show-hn/show-hn-rules.webp "The Show HN rules: if people can't try it, it isn't a Show HN.")
+
+| What you have | Show HN? | What to do instead |
+| --- | --- | --- |
+| A GitHub repo with an install that works | Yes | Link the repo |
+| A hosted app with a free tier or guest mode | Yes | Link to the part people can use |
+| A hosted app that requires signup | Allowed, but you get less feedback | Add a guest mode for launch day |
+| A landing page or waitlist | No | Come back when people can try it |
+| A launch blog post | No | Submit it as a regular story |
+| A point release | No | Wait for a major overhaul |
+
+**Launch HN is a different thing.** [Launch HN is only for YC startups](https://news.ycombinator.com/yli.html). The HN team works with the founders on the text, each startup gets one, and the title follows a fixed format: `Launch HN: <company name> (YC S24) - <your tag line here>`. The [HN FAQ](https://news.ycombinator.com/newsfaq.html) says YC startup launches are placed on the front page. Everyone else uses Show HN, but the Launch HN page is still the best public guide to writing for HN, and it says non-YC founders "should still follow the advice below."
+
+**Key pointers:**
+* Open your link in a private browser window. If the first screen asks for an email, add a guest mode or demo account before you post.
+* If what you have today is a blog post about the launch, submit it as a regular story and save Show HN for the repo or demo.
+
+## How to write a Show HN title
+
+The title has one job: tell a skimming engineer what the thing is. Use this formula:
+
+`Show HN: Name, what it does in plain words`
+
+Two titles from the [Show HN page](https://news.ycombinator.com/show) in November 2026 follow it: [`Show HN: Agentic Identity Broker, OAuth Delegation for AI Agents`](https://news.ycombinator.com/item?id=50393235) and [`Show HN: Tmux-restore saves tmux windows and agent sessions across reboots`](https://news.ycombinator.com/item?id=50355009). Both link straight to a GitHub repo, and both tell you what the tool does before you click.
+
+The [HN guidelines](https://news.ycombinator.com/newsguidelines.html) rule out uppercase, exclamation points and "saying how great" something is. The Launch HN page adds: "Don't use superlatives (fastest, biggest, first, best). Modest language is stronger." It caps Launch HN titles at 80 characters, a sensible budget for a Show HN title too. As Lucas da Costa puts it in his [notes on launching on HN](https://lucasfcosta.com/blog/hn-launch/): "Generic or vague titles do not perform well."
+
+**Before and after** (made-up titles):
+
+| Weak title | Why it fails | Stronger title |
+| --- | --- | --- |
+| `Show HN: Acme, the future of developer productivity` | Says nothing a reader can check | `Show HN: Acme, a CLI that finds unused env vars in your repo` |
+| `Show HN: The FASTEST way to deploy agents!` | Uppercase, exclamation point, superlative | `Show HN: Acme, deploy agent containers to your own AWS account` |
+
+**Key pointers:**
+* Write the title as if nobody will open the link: the name, then the job it does, in words a developer would search for.
+* Count the characters and stay under 80.
+* Cut every adjective you couldn't defend in the comments.
+
+## What to link: the repo or a live demo, not a marketing page
+
+Link to the place where a reader can try the product. For an open-source tool, that is the repo. Lucas da Costa argues that for technical products the repo effectively is the landing page, and that GitHub broadcasts stars to the starrer's followers. An [analysis of 188,085 Show HN posts](https://danfking.github.io/blog/2026/04/23/show-hn-by-the-numbers/) found that 27% link to a GitHub repo.
+
+For a hosted product, link to the part people can use. The Launch HN page says to "remove signup barriers, at least for launch day," to make pricing transparent, and to flag anything like a required onboarding call "up front."
+
+Whatever you link, the first screen decides whether people try it. Two examples from Studio1's work, neither an HN launch, both aimed at the first ten seconds a visitor spends:
+
+* **OpenLore.** After Studio1's DX audit, the README went from a dense, text-heavy About section to a one-line pitch and a diagram of agents sharing one knowledge server. ([OpenLore case study](/case-studies/openlore))
+* **Corsair.** After Studio1's onboarding audit, the Corsair team reworked the hosted app and the quick start, which now reaches a working example in under a minute. ([Corsair case study](/case-studies/corsair))
+
+**Key pointers:**
+* Put the install command and a GIF or screenshot in the first screen of the README.
+* Run the quickstart in a fresh container the day before, and fix every step that needs something you didn't document.
+* If the product needs an API key, ship a demo mode or hosted sandbox for launch day.
+
+## How to write the first comment
+
+HN moderator dang's [tips for a Show HN](https://news.ycombinator.com/item?id=22336638) cover the text. Give "the backstory of how you came to work on this" and explain "what's different about it." Include "a clear statement of what your project is or does," or the discussion will be "I can't tell what this is." Drop "any language that sounds like marketing or sales." The text should appear at the top of the submission; if it doesn't, post it as the first comment.
+
+In March 2026 dang added: "Write your text by hand. Don't use an LLM to generate any of it (not even a tiny bit, including to edit or spruce it up)." The [guidelines](https://news.ycombinator.com/newsguidelines.html) say the same.
+
+This template follows the structure on the [Launch HN page](https://news.ycombinator.com/yli.html), with a "what's rough" section added, because HN readers will find the weak spots anyway.
+
+**Template: Show HN first comment**
+
+```text
+Hi HN, I'm [first name]. I built [Name] with [co-founder / team of N].
+
+[Name] [does one thing] for [who]. [Say it a second way, without repeating the title.]
+
+The problem: [what was painful, with one concrete example a reader has hit].
+We ran into it while [where you were and what you tried first].
+
+How it works: [3 to 5 sentences: language, architecture, storage, and the one
+design decision people will want to argue about].
+
+What's different: [how it compares to the obvious alternatives, named honestly].
+
+What's rough: [known limitations, missing features, what breaks at scale].
+
+Try it: [repo or demo link, plus the one command or click to get started].
+[License, and how you make money or plan to.]
+
+I'd love feedback on [one specific question]. I'll be here all day.
+```
+
+Write it as paragraphs. The Launch HN page says "Don't make lists of features" and "Don't use single-sentence paragraphs. They read like sales letters."
+
+**Key pointers:**
+* Write the comment yourself and don't run it through an AI tool to tidy it up.
+* End with one specific question ("Would you configure this in YAML or in code?"), not "thoughts?"
+* Post from a personal account. dang's tips say your username shouldn't be your company or project name.
+
+## Frame it around a debate: what this looked like for Memori
+
+Memori, a Studio1 client, went to Hacker News twice in 2025, and I submitted both posts from my own HN account. The two posts are the clearest framing lesson we have.
+
+**Before: a product description.** Memori's [Show HN](https://news.ycombinator.com/item?id=44941043) in August 2025 had a plain name-and-description title and linked to the GitHub repo. The text described three memory modes, listed the database features behind them and invited feedback on the demo apps. It earned 17 points and 11 comments.
+
+![Memori's Show HN post on Hacker News, Open-Source Memory Engine for AI Agents, with 17 points and 11 comments](/blog/uploads/how-to-launch-on-hacker-news-show-hn/memori-show-hn-post.webp "Before: a product description earned 17 points.")
+
+**After: a side in an argument.** A month later, a regular text post titled ["Everyone's trying vectors and graphs for AI memory. We went back to SQL"](https://news.ycombinator.com/item?id=45329322) reached 136 points and 63 comments. It opened with a problem every agent builder knew: "You could tell an agent, 'I don't like coffee,' and three steps later it would suggest espresso again." It walked through four approaches (prompt stuffing, vector databases, graph databases and hybrids) with the trade-off of each, argued for relational databases, and only then introduced Memori.
+
+![Hacker News post titled Everyone's trying vectors and graphs for AI memory. We went back to SQL, with 136 points and 63 comments](/blog/uploads/how-to-launch-on-hacker-news-show-hn/memori-hn-debate-post.webp "After: a side in a debate developers were already having earned 136 points.")
+
+A debate invites pushback. Commenters argued over whether SQL can tell "I hate espresso" from "I love coffee," whether vector search handles fuzzy matching better, and how Memori decides which past conversations are relevant. That is the conversation you want, as long as your answers are ready.
+
+You can use this inside the Show HN rules. Keep the title plain and put the argument in the first comment: "The usual approach is X. We chose Y because Z. Here's where Y is worse." Or publish the technical argument as an article and submit it as a regular story on another day, keeping the guideline in mind: "Please don't use HN primarily for promotion."
+
+HN was one channel among several. Reddit launches, 12 demo agents, events and creator partnerships took Memori from launch to 12,000+ GitHub stars. ([Memori case study](/case-studies/memori))
+
+**Key pointers:**
+* Write the debate in your category as one line ("vectors vs SQL," "ORM vs raw queries") and say which side you took and why.
+* List the three strongest objections to your approach and draft a reply to each before you post.
+* Name the alternatives yourself in the first comment, before commenters do.
+
+## When to post: what the data says
+
+There is no reliable rule. The public data:
+
+* The [188,085-post analysis](https://danfking.github.io/blog/2026/04/23/show-hn-by-the-numbers/) found average scores peak around 12:00 to 15:00 UTC, while the best chance of reaching 50 points was Monday at 00:00 UTC (10.8%, against 2.6% for Thursday at 06:00 UTC). It reports no statistical tests for timing.
+* A [2025 paper on 138 AI tool launches](https://arxiv.org/abs/2511.04453) found posts made between 12:00 and 17:00 UTC gained about 200 more stars than posts at poor times, unadjusted for other factors. Weekend versus weekday made no meaningful difference.
+* Lucas da Costa: "There's no best time to post."
+
+What the Launch HN page says you need is "enough free time to engage with commenters on that day." It also warns against timing the launch with press coverage: "It does no good and is a pain."
+
+**Key pointers:**
+* Pick the day your most technical founder or engineer can clear their calendar from posting time to evening.
+* If you want a default, both sources lean toward 12:00 to 17:00 UTC (US morning, European afternoon). Don't move the date for it.
+
+## How to behave on launch day
+
+The [HN FAQ](https://news.ycombinator.com/newsfaq.html) says ranking "divides points by a power of the time since a story was submitted," with other factors such as user flags, anti-abuse software, account or site weighting and moderator action. High-karma accounts don't rank higher. The Comments section of the [Launch HN page](https://news.ycombinator.com/yli.html) is the best launch-day playbook there is:
+
+* "Reply when comments start appearing. Take breaks, but don't leave the thread for long without answering."
+* "Be generous with details about your technology, problem, and market."
+* "Respond to objections by first finding something to agree with."
+* You never have to convince a critic: "your goal is to win over the large silent audience."
+
+**Before and after** (a made-up reply):
+
+> **Comment:** "Isn't this just RAG with extra steps?"
+>
+> **Defensive:** "No. If you'd read the README you'd see it's completely different."
+>
+> **Better:** "Fair question, and retrieval is still the core of it. The difference is that we store facts as rows with a schema, so updates and deletes are plain SQL. Where it's worse: fuzzy matching across synonyms. Here's the retrieval code if you want to check."
+
+**Never ask for upvotes, and don't let friends post booster comments.** The FAQ says HN will "penalize or ban submissions, accounts, and sites" that solicit votes, and that readers "will detect it, flag it, and use unkind words like 'spam'." The Launch HN page calls booster comments "the worst mistake you can make on HN." Lucas da Costa adds that HN's voting-ring detection is "excellent."
+
+**Key pointers:**
+* Brief your team and users the day before: no upvote requests, no direct links to the thread, no "great work!" comments.
+* Keep a doc open with answers to the hardest questions and links to the code, benchmarks and docs behind them.
+* When a comment finds a real bug, thank them, fix it that day, and reply with the commit link.
+
+## What to do if your Show HN sinks
+
+Most do. The [188,085-post analysis](https://danfking.github.io/blog/2026/04/23/show-hn-by-the-numbers/) found the median Show HN gets 2 points, and 50 points puts a post in the top 6%. Every Show HN appears on [shownew](https://news.ycombinator.com/shownew), and only those that clear "a small points threshold" reach the Show page. What HN allows next:
+
+1. **Don't delete and repost.** The guidelines and FAQ both say "Deletion is for things that shouldn't have been submitted in the first place."
+2. **A few reposts are fine if nobody noticed.** The [FAQ](https://news.ycombinator.com/newsfaq.html): "If a story has not had significant attention in the last year or so, a small number of reposts is ok. Otherwise we bury reposts as duplicates."
+3. **A new Show HN needs a new version.** dang's tips allow one "only if the new version is significantly different," with a comment linking the previous Show HN. That "should probably only happen once or twice a year."
+4. **The second-chance pool is the moderators' call.** In HN's [second-chance pool](https://news.ycombinator.com/item?id=26998308), moderators and reviewers pick overlooked submissions, and software places them at random on the lower part of the front page. Put an email in your HN profile, since moderators sometimes invite reposts by email. Don't count on emailing in yourself: in March 2026 dang noted the team can no longer answer emails about Show HN posts because there are too many.
+
+**Key pointers:**
+* Reread your thread. If the comments say "I can't tell what this is," rewrite the title and first comment before any repost.
+* Repost only after you ship something a reader can see, and link the old thread.
+* Turn the post into content for other channels with our [distribution playbook](/blog/how-to-distribute-technical-content-reddit-x-youtube).
+
+## How to measure a Hacker News launch
+
+Points are the scoreboard, not the result. The [188,085-post analysis](https://danfking.github.io/blog/2026/04/23/show-hn-by-the-numbers/) studied 491 of the top 500 repos by HN score. Comments didn't predict stars (r = 0.10), the median repo gained about 1.4 stars per upvote within 48 hours, and "the half-life of a Show HN bump is almost exactly 24 hours." In the [138-launch paper](https://arxiv.org/abs/2511.04453), mostly well-received AI tools gained 121 stars on average in 24 hours, 189 in 48 hours and 289 in a week.
+
+So capture the first two days fast, then watch usage.
+
+| Metric | Where to find it | When to record it |
+| --- | --- | --- |
+| Stars and forks | The repo, plus a star-history chart | Before posting, then at 24 hours, 48 hours and 7 days |
+| Visitors from HN | GitHub Insights, Traffic, Referring sites | Within 14 days |
+| Signups, installs, downloads | Product analytics and your package registry | Daily for 2 weeks |
+| Docs and quickstart visits | Web analytics, news.ycombinator.com referrer | Daily for 2 weeks |
+| Questions and bug reports | The thread and GitHub issues | Tag each one within a week |
+
+GitHub's [traffic page](https://docs.github.com/en/repositories/viewing-activity-and-data-for-your-repository/viewing-traffic-to-a-repository) shows visitors from the past 14 days plus referring sites, and only people with push access can see it, so screenshot it while the launch is still in that window. [HN's pages](https://news.ycombinator.com/show) set their referrer policy to `origin`, so analytics shows news.ycombinator.com but not the thread. Some HN traffic also lands as direct or unknown, which we cover in [measuring developer tool content beyond pageviews](/blog/developer-tool-content-roi-beyond-pageviews).
+
+**Key pointers:**
+* Write down stars, weekly installs and signups the morning you post.
+* Screenshot the GitHub referring-sites panel on day 2 and day 7.
+* Count the issues and docs fixes the thread produced. They outlast the stars.
+
+## Show HN launch checklist
+
+Copy this into your launch doc.
+
+| When | Task | Done when |
+| --- | --- | --- |
+| 1 to 2 weeks before | Confirm it qualifies | A stranger can try it without signing up |
+| 1 to 2 weeks before | Fix the first screen | Pitch, visual and install command show without scrolling |
+| 1 to 2 weeks before | Test the quickstart | It works in a fresh container using only the written steps |
+| 2 to 3 days before | Write the title | `Show HN: Name, what it does`, under 80 characters |
+| 2 to 3 days before | Write the first comment by hand | Every template section filled, no feature lists |
+| 2 to 3 days before | Prepare for objections | The three hardest questions have written answers |
+| 1 day before | Brief your team | No upvote requests, booster comments or thread links |
+| 1 day before | Record baselines | Stars, installs, signups and docs traffic written down |
+| Launch day | Post and stay | Personal account; someone technical replies within the hour until evening |
+| Day 2 to 7 | Capture results | Stars at 24 hours, 48 hours and 7 days; referrers screenshotted |
+| Week after | Close the loop | Bug reports are issues and confused questions are docs fixes |
+
+If you want help with the title, the first comment, the README and the day itself, our [product launch service](/product-launch-service) does this work with your team. For open-source projects that need steady growth after the spike, our [GitHub growth service](/github-growth-agency) runs the demos, content and community work around it.
+
+## FAQ
+
+### Can I post a landing page or waitlist as a Show HN?
+
+No. The Show HN guidelines rule out landing pages and fundraisers, and list sign-up pages as off topic. Wait until people can try the product, then post.
+
+### What's the difference between Show HN and Launch HN?
+
+Show HN is open to anyone who has built something people can try. Launch HN is only for YC startups: the HN team works with the founders on the text, each startup gets one, and YC launches are placed on the front page.
+
+### What time should I post a Show HN?
+
+No posting time has been shown to reliably win. One large analysis favors 12:00 to 15:00 UTC for average score and a smaller paper favors 12:00 to 17:00 UTC, but neither shows cause and effect. Post when someone technical can stay in the thread all day.
+
+### Can I ask my team or users to upvote?
+
+No. HN says it penalizes or bans submissions, accounts and sites that solicit votes, and the Show HN rules say not to ask friends to upvote or comment. Tell people the product launched, not where to vote.
+
+### How many points does a good Show HN get?
+
+An analysis of 188,085 Show HN posts found the median post gets 2 points, and 50 points puts a post in the top 6%. Judge the launch by stars, installs, signups and the questions you got, not points alone.
+
+### Should I launch on Hacker News or Product Hunt first?
+
+Use Show HN for something developers can try directly, such as a repo or live demo, and Product Hunt for a hosted product with a polished listing. Many teams do both in the same launch week, on different days. Our [Product Hunt launch playbook](/blog/product-hunt-launch-playbook) covers that side.

@@ -1,0 +1,284 @@
+---
+title: "How to Get Your Repo on GitHub Trending and Trendshift"
+seoTitle: "How to Get Your Repo on GitHub Trending (and Trendshift)"
+slug: how-to-trend-on-github
+description: "GitHub trending, explained: what seems to move the list, how to land launch stars in 48 hours, fix your repo's language, get on Trendshift and avoid fake stars."
+tldrSummary: "GitHub doesn't publish how Trending works. Its only official description says it weighs stars, forks, commits, follows and pageviews by recency, and in practice repos trend on a burst of stars, so stack your launch into 48 hours, get your language right, and have the repo ready for visitors."
+tldrBullets:
+  - "GitHub's only public description of Trending is a 2013 post that names stars, forks, commits, follows and pageviews, weighted by how recently they happened."
+  - "Repos seem to trend on a burst of stars measured against their usual pace and against other repos that day, so put Show HN, Reddit, X and your community inside one 48-hour window."
+  - "Language lists are less crowded than the all-languages list, so check the language GitHub assigns your repo and fix it with .gitattributes a week before launch."
+  - "Bought and traded stars break GitHub's rules, and a study from Carnegie Mellon and Socket found only 78 of 18,617 fake-star repos in a GitHub Trending archive."
+date: 2026-11-07
+updatedDate: 2026-11-07
+draft: false
+authors:
+  - Arindam Majumder
+tags:
+  - github
+  - open-source
+  - launches
+bannerImage: /blog/uploads/how-to-trend-on-github/cover.png
+---
+**The short answer:** GitHub hasn't published how Trending is calculated. Its only official description, a 2013 blog post, says it weighs stars, forks, commits, follows and pageviews, and cares about how recently they happened. In practice, repos trend when they get a burst of stars in a short window, compared with their usual pace and with other repos that day. So stack your launch channels into the same 24 to 48 hours, make sure GitHub files your repo under the right language, and have the README and quickstart ready when visitors land.
+
+## What GitHub Trending is, and what it isn't
+
+[GitHub Trending](https://github.com/trending) is GitHub's list of "what the GitHub community is most excited about today." It has Repositories and Developers tabs and three filters: date range (Today, This week, This month), programming language, and spoken language. Each row shows the stars gained in that period, such as "306 stars today." There is no rank number and nothing to apply for.
+
+It is not a leaderboard of stars gained. In a snapshot of the daily lists at 05:14 UTC on November 7, 2026, the [Go list](https://github.com/trending/go?since=daily) included kubevirt/kubevirt with "1 star today," and the all-languages list put openssl/openssl (26 stars today) above cloudflare/security-audit-skill (2,548).
+
+GitHub's only explanation is a 2013 post, [Explore what is Trending on GitHub](https://github.blog/news-insights/company-news/explore-what-is-trending-on-github/): "We look at a variety of data points including stars, forks, commits, follows, and pageviews, weighting them appropriately. It's not just about total numbers, but also how recently the events happened." Nothing newer is documented, and a [2025 GitHub Community thread](https://github.com/orgs/community/discussions/163970) asking how it works got only guesses, none from GitHub staff.
+
+| Question | What is known |
+| --- | --- |
+| Which signals count? | Stars, forks, commits, follows and pageviews, by recency (GitHub, 2013) |
+| Is it relative to a repo's usual pace? | Widely suspected, never confirmed |
+| When does "today" start? | Not documented |
+
+**Key pointers:**
+
+* Treat any "exact Trending formula" you read as a guess.
+* For two weeks before launch, note the "stars today" of young repos on your language's daily list. That is your rough bar.
+* Keep committing and releasing during launch week. GitHub named commits and forks too.
+
+## What seems to move a repo onto the list
+
+The widely observed pattern is a burst: many new stars in a short window, compared with the repo's usual pace and with what other repos got that day. It is an observation, not a documented rule.
+
+The clearest public day-by-day record we know of is Trendshift, a third-party list that shows daily stars next to daily rank. Here is [OpenLore's page](https://trendshift.io/repositories/85262). OpenLore, a docs server for coding agents and a Studio1 client, had gained 0 to 10 stars a day for three weeks before this run. These are Trendshift ranks, not GitHub's.
+
+| Day (2026) | Stars gained | Rank in Go on Trendshift |
+| --- | --- | --- |
+| Sep 28 | +201 | #3 |
+| Sep 29 | +57 | #22 |
+| Oct 2 | +199 | #2 |
+| Oct 4 | +19 | Not trending |
+| Oct 6 | +56 | Not trending |
+| Oct 18 | +66 | #25 |
+| Oct 22 | +66 | Not trending |
+
+![Trendshift chart for OpenLore: daily stars, forks and merged PRs from September 8 to November 7, 2026, lined up with its daily rank in the Go top 25](/blog/uploads/how-to-trend-on-github/openlore-trendshift-momentum.webp "OpenLore on Trendshift: the rank follows each day's burst of stars, not the running total.")
+
+1. **The jump beats the total.** A repo that had been getting single-digit stars a day reached #3 in Go on a 201-star day.
+2. **The bar moves.** 57 stars ranked #22 on September 29, and 56 missed on October 6. 66 stars ranked #25 on October 18 and missed on October 22.
+3. **Ranks are earned daily.** OpenLore stayed in the Go top 25 for six straight days, September 28 to October 3, and dropped off when stars fell to 19.
+
+Language lists are the realistic target. In the same November 7 snapshot, GitHub's all-languages daily list had nothing under 26 stars today, while the Go list had six repos under 5.
+
+**Key pointers:**
+
+* Work out your baseline (average daily stars over 30 days). Launch day needs to be many times that.
+* Target your language list first. The all-languages list is a bonus.
+* Plan for three or more strong days in a row.
+
+## How to plan a launch so stars land in the same 24 to 48 hours
+
+Spread over two weeks, each channel adds a few dozen stars to a different day, and no day clears the bar. Stacked, the same channels can. This is a tighter version of the launch week in our [GitHub stars playbook](/blog/how-to-get-github-stars-open-source-launch).
+
+* **Weak:** Show HN on Monday, Reddit next week, Product Hunt when the listing is ready.
+* **Strong:** Show HN, Reddit, X and your community on day 1, Product Hunt and daily.dev on day 2, then one demo or talk a day.
+
+### Template: the 48-hour trending window
+
+Plan in UTC, since GitHub doesn't say when its "today" starts and Trendshift's day is UTC. Copy this and fill in the owners.
+
+| When | Channel | What goes out | Owner |
+| --- | --- | --- | --- |
+| Day minus 7 | The repo | Language check, README, issues, pinned discussion | |
+| Day minus 2 | Users and community | The date, the link, a request for feedback (not stars) | |
+| Hour 0 | Hacker News | Show HN linking the repo, maker in the thread | |
+| Hour 1 | X and LinkedIn | Launch thread with a 30-second demo clip | |
+| Hours 2 to 4 | Reddit | Problem-first post in 1 or 2 subreddits that allow it | |
+| Hour 6 | Discord, Slack, newsletter | A note to existing users | |
+| Day 2 | Product Hunt | The listing, if you have a hosted version | |
+| Day 2 | daily.dev, Dev.to | How it works, not what it is | |
+| Hours 36 to 48 | X and LinkedIn | What people asked, what you fixed | |
+| Days 3 to 5 | Demos, talks, creators | One new demo or session per day | |
+
+Follow each channel's rules. The [Show HN guidelines](https://news.ycombinator.com/showhn.html) want "something you've made that other people can play with" and say "Please don't ask friends to upvote or comment." Our [Product Hunt](/blog/product-hunt-launch-playbook) and [distribution](/blog/how-to-distribute-technical-content-reddit-x-youtube) playbooks cover the rest.
+
+The angle matters too. Memori's plain Show HN earned 17 points. A later post framed around a live debate, ["Everyone's trying vectors and graphs for AI memory. We went back to SQL"](https://news.ycombinator.com/item?id=45329322), reached 136 points and 63 comments.
+
+**Key pointers:**
+
+* Put every heavy channel in one 48-hour window, with a named owner per row.
+* Link the repo, not a landing page. Stars happen on the repo page.
+* Save a demo video, a talk or a deep dive for days 3 to 5.
+
+## How to get your repo's language detected correctly
+
+GitHub [uses the Linguist library](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-repository-languages) to set a repo's languages. Per [how Linguist works](https://github.com/github-linguist/linguist/blob/main/docs/how-linguist-works.md), it counts "bytes of code for each language," skipping binary, vendored, generated and documentation files, and `data` or `prose` languages such as JSON and Markdown. But Linguist's [language list](https://github.com/github-linguist/linguist/blob/main/lib/linguist/languages.yml) classes HTML, CSS and Jupyter Notebook as markup, which counts. Its [default documentation paths](https://github.com/github-linguist/linguist/blob/main/lib/linguist/documentation.yml) cover top-level `docs/`, `examples/` and `demo/`, but not `notebooks/`, `web/` or nested examples.
+
+**Before:** a Go server with a React demo in `web/` and a folder of notebooks can show up as TypeScript, in a far more crowded list.
+
+**After:** a `.gitattributes` file at the repo root, using Linguist's [overrides](https://github.com/github-linguist/linguist/blob/main/docs/overrides.md). Documentation is excluded from stats, and generated files are excluded and collapsed in diffs.
+
+```gitattributes
+web/** linguist-documentation
+notebooks/** linguist-documentation
+packages/*/examples/** linguist-documentation
+*.pb.go linguist-generated
+```
+
+1. Run `gem install github-linguist`, then `github-linguist --breakdown` in the repo. Per the [Linguist README](https://github.com/github-linguist/linguist), it lists the files behind each language.
+2. Add the overrides, run it again, and push to the default branch.
+3. Check the language bar. Stats are "only updated when you push changes," per the [troubleshooting guide](https://github.com/github-linguist/linguist/blob/main/docs/troubleshooting.md), and the background job "can take a while, particularly during busy periods."
+
+If your product really is mostly TypeScript, you are a TypeScript project. Overrides are for demos, docs and generated code, not for picking an easier list.
+
+**Key pointers:**
+
+* Check the language bar a week before launch, not on launch day.
+* Mark notebooks, demo UIs and nested examples `linguist-documentation`, and generated code `linguist-generated`.
+
+## What to have ready before the traffic arrives
+
+Trending visitors give a repo a few seconds, so the README is your landing page (more in our [open source growth guide](/blog/how-to-grow-an-open-source-project)). Our [README guide](/blog/github-readme-best-practices) has a template for that first screen. After Studio1's DX audit, OpenLore's README went from a dense, text-heavy About section to a one-line pitch and a diagram of agents sharing one knowledge server.
+
+### Checklist: a repo that is ready to trend
+
+- [ ] README first screen: a one-line pitch, a GIF or diagram, and the install command.
+- [ ] A quickstart that works on a clean machine. Corsair's reaches a working example in under a minute.
+- [ ] Up to 20 [topics](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/classifying-your-repository-with-topics), in lowercase with hyphens, 50 characters or less each.
+- [ ] A [social preview image](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/customizing-your-repositorys-social-media-preview) at 1280 by 640 pixels, under 1 MB.
+- [ ] 5 to 10 issues labeled `good first issue`, each naming the files to touch and what "done" means. GitHub uses the label to [surface approachable issues](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/encouraging-helpful-contributions-to-your-project-with-labels) across the site.
+- [ ] A pinned "Start here" discussion. You can [pin up to four](https://docs.github.com/en/discussions/managing-discussions-for-your-community/managing-discussions).
+- [ ] A LICENSE, a CONTRIBUTING.md, a tagged release, and one person on issue duty for 72 hours.
+
+### Template: the pinned "Start here" discussion
+
+```markdown
+Start here: what PROJECT is and how to try it
+
+PROJECT is a ONE-LINE PITCH for WHO IT IS FOR.
+
+Try it in two minutes:
+    INSTALL COMMAND
+    FIRST COMMAND THAT SHOWS A RESULT
+
+Where to go next:
+- Found a bug? Open an issue with the bug template.
+- Question or idea? Reply here or post in Q&A.
+- Want to contribute? Pick any issue labeled "good first issue".
+
+What we are building next:
+1. ROADMAP ITEM
+2. ROADMAP ITEM
+
+Tell us what you are building with it. We read every reply.
+```
+
+**Key pointers:**
+
+* Put the install command above the badges, in the first screen of the README.
+* Write the good first issues before launch day, not during it.
+
+## How to get on Trendshift
+
+[Trendshift](https://trendshift.io) calls itself "an alternative to GitHub Trending." Its repo pages say it "snapshots GitHub's daily Trending list and runs its own trending list." It has daily, weekly, monthly and yearly lists, a UTC day, and a top 25 per language. The formula isn't published. Its creator, Julian Li, [wrote in May 2026](https://dev.to/liweiyi88/five-things-every-github-trending-list-gets-wrong-and-what-i-built-instead-2b5b) that "daily weights momentum and freshness; weekly, monthly, and yearly weight sustained growth." There is a "Submit repository" button, but nothing says it affects rank, so plan to earn rank with momentum.
+
+The badges are the useful part. Trendshift says its "dynamic badges ... mark the best position this repository has reached on each platform" and "refresh automatically as its position climbs." OpenLore's page offers "#2 Go Repository Of The Day" and "#4 Go Repository Of The Week" badges. Replace `REPO_ID` with the number in your Trendshift page URL:
+
+```html
+<a href="https://trendshift.io/repositories/REPO_ID">
+  <img
+    src="https://trendshift.io/api/badge/trendshift/repositories/REPO_ID/daily?language=Go"
+    alt="Go Repository Of The Day on Trendshift"
+    width="250"
+    height="55"
+  />
+</a>
+```
+
+[Awesome AI Apps](https://github.com/Arindam200/awesome-ai-apps), the repo Studio1 uses to share client demos, carries a Trendshift badge in its README.
+
+**Key pointers:**
+
+* Bookmark your repo's Trendshift page before launch. It is the easiest record of stars against rank.
+* Label the badge "Trendshift," not "GitHub Trending," and screenshot your rank on the day for the recap post.
+
+## What not to do: bought stars, star-for-star rings and star giveaways
+
+The [StarScout study](https://arxiv.org/abs/2412.13459), by researchers at Carnegie Mellon, Socket and NC State and published at ICSE 2026, found 6.0 million suspected fake stars and 18,617 repos with fake star campaigns between July 2019 and December 2024. Sellers charged $0.10 to $2.00 per star. Fake stars helped for under two months, with about a fifth of the effect of real stars, and then had "a negative effect on star gain." Only 78 of those repos (0.42%) showed up in a GitHub Trending archive covering five languages, which the authors say "suggests that the GitHub trending algorithm is effective at filtering out most superficially-popular repositories."
+
+GitHub's [Acceptable Use Policies](https://docs.github.com/en/site-policy/acceptable-use-policies/github-acceptable-use-policies) ban "rank abuse, such as automated starring or following," "secondary markets" for inauthentic activity, and activity incentivized by "gifts or other give-aways."
+
+| Tactic | OK? | Why |
+| --- | --- | --- |
+| Buying stars | No | Rank abuse, and it backfires |
+| Star-for-star groups | No | A secondary market |
+| Swag for a star | No | Reward-incentivized |
+| Friends upvoting your Show HN | No | Against HN's rules |
+| Asking users for launch feedback | Yes | Real people choosing to engage |
+| "Star it if it helped" in the README | Yes | No reward attached |
+
+**Key pointers:**
+
+* Never pay for, trade or reward stars.
+* If an agency offers "guaranteed trending," walk away.
+
+## After you trend: turn visitors into users, then measure
+
+GitHub's [traffic page](https://docs.github.com/en/repositories/viewing-activity-and-data-for-your-repository/viewing-traffic-to-a-repository) (Insights, then Traffic) covers only the past 14 days, and the [traffic API](https://docs.github.com/en/rest/metrics/traffic) returns the "top 10 referrers over the last 14 days." Save it every day of launch week:
+
+```bash
+gh api repos/OWNER/REPO/traffic/popular/referrers > referrers-$(date +%F).json
+gh api repos/OWNER/REPO/traffic/views > views-$(date +%F).json
+gh api repos/OWNER/REPO/traffic/clones > clones-$(date +%F).json
+```
+
+| Signal | Where to find it | What it tells you |
+| --- | --- | --- |
+| Stars per day | Your Trendshift page | Whether the spike held |
+| Referring sites | Insights, then Traffic | Which channel sent people |
+| Clones | Insights, then Traffic | Whether visitors tried it |
+| Package downloads | npm, PyPI or crates.io | Real installs |
+| First-time contributors | Pull requests | Whether the good first issues worked |
+
+Then convert the spike: reply to every issue within a day, turn the three most-asked questions into docs fixes that week, and post a 48-hour recap of what people asked and what shipped.
+
+For which numbers to track once the spike fades, read [open source metrics beyond stars](/blog/open-source-metrics-beyond-stars).
+
+**Key pointers:**
+
+* Export traffic data daily, before the 14-day window drops it.
+* Judge the launch on clones, installs and contributors, not the badge.
+
+## How Studio1 has done this
+
+### OpenLore: #3 trending in Go on Trendshift
+
+In one month, Studio1 ran a DX audit of OpenLore's README, install and docs, set its "docs server for coding agents" positioning, and took it to talks and hackathons, where "stars jumped after each session." Daily posts on X, LinkedIn, daily.dev and Reddit drove 100K+ impressions. Stars grew from about 135 to 1,700+, and OpenLore trended #3 in Go on Trendshift. [Read the OpenLore case study](/case-studies/openlore).
+
+### Corsair: stars from builders who tried it
+
+Onboarding audits led Corsair to a quickstart that reaches a working example in under a minute. Student hackathons with a Corsair track gave builders a reason to try it, and "many of them starred it afterward." Stars went from about 300 in mid-May to 1,000 in early June and 2,000 by mid-June. [Read the Corsair case study](/case-studies/corsair).
+
+### Memori and Awesome AI Apps
+
+Memori grew from launch to 12,000+ GitHub stars, helped by a Reddit launch post with 85+ upvotes and 50K+ impressions and 12 demo agents shared through Awesome AI Apps. That repo's own [Trendshift page](https://trendshift.io/repositories/14662) records two days on GitHub Trending, best rank #10. [Read the Memori case study](/case-studies/memori).
+
+If you want a team to run the repo audit, demos, launch window and community work with you, our [GitHub growth service](/github-growth-agency) does that for open-source devtools. Nobody can promise a trending spot, and we don't.
+
+## FAQ
+
+### How many stars do you need to get on GitHub Trending?
+
+There is no published number, and the bar changes daily with whatever else is spiking. On Trendshift's Go list, OpenLore ranked #25 with 66 stars one day and missed with 66 stars four days later.
+
+### How does GitHub decide what is trending?
+
+GitHub hasn't documented it. Its 2013 announcement names stars, forks, commits, follows and pageviews, weighted by recency, and in practice a burst of stars relative to a repo's usual pace seems to matter most.
+
+### Does GitHub Trending reset at midnight UTC?
+
+GitHub doesn't say when its "today" starts. Trendshift's daily list runs on UTC, and GitHub's traffic graphs use UTC, so planning your launch window in UTC is the safest choice.
+
+### Is Trendshift the same as GitHub Trending?
+
+No. Trendshift is a third-party site that snapshots GitHub's daily Trending list and also runs its own ranking, with per-language lists and badges. A rank on one is not a rank on the other.
+
+### Will buying stars get my repo on GitHub Trending?
+
+Probably not, and it can hurt. The StarScout study found only 78 of 18,617 repos with fake star campaigns in a GitHub Trending archive, and fake stars hurt star growth after about two months. Buying, trading or rewarding stars also breaks GitHub's rules.

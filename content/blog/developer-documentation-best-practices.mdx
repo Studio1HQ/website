@@ -1,0 +1,409 @@
+---
+title: "Developer Documentation Best Practices: How to Write Docs Developers Use and AI Cites"
+seoTitle: "Developer Documentation Best Practices: A Practical Guide"
+slug: developer-documentation-best-practices
+description: "Developer documentation best practices: four doc types, quickstarts that work, tested code, helpful errors, AI-readable pages, a checklist and an audit plan."
+tldrSummary: "Good developer documentation gets a new developer to a working result without help and gives AI assistants clean pages to quote. Split docs into tutorials, how-to guides, reference and explanation, test every code sample, generate reference from your OpenAPI spec, and measure time to first successful call. An internal DX owner, a technical writer or an outside DX audit can check whether it works."
+tldrBullets:
+  - "Organize docs into the four Diátaxis types (tutorials, how-to guides, reference and explanation) and title each page after the task it covers."
+  - "Make the quickstart work on the first try: prerequisites up front, copy-paste commands, expected output and one clear success moment."
+  - "Run code samples in CI, generate the API reference from your OpenAPI spec, and write error messages that say what to do next."
+  - "Track time to first successful call, support tickets per feature and searches with no results, then have an internal owner, a writer or an outside team audit the docs."
+date: 2026-11-07
+updatedDate: 2026-11-07
+draft: false
+authors:
+  - Arindam Majumder
+tags:
+  - documentation
+  - developer-experience
+  - onboarding
+  - dx-audit
+bannerImage: /blog/uploads/developer-documentation-best-practices/cover.png
+---
+**The short answer:** Developer documentation best practices come down to six habits: split docs into tutorials, how-to guides, reference and explanation; ship a quickstart that works on the first try; test every code sample in CI; generate the API reference from your OpenAPI spec; write errors that say what to do next; and publish Markdown pages AI assistants can read. Three kinds of people can audit your docs: an internal DX owner, a technical writer, or an outside DX audit such as Studio1's. A good audit returns a ranked list of fixes.
+
+Docs now have two readers. In Stack Overflow's [2025 Developer Survey](https://survey.stackoverflow.co/2025/developers), 67.8% of respondents said they learned to code with technical documentation. Across docs sites hosted on Mintlify, [AI agents made up 66% of measured traffic](https://www.mintlify.com/blog/state-of-docs-traffic) in July 2026. Yet [Postman's 2025 State of the API report](https://www.postman.com/state-of-api/2025/) found 55% of respondents struggle with inconsistent documentation. Every practice below serves both readers.
+
+## Write four kinds of docs, not one
+
+The [Diátaxis framework](https://diataxis.fr/) splits documentation into four types, each for a different need. Cloudflare, quoted on the site, calls it the "north star" for the information architecture of its developer docs redesign. Its [compass](https://diataxis.fr/compass/) sorts any page with two questions: does it inform action or cognition, and does it help someone acquire a skill or apply one?
+
+![Diátaxis compass table sorting docs into tutorials, how-to guides, reference and explanation by action or cognition and skill](/blog/uploads/developer-documentation-best-practices/diataxis-compass.webp "The Diátaxis compass: two questions place any docs page in one of four types.")
+
+| Type | The reader is | Compass | Example title |
+| --- | --- | --- | --- |
+| Tutorial | Learning by doing | Action, acquisition | "Build your first webhook handler" |
+| How-to guide | Solving a problem they have | Action, application | "How to rotate API keys without downtime" |
+| Reference | Looking up a fact | Cognition, application | "Events API: create an event" |
+| Explanation | Trying to understand why | Cognition, acquisition | "How event delivery and retries work" |
+
+The usual failure is one page doing all four, such as a tutorial that stops to list every parameter. Diátaxis says a tutorial's purpose "is not to help the user get something done, but to help them learn," and that it should work "for every user, every time." Our post on [common mistakes in developer-first products](/blog/common-mistakes-developer-products) calls the result docs written for builders instead of beginners.
+
+Diátaxis also gives a [before and after for titles](https://diataxis.fr/how-to-guides/): "Application performance monitoring" is very bad, "Integrating application performance monitoring" is bad, and "How to integrate application performance monitoring" is good.
+
+Explanation is the type teams skip. For [Tensorlake](/case-studies/tensorlake), Studio1 paired the Building Graph RAG tutorial with architecture diagrams, so readers saw the data flow before the implementation.
+
+**Key pointers:**
+
+* Tag your 30 most visited pages by type, and split any page that needs two tags.
+* Retitle how-to pages as "How to" plus the task, in the words developers search for.
+* Write one explanation page for the concept your support tickets show people misunderstand most.
+
+## How to write a quickstart that works on the first try
+
+A quickstart needs four things: prerequisites, copy-paste commands, expected output and one success moment. Twilio's [SMS quickstart for Python](https://www.twilio.com/docs/messaging/quickstart/python) has all four. It lists prerequisites per language before any code. It gives exact commands such as `pip install flask twilio` and `python send_sms.py`, with environment variable setup for macOS, Linux and Windows. The sending section ends when an SMS arrives on the Twilio Virtual Phone.
+
+One step, before and after:
+
+* **Before:** "Configure your credentials and initialize the client."
+* **After:** "Copy your test key from `Dashboard > API keys` (it starts with `sk_test_`), then run `export ACME_API_KEY=sk_test_...` in the same terminal."
+
+**Template: a quickstart page.** "Acme" is a placeholder.
+
+```markdown
+## Quickstart: send your first event with Acme (about 5 minutes)
+
+### Before you start
+- Node.js 20 or later. Check with: node --version
+- An Acme account and a test API key (Dashboard > API keys)
+
+### 1. Install the SDK
+npm install @acme/sdk@3.2.0
+
+### 2. Set your key
+export ACME_API_KEY="sk_test_..."
+
+### 3. Send an event
+Paste the complete file: imports, client setup and the call.
+Run it: node send-event.js
+
+### 4. Check that it worked
+Expected output: Event evt_123 delivered
+You will also see the event under Dashboard > Events.
+
+### If it failed
+- 401 invalid_api_key: you used a live key. Use the sk_test_ key.
+
+### Next steps
+- How to verify webhook signatures
+- Events API reference
+```
+
+**Key pointers:**
+
+* List each prerequisite with its version and the command that checks it.
+* Show expected output under every command that prints something.
+* End on one visible success (a response, a dashboard row, a text message), then link two next steps.
+
+## Measure time to first hello world
+
+Time to first hello world is the time from a developer's first visit to their first working result. For an API, it is time to first call, which Postman calls ["the most important API metric"](https://blog.postman.com/improve-your-time-to-first-api-call-by-20x/). In one publisher's data in that post, a first successful call took 17 minutes without a Postman collection and 10 minutes with one.
+
+Measure it two ways:
+
+1. **Stopwatch test:** a new browser profile, a new email address, and a timer from the docs home page to the first successful response. Watch someone who has never used the product, and note every pause.
+2. **Product data:** log the signup time and the first 2xx API call for each account, and track the weekly median.
+
+After Studio1's onboarding audit, [Corsair](/case-studies/corsair) reworked its quick start so it reaches a working example in under a minute. Our guide to [time to first hello world](/blog/time-to-first-hello-world) covers the friction log, the event funnel and the seven blockers to fix first.
+
+**Key pointers:**
+
+* Set a target, such as under five minutes, and test against it before every release.
+* Count only successful calls. A 401 is not a first call.
+
+## Ship code samples that run
+
+Three rules keep samples honest.
+
+**Test them in CI.** Rust's rustdoc [runs documentation examples as tests](https://doc.rust-lang.org/rustdoc/write-documentation/documentation-tests.html) to make sure they are "up to date and working." Python's [doctest](https://docs.python.org/3/library/doctest.html) runs examples "to verify that they work exactly as shown." For a docs site, keep each sample as a file in an `examples/` folder, run the folder against a sandbox in CI, and pull the file into the page at build time, so the page and the test can't drift apart.
+
+**Pin versions and show output.** Before: `pip install acme`. After:
+
+```bash
+pip install acme==3.2.0
+python send_event.py   # prints: Event evt_123 delivered
+```
+
+**Cover every language you claim.** Twilio's quickstart has separate tracks for Python, Node.js, PHP, C#, Java, Go and Ruby, each with its own commands. A language tab with a broken sample is worse than no tab.
+
+For [Ittybit](/case-studies/ittybit), Studio1 verified code examples against product behavior before they were shared. The examples doubled as feature checks: DX gaps showed up while they were being built, before developers hit them.
+
+**Key pointers:**
+
+* Move every sample into a runnable file and run them all in CI on each release.
+* Update the pinned SDK version in the same pull request as the release.
+
+## Generate the API reference from your OpenAPI spec
+
+The [OpenAPI Specification](https://spec.openapis.org/oas/latest.html) "defines a standard, programming language-agnostic interface description for HTTP APIs," and documentation generation is one of its named uses. GitHub publishes its description in the open source `github/rest-api-description` repository and [uses it to generate the REST API reference](https://docs.github.com/en/rest/about-the-rest-api/about-the-openapi-description-for-the-rest-api) for each endpoint. Generated reference changes when the spec changes. Hand-written reference drifts.
+
+Generation gives you accurate fields, not useful words. Add those to the spec:
+
+* **Descriptions that say when to use an endpoint.** Before: "Creates an event." After: "Creates an event and queues it for every webhook endpoint subscribed to its type. Returns 202 before delivery, so check the event's status to confirm it arrived."
+* **A realistic example** request and response for every endpoint.
+* **Links** to shared pages on auth, pagination, rate limits and errors.
+
+Then lint the spec. [Spectral](https://github.com/stoplightio/spectral) is "a flexible JSON/YAML linter for creating automated style guides," with built-in OpenAPI support and a GitHub Action.
+
+**Key pointers:**
+
+* Regenerate the reference from the spec on every merge.
+* Fail the build when an operation has no description or no example.
+
+## Write error messages that say what to do next
+
+Google's course on [writing helpful error messages](https://developers.google.com/tech-writing/error-messages) says great messages answer two questions: "What went wrong?" and "How does the user fix that problem?"
+
+Stripe builds both into its [error object](https://docs.stripe.com/api/errors): a `code`, a readable `message`, a `param` that names the field at fault, and a `doc_url` that links to that code's docs entry. The [error codes page](https://docs.stripe.com/error-codes) then says what to do. For `api_key_expired`, it tells you to get your current keys from the Dashboard and update your integration. Twilio gives each code its own page, such as [error 20003](https://www.twilio.com/docs/api/errors/20003), with "Possible causes" and "Possible solutions" sections.
+
+![Twilio docs page for error 20003, Permission Denied, with a description, possible causes and a Copy as markdown button](/blog/uploads/developer-documentation-best-practices/twilio-error-20003.webp "One page per error code. Twilio lists the causes, links the solutions, and offers the page as Markdown for AI tools.")
+
+Before:
+
+```json
+{ "error": "Invalid request" }
+```
+
+After:
+
+```json
+{
+  "error": {
+    "type": "invalid_request_error",
+    "code": "parameter_missing",
+    "param": "destination_url",
+    "message": "Missing required parameter: destination_url. Add the HTTPS URL that should receive events, then retry.",
+    "doc_url": "https://docs.example.com/errors#parameter_missing"
+  }
+}
+```
+
+Publish the exact message text in the docs, because developers paste errors straight into search and AI assistants.
+
+**Key pointers:**
+
+* Rewrite your 10 most frequent error messages to name the field and the next step.
+* Link each error code to a docs entry with causes, fixes and a working sample.
+
+## Fix navigation, search and "no result" searches
+
+Organize docs around what developers are trying to do. For [LiteLLM](/case-studies/litellm), Studio1 added a Learn section as the single starting point, split the SDK and Gateway journeys, and regrouped tutorials and guides by job: agent SDKs, coding tools, observability, provider setup and proxy administration.
+
+Search shows what is still missing. Algolia's analytics include a [No Results Rate chart and a "Searches without Results" tab](https://www.algolia.com/doc/guides/search-analytics/concepts/metrics.md) that lists every query that returned nothing. Each one is a missing page, a missing synonym, or a page titled in your words instead of the developer's.
+
+A weekly routine:
+
+1. Export the last seven days of searches without results.
+2. Group them by intent and drop the typos.
+3. For each group, add a synonym (such as "token" for "API key"), rename a heading, or write the page.
+4. Check the same queries again next week.
+
+**Key pointers:**
+
+* Link one starting page for new users from the docs home page and the dashboard.
+* Add competitors' terms as synonyms for developers migrating from them.
+
+## Version your docs and keep a changelog developers can scan
+
+[Semantic Versioning](https://semver.org/) bumps MAJOR "when you make incompatible API changes," MINOR for backward compatible features and PATCH for backward compatible fixes.
+
+Stripe's [versioning page](https://docs.stripe.com/api/versioning) is a good model. Since the 2024-09-30.acacia release, Stripe ships monthly API versions with no breaking changes and a major release with breaking changes twice a year. Each account has a default version, any request can override it with the `Stripe-Version` header, and every change goes into the API changelog.
+
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/) puts the rule bluntly: "Don't let your friends dump git logs into changelogs." Group entries under Added, Changed, Deprecated, Removed, Fixed and Security.
+
+Before:
+
+```text
+- fix stuff (#4821)
+- bump deps
+- refactor events client
+```
+
+After:
+
+```markdown
+## [3.2.0] - 2026-11-03
+### Added
+- events.list() accepts a since filter.
+### Deprecated
+- events.fetchAll(). Use events.list() instead. Removed in 4.0.0.
+### Fixed
+- Retries no longer resend events that already returned a 2xx.
+```
+
+**Key pointers:**
+
+* Show the version near the top of each page, with a switcher for older versions.
+* Make every deprecation name its replacement and the version that removes it.
+
+## Make your docs readable by AI agents and assistants
+
+In Stack Overflow's [2026 survey results](https://stackoverflow.blog/2026/10/06/the-results-of-the-2026-developer-survey-are-here/), 70% of respondents said they ask an AI agent when they look for answers. We cover the full playbook in [developer docs as your best AEO asset](/blog/developer-docs-as-aeo-asset) and the file itself in [llms.txt explained](/blog/llms-txt-explained-developer-tools-guide). For docs teams, three things matter:
+
+* **A Markdown version of every page.** [docs.stripe.com/error-codes.md](https://docs.stripe.com/error-codes.md) returns Stripe's error codes page as clean Markdown.
+* **An llms.txt with instructions, not only links.** Stripe's [llms.txt](https://docs.stripe.com/llms.txt) tells agents to "always check the npm registry for the latest version rather than relying on memorized version numbers." That heads off a common agent mistake: installing an old version remembered from training data.
+* **Stable headings and anchors.** Renaming a heading breaks every deep link to it, from agents and from other sites.
+
+The format changes results. In [Mintlify's benchmark](https://www.mintlify.com/blog/state-of-docs-traffic) of 2,400 runs across 20 docs sites, agents averaged 2.23 404 errors per retrieval request on HTML pages, 1.42 on plain Markdown, and 0.11 on Markdown with an llms.txt linked or inlined.
+
+**Key pointers:**
+
+* Add `.md` to your quickstart URL. If clean Markdown doesn't come back, add it to the docs build.
+* Ask two AI assistants to complete your quickstart task, and fix the page behind every wrong answer.
+
+## Run docs like code, with a review process
+
+[Write the Docs](https://www.writethedocs.org/guide/docs-as-code/) describes docs as code as writing documentation "with the same tools as code": issue trackers, version control, plain text markup, code reviews and automated tests. The guide links talks from teams at Google, AWS and the UK Government Digital Service about adopting it.
+
+Give every docs pull request three reviews:
+
+1. **Accuracy:** the engineer who built the feature checks every claim and sample.
+2. **Clarity:** a writer or DX owner checks the page type, the terms and the title.
+3. **A newcomer run:** for quickstarts and tutorials, someone new to the feature follows the page exactly as written.
+
+Automate the rest. [Vale](https://vale.sh/) is "a markup-aware linter for prose" that runs in CI and can start from Microsoft, Google or Red Hat style rules. [lychee](https://github.com/lycheeverse/lychee) finds broken links in Markdown and HTML.
+
+**Template: a docs check for CI.** Run it on every pull request that touches `docs/` or `openapi.yaml`.
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+spectral lint openapi.yaml    # spec is valid and follows .spectral.yaml
+vale docs/                    # product terms, voice, banned words
+lychee 'docs/**/*.md'         # no broken links
+./scripts/run-examples.sh     # every code sample runs against the sandbox
+```
+
+**Template: a docs block for your pull request template.**
+
+```markdown
+## Docs
+- [ ] Reference regenerated from openapi.yaml
+- [ ] New or changed behavior has a how-to page or a changelog entry
+- [ ] New code samples live in examples/ and pass in CI
+- [ ] Deprecations name the replacement and the removal version
+```
+
+**Key pointers:**
+
+* Make the docs check block merges, not just warn.
+* Name an owner for each docs section in a CODEOWNERS file.
+
+## How to measure whether your docs work
+
+Page views say a page was opened, not that it helped. Track these instead:
+
+| Metric | What it tells you | Where to get it |
+| --- | --- | --- |
+| Time to first successful call | Whether the quickstart works | Signup time and first 2xx call per account |
+| Support tickets per feature | Which features the docs fail to explain | Tickets tagged by feature, divided by that feature's users |
+| Searches with no results | Missing pages and missing words | Docs search analytics |
+| Page feedback | Which pages confuse people | A "Was this page helpful?" widget with a comment box |
+| AI answer accuracy | Whether assistants describe you correctly | The same 20 prompts, monthly, in two or three assistants |
+
+Read the comments, not only the scores. "The Python sample throws an import error" is a fix you can ship the same afternoon.
+
+**Key pointers:**
+
+* Put time to first successful call and searches with no results on one weekly dashboard.
+* Each month, fix the docs for the feature with the most tickets.
+
+## Developer documentation best practices checklist
+
+**Checklist: bookmark this and run it before every major release.**
+
+| # | Check | Pass when |
+| --- | --- | --- |
+| 1 | Doc types | Each page is one of tutorial, how-to, reference or explanation |
+| 2 | Titles | How-to pages start with "How to" and name the task |
+| 3 | Prerequisites | At the top of the quickstart, with versions |
+| 4 | Commands | Copy-paste works in a fresh container with no edits |
+| 5 | Output | Expected output follows every command that prints |
+| 6 | Time to first call | Measured this release and under your target |
+| 7 | Code samples | Run in CI, with pinned versions |
+| 8 | Languages | Every language tab has a tested sample |
+| 9 | API reference | Generated from OpenAPI, with an example per endpoint |
+| 10 | Errors | Every code has a next step and a docs entry |
+| 11 | Search | Searches with no results reviewed this week |
+| 12 | Versions | Each page shows the version it covers |
+| 13 | Changelog | Grouped by change type, and deprecations name replacements |
+| 14 | AI readability | Markdown versions of pages and an llms.txt exist |
+| 15 | Review | Docs changes pass pull request review and CI checks |
+
+## Who can audit your developer docs?
+
+Most teams use more than one of these over time.
+
+| Who | Best when | Watch out for |
+| --- | --- | --- |
+| An internal DX owner (DevRel, a DX engineer or a PM) | You want checks on every release | They know the product too well to see the gaps |
+| A technical writer | Pages are unclear, inconsistent or missing | They may not test the product end to end |
+| An outside DX audit, such as Studio1's | You want a fresh cold run, a ranked roadmap and help with fixes | It needs access to tickets, analytics and a test account |
+
+Whoever runs it, an audit should deliver:
+
+1. A cold-run log of every step, pause and wrong turn, with timestamps.
+2. A measured baseline for time to first successful call.
+3. A missing-page inventory and a list of broken or outdated examples.
+4. Findings ranked by how many developers each one hits and how badly.
+5. A roadmap with owners, plus a follow-up review after the fixes ship.
+
+Studio1's [developer documentation and DX audit](/developer-documentation-dx-audit) delivers a findings report with prioritized friction points, evidence from walking the product as a new developer, and a practical roadmap. A focused docs audit typically lands in 2 to 3 weeks. For the areas an audit covers, the 10 problems we find most often and a 30-minute mini audit, read [what a DX audit covers](/blog/what-a-dx-audit-covers).
+
+**Key pointers:**
+
+* Run the 30-minute mini audit yourself first, so you know what to hand over.
+* Ask any auditor for timestamps and a ranked list, and book the follow-up review before the audit starts.
+
+## How Studio1 has done this
+
+### LiteLLM: a docs revamp across the SDK and Gateway
+
+Studio1 worked as LiteLLM's embedded docs and DX team. We added a new Learn section, SDK and Gateway quickstarts that take developers to a first working request in minutes, separate Guides and Tutorials hubs, regrouped integrations and restructured release notes. We also answered community questions and fed the recurring ones back into the docs.
+
+> "Thrilled to announce a revamped docs experience. Developers can now find their path faster, whether they need the SDK or the Gateway."
+>
+> **Krish D.**, CEO, LiteLLM
+
+### Ittybit: code examples verified before they shipped
+
+Studio1 built team-facing cookbooks, code examples and small guides for docs, each tested against real product behavior before it became external material.
+
+> "Studio1 team helped us with technical documentation, internal cookbooks and integration guides. They were easy to work with, got the core value of our product quickly, and iterated well whenever we had feedback. Most importantly they're great guys :)"
+>
+> **Paul Anthony Williams**, Founder, Ittybit
+
+### Corsair: an onboarding audit with specific fixes
+
+Studio1's audit of Corsair's hosted app, docs and first-run flow came back with specific fixes: open the dashboard on a getting-started guide with a test request, lead setup with the hosted app, and surface the docs' MCP endpoint. The team reworked the flow and a quick start that reaches a working example in under a minute, and a second audit followed.
+
+Read the full [LiteLLM](/case-studies/litellm), [Ittybit](/case-studies/ittybit) and [Corsair](/case-studies/corsair) case studies.
+
+If you want an outside cold run, or extra hands to fix what one finds, Studio1's [documentation and DX audit service](/developer-documentation-dx-audit) covers audits, edits to existing docs and new pages, inside Mintlify, Docusaurus, GitBook, custom Next.js docs and similar setups.
+
+## FAQ
+
+### Who can audit my developer docs?
+
+An internal DX owner, a technical writer, or an outside DX audit team such as Studio1. An internal owner suits checks on every release, a writer fixes clarity and consistency, and an outside team brings a fresh cold run with a ranked roadmap.
+
+### What are developer documentation best practices?
+
+Organize docs into tutorials, how-to guides, reference and explanation, and ship a quickstart that works on the first try. Test code samples in CI, generate the API reference from your OpenAPI spec, write errors with a next step, and publish Markdown versions AI assistants can read.
+
+### What is the Diátaxis framework?
+
+Diátaxis is a documentation framework with four types of docs: tutorials, how-to guides, reference and explanation. Its compass sorts a page by whether it informs action or understanding, and whether it helps someone learn a skill or apply one.
+
+### How long should a quickstart take?
+
+As short as your product allows, measured rather than guessed. Pick a target, such as under five minutes, and time a fresh account against it every release.
+
+### How do I keep code samples from going stale?
+
+Keep every sample as a runnable file, run them all in CI against a sandbox, and pin the SDK version in install commands. Pull the tested file into the page at build time.
+
+### Does my documentation need an llms.txt file?
+
+It is cheap, and it helps coding assistants find the right pages: in Mintlify's benchmark, agents hit far fewer 404 errors when an llms.txt was linked or inlined. It won't get you cited in AI search on its own, so pair it with Markdown versions of pages and answer-first writing.
