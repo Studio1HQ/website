@@ -6,12 +6,20 @@ const SPELLINGS: Record<string, string> = {
   devrel: "DevRel",
   dx: "DX",
   geo: "GEO",
+  github: "GitHub",
   llm: "LLM",
   seo: "SEO",
 };
 
+/** Whole tags whose label isn't a word-by-word title case of the slug. */
+const TAG_LABELS: Record<string, string> = {
+  "llms-txt": "llms.txt",
+};
+
 /** Human label for a tag slug, e.g. "developer-experience" -> "Developer Experience". */
 export function tagLabel(tag: string) {
+  const known = TAG_LABELS[tag.toLowerCase()];
+  if (known) return known;
   return tag
     .split(/[-_\s]+/)
     .filter(Boolean)

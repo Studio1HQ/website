@@ -37,7 +37,20 @@ collections:
     editor:
       preview: true
     fields:
-      - { name: title, label: Title, widget: string }
+      - {
+          name: title,
+          label: Title,
+          widget: string,
+          hint: "The headline at the top of the post. If it runs past 60 characters, also fill in SEO Title below.",
+        }
+      - {
+          name: seoTitle,
+          label: SEO Title,
+          widget: string,
+          required: false,
+          pattern: ["^.{0,60}$", "Keep the SEO Title to 60 characters or fewer."],
+          hint: "Optional. A shorter title for Google results and social cards, 60 characters or fewer, main keyword first. Leave empty when the Title is already short. \" | Studio1\" is added automatically when it fits.",
+        }
       - {
           name: slug,
           label: URL Slug,
@@ -50,7 +63,8 @@ collections:
           name: description,
           label: SEO Description,
           widget: text,
-          hint: "Suggested: 140-160 characters. Used for Google snippets, social cards, AI answers, and blog cards.",
+          pattern: ["^[\\s\\S]{50,160}$", "Write 50 to 160 characters (140 to 160 is best); Google cuts off anything longer."],
+          hint: "Aim for 140-160 characters, with the main keyword early. Used for Google snippets, social cards, AI answers, and blog cards.",
         }
       - {
           name: tldrSummary,
@@ -110,7 +124,7 @@ collections:
           name: tags,
           label: Tags,
           widget: list,
-          hint: "Use 3-6 topical tags for SEO/GEO and article grouping.",
+          hint: "Use 3-6 topical tags for SEO/GEO and article grouping. Add one tag per item (click Add for the next one) rather than a comma-separated line. The first tag is shown as the post's topic label.",
           field: { name: tag, label: Tag, widget: string },
         }
       - {

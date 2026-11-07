@@ -46,6 +46,8 @@ export type BlogPostMeta = {
 type Frontmatter = {
   slug?: string;
   title?: string;
+  /** Shorter title for search results and social cards; the page H1 keeps `title`. */
+  seoTitle?: string;
   description?: string;
   date?: Date | string;
   updatedDate?: Date | string;
@@ -283,7 +285,7 @@ function postMetaFromFile(fileName: string): BlogPostMeta {
     unlisted: d.unlisted === true,
     author: authors.join(", "),
     authors,
-    tags: Array.isArray(d.tags) ? d.tags : [],
+    tags: normalizeTags(d.tags),
     image,
     imageAlt: d.imageAlt ?? title,
     bannerImage,
@@ -294,6 +296,29 @@ function postMetaFromFile(fileName: string): BlogPostMeta {
       visibleReadingContent(bodySource, description, keyTakeaways, tldrSummary),
     ),
   };
+}
+
+/**
+ * Tags as kebab-case slugs ("Open Source" -> "open-source"). The CMS tag list
+ * takes one tag per item, but a comma-separated line is an easy slip, so split
+ * those too rather than show one long tag.
+ */
+function normalizeTags(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  const tags = value
+    .filter((item): item is string => typeof item === "string")
+    .flatMap((item) => item.split(","))
+    .map((tag) =>
+      tag
+        .trim()
+        .toLowerCase()
+        .replace(/[\s_]+/g, "-")
+        .replace(/[^a-z0-9.-]/g, "")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, ""),
+    )
+    .filter(Boolean);
+  return [...new Set(tags)];
 }
 
 function normalizeStringList(value?: string[]): string[] {
@@ -358,6 +383,8 @@ export type BlogPost = {
   slug: string;
   content: string;
   title: string;
+  /** Title for search results and social cards: `seoTitle` if set, else `title`. */
+  seoTitle: string;
   description: string;
   date: string;
   updatedDate: string;
@@ -401,7 +428,7 @@ export function getPostBySlug(slug: string): BlogPost | null {
 
   const title = d.title ?? "Untitled";
   const date = normalizeDate(d.date, "");
-  const tags = Array.isArray(d.tags) ? d.tags : [];
+  const tags = normalizeTags(d.tags);
   const description = d.description ?? "";
   const authors = normalizeAuthors(d.authors, d.author);
   const image = d.image ?? DEFAULT_POST_IMAGE;
@@ -418,6 +445,7 @@ export function getPostBySlug(slug: string): BlogPost | null {
     slug,
     content: bodyContent,
     title,
+    seoTitle: d.seoTitle?.trim() || title,
     description,
     date,
     updatedDate: normalizeDate(d.updatedDate, date),

@@ -150,6 +150,20 @@ export function homePageMetadata({
   };
 }
 
+/** Google shows about 60 characters of a title before cutting it off. */
+const SERP_TITLE_LIMIT = 60;
+
+/**
+ * Adds " | Studio1" only when the result still fits in a search result, so a
+ * long title is never cut off just to make room for the brand.
+ */
+function serpTitle(title: string) {
+  const branded = `${title} | Studio1`;
+  return branded.length <= SERP_TITLE_LIMIT
+    ? { meta: title, full: branded }
+    : { meta: { absolute: title }, full: title };
+}
+
 export function articlePageMetadata({
   title,
   description,
@@ -158,6 +172,8 @@ export function articlePageMetadata({
   keywords,
   image,
   imageAlt,
+  imageWidth = 1200,
+  imageHeight = 630,
   publishedTime,
   modifiedTime,
   author,
@@ -171,6 +187,8 @@ export function articlePageMetadata({
   keywords?: string[];
   image?: string;
   imageAlt?: string;
+  imageWidth?: number;
+  imageHeight?: number;
   publishedTime?: string;
   modifiedTime?: string;
   author?: string;
@@ -180,7 +198,7 @@ export function articlePageMetadata({
   const url = localizedUrl(path, locale, baseUrl);
   const ogImage = absoluteImageUrl(image);
   const ogImageAlt = imageAlt?.trim() || title;
-  const brandedTitle = `${title} | Studio1`;
+  const { meta: metaTitle, full: brandedTitle } = serpTitle(title);
   const authorList = authors?.length ? authors : author ? [author] : [];
   // Named authors link to their profile page (rel="author", article:author).
   const authorRefs = authorList.map((name) => {
@@ -189,7 +207,7 @@ export function articlePageMetadata({
   });
 
   return {
-    title,
+    title: metaTitle,
     description,
     ...(keywords?.length ? { keywords } : {}),
     ...(authorRefs.length ? { authors: authorRefs } : {}),
@@ -208,7 +226,7 @@ export function articlePageMetadata({
         ? { authors: authorRefs.map((ref) => ref.url ?? ref.name) }
         : {}),
       ...(tags?.length ? { tags } : {}),
-      images: [{ url: ogImage, width: 1200, height: 630, alt: ogImageAlt }],
+      images: [{ url: ogImage, width: imageWidth, height: imageHeight, alt: ogImageAlt }],
     },
     twitter: {
       card: "summary_large_image",

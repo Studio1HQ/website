@@ -13,6 +13,8 @@ export type Author = {
   name: string;
   jobTitle: string;
   bio: string;
+  /** Search-result description for the profile page: 160 characters or fewer. */
+  metaDescription: string;
   /** Square portrait in /public. */
   image: string;
   knowsAbout: string[];
@@ -26,6 +28,8 @@ export const AUTHORS: Author[] = [
     name: "Arindam Majumder",
     jobTitle: "Co-founder & Content Lead",
     bio: "Arindam Majumder is the co-founder of Studio1, where he leads content. He's a developer, technical writer, and community builder, and writes about developer relations, technical content, and getting developer tools in front of the developers who need them.",
+    metaDescription:
+      "Arindam Majumder, co-founder and content lead at Studio1, writes about developer relations, technical content, and getting devtools in front of developers.",
     image: "/assets/team/arindam-majumder-cutout.webp",
     knowsAbout: [
       "Developer relations",
@@ -47,6 +51,8 @@ export const AUTHORS: Author[] = [
     name: "Amitesh Anand",
     jobTitle: "Co-founder & Operations Lead",
     bio: "Amitesh Anand is the co-founder of Studio1, where he leads operations. Known online as Astrodevil, he builds AI demos, agent projects, tutorials, and developer education for SaaS, AI, and devtool teams.",
+    metaDescription:
+      "Amitesh Anand (Astrodevil), co-founder and operations lead at Studio1, builds AI demos, agent projects, and developer education for SaaS, AI, and devtool teams.",
     image: "/assets/team/amitesh-profile-square.webp",
     knowsAbout: [
       "AI agents",

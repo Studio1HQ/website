@@ -10,6 +10,7 @@ import {
 } from "@/lib/blog";
 import { PostLayout } from "@/components/blog/post-layout";
 import { postMarkdownUrl } from "@/lib/blog-markdown";
+import { BLOG_COVER_SIZE } from "@/lib/blog-cover";
 import {
   blogMdxComponents,
   transformBlogMdxContent,
@@ -37,12 +38,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const metadata = articlePageMetadata({
-    title: post.title,
+    title: post.seoTitle,
     description: post.description,
     path: `/blog/${slug}`,
     keywords: post.tags,
     image: post.socialImage,
     imageAlt: `${post.title} cover`,
+    imageWidth: BLOG_COVER_SIZE.width,
+    imageHeight: BLOG_COVER_SIZE.height,
     publishedTime: post.date,
     modifiedTime: post.updatedDate,
     authors: post.authors,
@@ -88,13 +91,13 @@ export default async function BlogPostPage({ params }: Props) {
     image: {
       "@type": "ImageObject",
       url: absoluteImageUrl(post.socialImage),
-      width: 1200,
-      height: 630,
+      width: BLOG_COVER_SIZE.width,
+      height: BLOG_COVER_SIZE.height,
       caption: `${post.title} cover`,
     },
     keywords: post.tags.join(", "),
     articleSection: post.tags,
-    wordCount: post.content.split(/\s+/).filter(Boolean).length,
+    wordCount: countBlogWords(post.content),
     inLanguage: "en",
     isAccessibleForFree: true,
     abstract: post.description,

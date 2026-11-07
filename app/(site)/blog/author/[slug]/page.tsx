@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return pageMetadata({
     title: `${author.name}, ${author.jobTitle}`,
-    description: author.bio,
+    description: author.metaDescription,
     path: authorPath(author),
     keywords: [author.name, ...author.knowsAbout],
   });

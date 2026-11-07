@@ -45,6 +45,9 @@ Selected results: Memori grew from launch to 12,000+ GitHub stars. Corsair went 
 
 ## Guides
 
+- [How to Grow an Open Source Project](https://www.studio1hq.com/blog/how-to-grow-an-open-source-project): 12 steps that bring real users and contributors: README, quickstart, beginner issues, launches, community, and a 30-day plan.
+- [What a DX Audit Covers](https://www.studio1hq.com/blog/what-a-dx-audit-covers): What a developer experience audit reviews, the 10 problems it most often finds, and a 30-minute mini audit you can run today.
+- [Build Your Own Grok Bot with OpenCrewBot](https://www.studio1hq.com/blog/build-your-own-grok-bot-opencrewbot): Set up OpenCrewBot, Studio1's open-source team of AI bots, try it without API keys, then connect models, tools, and apps.
 - [How to Launch a Developer Tool on Product Hunt](https://www.studio1hq.com/blog/product-hunt-launch-playbook): A step-by-step launch playbook: prep, the listing, launch day, Show HN and launch week, with results from Webcrumbs and Permit.io.
 - [How to Get More GitHub Stars for Your Open-Source Launch](https://www.studio1hq.com/blog/how-to-get-github-stars-open-source-launch): A step-by-step playbook: prelaunch prep, README, Show HN, Reddit, X, Product Hunt, demos, and community loops, with results from Memori, OpenLore, and Corsair.
 - [How to Distribute Technical Content to Developers on Reddit, X and YouTube](https://www.studio1hq.com/blog/how-to-distribute-technical-content-reddit-x-youtube): A channel-by-channel distribution playbook for Reddit, X, YouTube, daily.dev, Hacker News, LinkedIn, and Dev.to, with a one-week repurposing schedule and results from Entelligence AI, OpenLore, Memori, and Nebius.
