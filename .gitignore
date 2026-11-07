@@ -48,3 +48,7 @@ package-lock.json
 .pnpm-store
 claude-audit
 .gstack/
+
+# Original Notion export of the event photos (large; the site uses the
+# compressed copies in public/assets/events)
+/archive/notion-events-export/
