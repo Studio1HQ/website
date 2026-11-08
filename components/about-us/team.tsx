@@ -172,8 +172,8 @@ function TeamPanel() {
             }}
             style={{
               background: "linear-gradient(90deg, #f7b98e, #f39a5f)",
-              maskImage: `url(/assets/hand-${side}.png)`,
-              WebkitMaskImage: `url(/assets/hand-${side}.png)`,
+              maskImage: `url(/assets/site/hand-${side}.png)`,
+              WebkitMaskImage: `url(/assets/site/hand-${side}.png)`,
               maskSize: "contain",
               WebkitMaskSize: "contain",
               maskRepeat: "no-repeat",
