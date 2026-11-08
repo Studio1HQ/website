@@ -104,16 +104,22 @@ function PersonCard({ member }: { member: TeamMember }) {
         />
       </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-y-1 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-x-3">
-        <p
-          className={cn(
-            "min-w-0 text-[15px] font-medium leading-[1.3] tracking-[-0.01em]",
-            member.open ? "text-[#141414]/40" : "text-[#141414]",
-          )}
-        >
-          {member.open ? "Coming soon" : member.name}
-        </p>
-        <div className="order-3 mt-1.5 flex items-center gap-3 sm:order-none sm:col-start-2 sm:row-start-1 sm:mt-0 sm:gap-2.5">
+      {/* Name and role on the left, links on the right, top-aligned */}
+      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <p
+            className={cn(
+              "text-[15px] font-medium leading-[1.3] tracking-[-0.01em]",
+              member.open ? "text-[#141414]/40" : "text-[#141414]",
+            )}
+          >
+            {member.open ? "Coming soon" : member.name}
+          </p>
+          <p className="mt-1 text-[13px] leading-[1.4] text-[#141414]/50">
+            {member.role}
+          </p>
+        </div>
+        <div className="flex shrink-0 items-center gap-1.5">
           {socials(member.links).map(({ href, label, Icon, weight }) =>
             href ? (
               <Link
@@ -122,26 +128,23 @@ function PersonCard({ member }: { member: TeamMember }) {
                 target="_blank"
                 rel="noreferrer"
                 aria-label={`${member.name} on ${label}`}
-                className="text-[#141414]/45 drop-shadow-[0_1px_0_rgba(255,255,255,0.9)] transition-colors duration-200 hover:text-[#f97316]"
+                className="flex size-8 items-center justify-center rounded-full bg-[#141414]/[0.04] shadow-[inset_0_1px_2px_rgba(20,20,20,0.12),inset_0_-1px_0_rgba(255,255,255,0.85)] ring-1 ring-inset ring-[#141414]/[0.06] text-[#141414]/60 transition-colors duration-200 hover:bg-[#141414] hover:text-white"
               >
-                <Icon weight={weight} className="size-3.5" />
+                <Icon weight={weight} className="size-[17px]" />
               </Link>
             ) : (
-              // Not added yet: a quiet, engraved placeholder
+              // Link not added yet: the same chip, quieter and not clickable
               <span
                 key={label}
                 aria-hidden
                 title={`${label} coming soon`}
-                className="text-[#141414]/[0.16] drop-shadow-[0_1px_0_rgba(255,255,255,0.9)]"
+                className="flex size-8 items-center justify-center rounded-full bg-[#141414]/[0.04] shadow-[inset_0_1px_2px_rgba(20,20,20,0.12),inset_0_-1px_0_rgba(255,255,255,0.85)] ring-1 ring-inset ring-[#141414]/[0.06] cursor-default text-[#141414]/25"
               >
-                <Icon weight={weight} className="size-3.5" />
+                <Icon weight={weight} className="size-[17px]" />
               </span>
             ),
           )}
         </div>
-        <p className="text-[13px] leading-[1.4] text-[#141414]/50 sm:col-span-2">
-          {member.role}
-        </p>
       </div>
     </>
   );
@@ -258,16 +261,21 @@ export function TeamPage() {
             />
             <ul
               className={cn(
-                "mt-8 grid grid-cols-2 gap-4 md:gap-6",
-                // Fewer, larger cards at the top of the hierarchy
+                "mt-8 gap-4 md:gap-6",
+                // Fewer, larger cards at the top of the hierarchy; the
+                // smaller tiers stay centred however many people they hold
                 t === 0
-                  ? "mx-auto max-w-[880px] sm:grid-cols-2"
-                  : "md:grid-cols-3 lg:grid-cols-4",
+                  ? "mx-auto grid max-w-[880px] grid-cols-2"
+                  : "flex flex-wrap justify-center",
               )}
             >
               {tier.members.map((member, i) => (
                 <motion.li
                   key={`${member.role}-${i}`}
+                  className={cn(
+                    t > 0 &&
+                      "w-[calc(50%-8px)] md:w-[calc(33.333%-16px)] lg:w-[calc(25%-18px)]",
+                  )}
                   initial={reduceMotion ? false : { opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-60px" }}

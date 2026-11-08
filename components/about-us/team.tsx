@@ -9,6 +9,7 @@ import {
 } from "motion/react";
 import { useRef } from "react";
 import {
+  ArrowUpRight,
   GlobeSimple,
   LinkedinLogo,
   XLogo,
@@ -92,7 +93,7 @@ function LeaderCard({ member }: { member: Member }) {
             {member.role}
           </p>
         </div>
-        <div className="mt-0.5 flex shrink-0 items-center gap-2.5">
+        <div className="flex shrink-0 items-center gap-1.5">
           {socials(member).map(({ href, label, Icon, weight }) => (
             <Link
               key={label}
@@ -100,9 +101,9 @@ function LeaderCard({ member }: { member: Member }) {
               target="_blank"
               rel="noreferrer"
               aria-label={`${member.name} on ${label}`}
-              className="text-[#141414]/45 transition-colors duration-200 hover:text-[#141414]"
+              className="flex size-8 items-center justify-center rounded-full bg-[#141414]/[0.04] text-[#141414]/60 shadow-[inset_0_1px_2px_rgba(20,20,20,0.12),inset_0_-1px_0_rgba(255,255,255,0.85)] ring-1 ring-inset ring-[#141414]/[0.06] transition-colors duration-200 hover:bg-[#141414] hover:text-white"
             >
-              <Icon weight={weight} className="size-4" />
+              <Icon weight={weight} className="size-[17px]" />
             </Link>
           ))}
         </div>
@@ -154,10 +155,10 @@ function TeamPanel() {
                 }
           }
           className={cn(
-            "pointer-events-none absolute top-[24%] -z-10 hidden h-[260px] xl:block",
+            "pointer-events-none absolute top-[calc(44%-105px)] -z-10 hidden h-[210px] xl:block",
             side === "left"
-              ? "left-[calc(50%-50vw)] right-[calc(50%+446px)]"
-              : "left-[calc(50%+446px)] right-[calc(50%-50vw)]",
+              ? "left-[calc(50%-50vw)] right-[calc(50%+488px)] [mask-image:linear-gradient(to_right,transparent,black_45%)]"
+              : "left-[calc(50%+488px)] right-[calc(50%-50vw)] [mask-image:linear-gradient(to_left,transparent,black_45%)]",
           )}
         >
           {/* The hero's reaching hand, in its peach print colour */}
@@ -217,6 +218,21 @@ export const Team = ({ showHeader = true, className }: TeamProps) => {
         <div className={cn(showHeader && "mt-10 md:mt-12")}>
           <TeamPanel />
         </div>
+
+        {showHeader ? (
+          <div className="mt-10 flex justify-center md:mt-12">
+            <Link
+              href="/team"
+              className="group inline-flex h-11 items-center gap-2 rounded-full bg-[#141414] pl-5 pr-4 text-[14px] font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_10px_24px_-14px_rgba(20,20,20,0.7)] transition-colors duration-200 hover:bg-[#f97316]"
+            >
+              Meet the full team
+              <ArrowUpRight
+                weight="bold"
+                className="size-4 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+              />
+            </Link>
+          </div>
+        ) : null}
       </Container>
     </PaperSection>
   );

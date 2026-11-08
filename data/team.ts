@@ -80,7 +80,7 @@ export const TEAM: TeamTier[] = [
       },
       {
         name: "Souradeep Pradhan",
-        role: "Developer",
+        role: "Web Developer",
         portrait: "/assets/team/souradeep-pradhan.webp?v=11",
         links: {
           x: "https://x.com/bysoura",
