@@ -14,6 +14,7 @@ const SPELLINGS: Record<string, string> = {
 /** Whole tags whose label isn't a word-by-word title case of the slug. */
 const TAG_LABELS: Record<string, string> = {
   "llms-txt": "llms.txt",
+  "x-twitter": "X (Twitter)",
 };
 
 /** Human label for a tag slug, e.g. "developer-experience" -> "Developer Experience". */

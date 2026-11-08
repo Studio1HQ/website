@@ -1,0 +1,322 @@
+---
+title: "Developer Influencer Marketing Strategy: Why Fit Beats Reach"
+seoTitle: "Developer Influencer Marketing Strategy: Fit Over Reach"
+slug: developer-influencer-marketing-strategy
+description: "Developer influencer marketing strategy: why fit beats reach, how to find and seed the right creators, and a 90-day program judged on activation, not views."
+tldrSummary: "Developer influencer marketing runs on technical credibility, not reach. Shortlist creators whose viewers already use your stack, fix your first five minutes of onboarding, give the shortlist free access with no strings, then pay the ones who used it for tutorials and example apps. Run it as a program and judge every creator on one activation event."
+tldrBullets:
+  - "The pool is small: on 8 November 2026 GitHub had 368 user accounts above 10,000 followers, so most of your shortlist sits in the 1,000 to 10,000 band."
+  - "Score creators on stack overlap, real builds, comment quality, unpaid mentions and willingness to criticize, before you look at a rate card."
+  - "Seed 15 to 30 creators with free access and no ask, then pay the ones who activated for depth: tutorials, example apps and repeat collaborations."
+  - "Pick one activation event, such as a first API call, and renew creators on cost per activated user, not views."
+date: 2026-11-08
+updatedDate: 2026-11-08
+draft: false
+authors:
+  - Arindam Majumder
+tags:
+  - influencer-marketing
+  - developer-marketing
+  - devrel
+  - distribution
+bannerImage: /blog/uploads/developer-influencer-marketing-strategy/cover.png
+---
+**The short answer:** Developer influencer marketing works when you choose creators for fit, not reach. Shortlist creators whose viewers already use your stack and who show real code on screen. Make sure a stranger can get your quickstart working in five minutes. Give the shortlist free access with no strings, then pay the people who actually used it for depth: tutorials, example apps and repeat collaborations. Judge every creator on one activation event, such as a first API call, not on views.
+
+This post covers strategy: who to pick, in what order, and how to build a program. For rates, briefs, contracts and disclosure wording, read the companion guide on [developer influencer marketing costs, formats and results](/blog/developer-influencer-marketing).
+
+## How is developer influencer marketing different from consumer influencer marketing?
+
+Developers can check a claim in minutes. They copy the install command, run it, and find out whether the video told the truth. That changes what you are paying for.
+
+| | Consumer influencer marketing | Developer influencer marketing |
+| --- | --- | --- |
+| What you buy | Reach and taste | Technical credibility |
+| What proves it | The product looks good on camera | The code runs on camera |
+| Who writes the words | Often the brand | The creator, from your fact sheet |
+| What counts as success | Views, clicks, discount code sales | Activations: a first API call, a first deploy |
+| Worst outcome | A post nobody engages with | A public walkthrough of your broken onboarding |
+| Time frame | A campaign | A program |
+
+OurCodeWorld's [developer influencer marketing guide](https://ourcodeworld.com/articles/read/4518/developer-influencer-marketing) puts the scripting problem in one line: "Scripted talking points destroy the asset being bought." On a [Draft.dev panel about developer evangelists](https://draft.dev/learn/influencer-marketing-the-effective-use-of-dev-evangelists), Yard founder Karl McCarthy made the same point about the people themselves: "They just can't fake it."
+
+The verification habit also works for you. A creator who runs your tool live, hits an error and recovers is more convincing than a polished ad, as long as the product survives the demo.
+
+**Key pointers:**
+- Before you ask "how many views?", ask "would this creator's viewers run our quickstart?"
+- Assume your onboarding will be shown on camera, unedited, and prepare for that.
+- Treat the first paid deal as the start of a relationship, not a media buy.
+
+## How many developer creators are there?
+
+Fewer than most budgets assume. On 8 November 2026, the GitHub Search API returned **368 user accounts with more than 10,000 followers** and 8,750 with more than 1,000. GitHub's [Octoverse 2025 report](https://github.blog/news-insights/octoverse/octoverse-a-new-developer-joins-github-every-second-as-ai-leads-typescript-to-1/) says "180 million-plus developers now work and build on GitHub." OurCodeWorld ran the same query earlier in 2026 and counted 353 accounts above 10,000.
+
+![Bar chart of GitHub user accounts by follower count: 146,805 with 100 to 1,000, 8,382 with 1,000 to 10,000, 363 with 10,000 to 100,000, and 5 above](/blog/uploads/developer-influencer-marketing-strategy/github-creator-pool.webp "Most of your shortlist will come from the 1,000 to 10,000 band.")
+
+GitHub followers are not YouTube subscribers, so treat this as a proxy. It still shows the shape of the market: a tiny top tier that every devtool wants, then a few thousand developers with real but modest audiences. PostHog's [influencer handbook](https://posthog.com/handbook/marketing/influencers) says the same from the buyer's side: "The creator economy is surprisingly small."
+
+### Count the pool for your own stack
+
+GitHub's [user search](https://docs.github.com/en/search-github/searching-on-github/searching-users) has a `language:` qualifier that matches users "with a majority of their repositories written in" that language. Combine it with a follower range:
+
+```bash
+gh api "search/users?q=language:go+followers:1000..10000+type:user" --jq .total_count
+```
+
+On 8 November 2026 that returned 221 accounts for Go, 73 for Rust and 1,373 for Python. Run the same search on github.com and you get the list itself, which is a fair first pass at a candidate pool.
+
+![GitHub user search results for language:go with 1,000 to 10,000 followers, listing developer accounts with their follower counts](/blog/uploads/developer-influencer-marketing-strategy/github-user-search-go.webp "GitHub's user search, filtered to Go developers with 1,000 to 10,000 followers.")
+
+Three things follow from a pool this small:
+
+1. **The top accounts are booked and priced for it.** Their audiences also span every stack, so most of their viewers won't need your tool.
+2. **Most of your shortlist sits in the 1,000 to 10,000 band.** That is where the practitioners are.
+3. **Your reputation travels.** PostHog: "Building a good reputation compounds over time, so investing in long-term relationships is usually more valuable than constantly sourcing new creators."
+
+**Key pointers:**
+- Run the `language:` plus `followers:` search for your stack and save the results as your starting pool.
+- Check each GitHub account against YouTube, X and newsletters. You want people who ship code and also publish.
+- Don't build a plan that depends on booking the top 50 accounts in your category.
+
+## How do you pick developer creators by fit?
+
+Swap follower count for fit signals you can check in an afternoon. OurCodeWorld's first question is the right one: "Does the creator's audience actually run the languages, runtimes, and infrastructure your tool requires?"
+
+![Grid of audience size against stack fit: paid awareness, rare and booked up, skip, and your shortlist (small audience, high stack fit)](/blog/uploads/developer-influencer-marketing-strategy/creator-reach-vs-fit.webp "Small audiences that run your stack beat big audiences that don't.")
+
+**Creator fit score (copy this)**
+
+| Signal | How to check | 0 points | 1 point | 2 points |
+| --- | --- | --- | --- | --- |
+| Stack overlap | Their last 10 videos or posts | A different stack | A neighboring stack | Your stack, by name |
+| Builds, not just reviews | Their GitHub and the code on screen | Slides and voiceover | Occasional demos | Ships repos and runs code live |
+| Comment quality | 50 comments on recent posts | Emoji and "great video" | Mixed | Questions about versions, errors and config |
+| Unpaid mentions | Search their name plus your category | None | Talks about the problem | Covered your product or a direct alternative, unpaid |
+| Willing to criticize | Their past reviews, paid and unpaid | Only praise | Mild caveats | Names real limits, including of sponsors |
+
+Score 8 to 10: seed now. Score 5 to 7: watch them for a month. Score 4 or less: skip.
+
+The last row feels backwards, so it's worth spelling out. OurCodeWorld: "Counterintuitively, the creators who publicly criticise tools are the ones whose endorsements carry weight." A creator who only praises sponsors has trained their audience to discount every sponsored read, including yours.
+
+Two more inputs that don't fit in a table:
+
+- **Ask your own engineers.** PostHog finds creators by "looking at the creators engineers share or mention internally." Your team's watch history is a better list than any creator database.
+- **Prefer users.** PostHog again: "we'd rather work with someone who genuinely likes PostHog than someone with a much larger audience and no connection to the product."
+
+For a tie-breaker, use the "Three Cs" that Pieces CMO Cole Stark described on the same Draft.dev panel: Coding, Content and Community. A creator who does all three gives you a repo, a tutorial and someone answering questions in their own community. PostHog's numeric floor (above 5k views per video, with comment and like ratios) and the checks for audience geography and past sponsored reads are in the [vetting scorecard in our companion post](/blog/developer-influencer-marketing).
+
+**Key pointers:**
+- Post "which developer creators do you actually watch?" in your engineering channel this week.
+- Score every candidate on the five signals before you open their media kit.
+- Cap the shortlist at 15 to 30 people. A longer list means shallower checks.
+
+## Why fix onboarding before you contact a creator?
+
+A good creator will show what happens when they follow your quickstart. If it breaks, the honest ones say so on camera, and that video ranks for your product name. OurCodeWorld's first step is blunt: "Open your own quickstart on a machine with nothing installed and time it." Cole Stark described Pieces doing a version of this with users, asking them to "unbox" the product so the team can watch first impressions and onboarding.
+
+**The stranger test (copy this)**
+
+- [ ] Use a new machine or a fresh container with no saved credentials
+- [ ] Start from your homepage, not the docs URL you already know
+- [ ] Time signup, install, first command and first success separately
+- [ ] Record the screen and mark every moment you hesitate
+- [ ] Fix any step that takes over a minute or needs a question in Slack
+- [ ] Repeat it with someone outside the team
+
+Then pick **one activation event**: the moment a developer gets real value. Every seed, every paid video and every report gets measured against it.
+
+| Product type | A good activation event |
+| --- | --- |
+| API | First request that returns real data with a 200 |
+| SDK or library | First event or call that reaches your backend |
+| CLI | First command that completes without an error |
+| Database or backend | First query from the developer's own app |
+| Hosting or deploy | First successful deploy to a public URL |
+| Open-source project | Clone, install and run the example without opening an issue |
+
+We cover how to shorten that path in [time to first hello world](/blog/time-to-first-hello-world).
+
+**Key pointers:**
+- Run the stranger test the week before seeding, and again the day before any paid video goes live.
+- Put the activation event in the creator brief, so the demo ends on it.
+- If first success takes more than five minutes, pause creator spend and fix the quickstart first.
+
+## Should you send free access before you pay anyone?
+
+Yes. Seed before you sponsor. OurCodeWorld: "Before any commercial conversation, send the creator the product with no strings and no NDA, and ask them to try it." Posts from people who liked it unprompted are cheap and believable. And the creators who got stuck show you onboarding gaps before a paid video does.
+
+Two rules keep seeding honest:
+
+1. **Free access is still a relationship that needs disclosing.** The FTC's [Disclosures 101 for Social Media Influencers](https://www.ftc.gov/business-guidance/resources/disclosures-101-social-media-influencers) says "Financial relationships aren't limited to money," and tells creators who got free products to "make a disclosure even if you weren't asked to mention that product." Say this in your email.
+2. **Don't chase.** A seed that comes with "so when can we expect a post?" is a sponsorship without the payment.
+
+**Seeding email (copy this)**
+
+```text
+Subject: [Product] access for you, no strings
+
+Hi [Name],
+
+I watched your [specific video or post] and liked how you [specific thing].
+We build [Product], which [one-sentence job] for [stack] developers.
+
+I've added [credits or a team plan] to your account: [link].
+No post, review or NDA expected. If you try it, I'd love to hear
+where it got in your way, even in two lines.
+
+If you do mention it publicly, please note that you got free access.
+The FTC counts free products as a relationship that needs disclosing.
+
+[Your name], [role], [direct email]
+```
+
+Watch the seeded group for four weeks:
+
+| Signal | Where you see it | What it tells you |
+| --- | --- | --- |
+| Account activated | Your product analytics | They tried it |
+| Reached the activation event | Your product analytics | Onboarding works for a skilled stranger |
+| Got stuck, and where | Their reply, session replay | What to fix before paid content |
+| Posted without being paid | Their channels | Your first paid candidates |
+| Asked a sharp question | Their reply | A future tutorial topic |
+
+**Key pointers:**
+- Seed the whole shortlist in the same week so you can compare who activated.
+- Offer paid work first to the creators who used the product unprompted.
+- Never follow up a seed with a request for a post.
+
+## What should you pay developer creators for?
+
+Pay for depth. Once a creator has used the product, fund formats that show it working: tutorials, example apps and series. Plug.dev's [Dev Influencer Playbook](https://plug.dev/blog/influencer-playbook) makes the case that "Dev influencers aren't just awareness, they can drive the full funnel." Plan formats per stage, then judge them all on the same activation event.
+
+![Four funnel stages for developer creator content: awareness, evaluation, activation and retention, each with formats and what to measure](/blog/uploads/developer-influencer-marketing-strategy/creator-funnel-map.webp "Plan formats per stage, then judge every creator on activation.")
+
+Channels do different jobs. PostHog says "Long-form YouTube is still our strongest acquisition channel," and its handbook treats short-form mostly as an awareness play.
+
+| Channel | Its job | What to ask the creator for |
+| --- | --- | --- |
+| YouTube, long-form | Evaluation and activation | A build that ends on your activation event |
+| YouTube Shorts, TikTok, Instagram | Awareness | Clips cut from the long video |
+| X | Launch-day reach | A post with a demo clip on launch day |
+| LinkedIn | Engineering managers and budget holders | A short post on what changed for their team |
+| Newsletters | Clicks from readers who picked the topic | One line on the problem, not a feature list |
+| GitHub | Proof that lasts | An example repo with your tool in the README |
+
+When you brief, keep to facts. OurCodeWorld: "Set the technical brief, the accuracy requirements, and the constraints. Do not set the words." The companion post has a [creator brief template](/blog/developer-influencer-marketing) you can copy, and our guide to [scripting a technical demo video](/blog/how-to-script-a-technical-demo-video) covers what makes a demo land.
+
+**Key pointers:**
+- Fund at least one example app per quarter, published in the creator's own repo.
+- Buy the long video first, then cut Shorts and X clips from it (agree usage rights up front).
+- Ask every paid piece to end on your activation event, on screen.
+
+## Why run a program instead of one-off campaigns?
+
+Because most of the value arrives in the second and third collaboration. PostHog: "We also optimize for recurring collaborations over one-off sponsorships. When a creator works with us across several launches, PostHog becomes a natural part of their story, which beats any single ad read." Its handbook maps the lifecycle as "Discover → Evaluate → Outreach → First collaboration → Feedback → Repeat collaboration → Long-term partnership" and adds that "Most of the value shows up in the later stages."
+
+![PostHog handbook sections on the creator lifecycle and on sourcing creators, noting that the creator economy is surprisingly small](/blog/uploads/developer-influencer-marketing-strategy/posthog-creator-lifecycle.webp "PostHog treats a sponsorship as the start of a relationship.")
+
+Plug.dev draws the same line: "Campaigns are temporary bursts for launches and awareness," while "Programs are ongoing partnerships that drive adoption, authority and compound." Its suggested test is 3 to 5 creators a month for 3 months, then annual partnerships with the ones that work. A tutorial from month one keeps getting found in search, and in AI answers that cite tutorials, long after launch week. Our [guide to getting your tool recommended by ChatGPT, Perplexity and Google](/blog/how-to-get-your-tool-recommended-by-chatgpt-perplexity-google) explains why that content matters there.
+
+![A 90-day developer creator program in five steps: fix onboarding, shortlist by fit, seed with free access, pay 3 to 5 for depth, review and renew](/blog/uploads/developer-influencer-marketing-strategy/creator-program-90-days.webp "A 90-day plan: fix the product, seed, pay for depth, renew what activates.")
+
+**Day-90 review (copy this)**
+
+- Which creators drove activated users, and what did each one cost?
+- Which seeded creators posted without being paid?
+- Which questions repeated in the comments, and did the docs change?
+- Who gets a second collaboration, and in what format?
+- Which launch in the next quarter needs creators, and have they heard the date?
+
+PostHog shares launch dates with its creator team "a month ahead (or as soon as you can)" so there is time to "prep creators, fit into their schedules, and come up with a story". Creators book up, so the date matters as much as the budget.
+
+**Key pointers:**
+- Plan for at least two collaborations with every creator you pay.
+- Share your launch calendar with creators at least a month out.
+- Stay in touch between campaigns. PostHog's rule is short: "We treat creators as people, not inventory."
+
+## What should you do after the content goes live?
+
+Treat the comments under a developer video as a support queue and a docs backlog. That is where viewers ask the questions your docs didn't answer. Pieces, for example, has developer advocates who "help solve user questions in Discord channels," according to the Draft.dev panel.
+
+**Comment triage (copy this)**
+
+| Comment type | Who replies | Reply within | Follow-up |
+| --- | --- | --- | --- |
+| Setup error | The engineer who owns that feature, under their own name | 24 hours | Fix the docs, then reply with the link |
+| "How does it compare to X?" | Founder or DevRel | 48 hours | An honest answer; a comparison page if it keeps coming up |
+| Feature request | Product owner | 1 week | Log it, and reply again when it ships |
+| Criticism | Founder or engineer | 48 hours | Thank them, then fix or explain. Never argue with the creator |
+
+Then reuse the work. PostHog lists "generate clips that can be reused across channels" among the reasons a partnership is worth it beyond attributed signups. Share the creator's video from your own accounts, link it from the matching docs page, and thank them in public.
+
+**Key pointers:**
+- Name one engineer per paid video to watch the comments for the first 48 hours.
+- Turn every question asked twice into a docs change.
+- Link the creator's tutorial from the docs page it covers.
+
+## How do you measure a developer creator program?
+
+Measure each creator and the program as a whole. For each video, PostHog tracks CPM, unique sessions from the custom link, and signups, including people "who mentioned the influencer on sign up." Developers often see a video on one device and sign up later on another, so ask directly. Karl McCarthy's advice on the Draft.dev panel was to "simply ask customers how they found out about the product." Cole Stark suggested a "quarter-over-quarter approach to measurement," which fits a program better than a per-post report.
+
+**Program scoreboard (copy this)**
+
+| Metric | Why it matters |
+| --- | --- |
+| Cost per activated user, per creator | It decides renewals |
+| Share of seeded creators who activated | Tells you whether onboarding works for skilled strangers |
+| Share of seeded creators who posted unpaid | Shows whether creators like the product without payment |
+| Repeat collaborations this quarter | Shows whether the program is compounding |
+| Docs changes from creator comments | The product payoff |
+| Signups naming a creator in "How did you hear about us?" | Catches viewers who never clicked a link |
+
+Be skeptical of results you can't check. Many published creator case studies name no company and cite no data. Ask any platform or agency for named examples you can verify. For the UTM, signup code and tracking sheet setup, see the [tracking section of the companion post](/blog/developer-influencer-marketing), and for the wider measurement model read [developer content ROI beyond pageviews](/blog/developer-tool-content-roi-beyond-pageviews).
+
+**Key pointers:**
+- Add a free-text "How did you hear about us?" field before the first seed goes out.
+- Review the program each quarter, not after each post.
+- Renew on cost per activated user. Views only tell you who to look at.
+
+## Common developer influencer marketing mistakes
+
+| Mistake | What it looks like | The fix |
+| --- | --- | --- |
+| Buying reach | High views, almost no signups | Score on fit, pay for depth |
+| Writing the script | The read sounds like your homepage | Send a fact sheet and review for accuracy only |
+| Skipping the stranger test | A creator's video shows an error you didn't know about | Fix the first five minutes before outreach |
+| One-off sponsorships | A spike in launch week, then nothing | Run a program and renew on activation |
+| Chasing the top accounts | Months waiting for a slot | Build from the 1,000 to 10,000 follower band |
+| Hiding the sponsorship | Viewers call it out in the comments | Disclose inside the content, every time |
+| Nobody in the comments | Setup questions unanswered under a paid video | Assign an engineer for the first 48 hours |
+| Judging on views | You renew the wrong creators | Track cost per activated user |
+
+## How Studio1 runs developer creator programs
+
+**Memori.** For this open-source memory layer for AI agents, Studio1 ran developer creator collaborations "with technical fit and audience quality as the filter," next to demo agents, community launches and live events. The feedback loop from this post is what made it work: Memori collected "100+ detailed developer comments that informed onboarding, docs, and product direction," and grew from launch to 12,000+ GitHub stars. [Read the Memori case study](/case-studies/memori).
+
+Our [influencer marketing service](/influencer-marketing-agency) follows the order in this post. We start from your audience, not follower counts. You get a shortlist of creators who match your product and audience, and you approve it before any outreach. Every creator gets a brief, and you get a report by creator and platform across X, YouTube, LinkedIn, Instagram and TikTok.
+
+## FAQ
+
+### What is developer influencer marketing?
+
+It means partnering with developers who publish tutorials, videos, posts or newsletters, so they show your tool to an audience that writes code. It works through technical credibility: the creator uses the product on screen, and viewers can check the result themselves.
+
+### How is developer influencer marketing different from consumer influencer marketing?
+
+Consumer campaigns mostly buy reach and taste. Developer campaigns buy credibility, because viewers can run the code and catch false claims within minutes. That means creator-written scripts, products that survive an unedited demo, and success measured in activations rather than views.
+
+### How many followers should a developer influencer have?
+
+Pick on fit first. On 8 November 2026 GitHub had only 368 user accounts above 10,000 followers, so most good candidates sit between 1,000 and 10,000. PostHog's handbook sets a floor of more than 5,000 views per video for YouTube creators.
+
+### Should I give developer creators free access before paying them?
+
+Yes. Send free access with no request to post, then pay the creators who actually used the product. Tell them that free access still counts as a relationship they must disclose if they mention you, under FTC guidance.
+
+### How long should a developer influencer program run?
+
+Plan for at least a 90-day test, then longer partnerships with the creators who drove activations. PostHog optimizes for "recurring collaborations over one-off sponsorships," and Plug.dev suggests annual partnerships with the creators who work.
+
+### How do I measure developer influencer marketing?
+
+Pick one activation event, such as a first API call or first deploy, and track cost per activated user for each creator. Use a custom link, a signup code and a "How did you hear about us?" field, because many developers sign up later on a different device.

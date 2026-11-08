@@ -852,6 +852,62 @@ function Creator() {
   );
 }
 
+/** A founder's launch post with an install command, and creator quote posts stacking up beside it. */
+function LaunchPost() {
+  return (
+    <div style={flex({ position: "relative", width: 720, height: 470 })}>
+      {[0, 1, 2].map((i) => (
+        <div
+          key={i}
+          style={card({ position: "absolute", left: 380 + i * 30, top: 36 + i * 128, width: 300, padding: "16px 18px", gap: 10 })}
+        >
+          <div style={flex({ alignItems: "center", gap: 10 })}>
+            <div style={flex({ width: 30, height: 30, borderRadius: 999, background: "rgba(20,20,20,0.18)" })} />
+            <Bar width={110} height={10} color="rgba(20,20,20,0.4)" />
+            <div style={flex({ marginLeft: "auto" })}>
+              <Tag>quote</Tag>
+            </div>
+          </div>
+          <Bar width="92%" height={10} />
+          <Bar width="64%" height={10} />
+        </div>
+      ))}
+      <div style={card({ position: "absolute", left: 0, top: 0, width: 440, padding: "22px 24px" })}>
+        <div style={flex({ alignItems: "center", gap: 12 })}>
+          <div style={flex({ width: 48, height: 48, borderRadius: 999, alignItems: "center", justifyContent: "center", background: INK, color: CREAM, fontSize: 18, fontWeight: 500 })}>
+            {">_"}
+          </div>
+          <div style={flex({ flexDirection: "column", gap: 8 })}>
+            <Bar width={130} height={11} color="rgba(20,20,20,0.5)" />
+            <Bar width={90} height={9} />
+          </div>
+          <div style={flex({ marginLeft: "auto" })}>
+            <Tag>launch</Tag>
+          </div>
+        </div>
+        <div style={flex({ flexDirection: "column", gap: 9, marginTop: 16 })}>
+          <Bar width="90%" />
+          <Bar width="62%" />
+        </div>
+        <div style={flex({ marginTop: 14, padding: "10px 14px", background: INK, color: CREAM, fontSize: 17 })}>$ npx your-tool init</div>
+        <div style={flex({ height: 150, marginTop: 12, alignItems: "center", justifyContent: "center", background: PRINT })}>
+          <div style={flex({ width: 64, height: 64, borderRadius: 999, alignItems: "center", justifyContent: "center", background: CREAM })}>
+            <svg width={28} height={28} viewBox="0 0 24 24">
+              <path d={PLAY_PATH} fill={PRINT} />
+            </svg>
+          </div>
+        </div>
+        <div style={flex({ gap: 18, marginTop: 14, fontSize: 15, color: MUTED })}>
+          <div style={flex({})}>0:55</div>
+          <div style={flex({})}>replies</div>
+          <div style={flex({})}>quotes</div>
+          <div style={flex({})}>bookmarks</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /** One canonical post fanning out to the platforms it is republished on. */
 function CrossPost() {
   const targets: [string, number][] = [
@@ -1014,6 +1070,9 @@ function artFor(post: BlogPostMeta): Art {
       ),
     };
   }
+  if (/influencer/i.test(title) && /\bfit\b/i.test(title)) {
+    return { label: "creator-fit.fig", node: <Versus left="Reach" right="Fit" /> };
+  }
   if (/influencer/i.test(title)) return { label: "creator-post.fig", node: <Creator /> };
   if (/\bcosts?\b/i.test(title)) return { label: "pricing.fig", node: <Pricing /> };
   if (/mistake/i.test(title)) return { label: "checklist.fig", node: <Checklist /> };
@@ -1054,6 +1113,7 @@ function artFor(post: BlogPostMeta): Art {
     return { label: "terminal", node: <Terminal command="npx create-your-app" result="→ Hello, world!" /> };
   }
   if (/devrel for startups/i.test(title)) return { label: "devrel.fig", node: <Network />, scale: 1.05 };
+  if (/\blaunch/i.test(title) && /\bon x\b|twitter/i.test(title)) return { label: "launch-post.fig", node: <LaunchPost />, scale: 1.15 };
   if (/\blaunch/i.test(title)) return { label: "launch-plan.fig", node: <LaunchPlan /> };
   return { label: "studio1-mark", node: <PrintMark /> };
 }
