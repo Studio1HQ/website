@@ -933,7 +933,8 @@ const WORK = [
     headline: "16K+ GitHub stars and 29 integrations around Token Factory",
     mark: "every major Token Factory moment",
     logo: "/assets/logos/nebius.webp",
-    href: "/case-studies/nebius",
+    // No href while the case study is a draft (content/case-studies/en/nebius.mdx).
+    // Add `href: "/case-studies/nebius"` back when it is published.
     photo: "/case-studies/nebius/meetup-talk.webp",
     image: "/case-studies/nebius/workshop-dublin-recap.webp",
     ratio: 1194 / 1164,
@@ -1823,12 +1824,16 @@ function ProofSheet({
                 id={titleId}
                 className="text-[16px] font-semibold tracking-[-0.01em]"
               >
-                <Link
-                  href={work.href}
-                  className="transition-colors hover:text-[#f97316]"
-                >
-                  {work.client}
-                </Link>
+                {work.href ? (
+                  <Link
+                    href={work.href}
+                    className="transition-colors hover:text-[#f97316]"
+                  >
+                    {work.client}
+                  </Link>
+                ) : (
+                  work.client
+                )}
               </h3>
               {"span" in work && work.span ? (
                 <span className="rounded-full bg-[#f97316]/10 px-2.5 py-0.5 text-[11.5px] font-medium text-[#c2410c]">
@@ -1874,19 +1879,21 @@ function ProofSheet({
                   </li>
                 ))}
               </ul>
-              <Link
-                href={work.href}
-                aria-label={`Read the ${work.client} case study`}
-                className="group/cta inline-flex shrink-0 items-center gap-2 text-[14px] font-medium transition-colors hover:text-[#f97316]"
-              >
-                Read case study
-                <span
-                  className="flex size-8 items-center justify-center rounded-full text-white transition-transform duration-300 group-hover/cta:rotate-45"
-                  style={{ background: PRINT }}
+              {work.href ? (
+                <Link
+                  href={work.href}
+                  aria-label={`Read the ${work.client} case study`}
+                  className="group/cta inline-flex shrink-0 items-center gap-2 text-[14px] font-medium transition-colors hover:text-[#f97316]"
                 >
-                  <ArrowUpRight weight="bold" className="size-3.5" />
-                </span>
-              </Link>
+                  Read case study
+                  <span
+                    className="flex size-8 items-center justify-center rounded-full text-white transition-transform duration-300 group-hover/cta:rotate-45"
+                    style={{ background: PRINT }}
+                  >
+                    <ArrowUpRight weight="bold" className="size-3.5" />
+                  </span>
+                </Link>
+              ) : null}
             </div>
           </div>
 
