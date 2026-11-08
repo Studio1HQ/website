@@ -1265,8 +1265,8 @@ const PROOFS: Record<
     note: "with day-one support for every launch",
     prints: [
       {
-        src: "/case-studies/nebius/awesome-ai-apps-readme.webp",
-        ratio: 1434 / 1660,
+        src: "/case-studies/nebius/awesome-ai-apps-readme-v2.webp",
+        ratio: 1772 / 2355,
         name: "awesome-ai-apps.webp",
         alt: "The Awesome AI Apps README, maintained by the Studio1 team",
       },
