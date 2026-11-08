@@ -263,6 +263,8 @@ Real lines from the site:
 
 ## Making things with AI
 
+**Setting up an AI tool or agent?** Paste the system prompt in [AI-SYSTEM-PROMPT.md](AI-SYSTEM-PROMPT.md) into its instructions (a custom GPT, a Claude or ChatGPT Project, a Gemini Gem, or your agent's system prompt). The templates below are for one-off prompts.
+
 ### Rules
 
 1. **AI makes the picture. People place the logo and the words.** Image and video models misspell text and warp logos. Generate without text, then add type and the mark from the brand files in Figma, Canva or your editor.
