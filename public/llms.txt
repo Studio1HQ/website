@@ -56,6 +56,7 @@ Selected results: Memori grew from launch to 12,000+ GitHub stars. Corsair went 
 - [How to Measure Your Devtool's Visibility in AI Answers](https://www.studio1hq.com/blog/how-to-measure-devtool-visibility-in-ai-answers): A two-hour spreadsheet audit of how often AI tools mention, recommend, link to, and accurately describe your devtool.
 - [Developer Docs as Your Best AEO Asset](https://www.studio1hq.com/blog/developer-docs-as-aeo-asset): How to structure developer documentation so AI answers cite it.
 - [llms.txt Explained](https://www.studio1hq.com/blog/llms-txt-explained-developer-tools-guide): What llms.txt is, whether it improves AI visibility or SEO, and a practical template for developer tools.
+- [How to Get Developer Adoption Without a DevRel Team](https://www.studio1hq.com/blog/developer-adoption-without-devrel-team): A playbook for early-stage devtools: split the DevRel job across the team, fix the first run, answer evaluation questions, distribute where developers talk, and know when to bring in outside help.
 - [Fractional DevRel](https://www.studio1hq.com/blog/fractional-devrel): What fractional DevRel is, what it costs, and who it is for.
 - [DevRel Agency vs In-House DevRel Hire](https://www.studio1hq.com/blog/devrel-agency-vs-in-house-devrel-hire): Costs, timelines, and when each option fits.
 - [DevRel vs Developer Marketing](https://www.studio1hq.com/blog/devrel-vs-developer-marketing): The difference between DevRel and developer marketing, and how strong teams combine both.

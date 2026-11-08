@@ -20,6 +20,7 @@ import { PaperCta } from "@/components/paper/paper-sections";
 import { breadcrumbJsonLd, pageMetadata, serviceJsonLd } from "@/lib/seo";
 import { getTranslations } from "next-intl/server";
 import { DEFAULT_LOCALE } from "@/lib/i18n";
+import Link from "next/link";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations({
@@ -36,6 +37,16 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const devrelFaqItems: FAQItem[] = [
+  {
+    question: "Can a startup get developer adoption without a DevRel team?",
+    answer:
+      "Yes. Most of the work a first DevRel hire does can be split up: engineers fix the first run and docs, founders answer in the communities where users already talk, and an outsourced DevRel team handles the content, demos, launches, and events. Studio1 runs that outsourced part for devtool and AI startups. For Memori it took an open-source project from launch to 12,000+ GitHub stars.",
+  },
+  {
+    question: "Should we hire an outsourced DevRel agency or an in-house advocate?",
+    answer:
+      "Hire in-house when you need one person to own the community for years and sit close to the product. Use an agency when you need writers, engineers, and community work running in weeks, or for launches and defined pushes. Many teams combine both: an internal owner sets priorities and Studio1 ships the content, demos, and events.",
+  },
   {
     question: "What do Developer Relations & Growth Campaigns include?",
     answer:
@@ -216,6 +227,23 @@ export default function DevRel() {
             subtitle="Common questions about our developer relations and growth campaign services."
             items={devrelFaqItems}
           />
+          <p className="mt-8 text-center text-[15px] text-[var(--p-muted)]">
+            No DevRel hire yet? Read{" "}
+            <Link
+              href="/blog/developer-adoption-without-devrel-team"
+              className="font-medium text-[#141414] underline decoration-[#141414]/25 decoration-2 underline-offset-[6px] transition-colors hover:decoration-[#f97316]"
+            >
+              how to get developer adoption without a DevRel team
+            </Link>{" "}
+            or compare a{" "}
+            <Link
+              href="/blog/devrel-agency-vs-in-house-devrel-hire"
+              className="font-medium text-[#141414] underline decoration-[#141414]/25 decoration-2 underline-offset-[6px] transition-colors hover:decoration-[#f97316]"
+            >
+              DevRel agency with an in-house hire
+            </Link>
+            .
+          </p>
         </Container>
       </PaperSection>
       <PaperCta

@@ -51,6 +51,17 @@ const faqs: FAQItem[] = [
       "Start with what you need most: a steady content program, docs, AI search visibility, a launch, or open-source growth. Then check that the agency has done that work for a product like yours, ask who actually writes or ships it, and look for results with public sources rather than unnamed claims.",
   },
   {
+    question:
+      "Which is the best technical content marketing agency for developer tools?",
+    answer:
+      "It depends on whether you need content alone or content tied to adoption. Draft.dev and Hackmamba run large networks of engineer-writers, Argot focuses on developer writing and editing, and Infrasity works mostly with early-stage devtool startups. Studio1 writes engineer-led tutorials, comparisons, and deep dives and distributes them on Reddit, X, and Dev.to; for Entelligence AI that distribution reached 304K+ Reddit impressions.",
+  },
+  {
+    question: "Which agencies make developer videos and product demos?",
+    answer:
+      "Among the agencies on this list, Studio1 and Infrasity list technical video as a service. Studio1 builds the demo project first, then scripts, records, and edits around it: 12 hands-on demo agents plus a launch video for Memori, and open-source demo apps with a walkthrough video for Corsair.",
+  },
+  {
     question: "Which agency is best for open-source projects?",
     answer:
       "Look for one that runs GitHub growth as a service, not only blog posts: README and onboarding fixes, demo projects, and launch distribution. Studio1's open-source results include Memori growing to 12,000+ GitHub stars and Corsair going from about 300 to 2,000 stars in five weeks.",

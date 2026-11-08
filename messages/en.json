@@ -57,8 +57,8 @@
   "ServiceHero": {
     "technicalContent": {
       "badge": "Services",
-      "titleAccent": "Technical",
-      "titleRest": "Content That Converts",
+      "titleAccent": "Technical Content",
+      "titleRest": "Marketing for Developer Tools",
       "description": "A technical content marketing agency for developer tools: engineer-written tutorials, guides, and SEO content.",
       "primaryCta": "Book a Call",
       "secondaryCta": "Explore Services",
@@ -98,8 +98,8 @@
     },
     "video": {
       "badge": "Services",
-      "titleAccent": "Developer Videos",
-      "titleRest": "That Get Watched",
+      "titleAccent": "Developer Video",
+      "titleRest": "and Demo Agency for Devtools",
       "description": "Product demos, coding tutorials, and Shorts for devtool and AI teams, with demo projects developers can run.",
       "primaryCta": "Book a Call",
       "secondaryCta": "Explore Services"
