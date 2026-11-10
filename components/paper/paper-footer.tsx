@@ -398,11 +398,11 @@ export default function PaperFooter() {
             <p className="-mt-2 max-w-[300px] text-[14px] leading-[1.6] text-[#141414]/60">
               {t("description")}
             </p>
-            <ul aria-label="Follow us" className="-ml-2 mt-1 flex flex-nowrap items-center">
+            <ul aria-label="Follow us" className="mt-1 flex flex-nowrap items-center gap-1">
               {SOCIAL_LINKS.map(({ href, label, icon: SocialIcon }) => (
                 <li key={label}>
                   <SocialBubble href={href} label={label} size="sm">
-                    <SocialIcon aria-hidden className="size-[18px]" stroke={1.6} />
+                    <SocialIcon aria-hidden className="size-4" stroke={1.7} />
                   </SocialBubble>
                 </li>
               ))}
@@ -441,11 +441,8 @@ export default function PaperFooter() {
                                 : t(`links.${link.key}`)
                               : link.label}
                             {link.badge ? (
-                              <span className="relative ml-2 inline-flex -translate-y-px items-center overflow-hidden rounded-[4px] bg-[#141414] px-1.5 py-[3px] align-middle text-[10px] font-semibold leading-none text-white">
-                                {/* A light runs through the letters, left to right */}
-                                <span className="animate-[s1-text-shine_1.9s_ease-in-out_infinite] bg-[linear-gradient(90deg,rgba(255,255,255,0.4)_0%,rgba(255,255,255,0.4)_32%,#ffffff_44%,#fed7aa_50%,#ffffff_56%,rgba(255,255,255,0.4)_68%,rgba(255,255,255,0.4)_100%)] bg-[length:300%_100%] bg-clip-text text-transparent motion-reduce:animate-none motion-reduce:text-white">
-                                  {link.badge}
-                                </span>
+                              <span className="ml-2 inline-flex -translate-y-px items-center rounded-[4px] bg-[#141414] px-1.5 py-[3px] align-middle text-[10px] font-semibold leading-none text-white">
+                                {link.badge}
                               </span>
                             ) : null}
                           </FooterLink>

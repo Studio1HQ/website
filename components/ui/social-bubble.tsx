@@ -2,9 +2,9 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * A social icon link. At rest it is a plain ink icon; on hover or focus it
- * lifts onto a glassy white bubble, turns print orange and shows its name in
- * a small ink label above. Without an href it shows as a quiet placeholder.
+ * A social icon link in the Team page's engraved round chip: ink with a white
+ * icon on hover, and its name in a small ink label above. Without an href it
+ * shows as a quiet placeholder.
  */
 export function SocialBubble({
   href,
@@ -28,7 +28,7 @@ export function SocialBubble({
       <span
         aria-hidden
         className={cn(
-          "flex items-center justify-center rounded-full text-[#141414]/20",
+          "flex items-center justify-center rounded-full bg-[#141414]/[0.04] text-[#141414]/25 shadow-[inset_0_1px_2px_rgba(20,20,20,0.12),inset_0_-1px_0_rgba(255,255,255,0.85)] ring-1 ring-inset ring-[#141414]/[0.06]",
           box,
         )}
       >
@@ -44,10 +44,8 @@ export function SocialBubble({
       rel="noopener noreferrer"
       aria-label={name ? `${name} on ${label}` : label}
       className={cn(
-        "group/social relative flex items-center justify-center rounded-full text-[#141414]/70 outline-none transition-all duration-300 ease-out",
-        // Glass: a bright fill, a blur of what is behind, a light inner edge
-        "hover:bg-white/85 hover:text-[#f97316] hover:shadow-[0_8px_20px_-10px_rgba(20,20,20,0.35),inset_0_1px_0_rgba(255,255,255,1),inset_0_-1px_2px_rgba(20,20,20,0.06)] hover:backdrop-blur-md",
-        "focus-visible:bg-white/85 focus-visible:text-[#f97316] focus-visible:ring-2 focus-visible:ring-[#f97316]/30",
+        // The Team page chip: a soft engraved circle, ink with a white icon on hover
+        "group/social relative flex items-center justify-center rounded-full bg-[#141414]/[0.04] text-[#141414]/60 shadow-[inset_0_1px_2px_rgba(20,20,20,0.12),inset_0_-1px_0_rgba(255,255,255,0.85)] ring-1 ring-inset ring-[#141414]/[0.06] outline-none transition-colors duration-200 hover:bg-[#141414] hover:text-white focus-visible:bg-[#141414] focus-visible:text-white",
         box,
       )}
     >

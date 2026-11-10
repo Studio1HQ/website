@@ -10,9 +10,9 @@ import { cn } from "@/lib/utils";
 type Mode = "human" | "machine";
 
 /** The rise into the machine view: quick to start, long soft landing. */
-const RISE = { duration: 0.8, ease: [0.16, 1, 0.3, 1] } as const;
+const RISE = { duration: 0.45, ease: [0.22, 1, 0.36, 1] } as const;
 /** Going back is quicker, so the page returns without a wait. */
-const FALL = { duration: 0.5, ease: [0.7, 0, 0.84, 0] } as const;
+const FALL = { duration: 0.28, ease: [0.4, 0, 1, 1] } as const;
 
 const SITE = "https://www.studio1hq.com";
 
@@ -300,15 +300,18 @@ function MarkdownLine({
     );
   })();
 
+  // Only the first screenful eases in; the rest is simply there, so long
+  // pages open as fast as short ones.
+  if (index > 28) return <div className={mt}>{node}</div>;
   return (
     <motion.div
       className={mt}
-      initial={{ opacity: 0, y: 6, filter: "blur(4px)" }}
-      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{
-        duration: 0.4,
-        delay: 0.25 + Math.min(index * 0.01, 0.5),
-        ease: [0.25, 0.1, 0.25, 1],
+        duration: 0.35,
+        delay: 0.12 + index * 0.012,
+        ease: [0.22, 1, 0.36, 1],
       }}
     >
       {node}
@@ -317,7 +320,7 @@ function MarkdownLine({
 }
 
 /** The chip's glide: quick to leave, settling softly with no bounce. */
-const GLIDE = { duration: 0.5, ease: [0.65, 0, 0.35, 1] } as const;
+const GLIDE = { type: "spring", bounce: 0, duration: 0.5 } as const;
 
 /**
  * The Human / Machine switch. Both halves are the same width, so one white
@@ -345,20 +348,9 @@ function ModeSwitch({
         aria-hidden
         className="absolute inset-y-[3px] left-[3px] w-[calc(50%-3px)] rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.10),0_1px_2px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,1)]"
         initial={false}
-        // Slides over with a soft motion blur that clears as it lands
-        animate={{
-          x: value === "machine" ? "100%" : "0%",
-          filter:
-            value === "machine"
-              ? ["blur(0px)", "blur(3px)", "blur(0px)"]
-              : ["blur(0px)", "blur(3.01px)", "blur(0px)"],
-          scaleX: value === "machine" ? [1, 1.08, 1] : [1, 1.0801, 1],
-        }}
-        transition={{
-          x: GLIDE,
-          filter: { duration: 0.5, times: [0, 0.35, 1], ease: "easeOut" },
-          scaleX: { duration: 0.5, times: [0, 0.35, 1], ease: "easeOut" },
-        }}
+        // One clean glide, no bounce
+        animate={{ x: value === "machine" ? "100%" : "0%" }}
+        transition={GLIDE}
       />
       {(["human", "machine"] as const).map((option) => {
         const active = value === option;
@@ -369,22 +361,13 @@ function ModeSwitch({
             role="radio"
             aria-checked={active}
             onClick={() => (active ? undefined : onChange(option))}
-            className="relative w-[104px] py-[8px] text-center text-[10.5px] font-semibold uppercase tracking-[0.16em] outline-none focus-visible:ring-2 focus-visible:ring-[#f97316]/40 rounded-full"
+            className="group/mode relative w-[104px] rounded-full py-[8px] text-center text-[10.5px] font-semibold uppercase tracking-[0.16em] outline-none transition-opacity focus-visible:ring-2 focus-visible:ring-[#f97316]/40 [&:not([aria-checked=true])]:hover:opacity-80"
           >
             <motion.span
               className="relative"
               initial={false}
-              // Labels swap through a light blur, like a focus pull
-              animate={{
-                color: active ? "#1a1a1a" : "#a8a196",
-                filter: active
-                  ? ["blur(2px)", "blur(0px)"]
-                  : ["blur(0px)", "blur(1.5px)", "blur(0px)"],
-              }}
-              transition={{
-                color: { duration: 0.35, ease: [0.22, 1, 0.36, 1] },
-                filter: { duration: 0.45, ease: "easeOut" },
-              }}
+              animate={{ color: active ? "#141414" : "#a8a196" }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             >
               {option}
             </motion.span>
@@ -414,7 +397,7 @@ export function MachineToggle() {
       setInner("human");
       return;
     }
-    const id = window.setTimeout(() => setInner("machine"), 700);
+    const id = window.setTimeout(() => setInner("machine"), 120);
     return () => window.clearTimeout(id);
   }, [mode]);
   const [mounted, setMounted] = useState(false);
@@ -463,26 +446,14 @@ export function MachineToggle() {
         value={chip}
         onChange={(next) => {
           if (next !== "machine") return setMode("human");
-          // Let the chip glide over first, then raise the machine view
           setChip("machine");
-          window.setTimeout(open, 380);
+          open();
         }}
       />
 
       {mounted
         ? createPortal(
             <AnimatePresence>
-              {mode === "machine" ? (
-                // The page behind melts into a soft blur as the text rises
-                <motion.div
-                  key="machine-veil"
-                  aria-hidden
-                  className="pointer-events-none fixed inset-0 z-[1999] bg-[#f8f7f5]/40 backdrop-blur-2xl"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1, transition: { duration: 0.5, ease: "easeOut" } }}
-                  exit={{ opacity: 0, transition: { duration: 0.45, ease: "easeIn", delay: 0.1 } }}
-                />
-              ) : null}
               {mode === "machine" ? (
                 <motion.div
                   key="machine-view"
@@ -491,9 +462,10 @@ export function MachineToggle() {
                   aria-modal="true"
                   aria-label="Machine-readable version of this page"
                   className="fixed inset-0 z-[2000] flex flex-col bg-[#f8f7f5] text-neutral-800"
-                  initial={{ y: "14%", opacity: 0, filter: "blur(18px)" }}
-                  animate={{ y: "0%", opacity: 1, filter: "blur(0px)", transition: RISE }}
-                  exit={{ y: "10%", opacity: 0, filter: "blur(14px)", transition: FALL }}
+                  initial={{ y: 28, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1, transition: RISE }}
+                  exit={{ y: 16, opacity: 0, transition: FALL }}
+                  style={{ willChange: "transform, opacity" }}
                 >
                   {/* The page, as plain text */}
                   <div
@@ -566,9 +538,9 @@ export function MachineToggle() {
                       initial={{ opacity: 0, y: 16 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{
-                        duration: 0.5,
-                        ease: [0.16, 1, 0.3, 1],
-                        delay: 0.55,
+                        duration: 0.35,
+                        ease: [0.22, 1, 0.36, 1],
+                        delay: 0.1,
                       }}
                     >
                       <ModeSwitch
@@ -577,7 +549,7 @@ export function MachineToggle() {
                         onChange={(next) => {
                           if (next !== "human") return;
                           setInner("human");
-                          window.setTimeout(() => setMode("human"), 320);
+                          window.setTimeout(() => setMode("human"), 140);
                         }}
                       />
                     </motion.div>

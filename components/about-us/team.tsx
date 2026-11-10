@@ -1,6 +1,5 @@
 "use client";
 import Link from "next/link";
-import { SocialBubble } from "@/components/ui/social-bubble";
 import {
   motion,
   useReducedMotion,
@@ -94,17 +93,18 @@ function LeaderCard({ member }: { member: Member }) {
             {member.role}
           </p>
         </div>
-        <div className="-mr-1.5 flex shrink-0 items-center gap-0.5">
+        <div className="flex shrink-0 items-center gap-1.5">
           {socials(member).map(({ href, label, Icon, weight }) => (
-            <SocialBubble
+            <Link
               key={label}
               href={href}
-              label={label}
-              name={member.name}
-              size="sm"
+              target="_blank"
+              rel="noreferrer"
+              aria-label={`${member.name} on ${label}`}
+              className="flex size-8 items-center justify-center rounded-full bg-[#141414]/[0.04] text-[#141414]/60 shadow-[inset_0_1px_2px_rgba(20,20,20,0.12),inset_0_-1px_0_rgba(255,255,255,0.85)] ring-1 ring-inset ring-[#141414]/[0.06] transition-colors duration-200 hover:bg-[#141414] hover:text-white"
             >
               <Icon weight={weight} className="size-[17px]" />
-            </SocialBubble>
+            </Link>
           ))}
         </div>
       </div>

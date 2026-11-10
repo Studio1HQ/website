@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { SocialBubble } from "@/components/ui/social-bubble";
 import { motion, useReducedMotion } from "motion/react";
 import {
   ArrowUpRight,
@@ -120,18 +119,31 @@ function PersonCard({ member }: { member: TeamMember }) {
             {member.role}
           </p>
         </div>
-        <div className="-mr-1.5 flex shrink-0 items-center gap-0.5">
-          {socials(member.links).map(({ href, label, Icon, weight }) => (
-            <SocialBubble
-              key={label}
-              href={href}
-              label={label}
-              name={member.name ?? undefined}
-              size="sm"
-            >
-              <Icon weight={weight} className="size-[17px]" />
-            </SocialBubble>
-          ))}
+        <div className="flex shrink-0 items-center gap-1.5">
+          {socials(member.links).map(({ href, label, Icon, weight }) =>
+            href ? (
+              <Link
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={`${member.name} on ${label}`}
+                className="flex size-8 items-center justify-center rounded-full bg-[#141414]/[0.04] shadow-[inset_0_1px_2px_rgba(20,20,20,0.12),inset_0_-1px_0_rgba(255,255,255,0.85)] ring-1 ring-inset ring-[#141414]/[0.06] text-[#141414]/60 transition-colors duration-200 hover:bg-[#141414] hover:text-white"
+              >
+                <Icon weight={weight} className="size-[17px]" />
+              </Link>
+            ) : (
+              // Link not added yet: the same chip, quieter and not clickable
+              <span
+                key={label}
+                aria-hidden
+                title={`${label} coming soon`}
+                className="flex size-8 items-center justify-center rounded-full bg-[#141414]/[0.04] shadow-[inset_0_1px_2px_rgba(20,20,20,0.12),inset_0_-1px_0_rgba(255,255,255,0.85)] ring-1 ring-inset ring-[#141414]/[0.06] cursor-default text-[#141414]/25"
+              >
+                <Icon weight={weight} className="size-[17px]" />
+              </span>
+            ),
+          )}
         </div>
       </div>
     </>
