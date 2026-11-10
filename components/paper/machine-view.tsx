@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
@@ -387,19 +387,13 @@ export function MachineToggle() {
   const [mode, setMode] = useState<Mode>("human");
   const [markdown, setMarkdown] = useState("");
   const [copied, setCopied] = useState(false);
-  // The footer switch follows the view, but leads it when Machine is picked.
+  // One chip position for both copies of the switch, so they glide as one.
   const [chip, setChip] = useState<Mode>("human");
   useEffect(() => setChip(mode), [mode]);
-  // The switch inside the machine view starts on Human and glides over.
-  const [inner, setInner] = useState<Mode>("human");
-  useEffect(() => {
-    if (mode !== "machine") {
-      setInner("human");
-      return;
-    }
-    const id = window.setTimeout(() => setInner("machine"), 120);
-    return () => window.clearTimeout(id);
-  }, [mode]);
+  // Where the switch sits on screen when Machine is picked: the machine view
+  // draws its copy at exactly that spot, so the switch never moves.
+  const switchRef = useRef<HTMLDivElement>(null);
+  const [pin, setPin] = useState<{ left: number; top: number } | null>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
@@ -410,17 +404,24 @@ export function MachineToggle() {
   }, [pathname]);
 
   // Leaving the page or pressing Escape returns to the human view.
-  useEffect(() => setMode("human"), [pathname]);
+  useEffect(() => {
+    setMode("human");
+    setPin(null);
+  }, [pathname]);
   useEffect(() => {
     if (mode !== "machine") return;
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") setMode("human");
     };
     document.addEventListener("keydown", onKey);
-    document.documentElement.style.overflow = "hidden";
+    // Lock the page without the scrollbar vanishing, so nothing shifts sideways
+    const root = document.documentElement;
+    root.style.scrollbarGutter = "stable";
+    root.style.overflow = "hidden";
     return () => {
       document.removeEventListener("keydown", onKey);
-      document.documentElement.style.overflow = "";
+      root.style.overflow = "";
+      root.style.scrollbarGutter = "";
     };
   }, [mode]);
 
@@ -442,14 +443,18 @@ export function MachineToggle() {
 
   return (
     <>
-      <ModeSwitch
-        value={chip}
-        onChange={(next) => {
-          if (next !== "machine") return setMode("human");
-          setChip("machine");
-          open();
-        }}
-      />
+      <div ref={switchRef} className="inline-flex">
+        <ModeSwitch
+          value={chip}
+          onChange={(next) => {
+            if (next !== "machine") return setMode("human");
+            const box = switchRef.current?.getBoundingClientRect();
+            setPin(box ? { left: box.left, top: box.top } : null);
+            setChip("machine");
+            open();
+          }}
+        />
+      </div>
 
       {mounted
         ? createPortal(
@@ -530,33 +535,35 @@ export function MachineToggle() {
                     </pre>
                   </div>
 
-                  {/* Bottom fade + floating toggle */}
-                  <div className="pointer-events-none absolute inset-x-0 bottom-0">
-                    <div className="h-28 bg-gradient-to-t from-[#f8f7f5] via-[#f8f7f5]/80 to-transparent" />
-                    <motion.div
-                      className="pointer-events-auto -mt-20 flex justify-center pb-8"
-                      initial={{ opacity: 0, y: 16 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{
-                        duration: 0.35,
-                        ease: [0.22, 1, 0.36, 1],
-                        delay: 0.1,
-                      }}
-                    >
-                      <ModeSwitch
-                        floating
-                        value={inner}
-                        onChange={(next) => {
-                          if (next !== "human") return;
-                          setInner("human");
-                          window.setTimeout(() => setMode("human"), 140);
-                        }}
-                      />
-                    </motion.div>
-                  </div>
+                  {/* Bottom fade so the text runs out softly */}
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#f8f7f5] via-[#f8f7f5]/80 to-transparent" />
                 </motion.div>
               ) : null}
             </AnimatePresence>,
+            document.body,
+          )
+        : null}
+
+      {mounted && mode === "machine"
+        ? createPortal(
+            <div
+              className={cn(
+                "fixed z-[2002]",
+                !pin && "bottom-8 left-1/2 -translate-x-1/2",
+              )}
+              style={pin ? { left: pin.left, top: pin.top } : undefined}
+            >
+              <ModeSwitch
+                floating
+                value={chip}
+                onChange={(next) => {
+                  if (next !== "human") return;
+                  // Glide back first, then let the page return
+                  setChip("human");
+                  window.setTimeout(() => setMode("human"), 160);
+                }}
+              />
+            </div>,
             document.body,
           )
         : null}
