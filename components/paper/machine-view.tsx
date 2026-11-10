@@ -9,8 +9,10 @@ import { cn } from "@/lib/utils";
 
 type Mode = "human" | "machine";
 
-/** The wipe between views: slow in the middle, settled at both ends. */
-const WIPE = { duration: 0.75, ease: [0.76, 0, 0.24, 1] } as const;
+/** The rise into the machine view: quick to start, long soft landing. */
+const RISE = { duration: 0.8, ease: [0.16, 1, 0.3, 1] } as const;
+/** Going back is quicker, so the page returns without a wait. */
+const FALL = { duration: 0.5, ease: [0.7, 0, 0.84, 0] } as const;
 
 const SITE = "https://www.studio1hq.com";
 
@@ -301,11 +303,11 @@ function MarkdownLine({
   return (
     <motion.div
       className={mt}
-      initial={{ opacity: 0, y: 5 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 6, filter: "blur(4px)" }}
+      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
       transition={{
-        duration: 0.28,
-        delay: Math.min(index * 0.01, 0.55),
+        duration: 0.4,
+        delay: 0.25 + Math.min(index * 0.01, 0.5),
         ease: [0.25, 0.1, 0.25, 1],
       }}
     >
@@ -409,15 +411,14 @@ export function MachineToggle() {
         ? createPortal(
             <AnimatePresence>
               {mode === "machine" ? (
-                // A scan line sweeps up the screen, leading the wipe
+                // The page behind melts into a soft blur as the text rises
                 <motion.div
-                  key="machine-scan"
+                  key="machine-veil"
                   aria-hidden
-                  className="pointer-events-none fixed inset-x-0 z-[2001] h-px bg-[#f97316] shadow-[0_0_12px_2px_rgba(249,115,22,0.45)]"
-                  initial={{ top: "100%", opacity: 1 }}
-                  animate={{ top: "0%", opacity: [1, 1, 0] }}
-                  exit={{ top: "100%", opacity: [0, 1, 1] }}
-                  transition={WIPE}
+                  className="pointer-events-none fixed inset-0 z-[1999] bg-[#f8f7f5]/40 backdrop-blur-2xl"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1, transition: { duration: 0.5, ease: "easeOut" } }}
+                  exit={{ opacity: 0, transition: { duration: 0.45, ease: "easeIn", delay: 0.1 } }}
                 />
               ) : null}
               {mode === "machine" ? (
@@ -428,10 +429,9 @@ export function MachineToggle() {
                   aria-modal="true"
                   aria-label="Machine-readable version of this page"
                   className="fixed inset-0 z-[2000] flex flex-col bg-[#f8f7f5] text-neutral-800"
-                  initial={{ clipPath: "inset(100% 0% 0% 0%)" }}
-                  animate={{ clipPath: "inset(0% 0% 0% 0%)" }}
-                  exit={{ clipPath: "inset(100% 0% 0% 0%)" }}
-                  transition={WIPE}
+                  initial={{ y: "14%", opacity: 0, filter: "blur(18px)" }}
+                  animate={{ y: "0%", opacity: 1, filter: "blur(0px)", transition: RISE }}
+                  exit={{ y: "10%", opacity: 0, filter: "blur(14px)", transition: FALL }}
                 >
                   {/* The page, as plain text */}
                   <div

@@ -155,10 +155,10 @@ function TeamPanel() {
                 }
           }
           className={cn(
-            "pointer-events-none absolute top-[calc(44%-105px)] -z-10 hidden h-[210px] xl:block",
+            "pointer-events-none absolute top-[24%] -z-10 hidden h-[260px] xl:block",
             side === "left"
-              ? "left-[calc(50%-50vw)] right-[calc(50%+488px)] [mask-image:linear-gradient(to_right,transparent,black_45%)]"
-              : "left-[calc(50%+488px)] right-[calc(50%-50vw)] [mask-image:linear-gradient(to_left,transparent,black_45%)]",
+              ? "left-[calc(50%-50vw)] right-[calc(50%+446px)]"
+              : "left-[calc(50%+446px)] right-[calc(50%-50vw)]",
           )}
         >
           {/* The hero's reaching hand, in its peach print colour */}

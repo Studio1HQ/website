@@ -264,17 +264,18 @@ export function TeamPage() {
                 "mt-8 gap-4 md:gap-6",
                 // Fewer, larger cards at the top of the hierarchy; the
                 // smaller tiers stay centred however many people they hold
-                t === 0
-                  ? "mx-auto grid max-w-[880px] grid-cols-2"
-                  : "flex flex-wrap justify-center",
+                "flex flex-wrap justify-center",
+                t === 0 && "mx-auto max-w-[1180px]",
               )}
             >
               {tier.members.map((member, i) => (
                 <motion.li
                   key={`${member.role}-${i}`}
                   className={cn(
-                    t > 0 &&
-                      "w-[calc(50%-8px)] md:w-[calc(33.333%-16px)] lg:w-[calc(25%-18px)]",
+                    "w-[calc(50%-8px)]",
+                    t === 0
+                      ? "md:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]"
+                      : "md:w-[calc(33.333%-16px)] lg:w-[calc(25%-18px)]",
                   )}
                   initial={reduceMotion ? false : { opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}

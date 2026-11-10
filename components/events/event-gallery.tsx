@@ -511,7 +511,7 @@ function NextUp({
     >
       <div
         className={cn(
-          "flex min-w-0 flex-1 items-center gap-4 px-4 py-4 md:px-5",
+          "flex min-w-0 flex-1 basis-full flex-wrap items-center gap-3 px-4 py-4 sm:flex-nowrap sm:gap-4 md:basis-auto md:px-5",
           ENGRAVED,
         )}
       >
@@ -524,7 +524,7 @@ function NextUp({
           bare
           className="size-7 shrink-0 rounded-[6px]"
         />
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <h3 className="truncate text-[17px] font-medium tracking-[-0.02em]">
             {event.name}
           </h3>
@@ -551,7 +551,7 @@ function NextUp({
         href={event.link ?? "/calendar"}
         target={event.link ? "_blank" : undefined}
         rel={event.link ? "noreferrer" : undefined}
-        className="mr-2 inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[#141414] px-4 py-2.5 text-[13px] font-medium text-white transition-colors hover:bg-[#2a2522]"
+        className="ml-auto mr-2 inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[#141414] md:ml-0 px-4 py-2.5 text-[13px] font-medium text-white transition-colors hover:bg-[#2a2522]"
       >
         {event.link ? "Event site" : "Open calendar"}
         <ArrowUpRight weight="bold" className="size-3.5" />

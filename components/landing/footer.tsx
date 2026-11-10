@@ -1,5 +1,6 @@
 "use client";
 
+import { MachineToggle } from "@/components/paper/machine-view";
 import Link from "next/link";
 import { ArrowUpRight } from "@phosphor-icons/react";
 import {
@@ -276,6 +277,7 @@ export default function Footer() {
             <p className="text-[13px] text-white/45">
               ©<Num>{new Date().getFullYear()}</Num> Studio1. {t("rights")}
             </p>
+            <MachineToggle />
             <nav className="flex gap-6">
               <Link
                 href="/terms"

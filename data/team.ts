@@ -46,6 +46,11 @@ export const TEAM: TeamTier[] = [
           website: "https://mranand.com/",
         },
       },
+      {
+        name: "Nancy Garg",
+        role: "Founder's Associate",
+        portrait: "/assets/team/nancy-garg.webp?v=13",
+      },
     ],
   },
   {

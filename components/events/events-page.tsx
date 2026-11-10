@@ -85,6 +85,52 @@ export function EventMark({
   );
 }
 
+/** The hero collage: a few moments from the road, each linking to its event. */
+const MOMENTS = [
+  { src: "/assets/events/aki-hacks/03.webp", slug: "aki-hacks", caption: "AKI Hacks, Hacktoberfest", span: "col-span-2 row-span-2" },
+  { src: "/assets/events/ai-engineer-singapore/04.webp", slug: "ai-engineer-singapore", caption: "With the Vercel team", span: "" },
+  { src: "/assets/events/ai-engineer-singapore/01.webp", slug: "ai-engineer-singapore", caption: "With an engineer from Z.ai", span: "" },
+  { src: "/assets/events/kubecon-india-2026/01.webp", slug: "kubecon-india-2026", caption: "KubeCon India 2026", span: "md:col-span-2" },
+  { src: "/assets/events/hackspire-2/01.webp", slug: "hackspire-2", caption: "Hackspire, 2nd edition", span: "md:col-span-2" },
+  { src: "/assets/events/react-alicante/01.webp", slug: "react-alicante", caption: "React Alicante", span: "" },
+  { src: "/assets/events/blr-tech-week/01.webp", slug: "blr-tech-week", caption: "Bengaluru Tech Week", span: "" },
+] as const;
+
+function MomentsCollage({ reduceMotion }: { reduceMotion: boolean }) {
+  return (
+    <ul className="mt-10 grid auto-rows-[132px] grid-cols-2 gap-2 sm:auto-rows-[180px] md:mt-14 md:grid-cols-6 md:auto-rows-[200px] md:gap-3 lg:auto-rows-[236px]">
+      {MOMENTS.map((m, i) => (
+        <motion.li
+          key={m.src}
+          className={m.span}
+          initial={reduceMotion ? false : { opacity: 0, y: 18, filter: "blur(10px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ duration: 0.9, ease: EASE, delay: 1.1 + i * 0.08 }}
+        >
+          <a
+            href={`#${m.slug}`}
+            className="group relative block size-full overflow-hidden rounded-[6px] bg-[#e6e1d9] shadow-[0_18px_40px_-28px_rgba(20,20,20,0.55)] ring-1 ring-inset ring-[#141414]/[0.06]"
+          >
+            <Image
+              src={m.src}
+              alt={m.caption}
+              fill
+              sizes={i === 0 ? "(min-width: 768px) 34vw, 100vw" : "(min-width: 768px) 34vw, 50vw"}
+              className="object-cover"
+              priority={i < 3}
+            />
+            {/* Caption on a soft shade, so it reads on any photo */}
+            <span className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/55 to-transparent opacity-80 transition-opacity duration-300 group-hover:opacity-100" />
+            <span className="absolute bottom-2.5 left-3 right-3 truncate text-[12px] font-medium text-white md:bottom-3 md:left-4 md:text-[13px]">
+              {m.caption}
+            </span>
+          </a>
+        </motion.li>
+      ))}
+    </ul>
+  );
+}
+
 export function EventsPage({
   events,
   now,
@@ -135,25 +181,28 @@ export function EventsPage({
             </motion.p>
           </div>
 
+          {/* A few moments first, then the record and the timeline */}
+          <MomentsCollage reduceMotion={!!reduceMotion} />
+
           {/* The record, engraved into the page */}
-          <dl className="mt-10 grid grid-cols-2 overflow-hidden rounded-[6px] bg-[#ebe6de] shadow-[inset_0_2px_6px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08),inset_0_-1px_0_rgba(255,255,255,0.85)] md:mt-14 md:grid-cols-4">
+          <dl className="mt-3 grid grid-cols-2 overflow-hidden rounded-[6px] bg-[#ebe6de] shadow-[inset_0_2px_6px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08),inset_0_-1px_0_rgba(255,255,255,0.85)] md:mt-4 md:grid-cols-4">
             {stats.map(([value, label, StatIcon], i) => (
               <div
                 key={label}
                 className={cn(
-                  "flex items-center gap-4 px-5 py-5 md:px-6 md:py-6",
+                  "flex min-w-0 items-center gap-2.5 px-3.5 py-4 sm:gap-4 sm:px-5 sm:py-5 md:px-6 md:py-6",
                   i % 2 === 1 && "border-l border-[#141414]/[0.08]",
                   i > 1 && "max-md:border-t max-md:border-[#141414]/[0.08]",
                   i === 2 && "md:border-l md:border-[#141414]/[0.08]",
                 )}
               >
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#f4efe7] text-[#f97316] shadow-[0_1px_2px_rgba(20,20,20,0.1),inset_0_1px_0_rgba(255,255,255,0.9)]">
+                <span className="flex size-8 shrink-0 items-center sm:size-10 justify-center rounded-full bg-[#f4efe7] text-[#f97316] shadow-[0_1px_2px_rgba(20,20,20,0.1),inset_0_1px_0_rgba(255,255,255,0.9)]">
                   <StatIcon weight="bold" className="size-[18px]" />
                 </span>
-                <dd className="text-[32px] font-medium leading-none tracking-[-0.05em] tabular-nums text-[#141414]/85 [text-shadow:0_1px_0_rgba(255,255,255,0.9)] md:text-[40px]">
+                <dd className="text-[26px] font-medium leading-none sm:text-[32px] tracking-[-0.05em] tabular-nums text-[#141414]/85 [text-shadow:0_1px_0_rgba(255,255,255,0.9)] md:text-[40px]">
                   {value}
                 </dd>
-                <dt className="text-[13px] text-[#141414]/55 [text-shadow:0_1px_0_rgba(255,255,255,0.8)]">
+                <dt className="min-w-0 text-[12px] leading-tight text-[#141414]/55 sm:text-[13px] [text-shadow:0_1px_0_rgba(255,255,255,0.8)]">
                   {label}
                 </dt>
               </div>

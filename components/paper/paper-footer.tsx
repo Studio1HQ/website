@@ -10,7 +10,7 @@ import {
   useScroll,
   useTransform,
 } from "motion/react";
-import { ArrowBendDownRight, ArrowUpRight } from "@phosphor-icons/react";
+import { ArrowUpRight } from "@phosphor-icons/react";
 import {
   IconBrandGithub,
   IconBrandInstagram,
@@ -83,9 +83,9 @@ const COMPANY_LINKS = [
   { key: "product", href: "/product" },
 ] as const;
 
-const heading =
-  "text-[12px] font-medium uppercase tracking-[0.14em] text-[#141414]/45";
-/** Footer link: a curved arrow slides in on hover to show it redirects. */
+/** Card heading: a quiet label in ink above softer grey links. */
+const heading = "text-[14px] font-medium tracking-[-0.01em] text-[#141414]";
+/** Footer link: soft grey that settles to ink on hover. */
 function FooterLink({
   href,
   children,
@@ -100,17 +100,9 @@ function FooterLink({
   return (
     <Anchor
       href={href}
-      className="group inline-flex items-center gap-1.5 text-[15px] transition-colors duration-200 hover:text-[#f97316]"
+      className="inline-flex items-center text-[14px] leading-[1.45] text-[#141414]/60 transition-colors duration-200 hover:text-[#141414]"
     >
-      <ArrowBendDownRight
-        aria-hidden
-        weight="bold"
-        className="size-3.5 -translate-x-1 opacity-40 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100"
-        style={{ color: PRINT }}
-      />
-      <span className="transition-transform duration-300 group-hover:translate-x-0.5">
-        {children}
-      </span>
+      {children}
     </Anchor>
   );
 }
@@ -160,10 +152,10 @@ export default function PaperFooter() {
         </div>
 
         <div
-          className="grid grid-cols-2 gap-2 xl:grid-cols-4"
+          className="grid grid-cols-2 gap-2 xl:grid-cols-[1.12fr_1.9fr_1.04fr_0.74fr]"
           style={{ marginTop: 40 }}
         >
-          <div className="col-span-2 flex flex-col justify-between gap-10 rounded-[6px] bg-white/80 p-7 ring-1 ring-inset ring-[#141414]/10 xl:col-span-1">
+          <div className="col-span-2 flex flex-col justify-between gap-6 rounded-[6px] bg-white/80 p-6 ring-1 ring-inset ring-[#141414]/10 xl:col-span-1">
             <div>
               <Link href="/" className="inline-flex items-center gap-3">
                 <Logo className="size-8" />
@@ -171,28 +163,28 @@ export default function PaperFooter() {
                   Studio1
                 </span>
               </Link>
-              <p className="mt-5 max-w-[300px] text-[15px] leading-[1.6] text-[#141414]/60">
+              <p className="mt-4 max-w-[300px] text-[14px] leading-[1.6] text-[#141414]/60">
                 {t("description")}
               </p>
             </div>
             <a
               href="mailto:contact@studio1hq.com"
-              className="group inline-flex w-fit items-center gap-3 rounded-full py-2 pl-5 pr-2 text-[15px] font-medium transition-colors hover:opacity-90"
+              className="group inline-flex w-fit items-center gap-2.5 rounded-full py-1.5 pl-4 pr-1.5 text-[14px] font-medium transition-colors hover:opacity-90"
               style={{ background: PRINT, color: "#fff" }}
             >
               contact@studio1hq.com
-              <span className="flex size-8 items-center justify-center rounded-full bg-[#0d0d0d] text-white transition-transform duration-300 group-hover:rotate-45">
-                <ArrowUpRight weight="bold" className="size-4" />
+              <span className="flex size-7 items-center justify-center rounded-full bg-[#0d0d0d] text-white transition-transform duration-300 group-hover:rotate-45">
+                <ArrowUpRight weight="bold" className="size-3.5" />
               </span>
             </a>
           </div>
 
           <nav
             aria-label={nav("items.services")}
-            className="rounded-[6px] bg-white/80 p-7 ring-1 ring-inset ring-[#141414]/10"
+            className="rounded-[6px] bg-white/80 p-6 ring-1 ring-inset ring-[#141414]/10"
           >
             <p className={heading}>{nav("items.services")}</p>
-            <ul className="mt-6 space-y-3.5">
+            <ul className="mt-5 grid gap-y-3 xl:grid-flow-col xl:grid-rows-5 xl:gap-x-6">
               {SERVICE_LINKS.map((item) => (
                 <li key={item.key}>
                   <FooterLink href={item.href}>
@@ -204,11 +196,11 @@ export default function PaperFooter() {
           </nav>
 
           <nav
-            aria-label="Studio1"
-            className="rounded-[6px] bg-white/80 p-7 ring-1 ring-inset ring-[#141414]/10"
+            aria-label="Company"
+            className="rounded-[6px] bg-white/80 p-6 ring-1 ring-inset ring-[#141414]/10"
           >
-            <p className={heading}>Studio1</p>
-            <ul className="mt-6 space-y-3.5">
+            <p className={heading}>Company</p>
+            <ul className="mt-5 grid gap-y-3 xl:grid-flow-col xl:grid-rows-6 xl:gap-x-6">
               {COMPANY_LINKS.map((item) => (
                 <li key={item.key}>
                   <FooterLink href={item.href}>
@@ -240,9 +232,9 @@ export default function PaperFooter() {
             </ul>
           </nav>
 
-          <div className="col-span-2 rounded-[6px] bg-white/80 p-7 ring-1 ring-inset ring-[#141414]/10 xl:col-span-1">
+          <div className="col-span-2 rounded-[6px] bg-white/80 p-6 ring-1 ring-inset ring-[#141414]/10 xl:col-span-1">
             <p className={heading}>Follow us</p>
-            <ul className="mt-6 flex flex-wrap gap-2 xl:block xl:space-y-3">
+            <ul className="mt-5 flex flex-wrap gap-2 xl:block xl:space-y-2">
               {SOCIAL_LINKS.map(({ href, label, icon: SocialIcon }) => (
                 <li key={label}>
                   <a
@@ -250,10 +242,10 @@ export default function PaperFooter() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={label}
-                    className="group inline-flex items-center gap-3 text-[15px] transition-colors duration-200 hover:text-[#f97316]"
+                    className="group inline-flex items-center gap-2.5 text-[14px] text-[#141414]/60 transition-colors duration-200 hover:text-[#141414]"
                   >
-                    <span className="flex size-10 items-center justify-center rounded-[6px] bg-[#f6f3ee] text-[#141414]/75 shadow-[inset_0_2px_6px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08)] transition-colors group-hover:text-[#f97316]">
-                      <SocialIcon className="size-4" />
+                    <span className="flex size-9 items-center justify-center rounded-[6px] bg-[#f6f3ee] xl:size-7 text-[#141414]/75 shadow-[inset_0_2px_6px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08)] transition-colors group-hover:text-[#f97316]">
+                      <SocialIcon className="size-4 xl:size-3.5" />
                     </span>
                     <span className="hidden xl:inline">{label}</span>
                   </a>
