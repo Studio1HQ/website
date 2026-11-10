@@ -8,22 +8,24 @@ description: Learn what llms.txt is, whether it improves AI visibility or SEO,
 tldrSummary: llms.txt helps AI coding assistants navigate developer
   documentation, but it does not reliably improve search rankings or AI
   citations. Here's when to use it and how to set it up.
-tldrBullets: []
+tldrBullets:
+  - llms.txt is a plain Markdown file that tells AI tools what to do and which
+    pages matter most. Jeremy Howard proposed it in September 2024. It's a
+    community proposal, not an official standard.
+  - It won't get you recommended. Google says its search ignores it, a study of
+    about 300,000 domains found no link to AI citations, and Ahrefs found 97% of
+    files got zero requests in May 2026.
+  - Developer tools should still add one to their docs. It takes about an hour;
+    developers do point coding assistants at these files, and Chrome's
+    Lighthouse now checks for one.
 date: 2026-10-12
 updatedDate: 2026-10-12
 draft: false
 authors:
   - Studio1 Team
 bannerImage: /blog/uploads/whatsapp-image-2026-10-12-at-5.34.22-pm.jpeg
+bannerImageAlt: banner-image
 ---
-# llms.txt Explained: What It Is, Whether Developer Tools Need One, and a Template
-
-## TL;DR
-
-* llms.txt is a plain Markdown file that tells AI tools what to do and which pages matter most. Jeremy Howard proposed it in September 2024. It's a community proposal, not an official standard.
-* It won't get you recommended. Google says its search ignores it, a study of about 300,000 domains found no link to AI citations, and Ahrefs found 97% of files got zero requests in May 2026.
-* Developer tools should still add one to their docs. It takes about an hour; developers do point coding assistants at these files, and Chrome's Lighthouse now checks for one.
-
 A developer pastes your docs link into a coding assistant and says, "set this up for me." The assistant has to dig the useful text out of menus, scripts, and banners. Sometimes it grabs an old page and writes code for a version you retired two years ago. llms.txt tries to fix that.
 
 It's cheap, it's useful in one specific place, and it won't do what most blog posts promise. For the bigger picture, see our guide on [how to get your tool recommended by ChatGPT, Perplexity, and Google](https://www.studio1hq.com/blog/how-to-get-your-tool-recommended-by-chatgpt-perplexity-google). This post goes deep on one file.
