@@ -73,12 +73,11 @@ export function pageMetadata({
 }: PageMetadataOptions): Metadata {
   const url = localizedUrl(path, locale, baseUrl);
   // Titles that already name Studio1 (e.g. "Studio1 vs Draft.dev") skip the
-  // " | Studio1" suffix, so the brand never appears twice.
-  const namesBrand = title.includes("Studio1");
-  const brandedTitle = namesBrand ? title : `${title} | Studio1`;
+  // " | Studio1" suffix, so the brand never appears twice. See serpTitle.
+  const { meta: metaTitle, full: brandedTitle } = serpTitle(title);
 
   return {
-    title: namesBrand ? { absolute: title } : title,
+    title: metaTitle,
     description,
     ...(keywords?.length ? { keywords } : {}),
     alternates: {
@@ -160,10 +159,19 @@ const SERP_TITLE_LIMIT = 60;
  * Adds " | Studio1" only when the result still fits in a search result, so a
  * long title is never cut off just to make room for the brand.
  */
+/**
+ * The final <title>, always returned as `absolute`: a section layout that sets
+ * its own title (blog, case studies, careers…) stops the root "%s | Studio1"
+ * template from reaching the pages under it, so the suffix is added here.
+ * Titles that already name Studio1, or would pass the SERP limit, stay as is.
+ */
 function serpTitle(title: string) {
+  if (title.includes("Studio1")) {
+    return { meta: { absolute: title }, full: title };
+  }
   const branded = `${title} | Studio1`;
   return branded.length <= SERP_TITLE_LIMIT
-    ? { meta: title, full: branded }
+    ? { meta: { absolute: branded }, full: branded }
     : { meta: { absolute: title }, full: title };
 }
 

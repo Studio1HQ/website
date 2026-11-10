@@ -136,10 +136,10 @@ const GROWTH: Service[] = [
     href: "/aeo-agency",
     icon: Sparkle,
     description:
-      "AI visibility audits, answer-ready pages, and citations in ChatGPT, Perplexity, and Google AI.",
+      "Answer-ready content and docs that ChatGPT, Perplexity, and Google AI can quote, plus checks on whether you show up.",
     proof: {
-      value: "12/30",
-      label: "Bright Data queries in Google's top five",
+      value: "Page 1",
+      label: "Google ranking for Permit.io's RBAC guide",
     },
   },
 ];

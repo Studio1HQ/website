@@ -147,8 +147,8 @@ const githubCaseStudyProofs: CaseStudyResultData[] = [
     company: "Corsair",
     category: "Onboarding & Community Growth",
     href: "/case-studies/corsair",
-    heroValue: "2K+",
-    heroLabel: "GitHub stars in five weeks, up from about 300",
+    heroValue: "+567%",
+    heroLabel: "GitHub stars in five weeks, from about 300 to 2,000",
     proof:
       "Onboarding audits, example projects, README work, and student hackathons for an early open-source integration layer for AI agents.",
     stats: [

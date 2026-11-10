@@ -666,8 +666,7 @@ function HackerNewsCard() {
         />
         <div className="min-w-0">
           <p className="text-[12.5px] font-medium leading-snug tracking-[-0.015em]">
-            Everyone&apos;s trying vectors and graphs for AI memory. We went
-            back to SQL
+            Memori · AI agent memory discussion
           </p>
           <p className="mt-1 text-[10.5px] text-[#141414]/55">
             136 points · 63 comments
@@ -703,19 +702,19 @@ function RobotsCard() {
 }
 
 const RUNG_STYLE = {
-  Recommended: { background: PRINT, color: "#fff" },
-  Cited: { background: INK, color: "#fff" },
-  Absent: { background: "#f6f3ee", color: "rgba(20,20,20,0.5)" },
+  Cited: { background: PRINT, color: "#fff" },
+  Mentioned: { background: INK, color: "#fff" },
+  "Not yet": { background: "#f6f3ee", color: "rgba(20,20,20,0.5)" },
 } as const;
 
 function PromptAuditCard() {
   const rows: [prompt: string, rung: keyof typeof RUNG_STYLE][] = [
-    ["Best DevRel agency for devtool startups", "Recommended"],
-    ["Studio1 alternatives", "Cited"],
-    ["How do I get more GitHub stars?", "Absent"],
+    ["How do I add RBAC to Supabase?", "Cited"],
+    ["Best open-source auth for Next.js", "Mentioned"],
+    ["Alternatives to your competitor", "Not yet"],
   ];
   return (
-    <Shell title="AI answer audit" tag="15 prompts" tagIcon={MagnifyingGlass}>
+    <Shell title="AI answer check" tag="Example" tagIcon={MagnifyingGlass}>
       <ul className="divide-y divide-[#141414]/[0.08] px-1">
         {rows.map(([prompt, rung]) => (
           <li
@@ -735,7 +734,7 @@ function PromptAuditCard() {
         ))}
       </ul>
       <p className="px-1 pt-1.5 text-[10.5px] leading-snug text-[#141414]/55">
-        Every answer scored: recommended, cited, mentioned, or absent.
+        Does your page show up in the answer?
       </p>
     </Shell>
   );
@@ -1121,15 +1120,15 @@ export const LAUNCH_SIDES: HeroSides = {
 
 export const AEO_SIDES: HeroSides = {
   cards: [
-    { label: "aeo-audit · prompts", card: <PromptAuditCard /> },
+    { label: "aeo-check · answers", card: <PromptAuditCard /> },
     { label: "robots.txt · ai-crawlers", card: <RobotsCard /> },
   ],
   stats: [
     {
-      label: "stat · top-five",
-      value: "12/30",
-      text: "developer queries with a Studio1 post in Google's top five",
-      client: "Bright Data",
+      label: "stat · page-one",
+      value: "Page 1",
+      text: "Google ranking for \"RBAC in Supabase\" with a Studio1 guide",
+      client: "Permit.io",
       icon: MagnifyingGlass,
     },
     {
@@ -1184,9 +1183,9 @@ export const REDDIT_SIDES: HeroSides = {
       icon: RedditLogo,
     },
     {
-      label: "stat · subreddits",
-      value: "12",
-      text: "posts across AI, agent, MCP, and LLM subreddits",
+      label: "stat · nebius-reddit",
+      value: "221",
+      text: "upvotes on one launch-day post, with a 97% upvote ratio",
       client: "Nebius",
       icon: UsersThree,
     },

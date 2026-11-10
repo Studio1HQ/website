@@ -17,7 +17,7 @@ export default function Hero() {
         { value: "12K+", label: "stars for Memori" },
         { value: "16K+", label: "stars for Nebius" },
         { value: "12x", label: "OpenLore in a month" },
-        { value: "2K+", label: "Corsair in 5 weeks" },
+        { value: "+567%", label: "Corsair stars in 5 weeks" },
       ]}
       highlights={["A README and first run that work", "launches"]}
       sides={GITHUB_SIDES}

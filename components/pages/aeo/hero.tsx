@@ -10,15 +10,15 @@ export default function Hero() {
       pill="ChatGPT · Perplexity · Gemini · AI Overviews"
       titleAccent="Show Up"
       titleRest="When Developers Ask AI"
-      description="An AEO agency for developer tools: we track what ChatGPT, Perplexity, and Google AI say, then fix why you're missing."
+      description="An AEO agency for developer tools: we write the content and docs ChatGPT, Perplexity, and Google AI quote, and check whether you show up."
       primaryCta="Book a Strategy Call"
       secondaryCta="Explore Services"
       stats={[
-        { value: "12/30", label: "Bright Data queries in Google's top five" },
-        { value: "8", label: "of them in the top three" },
-        { value: "50+", label: "Bright Data posts live" },
+        { value: "69.9%", label: "of developers ask AI for answers · Stack Overflow" },
+        { value: "78%", label: "of Mintlify docs traffic is AI agents" },
+        { value: "400+", label: "technical tutorials and guides written" },
       ]}
-      highlights={["AEO agency for developer tools", "fix why you're missing"]}
+      highlights={["AEO agency for developer tools", "check whether you show up"]}
       sides={AEO_SIDES}
     />
   );

@@ -405,7 +405,9 @@ export function PaperCaseStudyCard({
       />
 
       <PoppingMark href={study.href} />
-      <div className="relative grid flex-1 gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:items-center">
+      {/* The text column stretches to the card's height so the "Read case
+          study" pill sits at the same bottom edge on cards side by side. */}
+      <div className="relative grid flex-1 gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)]">
         <div className="flex flex-col gap-6">
           <p className="text-[13px] font-medium" style={{ color: tone.soft }}>
             {study.company} · {study.category}
@@ -431,7 +433,7 @@ export function PaperCaseStudyCard({
             />
           </div>
         </div>
-        <div className="relative hidden lg:block">
+        <div className="relative hidden lg:block lg:self-center">
           <div className="relative -mr-9 overflow-hidden rounded-r-[6px]">
             <div className="w-[108%]">
               <CaseFrame study={study} art={art} imageHeight="210px" />

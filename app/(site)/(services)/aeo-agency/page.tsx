@@ -16,7 +16,7 @@ import { DEFAULT_LOCALE } from "@/lib/i18n";
 
 const TITLE = "AEO Agency for Developer Tools";
 const DESCRIPTION =
-  "AEO agency for developer tools and AI products: we audit what ChatGPT, Perplexity, and Google AI say about you, then fix the pages and sources behind it.";
+  "AEO agency for developer tools: answer-ready content, docs, and llms.txt that ChatGPT, Perplexity, and Google AI can quote, and checks that you show up.";
 
 const linkClass =
   "font-medium text-[#141414] underline decoration-[#141414]/25 decoration-2 underline-offset-[6px] transition-colors hover:decoration-[#f97316]";
@@ -42,7 +42,7 @@ const aeoFaqItems: FAQItem[] = [
   {
     question: "What does an AEO agency do?",
     answer:
-      "AEO, or answer engine optimization, is the work of getting your product named and cited in AI answers from ChatGPT, Perplexity, Gemini, and Google AI Overviews. An AEO agency measures where you show up today, finds why you're missing, and fixes it with better pages, docs, and third-party sources. Studio1 does this for devtool, AI, and open-source teams.",
+      "AEO, or answer engine optimization, is the work of getting your product named and cited in AI answers from ChatGPT, Perplexity, Gemini, and Google AI Overviews. An AEO agency makes your product easier for AI tools to find and quote. Studio1 does it mainly through content for devtool, AI, and open-source teams: answer-ready pages, comparisons, tutorials, and docs, plus llms.txt and structured data, and we check AI tools to see whether your pages show up.",
   },
   {
     question: "Why does AEO matter for developer tools?",
@@ -52,22 +52,22 @@ const aeoFaqItems: FAQItem[] = [
   {
     question: "How is AEO different from SEO?",
     answer:
-      "SEO earns a ranking; AEO earns a mention inside the answer. They overlap, because AI tools often build answers from pages that already rank well. AEO adds the parts SEO skips: tracking prompts instead of keywords, writing direct answers AI can quote, and earning mentions in the lists, threads, and reviews AI tools cite.",
+      "SEO earns a ranking; AEO earns a mention inside the answer. They overlap, because AI tools often build answers from pages that already rank well. AEO adds direct answers AI can quote, clear comparison and docs pages, and checking what AI tools actually say, not only where you rank.",
   },
   {
-    question: "How do you measure AI visibility?",
+    question: "How do you check AI visibility?",
     answer:
-      "We write 12 to 15 prompts developers would actually type, across category, problem, comparison, and brand questions. Each prompt runs several times in each AI tool, and every answer is scored as recommended, cited, mentioned, or absent. We also record which competitors and sources were named, so every lost prompt has a cause.",
+      "We ask ChatGPT, Perplexity, and Google AI the questions your buyers ask, and note whether your pages or posts show up and who is named instead. Those checks decide what we write next. They are spot checks, not a guarantee, because AI answers change from one run to the next.",
   },
   {
     question: "How long does AEO take to show results?",
     answer:
-      "It depends on the AI tool. Answers from tools that search the web can change soon after a fixed page is crawled, while answers drawn from a model's training data change slowly. That's why we rerun the same prompts after each round of changes, so you see what moved instead of guessing.",
+      "It depends on the AI tool. Answers from tools that search the web can change soon after a fixed page is crawled, while answers drawn from a model's training data change slowly. That's why we check again after new pages are live, rather than judging the work on day one.",
   },
   {
     question: "Can you guarantee ChatGPT will recommend us?",
     answer:
-      "No. Nobody controls what an AI tool says, and answers vary from one run to the next. We make your product easier to find, easier to quote, and more often named by the sources AI tools rely on, and we measure the change prompt by prompt.",
+      "No. Nobody controls what an AI tool says, and answers vary from one run to the next. We make your product easier to find and easier to quote, and we check whether your pages show up.",
   },
   {
     question: "Do we need llms.txt or schema markup?",
@@ -88,58 +88,47 @@ const aeoFaqItems: FAQItem[] = [
 
 const aeoWorkflow = [
   {
-    title: "Map the prompts",
+    title: "Find the questions",
     description:
-      "We write the questions developers actually ask AI tools about your category, your problem, your competitors, and your brand.",
+      "We list the questions developers ask about your category, your problem, and your competitors, and look at which pages answer them today.",
     points: [
-      "Category and best-of prompts",
-      "Problem and how-to prompts",
-      "Comparison and alternatives prompts",
-      "Brand and review prompts",
+      "Category and best-of questions",
+      "How-to and problem questions",
+      "Comparisons and alternatives",
+      "Questions about your product",
     ],
   },
   {
-    title: "Measure the baseline",
+    title: "Make the site readable",
     description:
-      "Each prompt runs several times in each AI tool. Every answer gets a score and a list of who was named instead of you.",
+      "We make sure AI tools can reach your pages and read them easily, so the content you publish can be quoted.",
     points: [
-      "Repeated runs per tool",
-      "Recommended, cited, mentioned, absent",
-      "Sources each answer cited",
-      "Google rank alongside",
-    ],
-  },
-  {
-    title: "Open the doors",
-    description:
-      "We check that AI crawlers can reach your site, and that the pages they need are easy to find and read.",
-    points: [
-      "robots.txt and CDN bot settings",
       "llms.txt and sitemaps",
+      "AI crawler access in robots.txt",
       "Pages that render without JavaScript",
-      "Canonical and duplicate pages",
+      "FAQs and structured data",
     ],
   },
   {
-    title: "Fix and publish",
+    title: "Write the answers",
     description:
-      "For each lost prompt we name the cause, then fix the page, publish the missing one, or earn the third-party source.",
+      "We write the pages AI tools quote: direct answers up top, comparison pages, tutorials, and docs that answer the how-to.",
     points: [
       "Direct answers on key pages",
-      "New guides for true gaps",
-      "Comparison and docs updates",
-      "Outreach to lists and threads",
+      "Comparison and alternatives pages",
+      "Tutorials and guides for gaps",
+      "Docs and FAQ updates",
     ],
   },
   {
-    title: "Rerun and report",
+    title: "Check the answers",
     description:
-      "We rerun the same prompts after changes land and report what moved, prompt by prompt, with the next fixes ranked.",
+      "We ask ChatGPT, Perplexity, and Google AI the same questions to see whether your pages show up, and plan the next pieces from what we find.",
     points: [
-      "Before and after for each prompt",
-      "Your share of answers against rivals",
-      "Citations to your own pages",
-      "Next fixes, ranked by demand",
+      "Checks across the main AI tools",
+      "Which of your pages get cited",
+      "Who gets named instead of you",
+      "What to write next",
     ],
   },
 ];
@@ -175,10 +164,10 @@ export default function Page() {
       <StoryCards
         index={2}
         name="How we run AEO"
-        title="From the prompts developers ask to the answers they get"
-        description="Five steps we run for developer tools, from mapping the prompts that matter to proving what moved."
+        title="From the questions developers ask to the pages AI tools quote"
+        description="Four steps we run for developer tools, from finding the questions that matter to checking whether your pages show up."
         steps={aeoWorkflow}
-        workflow="aeo-audit.yml"
+        workflow="aeo-content.yml"
       />
       <PaperSection tone="paper">
         <Container>
@@ -208,8 +197,8 @@ export default function Page() {
       </PaperSection>
       <PaperCta
         index={4}
-        title="Find Out What AI Says About Your Tool"
-        description="AI visibility audits, answer-ready pages and docs, and third-party citations for developer tools."
+        title="Get Your Tool Into AI Answers"
+        description="Answer-ready content, docs, and llms.txt for developer tools, plus checks on whether you show up."
       />
     </div>
   );

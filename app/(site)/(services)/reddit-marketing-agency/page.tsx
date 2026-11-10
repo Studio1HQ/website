@@ -79,12 +79,7 @@ const redditFaqItems: FAQItem[] = [
   {
     question: "Does Reddit help with Google and AI answers?",
     answer:
-      "Often. Reddit threads regularly show up in Google results and AI answers when developers compare tools, so a useful thread that names your product keeps working long after it is posted. Our AEO service tracks which threads AI tools cite for your category.",
-  },
-  {
-    question: "How long does Reddit marketing take to work?",
-    answer:
-      "A single post can do well on day one, but a reliable presence takes a few months of steady posting and commenting in the same communities, so people start to recognize the name and trust the answers.",
+      "Often. Reddit threads regularly show up in Google results and AI answers when developers compare tools, so a useful thread that names your product keeps working long after it is posted.",
   },
 ];
 

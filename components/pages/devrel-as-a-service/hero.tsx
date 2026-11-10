@@ -18,7 +18,7 @@ export default function Hero() {
       secondaryCta={t("secondaryCta")}
       stats={[
         { value: "40+", label: t("stats.events") },
-        { value: "35+", label: t("stats.teams") },
+        { value: "10+", label: t("stats.teams") },
         { value: "30+", label: t("stats.partners") },
         { value: "3M+", label: t("stats.views") },
       ]}

@@ -42,8 +42,7 @@ export default function Services() {
             stats={[
               { value: "3M+", label: t("stats.views") },
               { value: "35+", label: t("stats.companies") },
-              { value: "10+", label: t("stats.events") },
-              { value: "5+", label: t("stats.launch") },
+              { value: "40+", label: t("stats.events") },
             ]}
           />
         </motion.div>

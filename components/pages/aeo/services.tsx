@@ -8,48 +8,48 @@ import {
 
 const offerings: StoryOffer[] = [
   {
-    id: "ai-visibility-audit",
-    icon: MagnifyingGlass,
-    badges: ["Prompts", "Baseline"],
-    accent: "AI Visibility",
-    rest: "Audit",
-    description:
-      "We write the prompts your buyers actually type, run them across AI tools, and score every answer against your competitors.",
-    features: [
-      "Category, problem, comparison, and brand prompts",
-      "ChatGPT, Perplexity, Gemini, and Google AI",
-      "Recommended, cited, mentioned, or absent",
-      "Who gets named instead of you",
-    ],
-  },
-  {
     id: "answer-ready-content",
     icon: FileText,
     badges: ["Pages", "Docs"],
     accent: "Answer-Ready",
     rest: "Content",
     description:
-      "We fix the pages AI tools read: direct answers up top, comparison pages, docs that win the how-to, and guides for prompts you lose.",
+      "We write the pages AI tools quote: direct answers up top, comparison pages, tutorials, and docs that answer the how-to.",
     features: [
       "Direct answers in the first lines",
       "Comparison and alternatives pages",
-      "Docs and how-to guides",
+      "Tutorials, guides, and docs",
       "FAQs and structured data",
     ],
   },
   {
-    id: "citations-and-community",
+    id: "ai-readable-site",
     icon: UsersThree,
-    badges: ["Citations", "Community"],
-    accent: "Citations",
-    rest: "& Community",
+    badges: ["llms.txt", "Crawlers"],
+    accent: "AI-Readable",
+    rest: "Site",
     description:
-      "AI answers often lean on lists, threads, and reviews written by others. We find the sources that name your rivals and earn your place in them.",
+      "We make sure AI tools can reach and read your content, so what you publish can be found and quoted.",
     features: [
-      "Roundup and list outreach",
-      "Reddit and community answers",
-      "Directory and review profiles",
-      "One consistent description everywhere",
+      "llms.txt and sitemaps",
+      "AI crawler access in robots.txt",
+      "Pages that render without JavaScript",
+      "One clear product description everywhere",
+    ],
+  },
+  {
+    id: "ai-answer-checks",
+    icon: MagnifyingGlass,
+    badges: ["ChatGPT", "Perplexity"],
+    accent: "AI Answer",
+    rest: "Checks",
+    description:
+      "We check ChatGPT, Perplexity, and Google AI for the questions that matter to see whether your pages and posts show up, and plan what to write next.",
+    features: [
+      "Checks across the main AI tools",
+      "Which of your pages get cited",
+      "Who gets named instead of you",
+      "Gaps to cover next",
     ],
   },
 ];
@@ -63,7 +63,7 @@ export default function Services() {
           What We <span className="text-[#f97316]">Offer</span>
         </>
       }
-      description="Three connected workstreams for AI visibility: measure where you stand, fix the pages AI tools read, then earn the sources they trust."
+      description="Three connected workstreams for AI visibility: write the content AI tools quote, make your site easy for them to read, and check whether your pages show up."
       offers={offerings}
     />
   );
