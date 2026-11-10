@@ -41,7 +41,23 @@ export type StudioEvent = {
   brand?: string;
   /** A recording or post about the event. */
   link?: string;
+  /** What the team did there, only where the record says so. */
+  role?: EventRole;
 };
+
+export type EventRole = "Talk" | "Poster" | "Sponsor visit";
+
+/**
+ * Still to come (or under way) on the day `now` falls on. An event without
+ * an exact day counts as upcoming until its month is over.
+ */
+export function isUpcomingEvent(e: StudioEvent, now: number) {
+  const startOfToday = new Date(new Date(now).toDateString()).getTime();
+  const last = e.day
+    ? new Date(e.year, e.month - 1, e.endDay ?? e.day)
+    : new Date(e.year, e.month, 0);
+  return last.getTime() >= startOfToday;
+}
 
 export const EVENTS: StudioEvent[] = [
   {
@@ -114,6 +130,7 @@ export const EVENTS: StudioEvent[] = [
     slug: "ship-it-together",
     name: "Ship It Together talk at a hackathon",
     kind: "Hackathon",
+    role: "Talk",
     year: 2026,
     month: 9,
     day: 30,
@@ -122,6 +139,7 @@ export const EVENTS: StudioEvent[] = [
     slug: "corsair-hackathon",
     name: "Corsair sponsored hackathon visit",
     kind: "Hackathon",
+    role: "Sponsor visit",
     year: 2026,
     month: 7,
     day: 9,
@@ -184,6 +202,7 @@ export const EVENTS: StudioEvent[] = [
     slug: "pytorch-conference-poster",
     name: "PyTorch Conference poster",
     kind: "Conference",
+    role: "Poster",
     year: 2026,
     month: 4,
     approx: "Around April",
@@ -463,8 +482,8 @@ export const EVENTS: StudioEvent[] = [
     link: "https://www.crushconf.com/",
   },
   {
-    slug: "ctencf-meetup",
-    name: "cTENCF online meetup",
+    slug: "cncf-online-meetup",
+    name: "CNCF online meetup",
     kind: "Meetup",
     year: 2025,
     month: 11,

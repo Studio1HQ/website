@@ -1,5 +1,8 @@
 {
   "$schema": "https://mintlify.com/docs.json",
+  "seo": {
+    "metatags": { "robots": "noindex, nofollow" }
+  },
   "theme": "mint",
   "name": "Studio1 Documentation",
   "colors": {

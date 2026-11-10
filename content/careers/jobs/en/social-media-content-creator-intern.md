@@ -2,9 +2,7 @@
 id: social-media-content-creator-intern
 title: Social Media & Content Intern
 description: >-
-  Grow Studio1 socials with written posts, copy, LinkedIn updates, X threads,
-  memes, tech explainers, community prompts, and marketing content for developer
-  audiences.
+  Grow Studio1's socials with LinkedIn posts, X threads, memes, tech explainers, and community prompts written for developer audiences.
 department: Marketing
 location: Remote (India)
 type: Internship - 3 months

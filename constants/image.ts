@@ -18,7 +18,7 @@ import Eachlab from "@/public/assets/logos/eachlab.webp";
 import Stream from "@/public/assets/logos/stream.webp";
 import Stackql from "@/public/assets/logos/stackql.webp";
 import Swytchcode from "@/public/assets/logos/swytchcode.webp";
-import Enteligence from "@/public/assets/logos/enteligence.webp";
+import Entelligence from "@/public/assets/logos/enteligence.webp";
 import Motia from "@/public/assets/logos/motia.webp";
 import Graphite from "@/public/assets/logos/graphite.webp";
 import Ragie from "@/public/assets/logos/ragie.webp";
@@ -95,6 +95,7 @@ import InsForge from "@/public/assets/logos/insforge.webp";
 import InsForgeFull from "@/public/assets/logos/insforge-full.webp";
 import ByteRover from "@/public/assets/logos/byterover.webp";
 import ByteRoverFull from "@/public/assets/logos/byterover-full.webp";
+import ByteRoverMark from "@/public/assets/logos/byterover-mark.webp";
 import PaulImg from "@/public/assets/people/Paul.webp";
 import Vmware from "@/public/assets/logos/vmware.webp";
 
@@ -137,7 +138,7 @@ export {
   Opire,
   Encore,
   Dualite,
-  Enteligence,
+  Entelligence,
   Velt,
   ReadySet,
   Ragie,
@@ -217,6 +218,7 @@ export {
   InsForgeFull,
   ByteRover,
   ByteRoverFull,
+  ByteRoverMark,
   PaulImg,
   abstractBg,
   SauravImg,

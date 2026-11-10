@@ -12,7 +12,11 @@ import {
 import { ArrowUpRight, CalendarDots, MapPin } from "@phosphor-icons/react";
 import { Container, EASE } from "@/components/home/ui";
 import { EventMark } from "@/components/events/events-page";
-import type { EventKind, StudioEvent } from "@/data/events";
+import {
+  isUpcomingEvent,
+  type EventKind,
+  type StudioEvent,
+} from "@/data/events";
 import { cn } from "@/lib/utils";
 
 const MONTHS = [
@@ -44,22 +48,71 @@ function bigDate(e: StudioEvent) {
   return `${days}.${pad(e.month)}`;
 }
 
-const sortKey = (e: StudioEvent) =>
-  e.year * 10000 + e.month * 100 + (e.day ?? 15);
+/** Day of the month to sort by; "Early" and "Late" dates sit near the ends. */
+function sortDay(e: StudioEvent) {
+  if (e.day) return e.day;
+  if (e.approx?.startsWith("Early")) return 5;
+  if (e.approx?.startsWith("Late")) return 25;
+  return 15;
+}
+const sortKey = (e: StudioEvent) => e.year * 10000 + e.month * 100 + sortDay(e);
 
-/** A plain line for events without their own write-up yet. */
-const FALLBACK: Record<EventKind, string> = {
-  Conference:
-    "On stage with the community, sharing what we learn building and growing developer tools.",
-  Hackathon:
-    "On the floor with the builders, mentoring teams from first idea to final demo.",
-  Meetup: "In the room with the local developer community.",
-  Community: "Alongside the student developer community.",
-  Podcast: "A conversation on developer tools and how teams grow them.",
-  Livestream: "Live, building and answering questions from the audience.",
-  Webinar: "A live session for developers, with demos and Q&A.",
+/**
+ * A plain line for events without their own write-up yet. It only says what
+ * the record holds (the kind, the place, the role if known) and never claims
+ * a talk or mentoring the record does not show.
+ */
+const ROLE_LINE = {
+  Talk: "A talk for the builders in the room.",
+  Poster: "Presenting a poster at the conference.",
+  "Sponsor visit":
+    "A visit to a sponsored hackathon to meet the teams building there.",
+} as const;
+const KIND_LINES: Record<EventKind, string[]> = {
+  Conference: [
+    "At the conference with the developer community.",
+    "Part of the conference, meeting the people building in the space.",
+  ],
+  Hackathon: [
+    "At the hackathon with the teams building there.",
+    "Time on the hackathon floor, meeting the builders.",
+    "Out with the builders, seeing what the teams put together.",
+    "Meeting the teams building at the hackathon.",
+  ],
+  Meetup: [
+    "In the room with the local developer community.",
+    "A meetup with the local developer community.",
+  ],
+  Community: [
+    "Alongside the developer community at the event.",
+    "Part of the event with the local developer community.",
+  ],
+  Podcast: ["In conversation on the podcast."],
+  Livestream: ["A live session, streamed online."],
+  Webinar: ["A live online session for developers."],
 };
-const story = (e: StudioEvent) => e.summary ?? FALLBACK[e.kind];
+/** A stable pick, so a caption never changes between renders. */
+const pick = (lines: string[], seed: string) =>
+  lines[
+    [...seed].reduce((n, c) => (n * 31 + c.charCodeAt(0)) % 9973, 7) %
+      lines.length
+  ];
+function fallback(e: StudioEvent) {
+  if (e.role) return ROLE_LINE[e.role];
+  if (e.place === "Online") {
+    if (e.kind === "Meetup") return "An online meetup with the community.";
+    if (e.kind === "Conference") return "At the conference, online.";
+  } else if (e.place && e.kind !== "Podcast") {
+    if (e.kind === "Conference")
+      return `With the developer community at the conference in ${e.place}.`;
+    if (e.kind === "Meetup")
+      return `With the local developer community in ${e.place}.`;
+    if (e.kind === "Hackathon" || e.kind === "Community")
+      return `At ${e.place}, with the builders in the room.`;
+  }
+  return pick(KIND_LINES[e.kind], e.slug);
+}
+const story = (e: StudioEvent) => e.summary ?? fallback(e);
 
 /** A line that writes itself in, word by word, as it comes into view. */
 function WriteIn({ text, className }: { text: string; className?: string }) {
@@ -593,11 +646,7 @@ export function EventGallery({
     return scrollY.on("change", update);
   }, [scrollY, drawn, box]);
 
-  const startOfToday = new Date(new Date(now).toDateString()).getTime();
-  const isUpcoming = (e: StudioEvent) =>
-    (e.day
-      ? new Date(e.year, e.month - 1, e.endDay ?? e.day).getTime()
-      : new Date(e.year, e.month, 0).getTime()) >= startOfToday;
+  const isUpcoming = (e: StudioEvent) => isUpcomingEvent(e, now);
   const upcoming = events
     .filter(isUpcoming)
     .sort((a, b) => sortKey(a) - sortKey(b));

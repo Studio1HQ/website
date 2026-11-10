@@ -1,0 +1,224 @@
+---
+title: "Is Technical Writing Dead? What AI Means for Your Docs, Blogs and Developer Content"
+seoTitle: "Is Technical Writing Dead? AI, Docs and Developer Content"
+slug: is-technical-writing-dead
+description: "Is technical writing dead? What 2026 data says about AI-written docs, blogs and tutorials, where AI content fails, and how devtool teams should staff it."
+tldrSummary: "No. AI made drafting cheap, but the written content that wins developers, search rankings and AI citations is still mostly human-led. About half of new articles online are now AI-generated, yet 86% of articles ranking in Google and 82% of articles cited by ChatGPT and Perplexity are human-written. At the same time, AI agents now read more developer docs than people on some platforms. For a devtool team, the question isn't whether to use AI for docs and content. It's which work to automate and which work still needs someone who knows the product and owns accuracy."
+tldrBullets:
+  - "About 50% of new online articles are now primarily AI-generated, but only 14% of articles ranking in Google and 18% of articles cited by ChatGPT and Perplexity are (Graphite, vendor research)."
+  - "AI agents made 78% of requests to Mintlify-hosted docs in October 2026, so docs now have two readers: developers and their agents."
+  - "88% of docs professionals say documentation is important in purchase decisions, yet 57% don't track leads from their docs (GitBook State of Docs 2026, vendor survey)."
+  - "The US Bureau of Labor Statistics projects technical writer jobs to grow only 1% from 2025 to 2035: the job is changing, not disappearing."
+date: 2026-11-10
+updatedDate: 2026-11-10
+draft: false
+authors:
+  - Amitesh Anand
+tags:
+  - technical-writing
+  - documentation
+  - content-marketing
+  - ai
+---
+
+## The short answer
+
+Technical writing is not dead, but what companies need from it has changed. AI tools now draft docs, blog posts and tutorials in seconds, so the cost of producing words has collapsed. The value of written content hasn't. The pages that rank in Google, get cited by ChatGPT and convince a developer to try a product are still mostly written or heavily shaped by people who know the product. And AI agents are now a major reader of developer docs, which raises the bar for structure and accuracy.
+
+For a devtool team, the real question is how to split the work: what AI should draft, what a person must own, and how to staff it.
+
+I co-founded Studio1, a DevRel and developer marketing agency. Our engineers and writers have produced more than 400 tutorials and guides for devtool teams, so we make this call on every project. Below is what the public data says about AI-written content, docs, and the writing job market, and how to decide what to automate and what to keep human.
+
+## Why teams are asking "is technical writing dead?"
+
+Two things changed at once. Generating a 2,000-word article now costs almost nothing, and AI assistants now answer many of the questions developers used to search for. Founders and marketing leads reasonably ask whether they still need writers, or whether an engineer with a model can cover docs and the blog.
+
+Writers are asking the same question from the other side. A January 2026 post on Hacker News, [To those who fired or didn't hire tech writers because of AI](https://news.ycombinator.com/item?id=46629474), reached 352 points and 266 comments. One commenter put the writer's case: "AI can only report what someone was bothered to write down, but I actually go out in the real world and ask questions." Another put the business case: "AI just has to be good enough to make more money than the human work it supplants."
+
+Both are right. So the useful question is not whether AI can produce text that looks like documentation or a tutorial. It can. The question is whether that text gets found, trusted and acted on.
+
+## What happened when the web filled up with AI-written content
+
+### Half of new articles are now AI-generated
+
+Graphite, an SEO and AEO agency, has tracked this since ChatGPT launched. Its [May 2026 study](https://graphite.io/research/ai-now-writes-as-many-online-articles-as-humans-do), which ran 55,400 articles from Common Crawl through three AI detectors, found that primarily AI-generated articles reached 36% of new articles within a year of ChatGPT's launch and 48% within two years. Since early 2025, the share has stayed at roughly **50%**.
+
+Ahrefs found AI is involved in even more pages when you count partial use. In [an analysis of 900,000 new web pages from April 2025](https://ahrefs.com/blog/what-percentage-of-new-content-is-ai-generated/), its detector found that **74.2%** contained some AI-generated content. Only 2.5% were "pure AI", and 25.8% were "pure human". Most pages were a mix.
+
+### But AI-generated articles rarely rank or get cited
+
+Graphite's companion study, [How Does AI-Generated Content Perform in Search and Answer Engines?](https://graphite.io/research/ai-content-in-search-and-llms) (October 2025), looked at what actually shows up:
+
+- **86%** of articles ranking in Google Search were written by humans, and **14%** were generated by AI.
+- **82%** of articles cited by ChatGPT and Perplexity were written by humans, and **18%** were generated by AI.
+- When AI-generated articles did rank, they tended to rank lower. At position 1, 7.7% of articles were AI-generated, compared with 16% at position 20.
+
+![Graphite bar chart of the share of AI-generated articles by Google search position, rising from about 8% at position 1 to about 16% at position 20](/blog/uploads/is-technical-writing-dead/graphite-2025-ai-content-by-google-position.webp "AI-generated articles become rarer the higher you go in Google results. Source: Graphite, How Does AI-Generated Content Perform in Search and Answer Engines? (October 2025).")
+
+Graphite sells SEO and AEO services, and AI detectors make mistakes, so treat the exact numbers as directional. It also notes that it did not test AI-assisted content with heavy human editing, "and we believe this may be an effective strategy." That caveat is the important part: the line isn't between AI and humans, it's between unreviewed output and content someone with real knowledge has shaped.
+
+### Google judges quality, not how content was produced
+
+Google's position has been consistent since its [February 2023 guidance on AI-generated content](https://developers.google.com/search/blog/2023/02/google-search-and-ai-content): its ranking systems "aim to reward original, high-quality content" that shows expertise, experience, authoritativeness and trustworthiness, "however it is produced". AI use alone isn't against its guidelines.
+
+What is against its guidelines is volume without value. Google's [spam policies](https://developers.google.com/search/docs/essentials/spam-policies#scaled-content) define scaled content abuse as "when many pages are generated for the primary purpose of manipulating search rankings and not helping users", and list "using generative AI tools or other similar tools to generate many pages without adding value for users" as an example.
+
+For a devtool blog, that means AI can help you write faster. It can't replace the tested code, product knowledge and first-hand experience that make a tutorial worth ranking.
+
+## Docs now have a second reader: AI agents
+
+The biggest change for documentation is not who writes it. It's who reads it.
+
+In its [2026 midyear report on docs traffic](https://www.mintlify.com/blog/state-of-docs-traffic), Mintlify counted 213 million AI agent requests against 105 million human page loads across the docs it hosts in July 2026. By October, its [modern docs playbook](https://www.mintlify.com/blog/modern-docs-playbook) reported 471 million agent requests against 134 million human page loads, or 78% of all traffic.
+
+![Mintlify chart of monthly agent requests and human visits to Mintlify-hosted docs from January to July 2026: agent requests rise to 213 million while human visits fall to 105 million](/blog/uploads/is-technical-writing-dead/mintlify-2026-agent-vs-human-docs-traffic.webp "Agent requests passed human visits on Mintlify-hosted docs in mid-2026. Source: Mintlify, The state of docs traffic: a 2026 midyear report.")
+
+Other platforms measure it differently but see the same direction. GitBook's [April 2026 data](https://www.gitbook.com/blog/ai-docs-data-april-2026) found AI agents made 51.8% of intentional documentation reads across 61.2 million page views. In test runs described in Vercel's guide to [making documentation readable by AI agents](https://vercel.com/kb/guide/make-your-documentation-readable-by-ai-agents), agents asked for the Markdown version of a page in 65.1% of web fetches. Mintlify's [2026 State of Knowledge Report](https://www.mintlify.com/state-of-knowledge/2026/report) counted about 10.8 million fetches of `/llms.txt` in August 2026 alone.
+
+Developers have moved the same way. Stack Overflow's 2026 survey, covered in our guide to [what developer marketing is](/blog/what-is-developer-marketing), found that technical documentation is still the top learning resource, used by 59% of developers, while 69.9% now ask an AI agent when they need an answer. The agent usually answers from someone's docs.
+
+An agent can't look at a screenshot, guess a missing step or ask a colleague. It needs complete code samples, explicit prerequisites, consistent names, clean Markdown and a clear map of the site. Fabrizio Ferri-Benedetti wrote on his blog passo.uno in August 2025, in [AI must RTFM](https://passo.uno/from-tech-writers-to-ai-context-curators/), that "the most bleeding edge tech writing shops are serving llms.txt files". Our [llms.txt guide](/blog/llms-txt-explained-developer-tools-guide) explains how that file works.
+
+Most API teams haven't caught up. Postman's [2025 State of the API Report](https://www.postman.com/state-of-api/2025/), a survey of more than 5,700 developers, architects and executives, found that only 24% of developers design APIs with AI agents in mind, and 55% struggle with inconsistent documentation. That gap means more writing and structuring work for devtool teams, not less.
+
+## Docs and content are part of the sale
+
+Written content isn't only support material. GitBook's [State of Docs Report 2026](https://www.gitbook.com/blog/state-of-docs-2026), a survey of more than 1,100 documentation professionals, found that **88%** consider a product's documentation important when they make a purchase. 51% said their own docs are important or essential for closing deals, yet **57%** don't track leads from their docs at all. GitBook sells a docs platform, so read this as vendor data.
+
+![GitBook State of Docs 2026 chart on the importance of docs in purchase decisions: 53% extremely important, 35% somewhat important, 8% neutral, 3% not very important and 2% not important at all](/blog/uploads/is-technical-writing-dead/gitbook-state-of-docs-2026-docs-purchase-decisions.webp "88% of respondents rate docs as important to purchase decisions. Source: GitBook, State of Docs Report 2026.")
+
+Developers also check what they read. In Stack Overflow's [2026 data on trust in AI answers](https://survey.stackoverflow.co/2026/knowledge), 48% of developers trust AI output only when the result is easy to verify, and 93% call source attribution at least somewhat important. The pages AI assistants cite are the ones developers then open to check, which is why we treat [developer docs as an AEO asset](/blog/developer-docs-as-aeo-asset).
+
+Budgets reflect this. Draft.dev's [2026 Developer Marketing Survey](https://draft.dev/2026-developer-marketing-survey) found 51% of developer marketing teams increasing their content and SEO investment for 2026. Draft.dev is a content vendor and doesn't state a sample size, so treat it as directional.
+
+## What AI does well in docs and content, and where it fails
+
+AI handles some writing work well and some badly, based on the research above and what we see on projects:
+
+| Task | How AI does | Why |
+|---|---|---|
+| First drafts from specs, code, PRs or an outline | Well | Turning structured input into prose is what language models do best. |
+| API reference from an OpenAPI spec or type signatures | Well, with review | The input is structured, but descriptions need someone who knows the intent. |
+| Summaries, release-note drafts, style and grammar passes | Well | Low risk and easy to check. |
+| Translating and reformatting existing content | Well, with review | Fast, but product terms need a glossary check. |
+| Blog posts on general topics | Fluent but generic | Without first-hand experience or original data, the result looks like every other AI article, and Graphite's data shows those rarely rank or get cited. |
+| Tutorials with working code | Badly, unless someone runs it | A plausible sample and a working sample look the same in text. Broken code costs developer trust fast. |
+| Knowing what is missing from the docs | Badly | AI can only describe what someone wrote down. It doesn't know what users keep asking support. |
+| Edge cases, limits, failure modes and migrations | Badly | This knowledge lives in engineers' heads and incident threads, not in code comments. |
+| Information architecture across a docs site | Partly | It can suggest structures, but someone has to decide the product's mental model. |
+| Accountability for what is published | Not at all | Someone has to sign off. In regulated fields, that is a legal requirement. |
+
+Practitioners describe the same split. Fabrizio Ferri-Benedetti, in his January 2026 letter [to those who fired or didn't hire tech writers because of AI](https://passo.uno/letter-those-who-fired-tech-writers-ai/), wrote: "AI can generate noise effectively and infinitely, but only a technical writer can create the signal." Scott Abel of The Content Wrangler put it in one line in [The Real Future of Technical Writing Isn't Writing](https://www.thecontentwrangler.com/p/the-real-future-of-technical-writing) (June 2026): "Drafting has become cheap. Architecture has become valuable."
+
+## Where human writers stay essential
+
+### Anything that has to be correct
+
+For a devtool, that means every code sample, quickstart, migration guide and API behaviour described in the docs. Someone has to run it on the current version. For regulated products, it's also the law:
+
+- **Medical devices in the US.** The FDA defines [adequate directions for use (21 CFR 801.5)](https://www.law.cornell.edu/cfr/text/21/801.5) as "directions under which the layman can use a device safely" for its intended purposes.
+- **Medical devices in the EU.** The [Medical Device Regulation, Article 10(11)](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745), requires labels that are "indelible, easily legible and clearly comprehensible to the intended user or patient."
+- **High-risk AI systems in the EU.** [Article 11 of the EU AI Act](https://artificialintelligenceact.eu/article/11/) says technical documentation "shall be drawn up before that system is placed on the market or put into service and shall be kept up-to date".
+- **Aviation maintenance in the US.** Under [14 CFR 43.13](https://www.law.cornell.edu/cfr/text/14/43.13), maintenance must follow "the current manufacturer's maintenance manual or Instructions for Continued Airworthiness".
+
+### Content that depends on experience
+
+The blog posts and tutorials that rank and get cited usually contain something a model can't invent: a benchmark someone ran, a migration someone did, a mistake someone made in production, or an opinion from someone who has used the tools. Google's guidance calls this experience and expertise. Developers call it worth reading.
+
+### Work that starts with talking to people
+
+Good docs start before anything is written: interviewing an engineer about how a feature really behaves, watching a new user get stuck on step three, reading support tickets for the question nobody has answered. AI has no access to that information until a person writes it down.
+
+### Structure
+
+Deciding what goes in the quickstart, what goes in reference, which concepts come first and how pages link shapes how fast developers succeed. It now also shapes how well agents navigate your docs. In GitBook's survey, 70% of teams said they factor AI into information architecture decisions.
+
+## What the writing job market says
+
+The labour data matches what companies are doing: fewer people hired just to write, more expected of each one.
+
+- **Slow growth, with AI named as a reason.** The US Bureau of Labor Statistics' [Occupational Outlook Handbook for technical writers](https://www.bls.gov/ooh/media-and-communication/technical-writers.htm), updated 29 October 2026, counts 46,400 US technical writer jobs in 2025, a median pay of $90,390, and projected growth of 1% from 2025 to 2035. It says growth "may be slowed by artificial intelligence (AI) tools that allow these workers to be more productive", but still expects about 3,200 openings a year.
+- **Higher pay, lower confidence.** Write the Docs' [2025 salary survey](https://www.writethedocs.org/surveys/salary-survey/2025/) (755 responses, 48 countries) found the median employee salary rose from $85,793 to $93,759, while the share of employees feeling less confident about job security rose from 21.9% to 36.0%.
+- **More editing, less drafting.** In GitBook's State of Docs 2026, 76% of docs professionals use AI regularly, up 16 points in a year, and 56% of them spend less time writing and more time editing and reviewing.
+- **Writing is among the most AI-exposed work.** Microsoft Research's [Working with AI](https://arxiv.org/abs/2507.07935) study of 200,000 Bing Copilot conversations ranks technical writers 13th among the occupations where AI is most applicable (latest version, October 2026). Anthropic's [January 2026 Economic Index report](https://www.anthropic.com/research/anthropic-economic-index-january-2026-report) went further: "One job that experiences such deskilling is technical writers." Both companies build AI products, so read these as signals, not forecasts.
+- **Freelance writing took the first hit.** A study by Hui, Reshef and Zhou of Upwork freelancers, [summarised by Washington University's Olin Business School in 2023](https://olin.washu.edu/about/news-and-media/news/2023/08/study-ai-tools-cause-a-decline-in-freelance-work-and-incomeat-least-in-the-short-run.php), found that after ChatGPT launched, writing-related freelancers saw monthly jobs fall 2% and earnings fall 5.2%.
+
+Tom Johnson, a technical writer who publishes I'd Rather Be Writing, summed up the market in his [predictions for 2026](https://idratherbewriting.com/blog/tech-comm-predictions-for-2026): "The market isn't hiring for more people; it's hiring for more AI specialists." Larry Ullman, formerly at Stripe, described the shift in the work itself in GitBook's report: "with AI, we're more editors, but we're also more information architects."
+
+## How to staff docs and developer content in 2026
+
+The right setup depends on your stage and how much of your adoption depends on written content. These are the common options:
+
+| Setup | When it fits | Watch out for |
+|---|---|---|
+| Engineers write docs, AI drafts, no writer | Pre-launch, a small API surface, early users you talk to directly | Docs drift as the product changes, and the blog rarely gets written. |
+| One technical writer who owns docs, with AI tools | You have paying users, several integrations or SDKs, and support tickets that repeat | One person can't also run a blog, tutorials and launches. |
+| In-house writer plus an agency or freelancers for content | Docs are covered, but you need tutorials, comparisons and SEO or AEO content at a steady pace | Agency writers need access to engineers and a way to test code. |
+| Agency or fractional team for docs and content | No writer yet, a launch coming up, or a docs revamp with a deadline | Ownership after the engagement ends, so plan the handover. |
+
+Our comparison of a [technical writer vs a content agency](/blog/technical-writer-vs-content-agency) covers costs and trade-offs in more detail.
+
+### What to automate and what to keep human
+
+- **Automate:** first drafts from specs and outlines, API reference scaffolding, release-note drafts, summaries, reformatting, translation drafts, style checks and finding outdated pages.
+- **Keep human:** deciding what to document and what to publish, running every code sample, interviewing engineers and users, information architecture, original data and opinions, and the final sign-off.
+
+### What to look for when hiring a writer now
+
+The job has moved from typing to deciding and verifying, so test for that:
+
+- **Can they run the product?** Ask candidates to follow your quickstart and report what's broken, not just to write a sample page.
+- **Do they work in docs as code?** Git, pull requests, Markdown and a static site generator are now standard for software docs.
+- **Do they write for agents?** They should know how `llms.txt`, Markdown page versions and `AGENTS.md` files work, and write sections that make sense on their own. Write the Docs' April 2026 guide, [The Technical Writer's Edge](https://www.writethedocs.org/hiring-guide/job-search-ai-era/), puts it well: "Prompt engineering is, at its core, a documentation problem."
+- **Can they structure a docs site?** Information architecture matters more as AI takes over drafting.
+- **Do they use AI well?** They should be faster with it, and able to explain how they check what it produces.
+- **Do they measure?** Activation from docs, [time to first hello world](/blog/time-to-first-hello-world), support deflection and leads from content.
+
+## What to measure
+
+Page views don't tell you whether docs and content work, especially when agents do much of the reading. Track:
+
+- **Activation from content:** signups, API keys created or first successful calls from docs and blog sessions.
+- **Time to first hello world** for new developers following your quickstart.
+- **Support deflection:** fewer repeat tickets on topics the docs now cover.
+- **AI visibility:** whether ChatGPT, Claude, Perplexity and Google AI cite your docs and posts for the questions that matter. Our guide on [measuring devtool visibility in AI answers](/blog/how-to-measure-devtool-visibility-in-ai-answers) shows how.
+- **Agent traffic,** if your docs platform reports it, and whether agents fetch your Markdown and `llms.txt`.
+- **Accuracy:** how many code samples and pages have been tested against the current release.
+
+If you don't know where your docs lose developers today, [a DX audit](/blog/what-a-dx-audit-covers) is the fastest way to find out.
+
+## How Studio1 approaches docs and content
+
+At Studio1, docs, tutorials and technical blog posts are written by engineers and developer advocates who run the code before it ships. We use AI where it is fast and checkable, and keep people responsible for what decides whether content works: choosing what to write, testing every sample, adding real experience and data, and structuring it so both developers and AI agents can use it.
+
+Our [developer documentation and DX audit](/developer-documentation-dx-audit) service finds where developers and agents get stuck in your docs, and our [technical content marketing](/technical-content-marketing) team writes the tutorials, guides and posts that get a devtool found and cited.
+
+## FAQ
+
+### Is technical writing dead in 2026?
+
+No. The US Bureau of Labor Statistics still expects about 3,200 technical writer openings a year, and 86% of articles ranking in Google are human-written according to Graphite's research. What has changed is the work: AI now handles much of the drafting, so writers spend more time verifying, structuring and writing for AI agents as well as people.
+
+### Should we use AI to write our docs?
+
+Use AI to speed up drafts and reference docs, but keep someone who knows the product responsible for accuracy, structure and testing. A wrong code sample or a missing step costs more in support tickets and lost developers than AI saves in writing time. Most devtool teams get the best result from a person who owns the docs and uses AI as a drafting tool.
+
+### Does AI-generated content rank in Google or get cited by ChatGPT?
+
+Rarely, when it's unreviewed. Graphite found that 86% of articles ranking in Google Search and 82% of articles cited by ChatGPT and Perplexity were human-written, and AI-generated articles tended to rank lower. Google doesn't penalise AI use itself, but it rewards original, expert content and treats mass-produced pages without value as spam.
+
+### Will Google penalise AI-written blog posts?
+
+Not for using AI. Google's guidance says it rewards high-quality content "however it is produced". It does penalise scaled content abuse: generating many pages to manipulate rankings without adding value for users. A devtool blog using AI for drafts, with tested code and real expertise added, is fine. A blog that publishes AI articles in bulk is at risk.
+
+### Should a devtool startup hire a technical writer in 2026?
+
+Hire one when docs start limiting adoption: you have paying users, several SDKs or integrations, and support questions that repeat. Before that, engineers plus AI tools can cover the docs. If you also need a steady flow of tutorials, comparisons and SEO or AEO content, pair a writer with an agency or freelancers rather than expecting one person to do both.
+
+### How are AI agents changing documentation?
+
+AI agents now read a large share of developer docs. Mintlify reported that agents made 78% of requests to the docs it hosts in October 2026, and GitBook found agents made 51.8% of intentional docs reads in April 2026. Agents prefer Markdown and llms.txt files, can't see screenshots and can't guess missing steps, so docs need complete, explicit, well-structured pages.
+
+### What should a technical writer do differently now?
+
+Focus on the work AI can't own: testing the product and its code samples, interviewing engineers and users, information architecture, and writing for AI agents with llms.txt, Markdown page versions and AGENTS.md files. In GitBook's State of Docs 2026, 50% of respondents named AI and prompt engineering as the top new skill for documentation professionals.

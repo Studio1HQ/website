@@ -24,11 +24,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const job = getJobById(id, "en");
 
   if (!job) {
-    return { title: "Not found" };
+    return { title: { absolute: "Page not found | Studio1" } };
   }
 
+  // The careers layout sets its own title, which drops the root " | Studio1"
+  // template for this segment, so the brand is added here.
   return pageMetadata({
-    title: job.title,
+    title: `${job.title} | Studio1`,
     description: job.description,
     path: `/careers/${id}`,
     locale: "en",

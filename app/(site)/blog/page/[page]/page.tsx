@@ -22,7 +22,7 @@ export async function generateMetadata({
   const { page } = await params;
   return pageMetadata({
     title: `Developer Marketing & Tech Blog, Page ${page}`,
-    description: `Page ${page} of Studio1's practical guides on developer marketing, technical content, documentation, and growth for SaaS, AI, and devtool teams.`,
+    description: `Page ${page} of Studio1's practical guides on developer marketing, technical content, documentation, and growth for devtool, AI, and open-source teams.`,
     path: `/blog/page/${page}`,
     rssPath: "/feed.xml",
   });

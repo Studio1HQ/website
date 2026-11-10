@@ -151,7 +151,9 @@ export function CaseMosaic({
             src={item.src}
             alt=""
             fill
-            sizes="200px"
+            // A photo covers 2 of the 16 full-bleed columns.
+            sizes="(min-width: 1024px) 13vw, 200px"
+            quality={95}
             className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105"
           />
         );
@@ -212,9 +214,11 @@ export function CaseMosaic({
     <div className="relative">
       {/* Large screens: the mosaic, full bleed */}
       <div
-        className="relative left-1/2 hidden w-screen -translate-x-1/2 lg:block"
+        // 100vw / 100svh are divided by the page zoom (body zoom >= 1800px),
+        // otherwise the mosaic overflows and its edge photos fall off-screen.
+        className="relative left-1/2 hidden w-[calc(100vw/var(--s1-zoom,1))] -translate-x-1/2 lg:block"
         // Fills the first screen, under the 80px navbar
-        style={{ height: "max(560px, calc(100svh - 80px))" }}
+        style={{ height: "max(560px, calc(100svh / var(--s1-zoom, 1) - 80px))" }}
       >
         {cells}
         <div className="absolute inset-x-[14%] top-1/2 z-10 -translate-y-1/2">

@@ -41,6 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     image: study.cover,
     imageAlt: getCaseStudyCoverAlt(study),
     publishedTime: study.date,
+    modifiedTime: study.updatedDate,
     tags: study.tags,
   });
 }
@@ -62,6 +63,9 @@ export default async function CaseStudyPage({ params }: Props) {
     headline: study.title,
     description: study.description,
     datePublished: study.date,
+    // updatedDate falls back to date in lib/case-studies.ts.
+    dateModified: study.updatedDate,
+    // The client the study is about; url only when the frontmatter has one.
     about: {
       "@type": "Organization",
       name: study.client,

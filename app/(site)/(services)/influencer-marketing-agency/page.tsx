@@ -81,7 +81,7 @@ const influencerFaqItems: FAQItem[] = [
   {
     question: "How much does influencer marketing cost?",
     answer:
-      "It depends on your goals, the platforms, and the creators involved. We plan every campaign around your budget, from a focused launch push to an ongoing creator program.",
+      "Cost depends on three things: how many creators, which platforms, and whether it's a one-off launch push or an ongoing creator program. Studio1 plans every campaign around your budget, so the fastest way to a number is to book a call and tell us your goal and launch date.",
   },
   {
     question: "How do you measure influencer campaigns?",
@@ -286,7 +286,7 @@ export default function Page() {
       </PaperSection>
       <PaperCta
         index={5}
-        title="Ready to Work With Developer Creators?"
+        title="Planning a Developer Creator Campaign?"
         description="Creator campaigns, UGC programs, and launch amplification for developer tools, planned around your goals and budget."
       />
     </div>

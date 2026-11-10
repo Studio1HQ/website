@@ -46,7 +46,7 @@ const launchFaqItems: FAQItem[] = [
   {
     question: "Who can run a Product Hunt launch for a developer tool?",
     answer:
-      "Product Hunt is one channel in the launches we run, not a standalone service. When it fits the product, we prepare the listing, demo video, and maker comment, and work launch day with your team alongside Hacker News, Reddit, X, and LinkedIn. Webcrumbs finished #3 Product of the Day on its first Product Hunt launch with our guidance.",
+      "Studio1 does, as part of a developer tool launch. We prepare the listing, demo video, and maker comment, warm up your community in the weeks before, and work launch day with your team, replying to comments while the launch also runs on Hacker News, Reddit, X, and LinkedIn. Permit.io won Product of the Day with our launch support, and Webcrumbs finished #3 Product of the Day on its first Product Hunt launch.",
   },
   {
     question: "How far ahead should we plan a developer tool launch?",
@@ -159,7 +159,7 @@ const launchCaseStudyProofs: CaseStudyResultData[] = [
     stats: [
       { value: "#3", label: "Product of the Day" },
       { value: "#5", label: "Product of the Week" },
-      { value: "First", label: "launch ever" },
+      { value: "1st", label: "Product Hunt launch" },
     ],
   },
   {
@@ -258,7 +258,7 @@ export default function Page() {
       </PaperSection>
       <PaperCta
         index={5}
-        title="Ready to Launch Your Developer Tool?"
+        title="Launching a Developer Tool Soon?"
         description="Launch plans, demo videos, launch posts, launch-day support, and a launch week across Reddit, Hacker News, X, LinkedIn, and Product Hunt."
       />
     </div>

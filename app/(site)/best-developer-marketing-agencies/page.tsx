@@ -14,7 +14,7 @@ import { breadcrumbJsonLd, ORGANIZATION_ID, pageMetadata } from "@/lib/seo";
 import { baseUrl } from "@/lib/site";
 
 const PATH = "/best-developer-marketing-agencies";
-const TITLE = "Best Developer Marketing Agencies in 2026, Compared";
+const TITLE = "Best Developer Marketing Agencies 2026, Compared";
 const DESCRIPTION =
   "The best developer marketing agencies for devtools in 2026: Studio1, Draft.dev, Hackmamba, Infrasity, and more, with services, clients, and public pricing.";
 
@@ -43,7 +43,7 @@ const faqs: FAQItem[] = [
   {
     question: "How much does a developer marketing agency cost?",
     answer:
-      "Among agencies that publish prices, writers on demand start around $3,500 a month, content retainers around $5,000 to $9,000 a month, and full-service programs reach $120,000 a year. Many agencies, including Studio1, quote by scope instead of publishing a price list.",
+      "Among agencies that publish prices, writers on demand start around $3,500 a month, content retainers around $5,000 to $9,000 a month, and full-service programs reach $120,000 a year. Many agencies don't publish prices. Studio1 is one of them: book a call and we'll scope the work to your product and goals.",
   },
   {
     question: "How do I choose a developer marketing agency?",

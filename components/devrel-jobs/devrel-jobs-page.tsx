@@ -445,7 +445,7 @@ export function DevRelJobsPage({ jobs }: DevRelJobsPageProps) {
   const stats = [
     { icon: Megaphone, label: t("statsRoles", { count: jobs.length }) },
     { icon: Buildings, label: t("statsCompanies", { count: companyCount }) },
-    { icon: ArrowsClockwise, label: t("statsUpdated") },
+    { icon: Check, label: t("statsUpdated") },
   ];
 
   return (
@@ -679,10 +679,12 @@ export function DevRelJobsPage({ jobs }: DevRelJobsPageProps) {
               </span>
               <div>
                 <p className="text-[20px] font-medium tracking-[-0.035em]">
-                  {t("emptyTitle")}
+                  {jobs.length === 0 ? t("noListingsTitle") : t("emptyTitle")}
                 </p>
                 <p className={cn("mt-1.5 text-[15px]", MUTED)}>
-                  {t("emptyDescription")}
+                  {jobs.length === 0
+                    ? t("noListingsDescription")
+                    : t("emptyDescription")}
                 </p>
               </div>
               {hasActiveFilters ? (

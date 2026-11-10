@@ -41,7 +41,7 @@ const SLIDES: Slide[] = [
       "Launch Support",
     ],
     summary:
-      "300+ deliverables, 29 framework integrations, an open-source library with 16K+ stars, and launch support across every major Token Factory moment.",
+      "400+ deliverables, 29 framework integrations, an open-source library with 16K+ stars, and launch support across every major Token Factory moment.",
   },
   {
     client: "Jozu",

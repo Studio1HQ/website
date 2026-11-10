@@ -18,7 +18,11 @@ import { PaperPageHeader } from "@/components/paper/paper-page-header";
 import { DotWord } from "@/components/team/dot-word";
 import { PaperCta } from "@/components/paper/paper-sections";
 import { EventGallery } from "@/components/events/event-gallery";
-import type { EventKind, StudioEvent } from "@/data/events";
+import {
+  isUpcomingEvent,
+  type EventKind,
+  type StudioEvent,
+} from "@/data/events";
 import { PAPER_SCOPE } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 
@@ -89,9 +93,11 @@ export function EventsPage({
   now: number;
 }) {
   const reduceMotion = useReducedMotion();
-  const count = (k: EventKind) => events.filter((e) => e.kind === k).length;
+  // The record counts what has happened; upcoming events are listed apart
+  const past = events.filter((e) => !isUpcomingEvent(e, now));
+  const count = (k: EventKind) => past.filter((e) => e.kind === k).length;
   const stats: [number, string, Icon][] = [
-    [events.length, "Events", CalendarDots],
+    [past.length, "Events", CalendarDots],
     [count("Conference"), "Conferences", MicrophoneStage],
     [count("Hackathon"), "Hackathons", Code],
     [

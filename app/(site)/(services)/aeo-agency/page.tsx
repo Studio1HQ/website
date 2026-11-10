@@ -42,12 +42,12 @@ const aeoFaqItems: FAQItem[] = [
   {
     question: "What does an AEO agency do?",
     answer:
-      "AEO, or answer engine optimization, is the work of getting your product named and cited in AI answers from ChatGPT, Perplexity, Gemini, and Google AI Overviews. An AEO agency measures where you show up today, finds why you're missing, and fixes it with better pages, docs, and third-party sources. Studio1 does this for developer tools, AI products, and B2B SaaS.",
+      "AEO, or answer engine optimization, is the work of getting your product named and cited in AI answers from ChatGPT, Perplexity, Gemini, and Google AI Overviews. An AEO agency measures where you show up today, finds why you're missing, and fixes it with better pages, docs, and third-party sources. Studio1 does this for devtool, AI, and open-source teams.",
   },
   {
     question: "Why does AEO matter for developer tools?",
     answer:
-      "Developers now ask AI tools which library, API, or platform to use before they search. In Stack Overflow's 2026 Developer Survey, 70% of developers said they look for answers by asking an AI agent. If those answers name your competitors and not you, you lose the evaluation before it starts.",
+      "Developers now ask AI tools which library, API, or platform to use before they search. In the Stack Overflow 2026 Developer Survey, 69.9% of developers said they ask an AI agent when they need an answer. If those answers name your competitors and not you, you lose the evaluation before it starts.",
   },
   {
     question: "How is AEO different from SEO?",
@@ -208,7 +208,7 @@ export default function Page() {
       </PaperSection>
       <PaperCta
         index={4}
-        title="Ready to Show Up in AI Answers?"
+        title="Find Out What AI Says About Your Tool"
         description="AI visibility audits, answer-ready pages and docs, and third-party citations for developer tools."
       />
     </div>

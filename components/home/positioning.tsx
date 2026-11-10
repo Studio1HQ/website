@@ -10,7 +10,7 @@ import { Container, Rise } from "./ui";
 /** Headline numbers from the proof points in Studio1's own copy. */
 const STATS = [
   { value: "35+", label: ["Devtool and", "SaaS teams"] },
-  { value: "2M+", label: ["Total content", "views"] },
+  { value: "3M+", label: ["Total content", "views"] },
   { value: "10+", label: ["High-impact", "developer events"] },
   { value: "30+", label: ["Successful", "partnerships"] },
 ];

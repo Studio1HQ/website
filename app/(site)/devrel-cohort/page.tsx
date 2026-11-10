@@ -11,7 +11,7 @@ import {
 import { isSupabaseConfigured } from "@/lib/supabase-server";
 
 const PATH = "/devrel-cohort";
-const TITLE = "DevRel Cohort: A Month-Long Developer Relations Program";
+const TITLE = "DevRel Cohort: 4-Week Developer Relations Program";
 const DESCRIPTION =
   "A four-week, hands-on DevRel cohort run by Studio1. Ship tutorials, demos, videos and a launch plan. Top participants get interviews and partner referrals.";
 

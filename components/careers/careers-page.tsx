@@ -5,7 +5,6 @@ import {
   ArrowDown,
   ArrowUpRight,
   MapPin,
-  PaperPlaneTilt,
   UsersThree,
 } from "@phosphor-icons/react";
 import { motion, useReducedMotion } from "motion/react";
@@ -19,7 +18,6 @@ import {
 } from "@/components/careers/careers-extras";
 import { Container, EASE } from "@/components/home/ui";
 import {
-  Cursor,
   GRAIN,
   INK,
   PAPER,
@@ -36,10 +34,6 @@ import {
   Selected,
 } from "@/components/paper/paper-sections";
 import type { JobOpening } from "@/lib/careers";
-import {
-  CAREERS_CONTACT_EMAIL,
-  getJobApplicationMailto,
-} from "@/lib/careers-mailto";
 import { cn } from "@/lib/utils";
 
 /* ------------------------------------------------------------------ */
@@ -84,13 +78,6 @@ function inTeam(job: JobOpening, team: TeamKey) {
     TEAMS.find((item) => item.key === team)?.departments ?? [];
   return departments.includes(job.department);
 }
-
-/** The open-pitch email: resume, proof of work and a one-page pitch. */
-const PITCH_MAILTO = getJobApplicationMailto({
-  title: "Open pitch",
-  department: "Open pitch",
-  applySubject: "Open pitch",
-});
 
 function formatPostedDate(value: string) {
   const parsed = new Date(value);
@@ -380,16 +367,6 @@ function CareersHero({ jobs }: { jobs: JobOpening[] }) {
 
           <div className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-5">
             <SeeRolesButton label="See open roles" />
-            <a
-              href={PITCH_MAILTO}
-              className="group inline-flex items-center gap-1.5 text-[15px] font-medium underline decoration-[#141414]/25 decoration-2 underline-offset-[6px] transition-colors hover:decoration-[#f97316]"
-            >
-              or pitch us a role
-              <ArrowUpRight
-                weight="bold"
-                className="size-4 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-              />
-            </a>
           </div>
 
           {/* Facts: engraved tiles in one glass card */}
@@ -576,7 +553,7 @@ function OpenRoles({
         <SectionHead
           title={
             <>
-              Roles we&apos;re <Accent>hiring for</Accent> right now
+              Open and <Accent>upcoming</Accent> roles
             </>
           }
           description={t("applicationNote")}
@@ -659,16 +636,6 @@ function OpenRoles({
             <p className="text-[18px] font-medium tracking-[-0.03em]">
               No roles on this team right now.
             </p>
-            <a
-              href={PITCH_MAILTO}
-              className="group inline-flex h-11 items-center gap-2 rounded-full border-[1.5px] border-[#141414] px-5 text-[14px] font-medium transition-colors hover:bg-[#141414] hover:text-[#f4efe7]"
-            >
-              Pitch us a role
-              <ArrowUpRight
-                weight="bold"
-                className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-              />
-            </a>
           </div>
         )}
 
@@ -980,128 +947,6 @@ function HiringProcess() {
 }
 
 /* ------------------------------------------------------------------ */
-/* 04 — Open pitch (night band): the email to send, drafted            */
-/* ------------------------------------------------------------------ */
-
-const PITCH_PARTS = [
-  ["Resume or profile", "Where you have worked and what you did there."],
-  ["Proof of past work", "Repos, demos, blogs, docs or videos you made."],
-  ["A one-page pitch", "The role you would create and why Studio1 needs it."],
-  ["What you would do first", "Your first moves if you joined tomorrow."],
-];
-
-function PitchCta() {
-  return (
-    <PaperSection id="pitch" tone="night">
-      <Container>
-        <IndexBar index={4} name="Open pitch" aside={CAREERS_CONTACT_EMAIL} />
-        <div className="mt-8 grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-20">
-          <div>
-            <h2 className="text-[34px] font-medium leading-[1.1] tracking-[-0.05em] sm:text-[48px] lg:text-[60px]">
-              Don&apos;t see your role?
-              <br />
-              <Accent>Pitch us one.</Accent>
-            </h2>
-            <p
-              className={cn(
-                "mt-6 max-w-[440px] text-[16px] leading-[1.6]",
-                MUTED,
-              )}
-            >
-              Tell us what you would build, write or run for developer products,
-              and why Studio1 is the place to do it.
-            </p>
-            <a
-              href={PITCH_MAILTO}
-              className="group mt-9 inline-flex h-12 items-center gap-3 rounded-full py-1.5 pl-6 pr-1.5 text-[15px] font-medium transition-transform duration-300 hover:-translate-y-0.5"
-              style={{ background: PAPER, color: INK }}
-            >
-              Write your pitch
-              <span
-                className="flex size-9 items-center justify-center rounded-full text-white transition-transform duration-300 group-hover:rotate-45"
-                style={{ background: PRINT }}
-              >
-                <ArrowUpRight weight="bold" className="size-4" />
-              </span>
-            </a>
-          </div>
-
-          {/* The pitch, drafted as an email */}
-          <div className="relative">
-            <div className="bg-[var(--p-card)] ring-1 ring-inset ring-white/10">
-              <div className="flex items-center gap-1.5 border-b border-white/10 px-5 py-3">
-                {[0, 1, 2].map((dot) => (
-                  <span
-                    key={dot}
-                    className="size-2.5 rounded-full bg-white/15"
-                  />
-                ))}
-                <span className={cn("ml-3 text-[12px]", MUTED)}>
-                  New message
-                </span>
-              </div>
-              <dl className="border-b border-white/10 px-5 text-[13px]">
-                <div className="flex gap-3 border-b border-white/10 py-3">
-                  <dt className={cn("w-16 shrink-0", FAINT)}>To</dt>
-                  <dd className="truncate font-medium">
-                    {CAREERS_CONTACT_EMAIL}
-                  </dd>
-                </div>
-                <div className="flex gap-3 py-3">
-                  <dt className={cn("w-16 shrink-0", FAINT)}>Subject</dt>
-                  <dd className="truncate font-medium">
-                    Application: Open pitch
-                  </dd>
-                </div>
-              </dl>
-              <ol className="space-y-4 px-5 py-6">
-                {PITCH_PARTS.map(([title, detail], index) => (
-                  <li key={title} className="flex gap-3.5">
-                    <span
-                      className="mt-1 flex size-5 shrink-0 items-center justify-center text-[10px] font-semibold tabular-nums text-white"
-                      style={{ background: PRINT }}
-                    >
-                      {index + 1}
-                    </span>
-                    <span>
-                      <span className="block text-[15px] font-medium">
-                        {title}
-                      </span>
-                      <span
-                        className={cn("block text-[13px] leading-[1.5]", MUTED)}
-                      >
-                        {detail}
-                      </span>
-                    </span>
-                  </li>
-                ))}
-              </ol>
-              <div className="flex items-center justify-between border-t border-white/10 px-5 py-4">
-                <span className={cn("text-[12px]", FAINT)}>
-                  Reply in about 1 week if there is a fit
-                </span>
-                <a
-                  href={PITCH_MAILTO}
-                  className="inline-flex h-9 items-center gap-2 rounded-full px-4 text-[13px] font-medium text-white transition-[filter] hover:brightness-110"
-                  style={{ background: PRINT }}
-                >
-                  Send
-                  <PaperPlaneTilt weight="fill" className="size-3.5" />
-                </a>
-              </div>
-            </div>
-            <Cursor
-              color={PAPER}
-              className="pointer-events-none absolute -bottom-5 right-12 hidden sm:block"
-            />
-          </div>
-        </div>
-      </Container>
-    </PaperSection>
-  );
-}
-
-/* ------------------------------------------------------------------ */
 /* Page                                                                */
 /* ------------------------------------------------------------------ */
 
@@ -1119,7 +964,6 @@ export function CareersPage({ jobOpenings }: CareersPageProps) {
       <OpenRoles jobs={jobOpenings} team={team} onTeam={setTeam} />
       <WhyStudio1 />
       <HiringProcess />
-      <PitchCta />
     </div>
   );
 }

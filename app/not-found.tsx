@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { SiteChrome } from "@/components/site-chrome";
 import { PaperNotFound } from "@/components/paper/paper-error-pages";
@@ -22,6 +23,10 @@ Useful machine-readable links:
  * No intro curtain: a dead end should get out of the way, and the curtain's
  * boot script can't run when the 404 renders on the client.
  */
+export const metadata: Metadata = {
+  title: { absolute: "Page not found | Studio1" },
+};
+
 export default async function NotFound() {
   const messages = await getMessages(DEFAULT_LOCALE);
 

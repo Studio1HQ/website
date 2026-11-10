@@ -49,17 +49,17 @@ const redditFaqItems: FAQItem[] = [
   {
     question: "Does Reddit marketing work for developer tools?",
     answer:
-      "Yes, when the post is useful on its own. Developers on Reddit ignore pitches but engage with real technical problems, benchmarks, and demos they can try. One discussion-led post for Entelligence AI in r/LLMDevs reached 205K views and 278 upvotes, and Memori's launch post reached 50K+ views.",
+      "Yes, when the post is useful on its own. Developers on Reddit ignore pitches but engage with real technical problems, benchmarks, and demos they can try. One discussion-led post for Entelligence AI reached 205K views and 278 upvotes, and Reddit distribution for Memori's launch reached 50K+ views.",
   },
   {
-    question: "Which subreddits do you post in?",
+    question: "Which subreddits do you target?",
     answer:
-      "The ones your users already read, which depends on your product. For AI and devtool clients that has meant communities like r/LLMDevs and subreddits about AI agents, MCP, and LLMs. We check each subreddit's rules on self-promotion before anything goes live.",
+      "The ones your users already read, which depends on your product. For AI and devtool clients that has meant subreddits about LLM development, AI agents, and MCP. We check each subreddit's rules on self-promotion before anything goes live.",
   },
   {
-    question: "Will our posts get removed?",
+    question: "Will the posts get removed?",
     answer:
-      "Each subreddit sets its own rules, and many limit self-promotion. We read them first, lead with the problem rather than the product, say who we are when it matters, and never paste the same link everywhere. Posts that follow the rules and add something useful are far less likely to be removed.",
+      "Each subreddit sets its own rules, and many limit self-promotion. We read them first, write each post to be useful before it mentions any product, follow each subreddit's self-promotion rules, and never paste the same link everywhere. Posts that follow the rules and add something useful are far less likely to be removed.",
   },
   {
     question: "Do you buy upvotes or use fake accounts?",
@@ -154,7 +154,7 @@ const redditCaseStudyProofs: CaseStudyResultData[] = [
     heroValue: "304K+",
     heroLabel: "Reddit impressions from adapted blog angles",
     proof:
-      "Technical blogs and deep dives reshaped into discussion-led Reddit posts. One r/LLMDevs post alone reached 205K views and 278 upvotes.",
+      "Technical blogs and deep dives reshaped into discussion-led Reddit posts. One post alone reached 205K views and 278 upvotes.",
     stats: [
       { value: "205K", label: "views on one post" },
       { value: "278", label: "upvotes" },
@@ -179,14 +179,14 @@ const redditCaseStudyProofs: CaseStudyResultData[] = [
     company: "Nebius",
     category: "Subreddit Distribution",
     href: "/case-studies/nebius",
-    heroValue: "12",
-    heroLabel: "posts across AI, agent, MCP, and LLM subreddits",
+    heroValue: "44K",
+    heroLabel: "views on one launch-day post in an AI model subreddit",
     proof:
       "Technical posts adapted for communities already discussing each topic, reaching hundreds of thousands of Reddit views. Several were featured in developer newsletters.",
     stats: [
-      { value: "44K", label: "views on one DeepSeek R1 post" },
       { value: "221", label: "upvotes on that post" },
-      { value: "12", label: "subreddit posts" },
+      { value: "97%", label: "upvote ratio" },
+      { value: "32K", label: "views on a second, build-focused post" },
     ],
   },
 ];
@@ -268,7 +268,7 @@ export default function Page() {
       </PaperSection>
       <PaperCta
         index={5}
-        title="Ready to Show Up on Reddit?"
+        title="Get Your Devtool Discussed on Reddit"
         description="Subreddit research, technical posts, launch threads, and community engagement for developer tools."
       />
     </div>

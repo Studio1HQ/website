@@ -4,7 +4,7 @@ import { pageMetadata } from "@/lib/seo";
 export const metadata: Metadata = pageMetadata({
   title: "Developer Marketing & Tech Blog",
   description:
-    "Practical guides on developer marketing, technical content, documentation, and growth for SaaS, AI, and devtool teams.",
+    "Practical guides on developer marketing, technical content, documentation, and growth for devtool, AI, and open-source teams.",
   path: "/blog",
   rssPath: "/feed.xml",
   keywords: [

@@ -7,14 +7,30 @@ import {
   breadcrumbJsonLd,
 } from "@/lib/seo";
 
-export const POSTS_PER_BLOG_PAGE = 10;
+/**
+ * Page 1 shows a featured post above a 3-column grid of 9, so it takes 10.
+ * Later pages are grid only, so 9 fills three full rows with no orphan card.
+ */
+const FIRST_PAGE_POSTS = 10;
+export const POSTS_PER_BLOG_PAGE = 9;
+
+/** Number of pages needed for `count` posts. */
+function pageCountFor(count: number) {
+  if (count <= FIRST_PAGE_POSTS) return 1;
+  return 1 + Math.ceil((count - FIRST_PAGE_POSTS) / POSTS_PER_BLOG_PAGE);
+}
+
+/** Index of the first post on `page` (1-based). */
+function pageStartFor(page: number) {
+  return page === 1 ? 0 : FIRST_PAGE_POSTS + (page - 2) * POSTS_PER_BLOG_PAGE;
+}
 
 type BlogIndexViewProps = {
   currentPage?: number;
 };
 
 export function getBlogPageCount() {
-  return Math.max(1, Math.ceil(getListedPosts().length / POSTS_PER_BLOG_PAGE));
+  return pageCountFor(getListedPosts().length);
 }
 
 function pageHref(page: number) {
@@ -23,12 +39,12 @@ function pageHref(page: number) {
 
 export function BlogIndexView({ currentPage = 1 }: BlogIndexViewProps) {
   const posts = getListedPosts();
-  const totalPages = Math.max(1, Math.ceil(posts.length / POSTS_PER_BLOG_PAGE));
+  const totalPages = pageCountFor(posts.length);
   const safePage = Math.min(Math.max(currentPage, 1), totalPages);
-  const pageStart = (safePage - 1) * POSTS_PER_BLOG_PAGE;
+  const pageStart = pageStartFor(safePage);
   const paginatedPosts = posts.slice(
     pageStart,
-    pageStart + POSTS_PER_BLOG_PAGE,
+    pageStart + (safePage === 1 ? FIRST_PAGE_POSTS : POSTS_PER_BLOG_PAGE),
   );
   const currentUrl = `${baseUrl}${pageHref(safePage)}`;
 
@@ -38,7 +54,7 @@ export function BlogIndexView({ currentPage = 1 }: BlogIndexViewProps) {
     "@id": `${baseUrl}/blog#blog`,
     name: "Studio1 Developer Marketing & Tech Blog",
     description:
-      "Practical articles on developer marketing, technical content, documentation, developer experience, and growth for SaaS, AI, and devtool teams.",
+      "Practical articles on developer marketing, technical content, documentation, developer experience, and growth for devtool, AI, and open-source teams.",
     url: `${baseUrl}/blog`,
     inLanguage: "en",
     publisher: {

@@ -98,8 +98,8 @@ export const products: Product[] = [
     domain: "raah.dev",
     logo: "/products/raah-logo.svg",
     category: "Analytics & Observability",
-    status: "launched",
-    statusLabel: "Launched",
+    status: "live",
+    statusLabel: "Live",
     media: {
       kind: "video",
       src: "https://cdn.raah.dev/videos/raah-hero.mp4",

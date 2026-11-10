@@ -219,7 +219,10 @@ export function WorldReachMap({
                   >
                     <Logo className="size-3 brightness-0 invert" />
                   </span>
-                  Studio1 in {highlight}
+                  {/* Studio1 is based in India; other countries are where clients are. */}
+                  {highlight === hq
+                    ? `Studio1 in ${highlight}`
+                    : `Clients in ${highlight}`}
                 </span>
                 {highlight === hq ? (
                   <span

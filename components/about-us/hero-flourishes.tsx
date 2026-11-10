@@ -251,14 +251,14 @@ const MAKES: {
   {
     icon: Megaphone,
     label: "DevRel",
-    note: "10+ high-impact events",
+    note: "40+ developer events",
     side: "left",
     top: "68%",
   },
   {
     icon: PenNib,
     label: "Tutorials",
-    note: "300+ tutorials & guides",
+    note: "400+ tutorials & guides",
     side: "right",
     top: "32%",
   },

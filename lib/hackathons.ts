@@ -200,6 +200,15 @@ export function milestoneState(date: string, now = Date.now()) {
 }
 
 /** Every hackathon page shares this: hidden while the program is a draft. */
+/**
+ * /hackathons is hidden until the program launches: in production the pages
+ * 404 and registrations are refused unless HACKATHONS_PUBLIC=true is set.
+ * Local development always shows them so the pages can still be built.
+ */
+export const HACKATHONS_PUBLIC =
+  process.env.NODE_ENV !== "production" ||
+  process.env.HACKATHONS_PUBLIC === "true";
+
 export const HACKATHON_ROBOTS = {
   index: false,
   follow: false,

@@ -14,7 +14,7 @@ export default function Process({ index = 4 }: { index?: number }) {
           steps={blogAsServiceProcess}
           title="How We Deliver"
           accent="Developer-First Content"
-          description="A transparent, collaborative content process built for fast-moving SaaS and devtool teams."
+          description="A transparent, collaborative content process built for fast-moving devtool, AI, and open-source teams."
         />
       </Container>
     </PaperSection>

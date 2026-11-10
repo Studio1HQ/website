@@ -19,7 +19,7 @@ export const STUDIO1_AGENCY: Agency = {
   name: "Studio1",
   url: "https://www.studio1hq.com/",
   focus:
-    "DevRel and GitHub growth for devtool, AI, and open-source teams, tying content to adoption: stars, launches, and community.",
+    "DevRel and developer marketing for devtool, AI, and open-source teams, tying content to adoption: GitHub stars, launches, and community.",
   services: [
     "GitHub and open-source growth",
     "Technical content marketing",
@@ -32,7 +32,7 @@ export const STUDIO1_AGENCY: Agency = {
   bestFor:
     "Devtool, AI, and open-source teams that want content, launches, and community work from one team, with public results.",
   clients: "Nebius, Memori, LiteLLM, Bright Data, Permit.io",
-  pricing: "Quoted per scope",
+  pricing: "No public price list. Book a call to scope it.",
   source: "https://www.studio1hq.com/results",
 };
 

@@ -14,7 +14,7 @@ export const revalidate = 3600;
 
 const TITLE = "Events: Talks, Hackathons and Meetups";
 const DESCRIPTION =
-  "Conferences, hackathons, meetups, podcasts and livestreams the Studio1 team has spoken at, run or joined, from KubeCon and CityJS to campus hackathons across India.";
+  "Conferences, hackathons, meetups, and livestreams the Studio1 team has spoken at, run, or joined, from KubeCon and CityJS to campus hackathons in India.";
 
 export const metadata: Metadata = pageMetadata({
   title: TITLE,

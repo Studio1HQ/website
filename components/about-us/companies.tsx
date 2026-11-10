@@ -35,7 +35,7 @@ export const Companies = () => {
               Partnered <Accent>Companies</Accent>
             </>
           }
-          description="We empower tech brands to build thriving developer communities through DevRel and high-impact content."
+          description="We help devtool teams reach more developers through technical content and DevRel programs."
         />
 
         <div className="relative isolate">

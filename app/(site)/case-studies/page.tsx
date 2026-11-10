@@ -43,11 +43,13 @@ export default async function CaseStudiesPage() {
       ? [{ slug: study.slug, client: study.client, logo: logo.icon }]
       : [];
   });
+  // Filled in reading order: top left, top right, bottom left, bottom right.
+  // The top row is always on screen, so the clearest photos go first.
   const photos: MosaicPhoto[] = [
     {
-      slug: "nebius",
-      src: "/case-studies/nebius/meetup-talk.webp",
-      alt: "Nebius meetup talk",
+      slug: "jozu",
+      src: "/case-studies/jozu/devfest-pune-2025-portrait.webp",
+      alt: "Jozu at DevFest Pune 2025",
     },
     {
       slug: "openlore",
@@ -55,14 +57,14 @@ export default async function CaseStudiesPage() {
       alt: "OpenLore talk at Hackspire",
     },
     {
-      slug: "jozu",
-      src: "/case-studies/jozu/devfest-jozu-booth.webp",
-      alt: "Jozu booth at DevFest",
+      slug: "nebius",
+      src: "/case-studies/nebius/meetup-talk.webp",
+      alt: "Nebius meetup talk",
     },
     {
       slug: "jozu",
-      src: "/case-studies/jozu/devfest-pune-2025.webp",
-      alt: "Jozu at DevFest Pune 2025",
+      src: "/case-studies/jozu/devfest-jozu-booth.webp",
+      alt: "Jozu booth at DevFest",
     },
   ];
 
@@ -209,7 +211,7 @@ export default async function CaseStudiesPage() {
         </Container>
       </PaperSection>
       <PaperCta
-        title="Want Results Like These?"
+        title="Plan Your Developer Growth With Us"
         description="Every case study started with one call. Share your goals and we will map what moves adoption for you."
       />
     </div>

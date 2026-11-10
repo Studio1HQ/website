@@ -40,8 +40,8 @@ export default function Home() {
       <section className="sr-only" aria-label="Studio1 agent-readable overview">
         <h2>Studio1 Services Overview</h2>
         <p>
-          Studio1 is a technical content and developer growth partner for
-          devtool, SaaS, AI, and open-source teams. We help developer-focused
+          Studio1 is a DevRel and developer marketing agency for devtool, AI,
+          and open-source teams. We help developer-focused
           companies create practical tutorials, documentation, DX audits, video
           demos, launch support, DevRel programs, community motions, and
           developer-facing campaigns that make products easier to understand and

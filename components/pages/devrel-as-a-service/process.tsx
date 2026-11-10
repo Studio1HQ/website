@@ -14,7 +14,7 @@ export default function Process({ index = 4 }: { index?: number }) {
           steps={devRelAsServiceProcess}
           title="How We Deliver"
           accent="Developer-First DevRel"
-          description="A proven process designed for fast-moving product teams and developer-focused startups."
+          description="A step-by-step process for fast-moving product teams and developer-focused startups."
         />
       </Container>
     </PaperSection>

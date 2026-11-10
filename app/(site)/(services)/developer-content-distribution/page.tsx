@@ -18,7 +18,7 @@ import { DEFAULT_LOCALE } from "@/lib/i18n";
 
 const TITLE = "Developer Content Distribution Agency for Devtools";
 const DESCRIPTION =
-  "Developer content distribution for devtools: Reddit, X, LinkedIn, daily.dev, Dev.to, and YouTube versions of every piece. 304K+ Reddit impressions for Entelligence AI.";
+  "Developer content distribution: every piece rebuilt for Reddit, X, LinkedIn, daily.dev, Dev.to, and YouTube. 304K+ Reddit impressions for Entelligence AI.";
 
 const linkClass =
   "font-medium text-[#141414] underline decoration-[#141414]/25 decoration-2 underline-offset-[6px] transition-colors hover:decoration-[#f97316]";
@@ -149,7 +149,7 @@ const distributionCaseStudyProofs: CaseStudyResultData[] = [
     heroValue: "304K+",
     heroLabel: "Reddit impressions from adapted blog angles",
     proof:
-      "Technical blogs and deep dives reshaped into discussion-led Reddit posts. One r/LLMDevs post alone reached 205K views and 278 upvotes.",
+      "Technical blogs and deep dives reshaped into discussion-led Reddit posts. One post alone reached 205K views and 278 upvotes.",
     stats: [
       { value: "205K", label: "views on one post" },
       { value: "278", label: "upvotes" },
@@ -167,7 +167,7 @@ const distributionCaseStudyProofs: CaseStudyResultData[] = [
     stats: [
       { value: "50K", label: "on one daily.dev post" },
       { value: "24K", label: "views on one X Article" },
-      { value: "200+", label: "LinkedIn posts from developers" },
+      { value: "200+", label: "LinkedIn posts and comments" },
     ],
   },
   {
@@ -260,7 +260,7 @@ export default function Page() {
       </PaperSection>
       <PaperCta
         index={5}
-        title="Ready to Get Your Content Read?"
+        title="Put Your Content in Front of Developers"
         description="Channel plans, native posts, and community engagement for developer tools."
       />
     </div>

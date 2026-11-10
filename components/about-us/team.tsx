@@ -210,7 +210,7 @@ export const Team = ({ showHeader = true, className }: TeamProps) => {
                   Meet Our <Accent>Leadership Team</Accent>
                 </>
               }
-              description="We’re a team of writers, engineers and DevRels who care about clarity, craft and developer outcomes."
+              description="We’re a team of writers, engineers and developer advocates who care about clarity, craft and developer outcomes."
             />
           </>
         ) : null}

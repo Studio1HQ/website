@@ -14,7 +14,7 @@ import { tick } from "@/lib/tick";
  * Partner logos as a white jigsaw: one logo per piece, the pieces locked
  * together into a single board. Pieces settle into place as the board
  * comes into view, the board tilts gently as you scroll, and a hovered
- * piece lifts off the board. A Studio1 piece completes the set.
+ * piece lifts off the board.
  */
 
 const COLS = 9;
@@ -98,7 +98,7 @@ const CASE_STUDY: Record<string, string> = {
   Memori: "memori",
   Ittybit: "ittybit",
   ScrapeGraph: "scrapegraph",
-  Enteligence: "entelligence-ai",
+  Entelligence: "entelligence-ai",
   "Permit.io": "permit",
   Jozu: "jozu",
   Corsair: "corsair",
@@ -248,8 +248,8 @@ function CompanyMark({ item }: { item: Company }) {
 
 export function LogoPuzzle({ className }: { className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
-  // Every partner, then one Studio1 piece that completes the board.
-  const total = companies.length + 1;
+  // Partners only: Studio1's own mark doesn't belong in its partner list.
+  const total = companies.length;
   const rows = Math.ceil(total / COLS);
 
   const pieces: { c: number; node: ReactNode }[] = companies.map(
@@ -276,28 +276,6 @@ export function LogoPuzzle({ className }: { className?: string }) {
       };
     },
   );
-  pieces.push({
-    c: companies.length % COLS,
-    node: (
-      <Piece
-        key="studio1"
-        r={Math.floor(companies.length / COLS)}
-        c={companies.length % COLS}
-        rows={rows}
-        total={total}
-        href="/"
-        label="Studio1"
-        external={false}
-      >
-        <span className="flex h-8 items-center justify-center">
-          <Logo className="size-8" />
-        </span>
-        <span className="text-center text-[11.5px] font-semibold tracking-[-0.01em] text-[#c2410c]">
-          Studio1
-        </span>
-      </Piece>
-    ),
-  });
 
   return (
     // Full bleed, tilted back like a board on a table, every edge fading

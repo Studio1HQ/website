@@ -6,8 +6,8 @@ import { useEffect, useRef, useState } from "react";
 import {
   AnimatePresence,
   motion,
+  useMotionValue,
   useReducedMotion,
-  useScroll,
   useSpring,
   useTransform,
 } from "motion/react";
@@ -267,12 +267,11 @@ const RIBBON =
 export function CaseChapters({ acts }: { acts: Act[] }) {
   const ref = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
-  // The orange reaches down to the middle of the screen, wherever you are
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start center", "end center"],
-  });
-  const fill = useSpring(scrollYProgress, {
+  // The orange reaches down to the middle of the screen, wherever you are.
+  // Measured from on-screen boxes (not useScroll's layout offsets), so it
+  // stays right under the large-screen `zoom` on <body> in every browser.
+  const progress = useMotionValue(0);
+  const fill = useSpring(progress, {
     // Tight enough to stay with a fast flick, soft enough to glide
     stiffness: 420,
     damping: 42,
@@ -291,23 +290,40 @@ export function CaseChapters({ acts }: { acts: Act[] }) {
     let raf = 0;
     const update = () => {
       raf = 0;
-      const cards = ref.current?.querySelectorAll("[data-chapter]") ?? [];
+      const root = ref.current;
+      if (!root) return;
+      const mid = window.innerHeight / 2;
+      // Progress: 0 when the top of the chapters reaches mid-screen,
+      // 1 when their bottom does.
+      const box = root.getBoundingClientRect();
+      progress.set(
+        box.height > 0
+          ? Math.min(1, Math.max(0, (mid - box.top) / box.height))
+          : 0,
+      );
+      const cards = root.querySelectorAll("[data-chapter]");
       let at = 0;
       cards.forEach((card, i) => {
-        if (card.getBoundingClientRect().top <= window.innerHeight / 2) at = i;
+        if (card.getBoundingClientRect().top <= mid) at = i;
       });
       setCurrent(at);
     };
-    const onScroll = () => {
+    const schedule = () => {
       if (!raf) raf = requestAnimationFrame(update);
     };
     update();
-    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    // Cards and images settle after load, which moves everything below them
+    const resize = new ResizeObserver(schedule);
+    if (ref.current) resize.observe(ref.current);
     return () => {
-      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      resize.disconnect();
       if (raf) cancelAnimationFrame(raf);
     };
-  }, []);
+  }, [progress]);
   const reading = studies[current];
 
   const band = (stroke: string, opacity: number, width: number) => (

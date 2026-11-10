@@ -13,7 +13,8 @@
     "start": "next start",
     "format": "prettier --write .",
     "lint": "next lint",
-    "test:agent-readiness": "node scripts/verify-agent-readiness.mjs"
+    "test:agent-readiness": "node scripts/verify-agent-readiness.mjs",
+    "test:content": "node scripts/verify-content.mjs"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",

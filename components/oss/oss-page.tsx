@@ -212,7 +212,7 @@ function OssHero({ stats }: OssPageProps) {
               Awesome AI Apps puts {AWESOME_APP_COUNT} runnable LLM apps and
               agents in one repo. Studio1-OSS holds the full products we build
               on open models. All of it is on GitHub, with the code, the README
-              and the keys you need to run it.
+              and a .env.example for your own API keys.
             </motion.p>
 
             <motion.div
@@ -526,11 +526,13 @@ function RepoMeta({
         {repo.language}
       </span>
       {repo.license ? <span>{repo.license}</span> : null}
-      <span className="flex items-center gap-1 tabular-nums">
-        <Star weight="fill" className="size-3.5" />
-        {stars}
-        <span className="sr-only">stars</span>
-      </span>
+      {stars ? (
+        <span className="flex items-center gap-1 tabular-nums">
+          <Star weight="fill" className="size-3.5" />
+          {stars}
+          <span className="sr-only">stars</span>
+        </span>
+      ) : null}
       {forks ? (
         <span className="flex items-center gap-1 tabular-nums">
           <GitFork weight="bold" className="size-3.5" />

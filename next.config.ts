@@ -115,13 +115,28 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/careers/ai-cloud-engineer",
+        destination: "/careers",
+        permanent: true,
+      },
+      {
+        source: "/careers/genai-developer-contract",
+        destination: "/careers",
+        permanent: true,
+      },
+      {
+        source: "/careers/developer-advocate",
+        destination: "/careers/devrel-engineer",
+        permanent: true,
+      },
+      {
         source: "/careers/aws-bedrock-ai-agent-engineer",
-        destination: "/careers/ai-cloud-engineer",
+        destination: "/careers",
         permanent: true,
       },
       {
         source: "/careers/aws-ai-agent-engineer",
-        destination: "/careers/ai-cloud-engineer",
+        destination: "/careers",
         permanent: true,
       },
       {

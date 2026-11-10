@@ -11,7 +11,7 @@ export default function Hero() {
       titleAccent="Devtool Marketing"
       titleRest="Services"
       description="Content, DevRel, and growth for devtool, AI, and open-source teams. One service or several, one team."
-      primaryCta="Book a Call"
+      primaryCta="Book a Strategy Call"
       secondaryCta="Not sure where to start?"
       secondaryHref="#where-to-start"
       stats={[

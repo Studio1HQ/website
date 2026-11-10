@@ -69,7 +69,7 @@ export const blogAsServiceProcess = [
 export const blogAsServiceTeam = [
     {
       name: "Arindam Majumder",
-      role: "Co-founder & Content Lead",
+      role: "Co-founder",
       image: "https://avatars.githubusercontent.com/u/109217591?v=4",
       bio: "Developer Advocate with expertise in technical writing and open-source. Has reached 270k+ developers through technical content, with notable contributions to Next.js and featured in their RC release blog. Specializes in creating developer-centric content that drives engagement and growth.",
       social: {
@@ -80,7 +80,7 @@ export const blogAsServiceTeam = [
     },
     {
       name: "Amitesh Anand",
-      role: "Co-founder & Operations Lead",
+      role: "Co-founder",
       image: "/assets/team/amitesh.webp",
       bio: "Technical writer and developer advocate with expertise in creating scalable content. Published 80k+ words reaching thousands of readers across major tech platforms. Nominated for Noonies 2022 Tech Awards, focused on delivering high-impact technical content.",
       social: {

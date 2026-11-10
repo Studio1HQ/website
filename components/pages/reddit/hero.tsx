@@ -11,11 +11,11 @@ export default function Hero() {
       titleAccent="Reddit Marketing"
       titleRest="for Devtools"
       description="A Reddit marketing agency for developer tools: technical posts, launch threads, and answers developers upvote."
-      primaryCta="Book a Call"
+      primaryCta="Book a Strategy Call"
       secondaryCta="Explore Services"
       stats={[
-        { value: "304K+", label: "Reddit impressions for Entelligence" },
-        { value: "205K", label: "views on one r/LLMDevs post" },
+        { value: "304K+", label: "Reddit impressions for Entelligence AI" },
+        { value: "205K", label: "views on one Entelligence AI post" },
         { value: "50K+", label: "Memori launch post" },
         { value: "100+", label: "comments on one Memori thread" },
       ]}

@@ -28,9 +28,10 @@ export type Comparison = {
 
 /** Studio1's own column, shared by every comparison. */
 const STUDIO1 = {
-  focus: "DevRel and GitHub growth for devtool, AI, and open-source teams",
+  focus:
+    "DevRel and developer marketing for devtool, AI, and open-source teams",
   team: "Studio1's own engineers and writers",
-  pricing: "Quoted per scope; no public price list",
+  pricing: "No public price list. Book a call to scope it.",
   clients: "Nebius, Memori, LiteLLM, Bright Data, Permit.io, Jozu",
 };
 
@@ -143,14 +144,14 @@ export const COMPARISONS: Comparison[] = [
       {
         question: "How does pricing compare?",
         answer:
-          "Draft.dev lists plans starting at $9K a month with an initial 3-month minimum, plus custom offers on request. Studio1 quotes each engagement by scope and doesn't publish a price list.",
+          "Draft.dev lists plans starting at $9K a month with an initial 3-month minimum, plus custom offers on request. Studio1 doesn't publish a price list. Book a call with Studio1 and we'll scope the work around your product, channels, and goals.",
       },
     ],
     sources: [
       { label: "Draft.dev homepage", href: "https://draft.dev/" },
       { label: "Draft.dev about", href: "https://draft.dev/about" },
       {
-        label: "Draft.dev for marketers and DevRels",
+        label: "Draft.dev for marketers and DevRel teams",
         href: "https://draft.dev/drive-awareness",
       },
       {
@@ -174,7 +175,7 @@ export const COMPARISONS: Comparison[] = [
       "devtool marketing agency comparison",
     ],
     shortAnswer:
-      "Infrasity and Studio1 cover similar ground for devtool teams: technical content, docs, video, Reddit, GitHub marketing, AEO, and DevRel. Infrasity positions itself as a technical content marketing agency for B2B SaaS, with packaged monthly plans for early-stage infra, AI, and devtool startups. Studio1 leads with GitHub and open-source growth and runs product launches and in-person DevRel as services, with public results such as Memori's 12,000+ GitHub stars.",
+      "Infrasity and Studio1 cover similar ground for devtool teams: technical content, docs, video, Reddit, GitHub marketing, AEO, and DevRel. Infrasity positions itself as a technical content marketing agency for B2B SaaS, with packaged monthly plans for early-stage infra, AI, and devtool startups. Studio1 is a DevRel and developer marketing agency for devtool, AI, and open-source teams; GitHub and open-source growth is one of its strengths, alongside product launches and in-person DevRel, with public results such as Memori's 12,000+ GitHub stars.",
     rows: [
       {
         label: "Focus",
@@ -256,7 +257,7 @@ export const COMPARISONS: Comparison[] = [
       {
         question: "What is the difference between Studio1 and Infrasity?",
         answer:
-          "Their services overlap: both offer technical content, docs, video, Reddit, GitHub marketing, AEO, and DevRel. Infrasity positions itself as a technical content marketing agency for B2B SaaS with packaged monthly plans. Studio1 leads with GitHub and open-source growth, and runs product launches and in-person DevRel as services.",
+          "Their services overlap: both offer technical content, docs, video, Reddit, GitHub marketing, AEO, and DevRel. Infrasity positions itself as a technical content marketing agency for B2B SaaS with packaged monthly plans. Studio1 is a DevRel and developer marketing agency for devtool, AI, and open-source teams, with GitHub and open-source growth as one strength alongside product launches and in-person DevRel.",
       },
       {
         question: "Is Studio1 an Infrasity alternative?",
@@ -271,7 +272,7 @@ export const COMPARISONS: Comparison[] = [
       {
         question: "How does pricing compare?",
         answer:
-          "Infrasity's pricing page lists Starter and Scale plans by monthly blog and video volume, without prices, and offers a 30-day proof of concept. Studio1 quotes each engagement by scope and doesn't publish a price list.",
+          "Infrasity's pricing page lists Starter and Scale plans by monthly blog and video volume, without prices, and offers a 30-day proof of concept. Studio1 doesn't publish a price list. Book a call with Studio1 and we'll scope the work around your product, channels, and goals.",
       },
     ],
     sources: [

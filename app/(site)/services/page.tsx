@@ -23,6 +23,7 @@ import {
   PaperSection,
   SectionHead,
 } from "@/components/paper/paper-sections";
+import { PaperServiceFaq } from "@/components/pages/shared/paper-service-kit";
 import { Container } from "@/components/home/ui";
 import { DEFAULT_LOCALE } from "@/lib/i18n";
 import { INK, PAPER_SCOPE, PRINT } from "@/lib/paper";
@@ -120,7 +121,7 @@ const GROWTH: Service[] = [
     icon: RedditLogo,
     description:
       "Subreddit research, technical posts, and launch threads developers upvote.",
-    proof: { value: "304K+", label: "Reddit impressions for Entelligence" },
+    proof: { value: "304K+", label: "Reddit impressions for Entelligence AI" },
   },
   {
     name: "Content Distribution",
@@ -173,6 +174,45 @@ const STARTING_POINTS: { situation: string; name: string; href: string }[] = [
 ];
 
 const CARD = "rounded-[6px] bg-white/80 ring-1 ring-inset ring-[#141414]/10";
+
+const SERVICES_FAQ = [
+  {
+    question: "What does a developer marketing agency do?",
+    answer:
+      "A developer marketing agency helps a company that sells to developers get found, tried and adopted. Studio1 does that with technical content, docs and DX audits, developer video, DevRel programs, launches, GitHub growth, creators, Reddit, distribution and AEO, written and run by engineers and developer advocates who know the stack.",
+  },
+  {
+    question: "Which Studio1 service should we start with?",
+    answer:
+      "Start where developers drop off. If they find you but don't get started, begin with a docs and DX audit. If your repo has stalled, start with GitHub growth. If a launch is coming up, start with launch support. If AI answers name your competitors and not you, start with AEO. On a call, Studio1 maps your funnel and recommends one starting point.",
+  },
+  {
+    question: "What is the difference between DevRel and developer marketing?",
+    answer:
+      "DevRel builds trust and long-term relationships with developers through education, community and feedback. Developer marketing turns that trust into adoption with positioning, content, launches and distribution, measured by signups and activation. Most devtool teams need both, which is why Studio1 runs them together.",
+  },
+  {
+    question: "Can we combine Studio1 services?",
+    answer:
+      "Yes. Most Studio1 engagements combine two or three services that feed each other, such as technical content with distribution and AEO, or a DX audit followed by tutorials and a launch. We plan the combination around one goal so the work compounds instead of running as separate projects.",
+  },
+  {
+    question: "Who does the work at Studio1?",
+    answer:
+      "Studio1's core team of engineers, developer advocates, writers, video producers and designers runs every engagement, with vetted technical writers joining when a project needs more hands or a specific stack. Technical pieces are written by people who run the code before it ships, and every engagement has one point of contact who keeps the work tied to your goals.",
+  },
+  {
+    question: "How long until we see results?",
+    answer:
+      "It depends on the service. A launch or a DX fix can move signups and GitHub stars within weeks, while technical content, SEO and AEO compound over several months. Studio1 agrees on the metrics up front, such as activation, stars, inbound leads or AI citations, and reports against them.",
+  },
+  {
+    question: "How does an engagement with Studio1 start?",
+    answer:
+      "Every engagement starts with a strategy call. We look at your product, where developers drop off and what you have tried, then propose a shape that fits: a focused sprint such as an audit, a monthly program for content and DevRel, or a launch project. Book a strategy call to get started.",
+  },
+];
+
 
 function ServiceCard({ service }: { service: Service }) {
   const ServiceIcon = service.icon;
@@ -329,6 +369,33 @@ export default function ServicesPage() {
               </li>
             ))}
           </ul>
+        </Container>
+      </PaperSection>
+
+      <PaperSection tone="paper">
+        <Container>
+          <PaperServiceFaq
+            index={4}
+            subtitle="Common questions about Studio1's developer marketing and DevRel services."
+            items={SERVICES_FAQ}
+          />
+          <p className="mt-8 text-center text-[15px] text-[var(--p-muted)]">
+            New to the topic? Read{" "}
+            <Link
+              href="/blog/what-is-developer-marketing"
+              className="font-medium text-[var(--p-fg)] underline decoration-[#f97316] underline-offset-4"
+            >
+              what developer marketing is
+            </Link>{" "}
+            and{" "}
+            <Link
+              href="/blog/devrel-vs-developer-marketing"
+              className="font-medium text-[var(--p-fg)] underline decoration-[#f97316] underline-offset-4"
+            >
+              how it differs from DevRel
+            </Link>
+            .
+          </p>
         </Container>
       </PaperSection>
 

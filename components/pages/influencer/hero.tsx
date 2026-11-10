@@ -11,7 +11,7 @@ export default function Hero() {
       titleAccent="Influencer Management"
       titleRest="for Devtools"
       description="Developer creators on X, YouTube, LinkedIn, Instagram, and TikTok, vetted for credibility, briefed on your product, and measured against the KPIs you set."
-      primaryCta="Book a Call"
+      primaryCta="Book a Strategy Call"
       secondaryCta="Explore Services"
       stats={[
         { value: "5", label: "platforms, from X to TikTok" },

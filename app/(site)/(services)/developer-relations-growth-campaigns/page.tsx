@@ -43,19 +43,15 @@ const devrelFaqItems: FAQItem[] = [
       "Yes. Most of the work a first DevRel hire does can be split up: engineers fix the first run and docs, founders answer in the communities where users already talk, and an outsourced DevRel team handles the content, demos, launches, and events. Studio1 runs that outsourced part for devtool and AI startups. For Memori it took an open-source project from launch to 12,000+ GitHub stars.",
   },
   {
-    question: "Should we hire an outsourced DevRel agency or an in-house advocate?",
+    question:
+      "Should we hire an outsourced DevRel agency or an in-house advocate?",
     answer:
-      "Hire in-house when you need one person to own the community for years and sit close to the product. Use an agency when you need writers, engineers, and community work running in weeks, or for launches and defined pushes. Many teams combine both: an internal owner sets priorities and Studio1 ships the content, demos, and events.",
+      "Hire in-house when you need one person to own the community for years and sit close to the product. Use an agency when you need writers, engineers, and community work running in weeks without hiring, onboarding, and managing each role, or for launches and defined pushes. Many teams combine both: an internal owner sets priorities and Studio1 ships the content, demos, and events.",
   },
   {
-    question: "What do Developer Relations & Growth Campaigns include?",
+    question: "What does a DevRel and growth campaign service include?",
     answer:
       "Our developer relations and growth service covers community building, developer education, advocacy, project tutorials, product launches, organic distribution, creator collaborations, integrations, and event support. We operate as an embedded extension of your team.",
-  },
-  {
-    question: "How is this different from hiring an in-house DevRel team?",
-    answer:
-      "With Studio1, you get a hands-on DevRel team with writers, engineers, community managers, and advocates without the overhead of hiring, onboarding, and managing multiple roles. We ramp up fast, require minimal oversight, and stay leaner than building every function in-house.",
   },
   {
     question: "What kind of community building do you do?",
@@ -75,12 +71,12 @@ const devrelFaqItems: FAQItem[] = [
   {
     question: "Can you work alongside our existing DevRel team?",
     answer:
-      "Absolutely. Most of our engagements complement existing DevRel or marketing teams. Your team handles product positioning while we handle execution: community programs, campaign coordination, launch support, creator management, and distribution at scale.",
+      "Yes. Most of our engagements complement existing DevRel or marketing teams. Your team handles product positioning while we handle execution: community programs, campaign coordination, launch support, creator management, and distribution at scale.",
   },
   {
     question: "What is the onboarding process like?",
     answer:
-      "We start with a Discovery phase where we audit your existing developer programs, analyze community engagement, and identify growth opportunities. Within the first two weeks, we deliver an actionable assessment and a tailored DevRel roadmap aligned to your goals.",
+      "We start with a discovery phase: we audit your existing developer programs, look at community engagement, and find the growth opportunities. Within the first two weeks, you get a written assessment and a DevRel roadmap built around your goals.",
   },
   {
     question: "Do you run growth campaigns and influencer programs?",
@@ -242,13 +238,27 @@ export default function DevRel() {
             >
               DevRel agency with an in-house hire
             </Link>
+            . Planning events? See{" "}
+            <Link
+              href="/blog/developer-event-marketing"
+              className="font-medium text-[#141414] underline decoration-[#141414]/25 decoration-2 underline-offset-[6px] transition-colors hover:decoration-[#f97316]"
+            >
+              what developer events cost and return
+            </Link>
+            , or start with{" "}
+            <Link
+              href="/blog/what-is-developer-marketing"
+              className="font-medium text-[#141414] underline decoration-[#141414]/25 decoration-2 underline-offset-[6px] transition-colors hover:decoration-[#f97316]"
+            >
+              what developer marketing is
+            </Link>
             .
           </p>
         </Container>
       </PaperSection>
       <PaperCta
         index={6}
-        title="Ready to Grow Your Developer Community?"
+        title="Need a DevRel Team Without the Hiring?"
         description="Developer advocacy, community growth, launch campaigns, organic distribution, and creator programs for developer products."
       />
       {/* <DevRelPricing /> */}

@@ -21,11 +21,33 @@ type SitemapEntry = {
   localized?: boolean;
 };
 
-const STATIC_LAST_MODIFIED = "2026-08-12";
-const LEGAL_LAST_MODIFIED = "2025-01-15";
+/**
+ * Last real content change per page (YYYY-MM-DD). Update the date when you
+ * change a page's copy, so crawlers and AI search see honest freshness.
+ */
+const PAGE_LAST_MODIFIED: Record<string, string> = {
+  "/": "2026-11-09",
+  "/technical-content-marketing": "2026-10-30",
+  "/developer-documentation-dx-audit": "2026-10-29",
+  "/developer-video-production": "2026-11-08",
+  "/developer-relations-growth-campaigns": "2026-11-08",
+  "/about-us": "2026-10-29",
+  "/product": "2026-11-02",
+  "/case-studies": "2026-11-05",
+  "/careers": "2026-11-10",
+  "/devrel-jobs": "2026-11-10",
+  "/team": "2026-11-08",
+  "/events": "2026-11-07",
+  "/calendar": "2026-11-07",
+  "/brand": "2026-11-07",
+};
+const STATIC_LAST_MODIFIED = "2026-11-09";
+const lastModified = (path: string) =>
+  PAGE_LAST_MODIFIED[path] ?? STATIC_LAST_MODIFIED;
+const LEGAL_LAST_MODIFIED = "2026-11-09";
 const GROWTH_PAGES_LAST_MODIFIED = "2026-10-29";
 const DEVREL_COHORT_LAST_MODIFIED = "2026-11-02";
-const INFLUENCER_PAGE_LAST_MODIFIED = "2026-11-03";
+const INFLUENCER_PAGE_LAST_MODIFIED = "2026-11-09";
 
 function escapeXml(value: string) {
   return value
@@ -60,7 +82,7 @@ export async function GET() {
   const localizedStaticPaths: SitemapEntry[] = LOCALIZED_PUBLIC_PATHS.map(
     (path) => ({
       path,
-      lastModified: STATIC_LAST_MODIFIED,
+      lastModified: lastModified(path),
       priority: path === "/" ? 1.0 : 0.8,
       localized: true,
     }),
@@ -124,13 +146,13 @@ export async function GET() {
     },
     {
       path: "/case-studies",
-      lastModified: STATIC_LAST_MODIFIED,
+      lastModified: lastModified("/case-studies"),
       priority: 0.8,
     },
-    { path: "/careers", lastModified: STATIC_LAST_MODIFIED, priority: 0.8 },
+    { path: "/careers", lastModified: lastModified("/careers"), priority: 0.8 },
     {
       path: "/devrel-jobs",
-      lastModified: STATIC_LAST_MODIFIED,
+      lastModified: lastModified("/devrel-jobs"),
       priority: 0.8,
     },
     {
@@ -139,11 +161,24 @@ export async function GET() {
       priority: 0.8,
     },
     { path: "/oss", lastModified: OSS_SNAPSHOT_DATE, priority: 0.8 },
-    { path: "/blog", lastModified: STATIC_LAST_MODIFIED, priority: 0.8 },
-    { path: "/brand", lastModified: STATIC_LAST_MODIFIED, priority: 0.6 },
-    { path: "/team", lastModified: STATIC_LAST_MODIFIED, priority: 0.7 },
-    { path: "/events", lastModified: STATIC_LAST_MODIFIED, priority: 0.7 },
-    { path: "/calendar", lastModified: STATIC_LAST_MODIFIED, priority: 0.5 },
+    {
+      path: "/blog",
+      // The blog index changes whenever a post is published or updated.
+      lastModified:
+        getAllPosts()
+          .map((post) => post.updatedDate)
+          .sort()
+          .at(-1) ?? STATIC_LAST_MODIFIED,
+      priority: 0.8,
+    },
+    { path: "/brand", lastModified: lastModified("/brand"), priority: 0.6 },
+    { path: "/team", lastModified: lastModified("/team"), priority: 0.7 },
+    { path: "/events", lastModified: lastModified("/events"), priority: 0.7 },
+    {
+      path: "/calendar",
+      lastModified: lastModified("/calendar"),
+      priority: 0.5,
+    },
     { path: "/terms", lastModified: LEGAL_LAST_MODIFIED, priority: 0.5 },
     { path: "/privacy", lastModified: LEGAL_LAST_MODIFIED, priority: 0.5 },
     ...getJobOpenings("en").map((job) => ({

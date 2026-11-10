@@ -1,7 +1,7 @@
 import type { StaticImageData } from "next/image";
 import {
   Brightdata,
-  Enteligence,
+  Entelligence,
   EntelligenceFull,
   Ittybit,
   IttybitFull,
@@ -34,7 +34,7 @@ export type ClientLogo = {
 export const clientLogos: Record<string, ClientLogo> = {
   brightdata: { icon: Brightdata },
   corsair: { icon: Corsair },
-  "entelligence-ai": { icon: Enteligence, full: EntelligenceFull },
+  "entelligence-ai": { icon: Entelligence, full: EntelligenceFull },
   ittybit: { icon: Ittybit, full: IttybitFull },
   jozu: { icon: Jozu, full: JozuFull },
   litellm: { icon: LiteLLM, full: LiteLLMFull },

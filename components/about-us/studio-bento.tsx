@@ -44,12 +44,12 @@ const ROOT: Node = {
 };
 const CONTENT: Node = {
   name: "Technical Content",
-  sub: "300+ tutorials & guides",
+  sub: "400+ tutorials & guides",
   icon: PenNib,
 };
 const DEVREL: Node = {
   name: "DevRel & Growth",
-  sub: "10+ high-impact events",
+  sub: "40+ developer events",
   icon: Megaphone,
 };
 const DOCS: Node = {
@@ -180,9 +180,9 @@ const VOICES = homeTestimonials
 
 /** The work behind the principle. */
 const PROOF = [
-  { label: "Tutorials & guides", value: "300+" },
+  { label: "Tutorials & guides", value: "400+" },
   { label: "Docs audits", value: "15+" },
-  { label: "Developer events", value: "10+" },
+  { label: "Developer events", value: "40+" },
 ];
 
 /** The craft's tools, as an even icon grid that fades into the card. */
@@ -262,7 +262,7 @@ export function StudioBento() {
           >
             <div className="relative z-10 max-w-[460px]">
               <h2 className="text-[34px] font-semibold leading-[1.02] tracking-[-0.05em] text-[#2a0f00] sm:text-[44px] md:text-[52px]">
-                We empower tech brands to build thriving developer communities
+                We help devtool teams reach more developers
               </h2>
               <p className="mt-5 text-[15px] leading-[1.6] text-[#2a0f00]/75">
                 Turn technical complexity into developer-friendly storytelling.
@@ -321,10 +321,10 @@ export function StudioBento() {
                 </span>
                 <span className="leading-tight">
                   <span className="block text-[13px] font-medium text-[#141414]">
-                    Trusted by DevRel leads
+                    Trusted by 35+ teams
                   </span>
                   <span className="block text-[11.5px] text-[#141414]/55">
-                    at Jozu, Nebius &amp; Entelligence
+                    across devtools, AI &amp; open source
                   </span>
                 </span>
               </motion.div>
@@ -357,7 +357,7 @@ export function StudioBento() {
                 <span style={{ color: PRINT }}>actually read.</span>
               </p>
               <p className="mt-4 max-w-[360px] text-[15px] leading-[1.6] text-[#141414]/60">
-                Deliver clear, technical content that developers value.
+                Written by engineers, with code samples that run.
               </p>
             </div>
 

@@ -39,7 +39,7 @@ import { cn } from "@/lib/utils";
 
 const TITLE = "Results: GitHub Stars, Rankings, and Reach";
 const DESCRIPTION =
-  "Every Studio1 result in one place, with sources: 12,000+ GitHub stars for Memori, 300 to 2,000 for Corsair in five weeks, 16K+ for Nebius, and more.";
+  "Every Studio1 result in one place, with sources: 12,000+ GitHub stars for Memori, 300 to 2,000 for Corsair in five weeks, and more.";
 
 export async function generateMetadata(): Promise<Metadata> {
   return pageMetadata({
@@ -804,8 +804,8 @@ export default function ResultsPage() {
 
       <PaperCta
         index={3}
-        title="Want Results Like These?"
-        description="Every number on this page started with one call. Share your goals and we will map what moves adoption for you."
+        title="See Which Numbers You Can Move"
+        description="Share your goals and we will map which of these results fit your product and stage."
       />
     </div>
   );

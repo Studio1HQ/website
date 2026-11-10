@@ -17,10 +17,10 @@ export default function Hero() {
       primaryCta={t("primaryCta")}
       secondaryCta={t("secondaryCta")}
       stats={[
-        { value: "10+", label: t("stats.events") },
-        { value: "7+", label: t("stats.teams") },
-        { value: "35+", label: t("stats.partners") },
-        { value: "5+", label: t("stats.launch") },
+        { value: "40+", label: t("stats.events") },
+        { value: "35+", label: t("stats.teams") },
+        { value: "30+", label: t("stats.partners") },
+        { value: "3M+", label: t("stats.views") },
       ]}
       highlights={[
         "Developer advocacy",

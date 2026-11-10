@@ -207,8 +207,8 @@ export function TeamPage() {
                       Studio1 is hiring.
                     </p>
                     <p className="mt-1 text-[14px] leading-[1.55] text-white/80">
-                      If one of the open seats below fits you, we would like to
-                      hear from you.
+                      Want to work with this team? See the open and upcoming
+                      roles on our careers page.
                     </p>
                     <Link
                       href="/careers"
@@ -297,10 +297,10 @@ export function TeamPage() {
           >
             <span>
               <span className="block text-[24px] font-medium tracking-[-0.04em]">
-                Want one of these seats?
+                Want to work with this team?
               </span>
               <span className="mt-1 block text-[15px] text-[#141414]/60">
-                See the open roles and how we hire.
+                See open and upcoming roles, and how we hire.
               </span>
             </span>
             <span className="inline-flex items-center gap-2 rounded-full bg-[#141414] px-5 py-3 text-[14px] font-medium text-white transition-colors group-hover:bg-[#f97316]">

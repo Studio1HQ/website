@@ -46,6 +46,8 @@ export type CaseStudyMeta = {
   /** Exactly one study should be featured on the listing page. */
   featured: boolean;
   date: string;
+  /** Last content review (YYYY-MM-DD). Falls back to `date`. Feeds dateModified. */
+  updatedDate: string;
   order: number;
   cover: string;
   tags: string[];
@@ -55,6 +57,12 @@ export type CaseStudyMeta = {
   quotes: CaseStudyQuote[];
   /** Qualitative outcomes for impact lists and metric-light studies. */
   outcomes: string[];
+  /** Where the client stood before the work, in one or two sentences. Empty when not set. */
+  challenge: string;
+  /** What the engagement set out to do, as short lines. */
+  goals: string[];
+  /** Concrete things Studio1 shipped (not outcomes). Story falls back to services. */
+  deliverables: string[];
   /** Theme-matched closing CTA line, e.g. "Need docs that convert developers?" */
   ctaHook: string;
   readingTimeMinutes: number;
@@ -76,12 +84,17 @@ type Frontmatter = {
   timeline?: string;
   featured?: boolean;
   date?: string;
+  /** Optional in every locale; untranslated files fall back to `date`. */
+  updatedDate?: string | Date;
   order?: number;
   cover?: string;
   tags?: string[];
   metrics?: CaseStudyMetric[];
   quotes?: CaseStudyQuote[];
   outcomes?: string[];
+  challenge?: string;
+  goals?: string[];
+  deliverables?: string[];
   ctaHook?: string;
   /** Draft studies stay in the repo but are excluded from every public surface. */
   draft?: boolean;
@@ -91,7 +104,28 @@ function isDraft(data: Frontmatter) {
   return data.draft === true;
 }
 
+/** YAML may parse an unquoted date as a Date; normalise to YYYY-MM-DD. */
+function toDateString(value: unknown): string | undefined {
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value.toISOString().split("T")[0];
+  }
+  if (typeof value === "string" && value.trim()) {
+    return value.trim().split("T")[0];
+  }
+  return undefined;
+}
+
+function toStringList(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter(
+        (item): item is string => typeof item === "string" && item.trim() !== "",
+      )
+    : [];
+}
+
 function toMeta(slug: string, data: Frontmatter, content: string): CaseStudyMeta {
+  const date =
+    toDateString(data.date) ?? new Date().toISOString().split("T")[0];
   return {
     slug,
     title: data.title ?? "Untitled",
@@ -104,7 +138,8 @@ function toMeta(slug: string, data: Frontmatter, content: string): CaseStudyMeta
     website: data.website ?? "",
     timeline: data.timeline ?? "",
     featured: data.featured === true,
-    date: data.date ?? new Date().toISOString().split("T")[0],
+    date,
+    updatedDate: toDateString(data.updatedDate) ?? date,
     order: typeof data.order === "number" ? data.order : 999,
     cover: data.cover ?? "/opengraph-image.png",
     tags: Array.isArray(data.tags) ? data.tags : [],
@@ -116,6 +151,9 @@ function toMeta(slug: string, data: Frontmatter, content: string): CaseStudyMeta
         )
       : [],
     outcomes: Array.isArray(data.outcomes) ? data.outcomes : [],
+    challenge: typeof data.challenge === "string" ? data.challenge.trim() : "",
+    goals: toStringList(data.goals),
+    deliverables: toStringList(data.deliverables),
     ctaHook: data.ctaHook ?? "",
     readingTimeMinutes: estimateReadingMinutes(content),
   };

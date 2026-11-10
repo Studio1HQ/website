@@ -11,7 +11,7 @@ export default function Hero() {
       titleAccent="Product Launch"
       titleRest="Service for Developer Tools"
       description="Launch plans, demo videos, and launch-day support across Reddit, Hacker News, X, LinkedIn, and Product Hunt."
-      primaryCta="Book a Call"
+      primaryCta="Book a Strategy Call"
       secondaryCta="Explore Services"
       stats={[
         { value: "50K+", label: "Memori Reddit launch" },

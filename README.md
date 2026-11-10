@@ -67,7 +67,7 @@ We help tech companies grow developer communities and boost engagement through D
 <table>
   <tr>
     <td width="22%"><a href="https://studio1hq.com/case-studies/nebius"><strong>Nebius</strong></a></td>
-    <td>300+ deliverables, 29 framework integrations, an open-source library with 16K+ stars, and launch support across every major Token Factory moment.</td>
+    <td>400+ deliverables, 29 framework integrations, an open-source library with 16K+ stars, and launch support across every major Token Factory moment.</td>
   </tr>
   <tr>
     <td><a href="https://studio1hq.com/case-studies/jozu"><strong>Jozu</strong></a></td>

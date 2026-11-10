@@ -31,15 +31,15 @@ const contentData = {
     points: [
       {
         icon: Target,
-        text: "Deliver clear, technical content that developers value",
+        text: "Content written by engineers who use the product",
       },
       {
         icon: Lightbulb,
-        text: "Encourage creativity and constant learning",
+        text: "Code samples tested before they ship",
       },
       {
         icon: TrendUp,
-        text: "Drive measurable growth with every project",
+        text: "Measure developer adoption, not just reach",
       },
       {
         icon: Users,
@@ -47,7 +47,7 @@ const contentData = {
       },
       {
         icon: Globe,
-        text: "Lead with quality and developer-first thinking",
+        text: "Docs and DX that get developers to a first success",
       },
     ],
   },
@@ -57,23 +57,23 @@ const contentData = {
     points: [
       {
         icon: Rocket,
-        text: "Turn technical complexity into developer-friendly storytelling",
+        text: "Run launches developers can try on day one",
       },
       {
         icon: HandHeart,
-        text: "Help clients hit growth goals through strategic content",
+        text: "Tie every piece of content to a growth goal",
       },
       {
         icon: Heart,
-        text: "Foster a collaborative and inclusive team culture",
+        text: "Show up in developer communities, online and at events",
       },
       {
         icon: Globe,
-        text: "Commit to sustainable, long-term results",
+        text: "Build programs that keep working after launch",
       },
       {
         icon: Users,
-        text: "Create meaningful impact for both SaaS teams and developer communities",
+        text: "Do work that helps both devtool teams and the developer communities they serve",
       },
     ],
   },
@@ -169,22 +169,22 @@ export const VisionMission = () => {
         <SectionHead
           title={
             <>
-              What <Accent>Fuels Us?</Accent>
+              Our Vision and <Accent>Mission</Accent>
             </>
           }
-          description="We help SaaS teams build developer trust through high-impact content and DevRel strategy that scales with their product."
+          description="We help devtool, AI, and open-source teams earn developer trust with technical content and DevRel programs that grow with the product."
         />
 
         <div className="relative isolate mt-10 grid grid-cols-1 gap-3 md:mt-12 md:grid-cols-2">
           <ContentBlock
             data={contentData.vision}
             index={0}
-            lede="Clear, technical content and DevRel that developers value and trust."
+            lede="Technical content and DevRel that engineers write, test, and stand behind."
           />
           <ContentBlock
             data={contentData.mission}
             index={1}
-            lede="Turn technical complexity into developer-friendly storytelling that drives growth."
+            lede="Help devtool, AI, and open-source teams turn product depth into developer adoption."
           />
         </div>
       </Container>

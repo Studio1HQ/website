@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Process from "@/components/pages/blogs-as-a-service/process";
 import type { Metadata } from "next";
 import Hero from "@/components/pages/blogs-as-a-service/hero";
@@ -37,7 +38,7 @@ const blogFaqItems: FAQItem[] = [
     question:
       "What does a technical content marketing agency for developer tools do?",
     answer:
-      "It plans, writes, and distributes the content developers use to evaluate a tool: tutorials, integration guides, comparison posts, deep dives, and SEO articles that answer the questions developers search for. Studio1 does this for devtool, AI, and SaaS teams with engineers and technical writers matched to your stack, and can distribute each piece on Reddit, X, LinkedIn, Dev.to, and daily.dev. For Bright Data, that meant 50+ live posts on brightdata.com in a year.",
+      "It plans, writes, and distributes the content developers use to evaluate a tool: tutorials, integration guides, comparison posts, deep dives, and SEO articles that answer the questions developers search for. Studio1 does this for devtool, AI, and open-source teams with engineers and technical writers matched to your stack, and can distribute each piece on Reddit, X, LinkedIn, Dev.to, and daily.dev. For Bright Data, that meant 50+ live posts on brightdata.com in a year.",
   },
   {
     question:
@@ -81,9 +82,9 @@ const blogFaqItems: FAQItem[] = [
       "We usually start with a topic, then send an outline and overview for approval. After your team approves the direction, we write the draft, review it internally, send it for client review, revise, and then publish on the agreed channel.",
   },
   {
-    question: "Can content publish from Studio1 or individual author profiles?",
+    question: "Where does the content get published?",
     answer:
-      "Yes. Depending on the goal, content can publish on your company blog, your Dev.to or Medium profile, Studio1 profiles, or individual author profiles. We also support social posts from either your channels or ours when that fits the campaign.",
+      "Wherever your developers will find it. Most pieces publish on your company blog, and many are also syndicated to developer platforms such as Dev.to and Medium with canonical links back to you. We plan the channels with you for each piece, along with the social posts that go with it.",
   },
 ];
 
@@ -124,11 +125,11 @@ const contentWorkflow = [
   {
     title: "Publishing on the right channel",
     description:
-      "Content can ship on your company blog, Dev.to, Medium, or from Studio1/team profiles depending on the goal and audience.",
+      "Content ships on your company blog and the developer platforms that fit the goal and audience.",
     points: [
       "Company blog publishing",
-      "Studio1 or author profile publishing",
-      "Dev.to and Medium syndication",
+      "Developer platform syndication",
+      "Dev.to and Medium distribution",
       "Canonical and attribution guidance",
     ],
   },
@@ -194,7 +195,7 @@ export default function Page() {
   const serviceSchema = serviceJsonLd({
     name: "Technical Content Marketing Agency for Developer Tools",
     description:
-      "Technical content marketing agency for developer tools, AI, and SaaS teams: engineer-written tutorials, integration guides, comparisons, and SEO articles that build trust and drive adoption.",
+      "Technical content marketing agency for developer tools, AI, and open-source teams: engineer-written tutorials, integration guides, comparisons, and SEO articles that build trust and drive adoption.",
     path: "/technical-content-marketing",
     serviceType: "Technical Content Marketing",
   });
@@ -243,12 +244,29 @@ export default function Page() {
             subtitle="Common questions about our technical content marketing services."
             items={blogFaqItems}
           />
+          <p className="mt-8 text-center text-[15px] text-[var(--p-muted)]">
+            Planning your content? Read our{" "}
+            <Link
+              href="/blog/technical-content-marketing-for-devtools"
+              className="font-medium text-[#141414] underline decoration-[#141414]/25 decoration-2 underline-offset-[6px] transition-colors hover:decoration-[#f97316]"
+            >
+              technical content marketing guide
+            </Link>{" "}
+            and{" "}
+            <Link
+              href="/blog/is-technical-writing-dead"
+              className="font-medium text-[#141414] underline decoration-[#141414]/25 decoration-2 underline-offset-[6px] transition-colors hover:decoration-[#f97316]"
+            >
+              what AI changes for docs, blogs and developer content
+            </Link>
+            .
+          </p>
         </Container>
       </PaperSection>
       <PaperCta
         index={6}
-        title="Ready to Ship Technical Content Developers Trust?"
-        description="We create developer tutorials, guides, and SEO content that build trust, increase product visibility, and drive technical adoption."
+        title="Need Technical Content Developers Trust?"
+        description="Engineer-written tutorials, integration guides, and SEO articles that developers read, run, and share."
       />
     </div>
   );

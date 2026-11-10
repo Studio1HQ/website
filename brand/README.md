@@ -148,8 +148,8 @@ Only two gradients exist. Use nothing else.
 ### Type rules
 
 - Headlines get tight negative tracking. Body text is tracked slightly tight too (−0.03em).
-- **Accent words:** colour one or two key words of a headline in print orange, the words the piece is about: "Technical Content and **DevRel** Partner for **DevTools**". Never a whole line.
-- Stats are written `35+`, `2M+`, `10+`, with the "+" in orange.
+- **Accent words:** colour one or two key words of a headline in print orange, the words the piece is about: "Developer Marketing & **DevRel** Agency for **DevTools**". Never a whole line.
+- Stats are written `35+`, `3M+`, `10+`, with the "+" in orange.
 - Uppercase is only for small eyebrows and captions. Never set headlines in all caps.
 - Headlines and buttons use Title Case, as on the site. Body copy and captions use sentence case.
 
@@ -246,13 +246,13 @@ We write like engineers explaining something to other engineers: plain, specific
 
 Real lines from the site:
 
-> Technical Content and DevRel Partner for DevTools
+> Developer Marketing & DevRel Agency for DevTools
 
-> We help SaaS and devtool teams publish content, docs, and DevRel programs that build search visibility and trust.
+> Studio1 helps devtool, AI, and open-source teams get found and adopted by developers through technical content, docs, video, launches, and community programs.
 
 > Ready to Scale Developer Adoption?
 
-- **Numbers and names over adjectives.** "300+ deliverables, 29 framework integrations" beats "massive impact".
+- **Numbers and names over adjectives.** "400+ deliverables, 29 framework integrations" beats "massive impact".
 - **"We"** is Studio1. **"You"** is the reader.
 - **Short sentences.** One idea each.
 - **No hype:** avoid revolutionary, game-changing, unlock, supercharge, leverage, cutting-edge, seamless.

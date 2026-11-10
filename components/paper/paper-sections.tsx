@@ -356,7 +356,7 @@ export function PaperLogos() {
         <IndexBar
           index={1}
           name="Trusted by"
-          aside="35+ devtool and SaaS teams"
+          aside="35+ devtool and AI teams"
         />
         <ul
           role="list"
@@ -400,25 +400,25 @@ const STATS = [
   {
     value: 35,
     suffix: "",
-    label: "Devtool and SaaS teams",
+    label: "Devtool and AI teams",
     icons: [UsersThree, Code, Star],
   },
   {
-    value: 2,
+    value: 3,
     suffix: "M",
     label: "Total content views",
     icons: [Eye, TrendUp, Article],
   },
   {
-    value: 10,
+    value: 40,
     suffix: "",
-    label: "High-impact developer events",
+    label: "Developer events",
     icons: [Ticket, CalendarCheck, UsersThree],
   },
   {
     value: 30,
     suffix: "",
-    label: "Successful partnerships",
+    label: "Partnerships",
     icons: [Handshake, PlugsConnected, SealCheck],
   },
 ];
@@ -503,7 +503,7 @@ type AboutToken =
 const ABOUT_TOKENS: AboutToken[] = [
   { kind: "word", text: "Studio1", accent: true },
   ...(
-    "is a technical content and developer growth partner for SaaS and devtool teams. We produce".split(
+    "is a DevRel and developer marketing agency for devtool, AI, and open-source teams. We produce".split(
       " ",
     ) as string[]
   ).map((text): AboutToken => ({ kind: "word", text })),
@@ -642,7 +642,7 @@ export function CountUp({
     return () => controls.stop();
   }, [inView, reduceMotion, value]);
 
-  // Small values count in whole steps; "2M" counts in tenths.
+  // Small values count in whole steps; "3M" counts in tenths.
   const text =
     value < 5 && shown < value ? shown.toFixed(1) : String(Math.round(shown));
   return (
@@ -760,7 +760,7 @@ export function PaperCreation() {
             MUTED,
           )}
         >
-          Developer-first content. Fast turnaround.
+          Written by engineers. Measured by developer adoption.
         </p>
       </Container>
     </PaperSection>
@@ -917,13 +917,13 @@ const WORK = [
       label: "GitHub stars on the open-source examples library",
     },
     outcomeNote:
-      "300+ deliverables, and day-one support for every major launch.",
+      "400+ deliverables, and day-one support for every major launch.",
     situation:
       "Token Factory competes for developers who choose by building, so Nebius needed the product inside the frameworks, examples and events developers already use.",
     changed:
       "We worked as an extension of the team: articles, video and demos, 29 framework and gateway integrations, an open-source library of agent apps, workshops, and launch coverage.",
     result:
-      "300+ deliverables in under two years, 16K+ GitHub stars on the examples library, and day-one support for every major launch.",
+      "400+ deliverables in nearly two years, 16K+ GitHub stars on the examples library, and day-one support for every major launch.",
     quote: {
       text: "Studio1 has been an exceptional partner: fast-moving, creative, and highly aligned with our goals.",
       author: "Dylan Bristot",
@@ -940,7 +940,7 @@ const WORK = [
     ratio: 1194 / 1164,
     metrics: [
       [Star, "16K+", "GitHub stars on the examples library"],
-      [Stack, "300+", "deliverables over nearly two years"],
+      [Stack, "400+", "deliverables over nearly two years"],
       [PlugsConnected, "29", "framework integrations adding Nebius"],
     ],
     tags: [
@@ -1012,7 +1012,7 @@ const WORK = [
   },
   {
     client: "Bright Data",
-    span: "12+ months",
+    span: "1 year",
     shipped: [
       "50+ live posts",
       "Comparison & integration guides",
@@ -1082,7 +1082,7 @@ const WORK = [
   },
   {
     client: "LiteLLM",
-    span: "Docs & DX",
+    span: "Docs revamp",
     shipped: [
       "New Learn section",
       "SDK + Gateway quickstarts",
@@ -1263,18 +1263,18 @@ const PROOFS: Record<
   { note: string; prints: [ProofPrint, ProofPrint] }
 > = {
   Nebius: {
-    note: "with day-one support for every launch",
+    note: "with day-one support for major launches",
     prints: [
       {
         src: "/case-studies/nebius/awesome-ai-apps-readme-v2.webp",
         ratio: 1772 / 2355,
-        name: "awesome-ai-apps.webp",
+        name: "awesome-ai-apps",
         alt: "The Awesome AI Apps README, maintained by the Studio1 team",
       },
       {
         src: "/case-studies/nebius/meetup-talk.webp",
         ratio: 720 / 311,
-        name: "meetup-talk.webp",
+        name: "meetup-talk",
         alt: "A Studio1 talk at a Nebius developer meetup",
       },
     ],
@@ -1285,13 +1285,13 @@ const PROOFS: Record<
       {
         src: "/case-studies/brightdata/bright-data-vs-zyte-google.webp",
         ratio: 1024 / 570,
-        name: "serp-bright-data-vs-zyte.webp",
+        name: "google-results",
         alt: "Google results for “bright data vs zyte”, with the Studio1 comparison post first",
       },
       {
         src: "/case-studies/brightdata/docs-deep-research-architecture.webp",
         ratio: 2000 / 1293,
-        name: "docs-architecture.webp",
+        name: "docs-architecture",
         alt: "The Deep Research Agent Architecture page in the Bright Data docs",
       },
     ],
@@ -1302,13 +1302,13 @@ const PROOFS: Record<
       {
         src: "/case-studies/memori/memori-launch-reddit-redacted.png",
         ratio: 1488 / 968,
-        name: "launch-post.png",
-        alt: "The Memori open-source launch post on r/LocalLLaMA",
+        name: "launch-post",
+        alt: "The Memori open-source launch post on Reddit",
       },
       {
         src: "/case-studies/memori/memori-reddit-launch-stats.png",
         ratio: 1318 / 988,
-        name: "launch-stats.png",
+        name: "launch-stats",
         alt: "Launch post stats: 50K views and a 95.6% upvote ratio",
       },
     ],
@@ -1319,13 +1319,13 @@ const PROOFS: Record<
       {
         src: "/case-studies/litellm/github-guides-activity.webp",
         ratio: 792 / 619,
-        name: "docs-pull-requests.webp",
+        name: "docs-pull-requests",
         alt: "Studio1 docs pull requests and issues in the BerriAI/litellm repository",
       },
       {
         src: "/case-studies/litellm/litellm-support-feedback.avif",
         ratio: 902 / 170,
-        name: "team-feedback.avif",
+        name: "feedback",
         alt: "Team feedback in Slack: “this is amazing work, i love it”",
       },
     ],
@@ -1629,11 +1629,12 @@ function TapedPrint({
   );
 }
 
-/** The client's sign-off, or a verified result, with a stamp landing on it. */
+/** The client's words, or the headline result, with a stamp landing on it. */
 function SignOff({ work, active }: { work: FeaturedWork; active: boolean }) {
   const quote = "quote" in work ? work.quote : undefined;
   const proof = "outcomeNote" in work ? work.outcomeNote : undefined;
-  const signer = quote ? quote.author.split(" ")[0].toLowerCase() : "studio1";
+  // The cursor is always Studio1 working on the file, never a client person.
+  const signer = "studio1";
 
   return (
     <figure className="relative bg-white p-4 shadow-[0_22px_40px_-24px_rgba(20,20,20,0.55),0_1px_0_rgba(20,20,20,0.05)] ring-1 ring-[#141414]/[0.06] lg:p-5">
@@ -1642,7 +1643,7 @@ function SignOff({ work, active }: { work: FeaturedWork; active: boolean }) {
           className="text-[10.5px] font-semibold uppercase tracking-[0.16em]"
           style={{ color: PRINT }}
         >
-          Verified result
+          From the case study
         </p>
       )}
       <blockquote
@@ -1683,8 +1684,8 @@ function SignOff({ work, active }: { work: FeaturedWork; active: boolean }) {
         <RubberStamp
           text={
             quote
-              ? "CLIENT APPROVED · STUDIO1 · "
-              : "VERIFIED RESULT · STUDIO1 · "
+              ? "IN THEIR WORDS · STUDIO1 · "
+              : "FROM THE CASE STUDY · STUDIO1 · "
           }
           active={active}
         />
@@ -1793,7 +1794,7 @@ function ProofSheet({
         <div className="flex items-center gap-3 text-[10.5px] font-medium uppercase tracking-[0.16em] text-[#141414]/45">
           <RegMark />
           <span className="shrink-0 tabular-nums" style={{ color: PRINT }}>
-            Proof {sheetNumber}
+            Case {sheetNumber}
           </span>
           <span aria-hidden className="h-px min-w-6 flex-1 bg-[#141414]/12" />
           <span className="min-w-0 truncate">
@@ -1937,7 +1938,7 @@ function ProofSheet({
             ))}
           </span>
           <span className="hidden truncate sm:inline">
-            Studio1 · {work.client} · OK to print
+            Studio1 · {work.client} · case study
           </span>
           <span className="h-px flex-1 bg-[#141414]/12" />
           <RegMark />
@@ -2312,11 +2313,6 @@ export function PaperTestimonials() {
               <span>
                 <cite className="flex items-center gap-1.5 text-[17px] font-medium not-italic">
                   {current.name}
-                  <SealCheck
-                    weight="fill"
-                    aria-label="Verified client"
-                    className="size-[18px] shrink-0 text-[#1d9bf0]"
-                  />
                 </cite>
                 <span className={cn("text-[14px]", MUTED)}>{current.role}</span>
               </span>

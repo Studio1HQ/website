@@ -59,7 +59,7 @@ export default function Services() {
           What We <span className="text-[#f97316]">Offer</span>
         </>
       }
-      description="Three connected workstreams for AI and DevTool products: audit the docs, write what is missing, then improve the developer path."
+      description="Three connected workstreams for AI and devtool products: audit the docs, write what is missing, then improve the developer path."
       offers={offerings}
     />
   );

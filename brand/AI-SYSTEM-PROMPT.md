@@ -46,7 +46,7 @@ TEXTURE
 
 TYPE
 - Studio1 Sans (Inter). Regular 400 and Medium 500 only. No bold, italics or second font. Letter spacing -0.03em.
-- Headline: Medium, ink, letter spacing -0.045em, line height 1.1, Title Case, centred, usually two lines. One or two keywords in orange, e.g. "Technical Content and DevRel / Partner for DevTools" with DevRel and DevTools orange. 60px on 1500x500, 40px on 1128x191, 72px on a 1200x630 link preview.
+- Headline: Medium, ink, letter spacing -0.045em, line height 1.1, Title Case, centred, usually two lines. One or two keywords in orange, e.g. "Developer Marketing & DevRel / Agency for DevTools" with DevRel and DevTools orange. 60px on 1500x500, 40px on 1128x191, 72px on a 1200x630 link preview.
 - Subline: Regular, ink at 60%, a third of the headline size, 22px below it. Items split by a "·" in ink at 28%: "Content · Docs · Video · DevRel programs · Launches".
 - Eyebrow: 12px Medium, UPPERCASE, letter spacing 0.1em, ink at 55-60%.
 - Orange text only at 40px and up. Smaller orange text uses #C2410C.
@@ -54,7 +54,7 @@ TYPE
 ELEMENTS (two or three per piece; sizes are for a 1500px-wide canvas, scale with it)
 - Selection frame: 1.5px orange outline with 6px padding. 9x9px square handles on the four corners (paper fill, orange border). Layer label: 11px Medium white text on an orange tag, square, outside the frame at the top-left or bottom-right, in kebab-case: card-metrics, button-filled-enabled, block-print, print-swatches.
 - Cursor: a solid ink arrow pointer, 32px, tip up-left, just outside a frame's bottom-right corner, as if about to click. One or two per canvas.
-- Metric card: white, square, 1px soft bottom shadow, 268px wide. Top to bottom: eyebrow "TOTAL CONTENT VIEWS"; a 40px Medium number with an orange "+" ("2M+"), with a square orange tag "↗ growing" on the right; a thin ink sparkline rising left to right with two white dots and an orange end dot over a soft orange fill; a hairline; three 17px stats with orange "+" (35+ Devtool teams, 10+ Dev events, 30+ Partnerships), labels 11px.
+- Metric card: white, square, 1px soft bottom shadow, 268px wide. Top to bottom: eyebrow "TOTAL CONTENT VIEWS"; a 40px Medium number with an orange "+" ("3M+"), with a square orange tag "↗ growing" on the right; a thin ink sparkline rising left to right with two white dots and an orange end dot over a soft orange fill; a hairline; three 17px stats with orange "+" (35+ Devtool teams, 10+ Dev events, 30+ Partnerships), labels 11px.
 - Pill button: fully round, 56px tall, ink fill, 19px Medium label in paper colour; at the right end a 40px orange circle with a white up-right arrow. Often in a frame labelled button-filled-enabled.
 - Block print: a flat orange rectangle with grain, holding a cream dithered image, usually the reaching hand from Michelangelo's Creation of Adam pointing toward the headline. It bleeds off the canvas edge (X header: 320x178px, 52px off the right side).
 - Swatch strip: the eight ramp colours as 22px squares in a row, no gaps, light to dark, in a frame labelled print-swatches.
@@ -116,7 +116,7 @@ All of these files are in the Studio1 brand kit, **studio1-brand.zip**. Upload t
 Give the tool the format, the size, the exact words and the real numbers. It shouldn't have to guess any of them. Examples:
 
 ```text
-Make a LinkedIn post, 1080 x 1350. Headline: "300+ Deliverables for Devtool Teams", with "300+" in orange. Subline: "Content · Docs · Video · DevRel programs". Use the metric card with these numbers only: 300+ deliverables, 29 framework integrations, 35+ devtool teams. Put the hand block print bleeding off the right edge. Build it as HTML and render a PNG.
+Make a LinkedIn post, 1080 x 1350. Headline: "400+ Deliverables for Devtool Teams", with "400+" in orange. Subline: "Content · Docs · Video · DevRel programs". Use the metric card with these numbers only: 400+ deliverables, 29 framework integrations, 35+ devtool teams. Put the hand block print bleeding off the right edge. Build it as HTML and render a PNG.
 ```
 
 ```text

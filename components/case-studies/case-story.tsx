@@ -23,6 +23,13 @@ import { cn } from "@/lib/utils";
 const WELL =
   "bg-[#f1ece4] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)]";
 
+const CHAPTER_COUNT: Record<number, string> = {
+  1: "One",
+  2: "Two",
+  3: "Three",
+  4: "Four",
+};
+
 type Chapter = {
   icon: Icon;
   eyebrow: string;
@@ -84,10 +91,12 @@ function ChapterRow({
 }
 
 /**
- * The engagement told as a short story in four chapters: where the product
- * stood, what it set out to do, what we shipped, and what changed. A line
- * runs down the left and fills as you read; each chapter lights up when the
- * line reaches it. Built only from the study's own facts.
+ * The engagement told as a short story in up to four chapters: where the
+ * client stood (`challenge`), what we set out to do (`goals`), what we
+ * shipped (`deliverables`, else `services`), and what changed (`metrics`).
+ * A chapter is left out when its field is empty, so a heading never sits
+ * over content that does not match it. A line runs down the left and fills
+ * as you read; each chapter lights up when the line reaches it.
  */
 export function CaseStory({ study }: { study: CaseStudyMeta }) {
   const ref = useRef<HTMLOListElement>(null);
@@ -102,9 +111,17 @@ export function CaseStory({ study }: { study: CaseStudyMeta }) {
     mass: 0.5,
   });
 
-  const quote = study.quotes[0];
-  const chapters: Chapter[] = [
-    {
+  const shipped = study.deliverables.length
+    ? study.deliverables
+    : study.services;
+
+  // Each chapter only renders when the study has the data its heading
+  // promises. The hero already shows the description, outcomes and quote,
+  // so the story never reuses them.
+  const chapters: Chapter[] = [];
+
+  if (study.challenge) {
+    chapters.push({
       icon: Compass,
       eyebrow: "The starting point",
       title: `Where ${study.client} stood`,
@@ -121,32 +138,46 @@ export function CaseStory({ study }: { study: CaseStudyMeta }) {
             </span>
           ) : null}
           <p className="max-w-[640px] text-[16px] leading-[1.7] text-[#141414]/65">
-            {study.description}
+            <NumericText>{study.challenge}</NumericText>
           </p>
         </>
       ),
-    },
-    {
+    });
+  }
+
+  if (study.goals.length) {
+    chapters.push({
       icon: Flag,
       eyebrow: "The purpose",
       title: "What we set out to do together",
       body: (
-        <>
-          <p className="max-w-[640px] text-[16px] leading-[1.7] text-[#141414]/65">
-            {study.summary}
-          </p>
-        </>
+        <ul className="max-w-[640px] space-y-2.5">
+          {study.goals.map((goal) => (
+            <li
+              key={goal}
+              className="flex gap-3 text-[16px] leading-[1.6] text-[#141414]/65"
+            >
+              <span className="mt-[0.6em] size-1.5 shrink-0 rounded-full bg-[#f97316]" />
+              <span>
+                <NumericText>{goal}</NumericText>
+              </span>
+            </li>
+          ))}
+        </ul>
       ),
-    },
-    {
+    });
+  }
+
+  if (shipped.length) {
+    chapters.push({
       icon: Rocket,
       eyebrow: "The journey",
       title: "What we shipped",
-      body: study.outcomes.length ? (
+      body: (
         <ul className="grid gap-2 sm:grid-cols-2">
-          {study.outcomes.slice(0, 4).map((outcome) => (
+          {shipped.slice(0, 6).map((item) => (
             <li
-              key={outcome}
+              key={item}
               className={cn(
                 "flex gap-3 rounded-[6px] p-4 text-[14.5px] leading-[1.55] text-[#141414]/80",
                 WELL,
@@ -154,22 +185,23 @@ export function CaseStory({ study }: { study: CaseStudyMeta }) {
             >
               <span className="mt-[0.5em] size-1.5 shrink-0 rounded-full bg-[#f97316]" />
               <span>
-                <NumericText>{outcome}</NumericText>
+                <NumericText>{item}</NumericText>
               </span>
             </li>
           ))}
         </ul>
-      ) : (
-        <p className="text-[16px] leading-[1.7] text-[#141414]/65">
-          {study.services.join(" · ")}
-        </p>
       ),
-    },
-    {
+    });
+  }
+
+  // Studies without metrics already list their outcomes in the hero's
+  // "What changed" panel, so the story ends at the work.
+  if (study.metrics.length) {
+    chapters.push({
       icon: TrendUp,
       eyebrow: "The value",
       title: "What changed",
-      body: study.metrics.length ? (
+      body: (
         <dl className="grid gap-2 sm:grid-cols-3">
           {study.metrics.slice(0, 3).map((metric, i) => (
             <div key={metric.label} className={cn("rounded-[6px] p-4", WELL)}>
@@ -187,21 +219,11 @@ export function CaseStory({ study }: { study: CaseStudyMeta }) {
             </div>
           ))}
         </dl>
-      ) : quote ? (
-        <blockquote className="max-w-[640px] border-l-[3px] border-[#f97316] pl-5 text-[18px] font-medium leading-[1.55] tracking-[-0.015em]">
-          &ldquo;{quote.text}&rdquo;
-          <footer className="mt-3 text-[13px] font-normal text-[#141414]/55">
-            {quote.author}
-            {quote.role ? `, ${quote.role}` : ""}
-          </footer>
-        </blockquote>
-      ) : (
-        <p className="text-[16px] leading-[1.7] text-[#141414]/65">
-          {study.summary}
-        </p>
       ),
-    },
-  ];
+    });
+  }
+
+  if (chapters.length === 0) return null;
 
   return (
     <section
@@ -215,7 +237,9 @@ export function CaseStory({ study }: { study: CaseStudyMeta }) {
           The <span className="text-[#ea580c]">{study.client}</span> story
         </h2>
         <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-[#141414]/45">
-          Four chapters · {study.services.length} services
+          {CHAPTER_COUNT[chapters.length] ?? chapters.length}{" "}
+          {chapters.length === 1 ? "chapter" : "chapters"} ·{" "}
+          {study.services.length} services
         </p>
       </div>
       <ol ref={ref} className="relative mt-10">

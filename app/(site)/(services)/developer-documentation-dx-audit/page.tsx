@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Process from "@/components/pages/docs-as-a-service/process";
 import React from "react";
 import type { Metadata } from "next";
@@ -42,9 +43,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const docsFaqItems: FAQItem[] = [
   {
-    question: "What do Developer Documentation & DX Audit Services include?",
+    question: "What do developer documentation and DX audit services include?",
     answer:
-      "Four connected workstreams: editing existing documentation, writing missing documentation from scratch, docs audits, and developer experience audits across docs, APIs, SDKs, onboarding, dashboards, and developer-facing product surfaces. You can start with any one or run them together.",
+      "Three connected workstreams: a docs audit, documentation work (editing existing pages and writing missing ones from scratch), and developer experience improvements across docs, APIs, SDKs, onboarding, dashboards, and developer-facing product surfaces. You can start with any one or run them together.",
   },
   {
     question: "What does a docs audit deliver?",
@@ -176,7 +177,7 @@ export default function Page() {
   const serviceSchema = serviceJsonLd({
     name: "Developer Documentation & DX Audit Services",
     description:
-      "Developer documentation and DX audit services for AI and DevTool products: onboarding reviews, API clarity, quickstarts, reference docs, and a clearer path to first success.",
+      "Developer documentation and DX audit services for AI and devtool products: onboarding reviews, API clarity, quickstarts, reference docs, and a clearer path to first success.",
     path: "/developer-documentation-dx-audit",
     serviceType: "Developer Documentation, Docs Audit, and DX Improvements",
   });
@@ -226,11 +227,28 @@ export default function Page() {
             subtitle="Common questions about our developer documentation and DX audit services."
             items={docsFaqItems}
           />
+          <p className="mt-8 text-center text-[15px] text-[var(--p-muted)]">
+            Want the background? Read{" "}
+            <Link
+              href="/blog/what-a-dx-audit-covers"
+              className="font-medium text-[#141414] underline decoration-[#141414]/25 decoration-2 underline-offset-[6px] transition-colors hover:decoration-[#f97316]"
+            >
+              what a DX audit covers
+            </Link>{" "}
+            and{" "}
+            <Link
+              href="/blog/is-technical-writing-dead"
+              className="font-medium text-[#141414] underline decoration-[#141414]/25 decoration-2 underline-offset-[6px] transition-colors hover:decoration-[#f97316]"
+            >
+              what AI means for your docs
+            </Link>
+            .
+          </p>
         </Container>
       </PaperSection>
       <PaperCta
         index={6}
-        title="Ready to Get Developers to First Success?"
+        title="Get Developers to First Success Faster"
         description="Documentation audits, DX reviews, and docs improvements that get developers to first success with your product."
       />
     </div>

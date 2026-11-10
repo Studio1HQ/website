@@ -15,7 +15,7 @@ export const COMPANY_MARKS: Record<string, string> = {
   Crawlee: "/assets/logos/crawlee.webp",
   Opire: "/assets/logos/opire.webp",
   "Permit.io": "/assets/logos/permit.webp",
-  "VDK(VMware)": "/assets/logos/vmware.webp",
+  "VDK (VMware)": "/assets/logos/vmware.webp",
   Tolgee: "/assets/logos/tolgee.webp",
   WebCrumbs: "/assets/logos/webcrumbs.webp",
   "Pieces.app": "/assets/logos/pieces.webp",

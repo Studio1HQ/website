@@ -11,7 +11,7 @@ export default function Hero() {
       titleAccent="Show Up"
       titleRest="When Developers Ask AI"
       description="An AEO agency for developer tools: we track what ChatGPT, Perplexity, and Google AI say, then fix why you're missing."
-      primaryCta="Book a Call"
+      primaryCta="Book a Strategy Call"
       secondaryCta="Explore Services"
       stats={[
         { value: "12/30", label: "Bright Data queries in Google's top five" },

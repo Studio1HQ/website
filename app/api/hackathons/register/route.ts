@@ -3,7 +3,7 @@ import { getHackathon } from "@/data/hackathons";
 import { looksAutomated } from "@/lib/form-guard";
 import { readJsonBody } from "@/lib/read-body";
 import { validateRegistration } from "@/lib/hackathon-registration";
-import { isRegistrationOpen } from "@/lib/hackathons";
+import { HACKATHONS_PUBLIC, isRegistrationOpen } from "@/lib/hackathons";
 import { insertRow, isSupabaseConfigured } from "@/lib/supabase-server";
 
 /**
@@ -13,6 +13,9 @@ import { insertRow, isSupabaseConfigured } from "@/lib/supabase-server";
  * refuses, so no registration is ever silently dropped.
  */
 export async function POST(request: Request) {
+  if (!HACKATHONS_PUBLIC) {
+    return NextResponse.json({ error: "Not found." }, { status: 404 });
+  }
   const parsed = await readJsonBody(request, 32 * 1024);
   if (!parsed.ok) {
     return parsed.reason === "too-large"

@@ -29,7 +29,7 @@ export const homeFeatures: Feature[] = [
   {
     title: "Quality",
     description:
-      "Premium tutorials, API docs, and developer onboarding content from a lean team that can support docs, content, and DevRel without a full in-house hire.",
+      "Tutorials, API docs, and onboarding content written by engineers, from a lean team that covers docs, content, and DevRel without a full in-house hire.",
     icon: CubeFocus,
   },
   {
@@ -47,13 +47,13 @@ export const homeFeatures: Feature[] = [
   {
     title: "Support",
     description:
-      "We operate as an embedded team with fast iterations and minimal oversight. Your success is our priority.",
+      "We work as an embedded team with fast iterations and minimal oversight.",
     icon: Headset,
   },
   {
     title: "Results",
     description:
-      "2M+ content views, 10+ high-impact developer events, and Product Hunt #1 launches driving real product growth.",
+      "3M+ content views, 40+ developer events, and a Product Hunt Product of the Day launch.",
     icon: ChartBar,
   },
   {
@@ -180,7 +180,7 @@ Highly recommended. 💯`,
   },
   {
     name: "Ivan Cordoba",
-    role: "CEO & Founder Opire",
+    role: "CEO & Founder, Opire",
     avatar: IvanImg.src,
     content: `Studio1 turned our ideas into clear and engaging content, helping us connect with our community and strengthen our identity.
 
@@ -207,9 +207,9 @@ So far, 10/10 experience!`,
   },
   {
     name: "Agita Jaunzeme",
-    role: "Community Manager, VDK(VMware)",
+    role: "Community Manager, VDK (VMware)",
     avatar: AgitaImg.src,
-    content: `Very fast, good-quality work, results! Nothing to add; I totally recommend working with Amitesh !`,
+    content: `Very fast, good-quality work, results! Nothing to add; I totally recommend working with Amitesh!`,
     highlights: ["Amitesh", "good-quality"],
   },
   {
@@ -235,9 +235,9 @@ The whole process was smooth!`,
     name: "Julia Machado",
     role: "Founder & CEO, WebCrumbs",
     avatar: JuliaImg.src,
-    content: `Arindam gave us a masterclass on how to launch on Product Hunt and I dare to say if it wasn't that we wouldn't have achieved 3rd in our first launch ever and with almost zero preparation.
+    content: `Arindam gave us a masterclass on how to launch on Product Hunt and I dare to say if it wasn't for that we wouldn't have achieved 3rd in our first launch ever and with almost zero preparation.
 
-He write great technical texts that reach an impressive audience.
+He wrote great technical texts that reached an impressive audience.
 
 We'll definitely work with him again!`,
     highlights: [

@@ -36,7 +36,7 @@ const layers = [
   {
     icon: IconDeviceMobile,
     title: "Shorts from the same idea",
-    body: "Short clips and vertical cuts that reuse the strongest explanation without pretending every topic needs a full campaign.",
+    body: "Short clips and vertical cuts that reuse the strongest explanation from the main video.",
   },
 ];
 
@@ -50,7 +50,8 @@ export default function Packaging({ index = 4 }: { index?: number }) {
           <div className="lg:sticky lg:top-28 lg:self-start">
             <h2 className="max-w-md text-[32px] font-medium leading-[1.2] tracking-[-0.045em] sm:text-[40px] lg:text-[46px]">
               <span>
-                Make the technical idea clear before <Accent>play</Accent>
+                Show developers what the video covers before they press{" "}
+                <Accent>play</Accent>
               </span>
             </h2>
             <p className={cn("mt-6 max-w-md text-[16px] leading-[1.6]", MUTED)}>

@@ -32,6 +32,7 @@ import {
   IttybitFull,
   InsForgeFull,
   ByteRover,
+  ByteRoverMark,
   WeaviateFull,
   MaximFull,
   Puck,
@@ -90,10 +91,11 @@ export const navItems: NavItem[] = [
     title: "Home",
     path: "/",
     children: [
+      // Same order as the sections on the home page.
       { title: "Services", path: "/#service-offerings", icon: Briefcase },
-      { title: "Proof", path: "/#testimonials", icon: Star },
-      { title: "Process", path: "/#how-it-works", icon: Lightbulb },
       { title: "Results", path: "/#results", icon: Files },
+      { title: "Proof", path: "/#testimonials", icon: Star },
+      { title: "Process", path: "/#process", icon: Lightbulb },
     ],
   },
   { title: "About Us", path: "/about-us" },
@@ -220,7 +222,7 @@ export const trustedbyLogo = [
   },
   {
     name: "ByteRover",
-    image: ByteRover,
+    image: ByteRoverMark,
     isWhite: true,
     showNameBeside: true,
     className:

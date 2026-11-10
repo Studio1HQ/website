@@ -12,6 +12,7 @@ import {
 } from "motion/react";
 import { ArrowBendDownRight, ArrowUpRight } from "@phosphor-icons/react";
 import {
+  IconBrandGithub,
   IconBrandInstagram,
   IconBrandLinkedin,
   IconBrandX,
@@ -31,6 +32,11 @@ const SOCIAL_LINKS = [
   },
   { href: "https://x.com/Studio1HQ", label: "X", icon: IconBrandX },
   {
+    href: "https://github.com/Studio1HQ",
+    label: "GitHub",
+    icon: IconBrandGithub,
+  },
+  {
     href: "https://www.instagram.com/studio1_hq/",
     label: "Instagram",
     icon: IconBrandInstagram,
@@ -41,6 +47,18 @@ const SOCIAL_LINKS = [
     icon: IconBrandYoutube,
   },
   { href: "https://dev.to/studio1hq", label: "DEV", icon: IconNews },
+] as const;
+
+/** Open-source projects Studio1 runs, linked so people and AI crawlers can find them. */
+const OPEN_SOURCE_LINKS = [
+  {
+    href: "https://github.com/Arindam200/awesome-ai-apps",
+    label: "Awesome AI Apps",
+  },
+  {
+    href: "https://awesomellmbenchmarks.com/",
+    label: "Awesome LLM Benchmarks",
+  },
 ] as const;
 
 const SERVICE_LINKS = [
@@ -238,6 +256,26 @@ export default function PaperFooter() {
                       <SocialIcon className="size-4" />
                     </span>
                     <span className="hidden xl:inline">{label}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <p className={`${heading} mt-8`}>{t("links.openSource")}</p>
+            <ul className="mt-4 space-y-3">
+              {OPEN_SOURCE_LINKS.map(({ href, label }) => (
+                <li key={label}>
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener"
+                    className="group inline-flex items-center gap-1.5 text-[15px] transition-colors duration-200 hover:text-[#f97316]"
+                  >
+                    {label}
+                    <ArrowUpRight
+                      aria-hidden
+                      weight="bold"
+                      className="size-3.5 opacity-40 transition-opacity group-hover:opacity-100"
+                    />
                   </a>
                 </li>
               ))}

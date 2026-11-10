@@ -189,7 +189,7 @@ function SearchCard() {
   return (
     <Shell
       title="Google search"
-      tag="Top 3"
+      tag="Google"
       tagIcon={MagnifyingGlass}
       value="Top 3"
       note="on Google, next to GitHub and IBM"
@@ -585,7 +585,7 @@ function RepoCard() {
           Powered by Nebius · maintained by Studio1
         </p>
         <p className="mt-2 flex flex-wrap gap-1">
-          {["132 projects", "GitHub Trending", "AI agents"].map((chip) => (
+          {["130+ projects", "GitHub Trending", "AI agents"].map((chip) => (
             <span
               key={chip}
               className="bg-[#f97316]/[0.1] px-1.5 py-0.5 text-[10px] font-medium text-[#c2410c]"
@@ -643,7 +643,7 @@ function ListingCard() {
         ))}
       </div>
       <p className="px-1 pt-2 text-[10.5px] leading-snug text-[#141414]/55">
-        Its first Product Hunt launch, with almost no prep time.
+        Its first Product Hunt launch ever.
       </p>
     </Shell>
   );
@@ -694,7 +694,7 @@ function RobotsCard() {
             ["-", "User-agent: GPTBot  Disallow: /"],
             ["-", "User-agent: ClaudeBot  Disallow: /"],
             ["+", "User-agent: GPTBot  Allow: /"],
-            ["+", "User-agent: PerplexityBot  Allow: /"],
+            ["+", "User-agent: ClaudeBot  Allow: /"],
           ]}
         />
       </div>
@@ -745,7 +745,7 @@ function PromptAuditCard() {
 /* Reddit                                                              */
 /* ------------------------------------------------------------------ */
 
-/** Reddit's post insights panel, with the numbers from the screenshot. */
+/** A post's Reddit results, with the numbers from the case study. */
 function InsightsCard({
   client,
   place,
@@ -756,7 +756,7 @@ function InsightsCard({
   rows: [label: string, value: string][];
 }) {
   return (
-    <Shell title="Post insights" tag={client} tagIcon={RedditLogo}>
+    <Shell title="Reddit results" tag={client} tagIcon={RedditLogo}>
       <p className="flex items-center gap-1.5 px-1 text-[10.5px] text-[#141414]/55">
         <RedditLogo
           weight="fill"
@@ -1014,12 +1014,12 @@ export const CONTENT_SIDES: HeroSides = {
       label: "stat · reddit",
       value: "304K+",
       text: "Reddit impressions from developer distribution",
-      client: "Entelligence",
+      client: "Entelligence AI",
       icon: RedditLogo,
     },
     {
       label: "stat · content-views",
-      value: "2M+",
+      value: "3M+",
       text: "content views across our client work",
       client: "Studio1",
       icon: Eye,
@@ -1035,8 +1035,8 @@ export const DOCS_SIDES: HeroSides = {
   stats: [
     {
       label: "stat · trendshift",
-      value: "#2",
-      text: "Repository of the Day after the DX audit",
+      value: "#3",
+      text: "trending in Go on Trendshift after the DX audit",
       client: "OpenLore",
       icon: TrendUp,
     },
@@ -1057,16 +1057,16 @@ export const DEVREL_SIDES: HeroSides = {
   ],
   stats: [
     {
-      label: "stat · reddit",
-      value: "630K+",
-      text: "views across Reddit posts",
+      label: "stat · integrations",
+      value: "29",
+      text: "framework integrations shipped with launch support",
       client: "Nebius",
-      icon: RedditLogo,
+      icon: GitDiff,
     },
     {
       label: "stat · meetups",
       value: "150+",
-      text: "developers at meetups",
+      text: "attendees at one MongoDB meetup talk",
       client: "Memori",
       icon: UsersThree,
     },
@@ -1112,7 +1112,7 @@ export const LAUNCH_SIDES: HeroSides = {
     {
       label: "stat · upvotes",
       value: "300+",
-      text: "upvotes on the Permit Share-If launch",
+      text: "upvotes on Permit's Share-If Product Hunt launch",
       client: "Permit.io",
       icon: ArrowFatUp,
     },
@@ -1136,7 +1136,7 @@ export const AEO_SIDES: HeroSides = {
       label: "stat · reddit",
       value: "304K+",
       text: "Reddit impressions from developer distribution",
-      client: "Entelligence",
+      client: "Entelligence AI",
       icon: RedditLogo,
     },
   ],
@@ -1145,11 +1145,11 @@ export const AEO_SIDES: HeroSides = {
 export const REDDIT_SIDES: HeroSides = {
   cards: [
     {
-      label: "r/LLMDevs · post-insights",
+      label: "entelligence-ai · reddit-results",
       card: (
         <InsightsCard
-          client="Entelligence"
-          place="r/LLMDevs"
+          client="Entelligence AI"
+          place="Discussion post"
           rows={[
             ["Views", "205K"],
             ["Upvotes", "278"],
@@ -1160,7 +1160,7 @@ export const REDDIT_SIDES: HeroSides = {
       ),
     },
     {
-      label: "memori · launch-post",
+      label: "memori · reddit-results",
       card: (
         <InsightsCard
           client="Memori"
@@ -1180,7 +1180,7 @@ export const REDDIT_SIDES: HeroSides = {
       label: "stat · reddit",
       value: "304K+",
       text: "Reddit impressions from adapted blog angles",
-      client: "Entelligence",
+      client: "Entelligence AI",
       icon: RedditLogo,
     },
     {
@@ -1211,7 +1211,7 @@ export const SERVICES_SIDES: HeroSides = {
       label: "stat · reddit",
       value: "304K+",
       text: "Reddit impressions from developer distribution",
-      client: "Entelligence",
+      client: "Entelligence AI",
       icon: RedditLogo,
     },
   ],
@@ -1220,11 +1220,11 @@ export const SERVICES_SIDES: HeroSides = {
 export const DISTRIBUTION_SIDES: HeroSides = {
   cards: [
     {
-      label: "r/LLMDevs · post-insights",
+      label: "entelligence-ai · reddit-results",
       card: (
         <InsightsCard
-          client="Entelligence"
-          place="r/LLMDevs"
+          client="Entelligence AI"
+          place="Discussion post"
           rows={[
             ["Views", "205K"],
             ["Upvotes", "278"],
@@ -1241,7 +1241,7 @@ export const DISTRIBUTION_SIDES: HeroSides = {
       label: "stat · reddit",
       value: "304K+",
       text: "Reddit impressions from adapted blog angles",
-      client: "Entelligence",
+      client: "Entelligence AI",
       icon: RedditLogo,
     },
     {
@@ -1291,14 +1291,14 @@ export const INFLUENCER_SIDES: HeroSides = {
       label: "stat · services",
       value: "3",
       text: "ways to work with creators: campaigns, UGC, and launches",
-      client: "Influencer management",
+      client: "Studio1",
       icon: Megaphone,
     },
     {
       label: "stat · platforms",
       value: "5",
       text: "platforms in one plan, from X to TikTok",
-      client: "Creator mix",
+      client: "Studio1",
       icon: UsersThree,
     },
   ],

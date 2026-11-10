@@ -40,7 +40,7 @@ export default function Services() {
             highlightValues
             className="max-w-5xl"
             stats={[
-              { value: "2M+", label: t("stats.views") },
+              { value: "3M+", label: t("stats.views") },
               { value: "35+", label: t("stats.companies") },
               { value: "10+", label: t("stats.events") },
               { value: "5+", label: t("stats.launch") },
@@ -83,7 +83,7 @@ export default function Services() {
               <div className="flex flex-col gap-2">
                 <div className="flex gap-2 flex-wrap">
                   <Badge className="w-fit bg-accent text-foreground">
-                    <Num>2M+</Num> {t("cards.content.badgeOne")}
+                    <Num>3M+</Num> {t("cards.content.badgeOne")}
                   </Badge>
                   <Badge className="w-fit bg-accent text-foreground">
                     <Num>30+</Num> {t("cards.content.badgeTwo")}

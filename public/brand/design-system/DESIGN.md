@@ -34,8 +34,8 @@ Rules:
 - **Only two weights: 400 (Regular) and 500 (Medium).** Never 600, 700, 800, 900 or 100–300. Headings are 500.
 - **No italics.** There is no italic file, and `font-synthesis: none` stops browsers faking one.
 - **Studio1 Sans is the only brand font.** It is Inter renamed for Studio1: identical letterforms, spacing and kerning. Stack: `"Studio1 Sans", "Inter", Arial, sans-serif`. The old serif-italic accent is retired.
-- **Accent words:** colour one or two keywords of a headline in print orange with `.s1-accent` ("Technical Content and **DevRel** Partner for **DevTools**"). Never a whole line, never body text.
-- Stats are written `35+`, `2M+`, with the "+" in `.s1-accent`.
+- **Accent words:** colour one or two keywords of a headline in print orange with `.s1-accent` ("Developer Marketing & **DevRel** Agency for **DevTools**"). Never a whole line, never body text.
+- Stats are written `35+`, `3M+`, with the "+" in `.s1-accent`.
 - Headlines and buttons use Title Case. Body copy and captions use sentence case. Uppercase is only for small labels.
 - Install the TTF files from `fonts/` for Figma, Keynote, Word, Google Slides or video editors, and set tracking to -3% to match the web. If you can't install fonts, use Inter.
 - Code uses the device's monospace font, and only code. Labels, numbers and hex codes stay in Studio1 Sans (`font-variant-numeric: tabular-nums` where numbers line up).
@@ -154,7 +154,7 @@ Only two exist:
 
 - **Dither photos:** people, hands and objects become 1-bit or halftone images, cream on print orange or ink on paper. The reaching hands (after *The Creation of Adam*) are the house motif.
 - **Real people and real UI only.** Dither real photos; never generate stand-ins for the team or clients. Show real product screenshots, never invented dashboards or numbers.
-- **Voice:** plain, specific, short sentences, the way an engineer explains something to another engineer. Numbers and names over adjectives ("300+ deliverables, 29 framework integrations"). "We" is Studio1, "you" is the reader. No hype words (revolutionary, game-changing, unlock, supercharge, leverage, seamless), no emoji, no exclamation marks.
+- **Voice:** plain, specific, short sentences, the way an engineer explains something to another engineer. Numbers and names over adjectives ("400+ deliverables, 29 framework integrations"). "We" is Studio1, "you" is the reader. No hype words (revolutionary, game-changing, unlock, supercharge, leverage, seamless), no emoji, no exclamation marks.
 - **AI images and video:** generate without text or logos, then add type and the mark from these files. Paste this style block into the prompt:
 
   > Studio1 house style: a flat printed graphic on warm off-white paper (#F4EFE7) with a subtle paper grain. Only two colours besides the paper: black ink (#141414) and one vivid print orange (#F97316). Risograph and screen-print feel; coarse halftone and 1-bit pixel dither for any shading or photographic subject. Editorial and minimal, with lots of empty paper, generous margins and square corners. Optional design-tool details: a thin orange selection frame with small square corner handles, a small orange layer-name tag, a solid black arrow cursor. No text.

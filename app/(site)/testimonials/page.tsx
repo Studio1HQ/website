@@ -6,7 +6,6 @@ import {
   ArrowUpRight,
   ChartLineUp,
   Quotes,
-  SealCheck,
 } from "@phosphor-icons/react/dist/ssr";
 import {
   PaperEyebrow,
@@ -254,11 +253,6 @@ function Author({
           )}
         >
           {name}
-          <SealCheck
-            weight="fill"
-            aria-label="Verified client"
-            className="size-4 shrink-0 text-[#1d9bf0]"
-          />
         </cite>
         <span className="block truncate text-[13px] text-[#141414]/55">
           {titleOf(role)}
@@ -589,7 +583,7 @@ export default function TestimonialsPage() {
 
       <PaperCta
         index={3}
-        title="Want Results Like These?"
+        title="Talk to the Team Behind These Quotes"
         description="Technical content, DevRel, launches, and GitHub growth for developer tools."
       />
     </div>

@@ -12,7 +12,7 @@ import {
 
 const TITLE = "Our Team: The People Behind the Work";
 const DESCRIPTION =
-  "Meet the Studio1 team: the founders, founding team and leads behind our developer marketing, DevRel, technical content and developer video work for devtool, AI and open-source companies.";
+  "Meet the Studio1 team: the founders, leads, writers, and developer advocates behind our DevRel, technical content, and developer video work.";
 
 export const metadata: Metadata = pageMetadata({
   title: TITLE,

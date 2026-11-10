@@ -11,7 +11,7 @@ export default function Hero() {
       titleAccent="GitHub Growth"
       titleRest="for Open-Source Devtools"
       description="A README and first run that work, demos worth trying, and launches in the communities where developers gather."
-      primaryCta="Book a Call"
+      primaryCta="Book a Strategy Call"
       secondaryCta="Explore Services"
       stats={[
         { value: "12K+", label: "stars for Memori" },

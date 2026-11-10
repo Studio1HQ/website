@@ -239,9 +239,9 @@ export function LogoCloud({ logos }: { logos: CloudLogo[] }) {
       <div className="mt-8 flex flex-col items-center gap-4 text-center md:mt-4">
         <p className="text-[13.5px] text-[#141414]/60 sm:text-[14.5px]">
           <span className="font-medium text-[#141414]">
-            {spots.length} developer-first teams
+            {spots.length} case studies
           </span>{" "}
-          trust us with their growth.
+          from the 35+ devtool and AI teams Studio1 has worked with.
         </p>
         <a
           href="https://cal.com/studio1/collab"

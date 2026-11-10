@@ -59,7 +59,7 @@ const defaultCards = [
   {
     icon: <PenTool className="size-4 text-primary" />, // Content & writing
     title: "Content Impact",
-    description: "2M+ content views and growing",
+    description: "3M+ content views and growing",
     date: "Quick Insights",
     iconClassName: "text-primary",
     titleClassName:

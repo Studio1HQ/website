@@ -99,7 +99,7 @@ const growthWorkflow = [
       "Example projects and demo apps show the project inside real workflows, which gives every launch post something to try.",
     points: [
       "Demo agents and sample apps",
-      "Examples repos",
+      "Example repos",
       "Supporting guides",
       "Short videos when they help",
     ],
@@ -182,7 +182,7 @@ const githubCaseStudyProofs: CaseStudyResultData[] = [
     stats: [
       { value: "130+", label: "agent examples" },
       { value: "29", label: "framework integrations" },
-      { value: "300+", label: "deliverables" },
+      { value: "400+", label: "deliverables" },
     ],
   },
 ];
@@ -250,7 +250,7 @@ export default function Page() {
       </PaperSection>
       <PaperCta
         index={5}
-        title="Ready to Grow Your Open-Source Project?"
+        title="Let's Grow Your Open-Source Project"
         description="README and onboarding fixes, demos, launches, and community distribution for open-source devtools."
       />
     </div>

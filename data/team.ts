@@ -28,7 +28,7 @@ export const TEAM: TeamTier[] = [
     members: [
       {
         name: "Arindam Majumder",
-        role: "Co-founder & Content Lead",
+        role: "Co-founder",
         portrait: "/assets/team/arindam-majumder.webp?v=11",
         links: {
           x: "https://dub.sh/arindam-x",
@@ -38,7 +38,7 @@ export const TEAM: TeamTier[] = [
       },
       {
         name: "Amitesh Anand",
-        role: "Co-founder & Operations Lead",
+        role: "Co-founder",
         portrait: "/assets/team/amitesh-anand.webp?v=11",
         links: {
           x: "https://x.com/astrodevil_",
@@ -49,8 +49,8 @@ export const TEAM: TeamTier[] = [
     ],
   },
   {
-    title: "Founding team",
-    description: "The first people who shaped how Studio1 works.",
+    title: "Team",
+    description: "Write, build, film and ship for our clients every week.",
     members: [
       {
         name: "Shivay Lamba",
@@ -62,12 +62,6 @@ export const TEAM: TeamTier[] = [
           website: "https://shivaylamba.me",
         },
       },
-    ],
-  },
-  {
-    title: "Team",
-    description: "Write, build, film and ship for our clients every week.",
-    members: [
       {
         name: "Kathank Raithatha",
         role: "Developer Advocate",

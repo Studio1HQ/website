@@ -52,3 +52,6 @@ claude-audit
 # Original Notion export of the event photos (large; the site uses the
 # compressed copies in public/assets/events)
 /archive/notion-events-export/
+
+# Team operations notes kept out of the public repo
+supabase/OPERATIONS.local.md

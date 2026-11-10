@@ -2,9 +2,7 @@
 id: founders-office-associate
 title: Founder's Office Associate
 description: >-
-  Work closely with Studio1 founders across operations, team coordination,
-  growth, marketing, sales outreach, client research, partnerships, and
-  internal execution.
+  Work with Studio1's founders on operations, team coordination, growth, sales outreach, client research, partnerships, and internal execution.
 department: Founder's Office
 location: Remote (India)
 type: Full-time

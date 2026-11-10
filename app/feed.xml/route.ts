@@ -37,7 +37,7 @@ export async function GET() {
   <channel>
     <title>Studio1 Developer Marketing &amp; Tech Blog</title>
     <link>${baseUrl}/blog</link>
-    <description>Practical guides on developer marketing, technical content, documentation, and growth for SaaS, AI, and devtool teams.</description>
+    <description>Practical guides on developer marketing, technical content, documentation, and growth for devtool, AI, and open-source teams.</description>
     <language>en</language>
     <lastBuildDate>${new Date(latestPostDate).toUTCString()}</lastBuildDate>
 ${items}

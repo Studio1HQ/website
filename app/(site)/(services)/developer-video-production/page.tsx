@@ -258,7 +258,7 @@ export default function Page() {
       </PaperSection>
       <PaperCta
         index={8}
-        title="Ready to Make Videos Developers Learn From?"
+        title="Make Videos Developers Learn From"
         description="Technical demos, tutorials, scripts, edits, shorts, and upload-ready assets for developer brands."
       />
     </div>

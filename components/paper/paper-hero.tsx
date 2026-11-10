@@ -19,8 +19,6 @@ import { Container, EASE } from "@/components/home/ui";
 import { DitherField } from "@/components/home/dither-field";
 import { GRAIN, INK, PAPER, PRINT } from "@/lib/paper";
 
-type OfferingCopy = { label: string; description: string };
-
 const TRUSTED_FACES = [
   { src: SauravImg, alt: "Saurav" },
   { src: JesseImg, alt: "Jesse" },
@@ -54,31 +52,27 @@ function useIntroDelay() {
   return delay;
 }
 
-/** The four service pages, each tagged with the offerings it covers. */
+/** The four service pages; each card lists what it includes (HomeDomains.cards). */
 const TEAMS = [
   {
     navKey: "technicalContent",
     href: "/technical-content-marketing",
     icon: PenNib,
-    offerings: [0],
   },
   {
     navKey: "devrel",
     href: "/developer-relations-growth-campaigns",
     icon: Megaphone,
-    offerings: [1, 5, 6],
   },
   {
     navKey: "video",
     href: "/developer-video-production",
     icon: VideoCamera,
-    offerings: [2, 3],
   },
   {
     navKey: "docs",
     href: "/developer-documentation-dx-audit",
     icon: Books,
-    offerings: [4],
   },
 ] as const;
 
@@ -366,7 +360,7 @@ export default function PaperHero() {
   const t = useTranslations("Hero");
   const nav = useTranslations("Nav");
   const domains = useTranslations("HomeDomains");
-  const offerings = domains.raw("offerings") as OfferingCopy[];
+  const cards = domains.raw("cards") as Record<string, string[]>;
   const reduceMotion = useReducedMotion();
   const introDelay = useIntroDelay();
 
@@ -377,8 +371,7 @@ export default function PaperHero() {
     transition: { duration: 0, delay: introDelay * 0 + delay * 0 },
   });
 
-  const highlight =
-    "";
+  const highlight = "";
 
   return (
     <section
@@ -424,7 +417,7 @@ export default function PaperHero() {
                     Total content views
                   </p>
                   <p className="mt-1 text-[28px] font-medium leading-none tracking-[-0.04em]">
-                    2M<span style={{ color: PRINT }}>+</span>
+                    3M<span style={{ color: PRINT }}>+</span>
                   </p>
                 </div>
                 <span
@@ -497,8 +490,8 @@ export default function PaperHero() {
               </svg>
               <div className="mt-2.5 grid grid-cols-3 border-t border-[#141414]/10 pt-2.5">
                 {[
-                  ["35+", "Devtool & SaaS teams"],
-                  ["10+", "Developer events"],
+                  ["35+", "Devtool & AI teams"],
+                  ["40+", "Developer events"],
                   ["30+", "Partnerships"],
                 ].map(([value, label]) => (
                   <div key={label} className="min-w-0 pr-2">
@@ -582,10 +575,10 @@ export default function PaperHero() {
               </ol>
               <div className="mt-2.5 flex items-baseline gap-2 border-t border-[#141414]/10 px-1 pt-2">
                 <p className="text-[15px] font-medium leading-none tracking-[-0.03em]">
-                  10<span style={{ color: PRINT }}>+</span>
+                  40<span style={{ color: PRINT }}>+</span>
                 </p>
                 <p className="text-[10.5px] leading-tight text-[#141414]/55">
-                  High-impact developer events
+                  Developer events
                 </p>
               </div>
             </div>
@@ -701,7 +694,7 @@ export default function PaperHero() {
           role="list"
           className="relative mt-16 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4"
         >
-          {TEAMS.map(({ navKey, href, icon: Icon, offerings: ids }, index) => (
+          {TEAMS.map(({ navKey, href, icon: Icon }, index) => (
             <li key={navKey} className="min-w-0">
               <Link
                 href={href}
@@ -730,9 +723,7 @@ export default function PaperHero() {
                 </span>
                 <span className="mt-1.5 block w-full">
                   <CyclingLabel
-                    items={ids
-                      .map((id) => offerings[id]?.label)
-                      .filter(Boolean)}
+                    items={cards[navKey] ?? []}
                     offset={index * 0.6}
                   />
                 </span>

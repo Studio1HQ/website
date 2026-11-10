@@ -21,7 +21,7 @@ export { baseUrl };
 
 export const DEFAULT_OG_IMAGE = "/opengraph-image.png";
 export const DEFAULT_OG_IMAGE_ALT =
-  "Studio1 - Technical Content and Developer Growth Services";
+  "Studio1 - DevRel and Developer Marketing Agency for DevTools";
 
 const defaultOgImageUrl = `${baseUrl}${DEFAULT_OG_IMAGE}`;
 
@@ -72,10 +72,13 @@ export function pageMetadata({
   rssPath,
 }: PageMetadataOptions): Metadata {
   const url = localizedUrl(path, locale, baseUrl);
-  const brandedTitle = `${title} | Studio1`;
+  // Titles that already name Studio1 (e.g. "Studio1 vs Draft.dev") skip the
+  // " | Studio1" suffix, so the brand never appears twice.
+  const namesBrand = title.includes("Studio1");
+  const brandedTitle = namesBrand ? title : `${title} | Studio1`;
 
   return {
-    title,
+    title: namesBrand ? { absolute: title } : title,
     description,
     ...(keywords?.length ? { keywords } : {}),
     alternates: {
@@ -226,7 +229,14 @@ export function articlePageMetadata({
         ? { authors: authorRefs.map((ref) => ref.url ?? ref.name) }
         : {}),
       ...(tags?.length ? { tags } : {}),
-      images: [{ url: ogImage, width: imageWidth, height: imageHeight, alt: ogImageAlt }],
+      images: [
+        {
+          url: ogImage,
+          width: imageWidth,
+          height: imageHeight,
+          alt: ogImageAlt,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
@@ -348,9 +358,16 @@ export function jobPostingJsonLd(job: {
   const normalizedStatus = job.status?.toLowerCase() ?? "";
   const isUnavailable =
     normalizedStatus.includes("soon") || normalizedStatus.includes("closed");
-  const employmentType = job.type.toLowerCase().includes("contract")
-    ? "CONTRACTOR"
-    : "INTERN";
+  const jobType = job.type.toLowerCase();
+  const employmentType = jobType.includes("full-time")
+    ? "FULL_TIME"
+    : jobType.includes("contract")
+      ? "CONTRACTOR"
+      : jobType.includes("intern")
+        ? "INTERN"
+        : jobType.includes("part-time")
+          ? "PART_TIME"
+          : "OTHER";
 
   return {
     "@context": "https://schema.org",
@@ -393,7 +410,7 @@ export function jobPostingJsonLd(job: {
 export const ORGANIZATION_ID = `${baseUrl}/#organization`;
 
 export const ORGANIZATION_DESCRIPTION =
-  "Studio1 is a DevRel and GitHub growth agency for devtool, AI, and open-source teams. We ship technical content, docs and DX audits, developer videos, launches, and community programs that drive developer adoption.";
+  "Studio1 (studio1hq.com) is a DevRel and developer marketing agency for devtool, AI, and open-source teams. We ship technical content, docs and DX audits, developer videos, launches, GitHub growth, and community programs that drive developer adoption. Studio1 also maintains the open-source Awesome AI Apps collection and Awesome LLM Benchmarks.";
 
 export function organizationJsonLd() {
   return {
@@ -401,6 +418,7 @@ export function organizationJsonLd() {
     "@type": "Organization",
     "@id": ORGANIZATION_ID,
     name: "Studio1",
+    legalName: "STUDI01HQ PRIVATE LIMITED",
     alternateName: "Studio1HQ",
     url: baseUrl,
     logo: {

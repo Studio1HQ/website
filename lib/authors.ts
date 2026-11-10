@@ -26,7 +26,7 @@ export const AUTHORS: Author[] = [
   {
     slug: "arindam-majumder",
     name: "Arindam Majumder",
-    jobTitle: "Co-founder & Content Lead",
+    jobTitle: "Co-founder",
     bio: "Arindam Majumder is the co-founder of Studio1, where he leads content. He's a developer, technical writer, and community builder, and writes about developer relations, technical content, and getting developer tools in front of the developers who need them.",
     metaDescription:
       "Arindam Majumder, co-founder and content lead at Studio1, writes about developer relations, technical content, and getting devtools in front of developers.",
@@ -49,10 +49,10 @@ export const AUTHORS: Author[] = [
   {
     slug: "amitesh-anand",
     name: "Amitesh Anand",
-    jobTitle: "Co-founder & Operations Lead",
-    bio: "Amitesh Anand is the co-founder of Studio1, where he leads operations. Known online as Astrodevil, he builds AI demos, agent projects, tutorials, and developer education for SaaS, AI, and devtool teams.",
+    jobTitle: "Co-founder",
+    bio: "Amitesh Anand is the co-founder of Studio1, where he leads operations. Known online as Astrodevil, he builds AI demos, agent projects, tutorials, and developer education for devtool, AI, and open-source teams.",
     metaDescription:
-      "Amitesh Anand (Astrodevil), co-founder and operations lead at Studio1, builds AI demos, agent projects, and developer education for SaaS, AI, and devtool teams.",
+      "Amitesh Anand (Astrodevil), co-founder and operations lead at Studio1, builds AI demos, agent projects, and developer education for devtool, AI, and open-source teams.",
     image: "/assets/team/amitesh-profile-square.webp",
     knowsAbout: [
       "AI agents",

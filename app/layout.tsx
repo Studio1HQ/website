@@ -66,7 +66,7 @@ export const metadata: Metadata = {
         url: `${baseUrl}/opengraph-image.png`,
         width: 1200,
         height: 630,
-        alt: "Studio1 - Technical Content and Developer Growth Services",
+        alt: "Studio1 - DevRel and Developer Marketing Agency for DevTools",
       },
     ],
   },

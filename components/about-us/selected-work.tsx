@@ -57,7 +57,7 @@ const PROJECTS: Project[] = [
     image: "/case-studies/nebius/workshop-dublin-poster.webp",
     year: "2025",
     summary:
-      "300+ deliverables, 29 framework integrations, an open-source library with 16K+ stars, and launch support across every major Token Factory moment.",
+      "400+ deliverables, 29 framework integrations, an open-source library with 16K+ stars, and launch support across every major Token Factory moment.",
   },
   {
     slug: "openlore",
