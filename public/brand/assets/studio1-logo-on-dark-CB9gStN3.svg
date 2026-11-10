@@ -2,8 +2,8 @@
   <!-- Studio1 logo, for dark backgrounds: the gradient mark with white cut-outs, white wordmark (Studio1 Sans Medium, outlined). -->
   <defs>
     <linearGradient id="studio1-gradient" x1="0" y1="80" x2="160" y2="80" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#FE3C34"/>
-      <stop offset="1" stop-color="#FE8B4B"/>
+      <stop stop-color="#F97316"/>
+      <stop offset="1" stop-color="#F97316"/>
     </linearGradient>
   </defs>
   <rect x="1" y="1" width="158" height="158" rx="34" fill="#FFFFFF"/>

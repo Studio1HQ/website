@@ -93,11 +93,14 @@ function MenuLink({
   isPaper,
   current,
   t,
+  rowHeight = false,
 }: {
   child: NavLink;
   isPaper: boolean;
   current: boolean;
   t: ReturnType<typeof useTranslations>;
+  /** Match the group rail's row height, so both panes line up. */
+  rowHeight?: boolean;
 }) {
   return (
     <Link
@@ -108,6 +111,7 @@ function MenuLink({
         isPaper
           ? "items-center gap-3 rounded-[6px] py-2 text-[14px] text-[#141414] hover:bg-[#f4efe7]/60"
           : "text-muted-foreground hover:text-foreground",
+        rowHeight && "h-[54px] py-0",
         current && (isPaper ? "bg-[#f4efe7]/60" : "text-foreground"),
       )}
     >
@@ -192,7 +196,7 @@ function GroupedNavItem({
       <div className={cn(dropdownClass, "left-1/2 -translate-x-1/2")}>
         <div
           className={cn(
-            "grid w-[39rem] grid-cols-[15rem_minmax(0,1fr)] overflow-hidden",
+            "grid w-[43rem] grid-cols-[18.5rem_minmax(0,1fr)] overflow-hidden",
             isPaper
               ? paperCard
               : "rounded-[6px] border bg-background/95 shadow-lg backdrop-blur-xl",
@@ -230,7 +234,7 @@ function GroupedNavItem({
                     onFocus={() => setHovered(index)}
                     onClick={() => setHovered(index)}
                     className={cn(
-                      "flex items-center gap-3 rounded-[6px] px-2.5 py-2 text-left transition-colors duration-200",
+                      "flex h-[54px] items-center gap-3 rounded-[6px] px-2.5 text-left transition-colors duration-200",
                       selected
                         ? isPaper
                           ? "bg-white shadow-[0_1px_0_rgba(20,20,20,0.06)] ring-1 ring-[#141414]/[0.08]"
@@ -258,7 +262,7 @@ function GroupedNavItem({
                       </span>
                       <span
                         className={cn(
-                          "text-[12px] leading-snug",
+                          "whitespace-nowrap text-[12px] leading-snug",
                           isPaper
                             ? "text-[#141414]/55"
                             : "text-muted-foreground/80",
@@ -319,15 +323,18 @@ function GroupedNavItem({
               >
                 {t(`groups.${group.key}.title`)}
               </p>
-              {group.children.map((child) => (
-                <MenuLink
-                  key={child.path}
-                  child={child}
-                  isPaper={isPaper}
-                  current={child.path === path}
-                  t={t}
-                />
-              ))}
+              <div className="flex flex-col gap-1">
+                {group.children.map((child) => (
+                  <MenuLink
+                    key={child.path}
+                    child={child}
+                    isPaper={isPaper}
+                    current={child.path === path}
+                    t={t}
+                    rowHeight
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </div>

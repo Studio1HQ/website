@@ -231,8 +231,8 @@ export function WorldMap({
             </feMerge>
           </filter>
           <linearGradient id="flag-mark-grad" x1="0" y1="80" x2="160" y2="80" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#FE3C34" />
-            <stop offset="1" stopColor="#FE8B4B" />
+            <stop stopColor="#F97316" />
+            <stop offset="1" stopColor="#F97316" />
           </linearGradient>
         </defs>
 

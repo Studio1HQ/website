@@ -42,8 +42,8 @@ function GlassFace({
           <stop offset="1" stopColor="#fff" stopOpacity="0.28" />
         </linearGradient>
         <linearGradient id={`${id}-glow`} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#FE3C34" />
-          <stop offset="1" stopColor="#FE8B4B" />
+          <stop offset="0" stopColor="#F97316" />
+          <stop offset="1" stopColor="#FB923C" />
         </linearGradient>
         <linearGradient id={`${id}-rim`} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#ffffff" />

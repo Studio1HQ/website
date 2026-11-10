@@ -38,7 +38,7 @@ design-system/
 ├── css/               fonts.css · tokens.css · studio1.css
 ├── tailwind/          preset.cjs (v3) · theme.css (v4)
 ├── fonts/             Studio1 Sans 400/500 (WOFF2 + TTF) + license
-├── logo/              main logo (gradient mark + wordmark), dark-mode logo (gradient mark, white cut-outs), the mark in gradient, dark mode, black and white
+├── logo/              main logo (orange mark + wordmark), dark-mode logo (orange mark, white cut-outs), the mark in orange, dark mode, black and white
 └── templates/         og-image.html · code-snippet.html
 ```
 

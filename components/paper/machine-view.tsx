@@ -316,6 +316,85 @@ function MarkdownLine({
   );
 }
 
+/** The chip's glide: quick to leave, settling softly with no bounce. */
+const GLIDE = { duration: 0.5, ease: [0.65, 0, 0.35, 1] } as const;
+
+/**
+ * The Human / Machine switch. Both halves are the same width, so one white
+ * chip slides between them; the labels cross-fade as it passes.
+ */
+function ModeSwitch({
+  value,
+  onChange,
+  floating = false,
+}: {
+  value: Mode;
+  onChange: (next: Mode) => void;
+  floating?: boolean;
+}) {
+  return (
+    <div
+      role="radiogroup"
+      aria-label="View this page as"
+      className={cn(
+        "relative grid grid-cols-2 rounded-full bg-[#eeebe6] p-[3px] shadow-[inset_0_1px_2px_rgba(0,0,0,0.08),0_1px_0_rgba(255,255,255,0.9)]",
+        floating && "shadow-[inset_0_1px_2px_rgba(0,0,0,0.08),0_1px_0_rgba(255,255,255,0.9),0_10px_32px_rgba(0,0,0,0.12)]",
+      )}
+    >
+      <motion.span
+        aria-hidden
+        className="absolute inset-y-[3px] left-[3px] w-[calc(50%-3px)] rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.10),0_1px_2px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,1)]"
+        initial={false}
+        // Slides over with a soft motion blur that clears as it lands
+        animate={{
+          x: value === "machine" ? "100%" : "0%",
+          filter:
+            value === "machine"
+              ? ["blur(0px)", "blur(3px)", "blur(0px)"]
+              : ["blur(0px)", "blur(3.01px)", "blur(0px)"],
+          scaleX: value === "machine" ? [1, 1.08, 1] : [1, 1.0801, 1],
+        }}
+        transition={{
+          x: GLIDE,
+          filter: { duration: 0.5, times: [0, 0.35, 1], ease: "easeOut" },
+          scaleX: { duration: 0.5, times: [0, 0.35, 1], ease: "easeOut" },
+        }}
+      />
+      {(["human", "machine"] as const).map((option) => {
+        const active = value === option;
+        return (
+          <button
+            key={option}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            onClick={() => (active ? undefined : onChange(option))}
+            className="relative w-[104px] py-[8px] text-center text-[10.5px] font-semibold uppercase tracking-[0.16em] outline-none focus-visible:ring-2 focus-visible:ring-[#f97316]/40 rounded-full"
+          >
+            <motion.span
+              className="relative"
+              initial={false}
+              // Labels swap through a light blur, like a focus pull
+              animate={{
+                color: active ? "#1a1a1a" : "#a8a196",
+                filter: active
+                  ? ["blur(2px)", "blur(0px)"]
+                  : ["blur(0px)", "blur(1.5px)", "blur(0px)"],
+              }}
+              transition={{
+                color: { duration: 0.35, ease: [0.22, 1, 0.36, 1] },
+                filter: { duration: 0.45, ease: "easeOut" },
+              }}
+            >
+              {option}
+            </motion.span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 /**
  * Footer switch between the normal site (Human) and a plain-text version of
  * the current page (Machine), the way an agent or LLM would read it.
@@ -325,6 +404,19 @@ export function MachineToggle() {
   const [mode, setMode] = useState<Mode>("human");
   const [markdown, setMarkdown] = useState("");
   const [copied, setCopied] = useState(false);
+  // The footer switch follows the view, but leads it when Machine is picked.
+  const [chip, setChip] = useState<Mode>("human");
+  useEffect(() => setChip(mode), [mode]);
+  // The switch inside the machine view starts on Human and glides over.
+  const [inner, setInner] = useState<Mode>("human");
+  useEffect(() => {
+    if (mode !== "machine") {
+      setInner("human");
+      return;
+    }
+    const id = window.setTimeout(() => setInner("machine"), 700);
+    return () => window.clearTimeout(id);
+  }, [mode]);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
@@ -367,45 +459,15 @@ export function MachineToggle() {
 
   return (
     <>
-      <div
-        role="radiogroup"
-        aria-label="View this page as"
-        className="relative inline-flex items-center rounded-full bg-[#eeebe6] p-[3px] shadow-[inset_0_1px_2px_rgba(0,0,0,0.08),0_1px_0_rgba(255,255,255,0.9)]"
-      >
-        {(["human", "machine"] as const).map((value) => {
-          const active = mode === value;
-          return (
-            <button
-              key={value}
-              type="button"
-              role="radio"
-              aria-checked={active}
-              onClick={() => (value === "machine" ? open() : setMode("human"))}
-              className="relative px-5 py-[7px] text-[10.5px] font-bold uppercase tracking-[0.16em]"
-            >
-              {active ? (
-                <motion.span
-                  layoutId="machine-toggle-chip"
-                  className="absolute inset-0 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.10),0_1px_2px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,1)]"
-                  transition={{
-                    type: "spring",
-                    stiffness: 300,
-                    damping: 28,
-                    mass: 0.8,
-                  }}
-                />
-              ) : null}
-              <motion.span
-                className="relative"
-                animate={{ color: active ? "#1a1a1a" : "#b0a99e" }}
-                transition={{ duration: 0.22, ease: "easeOut" }}
-              >
-                {value}
-              </motion.span>
-            </button>
-          );
-        })}
-      </div>
+      <ModeSwitch
+        value={chip}
+        onChange={(next) => {
+          if (next !== "machine") return setMode("human");
+          // Let the chip glide over first, then raise the machine view
+          setChip("machine");
+          window.setTimeout(open, 380);
+        }}
+      />
 
       {mounted
         ? createPortal(
@@ -509,25 +571,15 @@ export function MachineToggle() {
                         delay: 0.55,
                       }}
                     >
-                      <div className="inline-flex items-center rounded-full bg-[#eeebe6] p-[3px] shadow-[inset_0_1px_2px_rgba(0,0,0,0.08),0_1px_0_rgba(255,255,255,0.9),0_8px_32px_rgba(0,0,0,0.10)]">
-                        <button
-                          type="button"
-                          onClick={() => setMode("human")}
-                          className="relative px-5 py-[7px] text-[10.5px] font-bold uppercase tracking-[0.16em]"
-                        >
-                          <motion.span
-                            className="relative"
-                            animate={{ color: "#b0a99e" }}
-                            whileHover={{ color: "#6b6560" }}
-                            transition={{ duration: 0.18, ease: "easeOut" }}
-                          >
-                            Human
-                          </motion.span>
-                        </button>
-                        <span className="relative inline-flex items-center rounded-full bg-white px-5 py-[7px] text-[10.5px] font-bold uppercase tracking-[0.16em] text-neutral-800 shadow-[0_2px_8px_rgba(0,0,0,0.10),0_1px_2px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,1)]">
-                          Machine
-                        </span>
-                      </div>
+                      <ModeSwitch
+                        floating
+                        value={inner}
+                        onChange={(next) => {
+                          if (next !== "human") return;
+                          setInner("human");
+                          window.setTimeout(() => setMode("human"), 320);
+                        }}
+                      />
                     </motion.div>
                   </div>
                 </motion.div>

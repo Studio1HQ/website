@@ -63,8 +63,8 @@ module.exports = {
           800: '#9a3412',
         },
         brand: {
-          red: '#fe3c34',
-          orange: '#fe8b4b',
+          red: '#f97316',
+          orange: '#f97316',
         },
         success: { DEFAULT: '#1a7f37', bg: '#dafbe1' },
         warning: { DEFAULT: '#9a6700', bg: '#fff8c5' },
@@ -79,7 +79,7 @@ module.exports = {
         frame: '1.5px',
       },
       backgroundImage: {
-        'brand-gradient': 'linear-gradient(90deg, #fe3c34, #fe8b4b)',
+        'brand-gradient': 'linear-gradient(90deg, #f97316, #f97316)',
       },
       boxShadow: {
         card: '0 1px 0 rgba(27, 23, 20, 0.06)',

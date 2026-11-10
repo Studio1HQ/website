@@ -65,7 +65,7 @@ Rules:
 
 ### Gradients
 Only two exist:
-- **The mark gradient**, `linear-gradient(90deg, #fe3c34, #fe8b4b)`, only inside the Studio1 mark.
+- **The mark** is solid Studio1 orange, `#f97316`; it carries no gradient.
 - **The print panel** for blog covers: base `#fb8a1e`, a `#ff3a00` glow from both top corners, fading down through `#f7a54a` and `#eeb795` to `#f2b38a`, with a soft cream horizon arc rising from the bottom.
 
 ### Contrast rules
@@ -113,14 +113,14 @@ Only two exist:
 
 ## 6. Logo
 
-**The main logo is the gradient mark with the wordmark** ([logo/studio1-logo-on-light.svg](logo/studio1-logo-on-light.svg)). Use it by default: the site nav, footer, docs, slides, templates, partner pages. The dark-mode logo (the same gradient mark with white cut-outs and a white wordmark) is only for dark backgrounds; never use it in place of the main logo on light backgrounds.
+**The main logo is the orange mark with the wordmark** ([logo/studio1-logo-on-light.svg](logo/studio1-logo-on-light.svg)). Use it by default: the site nav, footer, docs, slides, templates, partner pages. The dark-mode logo (the same orange mark with white cut-outs and a white wordmark) is only for dark backgrounds; never use it in place of the main logo on light backgrounds.
 
 | File | Use it on |
 |---|---|
-| [logo/studio1-logo-on-light.svg](logo/studio1-logo-on-light.svg) | **Main logo.** Paper and white backgrounds: the gradient mark with the black wordmark |
-| [logo/studio1-logo-on-dark.svg](logo/studio1-logo-on-dark.svg) | **Dark-mode logo.** Night and other dark backgrounds: the gradient mark with white cut-outs, white wordmark |
+| [logo/studio1-logo-on-light.svg](logo/studio1-logo-on-light.svg) | **Main logo.** Paper and white backgrounds: the orange mark with the black wordmark |
+| [logo/studio1-logo-on-dark.svg](logo/studio1-logo-on-dark.svg) | **Dark-mode logo.** Night and other dark backgrounds: the orange mark with white cut-outs, white wordmark |
 | [logo/studio1-mark-gradient.svg](logo/studio1-mark-gradient.svg) | The main mark on its own; the favicon |
-| [logo/studio1-mark-dark.svg](logo/studio1-mark-dark.svg) | The dark-mode mark on its own: the gradient mark with white cut-outs |
+| [logo/studio1-mark-dark.svg](logo/studio1-mark-dark.svg) | The dark-mode mark on its own: the orange mark with white cut-outs |
 | [logo/studio1-mark-black.svg](logo/studio1-mark-black.svg) | One colour, black: print, embossing, watermarks on light backgrounds |
 | [logo/studio1-mark-white.svg](logo/studio1-mark-white.svg) | One colour, white: on photos and dark backgrounds where colour can't be used |
 
@@ -128,7 +128,7 @@ Only two exist:
 - **Wordmark lockup:** the mark, then "Studio1" in Studio1 Sans Medium, vertically centred. On the site: mark 32px, gap 8px, name 24px. Scale them together.
 - The name is always **Studio1**: one word, capital S, the digit 1. Handle **@Studio1HQ**, site **studio1hq.com**.
 - Clear space: a quarter of the mark's width on every side. Minimum size: 16px on screen, 8mm in print.
-- Don't put the gradient mark on orange, recolour it, outline it, add shadows or glows, rotate, stretch or tilt it, or set "Studio1" in another font or in bold. Don't swap the main logo for the dark-mode mark on light backgrounds.
+- Don't put the orange mark on orange, recolour it, outline it, add shadows or glows, rotate, stretch or tilt it, or set "Studio1" in another font or in bold. Don't swap the main logo for the dark-mode mark on light backgrounds.
 
 ## 7. Recipes by format
 
@@ -140,7 +140,7 @@ Only two exist:
 
 **Code snippets (social and blog):** [templates/code-snippet.html](templates/code-snippet.html). A Night card on a paper sheet, filename in mono at the top left, the dark-mode mark at the top right, 18 lines at most.
 
-**Featured / OG images (1200×630):** [templates/og-image.html](templates/og-image.html). Paper with grain, the gradient lockup top left, a square orange tag in a selection frame top right, a 72px Medium title with one orange keyword, domain and metadata in ink 60% at the bottom. Night variant for dark posts.
+**Featured / OG images (1200×630):** [templates/og-image.html](templates/og-image.html). Paper with grain, the orange lockup top left, a square orange tag in a selection frame top right, a 72px Medium title with one orange keyword, domain and metadata in ink 60% at the bottom. Night variant for dark posts.
 
 **Blog covers (1600×900):** made automatically on the site. The print panel gradient full-bleed, a white UI card that shows the topic (comparison, benchmark bars, checklist, terminal) inside an ink selection frame labelled `<topic>.fig`, an ink cursor at its corner. No title on the image.
 
@@ -165,7 +165,7 @@ Only two exist:
 
 - Bold (600 and up), light weights or italics
 - Any font other than Studio1 Sans (the system monospace is allowed for code only)
-- Blue, purple or any colour outside the palette; gradients other than the mark and the print panel
+- Blue, purple or any colour outside the palette; gradients other than the print panel
 - Orange body text or small orange text on paper (use print 700); orange focus rings
 - Glossy 3D, glassmorphism, glows, heavy or coloured drop shadows (except `print` on the print panel)
 - Rounded corners on frames, block prints, images, stat cards or tags; radii other than 0, 4, 6 and 999px

@@ -68,8 +68,8 @@
   --s1-print-800: #9a3412;
 
   /* The mark's gradient: inside the mark only */
-  --s1-brand-red: #fe3c34;
-  --s1-brand-orange: #fe8b4b;
+  --s1-brand-red: #f97316;
+  --s1-brand-orange: #f97316;
   --s1-brand-gradient: linear-gradient(90deg, var(--s1-brand-red), var(--s1-brand-orange));
 
   /* Status: product UI only, real states */

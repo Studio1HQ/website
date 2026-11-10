@@ -48,13 +48,13 @@ function useLogoGeometry() {
       }),
     );
     // Brand gradient baked into vertex colours, matching the flat logo:
-    // red (#FE3C34) at the bottom-left to orange (#FE8B4B) at the top-right.
+    // print orange (#F97316) at the bottom-left to a lighter orange (#FB923C) at the top-right.
     tile.computeBoundingBox();
     const box = tile.boundingBox!;
     const position = tile.attributes.position;
     const colors = new Float32Array(position.count * 3);
-    const from = new THREE.Color("#FE3C34");
-    const to = new THREE.Color("#FE8B4B");
+    const from = new THREE.Color("#F97316");
+    const to = new THREE.Color("#FB923C");
     const mixed = new THREE.Color();
     for (let i = 0; i < position.count; i++) {
       const u = (position.getX(i) - box.min.x) / (box.max.x - box.min.x);

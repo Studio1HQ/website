@@ -1347,3 +1347,13 @@ html::-webkit-scrollbar-thumb:hover {
     animation: none;
   }
 }
+
+/* The "New" tag in the footer: a light runs through the text, left to right. */
+@keyframes s1-text-shine {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0% 0;
+  }
+}
