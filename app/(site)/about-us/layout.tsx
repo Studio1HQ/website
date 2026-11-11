@@ -1,4 +1,6 @@
 import { pageMetadata } from "@/lib/seo";
+import { getCaseStudySlugs } from "@/lib/case-studies";
+import { PublishedCaseStudiesProvider } from "@/components/about-us/published-case-studies";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { DEFAULT_LOCALE } from "@/lib/i18n";
@@ -18,5 +20,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <PublishedCaseStudiesProvider slugs={getCaseStudySlugs()}>
+      {children}
+    </PublishedCaseStudiesProvider>
+  );
 }

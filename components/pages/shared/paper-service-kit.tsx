@@ -263,7 +263,7 @@ function CaseChips({
         <li
           key={`${stat.value}-${index}`}
           className={cn(
-            "flex items-center gap-2 rounded-full py-1 pl-1 pr-3.5 text-[12.5px] font-medium ring-1 ring-inset backdrop-blur-md",
+            "flex items-center gap-2 rounded-full py-1 pl-1 pr-3.5 text-[12.5px] font-medium ring-1 ring-inset",
             dark
               ? "bg-white/12 text-white ring-white/20"
               : "bg-white/70 text-[#141414] ring-[#141414]/[0.06]",
@@ -297,7 +297,7 @@ function EdgeChip({
     <span
       aria-hidden
       className={cn(
-        "pointer-events-none absolute z-10 hidden items-center gap-2 rounded-full bg-white/80 py-1.5 pl-1.5 pr-4 text-[12.5px] font-medium text-[#141414] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_14px_30px_-14px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-white/70 backdrop-blur-md transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1 md:flex",
+        "pointer-events-none absolute z-10 hidden items-center gap-2 rounded-full bg-[#fbf9f5] py-1.5 pl-1.5 pr-4 text-[12.5px] font-medium text-[#141414] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_14px_30px_-14px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-white/70 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1 md:flex",
         className,
       )}
     >
@@ -820,7 +820,7 @@ function ProcessStory({
 
             {/* Progress pill */}
             <div className="absolute inset-x-0 bottom-7 flex justify-center">
-              <span className="flex items-center gap-1.5 rounded-full bg-black/45 px-3 py-2 ring-1 ring-inset ring-white/20 backdrop-blur-md">
+              <span className="flex items-center gap-1.5 rounded-full bg-black/45 px-3 py-2 ring-1 ring-inset ring-white/20">
                 {steps.map((item, position) => (
                   <span
                     key={item.name}

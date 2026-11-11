@@ -100,7 +100,7 @@ function PersonCard({ member }: { member: TeamMember }) {
         {/* Engraved glass, as on the About Us portraits */}
         <span
           aria-hidden
-          className="pointer-events-none absolute inset-0 rounded-[6px] bg-gradient-to-b from-white/25 via-transparent to-transparent shadow-[inset_0_6px_16px_rgba(20,20,20,0.16),inset_0_1px_3px_rgba(20,20,20,0.18),inset_0_-1px_0_rgba(255,255,255,0.7)] ring-1 ring-inset ring-white/50"
+          className="pointer-events-none absolute inset-0 rounded-[6px] shadow-[inset_0_6px_16px_rgba(20,20,20,0.16),inset_0_1px_3px_rgba(20,20,20,0.18),inset_0_-1px_0_rgba(255,255,255,0.7)] ring-1 ring-inset ring-white/50"
         />
       </div>
 
@@ -229,13 +229,14 @@ export function TeamPage() {
                 viewport={{ once: true, margin: "-40px" }}
                 transition={{ duration: 0.8, ease: EASE, delay: i * 0.08 }}
               >
-                {/* Pressed into the page: orange glass on the outer two, cream in the middle */}
+                {/* Printed sheets: flat orange ink on the outer two, plain
+                    paper in the middle, each with a soft drop */}
                 <div
                   className={cn(
-                    "relative flex-1 overflow-hidden rounded-[6px] p-6 backdrop-blur-md md:p-7",
+                    "relative isolate flex-1 overflow-hidden rounded-[6px] p-6 shadow-[0_1px_0_rgba(20,20,20,0.05),0_16px_32px_-24px_rgba(20,20,20,0.4)] md:p-7",
                     i === 1
-                      ? "bg-[#f4efe7]/70 shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.9)] ring-1 ring-inset ring-[#141414]/[0.05]"
-                      : "bg-gradient-to-br from-[#fb923c] via-[#f97316] to-[#ea580c] shadow-[inset_0_3px_10px_rgba(124,45,18,0.45),inset_0_1px_2px_rgba(124,45,18,0.35),inset_0_-1px_0_rgba(255,255,255,0.35)] ring-1 ring-inset ring-[#7c2d12]/20",
+                      ? "bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07]"
+                      : "bg-[#f97316] ring-1 ring-inset ring-[#c2410c]/30",
                   )}
                 >
                   {panel.body}
@@ -265,7 +266,7 @@ export function TeamPage() {
                 // Fewer, larger cards at the top of the hierarchy; the
                 // smaller tiers stay centred however many people they hold
                 "flex flex-wrap justify-center",
-                t === 0 && "mx-auto max-w-[1180px]",
+                t === 0 && "mx-auto max-w-[880px]",
               )}
             >
               {tier.members.map((member, i) => (
@@ -274,7 +275,7 @@ export function TeamPage() {
                   className={cn(
                     "w-[calc(50%-8px)]",
                     t === 0
-                      ? "md:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]"
+                      ? "md:w-[calc(50%-12px)]"
                       : "md:w-[calc(33.333%-16px)] lg:w-[calc(25%-18px)]",
                   )}
                   initial={reduceMotion ? false : { opacity: 0, y: 24 }}
@@ -294,7 +295,7 @@ export function TeamPage() {
         <Container>
           <Link
             href="/careers"
-            className="group flex flex-wrap items-center justify-between gap-4 rounded-[6px] bg-white/60 p-6 shadow-[0_30px_60px_-46px_rgba(20,20,20,0.5),inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-inset ring-white/80 backdrop-blur-xl md:p-8"
+            className="group flex flex-wrap items-center justify-between gap-4 rounded-[6px] bg-[#fbf9f5] p-6 shadow-[0_30px_60px_-46px_rgba(20,20,20,0.5),inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-inset ring-white/80 md:p-8"
           >
             <span>
               <span className="block text-[24px] font-medium tracking-[-0.04em]">

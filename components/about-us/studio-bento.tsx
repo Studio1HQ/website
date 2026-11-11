@@ -86,7 +86,7 @@ function MapNode({ node, delay }: { node: Node; delay: number }) {
   const NodeIcon = node.icon;
   return (
     <motion.div
-      className="rounded-[6px] bg-[#141414]/80 p-3 text-white shadow-[0_18px_34px_-18px_rgba(20,20,20,0.6)] backdrop-blur-md"
+      className="rounded-[6px] bg-[#141414]/80 p-3 text-white shadow-[0_18px_34px_-18px_rgba(20,20,20,0.6)]"
       initial={reduceMotion ? false : { opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -296,7 +296,7 @@ export function StudioBento() {
 
               {/* Client voices from the home page, as one avatar stack */}
               <motion.div
-                className="absolute -bottom-4 right-0 flex items-center gap-3 rounded-full bg-white/80 py-1.5 pl-1.5 pr-4 shadow-[0_18px_34px_-18px_rgba(60,20,0,0.45)] ring-1 ring-[#141414]/[0.06] backdrop-blur-md sm:right-[4%]"
+                className="absolute -bottom-4 right-0 flex items-center gap-3 rounded-full bg-[#fbf9f5] py-1.5 pl-1.5 pr-4 shadow-[0_18px_34px_-18px_rgba(60,20,0,0.45)] ring-1 ring-[#141414]/[0.06] sm:right-[4%]"
                 initial={reduceMotion ? false : { opacity: 0, y: 12 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}

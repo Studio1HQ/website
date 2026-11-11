@@ -52,7 +52,7 @@ export function availabilityOf(status: string): Availability {
 /** Departments grouped into the teams a candidate would join. */
 /** Glass card and engraved well, shared by this page's blocks. */
 const GLASS_CARD =
-  "rounded-[6px] bg-white/70 shadow-[0_20px_44px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.06] backdrop-blur-xl";
+  "rounded-[6px] bg-[#fbf9f5] shadow-[0_20px_44px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.06]";
 const WELL =
   "bg-[#f1ece4] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)]";
 
@@ -889,7 +889,7 @@ function HiringProcess() {
                   >
                     <motion.span
                       aria-hidden
-                      className="absolute inset-0 bg-[linear-gradient(150deg,#fb923c,#f97316_50%,#ea580c)]"
+                      className="absolute inset-0 bg-[#f97316]"
                       variants={{
                         hidden: reduceMotion ? {} : { opacity: 0, scale: 0.4 },
                         visible: {

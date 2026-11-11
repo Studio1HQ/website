@@ -28,7 +28,7 @@ function RelatedCard({ study }: { study: CaseStudyMeta }) {
   return (
     <Link
       href={`/case-studies/${study.slug}`}
-      className="group flex h-full flex-col rounded-[6px] bg-white/55 p-2 shadow-[0_30px_60px_-46px_rgba(20,20,20,0.5),inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-inset ring-white/80 backdrop-blur-xl backdrop-saturate-150 transition-[background-color,box-shadow] duration-500 hover:bg-white/80 hover:shadow-[0_36px_70px_-44px_rgba(20,20,20,0.55),inset_0_1px_0_#fff]"
+      className="group flex h-full flex-col rounded-[6px] bg-[#fbf9f5] p-2 shadow-[0_30px_60px_-46px_rgba(20,20,20,0.5),inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-inset ring-white/80 transition-[background-color,box-shadow] duration-500 hover:bg-[#f4efe7] hover:shadow-[0_36px_70px_-44px_rgba(20,20,20,0.55),inset_0_1px_0_#fff]"
     >
       {/* Engraved: Studio1 and the client, overlapping; closer on hover */}
       <div

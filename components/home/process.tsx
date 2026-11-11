@@ -67,7 +67,7 @@ function Sticker({
       aria-hidden
       style={{ rotate }}
       className={cn(
-        "inline-flex shrink-0 items-center justify-center rounded-[6px] bg-gradient-to-b from-[#fb923c] to-[#c2410c] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_14px_30px_-14px_rgba(194,65,12,0.75)]",
+        "inline-flex shrink-0 items-center justify-center rounded-[6px] bg-[#f97316] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_14px_30px_-14px_rgba(194,65,12,0.75)]",
         className,
       )}
     >

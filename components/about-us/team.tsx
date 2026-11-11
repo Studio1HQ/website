@@ -79,7 +79,7 @@ function LeaderCard({ member }: { member: Member }) {
         {/* Engraved glass: inner shadow along the top, light catch below */}
         <span
           aria-hidden
-          className="pointer-events-none absolute inset-0 rounded-[6px] bg-gradient-to-b from-white/25 via-transparent to-transparent shadow-[inset_0_6px_16px_rgba(20,20,20,0.16),inset_0_1px_3px_rgba(20,20,20,0.18),inset_0_-1px_0_rgba(255,255,255,0.7)] ring-1 ring-inset ring-white/50"
+          className="pointer-events-none absolute inset-0 rounded-[6px] shadow-[inset_0_6px_16px_rgba(20,20,20,0.16),inset_0_1px_3px_rgba(20,20,20,0.18),inset_0_-1px_0_rgba(255,255,255,0.7)] ring-1 ring-inset ring-white/50"
         />
       </div>
 

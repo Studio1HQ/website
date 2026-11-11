@@ -151,7 +151,7 @@ export function FlapCountdown({
   const tone: FlapTone = mode === "ends" ? "live" : "default";
 
   return (
-    <div className="relative isolate overflow-hidden rounded-[10px] bg-[#0d0d0d] p-5 text-[#f4efe7] shadow-[0_60px_100px_-50px_rgba(20,20,20,0.75)] ring-1 ring-inset ring-white/10 [--cw:28px] sm:p-7 sm:[--cw:44px] lg:[--cw:34px] xl:[--cw:46px]">
+    <div className="relative isolate overflow-hidden rounded-[6px] bg-[#0d0d0d] p-5 text-[#f4efe7] shadow-[0_60px_100px_-50px_rgba(20,20,20,0.75)] ring-1 ring-inset ring-white/10 [--cw:28px] sm:p-7 sm:[--cw:44px] lg:[--cw:34px] xl:[--cw:46px]">
       <style>{FLAP_KEYFRAMES}</style>
       <span
         aria-hidden

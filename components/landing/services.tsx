@@ -66,11 +66,11 @@ export default function Services() {
             <Link
               href={"/technical-content-marketing"}
               className={cn(
-                "border-2 dark:border transition-all duration-700 hover:-translate-y-4 h-[30rem] relative w-full max-w-[23rem] group rounded-[6px] overflow-hidden flex flex-col items-start bg-background/80 backdrop-blur-md justify-start p-8 mb-8 md:mb-0",
+                "border-2 dark:border transition-all duration-700 hover:-translate-y-4 h-[30rem] relative w-full max-w-[23rem] group rounded-[6px] overflow-hidden flex flex-col items-start bg-background/80 justify-start p-8 mb-8 md:mb-0",
                 elevatedCardShadow,
               )}
             >
-              <div className="absolute top-[-23rem] z-[101] delay-100 rotate-45 left-[-2rem] group-hover:top-[15rem] group-hover:left-[20rem] transition-all blur-[3em] duration-700 rounded-md h-[40rem] bg-white/50 opacity-30 w-[5rem] backdrop-blur-md"></div>
+              <div className="absolute top-[-23rem] z-[101] delay-100 rotate-45 left-[-2rem] group-hover:top-[15rem] group-hover:left-[20rem] transition-all blur-[3em] duration-700 rounded-md h-[40rem] bg-[#fbf9f5] opacity-30 w-[5rem]"></div>
 
               <div className={serviceCardHoverGlow}></div>
 
@@ -103,11 +103,11 @@ export default function Services() {
             <Link
               href={"/developer-relations-growth-campaigns"}
               className={cn(
-                "border-2 dark:border transition-all duration-700 hover:translate-y-4 relative overflow-hidden group flex flex-col items-start p-8 bg-background/80 backdrop-blur-2xl h-[30rem] w-full  max-w-[23rem] md:translate-y-20 rounded-[6px]",
+                "border-2 dark:border transition-all duration-700 hover:translate-y-4 relative overflow-hidden group flex flex-col items-start p-8 bg-background/80 h-[30rem] w-full max-w-[23rem] md:translate-y-20 rounded-[6px]",
                 elevatedCardShadow,
               )}
             >
-              <div className="absolute top-[-23rem] z-[101] rotate-45 delay-100 left-[-2rem] group-hover:top-[15rem] group-hover:left-[20rem] transition-all blur-[3em] duration-700 rounded-md h-[40rem] bg-white/50 opacity-30 w-[5rem] backdrop-blur-md"></div>
+              <div className="absolute top-[-23rem] z-[101] rotate-45 delay-100 left-[-2rem] group-hover:top-[15rem] group-hover:left-[20rem] transition-all blur-[3em] duration-700 rounded-md h-[40rem] bg-[#fbf9f5] opacity-30 w-[5rem]"></div>
 
               <div className={serviceCardHoverGlow}></div>
 

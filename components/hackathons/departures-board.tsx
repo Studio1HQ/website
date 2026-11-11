@@ -292,7 +292,7 @@ export function DeparturesBoard({
   return (
     <div
       className={cn(
-        "relative isolate overflow-hidden rounded-[10px] bg-[#0d0d0d] px-3 pb-4 pt-5 text-[#f4efe7] shadow-[0_60px_100px_-50px_rgba(20,20,20,0.75)] ring-1 ring-inset ring-white/10 [--cw:13px] sm:px-6 sm:pb-5 sm:pt-6 sm:[--cw:15px] lg:[--cw:17px] xl:[--cw:21px]",
+        "relative isolate overflow-hidden rounded-[6px] bg-[#0d0d0d] px-3 pb-4 pt-5 text-[#f4efe7] shadow-[0_60px_100px_-50px_rgba(20,20,20,0.75)] ring-1 ring-inset ring-white/10 [--cw:13px] sm:px-6 sm:pb-5 sm:pt-6 sm:[--cw:15px] lg:[--cw:17px] xl:[--cw:21px]",
         className,
       )}
     >

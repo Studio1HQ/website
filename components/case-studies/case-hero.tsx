@@ -22,7 +22,7 @@ const PLATFORMS: [RegExp, Icon][] = [
 ];
 
 const GLASS =
-  "rounded-[6px] bg-white/60 shadow-[0_30px_60px_-46px_rgba(20,20,20,0.5),inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-inset ring-white/80 backdrop-blur-xl";
+  "rounded-[6px] bg-[#fbf9f5] shadow-[0_30px_60px_-46px_rgba(20,20,20,0.5),inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-inset ring-white/80";
 
 /**
  * The case study hero as a bento: the work's cover on the left, the
@@ -96,7 +96,7 @@ export function CaseHero({
             logo={logo}
           />
         ) : quote ? (
-          <figure className="flex h-full flex-col justify-between rounded-[6px] bg-[linear-gradient(155deg,#fb923c_0%,#f97316_45%,#ea580c_100%)] p-6 text-white shadow-[0_34px_60px_-30px_rgba(234,88,12,0.6)]">
+          <figure className="flex h-full flex-col justify-between rounded-[6px] bg-[#f97316] p-6 text-white shadow-[0_34px_60px_-30px_rgba(234,88,12,0.6)]">
             <blockquote className="line-clamp-6 text-[16px] font-medium leading-[1.5]">
               &ldquo;{quote.text}&rdquo;
             </blockquote>

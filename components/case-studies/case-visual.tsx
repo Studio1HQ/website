@@ -110,7 +110,7 @@ export function CaseVisual({
           {services.slice(0, 3).map((service) => (
             <li
               key={service}
-              className="rounded-[6px] bg-white/[0.08] px-2.5 py-1 text-[12px] font-medium text-white/85 ring-1 ring-inset ring-white/10 backdrop-blur-sm"
+              className="rounded-[6px] bg-white/[0.08] px-2.5 py-1 text-[12px] font-medium text-white/85 ring-1 ring-inset ring-white/10"
             >
               {service}
             </li>

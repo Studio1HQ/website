@@ -68,7 +68,7 @@ function ChapterRow({
       >
         <motion.span
           aria-hidden
-          className="absolute inset-0 bg-[linear-gradient(150deg,#fb923c,#f97316_50%,#ea580c)]"
+          className="absolute inset-0 bg-[#f97316]"
           style={{ opacity: reduceMotion ? 1 : lit }}
         />
         <ChapterIcon
@@ -230,7 +230,7 @@ export function CaseStory({ study }: { study: CaseStudyMeta }) {
       aria-label={`The ${study.client} story`}
       id="case-story"
       data-story-start
-      className="mt-16 rounded-[6px] bg-white/55 p-6 shadow-[0_30px_60px_-46px_rgba(20,20,20,0.5),inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-inset ring-white/80 backdrop-blur-xl backdrop-saturate-150 md:p-10"
+      className="mt-16 rounded-[6px] bg-[#fbf9f5] p-6 shadow-[0_30px_60px_-46px_rgba(20,20,20,0.5),inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-inset ring-white/80 md:p-10"
     >
       <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[#141414]/[0.08] pb-6">
         <h2 className="text-[26px] font-medium leading-tight tracking-[-0.04em] md:text-[32px]">

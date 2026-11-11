@@ -240,7 +240,7 @@ function Photo({
 
 /** Clear glass: the page and the ribbon show through, softly. */
 const GLASS =
-  "bg-[#fbf9f5]/[0.92] backdrop-blur-sm shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_30px_60px_-44px_rgba(20,20,20,0.35)] ring-1 ring-[#141414]/[0.06]";
+  "bg-[#fbf9f5] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_30px_60px_-44px_rgba(20,20,20,0.35)] ring-1 ring-[#141414]/[0.06]";
 
 /** Storyboard entrance: slides in from its own side, no zoom. */
 const slide = (fromRight: boolean, reduceMotion: boolean, delay = 0) => ({
@@ -252,7 +252,7 @@ const slide = (fromRight: boolean, reduceMotion: boolean, delay = 0) => ({
 
 /** Engraved panel for the writing, pressed into the glass. */
 const ENGRAVED =
-  "rounded-[10px] bg-[#141414]/[0.025] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.75)]";
+  "rounded-[6px] bg-[#141414]/[0.025] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.75)]";
 
 /** The event's photos, changing on their own; thumbnails on glass inside. */
 function Slideshow({ event }: { event: StudioEvent }) {
@@ -293,7 +293,7 @@ function Slideshow({ event }: { event: StudioEvent }) {
       </AnimatePresence>
 
       {photos.length > 1 ? (
-        <div className="absolute inset-x-3 bottom-3 flex items-center gap-2 rounded-[10px] bg-[#141414]/70 p-1.5">
+        <div className="absolute inset-x-3 bottom-3 flex items-center gap-2 rounded-[6px] bg-[#141414]/70 p-1.5">
           {photos.map((src, k) => (
             <button
               key={src}
@@ -301,7 +301,7 @@ function Slideshow({ event }: { event: StudioEvent }) {
               aria-label={`Photo ${k + 1} of ${photos.length}`}
               onClick={() => setI(k)}
               className={cn(
-                "relative aspect-[4/3] w-14 overflow-hidden rounded-[7px] transition-opacity md:w-16",
+                "relative aspect-[4/3] w-14 overflow-hidden rounded-[6px] transition-opacity md:w-16",
                 k === i
                   ? "opacity-100 ring-2 ring-[#f97316]"
                   : "opacity-60 hover:opacity-100",
@@ -335,7 +335,7 @@ function Feature({
       // The open lane beside the card, where the ribbon passes
       data-ribbon={flip ? "left" : "right"}
       className={cn(
-        "relative grid scroll-mt-28 overflow-hidden rounded-[14px] md:w-[86%] md:grid-cols-2",
+        "relative grid scroll-mt-28 overflow-hidden rounded-[6px] md:w-[86%] md:grid-cols-2",
         // Staggered: one leaning left, the next leaning right
         flip && "md:ml-auto",
         GLASS,
@@ -406,7 +406,7 @@ function Brief({
   return (
     <motion.li
       id={event.slug}
-      className={cn("flex scroll-mt-28 flex-col rounded-[14px] p-6", GLASS)}
+      className={cn("flex scroll-mt-28 flex-col rounded-[6px] p-6", GLASS)}
       initial={reduceMotion ? false : { opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.3 }}
@@ -467,7 +467,7 @@ function YearHead({
       <h2 className="text-[88px] font-medium leading-[0.8] tracking-[-0.07em] tabular-nums md:text-[160px]">
         {title}
       </h2>
-      <div className={cn("rounded-[14px] p-5 md:mb-3 md:ml-6", GLASS)}>
+      <div className={cn("rounded-[6px] p-5 md:mb-3 md:ml-6", GLASS)}>
         <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           {stats.map(([n, label]) => (
             <div key={label}>
@@ -501,7 +501,7 @@ function NextUp({
     <motion.article
       id={event.slug}
       className={cn(
-        "flex scroll-mt-28 flex-wrap items-center gap-x-6 gap-y-4 rounded-[14px] p-3 md:flex-nowrap",
+        "flex scroll-mt-28 flex-wrap items-center gap-x-6 gap-y-4 rounded-[6px] p-3 md:flex-nowrap",
         GLASS,
       )}
       initial={reduceMotion ? false : { opacity: 0, y: 20 }}

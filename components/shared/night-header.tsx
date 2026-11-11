@@ -34,7 +34,7 @@ export function NightHeader({
 /** Small glass pill that sits above a page title. */
 export function NightEyebrow({ icon, children }: { icon?: ReactNode; children: ReactNode }) {
   return (
-    <p className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/25 px-4 py-1.5 text-[13px] font-medium text-white/90 backdrop-blur-md">
+    <p className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/25 px-4 py-1.5 text-[13px] font-medium text-white/90">
       {icon}
       {children}
     </p>

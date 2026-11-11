@@ -2207,7 +2207,7 @@ export function PaperReasons() {
                         "whitespace-nowrap rounded-full px-7 py-3.5 text-[26px] font-medium leading-none tracking-[-0.03em] transition-[background-color,color,box-shadow] duration-[420ms] ease-[cubic-bezier(0.4,0,0.2,1)] md:text-[34px]",
                         isActive
                           ? "bg-white text-[#141414] shadow-[0_0_36px_rgba(255,255,255,0.5),0_18px_36px_-18px_rgba(120,30,0,0.5)]"
-                          : "bg-white/[0.18] text-white/90 shadow-[0_0_24px_rgba(255,255,255,0.16),inset_0_1px_0_rgba(255,255,255,0.4),inset_0_0_0_1px_rgba(255,255,255,0.14)] backdrop-blur-md hover:bg-white/25",
+                          : "bg-white/[0.18] text-white/90 shadow-[0_0_24px_rgba(255,255,255,0.16),inset_0_1px_0_rgba(255,255,255,0.4),inset_0_0_0_1px_rgba(255,255,255,0.14)] hover:bg-white/25",
                       )}
                     >
                       {item.title}

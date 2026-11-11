@@ -396,7 +396,7 @@ export function PostLayout({
           <aside className="hidden xl:block">
             <div className="sticky top-28">
               {/* Details, set into the panel */}
-              <dl className="rounded-[6px] px-4 py-1 bg-white/70 shadow-[0_10px_24px_-20px_rgba(20,20,20,0.35)] ring-1 ring-[#141414]/[0.06] backdrop-blur-xl backdrop-saturate-150">
+              <dl className="rounded-[6px] px-4 py-1 bg-[#fbf9f5] shadow-[0_10px_24px_-20px_rgba(20,20,20,0.35)] ring-1 ring-[#141414]/[0.06]">
                 {details.map(([label, value]) => (
                   <div
                     key={label}
@@ -416,7 +416,7 @@ export function PostLayout({
                   href="https://cal.com/studio1/collab"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-center gap-3 rounded-[6px] bg-white/55 p-2 pr-3.5 text-[13px] font-medium text-[#141414] shadow-[0_10px_24px_-18px_rgba(20,20,20,0.45)] ring-1 ring-[#141414]/[0.06] backdrop-blur-xl backdrop-saturate-150 transition-colors hover:bg-white/80"
+                  className="group flex items-center gap-3 rounded-[6px] bg-[#fbf9f5] p-2 pr-3.5 text-[13px] font-medium text-[#141414] shadow-[0_10px_24px_-18px_rgba(20,20,20,0.45)] ring-1 ring-[#141414]/[0.06] transition-colors hover:bg-[#f4efe7]"
                 >
                   <span className="flex size-8 items-center justify-center text-[#141414]">
                     <CalendarDots weight="bold" className="size-4" />
@@ -431,7 +431,7 @@ export function PostLayout({
                   href={markdownUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-center gap-3 rounded-[6px] bg-white/70 shadow-[0_10px_24px_-20px_rgba(20,20,20,0.35)] ring-1 ring-[#141414]/[0.06] backdrop-blur-xl backdrop-saturate-150 p-2 pr-3.5 text-[13px] text-[#141414]/65 transition-colors hover:text-[#141414]"
+                  className="group flex items-center gap-3 rounded-[6px] bg-[#fbf9f5] shadow-[0_10px_24px_-20px_rgba(20,20,20,0.35)] ring-1 ring-[#141414]/[0.06] p-2 pr-3.5 text-[13px] text-[#141414]/65 transition-colors hover:text-[#141414]"
                 >
                   <span className="flex size-8 items-center justify-center text-[#141414]">
                     <MarkdownLogo weight="fill" className="size-4" />

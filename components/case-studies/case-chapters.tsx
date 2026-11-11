@@ -137,7 +137,7 @@ function Chapter({
             "relative flex min-h-[200px] flex-col justify-between overflow-hidden rounded-[6px] p-6",
             flip && "md:order-1",
             study.metric
-              ? "bg-[linear-gradient(155deg,#fb923c_0%,#f97316_45%,#ea580c_100%)] text-white"
+              ? "bg-[#f97316] text-white"
               : "bg-[#141414] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]",
           )}
         >
@@ -375,7 +375,7 @@ export function CaseChapters({ acts }: { acts: Act[] }) {
           <motion.span
             // Fixed across the rail, so it covers the ribbon wherever it sways and
             // never reaches the cards; only its height follows the scroll
-            className="absolute left-[36px] -ml-[46px] -mt-[22px] flex items-center gap-1.5 rounded-[6px] bg-white/70 p-1.5 shadow-[0_14px_30px_-14px_rgba(20,20,20,0.5),inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-inset ring-white/80 backdrop-blur-xl backdrop-saturate-150"
+            className="absolute left-[36px] -ml-[46px] -mt-[22px] flex items-center gap-1.5 rounded-[6px] bg-[#fbf9f5] p-1.5 shadow-[0_14px_30px_-14px_rgba(20,20,20,0.5),inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-inset ring-white/80"
             style={{ top: tipTop }}
           >
             <span className="relative flex size-8 items-center justify-center rounded-[6px] bg-white ring-1 ring-[#141414]/[0.08]">

@@ -52,18 +52,18 @@ const JOBS_PER_PAGE = 12;
 /** White pill on the paper header, holding one hero stat. */
 /** Frosted glass card, the outer layer of every block on the page. */
 const GLASS_CARD =
-  "rounded-[6px] bg-white/60 shadow-[0_20px_44px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.06] backdrop-blur-xl backdrop-saturate-150 transition-[transform,background-color,box-shadow] duration-500 ease-out";
+  "rounded-[6px] bg-[#fbf9f5] shadow-[0_20px_44px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.06] transition-[transform,background-color,box-shadow] duration-500 ease-out";
 
 /** Engraved well, set into a glass card. */
 const WELL =
   "bg-[#f1ece4] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)]";
 
 const statPillClassName =
-  "inline-flex items-center gap-2 rounded-full bg-white/60 shadow-[0_20px_44px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.06] backdrop-blur-xl backdrop-saturate-150 px-4 py-2 text-[13px] font-medium text-[#141414]";
+  "inline-flex items-center gap-2 rounded-full bg-[#fbf9f5] shadow-[0_20px_44px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.06] px-4 py-2 text-[13px] font-medium text-[#141414]";
 
 /** Outline pill used for pagination and secondary actions. */
 const outlinePillClassName =
-  "inline-flex h-11 items-center gap-2 rounded-full bg-white/60 shadow-[0_20px_44px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.06] backdrop-blur-xl backdrop-saturate-150 px-5 text-[14px] font-medium text-[#141414] transition-colors duration-300 hover:bg-white/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316]/50 disabled:pointer-events-none disabled:opacity-40";
+  "inline-flex h-11 items-center gap-2 rounded-full bg-[#fbf9f5] shadow-[0_20px_44px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.06] px-5 text-[14px] font-medium text-[#141414] transition-colors duration-300 hover:bg-[#f4efe7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316]/50 disabled:pointer-events-none disabled:opacity-40";
 
 const workplaceIcons: Record<
   DevRelJobWorkplace,
@@ -171,7 +171,7 @@ function FilterDropdown({
         <div
           role="listbox"
           aria-label={label}
-          className="absolute left-0 top-[calc(100%+0.5rem)] z-50 max-h-72 w-full min-w-48 overflow-y-auto rounded-[6px] bg-white/90 p-1.5 shadow-[0_24px_40px_-24px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-white backdrop-blur-xl"
+          className="absolute left-0 top-[calc(100%+0.5rem)] z-50 max-h-72 w-full min-w-48 overflow-y-auto rounded-[6px] bg-[#fbf9f5] p-1.5 shadow-[0_24px_40px_-24px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-white"
         >
           <button
             type="button"
@@ -705,7 +705,7 @@ export function DevRelJobsPage({ jobs }: DevRelJobsPageProps) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.8, ease: EASE }}
-            className="relative isolate mt-16 overflow-hidden rounded-[6px] bg-white/60 shadow-[0_20px_44px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.06] backdrop-blur-xl backdrop-saturate-150 p-7 sm:p-10 md:mt-20 lg:p-12"
+            className="relative isolate mt-16 overflow-hidden rounded-[6px] bg-[#fbf9f5] shadow-[0_20px_44px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.06] p-7 sm:p-10 md:mt-20 lg:p-12"
           >
             <span
               aria-hidden

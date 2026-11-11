@@ -31,7 +31,7 @@ export function Icon3D({
         "relative isolate flex aspect-square items-center justify-center overflow-hidden rounded-[6px] shadow-[0_18px_30px_-16px_rgba(20,20,20,0.5),0_0_0_3px_rgba(255,255,255,0.8),inset_0_1px_0_rgba(255,255,255,0.35)]",
         ink
           ? "bg-[linear-gradient(150deg,#3a3a3a,#141414)]"
-          : "bg-[linear-gradient(150deg,#fb923c,#f97316_50%,#ea580c)]",
+          : "bg-[#f97316]",
         className,
       )}
     >
@@ -77,7 +77,7 @@ export function GlassTab({
   return (
     <span
       className={cn(
-        "flex items-center gap-2.5 rounded-[6px] bg-white/45 py-2 pl-2 pr-4 text-[13px] font-medium text-[#141414] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),inset_0_0_0_1px_rgba(255,255,255,0.55),0_16px_32px_-20px_rgba(20,20,20,0.45)] ring-1 ring-[#141414]/[0.06] backdrop-blur-xl backdrop-saturate-150",
+        "flex items-center gap-2.5 rounded-[6px] bg-[#fbf9f5] py-2 pl-2 pr-4 text-[13px] font-medium text-[#141414] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),inset_0_0_0_1px_rgba(255,255,255,0.55),0_16px_32px_-20px_rgba(20,20,20,0.45)] ring-1 ring-[#141414]/[0.06]",
         className,
       )}
     >

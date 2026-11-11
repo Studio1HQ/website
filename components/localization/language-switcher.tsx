@@ -123,7 +123,7 @@ export function LanguageSwitcher({
 
   if (inline) {
     return (
-      <div className="rounded-[6px] border border-border/70 bg-background/70 p-1.5 shadow-sm backdrop-blur">
+      <div className="rounded-[6px] border border-border/70 bg-background/70 p-1.5 shadow-sm">
         <div className="mb-1 flex items-center gap-2 px-2 py-1 text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
           <Globe className="size-3.5" weight="duotone" />
           {t("label")}
@@ -139,7 +139,7 @@ export function LanguageSwitcher({
         type="button"
         aria-label={t("label")}
         className={cn(
-          "inline-flex h-10 items-center justify-center gap-2 rounded-full border border-black/10 bg-black/[0.03] dark:border-white/15 dark:bg-white/[0.06] pl-1.5 pr-3 text-[13px] font-medium text-current backdrop-blur-md transition-colors hover:border-primary/40",
+          "inline-flex h-10 items-center justify-center gap-2 rounded-full border border-black/10 bg-black/[0.03] dark:border-white/15 dark:bg-white/[0.06] pl-1.5 pr-3 text-[13px] font-medium text-current transition-colors hover:border-primary/40",
           "shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]",
           compact && "h-10",
         )}

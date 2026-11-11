@@ -52,7 +52,7 @@ export function EventMark({
   return (
     <span
       className={cn(
-        "relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-[8px]",
+        "relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-[6px]",
         !bare &&
           "bg-white shadow-[0_1px_2px_rgba(20,20,20,0.08)] ring-1 ring-[#141414]/[0.08]",
         className,

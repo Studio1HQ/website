@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useCaseStudyHref } from "@/components/about-us/published-case-studies";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, ArrowUpRight } from "@phosphor-icons/react";
@@ -156,6 +157,7 @@ function Folder({
   const [open, setOpen] = useState(false);
   const logo = getClientLogo(project.slug);
   const lift = open && !reduceMotion;
+  const caseHref = useCaseStudyHref();
 
   return (
     <motion.div
@@ -165,7 +167,7 @@ function Folder({
       transition={{ duration: 0.8, ease: EASE, delay: order * 0.08 }}
     >
       <Link
-        href={`/case-studies/${project.slug}`}
+        href={caseHref(project.slug)}
         className="group relative block pt-10"
         onPointerEnter={() => setOpen(true)}
         onPointerLeave={() => setOpen(false)}

@@ -60,7 +60,7 @@ import { cn } from "@/lib/utils";
 
 /** Glass card and engraved well, as on the careers page. */
 const GLASS_CARD =
-  "rounded-[18px] bg-white/70 shadow-[0_20px_44px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.06] backdrop-blur-xl";
+  "rounded-[6px] bg-[#fbf9f5] shadow-[0_20px_44px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.06]";
 const WELL =
   "bg-[#f1ece4] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)]";
 const INSET_WHITE =
@@ -387,7 +387,7 @@ function CohortHero() {
             {facts.map(([value, label], index) => (
               <motion.div
                 key={label}
-                className={cn("rounded-[12px] px-4 py-4", WELL)}
+                className={cn("rounded-[6px] px-4 py-4", WELL)}
                 variants={{
                   hidden: { opacity: 0, y: 14, scale: 0.97 },
                   visible: {
@@ -519,13 +519,13 @@ function AboutCohort() {
               >
                 <div
                   className={cn(
-                    "grid grid-cols-[48px_minmax(0,1fr)] gap-x-4 rounded-[12px] p-5 md:grid-cols-[60px_minmax(0,1fr)] md:p-6",
+                    "grid grid-cols-[48px_minmax(0,1fr)] gap-x-4 rounded-[6px] p-5 md:grid-cols-[60px_minmax(0,1fr)] md:p-6",
                     INSET_WHITE,
                   )}
                 >
                   <span
                     className={cn(
-                      "flex size-12 items-center justify-center rounded-[12px] text-[15px] font-medium tabular-nums text-[#141414]/40 transition-colors duration-500 group-hover:text-[#f97316] md:size-[52px]",
+                      "flex size-12 items-center justify-center rounded-[6px] text-[15px] font-medium tabular-nums text-[#141414]/40 transition-colors duration-500 group-hover:text-[#f97316] md:size-[52px]",
                       WELL,
                     )}
                   >
@@ -585,14 +585,14 @@ function Curriculum() {
             >
               <div
                 className={cn(
-                  "grid gap-6 rounded-[12px] p-5 md:p-7 lg:grid-cols-[200px_minmax(0,1fr)_minmax(0,0.85fr)] lg:gap-10",
+                  "grid gap-6 rounded-[6px] p-5 md:p-7 lg:grid-cols-[200px_minmax(0,1fr)_minmax(0,0.85fr)] lg:gap-10",
                   INSET_WHITE,
                 )}
               >
                 {/* Week number and theme */}
                 <div className="flex items-center gap-4 lg:flex-col lg:items-start">
                   <span
-                    className="relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-[14px] text-[18px] font-semibold tabular-nums text-white"
+                    className="relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-[6px] text-[18px] font-semibold tabular-nums text-white"
                     style={{
                       background:
                         "linear-gradient(150deg,#fb923c,#f97316 50%,#ea580c)",
@@ -640,7 +640,7 @@ function Curriculum() {
                 {/* The week's deliverable */}
                 <div
                   className={cn(
-                    "flex flex-col justify-between gap-5 rounded-[12px] p-5",
+                    "flex flex-col justify-between gap-5 rounded-[6px] p-5",
                     WELL,
                   )}
                 >
@@ -775,7 +775,7 @@ function Outcomes() {
             >
               <span
                 className={cn(
-                  "flex size-11 items-center justify-center rounded-[12px] text-[#f97316]",
+                  "flex size-11 items-center justify-center rounded-[6px] text-[#f97316]",
                   WELL,
                 )}
               >
@@ -901,7 +901,7 @@ function WhoShouldApply() {
               >
                 <span
                   className={cn(
-                    "flex size-10 shrink-0 items-center justify-center rounded-[10px] text-[#f97316]",
+                    "flex size-10 shrink-0 items-center justify-center rounded-[6px] text-[#f97316]",
                     WELL,
                   )}
                 >
@@ -921,7 +921,7 @@ function WhoShouldApply() {
 
           <div className={cn("p-2", GLASS_CARD)}>
             <div
-              className={cn("h-full rounded-[12px] p-6 md:p-7", INSET_WHITE)}
+              className={cn("h-full rounded-[6px] p-6 md:p-7", INSET_WHITE)}
             >
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#141414]/55">
                 What we look for
@@ -1035,20 +1035,20 @@ function Selection() {
             >
               <div
                 className={cn(
-                  "flex h-full flex-col rounded-[12px] p-5",
+                  "flex h-full flex-col rounded-[6px] p-5",
                   INSET_WHITE,
                 )}
               >
                 <div className="flex items-center justify-between">
                   <span
                     className={cn(
-                      "relative flex size-11 items-center justify-center overflow-hidden rounded-[12px] text-[14px] font-semibold tabular-nums",
+                      "relative flex size-11 items-center justify-center overflow-hidden rounded-[6px] text-[14px] font-semibold tabular-nums",
                       WELL,
                     )}
                   >
                     <motion.span
                       aria-hidden
-                      className="absolute inset-0 bg-[linear-gradient(150deg,#fb923c,#f97316_50%,#ea580c)]"
+                      className="absolute inset-0 bg-[#f97316]"
                       variants={{
                         hidden: reduceMotion ? {} : { opacity: 0, scale: 0.4 },
                         visible: {

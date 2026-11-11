@@ -232,10 +232,11 @@ export function PrintBlock({
       style={{ background: PRINT }}
     >
       {children}
-      {/* ink texture over the print */}
+      {/* ink texture over the print, light enough that the orange stays
+          the same #f97316 as the logo */}
       <div
         aria-hidden
-        className="absolute inset-0 opacity-40 mix-blend-multiply"
+        className="absolute inset-0 opacity-[0.14] mix-blend-multiply"
         style={{ backgroundImage: GRAIN }}
       />
     </div>

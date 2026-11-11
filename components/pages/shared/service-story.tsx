@@ -567,7 +567,7 @@ function OfferCard({
                   >
                     <span
                       className={cn(
-                        "block whitespace-nowrap rounded-full bg-white/25 px-3.5 py-1.5 text-[13px] font-medium text-white shadow-[0_10px_24px_-12px_rgba(110,30,0,0.6)] ring-1 ring-inset ring-white/40 backdrop-blur-md transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
+                        "block whitespace-nowrap rounded-full bg-white/25 px-3.5 py-1.5 text-[13px] font-medium text-white shadow-[0_10px_24px_-12px_rgba(110,30,0,0.6)] ring-1 ring-inset ring-white/40 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
                         slot === 0
                           ? "rotate-[4deg] group-hover:-translate-y-1.5"
                           : "-rotate-[3deg] group-hover:translate-x-1.5",
@@ -641,7 +641,7 @@ function OfferCard({
             {offer.features.map((feature) => (
               <li
                 key={feature}
-                className="flex items-center gap-3 rounded-[6px] bg-white/[0.14] px-3.5 py-3 text-[14px] font-medium leading-snug ring-1 ring-inset ring-white/25 backdrop-blur-sm"
+                className="flex items-center gap-3 rounded-[6px] bg-white/[0.14] px-3.5 py-3 text-[14px] font-medium leading-snug ring-1 ring-inset ring-white/25"
               >
                 <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-white text-[#ea580c] shadow-[0_4px_10px_-4px_rgba(110,30,0,0.6)]">
                   <Check weight="bold" className="size-3.5" />
@@ -817,8 +817,6 @@ export function ScrollEdgeBlur() {
           key={layer.blur}
           className="absolute inset-0"
           style={{
-            backdropFilter: `blur(${layer.blur}px)`,
-            WebkitBackdropFilter: `blur(${layer.blur}px)`,
             maskImage: `linear-gradient(to bottom, transparent ${layer.from}%, #000 ${layer.to}%)`,
             WebkitMaskImage: `linear-gradient(to bottom, transparent ${layer.from}%, #000 ${layer.to}%)`,
           }}

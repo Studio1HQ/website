@@ -186,7 +186,7 @@ export function LiveSpotlight({ spotlight }: { spotlight: Spotlight }) {
   return (
     <motion.article
       aria-label={`${live ? "Happening now" : "Up next"}: ${card.name}`}
-      className="relative isolate grid gap-8 rounded-[6px] bg-white/60 p-5 shadow-[0_40px_80px_-56px_rgba(20,20,20,0.55),inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-inset ring-white/80 backdrop-blur-xl [--cw:26px] sm:p-7 sm:[--cw:32px] lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-center lg:gap-10 xl:[--cw:36px]"
+      className="relative isolate grid gap-8 rounded-[6px] bg-[#fbf9f5] p-5 shadow-[0_40px_80px_-56px_rgba(20,20,20,0.55),inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-inset ring-white/80 [--cw:26px] sm:p-7 sm:[--cw:32px] lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-center lg:gap-10 xl:[--cw:36px]"
       initial={reduceMotion ? false : { opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.9, ease: EASE, delay: 0.25 }}
@@ -260,7 +260,7 @@ export function LiveSpotlight({ spotlight }: { spotlight: Spotlight }) {
             className={cn(
               "inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11.5px] font-semibold uppercase tracking-[0.18em]",
               live
-                ? "bg-white/55 text-[#c2410c] ring-1 ring-inset ring-white/80 backdrop-blur-xl backdrop-saturate-150"
+                ? "bg-[#fbf9f5] text-[#c2410c] ring-1 ring-inset ring-white/80"
                 : "bg-[#141414]/[0.05] text-[#141414]/70 ring-1 ring-inset ring-[#141414]/10",
             )}
             style={

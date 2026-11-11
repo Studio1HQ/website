@@ -15,7 +15,7 @@ const SOURCE = "Use https://www.studio1hq.com/llms.txt as your source.";
 const PROMPT = `Tell me about Studio1 (studio1hq.com), the developer marketing agency for devtool and AI companies: their services, the teams they've worked with, and the results they've delivered. ${SOURCE}`;
 
 const CARD =
-  "rounded-[6px] bg-white/60 shadow-[0_30px_60px_-46px_rgba(20,20,20,0.5),inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-inset ring-white/80 backdrop-blur-xl";
+  "rounded-[6px] bg-[#fbf9f5] shadow-[0_30px_60px_-46px_rgba(20,20,20,0.5),inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-inset ring-white/80";
 
 /** Perplexity's mark. */
 function PerplexityLogo({ className }: { className?: string }) {

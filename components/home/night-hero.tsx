@@ -210,7 +210,7 @@ export default function NightHero() {
             {...enter(0.1)}
             role="group"
             aria-label={t("trustedAria")}
-            className="inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/[0.06] py-1.5 pl-1.5 pr-4 backdrop-blur-md"
+            className="inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/[0.06] py-1.5 pl-1.5 pr-4"
           >
             <span className="flex -space-x-2" aria-hidden>
               {TRUSTED_FACES.map((face, index) => (
@@ -308,7 +308,7 @@ export default function NightHero() {
                 />
                 {/* Icon on top, then the heading, then the offerings cycling */}
                 <span className="flex w-full items-start justify-between">
-                  <span className="relative flex size-11 items-center justify-center overflow-hidden rounded-[6px] bg-[linear-gradient(160deg,rgba(255,255,255,0.18)_0%,rgba(255,255,255,0.04)_60%)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_10px_24px_-12px_rgba(249,115,22,0.55)] ring-1 ring-inset ring-white/15 backdrop-blur-md transition-transform duration-500 group-hover:-translate-y-0.5">
+                  <span className="relative flex size-11 items-center justify-center overflow-hidden rounded-[6px] bg-[linear-gradient(160deg,rgba(255,255,255,0.18)_0%,rgba(255,255,255,0.04)_60%)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_10px_24px_-12px_rgba(249,115,22,0.55)] ring-1 ring-inset ring-white/15 transition-transform duration-500 group-hover:-translate-y-0.5">
                     <Icon weight="regular" className="size-5" />
                   </span>
                   <ArrowUpRight

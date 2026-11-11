@@ -9,6 +9,17 @@ import { cn } from "@/lib/utils";
 
 type Mode = "human" | "machine";
 
+/** The bits of the site's smooth-scroll instance this view needs. */
+type LenisLike = {
+  stop: () => void;
+  start: () => void;
+  resize: () => void;
+  scrollTo: (
+    target: number,
+    options?: { immediate?: boolean; force?: boolean },
+  ) => void;
+};
+
 /** The rise into the machine view: quick to start, long soft landing. */
 const RISE = { duration: 0.45, ease: [0.22, 1, 0.36, 1] } as const;
 /** Going back is quicker, so the page returns without a wait. */
@@ -414,14 +425,23 @@ export function MachineToggle() {
       if (event.key === "Escape") setMode("human");
     };
     document.addEventListener("keydown", onKey);
-    // Lock the page without the scrollbar vanishing, so nothing shifts sideways
+    // Lock the page without the scrollbar vanishing, so nothing shifts
+    // sideways, and pause smooth scrolling so it cannot drift while hidden.
     const root = document.documentElement;
+    const lenis = (window as Window & { __lenis?: LenisLike }).__lenis;
+    const y = window.scrollY;
+    lenis?.stop();
     root.style.scrollbarGutter = "stable";
     root.style.overflow = "hidden";
     return () => {
       document.removeEventListener("keydown", onKey);
       root.style.overflow = "";
       root.style.scrollbarGutter = "";
+      // Back exactly where the reader was, with smooth scrolling in step
+      window.scrollTo(0, y);
+      lenis?.resize();
+      lenis?.scrollTo(y, { immediate: true, force: true });
+      lenis?.start();
     };
   }, [mode]);
 

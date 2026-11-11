@@ -52,7 +52,7 @@ export default function Positioning() {
         <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-20">
           <Rise className="flex flex-col gap-5">
             {/* Frosted glass tile: lit top edge, soft inner glow, white mark */}
-            <span className="relative flex size-[88px] items-center justify-center overflow-hidden rounded-[6px] bg-[linear-gradient(160deg,rgba(255,255,255,0.38)_0%,rgba(255,255,255,0.12)_55%,rgba(255,255,255,0.06)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.7),inset_0_-10px_24px_rgba(255,255,255,0.08),0_24px_48px_-20px_rgba(90,25,0,0.55)] ring-1 ring-inset ring-white/40 backdrop-blur-xl">
+            <span className="relative flex size-[88px] items-center justify-center overflow-hidden rounded-[6px] bg-[linear-gradient(160deg,rgba(255,255,255,0.38)_0%,rgba(255,255,255,0.12)_55%,rgba(255,255,255,0.06)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.7),inset_0_-10px_24px_rgba(255,255,255,0.08),0_24px_48px_-20px_rgba(90,25,0,0.55)] ring-1 ring-inset ring-white/40">
               <span aria-hidden className="absolute inset-x-3 top-0 h-1/2 rounded-b-[40%] bg-gradient-to-b from-white/30 to-transparent" />
               <Logo className="relative size-12 brightness-0 invert drop-shadow-[0_2px_6px_rgba(90,25,0,0.35)]" />
             </span>

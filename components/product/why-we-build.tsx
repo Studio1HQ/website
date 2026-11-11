@@ -60,7 +60,7 @@ export default function WhyWeBuild({ index }: { index: number }) {
             return (
               <article
                 key={point.key}
-                className="group relative flex flex-col overflow-hidden rounded-[6px] bg-white/[0.04] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_30px_60px_-40px_rgba(0,0,0,0.8)] ring-1 ring-inset ring-white/[0.08] backdrop-blur-xl"
+                className="group relative flex flex-col overflow-hidden rounded-[6px] bg-white/[0.04] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_30px_60px_-40px_rgba(0,0,0,0.8)] ring-1 ring-inset ring-white/[0.08]"
               >
                 {/* Warm light that gathers in the corner on hover */}
                 <span

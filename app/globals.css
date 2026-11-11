@@ -1347,3 +1347,70 @@ html::-webkit-scrollbar-thumb:hover {
     animation: none;
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Paper, not glass. The site is printed paper: the old glass styles   */
+/* now render as matte paper. Raised cards are opaque warm paper with  */
+/* a hairline and a soft drop; buttons are flat print; nothing blurs   */
+/* what is behind it and nothing carries a glossy sheen.               */
+/* ------------------------------------------------------------------ */
+.s1-glass-card,
+.s1-glass-card.s1-glass-raised {
+  background: #fbf9f5;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow:
+    inset 0 0 0 1px rgba(20, 20, 20, 0.07),
+    0 1px 0 rgba(20, 20, 20, 0.04),
+    0 22px 44px -32px rgba(20, 20, 20, 0.35);
+}
+
+.dark .s1-glass-card,
+.dark .s1-glass-card.s1-glass-raised {
+  background: #1d1916;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.07),
+    0 24px 60px -32px rgba(0, 0, 0, 0.7);
+}
+
+.s1-glass-dark {
+  background: #15100e;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.07),
+    0 50px 120px -40px rgba(40, 10, 0, 0.6);
+}
+
+.s1-glass-btn {
+  background: #f97316;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow:
+    inset 0 -1px 0 rgba(124, 45, 18, 0.28),
+    0 10px 24px -14px rgba(194, 65, 12, 0.7);
+}
+
+.s1-glass-btn:hover {
+  background: #ea580c;
+  box-shadow:
+    inset 0 -1px 0 rgba(124, 45, 18, 0.32),
+    0 12px 28px -14px rgba(194, 65, 12, 0.8);
+}
+
+.s1-glass-btn-light,
+.s1-glass-btn-light:hover {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.s1-glass-btn-light {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+}
+
+.s1-glass-btn-light:hover {
+  background: rgba(255, 255, 255, 0.16);
+}

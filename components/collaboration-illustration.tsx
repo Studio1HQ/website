@@ -23,7 +23,7 @@ export const CollaborationIllustration = ({
             return (
               <div
                 key={item.name}
-                className="flex h-16 min-w-[150px] items-center justify-center overflow-hidden rounded-[6px] bg-gradient-to-b from-white/[0.08] to-white/[0.02] px-5 ring-1 ring-inset ring-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] backdrop-blur-xl"
+                className="flex h-16 min-w-[150px] items-center justify-center overflow-hidden rounded-[6px] bg-gradient-to-b from-white/[0.08] to-white/[0.02] px-5 ring-1 ring-inset ring-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]"
               >
                 {item.showNameBeside ? (
                   <div className="flex min-w-0 items-center gap-2">
@@ -60,10 +60,10 @@ export const CollaborationIllustration = ({
           })}
         </Marquee>
 
-        {/* <div className="border-2 !w-1/3 h-fit bg-accent/80 backdrop-blur-xl rounded-md aspect-square flex items-center justify-center">
+        {/* <div className="border-2 !w-1/3 h-fit bg-accent/80 rounded-md aspect-square flex items-center justify-center">
           <Logo />
         </div>
-        <div className="border-2 !w-1/3 h-fit bg-accent/80 backdrop-blur-xl rounded-md aspect-square flex items-center justify-center">
+        <div className="border-2 !w-1/3 h-fit bg-accent/80 rounded-md aspect-square flex items-center justify-center">
           <Logo />
         </div> */}
       </div>

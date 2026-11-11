@@ -68,7 +68,7 @@ function CapturePanel() {
   const code = [...before, ...colours, ...after].join("\n");
 
   return (
-    <div className="flex min-w-0 flex-col rounded-[6px] bg-white/65 p-5 shadow-[inset_0_1px_0_#fff,0_40px_80px_-48px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/[0.07] backdrop-blur-xl sm:p-6">
+    <div className="flex min-w-0 flex-col rounded-[6px] bg-[#fbf9f5] p-5 shadow-[inset_0_1px_0_#fff,0_40px_80px_-48px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/[0.07] sm:p-6">
       {/* Scan summary */}
       <div className="flex items-end justify-between gap-4">
         <div>

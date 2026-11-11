@@ -360,7 +360,7 @@ export function CalendarBoard({
                           key={e.slug}
                           event={e}
                           className={cn(
-                            "absolute size-10 rounded-[9px] shadow-[0_8px_18px_-8px_rgba(0,0,0,0.8)]",
+                            "absolute size-10 rounded-[6px] shadow-[0_8px_18px_-8px_rgba(0,0,0,0.8)]",
                             photo ? "right-1 top-9 size-9" : "left-1 top-1",
                             j > 0 && "translate-x-6 translate-y-2",
                             ["-rotate-6", "rotate-3", "-rotate-2", "rotate-6"][

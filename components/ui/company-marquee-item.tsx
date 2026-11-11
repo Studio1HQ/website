@@ -74,7 +74,7 @@ function CompanyPreviewCard({
   return (
     <div
       className={cn(
-        "w-[min(92vw,22rem)] overflow-hidden rounded-[6px] border border-border/80 bg-card/95 text-card-foreground backdrop-blur-xl",
+        "w-[min(92vw,22rem)] overflow-hidden rounded-[6px] border border-border/80 bg-card/95 text-card-foreground",
         elevatedCardShadow,
       )}
     >

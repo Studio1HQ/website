@@ -199,7 +199,7 @@ function GroupedNavItem({
             "grid w-[43rem] grid-cols-[18.5rem_minmax(0,1fr)] overflow-hidden",
             isPaper
               ? paperCard
-              : "rounded-[6px] border bg-background/95 shadow-lg backdrop-blur-xl",
+              : "rounded-[6px] border bg-background shadow-lg",
           )}
         >
           {/* Rail: one row per group */}
@@ -482,8 +482,8 @@ export default function Navbar() {
               : "dark border-transparent bg-transparent text-white"
             : isPaper
               ? // Paper bar: same sheet as the page, no bottom rule, ink text.
-                "border-transparent bg-[#f4efe7]/90 text-[#1b1714] backdrop-blur-xl"
-              : cn("border-border/50 backdrop-blur-2xl", "bg-background/80"),
+                "border-transparent bg-[#f4efe7] text-[#1b1714]"
+              : cn("border-border/50", "bg-background"),
         )}
       >
         <nav
@@ -525,7 +525,7 @@ export default function Navbar() {
                           isPaper
                             ? // Paper menu: the hero's white card, square, hairline ring.
                               cn(paperCard, "p-2")
-                            : "rounded-[6px] border bg-background/95 px-1 py-1.5 shadow-lg backdrop-blur-xl",
+                            : "rounded-[6px] border bg-background px-1 py-1.5 shadow-lg",
                           item.children.some((child) =>
                             Boolean(child.description),
                           )

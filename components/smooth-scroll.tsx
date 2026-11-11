@@ -20,6 +20,9 @@ export function SmoothScroll() {
       anchors: { offset: -96 },
     });
 
+    // Shared so overlays (the machine view) can pause it and resync after.
+    (window as Window & { __lenis?: Lenis }).__lenis = lenis;
+
     let raf = 0;
     const loop = (time: number) => {
       lenis.raf(time);
@@ -29,6 +32,7 @@ export function SmoothScroll() {
 
     return () => {
       cancelAnimationFrame(raf);
+      delete (window as Window & { __lenis?: Lenis }).__lenis;
       lenis.destroy();
     };
   }, []);
