@@ -38,8 +38,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     path: `/case-studies/${slug}`,
     locale: DEFAULT_LOCALE,
     keywords: study.tags,
-    image: study.cover,
-    imageAlt: getCaseStudyCoverAlt(study),
     publishedTime: study.date,
     modifiedTime: study.updatedDate,
     tags: study.tags,

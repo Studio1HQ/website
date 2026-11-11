@@ -2,7 +2,13 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { baseUrl } from "@/lib/site";
-import { organizationJsonLd } from "@/lib/seo";
+import {
+  HOME_DESCRIPTION,
+  HOME_SOCIAL_DESCRIPTION,
+  HOME_TITLE,
+  defaultOgImages,
+  organizationJsonLd,
+} from "@/lib/seo";
 import Script from "next/script";
 import { cn } from "@/lib/utils";
 import localFont from "next/font/local";
@@ -28,11 +34,10 @@ export const metadata: Metadata = {
     apple: [{ url: "/icon.png", type: "image/png" }],
   },
   title: {
-    default: "DevRel & Developer Marketing Agency for Devtools | Studio1",
+    default: `${HOME_TITLE} | Studio1`,
     template: "%s | Studio1",
   },
-  description:
-    "Studio1 is a DevRel and developer marketing agency for devtool, AI, and open-source teams: technical content, docs, video, launches, and GitHub growth.",
+  description: HOME_DESCRIPTION,
   keywords: [
     "technical content",
     "developer relations",
@@ -53,29 +58,21 @@ export const metadata: Metadata = {
     "content marketing for devtools",
   ],
   authors: [{ name: "Studio1" }],
+  // Pages set their own share card; this is the fallback (404s, admin).
   openGraph: {
-    title: "DevRel & Developer Marketing Agency for Devtools | Studio1",
-    description:
-      "Studio1 is a DevRel and developer marketing agency for devtool, AI, and open-source teams: technical content, docs, video, launches, and GitHub growth.",
+    title: `${HOME_TITLE} | Studio1`,
+    description: HOME_SOCIAL_DESCRIPTION,
     url: baseUrl,
     siteName: "Studio1",
     locale: "en",
     type: "website",
-    images: [
-      {
-        url: `${baseUrl}/opengraph-image.png`,
-        width: 1200,
-        height: 630,
-        alt: "Studio1 - DevRel and Developer Marketing Agency for DevTools",
-      },
-    ],
+    images: defaultOgImages,
   },
   twitter: {
-    title: "DevRel & Developer Marketing Agency for Devtools | Studio1",
+    title: `${HOME_TITLE} | Studio1`,
     card: "summary_large_image",
-    description:
-      "Studio1 is a DevRel and developer marketing agency for devtool, AI, and open-source teams: technical content, docs, video, launches, and GitHub growth.",
-    images: [`${baseUrl}/opengraph-image.png`],
+    description: HOME_SOCIAL_DESCRIPTION,
+    images: defaultOgImages.map(({ url, alt }) => ({ url, alt })),
     creator: "@Studio1HQ",
   },
 };

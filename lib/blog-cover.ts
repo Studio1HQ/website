@@ -17,3 +17,8 @@ function version(updated?: string) {
 export function blogCoverUrl(slug: string, updated?: string) {
   return `/blog-cover/${slug}${version(updated)}`;
 }
+
+/** The same cover at the 1200x630 share-card size, from app/og/blog/[slug]. */
+export function blogOgUrl(slug: string, updated?: string) {
+  return `/og/blog/${slug}${version(updated)}`;
+}

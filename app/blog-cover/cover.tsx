@@ -45,7 +45,7 @@ function Bar({ width, color = "rgba(20,20,20,0.12)", height = 12 }: { width: num
   return <div style={flex({ width, height, borderRadius: 999, background: color })} />;
 }
 
-function Mark({ size, color }: { size: number; color: string }) {
+export function Mark({ size, color }: { size: number; color: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 160 160">
       <path fillRule="evenodd" clipRule="evenodd" d={LOGO_PATH} fill={color} />
@@ -940,7 +940,7 @@ function CrossPost() {
   );
 }
 
-function PrintMark() {
+export function PrintMark() {
   return (
     <div style={flex({ width: 380, height: 380, alignItems: "center", justifyContent: "center", background: CREAM })}>
       <Mark size={220} color={PRINT} />
@@ -949,7 +949,7 @@ function PrintMark() {
 }
 
 /** `scale` overrides the panel's zoom for art too tall to fit the cover at it. */
-type Art = { label: string; node: ReactNode; scale?: number };
+export type Art = { label: string; node: ReactNode; scale?: number };
 
 /** Picks the illustration from what the post is about. */
 function artFor(post: BlogPostMeta): Art {
@@ -1139,7 +1139,7 @@ function artFor(post: BlogPostMeta): Art {
 /* ------------------------------------------------------------------ */
 
 /** Design-tool selection frame around the illustration, with its layer label. */
-function Frame({ label, children }: { label: string; children: ReactNode }) {
+export function Frame({ label, children }: { label: string; children: ReactNode }) {
   const handle: CSSProperties = { position: "absolute", width: 16, height: 16, background: "#fff", border: `2px solid ${INK}` };
   return (
     <div style={flex({ position: "relative", padding: 18, border: `2px solid ${INK}` })}>
@@ -1171,8 +1171,24 @@ function Frame({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-/** Flat orange panel with the horizon line and the framed illustration. */
-function Panel({ art, width, scale = 1 }: { art: Art; width: number; scale?: number }) {
+/**
+ * Flat orange panel with the horizon line and the framed illustration.
+ * `zoom` shrinks the whole composition for smaller canvases (Open Graph cards),
+ * so a cover and its share card are the same picture at two sizes.
+ */
+export function Panel({
+  art,
+  width,
+  height = BLOG_COVER_SIZE.height,
+  scale = 1,
+  zoom = 1,
+}: {
+  art: Art;
+  width: number;
+  height?: number;
+  scale?: number;
+  zoom?: number;
+}) {
   return (
     // No overflow clip here: next/og drops SVGs (icons, charts, the cursor) inside
     // the scaled frame when an ancestor clips. The canvas edge clips anyway.
@@ -1181,29 +1197,31 @@ function Panel({ art, width, scale = 1 }: { art: Art; width: number; scale?: num
           homepage contact banner */}
       <svg
         width={width}
-        height={BLOG_COVER_SIZE.height}
-        viewBox={`0 0 ${width} ${BLOG_COVER_SIZE.height}`}
+        height={height}
+        viewBox={`0 0 ${width} ${height}`}
         style={{ position: "absolute", left: 0, top: 0 }}
       >
         <ellipse
           cx={width / 2}
-          cy={BLOG_COVER_SIZE.height + 420}
-          rx={Math.max(width * 0.72, 620)}
-          ry={680}
+          cy={height + 420 * zoom}
+          rx={Math.max(width * 0.72, 620 * zoom)}
+          ry={680 * zoom}
           fill="none"
           stroke="#ffffff"
           strokeOpacity="0.4"
           strokeWidth="2"
         />
       </svg>
-      <div style={flex({ transform: `scale(${art.scale ?? scale})` })}>
+      <div style={flex({ transform: `scale(${(art.scale ?? scale) * zoom})` })}>
         <Frame label={art.label}>{art.node}</Frame>
       </div>
     </div>
   );
 }
 
-async function loadFonts() {
+let fonts: ReturnType<typeof readFonts> | undefined;
+
+async function readFonts() {
   const fontsDir = path.join(process.cwd(), "app/fonts");
   const [regular, medium] = await Promise.all([
     readFile(path.join(fontsDir, "Studio1Sans-Regular.ttf")),
@@ -1215,6 +1233,12 @@ async function loadFonts() {
   ];
 }
 
+/** Studio1 Sans for next/og, read from disk once per server instance. */
+export function loadFonts() {
+  fonts ??= readFonts();
+  return fonts;
+}
+
 export function getCoverPost(slug: string) {
   return getAllPosts().find((post) => post.slug === slug) ?? null;
 }
@@ -1223,14 +1247,24 @@ export function coverStaticParams() {
   return getAllPosts().map((post) => ({ slug: post.slug }));
 }
 
-/** A post's cover: its illustration on the orange print panel, no title (the page shows it). */
-export async function renderCover(post: BlogPostMeta) {
+/**
+ * A post's cover: its illustration on the orange print panel, no title (the
+ * page shows it). At OG_SIZE it is the post's share card: the same picture,
+ * zoomed to the 1.91:1 canvas social networks expect.
+ */
+export async function renderCover(post: BlogPostMeta, size: { width: number; height: number } = BLOG_COVER_SIZE) {
   return new ImageResponse(
     (
       <div style={flex({ width: "100%", height: "100%", fontFamily: "Studio1 Sans", color: INK })}>
-        <Panel art={artFor(post)} width={BLOG_COVER_SIZE.width} scale={1.4} />
+        <Panel
+          art={artFor(post)}
+          width={size.width}
+          height={size.height}
+          scale={1.4}
+          zoom={size.height / BLOG_COVER_SIZE.height}
+        />
       </div>
     ),
-    { ...BLOG_COVER_SIZE, fonts: await loadFonts() },
+    { ...size, fonts: await loadFonts() },
   );
 }

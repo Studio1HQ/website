@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
-import { blogCoverUrl } from "@/lib/blog-cover";
+import { blogCoverUrl, blogOgUrl } from "@/lib/blog-cover";
 
 const DEFAULT_AUTHOR = "Amitesh Anand";
 const DEFAULT_POST_IMAGE = "/opengraph-image.png";
@@ -39,6 +39,8 @@ export type BlogPostMeta = {
   bannerImage?: string;
   bannerImageAlt: string;
   socialImage: string;
+  /** 1200x630 share card (og:image), the cover's art at Open Graph size. */
+  ogImage: string;
   readingTimeMinutes: number;
   tldrSummary: string;
 };
@@ -291,6 +293,7 @@ function postMetaFromFile(fileName: string): BlogPostMeta {
     bannerImage,
     bannerImageAlt: d.bannerImageAlt ?? d.imageAlt ?? title,
     socialImage: blogCoverUrl(slug, normalizeDate(d.updatedDate, date)),
+    ogImage: blogOgUrl(slug, normalizeDate(d.updatedDate, date)),
     tldrSummary,
     readingTimeMinutes: estimateReadingMinutes(
       visibleReadingContent(bodySource, description, keyTakeaways, tldrSummary),
@@ -398,6 +401,8 @@ export type BlogPost = {
   bannerImage?: string;
   bannerImageAlt: string;
   socialImage: string;
+  /** 1200x630 share card (og:image), the cover's art at Open Graph size. */
+  ogImage: string;
   readingTimeMinutes: number;
   tldrSummary: string;
   keyTakeaways: string[];
@@ -459,6 +464,7 @@ export function getPostBySlug(slug: string): BlogPost | null {
     bannerImage,
     bannerImageAlt: d.bannerImageAlt ?? d.imageAlt ?? title,
     socialImage: blogCoverUrl(slug, normalizeDate(d.updatedDate, date)),
+    ogImage: blogOgUrl(slug, normalizeDate(d.updatedDate, date)),
     tldrSummary,
     readingTimeMinutes: estimateReadingMinutes(
       visibleReadingContent(content, description, keyTakeaways, tldrSummary),
