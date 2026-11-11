@@ -177,7 +177,15 @@ export default function Page() {
             items={aeoFaqItems}
           />
           <p className="mt-8 text-center text-[15px] text-[var(--p-muted)]">
-            Want to try it yourself? Read{" "}
+            Want to try it yourself? Start with our{" "}
+            <Link href="/blog/answer-engine-optimization-guide" className={linkClass}>
+              AEO guide
+            </Link>{" "}
+            and{" "}
+            <Link href="/blog/generative-engine-optimization-guide" className={linkClass}>
+              GEO guide
+            </Link>
+            , then read{" "}
             <Link
               href="/blog/how-to-measure-devtool-visibility-in-ai-answers"
               className={linkClass}
