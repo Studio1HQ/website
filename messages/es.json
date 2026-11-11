@@ -115,6 +115,8 @@
     "descriptionRich": "Los ingenieros y developer advocates de Studio1 crean el contenido técnico, los docs y las demos<br></br>en los que confían los desarrolladores, y luego ejecutan los lanzamientos y programas de comunidad que llevan a la adopción de tu producto.",
     "primaryCta": "Reservar una llamada estratégica",
     "secondaryCta": "Ver nuestro trabajo",
+    "primaryCtaShort": "Agendar cita",
+    "secondaryCtaShort": "Ver casos",
     "trustedAria": "Con la confianza de más de 35 equipos devtool",
     "trustedPrefix": "Con la confianza de",
     "trustedSuffix": "equipos devtool"

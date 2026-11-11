@@ -115,6 +115,8 @@
     "descriptionRich": "Studio1's engineers and developer advocates create the technical content, docs, and demos<br></br>developers trust, then run the launches and community programs that get your product adopted.",
     "primaryCta": "Book a Strategy Call",
     "secondaryCta": "Check Our Work",
+    "primaryCtaShort": "Book a Call",
+    "secondaryCtaShort": "Our Work",
     "trustedAria": "Trusted by 35+ devtool teams",
     "trustedPrefix": "Trusted by",
     "trustedSuffix": "devtool teams"

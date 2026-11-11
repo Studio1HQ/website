@@ -158,6 +158,20 @@ const LINK_GROUPS: { title: string; links: GroupLink[] }[][] = [
   ],
 ];
 
+/**
+ * Phone order, where every group is its own cell in a two-column grid:
+ * services side by side, then company and resources, then the two short
+ * lists, so each row's headings line up and the rows come out even.
+ */
+const PHONE_ORDER: Record<string, string> = {
+  Content: "order-1",
+  Growth: "order-2",
+  Company: "order-3",
+  Resources: "order-4",
+  "Open Source": "order-5",
+  Careers: "order-6",
+};
+
 /** Card heading: a quiet label in ink above softer grey links. */
 const heading = "text-[14px] font-medium tracking-[-0.01em] text-[#141414]";
 const LIST = "mt-5 grid gap-y-2.5";
@@ -421,11 +435,16 @@ export default function PaperFooter() {
           </div>
 
           {/* The links, grouped by what they are for */}
-          <div className="grid grid-cols-2 gap-x-10 gap-y-12 md:grid-cols-4 xl:contents">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:gap-x-10 md:grid-cols-4 md:gap-y-12 xl:contents">
             {LINK_GROUPS.map((column, c) => (
-              <div key={c} className="flex flex-col gap-10">
+              // On phones the column steps aside so its groups pair up by row
+              <div key={c} className="contents md:flex md:flex-col md:gap-10">
                 {column.map((group) => (
-                  <nav key={group.title} aria-label={group.title}>
+                  <nav
+                    key={group.title}
+                    aria-label={group.title}
+                    className={cn(PHONE_ORDER[group.title], "md:order-none")}
+                  >
                     <p className={heading}>{group.title}</p>
                     <ul className={LIST}>
                       {group.links.map((link) => (
@@ -457,8 +476,9 @@ export default function PaperFooter() {
           </div>
         </div>
 
-        {/* Copyright left, the switch centred as in the machine view, legal right */}
-        <div className="flex flex-col items-start gap-4 pb-8 pt-4 md:grid md:grid-cols-[1fr_auto_1fr] md:items-center">
+        {/* Stacked and centred on phones; from md, copyright left, the
+            switch centred as in the machine view, legal right */}
+        <div className="flex flex-col items-center gap-4 pb-8 pt-4 text-center md:grid md:grid-cols-[1fr_auto_1fr] md:text-left">
           <p className="text-[13px] text-[#141414]/55">
             © {new Date().getFullYear()} Studio1. {t("rights")}
           </p>

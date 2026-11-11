@@ -115,6 +115,8 @@
     "descriptionRich": "Studio1 के engineers और developer advocates वह technical content, docs और demos बनाते हैं<br></br>जिन पर developers भरोसा करते हैं, फिर वे launches और community programs चलाते हैं जिनसे आपका product अपनाया जाता है.",
     "primaryCta": "रणनीति कॉल बुक करें",
     "secondaryCta": "हमारा काम देखें",
+    "primaryCtaShort": "कॉल बुक करें",
+    "secondaryCtaShort": "हमारा काम",
     "trustedAria": "अब तक 35+ devtool टीमों का भरोसा",
     "trustedPrefix": "अब तक",
     "trustedSuffix": "devtool टीमों का भरोसा"

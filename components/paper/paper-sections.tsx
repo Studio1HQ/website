@@ -367,7 +367,7 @@ export function PaperLogos() {
             return (
               <li
                 key={cell}
-                className="relative h-24 overflow-hidden rounded-[6px] bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)]"
+                className="relative h-16 overflow-hidden rounded-[6px] bg-[#fbf9f5] sm:h-24 ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)]"
               >
                 {cellLogos.map((item, index) => (
                   <span
