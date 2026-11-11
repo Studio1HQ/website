@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
+import { setRequestLocale } from "next-intl/server";
 import { SiteChrome } from "@/components/site-chrome";
 import { PaperNotFound } from "@/components/paper/paper-error-pages";
 import { DEFAULT_LOCALE } from "@/lib/i18n";
@@ -28,6 +29,10 @@ export const metadata: Metadata = {
 };
 
 export default async function NotFound() {
+  // Without this, next-intl reads the locale from headers(). On a static
+  // route (an unknown /<segment> matched by [locale], or /careers/<bad-id>)
+  // that throws "static to dynamic at runtime" and the 404 becomes a 500.
+  setRequestLocale(DEFAULT_LOCALE);
   const messages = await getMessages(DEFAULT_LOCALE);
 
   return (
