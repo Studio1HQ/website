@@ -67,7 +67,7 @@ function pageKind(pathname: string) {
   if (/^\/case-studies/.test(pathname)) return "Case study index";
   if (/^\/blog\/./.test(pathname)) return "Article";
   if (/^\/blog/.test(pathname)) return "Blog index";
-  if (/services|marketing|devrel|seo|launch|aeo|reddit|content/.test(pathname))
+  if (/services|marketing|devrel|seo|launch|aeo|reddit|content|developer-|agency|growth/.test(pathname))
     return "Service";
   return "Page";
 }

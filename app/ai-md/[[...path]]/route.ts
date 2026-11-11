@@ -31,12 +31,16 @@ const renderedPageMarkdown = unstable_cache(
       },
       redirect: "follow",
       cache: "no-store",
-      signal: AbortSignal.timeout(15_000),
+      signal: AbortSignal.timeout(30_000),
     });
     const type = response.headers.get("content-type") ?? "";
-    if (!response.ok || !type.includes("text/html")) {
-      return { status: response.status === 200 ? 404 : response.status, markdown: "" };
+    // A missing page is a real answer and can be cached. Any other failure
+    // throws, so it is not cached and the next request tries again.
+    if (response.status === 404 || response.status === 410) {
+      return { status: 404, markdown: "" };
     }
+    if (!response.ok) throw new Error(`page returned ${response.status}`);
+    if (!type.includes("text/html")) return { status: 404, markdown: "" };
     const { document } = parseHTML(await response.text());
     const markdown = pageToMarkdown(document as unknown as Document, {
       pathname: new URL(response.url || `${origin}${pathname}`).pathname,
@@ -99,11 +103,15 @@ export async function GET(
 
   const served = source.status === 200 && source.markdown.length > 0;
   const offerServed = served && offer.length > 0;
+  // A temporary failure must never read as "this page doesn't exist".
+  const temporary = !served && source.status >= 500;
   const body = served
     ? insertOffer(source.markdown.trim(), offer, {
         afterFirstSection: source.offerAfterFirstSection,
       })
-    : `# Not found\n\nThis page doesn't exist. See https://www.studio1hq.com/llms.txt for the site index.\n`;
+    : temporary
+      ? `# Temporarily unavailable\n\nThis page exists but couldn't be loaded just now. Please try again in a minute: https://www.studio1hq.com${pathname}\n`
+      : `# Not found\n\nThis page doesn't exist. See https://www.studio1hq.com/llms.txt for the site index.\n`;
 
   // One log line per AI agent request (Vercel runtime logs); no database.
   console.info(
@@ -118,12 +126,13 @@ export async function GET(
 
   const isText = pathname.endsWith(".txt");
   return new Response(body, {
-    status: served ? 200 : source.status === 200 ? 404 : source.status,
+    status: served ? 200 : temporary ? 503 : 404,
     headers: {
       "Content-Type": `${isText ? "text/plain" : "text/markdown"}; charset=utf-8`,
       "Cache-Control": "private, no-store",
       "X-Robots-Tag": "noindex",
       Vary: "User-Agent",
+      ...(temporary ? { "Retry-After": "60" } : {}),
     },
   });
 }
