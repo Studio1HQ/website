@@ -38,7 +38,7 @@ const blogFaqItems: FAQItem[] = [
     question:
       "What does a technical content marketing agency for developer tools do?",
     answer:
-      "It plans, writes, and distributes the content developers use to evaluate a tool: tutorials, integration guides, comparison posts, deep dives, and SEO articles that answer the questions developers search for. Studio1 does this for devtool, AI, and open-source teams with engineers and technical writers matched to your stack, and can distribute each piece on Reddit, X, LinkedIn, Dev.to, and daily.dev. For Bright Data, that meant 50+ live posts on brightdata.com in a year.",
+      "It plans, writes, and distributes the content developers use to evaluate a tool: tutorials, integration guides, comparison posts, deep dives, and SEO articles that answer the questions developers search for. Studio1 does this for devtool, AI, and open-source teams with engineers and technical writers matched to your stack, and can distribute each piece on Reddit, X, LinkedIn, Dev.to, and daily.dev. For Permit.io, that meant authorization guides ranking on page one of Google.",
   },
   {
     question:

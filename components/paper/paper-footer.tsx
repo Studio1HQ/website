@@ -151,7 +151,8 @@ const LINK_GROUPS: { title: string; links: GroupLink[] }[][] = [
       links: [
         { key: "careers", scope: "footer", href: "/careers", badge: "New" },
         { key: "devrelJobs", scope: "footer", href: "/devrel-jobs", badge: "New" },
-        { key: "devrelCohort", scope: "footer", href: "/devrel-cohort" },
+        // DevRel Cohort is hidden from the footer for now; restore this line to show it.
+        // { key: "devrelCohort", scope: "footer", href: "/devrel-cohort" },
       ],
     },
   ],

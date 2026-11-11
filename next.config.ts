@@ -145,6 +145,12 @@ const nextConfig: NextConfig = {
         destination: "/careers",
         permanent: true,
       },
+      // Split into two roles on 2026-11-11.
+      {
+        source: "/careers/growth-and-content-lead",
+        destination: "/careers",
+        permanent: true,
+      },
       {
         source: "/careers/developer-advocate",
         destination: "/careers/devrel-engineer",

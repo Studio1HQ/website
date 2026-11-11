@@ -220,11 +220,12 @@ export default function Footer() {
                   {t("links.devrelJobs")}
                 </Link>
               </li>
+              {/* DevRel Cohort is hidden from the footer for now.
               <li>
                 <Link href="/devrel-cohort" className={linkClass}>
                   {t("links.devrelCohort")}
                 </Link>
-              </li>
+              </li> */}
               <li>
                 <Link href="/oss" className={linkClass}>
                   {t("links.openSource")}

@@ -13,13 +13,23 @@ import {
 } from "@tabler/icons-react";
 import { navItems, type NavItem, type NavLink } from "@/constants/data";
 import { cn } from "@/lib/utils";
-import { unprefixPath } from "@/lib/paper";
+import type { CSSProperties } from "react";
+import { PAPER_SCOPE, unprefixPath } from "@/lib/paper";
 import { useIsPaper } from "@/components/paper/paper-chrome-context";
 import Logo from "../ui/svgs/logo";
 import { MailIcon } from "@/components/ui/mail-icon";
 import { LanguageSwitcher } from "@/components/localization/language-switcher";
 import { useTranslations } from "next-intl";
 
+
+/** Paper colours for the mobile menu, including the hover/accent tone. */
+const MOBILE_PAPER_SCOPE = {
+  ...PAPER_SCOPE,
+  "--accent": "36 25% 89%",
+  "--accent-foreground": "0 0% 8%",
+  "--popover": "0 0% 100%",
+  "--popover-foreground": "0 0% 8%",
+} as CSSProperties;
 const navTitleKeys: Record<string, string> = {
   "About Us": "about",
   "AEO Agency": "aeo",
@@ -590,7 +600,12 @@ export default function Navbar() {
               type="button"
               aria-label={isMenuOpen ? "Close menu" : "Open menu"}
               aria-expanded={isMenuOpen}
-              className="rounded-md p-2 hover:bg-accent"
+              className={cn(
+                "rounded-md p-2",
+                // Phones keep the hover state after a tap; on paper it must
+                // stay light even when the phone is in dark mode.
+                isPaper ? "hover:bg-[#141414]/[0.06]" : "hover:bg-accent",
+              )}
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               <IconMenu2 className="size-6" />
@@ -598,9 +613,12 @@ export default function Navbar() {
           </div>
         </nav>
 
-        {/* Mobile Navigation */}
+        {/* Mobile Navigation. On paper pages the panel is pinned to the paper
+            palette, so a phone in dark mode doesn't paint it near-black under
+            the ink-coloured links. */}
         <div
           data-lenis-prevent
+          style={isPaper ? MOBILE_PAPER_SCOPE : undefined}
           className={cn(
             "border bg-background pb-6 shadow-2xl transition-all duration-300 lg:hidden",
             isMenuOpen

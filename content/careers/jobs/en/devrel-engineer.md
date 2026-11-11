@@ -29,7 +29,7 @@ You will work with the Studio1 team on DevRel work for Studio1, Raah, AssetSnip,
 - Write technical blogs, tutorials, docs, guides, and launch content from real implementation work.
 - Record demo walkthroughs, product explainers, and short technical videos when a topic needs video.
 - Turn product context and technical research into angles, outlines, scripts, posts, and launch plans.
-- Package demos and repos for X, Reddit, Hacker News, YouTube, and developer communities, and work with our Growth & Content Lead on hooks and timing.
+- Package demos and repos for X, Reddit, Hacker News, YouTube, and developer communities, and work with our Growth Lead on hooks and timing.
 - Join developer conversations online, capture feedback, and turn recurring questions into better content or docs.
 - Review technical content from the team for accuracy, clarity, and whether it answers the questions developers are asking.
 
