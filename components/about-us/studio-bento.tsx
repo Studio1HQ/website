@@ -20,7 +20,7 @@ import { PaperSection } from "@/components/paper/paper-sections";
 import { PrintBlock, SelectionFrame } from "@/components/paper/paper-hero";
 import Logo from "@/components/ui/svgs/logo";
 import { homeTestimonials } from "@/data/home";
-import { PAPER, PRINT } from "@/lib/paper";
+import { GRAIN, PAPER, PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 
 /*
@@ -86,7 +86,7 @@ function MapNode({ node, delay }: { node: Node; delay: number }) {
   const NodeIcon = node.icon;
   return (
     <motion.div
-      className="rounded-[6px] bg-[#141414]/80 p-3 text-white shadow-[0_18px_34px_-18px_rgba(20,20,20,0.6)]"
+      className="rounded-[6px] bg-[#3d3631] p-3 text-white shadow-[0_12px_24px_-16px_rgba(42,15,0,0.55)] ring-1 ring-inset ring-white/[0.06]"
       initial={reduceMotion ? false : { opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -334,12 +334,18 @@ export function StudioBento() {
           {/* How the services connect */}
           <motion.div
             {...enter(0.1)}
-            className="relative overflow-hidden rounded-[6px] p-6 md:p-10"
+            className="relative isolate overflow-hidden rounded-[6px] p-6 md:p-10"
             style={{
               background:
                 "linear-gradient(180deg, #ebe5dc 0%, #f6dcbf 55%, #fbc28a 100%)",
             }}
           >
+            {/* Paper grain over the wash */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 -z-10 opacity-40 mix-blend-multiply"
+              style={{ backgroundImage: GRAIN }}
+            />
             <ServiceMap />
           </motion.div>
 

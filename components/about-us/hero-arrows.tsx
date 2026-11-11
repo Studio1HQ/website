@@ -28,17 +28,16 @@ export function Icon3D({
     <span
       aria-hidden
       className={cn(
-        "relative isolate flex aspect-square items-center justify-center overflow-hidden rounded-[6px] shadow-[0_18px_30px_-16px_rgba(20,20,20,0.5),0_0_0_3px_rgba(255,255,255,0.8),inset_0_1px_0_rgba(255,255,255,0.35)]",
+        "relative isolate flex aspect-square items-center justify-center overflow-hidden rounded-[6px] shadow-[0_14px_26px_-16px_rgba(20,20,20,0.45),0_0_0_3px_#fbf9f5]",
         ink
-          ? "bg-[linear-gradient(150deg,#3a3a3a,#141414)]"
+          ? "bg-[#141414]"
           : "bg-[#f97316]",
         className,
       )}
     >
-      {/* Print grid and grain */}
-      <span className="absolute inset-0 -z-10 bg-[linear-gradient(rgba(255,255,255,0.14)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.14)_1px,transparent_1px)] [background-size:16.66%_16.66%]" />
+      {/* Printed flat, with a light paper grain */}
       <span
-        className="absolute inset-0 -z-10 opacity-30 mix-blend-multiply"
+        className="absolute inset-0 -z-10 opacity-[0.14] mix-blend-multiply"
         style={{ backgroundImage: GRAIN }}
       />
       <Glyph weight="bold" className="size-[46%] text-white" />

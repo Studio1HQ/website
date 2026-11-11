@@ -9,6 +9,7 @@ import {
   XLogo,
 } from "@phosphor-icons/react";
 import { Container, EASE } from "@/components/home/ui";
+import { DitherField } from "@/components/home/dither-field";
 import { PixelPortrait } from "@/components/about-us/pixel-portrait";
 import { DotWord } from "@/components/team/dot-word";
 import { PaperPageHeader } from "@/components/paper/paper-page-header";
@@ -180,7 +181,7 @@ export function TeamPage() {
               The people behind the work.
             </motion.p>
           </div>
-          {/* Who we are, how we work, and the open seats: three glass panels */}
+          {/* Who we are, how we work, and the open seats: three paper sheets */}
           <div className="mt-12 grid gap-3 sm:grid-cols-2 md:mt-20 md:gap-4 lg:grid-cols-3">
             {[
               {
@@ -206,7 +207,7 @@ export function TeamPage() {
                     <p className="text-[15px] font-medium text-white">
                       Studio1 is hiring.
                     </p>
-                    <p className="mt-1 text-[14px] leading-[1.55] text-white/80">
+                    <p className="mt-1 text-[14px] leading-[1.55] text-white/85">
                       Want to work with this team? See the open and upcoming
                       roles on our careers page.
                     </p>
@@ -229,16 +230,24 @@ export function TeamPage() {
                 viewport={{ once: true, margin: "-40px" }}
                 transition={{ duration: 0.8, ease: EASE, delay: i * 0.08 }}
               >
-                {/* Printed sheets: flat orange ink on the outer two, plain
-                    paper in the middle, each with a soft drop */}
+                {/* Sheets cut like the home hero's service cards: a hairline,
+                    dots fading in from the right. The outer two are printed in
+                    the logo orange, the middle one is plain paper. */}
                 <div
                   className={cn(
-                    "relative isolate flex-1 overflow-hidden rounded-[6px] p-6 shadow-[0_1px_0_rgba(20,20,20,0.05),0_16px_32px_-24px_rgba(20,20,20,0.4)] md:p-7",
+                    "relative isolate flex-1 overflow-hidden rounded-[6px] p-6 ring-1 ring-inset md:p-7 [&>*:not(canvas)]:relative",
                     i === 1
-                      ? "bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07]"
-                      : "bg-[#f97316] ring-1 ring-inset ring-[#c2410c]/30",
+                      ? "bg-white/80 ring-[#141414]/10"
+                      : "bg-[#f97316] ring-[#c2410c]/25",
                   )}
                 >
+                  <DitherField
+                    still
+                    strength={1.8}
+                    seed={i * 1.7}
+                    colors={i === 1 ? undefined : ["#fdba74", "#ffedd5"]}
+                    className="absolute inset-y-0 right-0 -z-10 h-full w-[55%] opacity-80 [mask-image:linear-gradient(to_left,black_30%,transparent)]"
+                  />
                   {panel.body}
                 </div>
               </motion.div>
