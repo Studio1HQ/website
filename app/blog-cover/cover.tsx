@@ -237,6 +237,124 @@ function Answer() {
   );
 }
 
+/** A generative answer with numbered citations, your page first among its sources. */
+function Citations() {
+  const marker = (n: number, accent = false) => (
+    <div
+      style={flex({
+        width: 26,
+        height: 26,
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: 15,
+        fontWeight: 500,
+        color: accent ? "#fff" : MUTED,
+        background: accent ? PRINT : CREAM,
+      })}
+    >
+      {n}
+    </div>
+  );
+  const sources: [string, boolean][] = [
+    ["yourtool.dev/docs", true],
+    ["github.com", false],
+    ["reddit.com", false],
+  ];
+  return (
+    <div style={card({ width: 560, padding: "28px 30px" })}>
+      <div style={flex({ justifyContent: "space-between", alignItems: "center" })}>
+        <Caption>GENERATED ANSWER</Caption>
+        <Tag dark>GEO</Tag>
+      </div>
+      <div style={flex({ flexDirection: "column", gap: 14, marginTop: 22 })}>
+        <div style={flex({ alignItems: "center", gap: 10 })}>
+          <Bar width={360} />
+          {marker(1, true)}
+        </div>
+        <div style={flex({ alignItems: "center", gap: 10 })}>
+          <Bar width={300} />
+          {marker(2)}
+        </div>
+        <div style={flex({ alignItems: "center", gap: 10 })}>
+          <Bar width={250} color={PRINT} />
+          {marker(1, true)}
+        </div>
+      </div>
+      <div style={flex({ flexDirection: "column", marginTop: 22, paddingTop: 8, borderTop: `1px solid ${LINE}` })}>
+        {sources.map(([source, cited], index) => (
+          <div
+            key={source}
+            style={flex({
+              alignItems: "center",
+              gap: 14,
+              marginTop: 10,
+              padding: "10px 14px",
+              background: cited ? "#fdf0e4" : "transparent",
+              border: cited ? `2px solid ${PRINT}` : "2px solid transparent",
+            })}
+          >
+            {marker(index + 1, cited)}
+            <span style={{ fontSize: 20, fontWeight: cited ? 500 : 400, color: cited ? INK : MUTED }}>{source}</span>
+            {cited ? (
+              <div style={flex({ marginLeft: "auto" })}>
+                <Tag>cited twice</Tag>
+              </div>
+            ) : null}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** A search box, the answer shown above the links, and the follow-up questions. */
+function AnswerBox() {
+  return (
+    <div style={flex({ flexDirection: "column", width: 560, gap: 16 })}>
+      <div style={flex({ alignItems: "center", gap: 14, padding: "16px 22px", borderRadius: 999, background: "#fff", boxShadow: "0 20px 40px -26px rgba(20,20,20,0.4)" })}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <circle cx="10.5" cy="10.5" r="6.5" stroke={INK} strokeWidth="2.2" />
+          <path d="m15.5 15.5 5 5" stroke={INK} strokeWidth="2.2" strokeLinecap="round" />
+        </svg>
+        <span style={{ fontSize: 21 }}>what is answer engine optimization?</span>
+      </div>
+      <div style={card({ padding: "24px 28px" })}>
+        <div style={flex({ justifyContent: "space-between", alignItems: "center" })}>
+          <Caption>THE ANSWER</Caption>
+          <Tag>AEO</Tag>
+        </div>
+        <div style={flex({ marginTop: 14, fontSize: 24, fontWeight: 500, letterSpacing: "-0.02em" })}>Answer first, in 40 to 60 words.</div>
+        <div style={flex({ flexDirection: "column", gap: 10, marginTop: 14 })}>
+          <Bar width={430} />
+          <Bar width={360} />
+        </div>
+        <div style={flex({ alignItems: "center", gap: 10, marginTop: 18, fontSize: 17, color: MUTED })}>
+          <div style={flex({ width: 14, height: 14, background: PRINT })} />
+          yourtool.dev
+        </div>
+      </div>
+      <div style={card({ padding: "6px 28px" })}>
+        {["People also ask: is AEO the same as SEO?", "How do I get cited in AI answers?"].map((question, index) => (
+          <div
+            key={question}
+            style={flex({
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "14px 0",
+              borderTop: index ? `1px solid ${LINE}` : "none",
+              fontSize: 19,
+              color: index ? MUTED : INK,
+            })}
+          >
+            <span>{question}</span>
+            <span style={{ color: MUTED }}>⌄</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function Scorecard() {
   const engines = ["ChatGPT", "Perplexity", "Gemini"];
   // Which of the 12 prompts mentioned the tool, per engine (illustrative).
@@ -955,6 +1073,9 @@ export type Art = { label: string; node: ReactNode; scale?: number };
 function artFor(post: BlogPostMeta): Art {
   const title = post.title;
   const lead = title.split(":")[0].trim();
+  // The two pillar guides; narrow on purpose so other GEO and AEO posts keep their art.
+  if (/complete guide to geo\b/i.test(title)) return { label: "citations.fig", node: <Citations /> };
+  if (/complete guide to aeo\b/i.test(title)) return { label: "answer-box.fig", node: <AnswerBox />, scale: 1.2 };
   if (/\bvs\b/i.test(lead)) {
     const [left, right] = lead.split(/\s+vs\.?\s+/i);
     return { label: "versus.fig", node: <Versus left={left} right={right} /> };
