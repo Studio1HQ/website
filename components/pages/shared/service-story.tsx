@@ -242,7 +242,7 @@ export function StoryHero({
         {/* Tall enough on large screens for the flanks, whatever the copy */}
         <div
           id="overview"
-          className="relative mx-auto flex max-w-[820px] flex-col items-center justify-center text-center xl:min-h-[560px]"
+          className="relative mx-auto flex max-w-[880px] flex-col items-center justify-center text-center xl:min-h-[560px]"
         >
           <a
             href={secondaryHref}
@@ -261,8 +261,11 @@ export function StoryHero({
             />
           </a>
 
-          {/* The headline on white blocks, as on the home sheet */}
-          <h1 className="mt-8 max-w-[760px] text-balance text-[38px] font-medium leading-[1.12] tracking-[-0.045em] sm:text-[52px] lg:text-[60px] 2xl:text-[64px]">
+          {/* The headline on white blocks, as on the home sheet. The width is
+              in em so every title breaks the same way at every size: two
+              lines, or one if it is short. From xl the side cards leave less
+              room, so the type steps down until 1440px. */}
+          <h1 className="mt-8 max-w-[13.1em] text-balance text-[38px] font-medium leading-[1.12] tracking-[-0.045em] sm:text-[52px] lg:text-[60px] xl:text-[54px] min-[1440px]:text-[60px] 2xl:text-[64px]">
             <span className="bg-white px-[0.18em] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]">
               <span style={{ color: PRINT }}>{titleAccent}</span> {titleRest}
             </span>
@@ -281,16 +284,24 @@ export function StoryHero({
           </div>
 
           {stats.length ? (
-            <dl className="mt-12 flex flex-wrap justify-center gap-x-10 gap-y-5 border-t border-[#141414]/[0.1] pt-7">
+            // One row on desktop, between the side cards: long labels wrap
+            // to two balanced lines instead of pushing a stat to a new row
+            <dl className="mt-12 flex flex-wrap justify-center gap-x-10 gap-y-5 border-t border-[#141414]/[0.1] pt-7 lg:flex-nowrap lg:gap-x-8">
               {stats.slice(0, 4).map((stat) => {
                 const plus = stat.value.endsWith("+");
                 return (
-                  <div key={stat.label} className="min-w-[96px]">
+                  <div
+                    key={stat.label}
+                    className={cn(
+                      "min-w-[96px]",
+                      stats.length >= 4 ? "max-w-[150px]" : "max-w-[190px]",
+                    )}
+                  >
                     <dd className="whitespace-nowrap text-[28px] font-medium leading-none tracking-[-0.05em]">
                       {plus ? stat.value.slice(0, -1) : stat.value}
                       {plus ? <span style={{ color: PRINT }}>+</span> : null}
                     </dd>
-                    <dt className="mt-2 text-[12.5px] leading-snug text-[#141414]/55">
+                    <dt className="mt-2 text-balance text-[12.5px] leading-snug text-[#141414]/55">
                       {stat.label}
                     </dt>
                   </div>

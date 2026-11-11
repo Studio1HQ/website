@@ -219,7 +219,7 @@ export default function Page() {
             breadcrumbJsonLd([
               { name: "Home", path: "/" },
               {
-                name: "Developer Video and Demo Agency",
+                name: "Developer Video Production Agency",
                 path: "/developer-video-production",
               },
             ]),

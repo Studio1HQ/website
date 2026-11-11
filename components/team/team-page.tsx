@@ -38,7 +38,15 @@ const DOTS = Array.from({ length: COLS * ROWS }, (_, i) => {
   return inSilhouette(x, y) ? [x, y] : null;
 }).filter(Boolean) as [number, number][];
 
-function DotSilhouette({ coarse = false }: { coarse?: boolean }) {
+function DotSilhouette({
+  coarse = false,
+  fill = "#141414",
+  opacity = 0.32,
+}: {
+  coarse?: boolean;
+  fill?: string;
+  opacity?: number;
+}) {
   // Small tiles use every other dot, so the pattern reads without shimmer
   const dots = coarse
     ? DOTS.filter(([x, y]) => x % 2 === 0 && y % 2 === 0)
@@ -55,8 +63,8 @@ function DotSilhouette({ coarse = false }: { coarse?: boolean }) {
           cx={x}
           cy={y}
           r={coarse ? 0.8 : 0.42}
-          fill="#141414"
-          fillOpacity={0.32}
+          fill={fill}
+          fillOpacity={opacity}
         />
       ))}
     </svg>
@@ -148,6 +156,54 @@ function PersonCard({ member }: { member: TeamMember }) {
         </div>
       </div>
     </>
+  );
+}
+
+/** The last seat on the team grid: you, linked to the careers page. */
+function JoinCard() {
+  return (
+    <Link href="/careers" className="group block">
+      <div
+        className="relative isolate aspect-[4/4.4] overflow-hidden rounded-[6px] ring-1 ring-inset ring-[#c2410c]/25"
+        style={{ background: PRINT }}
+      >
+        <DitherField
+          still
+          strength={1.8}
+          seed={4.2}
+          colors={["#fdba74", "#ffedd5"]}
+          className="absolute inset-y-0 right-0 -z-10 h-full w-[60%] opacity-80 [mask-image:linear-gradient(to_left,black_30%,transparent)]"
+        />
+        {/* Fills the card so the transform doesn't move the silhouette's
+            layout box; grows from the shoulders and brightens on hover */}
+        <div className="absolute inset-0 origin-bottom opacity-[0.85] transition-[transform,opacity] duration-700 ease-out group-hover:scale-[1.03] group-hover:opacity-100 motion-reduce:transition-none motion-reduce:group-hover:scale-100">
+          <DotSilhouette fill="#ffffff" opacity={0.7} />
+        </div>
+        <span className="absolute left-4 top-4 text-[clamp(28px,4vw,44px)] font-medium leading-[0.95] tracking-[-0.05em] text-white md:left-5 md:top-5">
+          And you?
+        </span>
+        <span className="absolute right-3 top-3 hidden rounded-full bg-white/90 px-2.5 py-0.5 text-[11px] font-medium text-[#c2410c] lg:block">
+          We&apos;re hiring
+        </span>
+      </div>
+
+      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-[15px] font-medium leading-[1.3] tracking-[-0.01em] text-[#141414]">
+            Your name here
+          </p>
+          <p className="mt-1 text-[13px] leading-[1.4] text-[#141414]/50">
+            See the open roles
+          </p>
+        </div>
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#141414] text-white transition-colors duration-200 group-hover:bg-[#f97316]">
+          <ArrowUpRight
+            weight="bold"
+            className="size-[17px] transition-transform duration-200 group-hover:-translate-y-px group-hover:translate-x-px"
+          />
+        </span>
+      </div>
+    </Link>
   );
 }
 
@@ -286,7 +342,7 @@ export function TeamPage() {
                     "w-[calc(50%-8px)]",
                     t === 0
                       ? "md:w-[calc(50%-12px)]"
-                      : "md:w-[calc(33.333%-16px)] lg:w-[calc(25%-18px)]",
+                      : "md:w-[calc(33.333%-16px)]",
                   )}
                   initial={reduceMotion ? false : { opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -296,6 +352,22 @@ export function TeamPage() {
                   <PersonCard member={member} />
                 </motion.li>
               ))}
+              {/* The last tier ends on a seat for whoever reads this */}
+              {t === TEAM.length - 1 && (
+                <motion.li
+                  className="w-[calc(50%-8px)] md:w-[calc(33.333%-16px)]"
+                  initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-60px" }}
+                  transition={{
+                    duration: 0.8,
+                    ease: EASE,
+                    delay: tier.members.length * 0.06,
+                  }}
+                >
+                  <JoinCard />
+                </motion.li>
+              )}
             </ul>
           </Container>
         </PaperSection>
