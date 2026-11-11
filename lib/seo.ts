@@ -16,23 +16,56 @@ import {
   localizedUrl,
   type Locale,
 } from "@/lib/i18n";
+import { HOME_OG_ALT, HOME_OG_IMAGE, OG_SIZE, ogImageUrl } from "@/lib/og";
 
 export { baseUrl };
 
-export const DEFAULT_OG_IMAGE = "/opengraph-image.png";
-export const DEFAULT_OG_IMAGE_ALT =
-  "Studio1 - DevRel and Developer Marketing Agency for DevTools";
+/** The homepage share card, also the fallback for pages without their own. */
+export const DEFAULT_OG_IMAGE = HOME_OG_IMAGE;
+export const DEFAULT_OG_IMAGE_ALT = HOME_OG_ALT;
 
 const defaultOgImageUrl = `${baseUrl}${DEFAULT_OG_IMAGE}`;
 
 export const defaultOgImages = [
   {
     url: defaultOgImageUrl,
-    width: 1200,
-    height: 630,
+    ...OG_SIZE,
     alt: DEFAULT_OG_IMAGE_ALT,
+    type: "image/png",
   },
 ];
+
+/** og:image and twitter:image for a 1200x630 share card. */
+function shareImages(url: string, alt: string, size: { width: number; height: number } = OG_SIZE) {
+  const image = { url: absoluteImageUrl(url), ...size, alt, type: "image/png" };
+  return {
+    openGraph: [image],
+    twitter: [{ url: image.url, alt }],
+  };
+}
+
+/** Link previews show about 125 characters before cutting a description off. */
+const SOCIAL_DESCRIPTION_MAX = 125;
+
+/**
+ * The meta description shortened for og:description and twitter:description,
+ * so link previews end on a whole sentence (or the statement before a colon)
+ * instead of being cut mid-word. Search snippets keep the full description.
+ */
+export function socialDescription(description: string) {
+  const text = description.replace(/\s+/g, " ").trim();
+  if (text.length <= SOCIAL_DESCRIPTION_MAX) return text;
+  const head = text.slice(0, SOCIAL_DESCRIPTION_MAX);
+
+  const sentenceEnd = Math.max(head.lastIndexOf(". "), head.lastIndexOf("? "), head.lastIndexOf("! "));
+  if (sentenceEnd >= 50) return text.slice(0, sentenceEnd + 1);
+
+  const clauseEnd = Math.max(head.lastIndexOf(": "), head.lastIndexOf(" — "), head.lastIndexOf(" - "));
+  if (clauseEnd >= 50) return `${text.slice(0, clauseEnd).trimEnd()}.`;
+
+  const words = head.slice(0, head.lastIndexOf(" ")).replace(/[\s,;:–—-]+$/, "");
+  return `${words}…`;
+}
 
 export function absoluteImageUrl(image?: string): string {
   if (!image) return defaultOgImageUrl;
@@ -75,6 +108,8 @@ export function pageMetadata({
   // Titles that already name Studio1 (e.g. "Studio1 vs Draft.dev") skip the
   // " | Studio1" suffix, so the brand never appears twice. See serpTitle.
   const { meta: metaTitle, full: brandedTitle } = serpTitle(title);
+  const images = shareImages(ogImageUrl(title, path), `${title} | Studio1`);
+  const shareDescription = socialDescription(description);
 
   return {
     title: metaTitle,
@@ -91,26 +126,30 @@ export function pageMetadata({
     },
     openGraph: {
       title: brandedTitle,
-      description,
+      description: shareDescription,
       url,
       siteName: "Studio1",
       locale: localeMeta[locale].htmlLang.replace("-", "_"),
       type,
-      images: [...defaultOgImages],
+      images: images.openGraph,
     },
     twitter: {
       title: brandedTitle,
       card: "summary_large_image",
-      description,
-      images: [defaultOgImageUrl],
+      description: shareDescription,
+      images: images.twitter,
       creator: "@Studio1HQ",
     },
   };
 }
 
-const HOME_TITLE = "DevRel & Developer Marketing Agency for Devtools";
-const HOME_DESCRIPTION =
+/** 60 characters with " | Studio1", the most a search result shows. */
+export const HOME_TITLE = "DevRel and Developer Marketing Agency for Devtools";
+export const HOME_DESCRIPTION =
   "Studio1 is a DevRel and developer marketing agency for devtool, AI, and open-source teams: technical content, docs, video, launches, and GitHub growth.";
+/** Written for link previews, which show about 125 characters. */
+export const HOME_SOCIAL_DESCRIPTION =
+  "DevRel and developer marketing for devtool, AI, and open-source teams: content, docs, video, launches, and GitHub growth.";
 
 export function homePageMetadata({
   title = HOME_TITLE,
@@ -123,6 +162,9 @@ export function homePageMetadata({
 } = {}): Metadata {
   const brandedTitle = `${title} | Studio1`;
   const url = localizedUrl("/", locale, baseUrl);
+  const images = shareImages(HOME_OG_IMAGE, HOME_OG_ALT);
+  const shareDescription =
+    description === HOME_DESCRIPTION ? HOME_SOCIAL_DESCRIPTION : socialDescription(description);
 
   return {
     title: {
@@ -135,18 +177,18 @@ export function homePageMetadata({
     },
     openGraph: {
       title: brandedTitle,
-      description,
+      description: shareDescription,
       url,
       siteName: "Studio1",
       locale: localeMeta[locale].htmlLang.replace("-", "_"),
       type: "website",
-      images: [...defaultOgImages],
+      images: images.openGraph,
     },
     twitter: {
       title: brandedTitle,
       card: "summary_large_image",
-      description,
-      images: [defaultOgImageUrl],
+      description: shareDescription,
+      images: images.twitter,
       creator: "@Studio1HQ",
     },
   };
@@ -183,8 +225,8 @@ export function articlePageMetadata({
   keywords,
   image,
   imageAlt,
-  imageWidth = 1200,
-  imageHeight = 630,
+  imageWidth = OG_SIZE.width,
+  imageHeight = OG_SIZE.height,
   publishedTime,
   modifiedTime,
   author,
@@ -207,8 +249,13 @@ export function articlePageMetadata({
   tags?: string[];
 }): Metadata {
   const url = localizedUrl(path, locale, baseUrl);
-  const ogImage = absoluteImageUrl(image);
+  // Pages without a share image of their own get a generated card.
   const ogImageAlt = imageAlt?.trim() || title;
+  const images = shareImages(image ?? ogImageUrl(title, path), ogImageAlt, {
+    width: imageWidth,
+    height: imageHeight,
+  });
+  const shareDescription = socialDescription(description);
   const { meta: metaTitle, full: brandedTitle } = serpTitle(title);
   const authorList = authors?.length ? authors : author ? [author] : [];
   // Named authors link to their profile page (rel="author", article:author).
@@ -227,7 +274,7 @@ export function articlePageMetadata({
     },
     openGraph: {
       title: brandedTitle,
-      description,
+      description: shareDescription,
       url,
       siteName: "Studio1",
       type: "article",
@@ -237,20 +284,13 @@ export function articlePageMetadata({
         ? { authors: authorRefs.map((ref) => ref.url ?? ref.name) }
         : {}),
       ...(tags?.length ? { tags } : {}),
-      images: [
-        {
-          url: ogImage,
-          width: imageWidth,
-          height: imageHeight,
-          alt: ogImageAlt,
-        },
-      ],
+      images: images.openGraph,
     },
     twitter: {
       card: "summary_large_image",
       title: brandedTitle,
-      description,
-      images: [ogImage],
+      description: shareDescription,
+      images: images.twitter,
       creator: "@Studio1HQ",
     },
   };
