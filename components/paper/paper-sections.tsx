@@ -1179,8 +1179,12 @@ function MarkedSummary({ text, mark }: { text: string; mark: string }) {
   );
 }
 
-/** The case studies featured on the home page; the rest live on /case-studies. */
-const FEATURED = ["Nebius", "Bright Data", "Memori", "LiteLLM"];
+/**
+ * The case studies featured on the home page; the rest live on /case-studies.
+ * Bright Data is off the home page for now: add "Bright Data" back after
+ * "Nebius" to show its sheet again.
+ */
+const FEATURED = ["Nebius", "Memori", "LiteLLM"];
 
 /** Official GitHub and Google marks, set inline right before the word. */
 function BrandMark({ brand }: { brand: "GitHub" | "Google" }) {
