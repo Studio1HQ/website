@@ -45,6 +45,7 @@ If you read this and thought "yes, and here's what I'd do", keep reading.
 
 ## What we are looking for
 
+- High agency: you don't wait to be told what to do. You spot what needs doing, figure it out, ship it, and own the result.
 - 1+ year in growth or marketing for a technical product: a devtool, AI, SaaS, API, or open-source project. Experience only with general consumer brands is not a fit.
 - Proof in public: launches, posts, or campaigns you ran that spread, and you can explain why they worked.
 - You think distribution-first, and you know how developer communities react to brands and what not to post: no spam, no vote manipulation.

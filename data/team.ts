@@ -71,6 +71,9 @@ export const TEAM: TeamTier[] = [
         name: "Kathank Raithatha",
         role: "Developer Advocate",
         portrait: "/assets/team/kathank-raithatha.webp?v=11",
+        links: {
+          linkedin: "https://www.linkedin.com/in/kathank/",
+        },
       },
       {
         name: "Bhavya Bhardwaj",

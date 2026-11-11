@@ -40,7 +40,7 @@ const PAGE_LAST_MODIFIED: Record<string, string> = {
   "/aeo-agency": "2026-11-10",
   "/reddit-marketing-agency": "2026-11-10",
   "/developer-content-distribution": "2026-11-10",
-  "/careers": "2026-11-11",
+  "/careers": "2026-11-12",
   "/devrel-jobs": "2026-11-10",
   "/team": "2026-11-08",
   "/events": "2026-11-07",
