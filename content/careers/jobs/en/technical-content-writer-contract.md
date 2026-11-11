@@ -36,6 +36,7 @@ You will help Studio1 and engineering teams create developer-facing content for 
 
 You should be strong in English, comfortable writing for technical readers, and able to show past technical work from blogs, docs, repos, demos, or developer publications.
 
+- High agency: you don't wait to be told what to do. You spot what needs doing, figure it out, ship it, and own the result.
 - You have written technical content, docs, tutorials, blogs, newsletters, or developer explainers before and can share strong published samples or demo-led work.
 - You have a software, engineering, or technical builder background, or equivalent proof that you can understand developer topics deeply.
 - You can learn new tools, APIs, SDKs, frameworks, or stacks quickly enough to create accurate demos and tutorials.

@@ -44,6 +44,7 @@ If you read this and thought "yes, and here's what I'd do", keep reading.
 
 ## What we are looking for
 
+- High agency: you don't wait to be told what to do. You spot what needs doing, figure it out, ship it, and own the result.
 - 1+ year creating content for a technical product: a devtool, AI, SaaS, API, or open-source project. Experience only with general consumer brands is not a fit.
 - Proof in public. Your own X or LinkedIn, or a channel you grew, shows posts that spread, and you can explain why they worked.
 - You have taste. You can rewrite a flat hook and say why in one sentence.
