@@ -59,7 +59,7 @@ export const homeFeatures: Feature[] = [
   {
     title: "Collaboration",
     description:
-      "30+ successful partnerships with fast-moving teams. Trusted by industry leaders like Permit.io, Nebius, and LiteLLM.",
+      "30+ successful partnerships with fast-moving teams. Trusted by industry leaders like Permit.io, Bright Data, and Nebius.",
     icon: Handshake,
   },
   {

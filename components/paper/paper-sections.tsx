@@ -2071,7 +2071,7 @@ export function PaperWork() {
 
 /** One real Studio1 screen per reason, in homeFeatures order. */
 const REASON_SHOTS = [
-  "/case-studies/openlore/openlore-homepage.webp",
+  "/case-studies/brightdata/brightdata-homepage.webp",
   "/case-studies/nebius/token-factory.webp",
   "/case-studies/tensorlake/tensorlake-home.webp",
   "/case-studies/entelligence-ai/entelligence-homepage.webp",
