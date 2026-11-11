@@ -5,6 +5,17 @@ slug: what-a-dx-audit-covers
 description: "Learn what a DX audit covers, explore 10 common developer experience problems, and use a practical checklist to improve docs, onboarding, and adoption."
 tldrSummary: A DX audit identifies where developers get stuck while learning,
   setting up, and using your product.
+tldrBullets:
+  - Developers who hit a wall with your product rarely tell you. They leave
+    quietly, and a DX audit is how you find that wall before more of them walk
+    into it.
+  - The first hour matters most. If a new developer cannot get one working
+    result quickly, nothing else you built gets a fair chance.
+  - Weak docs are the most common cause. More than half of API teams call
+    inconsistent documentation a major problem, and since developers now ask AI
+    tools before opening your docs, unclear pages hurt you twice.
+  - "Most problems are small and cheap to fix: an old quickstart, a vague error
+    message, too many steps to get access, a change nobody announced."
 date: 2026-11-04
 updatedDate: 2026-11-04
 draft: false
@@ -17,21 +28,11 @@ tags:
   - onboarding
 bannerImage: /blog/uploads/what-a-dx-audit-covers/cover.png
 ---
-## TL;DR
-
-- Developers who hit a wall with your product rarely tell you. They leave quietly, and a DX audit is how you find that wall before more of them walk into it.
-- The first hour matters most. If a new developer cannot get one working result quickly, nothing else you built gets a fair chance.
-- Weak docs are the most common cause. More than half of API teams call inconsistent documentation a major problem, and since developers now ask AI tools before opening your docs, unclear pages hurt you twice.
-- Most problems are small and cheap to fix: an old quickstart, a vague error message, too many steps to get access, a change nobody announced.
-- You can test this yourself in 30 minutes. Sign up like a stranger, follow your own quickstart, and time how long it takes to get a first working result.
-
-## Why Developers Leave Quietly
-
 Most developers who try your product will never tell you what went wrong. They sign up, hit a wall, and go back to what they were using before. You see a drop in your funnel and nothing else.
 
 A DX audit is how you find that wall. Someone who has never used your product goes through it the way a new developer would, writes down every point where they got stuck, and turns that list into a plan.
 
-If you want the bigger picture on why developer products struggle, our post on common mistakes startups make when building developer-first products is a good companion to this one.
+If you want the bigger picture on why developer products struggle, our post on [common mistakes startups make when building developer-first products](/blog/common-mistakes-developer-products) is a good companion to this one.
 
 ## What Is a DX Audit?
 
@@ -43,11 +44,15 @@ You can audit an API, an SDK, a CLI tool, a developer platform, an open source p
 
 Developer friction is expensive, and the numbers are bigger than most teams expect.
 
-- **Time lost every week.** Atlassian's 2025 State of DevEx report surveyed 3,500 developers in six countries. Half of them said they lose 10 or more hours a week to organizational friction, and 90% lose at least six. The same report found developers spend only 16% of their time writing code. Atlassian estimates a company with 500 developers could lose up to $7.9 million a year this way.
-- **Self-serve answers pay off.** LeadDev reports that developers who can find documentation and knowledge on their own are 4.4 times more productive.
-- **Docs are a top complaint.** In Postman's 2025 State of the API report, more than half of respondents named inconsistent documentation as a major stumbling block. A year earlier, 39% called it the single biggest roadblock to API work.
-- **Maintenance eats the week.** Stripe's Developer Coefficient study found the average developer spends more than 17 hours a week on maintenance, plus about four hours on bad code. The study is from 2018, but it is still the most quoted number on this topic.
-- **AI makes bad docs more visible.** In the 2025 Stack Overflow Developer Survey, 84% of respondents use AI tools, and 66% say their biggest frustration is AI answers that are close but not quite right. When your docs are unclear, those tools get your product wrong too.
+- **Time lost every week.** Atlassian's 2025 State of DevEx report surveyed 3,500 developers in six countries. [Half of them said they lose 10 or more hours a week to organizational friction, and 90% lose at least six](https://leaddev.com/velocity/ai-productivity-gains-are-being-offset-by-organizational-bottlenecks). The same report found developers spend only [16% of their time writing code](https://www.atlassian.com/blog/developer/developer-experience-report-2025). Atlassian estimates a company with 500 developers could lose up to $7.9 million a year this way.
+
+- **Self-serve answers pay off.** LeadDev reports that developers who can find documentation and knowledge on their own are [4.4 times more productive](https://leaddev.com/velocity/ai-productivity-gains-are-being-offset-by-organizational-bottlenecks).
+
+- **Docs are a top complaint.** In Postman's 2025 State of the API report, [more than half of respondents named inconsistent documentation as a major stumbling block](https://nordicapis.com/a-deep-dive-into-the-state-of-the-api-2025/). A year earlier, [39% called it the single biggest roadblock to API work](https://sdtimes.com/api/report-developers-are-increasingly-adopting-an-api-first-approach/).
+
+- **Maintenance eats the week.** Stripe's Developer Coefficient study found the average developer spends [more than 17 hours a week on maintenance, plus about four hours on bad code](https://www.oreilly.com/radar/four-short-links-17-september-2018/). The study is from 2018, but it is still the most quoted number on this topic.
+
+- **AI makes bad docs more visible.** In the 2025 Stack Overflow Developer Survey, [84% of respondents use AI tools, and 66% say their biggest frustration is AI answers that are close but not quite right](https://survey.stackoverflow.co/2025/). When your docs are unclear, those tools get your product wrong too.
 
 ## What Does a DX Audit Cover?
 
@@ -73,10 +78,15 @@ Six steps take an audit from choosing a developer to a ranked fix list.
 ![Six-step DX audit process: pick the developer, cold run, evidence, interviews, numbers, then score and rank, with the cold run highlighted](/blog/uploads/what-a-dx-audit-covers/dx-audit-steps.webp "A DX audit turns real steps into a ranked fix list.")
 
 1. **Pick the developer.** Decide who you are auditing for: a beginner trying your API for the first time, or an expert migrating from a competitor. Each one hits different walls.
+
 2. **Do a cold run.** Someone who has never used the product starts from the homepage and tries to build the simplest useful thing. They write down every pause, every guess, and every tab they open to find an answer.
+
 3. **Read the evidence you already have.** Support tickets, GitHub issues, community threads, and sales call notes usually repeat the same five complaints.
+
 4. **Talk to a few real developers.** Five or six short conversations will confirm most of what the cold run found.
-5. **Check the numbers.** Look at signup to first successful call, quickstart completion, and how long it takes to find an answer in search. A DEV Community guide on API analytics lists the onboarding metrics worth tracking, including support ticket volume during onboarding.
+
+5. **Check the numbers.** Look at signup to first successful call, quickstart completion, and how long it takes to find an answer in search. A [DEV Community guide on API analytics](https://dev.to/zuplo/how-api-analytics-shapes-developer-experience-3edh) lists the onboarding metrics worth tracking, including support ticket volume during onboarding.
+
 6. **Score and rank.** Every problem gets a rating for how many developers it hits and how badly. The fix list is sorted by that, so the team starts with the biggest win.
 
 ## The 10 Problems We Find Most Often
@@ -85,7 +95,7 @@ These are patterns we see again and again in our [DX audits](/developer-document
 
 ### 1. The path to a first working result is too long
 
-A developer who signs up wants to see one thing work, fast. Postman calls time to first call the most important metric for a public API. We often find the real number is far longer than the team thinks, because the team has never gone through signup with a fresh account.
+A developer who signs up wants to see one thing work, fast. Postman calls [time to first call the most important metric for a public API](https://business.dptribune.com/dptribune/news/read/41565462/the_most_important_api_metric_is_time_to_first_call). We often find the real number is far longer than the team thinks, because the team has never gone through signup with a fresh account.
 
 **What it looks like:** a long signup form, a dashboard with no guidance, and docs that explain features before showing a single working call.
 
@@ -93,7 +103,7 @@ A developer who signs up wants to see one thing work, fast. Postman calls time t
 
 ### 2. The quickstart is out of date
 
-Docs drift. The product changes, the sample code does not, and the first copy-paste throws an error. The 2025 State of Docs report, as summarized by DigitalAPI, found that keeping docs current is the top challenge for over half of documentation teams.
+Docs drift. The product changes, the sample code does not, and the first copy-paste throws an error. The 2025 State of Docs report, as summarized by [DigitalAPI](https://www.digitalapi.ai/blogs/api-documentation-common-mistakes), found that keeping docs current is the top challenge for over half of documentation teams.
 
 **What it looks like:** old package versions, renamed endpoints, screenshots of a dashboard that no longer exists.
 
@@ -101,7 +111,7 @@ Docs drift. The product changes, the sample code does not, and the first copy-pa
 
 ### 3. Docs are written for people who already know the product
 
-Reference pages are easy to write, so that is where most teams stop. New developers need tutorials that walk them through a real task and short explanations of how the system thinks. Postman's 2024 report found that 44% of developers read source code just to understand an API. That is a sign the docs left something out.
+Reference pages are easy to write, so that is where most teams stop. New developers need tutorials that walk them through a real task and short explanations of how the system thinks. Postman's 2024 report found that [44% of developers read source code just to understand an API](https://sdtimes.com/api/report-developers-are-increasingly-adopting-an-api-first-approach/). That is a sign the docs left something out.
 
 **What it looks like:** pages full of parameters with no story, and terms used before they are explained.
 
@@ -133,7 +143,7 @@ Approval queues, sandbox requests, confusing OAuth flows, and keys hidden three 
 
 ### 7. Changes arrive with no warning
 
-Developers build on your product and then you rename a field. If you do not announce it, they find out when their app breaks. A JetBrains survey of plugin developers found that experienced developers want better API documentation notes far more than beginners do, 41% versus 17%. One of the clearest requests was a pointer to the new API whenever an old one is retired.
+Developers build on your product and then you rename a field. If you do not announce it, they find out when their app breaks. A JetBrains survey of plugin developers found that experienced developers want better API documentation notes far more than beginners do, [41% versus 17%](https://blog.jetbrains.com/platform/2026/03/the-experience-gap-how-developers-priorities-shift-as-they-grow/). One of the clearest requests was a pointer to the new API whenever an old one is retired.
 
 **What it looks like:** no changelog, silent deprecations, and breaking changes tucked inside a minor release.
 
@@ -153,11 +163,11 @@ Developers read your community channels before they commit. Unanswered questions
 
 **What it looks like:** a Discord with only announcements, GitHub issues that sit for weeks, and no visible team members.
 
-**The fix:** set a reply time you can actually meet, answer in public so the next person finds it, and turn good answers into docs. We cover why this matters in why active developer communities matter for early-stage startups.
+**The fix:** set a reply time you can actually meet, answer in public so the next person finds it, and turn good answers into docs. We cover why this matters in [why active developer communities matter for early-stage startups](/blog/why-developer-communities-matter).
 
 ### 10. AI assistants cannot read or cite your docs
 
-Developers now ask ChatGPT, Claude, Perplexity, and Copilot before they open your docs. Postman's 2025 report says 89% of respondents use generative AI tools in their daily work. If your docs are locked in scripts, buried in PDFs, or written with no clear headings, those tools give wrong answers or skip you entirely.
+Developers now ask ChatGPT, Claude, Perplexity, and Copilot before they open your docs. Postman's 2025 report says [89% of respondents use generative AI tools in their daily work](https://nordicapis.com/a-deep-dive-into-the-state-of-the-api-2025/). If your docs are locked in scripts, buried in PDFs, or written with no clear headings, those tools give wrong answers or skip you entirely.
 
 **What it looks like:** docs that load content with scripts, vague headings, no plain text version, and answers scattered across five pages.
 
@@ -168,10 +178,15 @@ Developers now ask ChatGPT, Claude, Perplexity, and Copilot before they open you
 You do not need a full audit to find the worst problems. Try this:
 
 1. Open a private browser window and find your product from a search, as a stranger would.
+
 2. Sign up with a new email address and start a timer.
+
 3. Follow your own quickstart exactly as written. Note every error and every place you had to guess.
+
 4. Trigger one error on purpose. Is the message clear enough to fix it alone?
+
 5. Ask an AI assistant how to do the same task with your product. Check whether the answer is right and whether it cites your docs.
+
 6. Write down the time to first working result and the three biggest blockers.
 
 If the timer ran past what you expected, you have your first fixes. For help tracking results over time, read our post on [measuring developer content ROI beyond pageviews](/blog/developer-tool-content-roi-beyond-pageviews).

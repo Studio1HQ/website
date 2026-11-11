@@ -1005,6 +1005,24 @@ function artFor(post: BlogPostMeta): Art {
       ),
     };
   }
+  if (/developer tutorial/i.test(title)) {
+    return {
+      label: "tutorial.md",
+      node: (
+        <Doc
+          file="tutorial.md"
+          lines={[
+            { text: "# Build a job queue", accent: true },
+            { text: "Step 1: Start the worker", accent: true },
+            { text: "You should see: Worker ready", indent: true },
+            { text: "Step 2: Submit a job", accent: true },
+            { text: "You should see: Job done", indent: true },
+            { bar: 260, accent: true },
+          ]}
+        />
+      ),
+    };
+  }
   if (/documentation best practices/i.test(title)) {
     return {
       label: "docs/index.md",

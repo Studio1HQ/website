@@ -4,15 +4,18 @@ slug: muse-wonder-review
 description: Explore Muse Wonder and Wonder Full benchmarks, pricing, API
   access, and privacy settings, plus comparisons with Claude Opus 5.5 and GPT-6
   Astra.
-tldrSummary: A breakdown of Muse Wonder and Muse Wonder Full, covering benchmark
-  results, costs, access options, privacy settings, and trade-offs for
-  developers.
+tldrSummary: Meta just released Muse Wonder and Muse Wonder Full, its first
+  top-tier AI models. This post covers what they score, what they cost, who can
+  use each one, and where Claude Opus 5.5 and GPT-6 Astra still come out ahead.
 tldrBullets:
-  - Understand the differences between Muse Wonder and Muse Wonder Full.
-  - Compare independent benchmarks with Meta's reported results.
-  - Review API pricing, subscription access, and data-training settings.
-  - Evaluate cost per task, response speed, and performance on your own
-    workflows.
+  - On the independent Artificial Analysis index, Muse Wonder Full scores 56,
+    and Muse Wonder scores 52. Claude Opus 5.5 scores 58, and GPT-6 Astra scores
+    53.
+  - Muse Wonder costs $4 per million input tokens and $20 per million output
+    tokens on the API. Muse Wonder Full is not on the API at all. You only get
+    it inside Muse Code plans that cost $50 or $200 a month.
+  - Meta's own table shows the models leading on long coding projects, legal
+    tasks, and memory. They trail on terminal work and from-scratch programming.
 date: 2026-10-19
 updatedDate: 2026-10-19
 draft: false
@@ -24,14 +27,6 @@ tags:
 unlisted: true
 bannerImage: /blog/uploads/muse-wonder-review/cover.png
 ---
-## TL;DR
-
-Meta just released Muse Wonder and Muse Wonder Full, its first top-tier AI models. This post covers what they score, what they cost, who can use each one, and where Claude Opus 5.5 and GPT-6 Astra still come out ahead.
-
-* On the independent Artificial Analysis index, Muse Wonder Full scores 56, and Muse Wonder scores 52. Claude Opus 5.5 scores 58, and GPT-6 Astra scores 53.
-* Muse Wonder costs $4 per million input tokens and $20 per million output tokens on the API. Muse Wonder Full is not on the API at all. You only get it inside Muse Code plans that cost $50 or $200 a month.
-* Meta's own table shows the models leading on long coding projects, legal tasks, and memory. They trail on terminal work and from-scratch programming.
-
 Meta spent most of 2026 shipping small, cheap models. On October 12, it changed lanes. [Muse Wonder and Muse Wonder Full](https://research.meta.ai/blog/muse-wonder) are bigger, pricier, and aimed straight at OpenAI and Anthropic.
 
 Meta's scoreboard says they win a lot. The independent scoreboard says they get close. Both can be true, and the gap between the two is the part worth reading. Both models are also only a day old, so very few people outside Meta have used them for real work.
@@ -56,7 +51,7 @@ The models were trained at Meta's Prometheus data center in Ohio, [according to 
 
 Muse Wonder is the one you can build with today. Muse Wonder Full is the stronger one, but Meta only sells it through its coding app, Muse Code.
 
-|                                        | Muse Wonder                           | Muse Wonder Full                      |
+|                                        | Muse Wonder                           | Muse Wonder Full                      |
 | -------------------------------------- | ------------------------------------- | ------------------------------------- |
 | Where you can use it                   | Meta Model API and Muse Code          | Muse Code only                        |
 | Price                                  | $4 input and $20 output per 1M tokens | Included in $50 or $200 monthly plans |
@@ -113,17 +108,17 @@ Muse Wonder costs $4 per million input tokens and $20 per million output tokens 
 
 A token is a small chunk of text, a bit shorter than a word. Input is what you send in. Output is what the model writes back.
 
-| Model                         | Input per 1M tokens | Output per 1M tokens |
-| ----------------------------- | ------------------- | -------------------- |
-| Muse Spark 1.3                | $1.25               | $4.25                |
-| Gemini 4 Argon (launch price) | $2                  | $10                  |
-| Claude Sonnet 5.5             | $2                  | $10                  |
-| **Muse Wonder**               | **$4**              | **$20**              |
-| Claude Opus 5.5               | $4                  | $20                  |
-| GPT-6 Astra                   | $10                 | $50                  |
-| Claude Fable 5.1              | $10                 | $50                  |
+| Model | Input per 1M tokens | Output per 1M tokens |
+| --- | --- | --- |
+| Muse Spark 1.3 | $1.25 | $4.25 |
+| Gemini 4 Argon (launch price) | $2 | $10 |
+| Claude Sonnet 5.5 | $2 | $10 |
+| **Muse Wonder** | **$4** | **$20** |
+| Claude Opus 5.5 | $4 | $20 |
+| GPT-6 Astra | $10 | $50 |
+| Claude Fable 5.1 | $10 | $50 |
 
-Prices are from [VentureBeat's comparison](https://venturebeat.com/technology/metas-new-muse-wonder-and-muse-wonder-full-models-achieve-frontier-performance-but-only-the-weaker-one-is-available-via-api). Argon's price goes to $4 and $20 after its launch period. Our [Gemini 4 Argon review](https://www.studio1hq.com/blog/gemini-4-argon-benchmarks-pricing-access) covers that in detail.
+Prices are from [VentureBeat's comparison](https://venturebeat.com/technology/metas-new-muse-wonder-and-muse-wonder-full-models-achieve-frontier-performance-but-only-the-weaker-one-is-available-via-api). Argon's price goes to $4 and $20 after its launch period. Our [Gemini 4 Argon review](/blog/gemini-4-argon-benchmarks-pricing-access) covers that in detail.
 
 Two extra costs to know about. Web search through the API is $2.50 per 1,000 searches. And Meta caps each team at 3,000 requests and 4 million tokens a minute.
 
@@ -179,7 +174,7 @@ Do not switch on a headline number. Here is a short checklist:
 
 There is no single winner. The independent scores point to this split:
 
-* **Pick Muse Wonder** if you run very long coding jobs or legal-style drafts, and you want Opus-level token prices with fewer tokens used. Our [Claude Opus 5.5 review](https://www.studio1hq.com/blog/claude-opus-5-5-review-motion-videos) has the other side of that comparison.
+* **Pick Muse Wonder** if you run very long coding jobs or legal-style drafts, and you want Opus-level token prices with fewer tokens used. Our [Claude Opus 5.5 review](/blog/claude-opus-5-5-review-motion-videos) has the other side of that comparison.
 * **Pick Claude Opus 5.5** if you want the highest overall score, strong from-scratch programming, and faster first answers.
 * **Pick GPT-6 Astra** if cost per task and terminal work matter most, and you can live with a higher token price.
 
