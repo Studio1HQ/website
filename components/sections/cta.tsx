@@ -7,14 +7,14 @@ const Cta = () => {
     <section className="sm:py-10 py-8" id="#cta">
       <div className="container">
         <CardWithGrid>
-          <div className="flex w-full flex-col gap-16 max-sm:gap-8 overflow-hidden rounded-lg border border-orange-400 p-8 md:rounded-xl lg:flex-row lg:items-center lg:p-16">
+          <div className="flex w-full flex-col gap-16 max-sm:gap-8 overflow-hidden rounded-[6px] border border-orange-400 p-8 md:rounded-[6px] lg:flex-row lg:items-center lg:p-16">
             <div className="flex-1">
               <h3 className="mb-3 text-2xl font-semibold md:mb-4 md:text-4xl lg:mb-6">
                 Ready to Scale Developer Adoption?
               </h3>
               <p className="text-muted-foreground lg:text-lg">
-                Talk to our team about technical content and DevRel programs that
-                drive real adoption.
+                Talk to our team about technical content and DevRel programs
+                that drive real adoption.
               </p>
             </div>
             <div className="flex shrink-0 flex-col gap-2 sm:flex-row">

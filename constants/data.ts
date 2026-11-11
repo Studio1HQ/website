@@ -32,6 +32,7 @@ import {
   IttybitFull,
   InsForgeFull,
   ByteRover,
+  ByteRoverMark,
   WeaviateFull,
   MaximFull,
   Puck,
@@ -45,51 +46,139 @@ import {
   Briefcase,
   CheckCircle,
   Files,
+  GithubLogo,
   Lightbulb,
+  Megaphone,
   Newspaper,
+  CalendarDots,
   Pen,
+  RedditLogo,
   RocketLaunch,
+  ShareNetwork,
+  Sparkle,
+  SquaresFour,
   Star,
+  UsersThree,
   YoutubeLogo,
 } from "@phosphor-icons/react/dist/ssr";
+import type { Icon } from "@phosphor-icons/react";
 
-export const navItems = [
+export type NavLink = {
+  title: string;
+  path: string;
+  icon: Icon;
+  description?: string;
+};
+
+/** A set of services in the two-pane menu; `key` names its Nav.groups copy. */
+export type NavGroup = {
+  key: "content" | "growth" | "distribution";
+  icon: Icon;
+  children: NavLink[];
+};
+
+export type NavItem = {
+  title: string;
+  path: string;
+  children?: NavLink[];
+  groups?: NavGroup[];
+  /** Pinned under the groups, e.g. "All Services". */
+  allLink?: NavLink;
+};
+
+export const navItems: NavItem[] = [
   {
     title: "Home",
     path: "/",
     children: [
+      // Same order as the sections on the home page.
       { title: "Services", path: "/#service-offerings", icon: Briefcase },
-      { title: "Proof", path: "/#testimonials", icon: Star },
-      { title: "Process", path: "/#how-it-works", icon: Lightbulb },
       { title: "Results", path: "/#results", icon: Files },
+      { title: "Proof", path: "/#testimonials", icon: Star },
+      { title: "Process", path: "/#process", icon: Lightbulb },
     ],
   },
   { title: "About Us", path: "/about-us" },
+  { title: "Team", path: "/team" },
   {
     title: "Services",
-    path: "#",
-    children: [
+    path: "/services",
+    /** Two-pane menu: hover a group on the left, its services show on the right. */
+    groups: [
       {
-        title: "Technical Content Marketing",
-        path: "/technical-content-marketing",
+        key: "content",
         icon: Pen,
+        children: [
+          {
+            title: "Technical Content Marketing",
+            path: "/technical-content-marketing",
+            icon: Pen,
+          },
+          {
+            title: "Developer Video Production",
+            path: "/developer-video-production",
+            icon: YoutubeLogo,
+          },
+          {
+            title: "Documentation & DX Audits",
+            path: "/developer-documentation-dx-audit",
+            icon: Books,
+          },
+        ],
       },
       {
-        title: "Developer Relations & Growth",
-        path: "/developer-relations-growth-campaigns",
-        icon: CheckCircle,
+        key: "growth",
+        icon: UsersThree,
+        children: [
+          {
+            title: "Developer Relations & Growth",
+            path: "/developer-relations-growth-campaigns",
+            icon: CheckCircle,
+          },
+          {
+            title: "GitHub Growth",
+            path: "/github-growth-agency",
+            icon: GithubLogo,
+          },
+          {
+            title: "Influencer Management",
+            path: "/influencer-marketing-agency",
+            icon: Megaphone,
+          },
+        ],
       },
       {
-        title: "Developer Video Production",
-        path: "/developer-video-production",
-        icon: YoutubeLogo,
-      },
-      {
-        title: "Documentation & DX Audits",
-        path: "/developer-documentation-dx-audit",
-        icon: Books,
+        key: "distribution",
+        icon: ShareNetwork,
+        children: [
+          {
+            title: "Product Launch",
+            path: "/product-launch-service",
+            icon: RocketLaunch,
+          },
+          {
+            title: "Reddit Marketing",
+            path: "/reddit-marketing-agency",
+            icon: RedditLogo,
+          },
+          {
+            title: "Content Distribution",
+            path: "/developer-content-distribution",
+            icon: ShareNetwork,
+          },
+          {
+            title: "AEO Agency",
+            path: "/aeo-agency",
+            icon: Sparkle,
+          },
+        ],
       },
     ],
+    allLink: {
+      title: "All Services",
+      path: "/services",
+      icon: SquaresFour,
+    },
   },
   { title: "Product", path: "/product" },
   {
@@ -107,6 +196,12 @@ export const navItems = [
         path: "/blog",
         icon: Newspaper,
         description: "Articles and insights from the Studio1 team",
+      },
+      {
+        title: "Events",
+        path: "/events",
+        icon: CalendarDots,
+        description: "Talks, hackathons and meetups we've been part of",
       },
     ],
   },
@@ -127,7 +222,7 @@ export const trustedbyLogo = [
   },
   {
     name: "ByteRover",
-    image: ByteRover,
+    image: ByteRoverMark,
     isWhite: true,
     showNameBeside: true,
     className:
@@ -154,8 +249,7 @@ export const trustedbyLogo = [
     name: "Weaviate",
     image: WeaviateFull,
     isWhite: true,
-    className:
-      "h-7 sm:h-8 md:h-8 w-auto max-w-[150px] object-contain",
+    className: "h-7 sm:h-8 md:h-8 w-auto max-w-[150px] object-contain",
     alt: "Weaviate",
   },
   {
@@ -187,8 +281,7 @@ export const trustedbyLogo = [
     name: "Interact AI",
     image: InteractAiLogo,
     isWhite: false,
-    className:
-      "h-7 sm:h-8 md:h-8 w-auto max-w-[150px] object-contain",
+    className: "h-7 sm:h-8 md:h-8 w-auto max-w-[150px] object-contain",
     alt: "Interact AI",
   },
   {

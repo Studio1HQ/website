@@ -1,4 +1,4 @@
-import { getAllPosts } from "@/lib/blog";
+import { getListedPosts } from "@/lib/blog";
 import { baseUrl } from "@/lib/site";
 
 function escapeXml(value: string) {
@@ -11,7 +11,7 @@ function escapeXml(value: string) {
 }
 
 export async function GET() {
-  const posts = getAllPosts();
+  const posts = getListedPosts();
   const latestPostDate = posts[0]?.updatedDate ?? new Date().toISOString();
 
   const items = posts
@@ -37,7 +37,7 @@ export async function GET() {
   <channel>
     <title>Studio1 Developer Marketing &amp; Tech Blog</title>
     <link>${baseUrl}/blog</link>
-    <description>Practical guides on developer marketing, technical content, documentation, and growth for SaaS, AI, and devtool teams.</description>
+    <description>Practical guides on developer marketing, technical content, documentation, and growth for devtool, AI, and open-source teams.</description>
     <language>en</language>
     <lastBuildDate>${new Date(latestPostDate).toUTCString()}</lastBuildDate>
 ${items}

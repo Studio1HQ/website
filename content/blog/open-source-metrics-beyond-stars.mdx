@@ -1,0 +1,268 @@
+---
+title: "Open Source Metrics Beyond GitHub Stars: What Shows Real Adoption"
+seoTitle: "Open Source Metrics Beyond Stars: What Shows Real Adoption"
+slug: open-source-metrics-beyond-stars
+description: "Open source metrics that show real adoption beyond GitHub stars: traffic, downloads, dependents, CHAOSS health metrics, telemetry and a monthly scorecard."
+tldrSummary: "Stars show interest, not use. Real open-source adoption shows up in downloads with CI filtered out, public dependents, referral traffic, new contributors and fast first responses. Save GitHub traffic weekly before its 14-day window closes, and report everything in one monthly scorecard."
+tldrBullets:
+  - "Keep stars as social proof, never as the headline: one study found about 6.0 million suspected fake stars across 18,617 repositories between 2019 and 2024."
+  - "GitHub only serves the last 14 days of views, clones and referrers, so export them weekly with the traffic API or a scheduled Action."
+  - "Downloads overcount: npm counts every tarball it serves, including build servers and bots, and CI made up 10 to 50% of monthly PyPI downloads for Wagtail and FastAPI in one analysis."
+  - "Dependents, time to first response and new contributors (as CHAOSS defines them) are harder to inflate and tell leadership whether people build on the project."
+date: 2026-11-03
+updatedDate: 2026-11-07
+draft: false
+authors:
+  - Arindam Majumder
+tags:
+  - open-source
+  - github
+  - analytics
+  - community
+bannerImage: /blog/uploads/open-source-metrics-beyond-stars/cover.png
+---
+**The short answer:** The open source metrics that show real adoption measure use, not interest: package downloads with CI and mirrors filtered out, public dependents (GitHub's "Used by" count and deps.dev), referral traffic to the repo, issues from people you don't know, new contributors, and time to first response as CHAOSS defines it. If you ship a CLI, transparent opt-in telemetry adds active installs. Keep GitHub stars as social proof, but report them next to these numbers in one monthly scorecard, never alone.
+
+## Why are GitHub stars a weak signal on their own?
+
+GitHub's docs describe a star as a bookmark and a thank-you: it [makes a repository easy to find again and shows appreciation to the maintainer](https://docs.github.com/en/get-started/exploring-projects-on-github/saving-repositories-with-stars). Neither means someone installed the project.
+
+Stars can also be faked. The [StarScout study](https://arxiv.org/abs/2412.13459) found about 6.0 million suspected fake stars across 18,617 repositories between July 2019 and December 2024. In July 2024, 16.66% of the popular repositories it tracked (those gaining 50 or more stars that month) had a fake star campaign. The fake stars helped for less than two months, then became a liability, and the authors conclude that star counts "should not be used for high-stakes decisions by themselves."
+
+Stars are still worth tracking:
+
+* **Social proof.** In a survey of 791 developers, [three out of four said they consider the number of stars](https://arxiv.org/abs/1811.07643) before using or contributing to a project.
+* **A public, comparable number.** Runa Capital's ROSS Index ranks startups on star growth alone, because more metrics would make [the results hard to verify externally](https://runacap.com/ross-index/methodology/).
+* **Launch reach.** A spike the day after a Show HN tells you the post landed. Our [GitHub stars launch playbook](/blog/how-to-get-github-stars-open-source-launch) covers earning one. Turning those visitors into installs starts with the [README](/blog/github-readme-best-practices). Landing on [GitHub Trending](/blog/how-to-trend-on-github) works the same way: it measures a burst, not adoption.
+
+**Key pointers:**
+* Put stars in the "awareness" row of your report, never the "usage" row.
+* When stars jump, check that week's referrers. A spike with no matching post or referrer deserves a closer look.
+* Never buy or trade stars. StarScout shows they can be detected at scale, and they stop helping within two months.
+
+## The open source metrics stack: one question per layer
+
+Treat a repo the way our [content ROI guide](/blog/developer-tool-content-roi-beyond-pageviews) treats a blog: each layer answers one question, and each number has a source.
+
+| Layer | Question | Metric | Where to get it | Watch out for |
+| --- | --- | --- | --- | --- |
+| Awareness | Are developers finding it? | Unique visitors, referrers, stars | GitHub Insights, Traffic tab | 14-day window, fake stars |
+| Usage | Is anyone running it? | Weekly downloads, Docker pulls, release binary downloads | npm API, pypistats.org, Docker Hub, GitHub Releases API | CI, mirrors, bots |
+| Retention | Do they keep using it? | Share of downloads on the newest versions, opted-in active installs | npm per-version counts, PyPI BigQuery, telemetry | Versions pinned in CI |
+| Community health | Can people get help and contribute? | Time to first response, new contributors, contributor absence factor | GitHub search, CHAOSS tools such as Augur and GrimoireLab | Bots, AI-generated PRs |
+| Business impact | Does it pay off? | Signups from GitHub referrals, companies in your dependents, revenue | Product analytics, CRM | Attribution lag |
+
+**Key pointers:**
+* Start with one number per layer. Five numbers you check monthly beat 30 you never open.
+* Write the "where to get it" column into a shared doc, so next month's report uses the same method.
+
+## How to read GitHub traffic before it expires
+
+Open the repo, click **Insights**, then **Traffic** (you need push access). GitHub shows [views and unique visitors for the past 14 days, full clones (not fetches), referring sites and popular content](https://docs.github.com/en/repositories/viewing-activity-and-data-for-your-repository/viewing-traffic-to-a-repository), in UTC. The [traffic API](https://docs.github.com/en/rest/metrics/traffic) has the same 14-day window and returns only the top 10 referrers and paths. Whatever you don't save is gone two weeks later.
+
+This script (tested with the GitHub CLI) appends each run to CSV files. Run it weekly as `REPO=owner/name ./save-traffic.sh`. The last loop drops the 7 days that overlap with the previous run.
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+REPO="${REPO:?set REPO=owner/name}"
+TODAY=$(date -u +%F)
+mkdir -p traffic
+
+gh api "repos/$REPO/traffic/views" \
+  --jq '.views[] | [.timestamp[:10], .count, .uniques] | @csv' >> traffic/views.csv
+gh api "repos/$REPO/traffic/clones" \
+  --jq '.clones[] | [.timestamp[:10], .count, .uniques] | @csv' >> traffic/clones.csv
+gh api "repos/$REPO/traffic/popular/referrers" \
+  --jq ".[] | [\"$TODAY\", .referrer, .count, .uniques] | @csv" >> traffic/referrers.csv
+gh api "repos/$REPO/traffic/popular/paths" \
+  --jq ".[] | [\"$TODAY\", .path, .count, .uniques] | @csv" >> traffic/paths.csv
+
+for f in traffic/views.csv traffic/clones.csv; do
+  awk -F, '{ row[$1] = $0 } END { for (d in row) print row[d] }' "$f" | sort > "$f.tmp"
+  mv "$f.tmp" "$f"
+done
+```
+
+Prefer an Action? [jgehrcke/github-repo-stats](https://github.com/jgehrcke/github-repo-stats) runs daily and commits each snapshot to git. Its README asks for a token with the `repo` scope.
+
+Once you have a few months of data:
+
+* **Referrers** show which launch post, newsletter or awesome list sent people.
+* **Popular content** shows whether visitors reach your examples and docs or stop at the README.
+* **Clones** are noisy. GitHub doesn't say it filters automation, so a pipeline that clones on every run looks like a user. Use them as a trend line only.
+
+**Key pointers:**
+* Schedule the export this week. Every week you wait is data you can't get back.
+* Add a notes column with launch and release dates, so every referrer spike has a cause next to it.
+
+## Package downloads: the best usage signal, with caveats
+
+**npm.** npm's stats are ["naïve by design"](https://blog.npmjs.org/post/92574016600/numeric-precision-matters-how-npm-download-counts-work.html): a count of tarballs served, including automated build servers and robots that download every package. npm says you only see real signal above 50 downloads a day, and that downloads are "definitely not the same as the number of users." The [downloads API](https://github.com/npm/registry/blob/main/docs/download-counts.md) returns up to 18 months of data, plus per-version counts for the last 7 days.
+
+**PyPI.** [pypistats.org](https://pypistats.org/about) ignores known mirrors and keeps 180 days. The Python Packaging guide calls download counts ["highly inaccurate"](https://packaging.python.org/en/latest/guides/analyzing-pypi-package-downloads/). CI is the bigger distortion: in a [discuss.python.org thread](https://discuss.python.org/t/pypi-downloads-statistics-and-continuous-integration/91810), Thibaud Colas reported CI at 10 to 30% of Wagtail's monthly downloads, and 20 to 50% for FastAPI. pip and uv flag CI runs, which fills the `details.ci` field in PyPI's BigQuery dataset.
+
+**Docker Hub.** A pull includes version checks, and [a multi-arch pull counts once per architecture](https://docs.docker.com/docker-hub/usage/pulls/). Verified Publisher and Sponsored Open Source projects get [insights reports](https://docs.docker.com/docker-hub/repos/manage/trusted-content/insights-analytics/) that separate version checks from downloads and count unique pullers.
+
+**GitHub Releases.** Every release asset has a [`download_count`](https://docs.github.com/en/rest/releases/assets). Sum the binaries only: [KitOps releases](https://github.com/kitops-ml/kitops/releases) ship an `.sbom.json` file next to each archive, and each has its own count.
+
+**Every package name.** Memori's Python SDK is on PyPI as both [memori](https://pypistats.org/packages/memori) and [memorisdk](https://pypistats.org/packages/memorisdk), from the same GitHub repo. A chart of one name undercounts.
+
+To pull last month's numbers for npm and PyPI (mirrors excluded):
+
+```bash
+curl -s https://api.npmjs.org/downloads/range/2026-10-01:2026-10-31/your-package
+curl -s "https://pypistats.org/api/packages/your-package/overall?mirrors=false"
+```
+
+To split PyPI CI downloads out in BigQuery (the free tier covers 1 TB of queries a month):
+
+```sql
+SELECT
+  COUNTIF(details.ci = TRUE) AS ci_downloads,
+  COUNTIF(details.ci IS NULL OR details.ci = FALSE) AS other_downloads
+FROM `bigquery-public-data.pypi.file_downloads`
+WHERE file.project = 'your-package'
+  AND DATE(timestamp) BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY) AND CURRENT_DATE()
+```
+
+**Key pointers:**
+* Report weekly downloads with CI split out, and write down how you split it.
+* Add every package name and channel (npm, PyPI, Docker, binaries) into one usage row.
+* Compare against your own history only. Registries count too differently to compare an npm package with a PyPI one.
+
+## Dependents: proof that someone built on it
+
+A dependent is a repository or package that lists yours as a dependency. Someone had to commit that line, which makes it a stronger signal than a click.
+
+Some GitHub repos show a ["Used by" section](https://docs.github.com/en/code-security/how-tos/view-and-interpret-data/change-used-by-data) in the sidebar: the number of public references to the package. For the full list, open **Insights**, then **Dependency graph**, then **Dependents**, and click **Packages** to see only dependents that are packages themselves. As of November 7, 2026, [Express's dependents page](https://github.com/expressjs/express/network/dependents) listed about 33 million repositories and 176,000 packages. Repositories show direct use; packages carry your code into other people's installs.
+
+![GitHub Dependency graph for Express, Dependents tab, showing 33,036,632 repositories and 175,952 packages that depend on express](/blog/uploads/open-source-metrics-beyond-stars/express-dependents.webp "Dependents split into repositories and packages. Packages carry your code into other people's installs.")
+
+[GitHub's docs](https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/exploring-the-dependencies-of-a-repository) add two caveats: dependents are only found in public repositories, and the counts are approximate. If your repo publishes several packages, an admin picks which one the counter tracks under **Settings**, then **Advanced Security**. For dependents across registries, [deps.dev](https://docs.deps.dev/faq/) lists transitive dependents for Cargo, Go, Maven, npm, NuGet, PyPI and RubyGems.
+
+Dependents fit libraries. A CLI like KitOps is installed, not imported, so release downloads and telemetry tell you more.
+
+**Key pointers:**
+* Write down the "Used by" number on the first of each month. GitHub shows today's count, not a history.
+* Read new dependents, don't just count them. Your own demo repos count too, and a company you didn't know about is a lead.
+
+## Contributor and issue health, using CHAOSS definitions
+
+Use CHAOSS's open definitions instead of inventing your own. Four to start with, from its [Starter Project Health Metrics Model](https://www.chaoss.community/starter-project-health-metrics-model/):
+
+| Metric | What it measures | How to check it |
+| --- | --- | --- |
+| [Time to first response](https://chaoss.community/kb/metric-time-to-first-response/) | Time from an activity needing attention to its first response | Median hours to the first human reply from someone other than the author |
+| [New contributors](https://chaoss.community/kb/metric-new-contributors/) | Contributors making their first contribution, and who they are | First-time authors of merged PRs this month |
+| [Contributor absence factor](https://chaoss.community/kb/metric-contributor-absence-factor/) | Smallest number of contributors behind 50% of contributions (formerly "bus factor") | PR authors over the last 90 days |
+| Change request closure ratio | Change requests closed against those open in a period | PRs closed or merged divided by PRs opened |
+
+Exclude bots, as CHAOSS's [issue response time](https://chaoss.community/kb/metric-issue-response-time/) metric suggests. Response time comes first because you control it. Open Source Guides cites a Mozilla study in which [contributors who got code reviews within 48 hours had a much higher rate of return](https://opensource.guide/building-community/). To find unanswered issues, paste this into GitHub's issue search, with the date set to two days ago:
+
+`is:issue is:open comments:0 created:<2026-11-05 -author:app/dependabot`
+
+One 2026 caveat: Andrew Nesbitt [argues](https://nesbitt.io/2026/05/27/chaoss-metrics-in-2026.html) that CHAOSS metrics "were calibrated for human-speed contribution", and AI triage bots and agent-run accounts can make response times and new-contributor counts look better than they are.
+
+**Key pointers:**
+* Put a response target in CONTRIBUTING.md (48 hours is a good one) and run the search above every Monday.
+* Count new contributors from merged PRs, not opened ones, to filter out drive-by generated PRs.
+* If your contributor absence factor is 1, find a second maintainer before you chase more stars.
+
+## Telemetry: only if you'd show users the payload
+
+For a CLI or framework, telemetry is the only way to count active installs, and the fastest way to lose trust if users find it by surprise. Three projects show the range:
+
+* **Go** keeps telemetry [local by default](https://go.dev/doc/telemetry). Data is uploaded only after a user runs `go telemetry on`, only counters approved through a public proposal process are uploaded, and the results are public at [telemetry.go.dev](https://telemetry.go.dev/).
+* **Homebrew** is [opt-out](https://docs.brew.sh/Analytics) but shows a notice before any event is sent. The payload has no user identifier or IP address field, events are kept 365 days, `brew analytics off` turns it off, and aggregates are [public](https://formulae.brew.sh/analytics/).
+* **Next.js** is also [opt-out](https://nextjs.org/telemetry). It lists what it never collects (environment variables, file paths, file contents, logs), and `NEXT_TELEMETRY_DEBUG=1` prints the payload without sending it.
+
+![Next.js telemetry page listing what it collects, such as the command invoked and build duration, and the NEXT_TELEMETRY_DEBUG=1 flag](/blog/uploads/open-source-metrics-beyond-stars/nextjs-telemetry.webp "Next.js publishes exactly what it tracks and a flag that prints the payload without sending it.")
+
+**Telemetry checklist (copy into your design doc):**
+
+* [ ] Opt-in, or opt-out with a notice before the first event is sent
+* [ ] A documented command or env var to turn it off and to check its state
+* [ ] A debug mode that prints the exact payload without sending it
+* [ ] No user IDs, IP addresses, file paths, env vars or source code
+* [ ] CI runs flagged, so you can exclude them
+* [ ] A written retention period, and aggregates published where users can see them
+
+**Key pointers:**
+* Publish the telemetry docs before the release that adds telemetry, and link them from the first-run notice.
+* Report telemetry as "active installs among users who opted in", never as total users.
+
+## Monthly OSS scorecard (template)
+
+Copy this into a sheet and add a column per month. Every row maps to a source above.
+
+| Layer | Metric | Source | This month | Last month | Note |
+| --- | --- | --- | --- | --- | --- |
+| Awareness | Unique visitors (sum of weekly exports) | Saved traffic CSV | | | |
+| Awareness | Stars gained, top 3 referrers | GitHub API, traffic CSV | | | |
+| Usage | Weekly downloads, CI excluded | npm API, PyPI BigQuery | | | |
+| Usage | Docker pulls or binary downloads | Docker Hub, Releases API | | | |
+| Retention | Share of downloads on the newest two versions | npm per-version counts, BigQuery | | | |
+| Retention | Active installs (opted in) | Telemetry | | | |
+| Reach | Public dependents ("Used by") | GitHub dependency graph | | | |
+| Health | Median time to first response | GitHub search, CHAOSS tools | | | |
+| Health | New contributors (merged PRs) | GitHub pull requests | | | |
+| Business | Signups from github.com, companies spotted | Product analytics, manual review | | | |
+
+**Key pointers:**
+* Use the "Note" column for causes: a launch, a release, a CI change, a renamed package.
+* Under the table, write one sentence on what changed and why. That sentence is what leadership reads.
+
+## What to show investors or leadership
+
+Investors do look at stars. The StarScout authors note that VCs refer to stars for product viability, and the ROSS Index ranks startups on [maximum star growth over a 90-day window](https://runacap.com/ross-index/methodology/). So show stars, as the first stage, not the whole story.
+
+a16z's [Open Source: From Community to Commercialization](https://a16z.com/open-source-from-community-to-commercialization/) (2019) splits a commercial open-source company into three stages with their own metrics:
+
+1. **Project-community fit:** "GitHub stars, commits, pull requests or contributor growth."
+2. **Product-market fit:** "downloads and usage."
+3. **Value-market fit:** measured by revenue.
+
+Build one slide with those three rows, in that order:
+
+> **Weak:** "We crossed 10,000 GitHub stars."
+>
+> **Strong (template):** "Stars: [n], up [x] this quarter. Weekly installs, CI excluded: [n], up [x]% since [month]. Public dependents: [n], including [company] and [company]. Median first response: [n] hours. [n] companies from our dependents list are in the sales pipeline."
+
+**Key pointers:**
+* Show 3 to 6 months of trend, not one month.
+* Add a method footnote: how you excluded CI, which mirrors you dropped, which package names you summed.
+* Name companies only from public dependents or with their permission.
+
+## What Studio1's open-source case studies report beyond stars
+
+Our case studies lead with stars, which anyone can check against the public repo. Each also reports signals a star count can't show.
+
+* **[Memori](/case-studies/memori):** 0 to 12,000+ stars, and a thought-leadership Reddit post with 100+ detailed developer comments that shaped onboarding, docs and the Memori v2 roadmap. The community "didn't just star the repo; it debated the architecture and shared real product feedback."
+* **[OpenLore](/case-studies/openlore):** about 135 to 1,700+ stars in one month, #3 trending in Go on Trendshift, 200+ LinkedIn posts and comments from developers after the sessions, and feature requests on bringing in existing docs, access control and team workflows, passed straight to the founders.
+* **[Corsair](/case-studies/corsair):** about 300 stars in mid-May, 1,000 in early June and 2,000 by mid-June. It started with an onboarding audit, which the team used to rework a quick start that reaches a working example in under a minute. The case study states its limits: "Star counts come from the public repo history during the engagement. We do not claim growth after it ended."
+* **[Jozu and KitOps](/case-studies/jozu):** no star target. At KubeCon + CloudNativeCon India 2025 and DevFest Pune 2025, booth conversations showed what developers understood quickly and where docs or demos could become clearer. In the words of Jesse Williams, Co-Founder & COO, Jozu: "Their contributions and work has helped us drive adoption and awareness with our audience."
+
+If you want help moving these numbers, our [GitHub growth service](/github-growth-agency) runs README, demo, launch and community work for open-source devtools, and our [DevRel growth campaigns](/developer-relations-growth-campaigns) cover longer programs like the one with Jozu. For the growth steps themselves, start with [how to grow an open source project](/blog/how-to-grow-an-open-source-project).
+
+## FAQ
+
+### What is the best metric for open-source adoption?
+
+For a library, weekly downloads with CI filtered out is the best usage number, and public dependents are the best proof that people build on it. Add time to first response to see whether the community can keep up.
+
+### Are GitHub stars a vanity metric?
+
+Partly. Stars are bookmarks, and StarScout found about 6.0 million suspected fake stars from 2019 to 2024. They still work as social proof: three out of four surveyed developers consider star counts before using or contributing to a project.
+
+### How long does GitHub keep repository traffic data?
+
+Views, unique visitors and clones cover only the last 14 days, in the UI and the API. Export them at least weekly, or the older data is lost.
+
+### Do npm and PyPI download counts include CI?
+
+Yes. npm counts every tarball it serves, including build servers and bots. PyPI's BigQuery data has a `details.ci` field, filled in by pip and uv, so you can split CI downloads out.
+
+### Should an open-source project collect telemetry?
+
+Only if you can document it on one page. Go's opt-in model is the strictest. If you choose opt-out, follow Homebrew and Next.js: a notice before the first event, an off switch, no identifiers, and a debug mode that shows the payload.

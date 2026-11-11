@@ -1,15 +1,21 @@
-import Hero from "@/components/landing/hero";
-import Trustedby from "@/components/landing/trustedby";
-import TechnicalDomains from "@/components/landing/domains";
-import Features from "@/components/landing/features";
-import Testimonials from "@/components/landing/testimonials";
-import GlobalReach from "@/components/landing/global-reach";
-import DeveloperJourney from "@/components/landing/developer-journey";
-import CaseStudyCards from "@/components/landing/case-study-cards";
 import { homePageMetadata, websiteJsonLd } from "@/lib/seo";
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { DEFAULT_LOCALE } from "@/lib/i18n";
+import PaperHero from "@/components/paper/paper-hero";
+import {
+  PaperCreation,
+  PaperCta,
+  PaperLogos,
+  PaperPositioning,
+  PaperProcess,
+  PaperReach,
+  PaperReasons,
+  PaperServices,
+  PaperTestimonials,
+  PaperWork,
+} from "@/components/paper/paper-sections";
+import { PaperAskAi } from "@/components/paper/ask-ai";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations({
@@ -34,8 +40,8 @@ export default function Home() {
       <section className="sr-only" aria-label="Studio1 agent-readable overview">
         <h2>Studio1 Services Overview</h2>
         <p>
-          Studio1 is a technical content and developer growth partner for
-          devtool, SaaS, AI, and open-source teams. We help developer-focused
+          Studio1 is a DevRel and developer marketing agency for devtool, AI,
+          and open-source teams. We help developer-focused
           companies create practical tutorials, documentation, DX audits, video
           demos, launch support, DevRel programs, community motions, and
           developer-facing campaigns that make products easier to understand and
@@ -43,6 +49,9 @@ export default function Home() {
         </p>
         <h3>Core Service Pages</h3>
         <ul>
+          <li>
+            <a href="/services">All Studio1 services</a>
+          </li>
           <li>
             <a href="/technical-content-marketing">
               Technical content marketing for developer products
@@ -62,6 +71,42 @@ export default function Home() {
             <a href="/developer-relations-growth-campaigns">
               Developer relations and growth campaigns
             </a>
+          </li>
+          <li>
+            <a href="/github-growth-agency">
+              GitHub growth agency for open-source devtools
+            </a>
+          </li>
+          <li>
+            <a href="/product-launch-service">
+              Product launch service for developer tools
+            </a>
+          </li>
+          <li>
+            <a href="/aeo-agency">AEO agency for developer tools</a>
+          </li>
+          <li>
+            <a href="/reddit-marketing-agency">
+              Reddit marketing agency for developer tools
+            </a>
+          </li>
+          <li>
+            <a href="/developer-content-distribution">
+              Developer content distribution for developer tools
+            </a>
+          </li>
+          <li>
+            <a href="/influencer-marketing-agency">
+              Influencer marketing agency for developer tools
+            </a>
+          </li>
+          <li>
+            <a href="/best-developer-marketing-agencies">
+              Best developer marketing agencies, compared
+            </a>
+          </li>
+          <li>
+            <a href="/testimonials">Client testimonials</a>
           </li>
         </ul>
         <h3>Proof, Products, and Company Information</h3>
@@ -92,15 +137,19 @@ export default function Home() {
           </li>
         </ul>
       </section>
-      <div className="overflow-x-hidden h-fit !max-h-fit">
-        <Hero />
-        <Trustedby />
-        <TechnicalDomains />
-        <Features />
-        <Testimonials />
-        <GlobalReach />
-        <DeveloperJourney />
-        <CaseStudyCards />
+      <div className="overflow-x-clip">
+        <PaperHero />
+        <PaperLogos />
+        <PaperPositioning />
+        <PaperCreation />
+        <PaperServices />
+        <PaperWork />
+        <PaperReasons />
+        <PaperTestimonials />
+        <PaperProcess />
+        <PaperReach />
+        <PaperAskAi index={9} />
+        <PaperCta index={10} />
       </div>
     </>
   );

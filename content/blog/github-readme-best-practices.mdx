@@ -1,0 +1,332 @@
+---
+title: "How to Write a GitHub README That Converts Visitors Into Users"
+seoTitle: "GitHub README Best Practices: Write One That Converts"
+slug: github-readme-best-practices
+description: "GitHub README best practices for devtools: the first screen, a three-command quickstart, comparisons, the About sidebar, and a copy-paste README template."
+tldrSummary: "A README converts when a stranger can tell what the project does from the first screen and get it running in three commands. Lead with one plain sentence and a demo, show the expected output, say why the project exists and how it compares, then point readers to examples, docs, the license and the contributing guide."
+tldrBullets:
+  - "Put the name, a one-sentence value statement, 3 to 5 badges and a demo image at the top of the README, before any scrolling."
+  - "Keep install plus quickstart to three commands or fewer, and show the output a developer should see after each one."
+  - "Fill in the About sidebar (description, website, up to 20 topics) and upload a 1280 by 640 pixel social preview image."
+  - "Keep key claims in text, not images, so search engines and AI assistants reading the raw Markdown can quote them."
+date: 2026-11-01
+updatedDate: 2026-11-07
+draft: false
+authors:
+  - Arindam Majumder
+tags:
+  - github
+  - open-source
+  - documentation
+  - developer-experience
+bannerImage: /blog/uploads/github-readme-best-practices/cover.png
+---
+**The short answer:** A good README for adoption gets a stranger from "what is this?" to a working result in a few minutes. The top of the README, before any scrolling, needs the project name, one sentence saying what it does and for whom, a few badges and a demo GIF or screenshot. Below that come install and quickstart in three commands or fewer with the expected output, why the project exists and how it compares, examples, links into the docs, and the license and contributing guide.
+
+## What should a visitor see before scrolling?
+
+GitHub's docs call the README ["often the first item a visitor will see when visiting your repository"](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes). On the repo page, the About box sits at the top right and the README renders below the file list. Visitors read the About description, then about one laptop screen of README, and decide whether to stay. (Our [GitHub stars launch playbook](/blog/how-to-get-github-stars-open-source-launch) covers the launch that sends them there.)
+
+| Element | What to put there | Common mistake |
+| --- | --- | --- |
+| Name | Plain text, or a logo with the name as alt text | A banner image with no readable text |
+| One-line value statement | Category, user, job, difference | A paragraph of history, or a stack of adjectives |
+| Badges | 3 to 5: build status, version, license, chat | A wall of badges that pushes the sentence down |
+| Demo | A GIF, screenshot or diagram of the result | A logo on its own |
+| Next step | The quickstart, or a link to it | Install instructions three screens down |
+
+[uv](https://github.com/astral-sh/uv), Astral's Python package manager, fits all five into one screen: a plain-text name, three badges (PyPI version, Python versions, Discord), the line "An extremely fast Python package and project manager, written in Rust." and a benchmark chart captioned with what was measured (installing Trio's dependencies with a warm cache).
+
+On badges, a [2018 study of the npm ecosystem](https://www.cs.cmu.edu/~ckaestne/pdf/srcicse18.pdf) found 46% of packages used at least one. Badges that assess something (build status, coverage, dependency freshness) tracked real quality more closely than badges that only display information.
+
+For the demo image, two details matter:
+
+* **Dark and light mode.** GitHub's docs show a [`<picture>` element with `prefers-color-scheme` sources](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/quickstart-for-writing-on-github#adding-an-image-to-suit-your-visitors) plus a default image. uv uses exactly this for its chart.
+* **Alt text**, which GitHub defines as ["a short text equivalent of the information in the image."](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax) OpenLore's diagram has a good one: "Claude Code, Codex and a CI job connect to one OpenLore server, which checks each identity's access and serves the same folder of Markdown."
+
+**Key pointers:**
+
+* Open your repo in a private window, scroll to the README and screenshot one screen. If it has no sentence saying what the project does, rewrite the top.
+* Cut badges to 3 to 5 a visitor can verify: CI, version, license, chat.
+* Write alt text that says what the image shows, not "demo."
+
+## How do you write the one-line value statement?
+
+Fill every slot of this formula:
+
+`[Name] is a [category developers search for] for [who] that [does the job] without [the usual cost].`
+
+The category matters most: it is the phrase a developer types into Google or an AI assistant. Our [open-source growth guide](/blog/how-to-grow-an-open-source-project) uses a shorter version, "My project helps X do Y without Z."
+
+| Weak opening line | Why it fails | Stronger version |
+| --- | --- | --- |
+| "Serve your docs to AI agents over SSH." (OpenLore, before) | Leads with the transport, not the outcome | "Give every AI agent on your team the same up-to-date knowledge." (OpenLore, after) |
+| "The next-generation, AI-powered data platform for modern teams." (illustrative) | No category, no user, no verb | "A Postgres-backed job queue for Node.js that retries failed jobs without Redis." (illustrative) |
+| "Welcome! This project started in 2023 as a weekend experiment..." (illustrative) | History before anyone has decided to care | "Turns an OpenAPI spec into a typed TypeScript client with one command." (illustrative) |
+
+After Studio1's DX audit, the OpenLore founders rewrote the top of their README. Before, it was a line about SSH, a one-sentence definition and six paragraphs of prose, with no command and no picture.
+
+![OpenLore GitHub README before the audit, with a bold line about SSH and six paragraphs of About prose](/case-studies/openlore/openlore-readme-before.webp "OpenLore's README before the DX audit: prose first, no visual.")
+
+After, it leads with the outcome, names tools the reader already uses (Claude Code, Codex, Cursor, a CI job) and shows a diagram.
+
+![OpenLore GitHub README after the audit, with a one-line pitch, a deploy button and a diagram of agents sharing one knowledge server](/case-studies/openlore/openlore-readme-after.webp "OpenLore's README after the DX audit: outcome, named tools, diagram.")
+
+**Key pointers:**
+
+* Write the line with the formula, then delete every adjective a competitor could also claim.
+* Use the same sentence as your About description. uv's matches its README line word for word.
+
+## How short should the install and quickstart be?
+
+Three commands or fewer from a clean machine to a first result, each copyable, with the expected output underneath so "did that work?" becomes a yes or no.
+
+* **uv** writes examples as terminal sessions: `$ uv init example` is followed by ``Initialized project `example` at `/home/user/example` ``.
+* **[Hono](https://github.com/honojs/hono)** shows a four-line code sample of what you will write, then a Quick Start with one command: `npm create hono@latest`.
+* **[OpenLore](https://github.com/aakarim/OpenLore)** installs in three commands (`brew install`, `lore init`, `cd`), serves with a fourth, then says what to expect: SSH on port 2222, the web view and MCP on port 8080.
+
+| Vague step | Clear step (illustrative) |
+| --- | --- |
+| "Install the dependencies and configure your environment." | "Run `npm install acme-sdk`, then set `ACME_API_KEY` from Settings, API keys." |
+| "Run the server." | "Run `npx acme dev`. You should see `Listening on http://localhost:3000`." |
+
+Put commands in `bash` blocks without a `$` prompt so a copy runs, and output in a separate `console` block. GitHub notes that ["You can add an optional language identifier to enable syntax highlighting in your fenced code block."](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks) Our [DX audit post](/blog/what-a-dx-audit-covers) has a 30-minute version of this test for the whole product.
+
+**Key pointers:**
+
+* Count the commands from a clean machine to the first result. Past three, move setup into a script or a `create` template.
+* Paste the real output under each command, and update it when the output changes.
+* Run the quickstart inside a fresh container, such as `docker run --rm -it node:22 bash`, before every release.
+
+## Why does this exist, and how does it compare?
+
+A developer reading your README is already comparing you with something: the incumbent, a homegrown script or doing nothing. Name it yourself.
+
+* **[Supabase](https://github.com/supabase/supabase)** opens with "Supabase is the Postgres development platform. We're building the features of Firebase using enterprise-grade open source tools." Further down: "Supabase is not a 1-to-1 mapping of Firebase." One comparison sets expectations both ways.
+* **uv** puts it in the first highlight: "A single tool to replace `pip`, `pip-tools`, `pipx`, `poetry`, `pyenv`, `twine`, `virtualenv`, and more." Its speed claim links to a benchmarks file in the repo.
+* **OpenLore** asks the reader's objection as a heading, "Why not just keep Markdown in your repo?", and answers "For one agent in one repository, do that." Saying when not to use it makes the rest believable.
+
+**Copy-paste template: the "why" section**
+
+```markdown
+## Why ProjectName?
+
+Most teams handle [job] with [incumbent or DIY approach]. That works until [specific breaking point].
+ProjectName [does the job differently], so you [concrete outcome].
+
+|                  | ProjectName | [Incumbent] | [DIY approach] |
+| ---------------- | ----------- | ----------- | -------------- |
+| Setup            | One command | ...         | ...            |
+| [Key capability] | Yes         | Partial     | No             |
+| Best for         | [who]       | [who]       | [who]          |
+
+Use [Incumbent] if you need [what it does better]. Use ProjectName if [your case].
+```
+
+**Key pointers:**
+
+* Name the tool developers would otherwise use, and say what changes when they switch.
+* Write one "when not to use this" sentence.
+* Link every performance claim to a benchmark file or script in the repo, as uv does.
+
+## Where do examples and docs links go?
+
+The README is a router, not the manual. GitHub says it ["should only contain information necessary for developers to get started using and contributing to your project. Longer documentation is best suited for wikis."](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes) There is a hard ceiling too: "any content beyond 500 KiB will be truncated." GitHub builds an "Outline" menu from your headings, so task-named headings double as navigation.
+
+Supabase shows the pattern: almost every item in its feature checklist (database, auth, REST, GraphQL, realtime, storage, AI) ends with a "Docs" link to that feature's page.
+
+| Link | Where it should point |
+| --- | --- |
+| Full docs | The docs home, plus the CLI or API reference |
+| Examples | An `examples/` folder where each one runs with one command |
+| Migration | A guide for users of the incumbent or an old major version (Hono links `docs/MIGRATION.md`) |
+| Help | Discussions, Discord or a forum, with what each is for |
+
+Use relative links for files in the repo. GitHub ["will automatically transform your relative link or image path based on whatever branch you're currently on,"](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes) and warns that "Absolute links may not work in clones of your repository."
+
+**Key pointers:**
+
+* Turn each feature bullet into a link to that feature's docs page, Supabase style.
+* Use relative paths such as `docs/CONTRIBUTING.md` and `examples/` for anything inside the repo.
+* Give every example a one-line description in the README and a single command to run it.
+
+## Contributing, license and community
+
+Start with the license. GitHub's docs: ["without a license, the default copyright laws apply, meaning that you retain all rights to your source code and no one may reproduce, distribute, or create derivative works from your work."](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository) In GitHub's [2017 Open Source Survey](https://opensourcesurvey.org/2017/), "64% say an open source license is very important in deciding whether to use a project, and 67% say it is very important in deciding whether to contribute."
+
+1. **Add `CONTRIBUTING.md`** to the root, `docs` or `.github`. ["When someone opens a pull request or creates an issue, they will see a link to that file."](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/setting-guidelines-for-repository-contributors)
+2. **Run GitHub's checklist.** Open the **Insights** tab and click **Community Standards** in the left sidebar to see the [community profile checklist](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/accessing-a-projects-community-profile). Add whatever it marks missing.
+3. **Route questions.** Supabase gives each support channel a "Best for" line, such as GitHub Issues for bugs and Discord for sharing what you built.
+4. **Show more than one way to help.** Hono lists five, from opening an issue to building middleware to sponsoring the maintainers.
+
+**Key pointers:**
+
+* Pick a license at [choosealicense.com](https://choosealicense.com) if you have none, and name it at the bottom of the README.
+* Give each support channel one line saying what it is for.
+* Link `CONTRIBUTING.md` and your "good first issue" label from the README.
+
+## How do you set up the About sidebar and social preview?
+
+The About box shows beside the file list on every visit, and the social preview is the card people see when the repo link is shared. To edit About, click the gear icon to the right of "About" on the repo's main page.
+
+| Field | Format | What to put there |
+| --- | --- | --- |
+| Description | One line of text | Your README one-liner, word for word |
+| Website | A URL | Your docs or quickstart. uv points to `docs.astral.sh/uv`. |
+| Topics | Lowercase letters, numbers and hyphens, 50 characters or less, no more than 20 | Category, language, runtimes, and the tool you replace |
+| Social preview | PNG, JPG or GIF under 1 MB, at least 640 by 320 pixels, 1280 by 640 for best display | Name, one-liner and a product visual on a solid background |
+
+The topic rules come from [GitHub's topics docs](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/classifying-your-repository-with-topics). As of November 2026, Hono's topics name the runtimes developers browse by (`bun`, `cloudflare-workers`, `deno`), and Supabase's 19 topics include `firebase` and `alternative`.
+
+For the image: **Settings**, **Social preview**, **Edit**, **Upload an image**. Without one, ["repository links expand to show basic information about the repository and the owner's avatar."](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/customizing-your-repositorys-social-media-preview) If unsure about transparency, GitHub recommends "an image with a solid background."
+
+**Key pointers:**
+
+* Paste your README one-liner into the About description today.
+* Add topics for your category, language, runtimes and the tool you replace, up to 20.
+* Export a 1280 by 640 PNG under 1 MB with a solid background and upload it under Settings, Social preview.
+
+## How do you write a README AI assistants can parse?
+
+In Stack Overflow's [2026 Developer Survey](https://stackoverflow.blog/2026/10/06/the-results-of-the-2026-developer-survey-are-here/), "83% still ask a search engine for answers, but 70% hit up their AI." Assistants and agents read your README as text; GitHub's REST API has an endpoint that ["Gets the preferred README for a repository"](https://docs.github.com/en/rest/repos/contents#get-a-repository-readme) and can return the raw file. Anything that exists only inside an image is invisible to a tool reading that raw Markdown.
+
+| Problem | Fix |
+| --- | --- |
+| The tagline or feature list is inside a banner image | Put every claim in text, and give images alt text |
+| A comparison table pasted as a screenshot | Use a Markdown table |
+| Untagged code blocks, commands mixed with output | Tag blocks (`bash`, `python`, `ts`) and keep output in `console` blocks |
+| Headings like "Overview" and "Misc" | Task and question headings: "Quickstart," "Why not just keep Markdown in your repo?" |
+
+Then split the audience. [AGENTS.md](https://agents.md/), "used by over 60k open-source projects," puts it this way: "README.md files are for humans: quick starts, project descriptions, and contribution guidelines." AGENTS.md holds "the extra, sometimes detailed context coding agents need," such as build and test commands. For your docs site, see [developer docs as an AEO asset](/blog/developer-docs-as-aeo-asset).
+
+**Key pointers:**
+
+* Search your README for images that contain sentences, and move each sentence into text.
+* Move build, test and style instructions for coding agents into `AGENTS.md`.
+* Ask ChatGPT, Claude and Perplexity "What is [repo] and how do I install it?" and check the answers against your one-liner and quickstart.
+
+## Copy-paste README template
+
+Replace the bracketed parts and delete any section you cannot fill honestly.
+
+````markdown
+ProjectName
+===========
+
+[![CI](https://img.shields.io/github/actions/workflow/status/OWNER/REPO/ci.yml?branch=main)](https://github.com/OWNER/REPO/actions)
+[![Version](https://img.shields.io/npm/v/PACKAGE)](https://www.npmjs.com/package/PACKAGE)
+[![License](https://img.shields.io/github/license/OWNER/REPO)](LICENSE)
+[![Discord](https://img.shields.io/discord/SERVER_ID?label=Discord)](https://discord.gg/INVITE)
+
+**ProjectName is a [category] for [who] that [does the job] without [the usual cost].**
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/demo-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="docs/assets/demo-light.png">
+  <img alt="[What the image shows, in one sentence]" src="docs/assets/demo-light.png">
+</picture>
+
+## Quickstart
+
+```bash
+npm install projectname
+npx projectname init my-app
+npx projectname dev
+```
+
+You should see:
+
+```console
+Created my-app/projectname.config.ts
+Listening on http://localhost:3000
+```
+
+## Why ProjectName?
+
+Most teams handle [job] with [alternative]. That works until [breaking point].
+ProjectName [difference], so you [outcome].
+Use [alternative] if [its real strength]. Use ProjectName if [your case].
+
+## Examples
+
+- [examples/basic](examples/basic): [one line on what it does]
+- [examples/with-nextjs](examples/with-nextjs): [one line on what it does]
+
+## Documentation
+
+- [Guides](https://docs.example.com/guides)
+- [API reference](https://docs.example.com/api)
+- [Migrating from [alternative]](docs/MIGRATION.md)
+
+## Community and support
+
+- [GitHub Discussions](https://github.com/OWNER/REPO/discussions): questions and ideas
+- [GitHub Issues](https://github.com/OWNER/REPO/issues): bugs
+- [Discord](https://discord.gg/INVITE): show what you built
+
+## Contributing
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md), then pick a
+[good first issue](https://github.com/OWNER/REPO/labels/good%20first%20issue).
+
+## License
+
+[MIT](LICENSE)
+````
+
+**README checklist (run it before every launch):**
+
+* [ ] The top screen has the name, the one-liner, 3 to 5 badges and a demo image
+* [ ] The one-liner names a category, a user and a job, and matches the About description
+* [ ] Install plus quickstart is three commands or fewer, with expected output
+* [ ] The quickstart passed in a fresh container this week
+* [ ] A "why" section names the alternative and says when to use it instead
+* [ ] Features link to their docs pages, and repo files use relative links
+* [ ] LICENSE and CONTRIBUTING.md exist, and Community Standards shows no gaps
+* [ ] Topics, website and a 1280 by 640 social preview are set
+* [ ] No claim exists only inside an image, and every image has alt text
+
+**Key pointers:**
+
+* Fill the template in on a branch, top to bottom, in one sitting.
+* Rerun the checklist after any release that changes install steps.
+
+## How Studio1 has done this: OpenLore, Corsair and Memori
+
+**OpenLore.** In a one-month engagement in September and October 2026, Studio1 started with a DX audit of OpenLore's README, install and docs, plus the "docs server for coding agents" positioning. The founders acted on much of it, and the README rewrite above is the clearest example. With talks, hackathons and daily distribution, OpenLore grew from about 135 to 1,700+ GitHub stars that month. [Read the OpenLore case study](/case-studies/openlore).
+
+**Corsair.** Studio1 improved Corsair's README with a clear one-line description, key links up front and the product shown in action. An onboarding audit led the Corsair team to rework its hosted app and a quick start that reaches a working example in under a minute. With example projects, hackathons and technical posts, stars grew from about 300 in mid-May to 2,000 by mid-June. [Read the Corsair case study](/case-studies/corsair).
+
+![Corsair GitHub README with a one-line title, Website, Discord and X links up front, and a product demo](/case-studies/corsair/github-readme.webp "Corsair's README: what it does, where to go next, and the product in action.")
+
+**Memori.** A Reddit post drew 100+ detailed developer comments that shaped Memori's onboarding, docs and v2 roadmap, and 12 demo agents gave developers something to run. Memori has grown from launch to 12,000+ GitHub stars. [Read the Memori case study](/case-studies/memori).
+
+To check whether a README change worked, track installs and returning users, not just stars: our guide to [open source metrics beyond stars](/blog/open-source-metrics-beyond-stars) shows where to find each number. If you are planning a launch spike, read [how to get your repo on GitHub Trending](/blog/how-to-trend-on-github).
+
+If your repo gets visitors but few installs, our [GitHub growth service](/github-growth-agency) starts with this same README and first-run review, then builds the demos and launch around it. If the problem runs deeper than the README, a [DX audit](/developer-documentation-dx-audit) covers docs and onboarding too.
+
+## FAQ
+
+### How long should a GitHub README be?
+
+Long enough to get someone from the one-liner to a working result, and no longer. GitHub truncates anything beyond 500 KiB, but stop well before that and link out to your docs for reference material.
+
+### Should a README start with a GIF or a screenshot?
+
+Use whatever shows the result fastest: a terminal GIF for a CLI, a screenshot for a UI, a diagram for infrastructure. Give it alt text, and use a `<picture>` element with dark and light sources if it must work in both themes.
+
+### How many badges should a README have?
+
+Three to five covers most projects: build status, latest version, license and a chat link. A 2018 study of npm packages found badges that assess a real quality, like build status, were better quality signals than badges that only display information.
+
+### What size should a GitHub social preview image be?
+
+GitHub recommends at least 640 by 320 pixels, and 1280 by 640 pixels for best display. The file must be a PNG, JPG or GIF under 1 MB.
+
+### How many topics can a GitHub repository have?
+
+Up to 20. Each must use lowercase letters, numbers and hyphens, with 50 characters or less.
+
+### Do I need an AGENTS.md as well as a README?
+
+If coding agents work in your repo, it helps. The AGENTS.md project frames the README as the file for humans and AGENTS.md as the place for the extra context agents need, such as build and test commands, which keeps the README short.

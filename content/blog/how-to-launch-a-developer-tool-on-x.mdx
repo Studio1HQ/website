@@ -1,0 +1,347 @@
+---
+title: "How to Launch a Developer Tool on X: What 520 Devtool Launches Show"
+seoTitle: "How to Launch a Developer Tool on X (2026 Playbook)"
+slug: how-to-launch-a-developer-tool-on-x
+description: "Launch a developer tool on X with data from 520 devtool launches in 2026, X's open-source ranking code, a creator plan, templates and 8 launches broken down."
+tldrSummary: "Post from the founder's account with a native demo under two minutes, say what the tool does in the first line, and put the install command or link where developers can try it that day. Give 20 to 50 relevant creators access a week early so they post their own takes in the first two hours, reply for 48 hours, then run a second wave of proof posts."
+tldrBullets:
+  - "In 520 devtool launches on X in 2026, 89% used a native video (median 55 seconds), and posts that said 'open source' were bookmarked about 4x as often per view."
+  - "X's published ranking code drops posts after 48 hours, ignores likes from people who open a post from a group chat, and gives small accounts a lift only in a post's first two hours."
+  - "Creators who used the product before launch day write the posts that travel: Cursor 2.0's first review went live 6 minutes before Cursor's own post."
+  - "Judge the launch on bookmarks per view, installs and API keys. 25 devtool launches passed 1M views with fewer than 0.3 likes per 1,000 views."
+date: 2026-11-08
+updatedDate: 2026-11-08
+draft: false
+authors:
+  - Arindam Majumder
+tags:
+  - launches
+  - x-twitter
+  - influencer-marketing
+  - developer-marketing
+bannerImage: /blog/uploads/how-to-launch-a-developer-tool-on-x/cover.png
+---
+**The short answer:** To launch a developer tool on X, post from the founder's account with a native demo under two minutes, say what the tool does in the first line, and include the install command or a link people can use that day. A week before, give 20 to 50 creators whose followers use your stack early access, so they post their own takes in the first two hours. Answer replies for 48 hours, when X stops recommending the post, then run a second wave of proof posts.
+
+The rest of this guide shows where each of those rules comes from: our analysis of 520 developer tool launches on X in 2026, X's own ranking code, and eight launches that went viral, plus what broke for some of them afterwards.
+
+## What 520 devtool launches on X in 2026 had in common
+
+Doomers, a launch agency, publishes a [public directory of X launches](https://doomers.ai/launches) with a downloadable CSV. On November 8, 2026 it listed 2,429 launches posted between January 7 and November 6, 2026. We pulled the 520 tagged as developer tools and compared them. Read it as a study of launches that got noticed: the median one in the set had 586K views, and the numbers are lifetime totals, not first-day counts.
+
+1. **Video is the default.** 461 of 520 launches (89%) had a native video. The median length was 55 seconds, and two thirds ran between 30 seconds and 2 minutes.
+2. **Developers save open source.** The 72 posts that said "open source" got a median of 5.3 bookmarks per 1,000 views, against 1.4 for the rest. Median bookmarks were 1,914 against 656, on similar views.
+3. **Audience size still matters.** Accounts with fewer than 5,000 followers had a median of 250K views. Accounts with more than 500,000 had 2.5M. Follower counts in the file are today's, so the small accounts were even smaller when they posted.
+4. **Small accounts still break out.** Rob Pruzan had about 7,800 followers when his terminal-code post reached 2.6M views (more on that below).
+5. **Midweek did best.** Wednesday and Thursday launches had the highest median views (698K and 731K) and Monday the lowest (518K). Only 27 of the 520 went out on a weekend.
+6. **Views can be bought.** 25 launches passed 1M views with fewer than 0.3 likes per 1,000 views. The median devtool launch got 3.5. A like rate that low usually means promoted reach.
+
+A second dataset points the same way. Okara, which sells creator matching, [analyzed 3,382 tech product launches on X](https://x.com/askOkara/status/2117236552820719742) from the past 12 months. Okara didn't publish its method, so treat these as directional:
+
+| What Okara found | The number |
+| --- | --- |
+| Explain what you built instead of opening with a story | ~20% more likes |
+| Include a demo video | 2x likes, 3x views; 1 to 2 minutes worked best |
+| Post from the founder's account | 1.7x more bookmarks (median) |
+| Post standalone, not as a quote of another post | Quote posts got ~20% fewer likes |
+| Creator quote posts in the first hour | 50 to 200 of them: median 456K views; 0 to 5: 6.7K |
+| Treat a V2 like a launch | Major updates did as well as new products |
+| Launch Monday or Tuesday, 10 AM to 2 PM ET | ~1.5x views |
+
+The timing advice conflicts. Okara favors Monday and Tuesday, the Doomers devtool set favors Wednesday and Thursday, and [Buffer's 2026 study of 8.7 million posts](https://buffer.com/resources/best-time-to-post-on-twitter-x/) ranks "Tuesday at 9 a.m." first. Pick a Tuesday to Thursday morning in US Eastern time and spend your effort on the creators instead.
+
+![Chart of 520 devtool launches on X in 2026: 89% used native video, open-source posts got 5.3 bookmarks per 1,000 views vs 1.4](/blog/uploads/how-to-launch-a-developer-tool-on-x/devtool-launch-data.webp "520 devtool launches on X in 2026. Source: Doomers' launch directory, analyzed by Studio1.")
+
+**Key pointers:**
+
+- Ship a native video of 30 seconds to 2 minutes. 89% of the devtool launches that broke out had one.
+- If the tool is open source, say so in the post. Developers bookmark it to try later.
+- Treat views as noise until you have checked likes and bookmarks per 1,000 views.
+
+## How X decides who sees your launch post
+
+X published its ranking code as [xai-org/x-algorithm](https://github.com/xai-org/x-algorithm) in January 2026 and added the live parameters, including the action weights, on August 13, 2026. The README says each post gets "Final Score = Σ (weight_i × P(action_i))": the predicted chance that a viewer takes each action, times that action's weight. These were the [weights in the parameter file](https://github.com/xai-org/x-algorithm/blob/main/home-mixer/params/param.rs), last synced on November 6, 2026:
+
+| Action | Weight | What it means for a launch |
+| --- | --- | --- |
+| Copy link | 20 | Developers paste launch links into Slack and Discord. Make the post worth sharing. |
+| Reply | 5 (+15 between mutual follows) | Technical questions help, and so do your answers. |
+| Quote post | 5 | A creator's quote helps 5x as much as a plain repost. |
+| Share by DM | 5 | Same signal as a reply. |
+| Follow the author | 4 | A founder account earns this. A brand account rarely does. |
+| Repost | 1 | Worth less than you'd think. |
+| Like | 0.708 | The weakest positive signal. |
+| Open the link | 0.2 | Clicks barely move ranking. |
+| Not interested, mute, block, report | −53, −58.8, −31.2, −234 | Hype that annoys people costs you. |
+
+A comment in the same file warns that the weights apply to predicted probabilities, not raw counts, so "one report cancels 468 likes" is the wrong reading. Many agency playbooks still quote the 2023 Twitter code, where a reply the author engaged with was worth 75. The 2026 code ranks differently.
+
+Four rules in the code change how you run launch day:
+
+1. **Posts older than 48 hours drop out.** `MAX_POST_AGE` is `48 * 60 * 60` seconds. Each day of a launch week starts a new clock.
+2. **Group-chat engagement does nothing.** The parameter file says engagement only counts on a post served in the Home timeline: "Directly navigating to a post (i.e., coordinating via groupchat) has no ranking impact." Asking 40 friends to like the post from a link does not help. Creators posting to their own followers does.
+3. **Small accounts get a two-hour lift.** A [cold-start scorer](https://github.com/xai-org/x-algorithm/blob/main/home-mixer/scorers/author_cold_start.rs) can move one original post into roughly the 15th or 16th slot of a feed. It applies when the author has 50,000 followers or fewer, the post is at most 7,200 seconds (two hours) old, and it has fewer than 200 Home impressions. The code runs it as an experiment. It is the only early window the code defines: there is no "first 30 minutes" rule.
+4. **Likes widen the pool.** Out-of-network retrieval keeps pools of recent posts with 1 like and with 32 likes. Posts from accounts a viewer doesn't follow are multiplied by 0.75, and each extra post from the same author in a feed by a decaying factor.
+
+On links, put the link in the post. In November 2024 Elon Musk [told people](https://www.businesstoday.in/technology/news/story/elon-musk-confirms-that-x-deprioritises-posts-with-links-to-discourage-lazy-linking-455115-2024-11-26) to "put the link in the reply". On July 28, 2026, Nikita Bier, X's head of product at the time, wrote that ["you do not need to put the links in replies anymore"](https://x.com/nikitabier/status/2082217171506344297), and Musk [added](https://x.com/elonmusk/status/2082273378749268440) that X hadn't penalized links "for over a year." The weights file has no link penalty. Write the post so it makes sense without the link, because a link click is worth only 0.2.
+
+**Key pointers:**
+
+- Make the launch post something a developer would copy into a team chat. Copy-link is the heaviest signal.
+- Get creators to quote-post from their own accounts. Don't ask people to like it from a group chat.
+- On an account under 50,000 followers, the first two hours are the window the code gives you.
+
+## 8 developer tool launches on X, and what each one teaches
+
+None of these are Bolt.new, Devin or the other launches most guides recycle. Every number below comes from the post itself on November 8, 2026, or from the page linked next to it.
+
+### 1. Jev (TypeSafe AI): the founder's post did 56x the company's
+
+TypeSafe AI [launched Jev](https://x.com/CompleteSkeptic/status/2099925682726002904), a decision model for developers, on September 15, 2026. Founder Diogo Almeida posted first. The post has 40.1M views and 58K bookmarks. The company account [quoted it 75 minutes later](https://x.com/typesafeai/status/2099944756931596454) and got 720K views.
+
+![Diogo Almeida's Jev launch post on X: a ChatGPT co-inventor hook, three number bullets and a 2:56 video, 40.1M views and 58K bookmarks](/blog/uploads/how-to-launch-a-developer-tool-on-x/jev-founder-launch-post.webp "Jev's launch: a credential, three numbers and a video. 40.1M views on the founder's account.")
+
+- **The hook was a credential a stranger could check:** "After co-inventing ChatGPT, I kept asking myself…", then three bullets with numbers ("20-200x faster", "40-400x cheaper") and a video just under three minutes.
+- **Creators were seeded, not asked for likes.** Doomers, which ran the launch, says it [seeded the announcement to "between 80 and 100 specific accounts"](https://doomers.ai/work/typesafe-ai-case-study) of engineers, founders, builders and creators, and that Almeida had "around 1,500 followers" beforehand. He has 157,800 now.
+- **The waitlist lasted five days.** TypeSafe [opened access to everyone](https://cryptobriefing.com/typesafe-jev-ai-public-access/) on September 20.
+- **Developers checked the numbers.** OpenChamber [studied 12,759 posts](https://openchamber.dev/blog/jev-typesafe-ai) from the launch week and found a median 7x speedup in user reports, against the 193x on TypeSafe's homepage. Adoption was real anyway: two weeks in, Jev [was used by 35% of paid teams](https://techcrunch.com/2026/10/16/jev-is-vercels-fastest-adopted-ai-model-ever/) on Vercel's AI Gateway.
+
+**Lesson:** Lead with the fact that makes a stranger stop scrolling, and use numbers your users will reproduce.
+
+### 2. Cursor 2.0: early access turned creators into day-zero reviewers
+
+Cursor [announced Cursor 2.0](https://x.com/cursor_ai/status/1983567619946147967) on October 29, 2025 with a 64-second video, and the post has 3.5M views. Six minutes earlier, Every's Dan Shipper posted a full review: "We've been testing it for a week or so @every and here's our Day 0 Vibe check."
+
+![Dan Shipper's Cursor 2.0 review on X, posted at 9:36 PM, next to Cursor's own launch post at 9:42 PM the same day](/blog/uploads/how-to-launch-a-developer-tool-on-x/cursor-2-creator-wave.webp "Dan Shipper's review went up six minutes before Cursor's launch post. Times in IST.")
+
+Others had the build too. Kevin Kern [wrote](https://x.com/kevinkern/status/1983570899782811846) "I've been testing it for a few days", and Kieran Klaassen [posted](https://x.com/kieranklaassen/status/1983566756938723486) "I'm intrigued… but Claude Code still has my heart." That honesty is why the wave read as reviews, not ads.
+
+**Lesson:** Give creators the product a week early, then let them say what they really think.
+
+### 3. Gemini CLI: price and a 30-second demo in the first lines
+
+Google [launched Gemini CLI](https://x.com/googleaidevs/status/1937861646082515205) on June 25, 2025 from @googleaidevs, an account with 117K followers today. The first two lines say what it is ("open-source AI agent… in your terminal") and what it costs ("at no cost"). The 30-second video opens on the terminal. The install command sits in the first reply. The post has 3.2M views, and three months later Google said ["more than one million developers are building with Gemini CLI."](https://blog.google/technology/developers/gemini-cli-extensions/)
+
+![Google AI Developers' Gemini CLI launch post with a terminal demo video, 3.2M views, and a first reply with npm i -g @google/gemini-cli](/blog/uploads/how-to-launch-a-developer-tool-on-x/gemini-cli-launch.webp "Gemini CLI: what it is, what it costs and how to install it, all above the fold.")
+
+Compare OpenAI's [Codex CLI post](https://x.com/OpenAIDevs/status/1912556874211422572) ten weeks earlier: an account with about four times the followers today, a 6-minute-19-second video, and 646K views. Brand and pricing differ, so this isn't a controlled test. But the post that showed the tool in 30 seconds and named the price got five times the views.
+
+**Lesson:** Put the price, the form factor and the install command where a scroller sees them.
+
+### 4. Remotion: the install command was the post
+
+Remotion's [Agent Skills launch](https://x.com/Remotion/status/2013626968386765291) on January 20, 2026 was three lines: what it does ("make videos just with Claude Code"), the command (`$ npx skills add remotion-dev/skills`), and an 8-second video made by prompting. From an account with about 59K followers, it reached 18.8M views and 38K bookmarks.
+
+![Remotion's launch post on X: one line, an npx install command and an 8-second terminal video, 18.8M views and 38K bookmarks](/blog/uploads/how-to-launch-a-developer-tool-on-x/remotion-agent-skills.webp "Remotion's post was the command. 38K developers bookmarked it.")
+
+Only 7 of the 520 devtool launches put an install command in the post text. Their median was 8,600 bookmarks, against 698 for the rest. Seven posts is a small sample, but the logic holds: a developer can copy a command into their terminal in seconds.
+
+**Lesson:** For a CLI, SDK or agent skill, make the command the post.
+
+### 5. terminal-code: a 7,800-follower founder and one comparison
+
+Rob Pruzan [introduced terminal-code](https://x.com/RobKnight__/status/2090106928668041363) on August 19, 2026 as "VS Code inside the terminal", followed by three short bullets, a link and a 21-second video of the editor working. It reached 2.6M views and 4.9K bookmarks, from an account that has 7,800 followers today.
+
+![Rob Pruzan's terminal-code launch post: VS Code inside the terminal, three bullets, a link and a 21-second demo, 2.6M views](/blog/uploads/how-to-launch-a-developer-tool-on-x/terminal-code-launch.webp "Five words told developers what terminal-code is. 2.6M views from a 7.8K-follower account.")
+
+This is Okara's second finding in action: compare the product to a tool people already know. "VS Code inside the terminal" needs no explanation. His likes and bookmarks per view are also well above the promoted-reach range, so the reach looks earned.
+
+**Lesson:** If your tool is "X, but Y", say exactly that in the first line.
+
+### 6. Lovable: the launch post wasn't the one that went viral
+
+Anton Osika [launched Lovable](https://x.com/antonosika/status/1859511355650552018) on November 21, 2024 with an 88-second video. That post has 40.6K views. A month later he posted ["$4m ARR in 4 weeks, this is how we did it"](https://x.com/antonosika/status/1870554039462814013), and it reached 1.2M views, 30 times the launch.
+
+![Anton Osika's Lovable thread on X: $4m ARR in 4 weeks with a subscriber chart, 1.2M views, and a reply saying we posted what we shipped on X](/blog/uploads/how-to-launch-a-developer-tool-on-x/lovable-results-thread.webp "A month after launch, the results thread did 30x the launch post's views.")
+
+The thread says how: "We posted what we shipped on X. And we ship often." By February 2025 Lovable was [at "$17m ARR with just $2m spent."](https://x.com/antonosika/status/1894455969129640196)
+
+**Lesson:** Plan the results post as carefully as the launch post, and keep shipping in public in between.
+
+### 7. Browser Use: someone else's launch became theirs
+
+Manus [launched](https://x.com/ManusAI/status/1897294098945728752) on March 5, 2025 as "the first general AI agent", invite-only, and [reached 2 million people on its waitlist](https://x.com/ManusAI/status/1899815881607422128) in 7 days. Four days after the launch, a user [posted a teardown](https://x.com/jianxliao/status/1898861051183349870) showing the runtime ran on Claude Sonnet and the open-source library @browser_use. The teardown has 2.6M views, more than the 2.4M on Manus's own launch post.
+
+![A user's X post showing Manus's sandbox code: it's Claude Sonnet with 29 tools and uses Browser Use, 2.6M views](/blog/uploads/how-to-launch-a-developer-tool-on-x/manus-teardown.webp "A teardown of Manus outdrew Manus's own launch post, and put Browser Use in front of developers.")
+
+For Browser Use, it was a launch they didn't plan. TechCrunch [reported](https://techcrunch.com/2025/03/12/browser-use-one-of-the-tools-powering-manus-is-also-going-viral/) that daily downloads "more than quintupled from around 5,000 on March 3 to 28,000 on March 10," and that a post about how Manus used Browser Use got over 2.4 million views.
+
+**Lesson:** If you build infrastructure, watch for products that credit you, and be ready to post when they do. If you launch a product, don't claim "first", because someone will open the sandbox.
+
+### 8. Kiro and OpenClaw: what breaks after the spike
+
+- **Kiro (AWS).** The brand's [launch post](https://x.com/kirodotdev/status/1944774206517899607) on July 14, 2025 got 249K views. CEO Andy Jassy's [post the same morning](https://x.com/ajassy/status/1944785963663966633) got 670K, 2.7 times as many. Within about a week, Kiro [added daily limits and a waitlist](https://www.techzine.eu/news/devops/133231/usage-restrictions-for-kiro-after-unexpectedly-high-demand/) because demand was "significantly higher than expected". In August, new pricing drew the headline ["a wallet-wrecking tragedy"](https://www.theregister.com/2025/08/18/aws_updated_kiro_pricing/). AWS called part of it a pricing bug and refunded users.
+- **OpenClaw.** Peter Steinberger's open-source agent spread in January 2026 through users' demos and explainers, then was [renamed twice](https://www.trendingtopics.eu/openclaw-2-million-visitors-in-a-week/): Clawdbot, then Moltbot, then OpenClaw, after Anthropic's legal team asked for a change. During one rename, Steinberger [posted](https://x.com/steipete/status/2016068265391354181) that "the X rename got snatched by crypto shills." The project still reached "over 100,000 GitHub stars and attracted 2 million visitors in a single week."
+
+**Lesson:** Before launch day, check capacity, final pricing, trademark clearance and every handle you'll need.
+
+**Key pointers:**
+
+- Founder posts beat company posts: 56x for Jev, 2.7x for Kiro.
+- A specific comparison, a price or an install command in the first lines is what these posts had in common.
+- Plan a second post with proof (results, user builds, a teardown you welcome) for days 2 to 30.
+
+## The X launch plan for a developer tool, from two weeks out to day 30
+
+![Six-stage X launch timeline for a developer tool, from creator early access two weeks out to the second wave in days 2 to 30](/blog/uploads/how-to-launch-a-developer-tool-on-x/x-launch-timeline.webp "An X launch for a developer tool, start to finish. The first two hours are framed.")
+
+### Two weeks out: make it usable and pick your creators
+
+- **Decide on the waitlist.** Manus turned scarcity into 2 million signups. Jev opened up in five days, and Kiro had to add a waitlist after launching open. For a developer tool, the best default is something people can install that day. If you need a waitlist, say when it opens.
+- **Shortlist 20 to 50 creators.** Clickstrike, an X launch agency, says to [plan for "20 to 50 creators across launch day and follow-on waves."](https://clickstrike.com/blog/how-to-launch-on-x/) Doomers picks them on ["median post performance rather than follower count."](https://doomers.ai/playbook) Check that they post code, that their followers use your stack, and that their replies are from developers.
+- **Send early access a week before.** Cursor's best launch-day posts came from people who had used it for days.
+
+### The week before: brief the creators, don't script them
+
+- **Give each creator a different angle:** a benchmark, a build, a comparison or a migration story. Doomers gives every creator ["different hooks, framing, and formats."](https://doomers.ai/playbook)
+- **Stay inside X's rules.** X's [authenticity policy](https://help.x.com/en/rules-and-policies/authenticity) prohibits "coordinated inauthentic activity" and "coordinating to exchange engagement" in likes, replies and reposts. Twenty creators posting the same sentence looks like exactly that.
+- **Label paid posts.** X's [Paid Partnerships policy](https://help.x.com/en/rules-and-policies/paid-partnerships-policy) requires the "Paid Partnership" disclosure on paid posts, including when you only gifted the product. Our [guide to developer influencer marketing](/blog/developer-influencer-marketing) covers disclosure wording and contracts.
+- **Prepare three assets:** the founder post with the video, a first reply with the install command and docs link, and a company post that quotes the founder.
+
+### Hour 0: the founder posts
+
+Post from the founder's account on a Tuesday, Wednesday or Thursday morning, US Eastern. Use the template in the next section. The company account quotes the post; it doesn't publish a copy.
+
+### Hours 0 to 2: the creator wave
+
+- **Creators quote-post with their own take inside the first two hours.** That is the cold-start window in X's code for accounts under 50,000 followers, and Okara found that launches with 50 to 200 creator quotes in the first hour had a median of 456K views.
+- **Spread them out a little.** Doomers runs creators "inside the same four-hour window, some spread across eight to twelve," so the posts don't land as one burst.
+- **Skip the group chat.** Likes from people who open the post from a shared link don't count for ranking.
+
+### Hours 0 to 48: live in the replies
+
+Answer every technical question, bug report and "how is this different from X" reply. Replies weigh 5 and a reply between mutual follows gets +15. Pin the launch post, post the fix commit when someone finds a bug, and stay online until the 48-hour cutoff.
+
+### Days 2 to 30: the second wave
+
+- **Quote the best builds.** Eleven days after Jev launched, a developer's [jevgrep CLI post](https://x.com/dzhng/status/2103920741481848861) reached 456K views. User builds are your next launch.
+- **Post the results.** Lovable's results thread did 30x its launch post.
+- **Ship and post again.** Okara found V2 launches and major updates did as well as new products. Clickstrike runs "follow-on creator waves for the next 60 to 90 days."
+- **Take the launch to other channels**, like [Hacker News](/blog/how-to-launch-on-hacker-news-show-hn) and [Product Hunt](/blog/product-hunt-launch-playbook). Our [developer tool launch guide](/blog/how-to-launch-a-developer-tool) covers the full multi-channel timeline.
+
+**Key pointers:**
+
+- Creators need the product a week before launch, not the night before.
+- Write a brief with angles. Never send creators copy.
+- Keep someone from engineering in the replies for 48 hours.
+
+## Launch post and creator brief templates (copy and paste)
+
+**The founder's launch post**
+
+```text
+[What it is in one line, compared to a tool developers know]
+e.g. "VS Code inside the terminal" / "make videos just with Claude Code"
+
+- [Proof 1: a number a user can reproduce]
+- [Proof 2: who it's for or what it replaces]
+- [Price or license: "free", "MIT", "open source", "$X per 1M tokens"]
+
+$ [install command]   (or: try it at [link])
+
+[native video, 30 to 120 seconds, product on screen in the first 3 seconds]
+```
+
+**The first reply**
+
+```text
+Docs: [link]  ·  Repo: [link]  ·  Quickstart: [link]
+What's next: [one line]. Questions welcome, we're answering all day.
+```
+
+**The creator brief**
+
+```text
+Product: [name], [one-line description]
+Access: [build/API key] from [date], one week before launch
+Launch: [date], [time ET]. Post within 2 hours after the founder's post: [link]
+Your angle (pick one, in your own words):
+  - Build something real with it and show it
+  - Benchmark it against [tool you already use]
+  - Migrate one workflow and say what broke
+What you must include: the "Paid Partnership" label if we paid you or gave you credits
+What we don't want: copied text, "game changer", claims you didn't test
+Format: quote post of the launch, native video or screenshots, under 2 minutes
+Reply to questions on your post for the first few hours if you can
+```
+
+**Key pointers:**
+
+- Keep the first line under about 10 words and make it a comparison or a result.
+- Put the install command or link in the post. Make the post complete without it.
+- Give every creator a different angle so the wave reads as many opinions.
+
+## What to measure in the first 72 hours
+
+Doomers puts it plainly in its playbook: ["Knowing a launch did 2M views tells you nothing actionable."](https://doomers.ai/playbook) Track these instead, per post and per creator:
+
+| Metric | Why it matters | Benchmark from the 520 launches |
+| --- | --- | --- |
+| Bookmarks per 1,000 views | Developers save tools they plan to try | Median 1.6; open-source launches 5.3 |
+| Likes per 1,000 views | Exposes promoted or low-fit reach | Median 3.5; under 0.3 suggests paid reach |
+| Technical replies | Questions, bugs and comparisons show real use | Count them, and answer each one |
+| Creator quote posts in hours 0 to 2 | Each starts in-network for that creator's followers | Okara: 50 to 200 had a median of 456K views |
+| Installs, API keys, repos connected | The first action that costs the developer effort | Use a UTM link and a code per creator |
+| GitHub stars and docs visits in 48 hours | Shows the launch reached people who build | Compare against your previous launch |
+
+Then check what lasted two weeks later: branded searches, mentions on Reddit, and whether AI assistants name your tool. Our [guide to measuring devtool visibility in AI answers](/blog/how-to-measure-devtool-visibility-in-ai-answers) shows how.
+
+**Key pointers:**
+
+- Give every creator their own link and signup code before launch day.
+- Rebook creators on activated users per dollar, not views.
+
+## Mistakes that sink developer tool launches on X
+
+- **Claiming "first" or a number users can't reproduce.** Manus's "first general AI agent" invited a teardown that outdrew the launch. Jev's 193x became 7x in user reports.
+- **Launching only from the company account.** Jev's founder post did 56x the company's, and Jassy's Kiro post 2.7x the brand's.
+- **Running out of capacity or changing the price.** Kiro added a waitlist within about a week of launch and drew pricing backlash a month later.
+- **Leaving names and handles unchecked.** OpenClaw renamed twice and lost an X handle to crypto spammers mid-rename.
+- **Rallying likes in a group chat, or sending creators the same copy.** It does nothing for ranking and breaks X's authenticity rules.
+- **Using a long video as the only asset.** Codex CLI's 6-minute video got a fifth of Gemini CLI's views.
+- **Judging the launch by views.** 25 devtool launches passed 1M views with almost no likes.
+
+**Key pointers:**
+
+- Have someone outside the team try to reproduce every claim in the post.
+- Load-test signup and confirm pricing before launch day.
+
+## How Studio1 runs X launches
+
+We plan X launches around the product working on camera: a demo people can run, posts from the people who built it, and creators who used it first.
+
+- **OpenLore.** An [X Article](https://x.com/Arindam_1729/status/2112892916159111359) on giving every coding agent the same memory was one of the biggest contributors to OpenLore's 100K+ impressions in a month, alongside a daily.dev post. [Read the OpenLore case study](/case-studies/openlore).
+- **ScrapeGraphAI.** We launched working agent demos, like an [agentic deep researcher](https://x.com/Arindam_1729/status/1942598540016115736) built with ScrapeGraphAI, DeepSeek R1 and an MCP server, as part of a campaign that reached 265K+ developers. [Read the ScrapeGraphAI case study](/case-studies/scrapegraph).
+- **Tensorlake.** We framed the founder's launch posts, like an [AI on-call engineer](https://x.com/diptanu/status/2011469984623718599), around a developer problem rather than a feature. [Read the Tensorlake case study](/case-studies/tensorlake).
+
+If you want a launch like this run for your tool, see our [product launch service](/product-launch-service) and our [influencer marketing service](/influencer-marketing-agency) for developer creators on X.
+
+## FAQ
+
+### How do I launch a developer tool on X?
+
+Post from the founder's account with a native demo video of 30 seconds to 2 minutes, say what the tool does in the first line, and include the install command or a link people can use that day. Give 20 to 50 relevant creators early access a week before so they post their own takes in the first two hours. Reply to every question for 48 hours, then run a second wave of proof posts.
+
+### How many creators do I need for an X launch?
+
+Clickstrike plans for 20 to 50 creators across launch day and follow-on waves. Doomers seeded Jev's launch to 80 to 100 accounts. Okara found launches with 50 to 200 creator quote posts in the first hour had a median of 456K views, against 6.7K for launches with 0 to 5. Fit matters more than size: pick creators whose followers use your stack.
+
+### Should a launch come from the founder's or the company's account?
+
+The founder's. Okara found founder launches got 1.7x more bookmarks than company launches. Jev's founder post reached 40.1M views and the company's quote of it 720K. Have the company account quote the founder's post instead of publishing a copy.
+
+### What is the best time to launch on X?
+
+Tuesday to Thursday, mid-morning US Eastern time. Okara found Monday and Tuesday from 10 AM to 2 PM ET did best, Buffer ranks Tuesday at 9 a.m. first, and in our analysis of 520 devtool launches Wednesday and Thursday had the highest median views. The difference between those slots is smaller than the effect of the creator wave.
+
+### Should I put the link in the post or in a reply?
+
+In the post. In July 2026 X's head of product said "you do not need to put the links in replies anymore," and Elon Musk said X hadn't penalized links "for over a year." The published ranking weights have no link penalty. Make sure the post still makes sense without the link, because a link click is a weak ranking signal.
+
+### How long does an X launch post keep getting views?
+
+About 48 hours. X's published code removes posts older than 48 hours from the For You timeline. That's why launch weeks work: each day's post starts a new 48-hour clock.
+
+### Can I pay creators to post about my launch on X?
+
+Yes, if each paid post carries X's "Paid Partnership" disclosure and the creator writes it in their own words. X's policy covers cash, gifted products and affiliate deals. Coordinated identical posts or engagement swaps break X's authenticity rules.

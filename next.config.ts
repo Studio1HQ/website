@@ -1,11 +1,15 @@
 import type { NextConfig } from "next";
 import nextMDX from "@next/mdx";
 import createNextIntlPlugin from "next-intl/plugin";
+import { AI_AGENT_HEADER_PATTERN } from "./lib/ai-agents";
 
 const withMDX = nextMDX();
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 const nextConfig: NextConfig = {
   pageExtensions: ["js", "jsx", "mdx", "ts", "tsx"],
+  // linkedom (app/ai-md) breaks when bundled: its optional canvas support
+  // resolves to a stub. Load it from node_modules at runtime instead.
+  serverExternalPackages: ["linkedom"],
   turbopack: {
     root: process.cwd(),
   },
@@ -22,6 +26,38 @@ const nextConfig: NextConfig = {
         hostname: "**",
       },
     ],
+    localPatterns: [
+      // Any local image without a query string, as before.
+      { pathname: "/**", search: "" },
+      // Blog covers carry a ?v= version so cache updates reach readers.
+      { pathname: "/blog-cover/**" },
+    ],
+  },
+  async rewrites() {
+    // AI agents (lib/ai-agents.ts, never search engines) get the markdown
+    // version of English pages from app/ai-md. People get the normal page.
+    const aiAgent = [
+      { type: "header" as const, key: "user-agent", value: AI_AGENT_HEADER_PATTERN },
+    ];
+    return {
+      beforeFiles: [
+        { source: "/", has: aiAgent, destination: "/ai-md" },
+        {
+          source:
+            "/:path((?!(?:_next|api|ai-md|blog-md|blog-cover|blog-og|brand|admin|assets|fonts|fr|es|hi|zh)(?:/|$))[^.]+|llms\\.txt|llms-full\\.txt)",
+          has: aiAgent,
+          destination: "/ai-md/:path",
+        },
+      ],
+      afterFiles: [
+        // Markdown version of every blog post, for LLMs and AI tools.
+        { source: "/blog/:slug.md", destination: "/blog-md/:slug" },
+        // The brand page (Studio1 Sans, design system, downloads): a static
+        // build in public/brand, refreshed with scripts/sync-brand.mjs.
+        { source: "/brand", destination: "/brand/index.html" },
+      ],
+      fallback: [],
+    };
   },
   async headers() {
     return [
@@ -43,6 +79,22 @@ const nextConfig: NextConfig = {
       {
         source: "/sitemap",
         destination: "/sitemap.xml",
+        permanent: true,
+      },
+      {
+        source: "/blogs",
+        destination: "/blog",
+        permanent: true,
+      },
+      // AI agents guess at /docs paths; point them at the real files.
+      {
+        source: "/docs/llms.txt",
+        destination: "/llms.txt",
+        permanent: true,
+      },
+      {
+        source: "/docs",
+        destination: "/services",
         permanent: true,
       },
       {
@@ -84,13 +136,28 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/careers/ai-cloud-engineer",
+        destination: "/careers",
+        permanent: true,
+      },
+      {
+        source: "/careers/genai-developer-contract",
+        destination: "/careers",
+        permanent: true,
+      },
+      {
+        source: "/careers/developer-advocate",
+        destination: "/careers/devrel-engineer",
+        permanent: true,
+      },
+      {
         source: "/careers/aws-bedrock-ai-agent-engineer",
-        destination: "/careers/ai-cloud-engineer",
+        destination: "/careers",
         permanent: true,
       },
       {
         source: "/careers/aws-ai-agent-engineer",
-        destination: "/careers/ai-cloud-engineer",
+        destination: "/careers",
         permanent: true,
       },
       {
@@ -108,15 +175,13 @@ const nextConfig: NextConfig = {
         destination: "/developer-video-production",
         permanent: true,
       },
-      ...[
-        "/product-launch",
-        "/organic-campaign",
-        "/influencer-management",
-      ].map((source) => ({
-        source,
-        destination: "/developer-relations-growth-campaigns",
-        permanent: true,
-      })),
+      ...["/product-launch", "/organic-campaign", "/influencer-management"].map(
+        (source) => ({
+          source,
+          destination: "/developer-relations-growth-campaigns",
+          permanent: true,
+        }),
+      ),
     ];
   },
 };

@@ -10,57 +10,57 @@
   },
   "Metadata": {
     "home": {
-      "title": "Technical Content & DevRel Agency for DevTools",
-      "description": "Studio1 helps SaaS, AI, and devtool teams ship technical content, docs, videos, launches, and DevRel programs that drive developer adoption."
+      "title": "DevRel & Developer Marketing Agency for Devtools",
+      "description": "Studio1 is a DevRel and developer marketing agency for devtool, AI, and open-source teams: technical content, docs, video, launches, and GitHub growth."
     },
     "services": {
       "technicalContent": {
-        "title": "Technical Content Marketing Services",
-        "description": "Technical content marketing for developer products: tutorials, integration guides, SEO articles, and code-rich content that builds trust and drives adoption."
+        "title": "Technical Content Marketing Agency for Devtools",
+        "description": "Technical content marketing for devtool and AI teams: engineer-written tutorials, integration guides, and SEO articles. 50+ posts for Bright Data."
       },
       "docs": {
-        "title": "Developer Documentation & DX Audit Services",
-        "description": "Developer documentation and DX audit services for AI and DevTool products: onboarding reviews, API clarity, quickstarts, reference docs, and a clearer path to first success."
+        "title": "Developer Experience Audit & Docs Services",
+        "description": "Developer experience audits and documentation services for devtools: onboarding reviews, quickstarts, API docs, and a faster time to first hello world."
       },
       "video": {
-        "title": "Developer Video Production Services",
-        "description": "Developer video production services for AI and DevTool startups: technical demos, tutorials, scripts, edits, thumbnails, SEO titles, Shorts, and a publishing cadence built for growth."
+        "title": "Developer Video and Demo Production for Devtools",
+        "description": "Developer video and demo agency for devtool and AI teams: product demo videos, coding tutorials, demo repos, YouTube series, Shorts, scripts, and edits."
       },
       "devrel": {
-        "title": "Developer Relations & Growth Campaigns",
-        "description": "Developer relations and growth campaigns for developer products: advocacy, community programs, product launches, organic distribution, and influencer management."
+        "title": "DevRel as a Service & Developer Growth Campaigns",
+        "description": "Outsourced developer relations for devtool startups: developer advocacy, community programs, launches, Reddit and X distribution, and creator campaigns."
       }
     },
     "pages": {
       "about": {
-        "title": "About Studio1",
-        "description": "Learn about Studio1, a developer-focused content agency helping devtool and SaaS companies grow through technical writing, DevRel strategy, video, and community work."
+        "title": "About Us: The DevRel Agency for Devtools",
+        "description": "Studio1 is a DevRel and developer marketing agency for devtool, AI, and open-source teams. Meet the founders, engineers, and writers who do the work."
       },
       "product": {
-        "title": "Studio1 Products for Developer Teams",
-        "description": "Studio1-built tools for developers and SaaS teams, including Raah for web analytics and AssetSnip for website asset extraction."
+        "title": "Products: Tools We Build for Developers",
+        "description": "Tools Studio1 builds for developers and devtool teams: Raah for revenue analytics and real-user observability, and AssetSnip for website asset extraction."
       },
       "careers": {
-        "title": "Careers at Studio1",
+        "title": "Careers: Join the Team",
         "description": "Join Studio1 across content, DevRel, engineering, and founder's office roles that help developer-focused products reach the right audience."
       },
       "caseStudies": {
         "title": "Developer Growth Case Studies",
-        "description": "Explore how Studio1 has helped devtool and SaaS companies increase developer adoption through technical content, DevRel strategy, and community engagement."
+        "description": "How Studio1 helped devtool, AI, and open-source teams grow developer adoption with technical content, docs, launches, and DevRel programs."
       },
       "devrelJobs": {
         "title": "DevRel Jobs Board",
-        "description": "Curated Developer Relations, Developer Advocate, Developer Experience, and community jobs from devtool companies. Search and filter open DevRel roles, updated weekly."
+        "description": "Curated developer relations, developer advocate, DX, and community jobs from devtool companies. Search and filter open DevRel roles."
       }
     }
   },
   "ServiceHero": {
     "technicalContent": {
       "badge": "Services",
-      "titleAccent": "Technical",
-      "titleRest": "Content Marketing",
-      "description": "We create developer tutorials, guides, and SEO content that build trust, increase product visibility, and drive technical adoption.",
-      "primaryCta": "Book a Call",
+      "titleAccent": "Technical Content",
+      "titleRest": "Marketing for Developer Tools",
+      "description": "A technical content marketing agency for developer tools: engineer-written tutorials, guides, and SEO content.",
+      "primaryCta": "Book a Strategy Call",
       "secondaryCta": "Explore Services",
       "stats": {
         "views": "tutorials & guides",
@@ -74,7 +74,7 @@
       "titleAccent": "Developer Documentation",
       "titleRest": "& DX Audits",
       "description": "Documentation audits, DX reviews, and docs improvements that get developers to first success with your product.",
-      "primaryCta": "Book a Call",
+      "primaryCta": "Book a Strategy Call",
       "secondaryCta": "Explore Services",
       "stats": {
         "audits": "docs audits",
@@ -86,33 +86,33 @@
       "badge": "Services",
       "titleAccent": "Developer Relations",
       "titleRest": "& Growth Campaigns",
-      "description": "Developer advocacy, community growth, launch campaigns, organic distribution, and creator programs for developer products.",
-      "primaryCta": "Book a Call",
+      "description": "DevRel as a service for developer products: developer advocacy, community growth, launch campaigns, organic distribution, and creator programs.",
+      "primaryCta": "Book a Strategy Call",
       "secondaryCta": "Explore Services",
       "stats": {
-        "events": "high-impact events",
+        "events": "developer events",
         "teams": "teams helped",
         "partners": "partner companies",
-        "launch": "launches supported"
+        "views": "content views"
       }
     },
     "video": {
       "badge": "Services",
       "titleAccent": "Developer Video",
-      "titleRest": "Production",
-      "description": "Technical demos, tutorials, scripts, edits, shorts, and upload-ready assets for developer brands.",
-      "primaryCta": "Book a Call",
+      "titleRest": "Production Agency for Devtools",
+      "description": "Product demos, coding tutorials, and Shorts for devtool and AI teams, with demo projects developers can run.",
+      "primaryCta": "Book a Strategy Call",
       "secondaryCta": "Explore Services"
     }
   },
   "Hero": {
     "badgePrefix": "Trusted by",
-    "badgeSuffix": "DevTool and SaaS Teams",
+    "badgeSuffix": "Devtool and AI Teams",
     "badgeSuffixShort": "teams",
-    "titleLine1": "Technical Content and",
-    "titleLine2": "Partner for",
-    "description": "We help SaaS and devtool teams publish content, docs, and DevRel programs that build search visibility and trust.",
-    "descriptionRich": "We help SaaS and devtool teams publish content, docs, and DevRel programs<br></br>that build search visibility and trust.",
+    "titleLine1": "Developer Marketing &",
+    "titleLine2": "Agency for",
+    "description": "Studio1's engineers and developer advocates create the technical content, docs, and demos developers trust, then run the launches and community programs that get your product adopted.",
+    "descriptionRich": "Studio1's engineers and developer advocates create the technical content, docs, and demos<br></br>developers trust, then run the launches and community programs that get your product adopted.",
     "primaryCta": "Book a Strategy Call",
     "secondaryCta": "Check Our Work",
     "trustedAria": "Trusted by 35+ devtool teams",
@@ -128,6 +128,14 @@
       "content": "Content",
       "devrel": "Developer Relations & Growth",
       "docs": "Documentation & DX Audits",
+      "githubGrowth": "GitHub Growth",
+      "productLaunch": "Product Launch",
+      "aeo": "AEO Agency",
+      "redditMarketing": "Reddit Marketing",
+      "distribution": "Content Distribution",
+      "influencer": "Influencer Management",
+      "testimonials": "Testimonials",
+      "allServices": "All Services",
       "home": "Home",
       "overview": "Overview",
       "process": "Process",
@@ -141,36 +149,91 @@
     "descriptions": {
       "blog": "Articles and insights from the Studio1 team",
       "caseStudies": "Proof from docs, DevRel, launch, and content work"
+    },
+    "groups": {
+      "content": {
+        "title": "Content",
+        "description": "Tutorials, docs, and video"
+      },
+      "growth": {
+        "title": "Growth",
+        "description": "DevRel, open source, and creators"
+      },
+      "distribution": {
+        "title": "Distribution",
+        "description": "Launches, Reddit, and AI answers"
+      }
     }
   },
   "AboutPage": {
-    "titlePrefix": "Amplifying Your",
-    "titleHighlightOne": "Product Story",
-    "titleMiddle": "for",
-    "titleHighlightTwo": "Developers",
-    "titleSuffix": "One Blog, Video, and Initiative at a Time",
-    "descriptionLineOne": "We help tech companies grow developer communities and boost engagement",
-    "descriptionLineTwo": "through DevRel and technical content that resonates.",
+    "titlePrefix": "Studio1 Is a",
+    "titleHighlightOne": "DevRel",
+    "titleMiddle": "and Developer",
+    "titleHighlightTwo": "Marketing",
+    "titleSuffix": "Agency for Devtool and AI Teams",
+    "descriptionLineOne": "We're the engineers, writers, and developer advocates behind the technical content,",
+    "descriptionLineTwo": "docs, launches, and DevRel programs that help devtool teams reach more developers.",
     "tags": {
       "developerCentric": "Developer-Centric",
       "technicalExpertise": "Technical Expertise",
       "communityDriven": "Community-Driven",
-      "contentFocused": "Content Focused",
+      "contentFocused": "Content-focused",
       "endToEnd": "End-to-End Solutions"
     }
   },
   "ProductPage": {
-    "visitProduct": "Visit {name}",
+    "visitProduct": "Try {name}",
+    "sampleData": "Sample data",
+    "copy": "Copy",
+    "copied": "Copied",
     "hero": {
-      "badge": "Built by",
-      "titlePrefix": "Our",
-      "titleHighlight": "Products",
-      "description": "Tools we build and ship for developers, designers, and teams."
+      "eyebrow": "Studio1 Products",
+      "count": "{shipped} shipped, {building} in the works",
+      "titleLineOne": "We market devtools.",
+      "titleLineTwo": "We also <mark>ship</mark> them.",
+      "description": "Raah and AssetSnip are tools we design, build, and grow in-house. Shipping our own products keeps us close to what developers actually go through, and that is what we bring to every devtool we work with."
     },
-    "pipeline": {
+    "dock": {
+      "jumpTo": "Jump to {name}",
+      "nextName": "Product 03",
+      "nextTagline": "Something new is on the workbench"
+    },
+    "why": {
+      "indexName": "Why we build",
+      "aside": "Built in-house by the Studio1 team",
+      "title": "Shipping our own tools makes us better at <accent>launching yours</accent>.",
+      "description": "We sit on both sides of a launch. What we learn building Raah and AssetSnip goes straight into the docs, videos, and campaigns we make for devtool teams.",
+      "points": {
+        "friction": {
+          "title": "We hit the friction first",
+          "body": "Setup steps, unclear errors, missing docs. We run into them on our own products, so we know where to look on yours."
+        },
+        "launches": {
+          "title": "We run launches, not just plan them",
+          "body": "Landing pages, demo videos, changelogs, and community posts. Every launch of our own sharpens the playbook we run for clients."
+        },
+        "builders": {
+          "title": "Content from people who build",
+          "body": "We write about devtools as builders, so tutorials and docs come from real use of the product, not a feature list."
+        }
+      },
+      "playbook": "Get the same playbook for your product"
+    },
+    "next": {
+      "indexName": "In the works",
+      "aside": "Product 03",
       "category": "AI SaaS",
       "status": "In progress",
-      "title": "upcoming ..."
+      "title": "Product 03 is on the workbench.",
+      "codename": "Codename",
+      "redacted": "Redacted",
+      "description": "Our next product is an AI SaaS tool, built the same way as Raah and AssetSnip. We will share more as soon as it is ready for real users.",
+      "follow": "Follow the build",
+      "building": "Building"
+    },
+    "cta": {
+      "title": "Building a developer product?",
+      "description": "We help devtools launch, explain, and grow, with the same playbook we use on our own products."
     }
   },
   "CareersPage": {
@@ -178,7 +241,7 @@
     "titlePrefix": "We're hiring for",
     "titleHighlight": "tech-native",
     "titleSuffix": "roles",
-    "description": "Studio1 helps devtool and SaaS teams grow through technical content and DevRel while building products like Raah and AssetSnip.",
+    "description": "Studio1 helps devtool, AI, and open-source teams grow through technical content and DevRel, and builds its own products like Raah and AssetSnip.",
     "internship": "Internship",
     "openings": "{count, plural, one {# opening} other {# openings}}",
     "posted": "Posted {date}",
@@ -199,7 +262,7 @@
     "description": "A curated board of Developer Relations, Developer Advocate, Developer Experience, and community roles from devtool companies. Every card links straight to the company's own application page.",
     "statsRoles": "{count, plural, one {# open role} other {# open roles}}",
     "statsCompanies": "{count, plural, one {# company hiring} other {# companies hiring}}",
-    "statsUpdated": "Updated weekly",
+    "statsUpdated": "Hand-picked by Studio1",
     "searchPlaceholder": "Search by role, company, or keyword...",
     "searchLabel": "Search jobs",
     "allCategories": "All roles",
@@ -219,6 +282,8 @@
     "pageOf": "Page {page} of {total}",
     "showing": "{shown} of {total} roles",
     "newBadge": "New",
+    "noListingsTitle": "No listings right now",
+    "noListingsDescription": "We're refreshing the board. Hiring for a DevRel role? Submit it below.",
     "emptyTitle": "No roles match your filters",
     "emptyDescription": "Try a different keyword or clear the filters.",
     "clearFilters": "Clear filters",
@@ -233,9 +298,15 @@
     "titleHighlight": "developer brands",
     "description": "Content, docs, video, DevRel, launches, and creator programs for developer brands.",
     "explore": "Explore service",
+    "cards": {
+      "technicalContent": ["Tutorials", "SEO articles", "Guides"],
+      "devrel": ["Advocacy", "Community", "Launches"],
+      "video": ["Product demos", "Tutorials", "Shorts"],
+      "docs": ["Docs audits", "Quickstarts", "DX reviews"]
+    },
     "offerings": [
       {
-        "label": "Technical Content Writing",
+        "label": "Technical Content Marketing",
         "description": "Developer tutorials, guides, and documentation that build trust, rank in search, and drive product adoption."
       },
       {
@@ -244,7 +315,7 @@
       },
       {
         "label": "Developer Video Production",
-        "description": "Product demos, how-tos, and integration videos made for AI and DevTool teams who need developers to get it."
+        "description": "Product demos, how-tos, and integration videos made for AI and devtool teams who need developers to get it."
       },
       {
         "label": "Content Creation",
@@ -255,12 +326,12 @@
         "description": "Docs audit, documentation, and DX improvements: onboarding reviews, shippable guides, and a clearer path to first success."
       },
       {
-        "label": "Organic Growth Campaign",
-        "description": "Multi-channel campaigns that create buzz, drive adoption, and establish your product in developer communities."
+        "label": "Organic Growth Campaigns",
+        "description": "Multi-channel campaigns on Reddit, X, LinkedIn, and developer communities that put your product in front of the developers who will use it."
       },
       {
         "label": "Product Launch Support",
-        "description": "Strategy, content, and community activation to maximize launch visibility and convert interest into users."
+        "description": "A launch plan, launch content, and community posts that turn launch-day attention into signups and GitHub stars."
       },
       {
         "label": "Influencer Management",
@@ -275,7 +346,7 @@
     "stats": {
       "views": "content views",
       "companies": "partner companies",
-      "events": "high-impact events",
+      "events": "developer events",
       "launch": "launches supported"
     },
     "cards": {
@@ -333,8 +404,8 @@
     "titleLine1": "Ready to Scale",
     "titleLine2": "Developer Adoption?",
     "descriptionLine1": "Let’s talk about how we can help you",
-    "descriptionLine2": "reach more developers and accelerate adoption.",
-    "button": "Schedule a call",
+    "descriptionLine2": "reach more developers and grow adoption.",
+    "button": "Book a Strategy Call",
     "bullets": {
       "savings": "Leaner than hiring in-house",
       "lockIn": "No lock-in",
@@ -344,7 +415,7 @@
   },
   "CaseStudiesIndex": {
     "metadataName": "Studio1 Case Studies",
-    "metadataDescription": "Real-world examples of how Studio1 helps devtool and SaaS companies drive growth, rankings, and developer adoption through technical content and distribution.",
+    "metadataDescription": "How Studio1 helps devtool, AI, and open-source teams earn GitHub stars, search rankings, and developer adoption through content and distribution.",
     "badge": "Case Studies",
     "titlePrefix": "Case Studies From",
     "titleHighlight": "Developer Growth Work",
@@ -357,10 +428,20 @@
     "titleHighlight": "not found",
     "description": "The page you're looking for doesn't exist or may have moved.",
     "homeCta": "Back to home",
-    "servicesCta": "Explore services"
+    "servicesCta": "Explore services",
+    "suggestions": "Try one of these"
+  },
+  "ErrorPage": {
+    "eyebrow": "Error",
+    "titlePrefix": "Something went",
+    "titleHighlight": "wrong",
+    "description": "An unexpected error stopped this page from rendering. Try again, or head back home.",
+    "retryCta": "Try again",
+    "homeCta": "Back to home",
+    "reference": "Ref"
   },
   "Footer": {
-    "description": "Technical content and developer growth partner for devtool and SaaS teams.",
+    "description": "DevRel and developer marketing agency for devtool, AI, and open-source teams.",
     "rights": "All rights reserved.",
     "links": {
       "growth": "Developer Growth",
@@ -368,7 +449,10 @@
       "products": "Products",
       "blog": "Our Blog",
       "careers": "Careers",
-      "devrelJobs": "DevRel Jobs"
+      "devrelJobs": "DevRel Jobs",
+      "devrelCohort": "DevRel Cohort",
+      "openSource": "Open Source",
+      "brandAssets": "Brand Assets"
     },
     "legal": {
       "terms": "Terms and Conditions",

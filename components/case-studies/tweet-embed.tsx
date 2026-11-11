@@ -23,7 +23,8 @@ export function TweetEmbed({ url }: TweetEmbedProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const render = () => window.twttr?.widgets?.load(containerRef.current ?? undefined);
+    const render = () =>
+      window.twttr?.widgets?.load(containerRef.current ?? undefined);
     const existingScript = document.querySelector<HTMLScriptElement>(
       `script[src="${WIDGET_SCRIPT}"]`,
     );
@@ -44,7 +45,10 @@ export function TweetEmbed({ url }: TweetEmbedProps) {
   }, []);
 
   return (
-    <div ref={containerRef} className="not-prose my-10 max-w-full overflow-hidden">
+    <div
+      ref={containerRef}
+      className="not-prose my-10 max-w-full overflow-hidden"
+    >
       <blockquote className="twitter-tweet" data-dnt="true">
         <a href={url}>View the Tensorlake post on X</a>
       </blockquote>

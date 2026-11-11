@@ -10,7 +10,7 @@ const MinimalCard = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-lg dark:bg-neutral-800 bg-neutral-50 p-2 no-underline shadow-sm transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800/80 ",
+      "rounded-[6px] dark:bg-neutral-800 bg-neutral-50 p-2 no-underline shadow-sm transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800/80 ",
       "shadow-[0px_1px_1px_0px_rgba(0,0,0,0.05),0px_1px_1px_0px_rgba(255,252,240,0.5)_inset,0px_0px_0px_1px_hsla(0,0%,100%,0.1)_inset,0px_0px_1px_0px_rgba(28,27,26,0.5)]",
       "shadow-[rgba(17,24,28,0.08)_0_0_0_1px,rgba(17,24,28,0.08)_0_1px_2px_-1px,rgba(17,24,28,0.04)_0_2px_4px]",
       "dark:shadow-[0_1px_0_0_rgba(255,255,255,0.03)_inset,0_0_0_1px_rgba(255,255,255,0.03)_inset,0_0_0_1px_rgba(0,0,0,0.1),0_2px_2px_0_rgba(0,0,0,0.1),0_4px_4px_0_rgba(0,0,0,0.1),0_8px_8px_0_rgba(0,0,0,0.1)]",
@@ -30,7 +30,7 @@ const MinimalCardImage = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "relative h-[200px] w-full rounded-lg  mb-6",
+      "relative h-[200px] w-full rounded-[6px]  mb-6",
       "shadow-[0px_1px_1px_0px_rgba(0,0,0,0.05),0px_1px_1px_0px_rgba(255,252,240,0.5)_inset,0px_0px_0px_1px_hsla(0,0%,100%,0.1)_inset,0px_0px_1px_0px_rgba(28,27,26,0.5)]",
       "dark:shadow-[0_1px_0_0_rgba(255,255,255,0.03)_inset,0_0_0_1px_rgba(255,255,255,0.03)_inset,0_0_0_1px_rgba(0,0,0,0.1),0_2px_2px_0_rgba(0,0,0,0.1),0_4px_4px_0_rgba(0,0,0,0.1),0_8px_8px_0_rgba(0,0,0,0.1)]",
       className,
@@ -42,19 +42,19 @@ const MinimalCardImage = React.forwardRef<
       alt={alt}
       fill
       sizes="(max-width: 768px) 100vw, 400px"
-      className="rounded-lg object-cover"
+      className="rounded-[6px] object-cover"
     />
-    <div className="absolute inset-0 rounded-lg">
+    <div className="absolute inset-0 rounded-[6px]">
       <div
         className={cn(
-          "absolute inset-0 rounded-lg",
+          "absolute inset-0 rounded-[6px]",
           "shadow-[0px_0px_0px_1px_rgba(0,0,0,.07),0px_0px_0px_3px_#fff,0px_0px_0px_4px_rgba(0,0,0,.08)]",
           "dark:shadow-[0px_0px_0px_1px_rgba(0,0,0,.07),0px_0px_0px_3px_rgba(100,100,100,0.3),0px_0px_0px_4px_rgba(0,0,0,.08)]",
         )}
       />
       <div
         className={cn(
-          "absolute inset-0 rounded-lg",
+          "absolute inset-0 rounded-[6px]",
           "dark:shadow-[0px_1px_1px_0px_rgba(0,0,0,0.15),0px_1px_1px_0px_rgba(0,0,0,0.15)_inset,0px_0px_0px_1px_rgba(0,0,0,0.15)_inset,0px_0px_1px_0px_rgba(0,0,0,0.15)]",
         )}
       />

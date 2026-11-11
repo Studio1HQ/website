@@ -107,12 +107,12 @@ export function SpotLightItem({ children, className }: SpotlightItemProps) {
       ref={boxWrapper}
       className={cn(
         className,
-        " relative rounded-lg justify-center items-center p-[2px] bg-[#ffffff15] overflow-hidden",
+        " relative rounded-[6px] justify-center items-center p-[2px] bg-[#ffffff15] overflow-hidden",
       )}
     >
       {isHovered && (
         <div
-          className="pointer-events-none absolute opacity-0 z-50 rounded-xl w-full h-full group-hover:opacity-100  transition duration-300 "
+          className="pointer-events-none absolute opacity-0 z-50 rounded-[6px] w-full h-full group-hover:opacity-100  transition duration-300 "
           style={{
             background: `
             radial-gradient(
@@ -126,7 +126,7 @@ export function SpotLightItem({ children, className }: SpotlightItemProps) {
       )}
       {HoverFocusSpotlight && (
         <div
-          className="absolute opacity-0 group-hover:opacity-100 z-10 inset-0 bg-fixed rounded-lg"
+          className="absolute opacity-0 group-hover:opacity-100 z-10 inset-0 bg-fixed rounded-[6px]"
           style={{
             background: `radial-gradient(circle at ${mousePosition.x}px ${mousePosition.y}px, #ffffff76 0%,transparent 20%,transparent) fixed `,
           }}
@@ -134,7 +134,7 @@ export function SpotLightItem({ children, className }: SpotlightItemProps) {
       )}
       {ProximitySpotlight && (
         <div
-          className="absolute inset-0 z-0  bg-fixed rounded-lg"
+          className="absolute inset-0 z-0  bg-fixed rounded-[6px]"
           style={{
             background: `radial-gradient(circle at ${mousePosition.x}px ${mousePosition.y}px, #ffffff6e 0%,transparent 20%,transparent) fixed`,
           }}
@@ -156,7 +156,7 @@ export function SpotlightCard({
 }: SpotlightCardProps) {
   return (
     <div
-      className={`relative h-full bg-slate-800 rounded-3xl p-px before:absolute before:w-80 before:h-80 before:-left-40 before:-top-40 before:bg-slate-400 before:rounded-full before:opacity-0 before:pointer-events-none before:transition-opacity before:duration-500 before:translate-x-[var(--mouse-x)] before:translate-y-[var(--mouse-y)] before:group-hover:opacity-100 before:z-10 before:blur-[100px] after:absolute after:w-96 after:h-96 after:-left-48 after:-top-48 after:bg-indigo-500 after:rounded-full after:opacity-0 after:pointer-events-none after:transition-opacity after:duration-500 after:translate-x-[var(--mouse-x)] after:translate-y-[var(--mouse-y)] after:hover:opacity-10 after:z-30 after:blur-[100px] overflow-hidden ${className}`}
+      className={`relative h-full bg-slate-800 rounded-[6px] p-px before:absolute before:w-80 before:h-80 before:-left-40 before:-top-40 before:bg-slate-400 before:rounded-full before:opacity-0 before:pointer-events-none before:transition-opacity before:duration-500 before:translate-x-[var(--mouse-x)] before:translate-y-[var(--mouse-y)] before:group-hover:opacity-100 before:z-10 before:blur-[100px] after:absolute after:w-96 after:h-96 after:-left-48 after:-top-48 after:bg-indigo-500 after:rounded-full after:opacity-0 after:pointer-events-none after:transition-opacity after:duration-500 after:translate-x-[var(--mouse-x)] after:translate-y-[var(--mouse-y)] after:hover:opacity-10 after:z-30 after:blur-[100px] overflow-hidden ${className}`}
     >
       {children}
     </div>

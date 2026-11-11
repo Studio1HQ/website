@@ -1,17 +1,15 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import {
-  elevatedCardShadow,
-  serviceCardHoverGlow,
-  servicesCenterGlow,
-  servicesSectionGlowBottom,
-  servicesSectionGlowTop,
-} from "@/lib/shadows";
-import { cn } from "@/lib/utils";
-import { staggerChildren, serviceItemVariants } from "@/lib/animations";
-import { motion } from "motion/react";
 import type { Icon } from "@phosphor-icons/react";
+import { Container, Rise } from "@/components/home/ui";
+import { MUTED, PaperSection } from "@/components/paper/paper-sections";
+import {
+  PaperChip,
+  PaperPoints,
+  ServiceHead,
+} from "@/components/pages/shared/paper-service-kit";
+import { INK, PRINT } from "@/lib/paper";
+import { cn } from "@/lib/utils";
 
 export type ServiceOfferCard = {
   icon: Icon;
@@ -31,13 +29,9 @@ type ServiceOfferCardsProps = {
   subtitle: string;
   cards: ServiceOfferCard[];
   id?: string;
+  /** Position in the page's printed section index. */
+  index?: number;
 };
-
-const cardMotion = [
-  { hoverClass: "hover:-translate-y-4", offsetClass: "" },
-  { hoverClass: "hover:translate-y-4", offsetClass: "md:translate-y-16" },
-  { hoverClass: "hover:-translate-y-4", offsetClass: "" },
-] as const;
 
 export function ServiceOfferCards({
   eyebrow,
@@ -46,60 +40,24 @@ export function ServiceOfferCards({
   subtitle,
   cards,
   id = "work",
+  index = 1,
 }: ServiceOfferCardsProps) {
   return (
-    <motion.section
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: "-100px" }}
-      variants={staggerChildren}
-      id={id}
-      className="relative mb-28 px-4 pb-20 pt-4 md:pt-6"
-    >
-      <div className={servicesSectionGlowBottom} />
-      <div className={servicesSectionGlowTop} />
+    <PaperSection id={id} tone="paper" className="scroll-mt-28">
+      <Container>
+        <ServiceHead
+          index={index}
+          name={eyebrow ?? "Services"}
+          title={titlePrefix}
+          accent={titleAccent}
+          description={subtitle}
+        />
 
-      <motion.div
-        variants={serviceItemVariants}
-        className="z-[20] flex flex-col items-center justify-center gap-4"
-      >
-        {eyebrow ? (
-          <p className="font-secondary text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-            {eyebrow}
-          </p>
-        ) : null}
-        <div className="text-center text-5xl font-normal max-sm:text-4xl">
-          {titlePrefix}{" "}
-          <span className="serif-accent bg-gradient-to-br from-primary via-primary1 to-primary bg-clip-text font-accent font-normal italic text-transparent">
-            {titleAccent}
-          </span>
-        </div>
-        <p className="mt-2 max-w-2xl text-center text-base text-muted-foreground max-sm:text-sm">
-          {subtitle}
-        </p>
-      </motion.div>
-
-      <div className="mx-auto flex max-w-7xl flex-col">
-        <motion.div
-          variants={serviceItemVariants}
-          className="relative mt-20 flex w-full flex-col items-center justify-center gap-[2%] md:-space-x-16 md:flex-row md:pb-20"
-        >
-          {cards.map((card, index) => {
+        <ul role="list" className="mt-10 grid gap-2 md:grid-cols-3">
+          {cards.map((card, position) => {
             const IconComponent = card.icon;
-            const motionClasses = cardMotion[index % cardMotion.length];
-
             return (
-              <div
-                key={card.accent}
-                id={card.id}
-                className={cn(
-                  "group relative mb-8 flex min-h-[30rem] w-full max-w-[23rem] flex-col items-start justify-start overflow-hidden rounded-lg border-2 bg-background/80 p-8 backdrop-blur-md transition-all duration-700 dark:border md:mb-0",
-                  "motion-reduce:transition-none",
-                  elevatedCardShadow,
-                  motionClasses.hoverClass,
-                  motionClasses.offsetClass,
-                )}
-              >
+              <li key={card.accent} id={card.id} className="relative min-w-0">
                 {card.anchorIds?.map((anchorId) => (
                   <span
                     key={anchorId}
@@ -107,64 +65,67 @@ export function ServiceOfferCards({
                     className="absolute -top-24"
                   />
                 ))}
-                <div className="absolute left-[-2rem] top-[-23rem] z-[101] h-[40rem] w-[5rem] rotate-45 rounded-md bg-white/50 opacity-30 blur-[3em] backdrop-blur-md transition-all delay-100 duration-700 group-hover:left-[20rem] group-hover:top-[15rem] motion-reduce:transition-none" />
-                <div className={serviceCardHoverGlow} />
-
-                <div className="relative z-10 flex w-full flex-1 flex-col">
-                  <div className="flex w-full items-start justify-between">
-                    <div className="flex size-16 items-center justify-center rounded-lg bg-accent p-3 dark:bg-accent/50">
-                      <IconComponent className="size-10" weight="duotone" />
-                    </div>
-                  </div>
-
-                  <div className="mt-auto flex flex-col gap-2 pt-8">
-                    <div className="flex flex-wrap gap-2">
-                      {card.badges.map((badge) => (
-                        <Badge
-                          key={badge}
-                          className="w-fit bg-accent text-foreground"
-                        >
-                          {badge}
-                        </Badge>
-                      ))}
-                    </div>
-                    <p className="text-left text-4xl font-light leading-tight">
-                      <span className="bg-gradient-to-br from-white via-primary/80 to-white bg-clip-text font-extrabold text-transparent dark:from-white dark:via-primary/80 dark:to-white">
-                        {card.accent}
+                <Rise delay={position * 0.08} className="h-full">
+                  <article className="group relative isolate flex h-full min-h-[440px] flex-col overflow-hidden rounded-[6px] bg-white/80 p-6 shadow-[inset_0_1px_0_#fff] ring-1 ring-inset ring-[#141414]/[0.08] transition-[background-color,box-shadow,transform] duration-500 hover:-translate-y-1 hover:bg-white hover:shadow-[inset_0_1px_0_#fff,0_24px_40px_-28px_rgba(20,20,20,0.45)] motion-reduce:transform-none md:p-7">
+                    {/* Hover: a soft orange wash rises from the bottom edge */}
+                    <span
+                      aria-hidden
+                      className="pointer-events-none absolute inset-0 -z-[5] translate-y-8 opacity-0 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-0 group-hover:opacity-100 motion-reduce:translate-y-0"
+                      style={{
+                        background:
+                          "radial-gradient(120% 60% at 50% 115%, rgba(249,115,22,0.16) 0%, rgba(249,115,22,0) 70%)",
+                      }}
+                    />
+                    <div className="flex items-start justify-between gap-4">
+                      <span
+                        className="flex size-12 items-center justify-center text-[#f4efe7]"
+                        style={{ background: INK }}
+                      >
+                        <IconComponent className="size-6" weight="regular" />
                       </span>
-                      {card.rest ? (
-                        <>
-                          <br />
-                          {card.rest}
-                        </>
-                      ) : null}
-                    </p>
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      {card.description}
-                    </p>
+                      <span
+                        className="text-[13px] font-medium tabular-nums"
+                        style={{ color: PRINT }}
+                      >
+                        {String(position + 1).padStart(2, "0")}
+                      </span>
+                    </div>
 
-                    <ul className="mt-5 space-y-2 border-t border-border/60 pt-4">
-                      {card.features.map((feature) => (
-                        <li
-                          key={feature}
-                          className="flex items-start gap-2.5 font-secondary text-sm text-foreground/85"
-                        >
-                          <span
-                            className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary"
-                            aria-hidden
-                          />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </div>
+                    <div className="mt-auto flex flex-col pt-10">
+                      <div className="flex flex-wrap gap-1.5">
+                        {card.badges.map((badge) => (
+                          <PaperChip key={badge}>{badge}</PaperChip>
+                        ))}
+                      </div>
+                      <h3 className="mt-4 text-[28px] font-medium leading-[1.08] tracking-[-0.045em] md:text-[30px]">
+                        <span style={{ color: PRINT }}>{card.accent}</span>
+                        {card.rest ? (
+                          <>
+                            <br />
+                            {card.rest}
+                          </>
+                        ) : null}
+                      </h3>
+                      <p
+                        className={cn(
+                          "mt-3 text-[14.5px] leading-[1.6]",
+                          MUTED,
+                        )}
+                      >
+                        {card.description}
+                      </p>
+                      <PaperPoints
+                        points={card.features}
+                        className="mt-5 border-t border-[#141414]/10 pt-4"
+                      />
+                    </div>
+                  </article>
+                </Rise>
+              </li>
             );
           })}
-          <div className={servicesCenterGlow} />
-        </motion.div>
-      </div>
-    </motion.section>
+        </ul>
+      </Container>
+    </PaperSection>
   );
 }

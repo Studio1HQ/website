@@ -1,5 +1,6 @@
 ---
 title: "Claude Opus 5.5 Review: Motion Videos, Coding Tests, and What Breaks"
+seoTitle: "Claude Opus 5.5 Review: Motion Videos and Coding Tests"
 slug: "claude-opus-5-5-review-motion-videos"
 description: "Claude Opus 5.5 review covering motion video generation, coding benchmarks, pricing, breaking changes, and whether teams should switch."
 tldrSummary: "If you want the quick take, Opus 5.5 is what Opus 5 should have shipped as, and Anthropic finally listened."
@@ -12,8 +13,12 @@ date: 2026-09-30
 draft: false
 authors:
   - "Studio1 Team"
-bannerImage: "/blog/uploads/claude-opus-5-5-review-motion-videos/banner.png"
-bannerImageAlt: "Claude Opus 5.5 blog banner"
+unlisted: true
+tags:
+  - ai
+  - llms
+  - review
+bannerImage: /blog/uploads/claude-opus-5-5-review-motion-videos/cover.png
 ---
 In September 2026, Anthropic's CEO Dario Amodei [published an essay](https://darioamodei.com/post/we-must-pace-the-frontier) with this line in it: "We must slow the pace at which we improve the capabilities of AI models."
 
@@ -21,7 +26,7 @@ A week after, on September 22, 2026, Anthropic [released Claude Opus 5.5](https:
 
 It landed just three weeks after Fable 5.1, so people had jokes. But if you write code for a living, the actual questions are something else. What does it cost you, what will it break, and is it better at your actual work?
 
-### What is Opus 5.5?
+## What is Opus 5.5?
 
 Claude has 3 families of Models. Haiku, Sonnet, and Opus. Then there's Fable, a separate tier above all three that costs the most.
 
@@ -29,7 +34,7 @@ Opus 5.5 is built for agents that run for hours. It has a 1M token context windo
 
 It's the first model in a new 5.5 family. Sonnet 5.5 and Haiku 5.5 are due in the next few weeks.
 
-### How it differs from the other models
+## How it differs from the other models
 
 |  | Opus 5.5 | Opus 5 | Fable 5.1 | Sonnet 5 |
 | --- | --- | --- | --- | --- |
@@ -48,7 +53,7 @@ It's the first model in a new 5.5 family. Sonnet 5.5 and Haiku 5.5 are due in th
 
 **Compared to Sonnet 5**, it's the heavier tool. Sonnet is half the price and faster, so it's the better pick for small edits, summaries, and routing. Reach for Opus 5.5 when the job is long or tricky.
 
-### What breaks when you switch
+## What breaks when you switch
 
 Some requests that worked on Opus 5 now return errors. The [full list is in the docs](https://platform.claude.com/docs/en/models/opus-5-5/whats-new-opus-5-5). These are the four you'll actually hit:
 
@@ -59,7 +64,7 @@ Some requests that worked on Opus 5 now return errors. The [full list is in the 
 
 There's one more, and it only affects newer accounts. Thinking blocks are tied to the conversation, so editing anything earlier in the conversation before replaying them returns an error. Keep conversations append-only.
 
-### What it will really cost you
+## What it will really cost you
 
 Anthropic says the average job costs about [40% less than on Opus 5](https://www.anthropic.com/claude-opus-5-5). That holds at the default effort, which is now medium.
 
@@ -73,7 +78,7 @@ A few other prices, if you're budgeting:
 - **Fast mode:** up to 2.5x speed at $8 in and $40 out. Claude API only, and still a research preview.
 - **OpenAI:** GPT-6 Astra is reported at $10 and $50, the same as Fable. The cheaper GPT-6 Sol costs far less per task but scored well below Opus 5.5 in the same test.
 
-### The Test Scores
+## The Test Scores
 
 Benchmarks are standard exams for models. These are the ones that matter most for dev work (best score in bold):
 
@@ -90,7 +95,7 @@ These are best-case scores, mostly from the maker's own runs. Even Anthropic say
 
 ![Claude Opus 5.5 comparison](/blog/uploads/claude-opus-5-5-review-motion-videos/comparison.png)
 
-### What people have built with it
+## What people have built with it
 
 These are some great use cases built by people who got their hands on Opus 5.5 in the first two days. Most came from a single prompt.
 
@@ -103,7 +108,7 @@ These are some great use cases built by people who got their hands on Opus 5.5 i
 
 These are demos people chose to post, so treat them as best cases. 
 
-### Where it still loses
+## Where it still loses
 
 Not everything's better. A few real gaps before you switch:
 
@@ -114,7 +119,7 @@ Not everything's better. A few real gaps before you switch:
 - **Security and biology.** Some work gets rerouted without asking. Most security tasks, like finding exploits, go to the older Opus 4.8. Flagged biology requests go to Opus 5. The filters read your files and search results too, so something already sitting in your repo can trigger a reroute. Worth checking if you build anything security or bio adjacent.
 - **Simple, everyday tasks.** Sonnet 5 is still the better call here. Cheaper, faster, no reason to reach for Opus.
 
-### Wrapping up
+## Wrapping up
 
 Opus 5.5 is basically Opus 5 with some parts fixed. Anthropic heard the complaints about Opus 5 and cheaper, faster, less bloated is the result.
 

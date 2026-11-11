@@ -1,6 +1,7 @@
 ---
 title: "llms.txt Explained: What It Is, Whether Developer Tools Need One, and a
   Template"
+seoTitle: "llms.txt Explained: Do Developer Tools Need One?"
 slug: llms-txt-explained-developer-tools-guide
 description: Learn what llms.txt is, whether it improves AI visibility or SEO,
   and how to create an llms.txt file for developer tools with a practical
@@ -23,12 +24,16 @@ updatedDate: 2026-10-12
 draft: false
 authors:
   - Studio1 Team
-bannerImage: /blog/uploads/whatsapp-image-2026-10-12-at-5.34.22-pm.jpeg
-bannerImageAlt: banner-image
+tags:
+  - llms-txt
+  - geo
+  - documentation
+  - ai
+bannerImage: /blog/uploads/llms-txt-explained-developer-tools-guide/cover.png
 ---
 A developer pastes your docs link into a coding assistant and says, "set this up for me." The assistant has to dig the useful text out of menus, scripts, and banners. Sometimes it grabs an old page and writes code for a version you retired two years ago. llms.txt tries to fix that.
 
-It's cheap, it's useful in one specific place, and it won't do what most blog posts promise. For the bigger picture, see our guide on [how to get your tool recommended by ChatGPT, Perplexity, and Google](https://www.studio1hq.com/blog/how-to-get-your-tool-recommended-by-chatgpt-perplexity-google). This post goes deep on one file.
+It's cheap, it's useful in one specific place, and it won't do what most blog posts promise. For the bigger picture, see our guide on [how to get your tool recommended by ChatGPT, Perplexity, and Google](/blog/how-to-get-your-tool-recommended-by-chatgpt-perplexity-google). This post goes deep on one file.
 
 ## What is llms.txt?
 
@@ -100,13 +105,13 @@ What stands out:
 * **Yet Google built a check for it.** On May 5, 2026, Chrome added an llms.txt audit to [Lighthouse](https://developer.chrome.com/docs/lighthouse/agentic-browsing/llms-txt) under "Agentic browsing audits." It only fails if your server errors on the request. No file means "Not Applicable." Search ranking is one job. Helping an AI agent browse for a user is another.
 * **One caution.** Per [Search Engine Journal's summary](https://searchenginejournal.com/97-of-llms-txt-files-got-no-requests-ahrefs-data-shows/579478), Ahrefs saw a research crawler studying llms.txt as a way to slip instructions to AI tools. Stick to your own plain facts and links.
 
-![image.png](/blog/uploads/image.png)
+![Ahrefs pie chart: 28% of 137,000 domains publish a valid llms.txt file and 72% do not](/blog/uploads/llms-txt-explained-developer-tools-guide/ahrefs-llms-txt-adoption.webp "Source: Ahrefs llms.txt study of 137,000 domains (ahrefs.com/blog/llmstxt-study).")
 
 ## Do developer tools need an llms.txt file?
 
 Need? No. Should you make one? For your docs, yes.
 
-**It won't help you rank or get cited.** If someone says a 30-minute llms.txt will get you into ChatGPT's answers, ask for their data. What moves the needle is in our [AEO playbook for developer tools](https://www.studio1hq.com/blog/how-to-get-your-tool-recommended-by-chatgpt-perplexity-google).
+**It won't help you rank or get cited.** If someone says a 30-minute llms.txt will get you into ChatGPT's answers, ask for their data. What moves the needle is in our [AEO playbook for developer tools](/blog/how-to-get-your-tool-recommended-by-chatgpt-perplexity-google).
 
 **It does help people using coding assistants.** Developers already point their tools at these files:
 
@@ -120,7 +125,7 @@ Howard says in v2 that coding assistants now use these files reliably. That's a 
 
 Put it where your docs live. A file at `docs.yourtool.com/llms.txt` or `yourtool.com/docs/llms.txt` can cover just the docs, and a second one at the root can cover the marketing site.
 
-![image.png](/blog/uploads/image-1.png)
+![Ahrefs bar chart: of about 38K domains with a valid llms.txt, only about 1.1K got any requests, so 97% of files were never requested](/blog/uploads/llms-txt-explained-developer-tools-guide/ahrefs-llms-txt-requests.webp "Source: Ahrefs llms.txt study of 137,000 domains (ahrefs.com/blog/llmstxt-study).")
 
 ## A worked example: the llms.txt file we use at Studio1
 
@@ -159,7 +164,7 @@ developer relations growth campaigns. [...]
 
 ## Blog
 
-- [How to Get Your Tool Recommended by ChatGPT, Perplexity, and Google](https://studio1hq.com/blog/how-to-get-your-tool-recommended-by-chatgpt-perplexity-google): AEO, GEO, LLM SEO, crawler access, documentation strategy, comparison pages, community mentions, schema, and llms.txt guidance for developer tools.
+- [How to Get Your Tool Recommended by ChatGPT, Perplexity, and Google](/blog/how-to-get-your-tool-recommended-by-chatgpt-perplexity-google): AEO, GEO, LLM SEO, crawler access, documentation strategy, comparison pages, community mentions, schema, and llms.txt guidance for developer tools.
 
 - [...]
 
@@ -285,7 +290,7 @@ grep -i "llms.txt" /var/log/nginx/access.log | grep -iE "gptbot|oai-searchbot|ch
 
 * **Expect very little.** A handful of hits a month is normal. Zero is common.
 * **Check the status code.** 200 means served. 404 or 500 means something's broken.
-* **Check robots.txt first.** If it blocks a crawler, that crawler never reaches your llms.txt. Our [AEO guide](https://www.studio1hq.com/blog/how-to-get-your-tool-recommended-by-chatgpt-perplexity-google) covers which bots to allow.
+* **Check robots.txt first.** If it blocks a crawler, that crawler never reaches your llms.txt. Our [AEO guide](/blog/how-to-get-your-tool-recommended-by-chatgpt-perplexity-google) covers which bots to allow.
 
 The bigger win is the manual test: give an assistant your llms.txt and a docs question, and see if the answer is right.
 

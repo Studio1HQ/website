@@ -1,5 +1,6 @@
 ---
 title: "Developer Docs as Your Best AEO Asset: How to Get AI to Cite Your Content"
+seoTitle: "Developer Docs for AEO: How to Get AI to Cite Your Docs"
 slug: developer-docs-as-aeo-asset
 description: Learn how to structure developer documentation for AEO so AI
   assistants can discover, understand, trust, and cite your docs in their
@@ -25,9 +26,7 @@ tags:
   - geo
   - documentation
   - ai
-bannerImage: /blog/uploads/developer-docs_-your-best-aeo-asset.png
-bannerImageAlt: "Developer Docs as Your Best AEO Asset: How to Get AI Assistants
-  to Cite Your Content"
+bannerImage: /blog/uploads/developer-docs-as-aeo-asset/cover.png
 ---
 A lot of developers now ask an assistant before they search Google. In the [2025 Stack Overflow Developer Survey](https://survey.stackoverflow.co/2025/ai), 50.6% of professional developers said they use AI tools every day, and another 17.4% use them weekly.
 
@@ -35,7 +34,7 @@ That changes what your docs are for. They are no longer only a place people visi
 
 This guide shows how to structure developer documentation so assistants find it, trust it, and cite it. Every number below links to its source.
 
-![agents-vs-human-traffic.webp](/blog/uploads/agents-vs-human-traffic.webp)
+![Line chart: AI agent requests to Mintlify-hosted docs overtook human visits from January to July, about 213M a month versus 105M](/blog/uploads/agents-vs-human-traffic.webp "Source: Mintlify, monthly traffic across Mintlify-hosted documentation.")
 
 ## What is answer engine optimization (AEO) for developer docs?
 
@@ -113,7 +112,7 @@ Four details trip up a lot of teams:
 
 A [September 2026 sample of 95 sites](https://tryhoverify.com/blog/generative-engine-optimization-statistics/) found training crawlers get blocked about twice as often as retrieval crawlers. If you want citations, block training bots by name if you wish, and keep the fetching bots allowed.
 
-![image.png](/blog/uploads/docs2.png)
+![Bar chart of AI crawler fetches on Vercel's network in one month: Googlebot near 4.5B, far ahead of GPTBot, Claude, AppleBot and PerplexityBot](/blog/uploads/docs2.png "Source: Vercel, AI crawler fetches across its network in one month.")
 
 ### 2. Put the answer in the first two sentences
 
@@ -167,7 +166,7 @@ Now the honest part about `llms.txt`the proposed file that lists your key pages 
 
 Treat llms.txt as a helper for coding tools, not a ranking trick. It costs almost nothing, so if your docs platform makes it for you, leave it on.
 
-![url-errors-benchmark.webp](/blog/uploads/url-errors-benchmark.webp)
+![Bar chart of 404 errors per agent retrieval request: HTML docs 2.23, Markdown 1.42, Markdown plus llms.txt 0.11](/blog/uploads/url-errors-benchmark.webp "Source: Mintlify, 2,400 test runs across 20 docs sites with Claude and Codex.")
 
 ### 6. Show versions and update dates
 

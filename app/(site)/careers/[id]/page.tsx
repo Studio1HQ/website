@@ -3,13 +3,15 @@ import type { Metadata } from "next";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
 import { JobDetailPage } from "@/components/careers/job-detail-page";
-import { getJobById, getJobIds } from "@/lib/careers";
+import { getJobById, getJobIds, getJobOpenings } from "@/lib/careers";
 import {
   jobPostingJsonLd,
   localizedBreadcrumbJsonLd,
   pageMetadata,
+  pageUrl,
 } from "@/lib/seo";
 import { getJobApplicationMailto } from "@/lib/careers-mailto";
+import { isSupabaseConfigured } from "@/lib/supabase-server";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -22,11 +24,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const job = getJobById(id, "en");
 
   if (!job) {
-    return { title: "Not found" };
+    return { title: { absolute: "Page not found | Studio1" } };
   }
 
+  // The careers layout sets its own title, which drops the root " | Studio1"
+  // template for this segment, so the brand is added here.
   return pageMetadata({
-    title: job.title,
+    title: `${job.title} | Studio1`,
     description: job.description,
     path: `/careers/${id}`,
     locale: "en",
@@ -47,9 +51,13 @@ export default async function CareerJobPage({ params }: Props) {
     ],
     "en",
   );
+  // The on-page form replaces email once Supabase is configured.
+  const applicationsEnabled = isSupabaseConfigured();
   const jobSchema = jobPostingJsonLd({
     ...job,
-    applyUrl: getJobApplicationMailto(job),
+    applyUrl: applicationsEnabled
+      ? pageUrl(`/careers/${id}#apply`)
+      : getJobApplicationMailto(job),
   });
 
   return (
@@ -62,7 +70,11 @@ export default async function CareerJobPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jobSchema) }}
       />
-      <JobDetailPage job={job}>
+      <JobDetailPage
+        job={job}
+        otherJobs={getJobOpenings("en").filter((other) => other.id !== id)}
+        applicationsEnabled={applicationsEnabled}
+      >
         <MDXRemote
           source={job.content}
           options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}

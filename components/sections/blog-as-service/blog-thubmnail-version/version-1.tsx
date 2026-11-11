@@ -31,10 +31,10 @@ export const Version1 = ({
       onPointerMove={onPointerMove}
       className={cn(
         cursorGlowCardClassName,
-        "flex h-72 w-full flex-col rounded-2xl",
+        "flex h-72 w-full flex-col rounded-[6px]",
       )}
     >
-      <CursorGlowCardEffects roundedClassName="rounded-2xl" />
+      <CursorGlowCardEffects roundedClassName="rounded-[6px]" />
 
       <div className="relative z-[2] flex flex-1 flex-col p-6">
         <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">

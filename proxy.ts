@@ -1,6 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import {
   DEFAULT_LOCALE,
+  isLocalizedPublicPath,
+  localeMeta,
   localizePathname,
   shouldBypassLocale,
   splitLocaleFromPathname,
@@ -37,8 +39,20 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(url, 308);
   }
 
+  // Only a few pages are translated. Send other locale-prefixed URLs (old
+  // links like /fr/careers) to the English page instead of a 404.
+  if (locale && !isLocalizedPublicPath(unprefixedPathname)) {
+    const url = nextUrl.clone();
+    url.pathname = unprefixedPathname;
+    return NextResponse.redirect(url, 308);
+  }
+
+  // The root <html lang> is "en" in the server HTML and is corrected in the
+  // browser. Crawlers that don't run JavaScript (Bing, most AI crawlers) read
+  // the page language from this header instead.
   if (locale) {
     const response = NextResponse.next();
+    response.headers.set("Content-Language", localeMeta[locale].htmlLang);
     response.cookies.set("studio1-locale", locale, {
       maxAge: 60 * 60 * 24 * 365,
       sameSite: "lax",
@@ -46,7 +60,9 @@ export function proxy(request: NextRequest) {
     return response;
   }
 
-  return NextResponse.next();
+  const response = NextResponse.next();
+  response.headers.set("Content-Language", localeMeta[DEFAULT_LOCALE].htmlLang);
+  return response;
 }
 
 export const config = {

@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Icon } from "@phosphor-icons/react";
 import {
   ChartBar,
@@ -14,15 +13,16 @@ import {
   Rocket,
   HandHeart,
 } from "@phosphor-icons/react/dist/ssr";
-import { motion } from "motion/react";
-import { CanvasRevealEffect } from "@/components/ui/canvas-reveal-effect";
+import { motion, useReducedMotion } from "motion/react";
+import { Icon3D } from "@/components/about-us/hero-arrows";
+import { Container } from "@/components/home/ui";
 import {
-  elevatedCardShadow,
-  serviceCardHoverGlow,
-  sideBeamGlowLeftTall,
-  sideBeamGlowRightTall,
-} from "@/lib/shadows";
-import { cn } from "@/lib/utils";
+  Accent,
+  IndexBar,
+  PaperSection,
+  SectionHead,
+} from "@/components/paper/paper-sections";
+import { PRINT } from "@/lib/paper";
 
 const contentData = {
   vision: {
@@ -31,15 +31,15 @@ const contentData = {
     points: [
       {
         icon: Target,
-        text: "Deliver clear, technical content that developers value",
+        text: "Content written by engineers who use the product",
       },
       {
         icon: Lightbulb,
-        text: "Encourage creativity and constant learning",
+        text: "Code samples tested before they ship",
       },
       {
         icon: TrendUp,
-        text: "Drive measurable growth with every project",
+        text: "Measure developer adoption, not just reach",
       },
       {
         icon: Users,
@@ -47,7 +47,7 @@ const contentData = {
       },
       {
         icon: Globe,
-        text: "Lead with quality and developer-first thinking",
+        text: "Docs and DX that get developers to a first success",
       },
     ],
   },
@@ -57,82 +57,32 @@ const contentData = {
     points: [
       {
         icon: Rocket,
-        text: "Turn technical complexity into developer-friendly storytelling",
+        text: "Run launches developers can try on day one",
       },
       {
         icon: HandHeart,
-        text: "Help clients hit growth goals through strategic content",
+        text: "Tie every piece of content to a growth goal",
       },
       {
         icon: Heart,
-        text: "Foster a collaborative and inclusive team culture",
+        text: "Show up in developer communities, online and at events",
       },
       {
         icon: Globe,
-        text: "Commit to sustainable, long-term results",
+        text: "Build programs that keep working after launch",
       },
       {
         icon: Users,
-        text: "Create meaningful impact for both SaaS teams and developer communities",
+        text: "Do work that helps both devtool teams and the developer communities they serve",
       },
     ],
   },
 };
 
-const cardSurface = cn(
-  "group relative flex h-full flex-col gap-7 overflow-hidden rounded-xl border-2 border-border/80 p-6 sm:p-8 dark:border",
-  "bg-accent dark:bg-muted-foreground/5",
-  "transition-[border-color,box-shadow,transform] duration-500 ease-out",
-  "hover:-translate-y-1 hover:border-primary/35 dark:hover:border-white/15",
-  "motion-reduce:transition-none motion-reduce:hover:translate-y-0",
-  elevatedCardShadow
-);
-
-function VisionMissionCardEffects({ active }: { active: boolean }) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    if (active) {
-      setMounted(true);
-      return;
-    }
-
-    const timeout = window.setTimeout(() => setMounted(false), 450);
-    return () => window.clearTimeout(timeout);
-  }, [active]);
-
-  return (
-    <>
-      <div aria-hidden className={serviceCardHoverGlow} />
-      <div
-        aria-hidden
-        className={cn(
-          "pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-xl opacity-0 transition-opacity duration-500 ease-out motion-reduce:transition-none",
-          active && "opacity-100"
-        )}
-      >
-        {mounted ? (
-          <CanvasRevealEffect
-            animationSpeed={3}
-            containerClassName="bg-transparent"
-            colors={[
-              [234, 88, 12],
-              [249, 115, 22],
-            ]}
-            dotSize={2}
-            showGradient={false}
-          />
-        ) : null}
-        <div className="absolute inset-0 bg-gradient-to-t from-accent via-accent/80 to-accent/40 dark:from-background dark:via-background/75 dark:to-background/35" />
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.08] via-transparent to-transparent" />
-      </div>
-    </>
-  );
-}
-
 const ContentBlock = ({
   data,
   index,
+  lede,
 }: {
   data: {
     title: string;
@@ -143,108 +93,101 @@ const ContentBlock = ({
     }[];
   };
   index: number;
+  lede: string;
 }) => {
-  const HeaderIcon = data.icon;
-  const [hovered, setHovered] = useState(false);
+  const reduceMotion = useReducedMotion();
+  const [first, ...rest] = data.title.split(" ");
+  // "Our Vision" -> accent the second word, keep "Our" in ink.
+  const accent = rest.join(" ");
+  const TileIcon = index === 0 ? Target : Rocket;
+  const SecondIcon = index === 0 ? Lightbulb : Flag;
 
   return (
     <motion.article
-      className={cardSurface}
-      initial={{ opacity: 0, y: 24 }}
+      className="group relative isolate flex h-full flex-col overflow-hidden rounded-[6px] bg-white p-7 text-[#141414] shadow-[0_1px_0_rgba(27,23,20,0.06)] ring-1 ring-inset ring-[#141414]/[0.07] md:p-9"
+      initial={reduceMotion ? false : { opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.55, delay: 0.08 * index, ease: "easeOut" }}
-      onHoverStart={() => setHovered(true)}
-      onHoverEnd={() => setHovered(false)}
-      onFocus={() => setHovered(true)}
-      onBlur={() => setHovered(false)}
     >
-      <VisionMissionCardEffects active={hovered} />
-
-      <div className="relative z-[1] flex h-full flex-col gap-7">
-        <header className="flex items-center gap-3.5">
-          <span
-            className={cn(
-              "flex size-12 shrink-0 items-center justify-center rounded-lg",
-              "bg-background text-foreground",
-              "dark:bg-background/80",
-              "transition-transform duration-500 ease-out group-hover:scale-110",
-              "motion-reduce:transition-none motion-reduce:group-hover:scale-100"
-            )}
-            aria-hidden
-          >
-            <HeaderIcon weight="regular" className="size-6" />
+      {/* Header: two printed tiles resting on a tabbed panel */}
+      <div className="relative pt-14">
+        <div className="absolute left-4 top-0 z-[2] flex items-end">
+          <span className="block w-16 -rotate-6 transition-transform duration-700 ease-out group-hover:-translate-y-1 group-hover:-rotate-[9deg] md:w-[72px]">
+            <Icon3D icon={TileIcon} className="w-full" />
           </span>
-          <h3 className="font-primary text-2xl font-semibold tracking-tight text-foreground sm:text-[1.65rem]">
-            {data.title}
+          <span className="-ml-3 mb-[-6px] block w-14 rotate-[8deg] transition-transform duration-700 ease-out group-hover:-translate-y-0.5 group-hover:rotate-[11deg] md:w-16">
+            <Icon3D icon={SecondIcon} ink className="w-full" />
+          </span>
+        </div>
+        <div className="relative rounded-[6px] rounded-tl-none bg-[#f4efe7] p-6 pt-10">
+          {/* The tab the tiles sit on */}
+          <span className="absolute -top-5 left-0 h-5 w-[46%] rounded-t-[6px] bg-[#f4efe7]" />
+          <h3 className="text-[30px] font-medium leading-[1.05] tracking-[-0.045em] md:text-[36px]">
+            {first} <span style={{ color: PRINT }}>{accent}</span>
           </h3>
-        </header>
-
-        <div className="h-px w-full bg-border/80" />
-
-        <ul className="flex flex-col gap-4">
-          {data.points.map((point, pointIndex) => {
-            const PointIcon = point.icon;
-            return (
-              <motion.li
-                key={point.text}
-                className="flex items-start gap-3"
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{
-                  delay: 0.1 + pointIndex * 0.04,
-                  duration: 0.35,
-                  ease: "easeOut",
-                }}
-              >
-                <PointIcon
-                  weight="regular"
-                  className="mt-0.5 size-[1.125rem] shrink-0 text-primary"
-                  aria-hidden
-                />
-                <p className="font-secondary text-[0.9375rem] leading-relaxed text-foreground/80">
-                  {point.text}
-                </p>
-              </motion.li>
-            );
-          })}
-        </ul>
+          <div className="my-4 h-px bg-[#141414]/10" />
+          <p className="max-w-[440px] text-[14.5px] leading-[1.55] text-[#141414]/60">
+            {lede}
+          </p>
+        </div>
       </div>
+
+      {/* Points: paper tiles, two across */}
+      <ul className="mt-8 grid flex-1 grid-cols-1 gap-2.5 sm:grid-cols-2">
+        {data.points.map((point, i) => {
+          const PointIcon = point.icon;
+          const last =
+            i === data.points.length - 1 && data.points.length % 2 === 1;
+          return (
+            <li
+              key={point.text}
+              className={
+                "group/tile flex items-start gap-3 rounded-[6px] bg-[#f4efe7] p-4 ring-1 ring-inset ring-[#141414]/[0.08] transition-colors duration-300 hover:bg-white" +
+                (last ? " sm:col-span-2" : "")
+              }
+            >
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-[6px] bg-white text-[#f97316] ring-1 ring-inset ring-[#141414]/[0.07] transition-colors duration-300 group-hover/tile:bg-[#f97316] group-hover/tile:text-white">
+                <PointIcon weight="bold" className="size-4" />
+              </span>
+              <span className="pt-[7px] text-[14px] font-medium leading-[18px] tracking-[-0.01em] text-[#141414]/85">
+                {point.text}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
     </motion.article>
   );
 };
 
 export const VisionMission = () => {
   return (
-    <div className="relative mx-auto mt-44 w-full px-4 py-8">
-      <div className={sideBeamGlowLeftTall}></div>
-      <div className={sideBeamGlowRightTall}></div>
+    <PaperSection tone="paper" className="py-10 md:py-14">
+      <Container>
+        <IndexBar index={1} name="Vision & mission" />
+        <SectionHead
+          title={
+            <>
+              Our Vision and <Accent>Mission</Accent>
+            </>
+          }
+          description="We help devtool, AI, and open-source teams earn developer trust with technical content and DevRel programs that grow with the product."
+        />
 
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-        className="mb-14 text-center md:mb-16"
-      >
-        <h2 className="mb-4 font-primary text-4xl font-normal tracking-tight md:text-5xl">
-          What{" "}
-          <span className="serif-accent bg-gradient-to-br from-primary via-primary1 to-primary bg-clip-text font-accent italic font-normal text-transparent">
-            Fuels
-          </span>{" "}
-          Us?
-        </h2>
-        <p className="text-muted-foreground">
-          We help SaaS teams build developer trust through <br /> high-impact
-          content and DevRel strategy that scales with their product.
-        </p>
-      </motion.div>
-
-      <div className="mx-auto grid max-w-5xl grid-cols-1 gap-4 md:grid-cols-2">
-        <ContentBlock data={contentData.vision} index={0} />
-        <ContentBlock data={contentData.mission} index={1} />
-      </div>
-    </div>
+        <div className="relative isolate mt-10 grid grid-cols-1 gap-3 md:mt-12 md:grid-cols-2">
+          <ContentBlock
+            data={contentData.vision}
+            index={0}
+            lede="Technical content and DevRel that engineers write, test, and stand behind."
+          />
+          <ContentBlock
+            data={contentData.mission}
+            index={1}
+            lede="Help devtool, AI, and open-source teams turn product depth into developer adoption."
+          />
+        </div>
+      </Container>
+    </PaperSection>
   );
 };

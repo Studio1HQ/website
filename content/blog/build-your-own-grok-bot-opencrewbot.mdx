@@ -20,8 +20,12 @@ updatedDate: 2026-10-28
 draft: false
 authors:
   - Studio1 Team
-bannerImage: /blog/uploads/opencrewbot-ai-bot-team.png
-bannerImageAlt: banner-image
+tags:
+  - open-source
+  - ai
+  - agent
+  - tutorial
+bannerImage: /blog/uploads/build-your-own-grok-bot-opencrewbot/cover.png
 ---
 
 SpaceXAI released [Grok Bot](https://composio.dev/content/guide-to-frok-bot) as an early beta on August 11, 2026. It gives you named AI teammates that keep working in the cloud, hand tasks to each other, and ask before risky actions. Since October 12, 2026, new users get it through the X Subscription, which [starts at $30 a month](https://cellcog.ai/blog/what-is-grok-bot/).
@@ -30,7 +34,7 @@ We liked the idea but wanted something we could run ourselves, on open models, w
 
 ## What is OpenCrewBot?
 
-OpenCrewBot is an open-source chat app for your own team of AI bots. It looks like a messaging app. Each contact in the sidebar is a bot with its own name, role, instructions, open-source model, tools, and memory. You can talk to one bot directly, or put a few in a room and let them share the work.
+[OpenCrewBot](https://github.com/Studio1-OSS/OpenCrewBot) is an open-source chat app for your own team of AI bots. It looks like a messaging app. Each contact in the sidebar is a bot with its own name, role, instructions, open-source model, tools, and memory. You can talk to one bot directly, or put a few in a room and let them share the work.
 
 On first run, you get three bots and one room:
 
@@ -66,9 +70,9 @@ The short version: Grok Bot is a polished product you rent. OpenCrewBot is a pro
 
 You need two things on your computer and nothing else to begin:
 
-1. [**Node.js](https://nodejs.org/) 22.13 or newer.** The project was built on Node 24. Check yours with `node -v`.
+1. **[Node.js](https://nodejs.org/) 22.13 or newer.** The project was built on Node 24. Check yours with `node -v`.
 
-2. [**pnpm**](https://pnpm.io/installation), the package manager the repo uses. Check it with `pnpm -v`.
+2. **[pnpm](https://pnpm.io/installation)**, the package manager the repo uses. Check it with `pnpm -v`.
 
 That's it for the first run. API keys come later, and all of them are optional. Here is what each one turns on, so you can decide what you want:
 
@@ -89,27 +93,20 @@ The whole install is five commands. Open a terminal and run them in order.
 ### Step 1: Clone the repo
 
 ```bash
-
 git clone https://github.com/Studio1-OSS/OpenCrewBot.git
-
 cd OpenCrewBot
-
 ```
 
 ### Step 2: Install the packages
 
 ```bash
-
 pnpm install
-
 ```
 
 ### Step 3: Create your settings file
 
 ```bash
-
 cp .env.example .env
-
 ```
 
 This copies the example file into a real `.env`. Leave it empty for now. Empty means mock mode, which is exactly what you want for a first look.
@@ -117,9 +114,7 @@ This copies the example file into a real `.env`. Leave it empty for now. Empty m
 ### Step 4: Start the app
 
 ```bash
-
 pnpm dev
-
 ```
 
 ### Step 5: Open it in your browser
@@ -149,9 +144,7 @@ Mock mode is worth five minutes of your time. The fake model only writes the rep
 Type:
 
 ```
-
 remember that I like short answers
-
 ```
 
 Scout calls its `memory_add` tool and writes a dated line to its `MEMORY.md` file. Open the bot's **Memory** tab, and you'll see the line appear. That tab is the file itself, and it refreshes live when the bot writes to it. You can edit it there or in any text editor.
@@ -163,9 +156,7 @@ The first 200 lines of that file load into the bot's instructions on every turn,
 Type:
 
 ```
-
 ask me something
-
 ```
 
 A question card shows up in the chat with two buttons, **Short** and **Detailed**. The bot waits. Click one, and it picks up where it left off. With a real model, a bot uses this when it can't go on without a decision from you.
@@ -183,9 +174,7 @@ None of the starter bots have the browser turned on, so switch it on first:
 Now type:
 
 ```
-
 open https://example.com
-
 ```
 
 The bot stops and shows a card asking to open the page. **Allow once** to run it. **Deny** skips it and the bot carries on. Nothing happens until you choose. (The browser itself needs a Browserbase key, so in mock mode the action will fail after you allow it. The point here is the card.)
@@ -211,9 +200,7 @@ Once you've seen how it works, open `.env` and add keys one at a time. Restart `
 ### 1. Nebius Token Factory: real models
 
 ```bash
-
 NEBIUS_API_KEY=your-key-here
-
 ```
 
 This is the big switch. Bots stop using the mock model and start using open-source models from Nebius Token Factory. Each reply then shows its tokens and cost.
@@ -231,9 +218,7 @@ Once your key is set, the live catalog from Nebius replaces these numbers, so ch
 ### 2. Tavily: web search
 
 ```bash
-
 TAVILY_API_KEY=your-key-here
-
 ```
 
 Bots with **Web search** turned on can now search, read pages, and crawl sites. The sources show up under the answer. Try `search for Nebius Token Factory` with Scout.
@@ -241,9 +226,7 @@ Bots with **Web search** turned on can now search, read pages, and crawl sites. 
 ### 3. Browserbase: a real browser
 
 ```bash
-
 BROWSERBASE_API_KEY=your-key-here
-
 ```
 
 Bots with **Browser** turned on get their own cloud browser for pages that need clicks, forms or JavaScript. Open the bot's **Browser** tab to watch it live, and click in to take over. Two optional settings sit next to it: `BROWSERBASE_PROJECT_ID` (worked out from the key if empty) and `BROWSERBASE_SESSION_MINUTES` (default 15), which caps how long one session runs. Sessions are released when you reset or delete a bot, so they stop billing.
@@ -251,9 +234,7 @@ Bots with **Browser** turned on get their own cloud browser for pages that need 
 ### 4. Composio: your apps
 
 ```bash
-
 COMPOSIO_API_KEY=your-key-here
-
 ```
 
 Click the plug icon in the sidebar to open **Connections**. Click **Connect** on an app, sign in on that app's own page, and come back. Featured apps include Slack, GitHub, Gmail, Google Calendar, Notion, Linear, Google Drive, and Jira, and search finds the rest. Then switch each app on for the bots that should have it, in the bot's details.
@@ -263,9 +244,7 @@ In the same panel, you can add your own remote MCP server by URL and token. Ther
 ### 5. TypeSafe: smart room routing
 
 ```bash
-
 TYPESAFE_API_KEY=your-key-here
-
 ```
 
 This turns on Jev in Auto rooms. When you post without an @mention, Jev reads the room and picks the best bot in a few hundred milliseconds. Without it, the room's lead always answers.
@@ -393,6 +372,6 @@ If you want to take the project further, these are the extensions we've listed i
 
 - Add voice, so you can speak to a bot and hear replies.
 
-The code is on [GitHub](https://github.com/Studio1-OSS/OpenCrewBot). Issues and pull requests are welcome. Before you open a pull request, run `pnpm exec tsc --noEmit` and `pnpm lint`, and say whether you tested it with live services or the mock model.
+The code is on GitHub at [Studio1-OSS/OpenCrewBot](https://github.com/Studio1-OSS/OpenCrewBot), next to our [other open-source projects](/oss). Issues and pull requests are welcome. Before you open a pull request, run `pnpm exec tsc --noEmit` and `pnpm lint`, and say whether you tested it with live services or the mock model.
 
 In the next post, we'll open up the code and explain how we built it: why we used Mastra instead of writing our own agent loop, how rooms decide who answers, and why each bot's memory is a plain Markdown file.

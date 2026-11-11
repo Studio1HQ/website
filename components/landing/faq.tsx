@@ -30,7 +30,7 @@ const defaultFaqData: FAQItem[] = [
   {
     question: "Can I see examples of Studio1's work?",
     answer:
-      "Yes. You can explore our case studies at docs.studio1hq.com which showcase real-world examples of how we have helped companies like Memori (0 to 12,000+ GitHub stars), ScrapeGraph AI (265K+ total reach), and Permit.io (first-page Google rankings) build thriving developer communities and drive product adoption.",
+      "Yes. You can explore our case studies at studio1hq.com/case-studies, which show real-world examples of how we have helped companies like Memori (0 to 12,000+ GitHub stars), ScrapeGraph AI (265K+ total reach), and Permit.io (first-page Google rankings) build thriving developer communities and drive product adoption.",
   },
   {
     question:

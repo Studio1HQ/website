@@ -1,34 +1,16 @@
+import { getTranslations } from "next-intl/server";
 import { products } from "@/constants/products";
 import ProductHero from "@/components/product/product-hero";
-import ProductList from "@/components/product/product-list";
-import ProductPipelineCard from "@/components/product/product-pipeline-card";
+import RaahChapter from "@/components/product/raah-chapter";
+import AssetSnipChapter from "@/components/product/assetsnip-chapter";
+import WhyWeBuild from "@/components/product/why-we-build";
+import NextProduct from "@/components/product/next-product";
+import { PaperCta } from "@/components/paper/paper-sections";
 import { softwareApplicationJsonLd } from "@/lib/seo";
+import { PAPER_SCOPE } from "@/lib/paper";
 
-const shipped = products
-  .filter((p) => p.status !== "upcoming")
-  .map(
-    ({
-      name,
-      tagline,
-      description,
-      highlights,
-      url,
-      category,
-      statusLabel,
-      media,
-    }) => ({
-      name,
-      tagline,
-      description,
-      highlights,
-      url,
-      category,
-      statusLabel,
-      media,
-    }),
-  );
-
-export default function ProductPage() {
+export default async function ProductPage() {
+  const t = await getTranslations("ProductPage.cta");
   const productSchemas = products
     .filter((p) => p.status !== "upcoming")
     .map((product) =>
@@ -42,7 +24,7 @@ export default function ProductPage() {
     );
 
   return (
-    <main className="relative overflow-x-hidden">
+    <main className="relative overflow-x-clip" style={PAPER_SCOPE}>
       {productSchemas.map((schema) => (
         <script
           key={schema.name as string}
@@ -51,15 +33,11 @@ export default function ProductPage() {
         />
       ))}
       <ProductHero />
-
-      <section className="relative overflow-x-hidden px-4 pb-20 sm:px-6 sm:pb-24 md:pb-32 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <ProductList products={shipped} />
-          <div className="mt-5 sm:mt-6 md:mt-8">
-            <ProductPipelineCard />
-          </div>
-        </div>
-      </section>
+      <RaahChapter index={1} />
+      <AssetSnipChapter index={2} />
+      <WhyWeBuild index={3} />
+      <NextProduct index={4} />
+      <PaperCta index={5} title={t("title")} description={t("description")} />
     </main>
   );
 }

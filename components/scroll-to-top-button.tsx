@@ -54,7 +54,7 @@ export default function ScrollToTopButton() {
       title="Back to top"
       onClick={scrollToTop}
       className={cn(
-        "fixed right-4 z-[540] inline-flex size-11 items-center justify-center rounded-full border border-border/70 bg-background/85 text-foreground shadow-[0_16px_44px_-22px_rgba(0,0,0,0.65)] backdrop-blur-xl transition-all duration-300 hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background md:right-6",
+        "fixed right-4 z-[540] inline-flex size-11 items-center justify-center rounded-full border border-border/70 bg-background/85 text-foreground shadow-[0_16px_44px_-22px_rgba(0,0,0,0.65)] transition-all duration-300 hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background md:right-6",
         hasServiceBottomNav ? "bottom-36 md:bottom-32" : "bottom-5 md:bottom-6",
         isVisible
           ? "translate-y-0 opacity-100"

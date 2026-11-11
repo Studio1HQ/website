@@ -2,11 +2,22 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
-import { getPostBySlug, getPostSlugs } from "@/lib/blog";
+import {
+  countBlogWords,
+  getLatestPosts,
+  getPostBySlug,
+  getPostSlugs,
+} from "@/lib/blog";
 import { PostLayout } from "@/components/blog/post-layout";
-import { blogMdxComponents, transformBlogMdxContent } from "@/components/blog/mdx";
+import { postMarkdownUrl } from "@/lib/blog-markdown";
+import { BLOG_COVER_SIZE } from "@/lib/blog-cover";
+import {
+  blogMdxComponents,
+  transformBlogMdxContent,
+} from "@/components/blog/mdx";
 import {
   absoluteImageUrl,
+  articleAuthorsJsonLd,
   articlePageMetadata,
   baseUrl,
   breadcrumbJsonLd,
@@ -26,18 +37,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: "Not found" };
   }
 
-  return articlePageMetadata({
-    title: post.title,
+  const metadata = articlePageMetadata({
+    title: post.seoTitle,
     description: post.description,
     path: `/blog/${slug}`,
     keywords: post.tags,
     image: post.socialImage,
-    imageAlt: post.bannerImageAlt,
+    imageAlt: `${post.title} cover`,
+    imageWidth: BLOG_COVER_SIZE.width,
+    imageHeight: BLOG_COVER_SIZE.height,
     publishedTime: post.date,
     modifiedTime: post.updatedDate,
     authors: post.authors,
     tags: post.tags,
   });
+
+  // Advertise the Markdown version for LLMs and AI tools.
+  return {
+    ...metadata,
+    alternates: {
+      ...metadata.alternates,
+      types: { "text/markdown": postMarkdownUrl(slug) },
+    },
+  };
 }
 
 export default async function BlogPostPage({ params }: Props) {
@@ -52,11 +74,7 @@ export default async function BlogPostPage({ params }: Props) {
     description: post.description,
     datePublished: post.date,
     dateModified: post.updatedDate,
-    author: post.authors.map((author) => ({
-      "@type": author === "Studio1 Team" ? "Organization" : "Person",
-      name: author,
-      url: baseUrl,
-    })),
+    author: articleAuthorsJsonLd(post.authors),
     publisher: {
       "@type": "Organization",
       name: "Studio1",
@@ -73,13 +91,13 @@ export default async function BlogPostPage({ params }: Props) {
     image: {
       "@type": "ImageObject",
       url: absoluteImageUrl(post.socialImage),
-      width: 1200,
-      height: 630,
-      caption: post.bannerImageAlt,
+      width: BLOG_COVER_SIZE.width,
+      height: BLOG_COVER_SIZE.height,
+      caption: `${post.title} cover`,
     },
     keywords: post.tags.join(", "),
     articleSection: post.tags,
-    wordCount: post.content.split(/\s+/).filter(Boolean).length,
+    wordCount: countBlogWords(post.content),
     inLanguage: "en",
     isAccessibleForFree: true,
     abstract: post.description,
@@ -121,13 +139,17 @@ export default async function BlogPostPage({ params }: Props) {
         author={post.author}
         authors={post.authors}
         tags={post.tags}
+        slug={slug}
         bannerImage={post.bannerImage}
         bannerImageAlt={post.bannerImageAlt}
         readingTimeMinutes={post.readingTimeMinutes}
+        wordCount={countBlogWords(post.content)}
         shareUrl={`${baseUrl}/blog/${slug}`}
+        markdownUrl={postMarkdownUrl(slug)}
         tldrSummary={post.tldrSummary}
         keyTakeaways={post.keyTakeaways}
         navigation={post.navigation}
+        latest={getLatestPosts(slug, 3)}
       >
         <MDXRemote
           source={transformBlogMdxContent(post.content)}

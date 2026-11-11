@@ -32,15 +32,17 @@ export default function Services() {
       >
         <div className={servicesSectionGlowBottom}></div>
         <div className={servicesSectionGlowTop}></div>
-        <motion.div variants={serviceItemVariants} className="w-full z-[20] mb-12 md:mb-16">
+        <motion.div
+          variants={serviceItemVariants}
+          className="w-full z-[20] mb-12 md:mb-16"
+        >
           <HeroStatsStrip
             highlightValues
             className="max-w-5xl"
             stats={[
-              { value: "2M+", label: t("stats.views") },
+              { value: "3M+", label: t("stats.views") },
               { value: "35+", label: t("stats.companies") },
-              { value: "10+", label: t("stats.events") },
-              { value: "5+", label: t("stats.launch") },
+              { value: "40+", label: t("stats.events") },
             ]}
           />
         </motion.div>
@@ -64,23 +66,23 @@ export default function Services() {
             <Link
               href={"/technical-content-marketing"}
               className={cn(
-                "border-2 dark:border transition-all duration-700 hover:-translate-y-4 h-[30rem] relative w-full max-w-[23rem] group rounded-lg overflow-hidden flex flex-col items-start bg-background/80 backdrop-blur-md justify-start p-8 mb-8 md:mb-0",
+                "border-2 dark:border transition-all duration-700 hover:-translate-y-4 h-[30rem] relative w-full max-w-[23rem] group rounded-[6px] overflow-hidden flex flex-col items-start bg-background/80 justify-start p-8 mb-8 md:mb-0",
                 elevatedCardShadow,
               )}
             >
-              <div className="absolute top-[-23rem] z-[101] delay-100 rotate-45 left-[-2rem] group-hover:top-[15rem] group-hover:left-[20rem] transition-all blur-[3em] duration-700 rounded-md h-[40rem] bg-white/50 opacity-30 w-[5rem] backdrop-blur-md"></div>
+              <div className="absolute top-[-23rem] z-[101] delay-100 rotate-45 left-[-2rem] group-hover:top-[15rem] group-hover:left-[20rem] transition-all blur-[3em] duration-700 rounded-md h-[40rem] bg-[#fbf9f5] opacity-30 w-[5rem]"></div>
 
               <div className={serviceCardHoverGlow}></div>
 
               <div className="flex-1 flex items-start justify-between w-full">
-                <div className="flex items-center bg-accent dark:bg-accent/50 justify-center size-16 p-3 rounded-lg">
+                <div className="flex items-center bg-accent dark:bg-accent/50 justify-center size-16 p-3 rounded-[6px]">
                   <Pen className="size-10" />
                 </div>
               </div>
               <div className="flex flex-col gap-2">
                 <div className="flex gap-2 flex-wrap">
                   <Badge className="w-fit bg-accent text-foreground">
-                    <Num>2M+</Num> {t("cards.content.badgeOne")}
+                    <Num>3M+</Num> {t("cards.content.badgeOne")}
                   </Badge>
                   <Badge className="w-fit bg-accent text-foreground">
                     <Num>30+</Num> {t("cards.content.badgeTwo")}
@@ -101,16 +103,16 @@ export default function Services() {
             <Link
               href={"/developer-relations-growth-campaigns"}
               className={cn(
-                "border-2 dark:border transition-all duration-700 hover:translate-y-4 relative overflow-hidden group flex flex-col items-start p-8 bg-background/80 backdrop-blur-2xl h-[30rem] w-full  max-w-[23rem] md:translate-y-20 rounded-lg",
+                "border-2 dark:border transition-all duration-700 hover:translate-y-4 relative overflow-hidden group flex flex-col items-start p-8 bg-background/80 h-[30rem] w-full max-w-[23rem] md:translate-y-20 rounded-[6px]",
                 elevatedCardShadow,
               )}
             >
-              <div className="absolute top-[-23rem] z-[101] rotate-45 delay-100 left-[-2rem] group-hover:top-[15rem] group-hover:left-[20rem] transition-all blur-[3em] duration-700 rounded-md h-[40rem] bg-white/50 opacity-30 w-[5rem] backdrop-blur-md"></div>
+              <div className="absolute top-[-23rem] z-[101] rotate-45 delay-100 left-[-2rem] group-hover:top-[15rem] group-hover:left-[20rem] transition-all blur-[3em] duration-700 rounded-md h-[40rem] bg-[#fbf9f5] opacity-30 w-[5rem]"></div>
 
               <div className={serviceCardHoverGlow}></div>
 
               <div className="flex-1 flex items-start justify-between w-full">
-                <div className="flex items-center bg-accent dark:bg-accent/50 justify-center size-16 p-3 rounded-lg">
+                <div className="flex items-center bg-accent dark:bg-accent/50 justify-center size-16 p-3 rounded-[6px]">
                   <Users className="size-10" />
                 </div>
               </div>

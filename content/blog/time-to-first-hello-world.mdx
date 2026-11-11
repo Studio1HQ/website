@@ -1,0 +1,305 @@
+---
+title: "Time to First Hello World: How to Cut Developer Onboarding Time"
+seoTitle: "Time to First Hello World: How to Cut Onboarding Time"
+slug: time-to-first-hello-world
+description: "Time to first hello world is how long a new developer takes to get your product working. How to measure it, find the blockers and cut onboarding time."
+tldrSummary: "Time to first hello world (TTFHW) is the time from a developer's first visit to their first working result with your product. Measure it with a stopwatch test on 3 to 5 new developers and with product events from signup to first successful call, then remove the blockers in the order developers hit them."
+tldrBullets:
+  - "Define hello world as one visible success, such as the first 2xx API response with the developer's own key, and time it from signup."
+  - "Run a stopwatch test with 3 to 5 developers who have never seen the product, and keep a friction log of every pause."
+  - "Log signup, API key created and first successful call as events, and review the median time between them every month."
+  - "Fix blockers in journey order: signup walls, email checks, card forms, buried keys, setup, stale SDKs and vague auth errors."
+date: 2026-10-11
+updatedDate: 2026-10-11
+draft: false
+authors:
+  - Arindam Majumder
+tags:
+  - developer-experience
+  - onboarding
+  - documentation
+  - dx-audit
+bannerImage: /blog/uploads/time-to-first-hello-world/cover.png
+---
+**The short answer:** To reduce developer onboarding time, measure time to first hello world: the minutes from a developer's first visit to their first working result. Time 3 to 5 developers new to your product, log every pause, and track signup, API key and first successful call as product events. Then remove blockers in journey order: let developers try before email verification or a card, show their key inside the docs, give one install command or a browser sandbox, pin SDK versions, and make every auth error say what to do next.
+
+## What is time to first hello world?
+
+Time to first hello world (TTFHW) is the time from a developer's first contact with your product to the first visible proof that it works. Instruqt defines it as the time it takes a developer [to set up and run their first successful command, application, or project](https://instruqt.com/glossary/time-to-hello-world) with a new tool. For APIs, the narrower version is time to first call (TTFC), which a Postman post calls ["The Most Important API Metric"](https://blog.postman.com/the-most-important-api-metric-is-time-to-first-call/).
+
+Write down what "hello world" means for your product before you time it: the first 2xx response with the developer's own key for an API, a script that prints a real result for an SDK, the first deploy for a platform, a local run of the example app for an open-source project. Chris Chabot's [activation metrics guide](https://chris-chabot-blog.pages.dev/almanac/04-metrics/activation-metrics/) starts the clock at account creation.
+
+**Why it predicts adoption.** Our view at Studio1: until hello world, a developer is judging your signup form, dashboard and docs, not your product. Postman makes the same point: ["judgments are formed at this very early stage, likely while comparing your product among alternatives."](https://blog.postman.com/the-most-important-api-metric-is-time-to-first-call/) The number also moves with packaging alone. In [Postman's data](https://blog.postman.com/improve-your-time-to-first-api-call-by-20x/), developers reached a first successful call to one publisher's API in 17 minutes without its Postman collection and 10 minutes with it. The API didn't change. The path to it did. It is one of the checks in our [developer documentation best practices](/blog/developer-documentation-best-practices) guide.
+
+**Key pointers:**
+
+* Write your hello world as one sentence, such as "first 2xx from `POST /v1/messages` with the user's own test key."
+* Keep the start point fixed, so this month's number compares with last month's.
+* Count only success. A 401 is an attempt, not a hello world.
+
+## How to measure it with a stopwatch test
+
+A stopwatch test shows you *why* developers are slow.
+
+1. **Recruit 3 to 5 developers** who match your buyer and have never used the product. Teammates don't count, because they know where the key lives.
+2. **Give each a fresh browser profile and a new email address,** and start them where a stranger starts: a Google result, your homepage or your README.
+3. **Give one task in plain words,** such as "Send your first SMS with Acme." Don't link the quickstart. Finding it is part of the test.
+4. **Start the clock and stay quiet.** Ask them to think aloud and record the screen. If you help, note the minute.
+5. **Stop at the hello world event, or at 30 minutes.** A session that hits 30 minutes is a fail, and the log shows where.
+
+### Friction log template (copy this)
+
+```text
+FRICTION LOG: [Product] time to first hello world
+Tester:          [role, main language, used the product before? yes/no]
+Date and build:  [date, app version, SDK version]
+Starting point:  [search result / homepage / docs home / README]
+Hello world:     [e.g. first 2xx from POST /v1/messages with own test key]
+Start / end:     [hh:mm] / [hh:mm, or "stopped at 30 min"]
+Total minutes:   [n]
+
+| Clock | Where (URL or command) | What I tried          | What happened                    | Mood 1-5 | Blocker? |
+|-------|------------------------|-----------------------|----------------------------------|----------|----------|
+| 00:00 | /docs                  | Clicked "Get started" | Concepts page, no code           | 4        | no       |
+| 03:40 | /dashboard             | Looked for an API key | Found it under Settings > Team   | 2        | yes      |
+| 09:15 | terminal               | npm install acme      | Installed v2, docs show v3 calls | 1        | yes      |
+
+Top 3 blockers, with minutes lost:
+1.
+2.
+3.
+The one fix I would ship first:
+```
+
+**Key pointers:**
+
+* Merge the logs and count how often each blocker appears. Fix the ones that hit three or more testers first.
+* Keep the recordings. A 40-second clip of someone hunting for a key persuades an engineering lead faster than a report.
+
+## How to measure it with product events
+
+Product events show how often and how long, across every signup. Log each step with a user ID and a timestamp.
+
+| Step | Event | Fires when | A long gap here usually means |
+| --- | --- | --- | --- |
+| 1 | `quickstart_viewed` | First quickstart view | No clear starting page |
+| 2 | `signup_completed` | Account created | Signup wall or long form |
+| 3 | `email_verified` | Link clicked, if required | Verification blocks trying |
+| 4 | `api_key_created` | First key created or copied | The key is buried |
+| 5 | `first_call_attempted` | First request, any status | Setup or SDK install is hard |
+| 6 | `first_call_succeeded` | First 2xx for the account | Auth errors or stale examples |
+
+Postman explains why smaller steps matter: [smaller increments give more precise attribution](https://blog.postman.com/the-most-important-api-metric-is-time-to-first-call/). Browsing to signup reflects your website and docs, and signup to first call reflects your getting-started guide and product usability.
+
+In PostHog, for example, build a funnel from steps 2, 4 and 6 in sequential order, set a 7-day conversion window, and switch to **Time to convert**, which ["shows you steps with the highest friction."](https://posthog.com/docs/product-analytics/funnels) Report the median, because one developer who returns after a week drags an average up.
+
+**Key pointers:**
+
+* Fire `first_call_succeeded` from server-side API logs, so curl, SDK and Postman calls all count.
+* Log the error code on failed first attempts. The most common one is your next docs fix.
+* When a signup passes your target with no success, send one email with the exact next step, as [Moesif suggests](https://www.moesif.com/blog/technical/api-product-management/What-is-TTFHW/).
+
+## Seven blockers that slow the first hello world, in journey order
+
+In the order a new developer hits them. For everything else an audit checks, see [what a DX audit covers](/blog/what-a-dx-audit-covers).
+
+| # | Blocker | What the developer sees | The fix | Shows in your funnel as |
+| --- | --- | --- | --- | --- |
+| 1 | Signup wall | "Sign up to view the docs" | Public docs, plus a sample key or sandbox that works without an account | Few quickstart viewers sign up |
+| 2 | Email verification first | Waiting on an email, checking spam | Allow test mode before verification; verify before live keys | Long gap from signup to verified |
+| 3 | Credit card upfront | A billing form before the first call | Free test mode or credits; ask for a card at go-live | Drop on the billing page |
+| 4 | Buried API key | A dashboard with no key in sight | Test key on the first dashboard screen and in docs samples | Long gap from signup to key |
+| 5 | Environment setup | Docker, a database and five env vars | One command, a hosted option or a browser sandbox | Key created, no attempt |
+| 6 | Outdated SDK versions | Copied code calls a removed method | Pin versions; run the quickstart in CI on each release | Errors before any request |
+| 7 | Vague auth errors | `401 Unauthorized`, nothing else | Name the key, the mode and the next step | Repeated 401s, no 2xx |
+
+**Key pointers:**
+
+* Match your slowest funnel step to a row in this table and start there.
+* Keep fraud checks, but move email verification and card forms to the step that issues live keys.
+* Add a CI job that runs the quickstart code in a clean container against your sandbox on every SDK release.
+
+## Four fixes that cut the time
+
+### Give a one-command or one-click start
+
+* **A create command.** Vite scaffolds a project with [`npm create vite@latest my-vue-app -- --template vue`](https://vite.dev/guide/). Yours might be `npm create acme@latest`: write the project, install pinned dependencies, ask for the key.
+* **A starter template.** Mark your example repo as a [GitHub template repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-template-repository) so anyone with access can create a new repo from it.
+* **A browser sandbox.** StackBlitz opens a repo at [`stackblitz.com/github/USERNAME/REPOSITORY_NAME`](https://developer.stackblitz.com/guides/integration/open-from-github), and GitHub Codespaces at [`codespaces.new/OWNER/REPO-NAME`](https://docs.github.com/en/codespaces/setting-up-your-project-for-codespaces/setting-up-your-repository/facilitating-quick-creation-and-resumption-of-codespaces), with the environment defined in [`.devcontainer/devcontainer.json`](https://docs.github.com/en/codespaces/setting-up-your-project-for-codespaces/adding-a-dev-container-configuration/introduction-to-dev-containers).
+
+Both publish README badges:
+
+```md
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/YOUR_ORG/YOUR_STARTER)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/YOUR_ORG/YOUR_STARTER)
+```
+
+### Put the developer's own key in the docs
+
+Stripe's API reference puts [a sample test key in every example "so you can test any example right away,"](https://docs.stripe.com/api/authentication) and you can log in to use your own. Its [Node.js quickstart](https://docs.stripe.com/get-started/development-environment?lang=node) uses your account's default sandbox keys, visible only to you. Sandbox keys [start with `sk_test_`](https://docs.stripe.com/keys), so the key tells you the mode, and the curl is ready to paste:
+
+```bash
+curl https://api.stripe.com/v1/charges \
+  -u sk_test_...:   # The colon prevents curl from asking for a password.
+```
+
+If your docs and dashboard share a login, render the signed-in user's test key into every code block. If not, show the key prefix in the placeholder and link straight to the keys page.
+
+![Stripe API reference showing a curl example with a sk_test_ key and a note that a sample test key is included in every example](/blog/uploads/time-to-first-hello-world/stripe-test-key-in-docs.webp "Stripe puts a working test key in every example, and swaps in yours when you log in.")
+
+### Ship a sample app with test data
+
+With a sample app, the developer's first job is to change something that works.
+
+* Stripe's [Checkout quickstart](https://docs.stripe.com/checkout/quickstart) is a full working sample with a Download link and test cards: `4242424242424242` succeeds, `4000000000009995` is declined.
+* Until your domain is verified, Resend lets you [send from `onboarding@resend.dev` to your own address or to test addresses](https://resend.com/setup.md) like [`delivered@resend.dev`](https://resend.com/docs/dashboard/emails/send-test-emails).
+* Twilio's [messaging quickstart](https://www.twilio.com/docs/messaging/quickstart) sends the first SMS to a Virtual Phone in the Console, so no second phone is needed.
+
+### Write errors that say what to do next
+
+At the first call, the error message is your docs. Resend's [errors reference](https://resend.com/docs/api-reference/errors) pairs each error with a suggested action: the 403 "You can only send testing emails to your own email address" comes with "add and verify a domain." Stripe's [error object](https://docs.stripe.com/api/errors) carries `param`, a `doc_url` for the error code and a `request_log_url`. For a standard shape, use [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457.html) problem details.
+
+Before:
+
+```json
+{ "error": "Unauthorized" }
+```
+
+After:
+
+```json
+{
+  "type": "https://docs.example.com/errors/live-key-in-test-mode",
+  "title": "Live key used on a test request",
+  "status": 401,
+  "detail": "Your key starts with acme_live_. Test requests need an acme_test_ key. Copy one from https://dashboard.example.com/keys",
+  "param": "Authorization"
+}
+```
+
+**Key pointers:**
+
+* Put an "Open in Codespaces" or "Open in StackBlitz" badge on the first screen of your starter repo's README.
+* Replace every `YOUR_API_KEY` with the signed-in user's test key, or a prefixed placeholder and a direct link to the keys page.
+* Pull your five most common first-call errors from the logs and rewrite each to name the cause and the next action.
+
+## Before and after: a 7-step quickstart cut to 3
+
+**Before: 7 vague steps**
+
+1. Create an account.
+2. Set up your environment.
+3. Get your API credentials from the dashboard.
+4. Install the SDK.
+5. Initialize the client.
+6. Make your first request.
+7. Check that it worked.
+
+Each step names a task but not the action. "Set up your environment" can hide 20 minutes, and step 7 never says what success looks like.
+
+**After: 3 concrete steps**
+
+**1. Install the SDK** (Node.js 18 or later):
+
+```bash
+npm install @acme/sdk@3.2.0
+```
+
+**2. Set your test key.** Signed in, your key appears here. Otherwise copy it from your dashboard's Keys page. It starts with `acme_test_`.
+
+```bash
+export ACME_API_KEY=acme_test_4eC39HqLyjWD
+```
+
+**3. Send your first message:**
+
+```js
+// send.mjs
+import Acme from "@acme/sdk";
+
+const acme = new Acme(process.env.ACME_API_KEY);
+const msg = await acme.messages.send({ to: "test@example.com", text: "Hello world" });
+console.log(msg.id, msg.status);
+```
+
+Run `node send.mjs` and you should see:
+
+```text
+msg_8fk2x9 delivered
+```
+
+Seeing a `401`? You copied a live key. Use the one that starts with `acme_test_`.
+
+The rewrite pins the version, puts the key on the page, shows the expected output and answers the likeliest error inline. Self-contained steps are also easier for AI assistants to quote, as we cover in [developer docs as your best AEO asset](/blog/developer-docs-as-aeo-asset).
+
+**Key pointers:**
+
+* Cut any step that has no command or click. Fold "initialize the client" into the code sample.
+* Show the expected output under every command that prints something.
+* Answer the most common first-call error in one line under the last step.
+
+## What target should you set, and how do you track it monthly?
+
+Chabot's [guide](https://chris-chabot-blog.pages.dev/almanac/04-metrics/activation-metrics/) gives rules of thumb for APIs: "A median under 5 minutes is an ambitious target," and "A median over 30 minutes usually indicates friction in the onboarding path." For platforms with more setup, "Over an hour warrants investigation."
+
+Our advice: set one target for the stopwatch test and a looser one for product data, which includes everyone who got distracted. And don't game it. Postman warns against ["artificially hacking a TTFC, perhaps by hiding away the tricky parts or ignoring the gotchas,"](https://blog.postman.com/the-most-important-api-metric-is-time-to-first-call/) which only moves the friction into implementation.
+
+### Monthly TTFHW tracker (copy this)
+
+| Metric | Source | Target | Last month | This month | Owner |
+| --- | --- | --- | --- | --- | --- |
+| Median minutes, signup to first 2xx | Product events | Under 15 for an API | | | |
+| Share of signups with a first 2xx in 7 days | Product events | Up on baseline | | | |
+| Slowest funnel step | Time to convert | Name it | | | |
+| Top error before a first 2xx | API logs | Falling | | | |
+| Stopwatch median | Friction logs, quarterly | Under 5 for an API | | | |
+| Quickstart CI runs passing | CI | Every run | | | |
+
+On the first working day of each month, fill it in and give the blocker behind the slowest step an owner and a ship date. Re-run the stopwatch test every quarter and after any change to signup, the dashboard or the quickstart.
+
+**Key pointers:**
+
+* Track the share of signups reaching a first 2xx next to the median. A falling median with a falling share means slow developers are quitting, not speeding up.
+* Ship one onboarding fix a month and log its date in the tracker, so you can see which fix moved the number.
+
+## How Studio1 has cut time to first hello world
+
+**LiteLLM: separate SDK and Gateway quickstarts.** New [LiteLLM](/case-studies/litellm) users were choosing between the SDK and the Gateway without enough guidance. As the embedded docs and DX team, Studio1 built a new Learn section as the starting point, with SDK and Gateway quickstarts that take developers from zero to a first working request in minutes. The clear split ended the most common onboarding confusion.
+
+> "Thrilled to announce a revamped docs experience. Developers can now find their path faster, whether they need the SDK or the Gateway."
+>
+> **Krish D.**, CEO, LiteLLM
+
+![LiteLLM docs Choose Your Path section with two cards, Python SDK and Proxy Server (LLM Gateway), each listing what it is for](/blog/uploads/time-to-first-hello-world/litellm-choose-your-path.webp "LiteLLM's getting started page puts the SDK or Gateway choice before the first request.")
+
+**Corsair: an audit that reshaped the quick start.** For [Corsair](/case-studies/corsair), Studio1 audited the hosted app, docs and first-run flow as a new developer. Two of the fixes: open the dashboard on a getting-started guide with a way to make a test request, and lead with the hosted app so the first response arrives before the long self-hosted path. The Corsair team used the first audit to rework the hosted app and a quick start that reaches a working example in under a minute.
+
+**Ittybit: examples tested before anyone copied them.** For [Ittybit](/case-studies/ittybit), Studio1 verified code examples against real product behavior before they were shared. The examples doubled as feature checks, so DX gaps surfaced before the material reached developers: the cheapest guard against blocker 6.
+
+If you want an outside team to run this, our [developer documentation and DX audit](/developer-documentation-dx-audit) service starts with a time-to-first-success review from a new developer's seat and ends in a prioritized fix list, typically in 2 to 3 weeks. For the onboarding mistakes behind a slow number, read [common mistakes startups make when building developer-first products](/blog/common-mistakes-developer-products).
+
+## FAQ
+
+### What is time to first hello world?
+
+Time to first hello world (TTFHW) is the time from a developer's first contact with your product to their first working result, such as a 2xx API response or a first deploy. Most teams start the clock at signup.
+
+### What is the difference between time to first call and time to first hello world?
+
+Time to first call (TTFC) is the API version: the time until a developer's first successful API call. Time to first hello world covers any developer product, where the first success might also be a build, a deploy or a script's output.
+
+### What is a good time to first hello world?
+
+For an API, Chris Chabot's activation metrics guide calls a median under 5 minutes an ambitious target and a median over 30 minutes a sign of onboarding friction. Set your own target from a measured baseline.
+
+### How many developers do you need for a stopwatch test?
+
+Three to five developers who have never used the product are enough to see which blockers repeat. Pair the test with product events, which give you the median across every signup.
+
+### Should you remove email verification and credit card checks?
+
+Usually move them rather than remove them. Let developers use test mode right after signup, and ask for verification or a card when they request live keys.
+
+### How often should you measure time to first hello world?
+
+Review the product-data median monthly and re-run the stopwatch test quarterly. Also re-run it after any change to signup, the dashboard, the SDK or the quickstart.

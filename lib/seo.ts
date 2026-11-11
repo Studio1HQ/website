@@ -1,6 +1,14 @@
 import type { Metadata } from "next";
 import { baseUrl } from "@/lib/site";
 import {
+  AUTHORS,
+  TEAM_AUTHOR,
+  authorPersonId,
+  authorUrl,
+  getAuthorByName,
+  type Author,
+} from "@/lib/authors";
+import {
   DEFAULT_LOCALE,
   hasLocalizedAlternates,
   localeMeta,
@@ -13,7 +21,7 @@ export { baseUrl };
 
 export const DEFAULT_OG_IMAGE = "/opengraph-image.png";
 export const DEFAULT_OG_IMAGE_ALT =
-  "Studio1 - Technical Content and Developer Growth Services";
+  "Studio1 - DevRel and Developer Marketing Agency for DevTools";
 
 const defaultOgImageUrl = `${baseUrl}${DEFAULT_OG_IMAGE}`;
 
@@ -39,7 +47,7 @@ function normalizePath(path: string): string {
   return path.startsWith("/") ? path : `/${path}`;
 }
 
-function pageUrl(path: string): string {
+export function pageUrl(path: string): string {
   const normalized = normalizePath(path);
   return normalized === "" ? baseUrl : `${baseUrl}${normalized}`;
 }
@@ -64,10 +72,12 @@ export function pageMetadata({
   rssPath,
 }: PageMetadataOptions): Metadata {
   const url = localizedUrl(path, locale, baseUrl);
-  const brandedTitle = `${title} | Studio1`;
+  // Titles that already name Studio1 (e.g. "Studio1 vs Draft.dev") skip the
+  // " | Studio1" suffix, so the brand never appears twice. See serpTitle.
+  const { meta: metaTitle, full: brandedTitle } = serpTitle(title);
 
   return {
-    title,
+    title: metaTitle,
     description,
     ...(keywords?.length ? { keywords } : {}),
     alternates: {
@@ -98,9 +108,9 @@ export function pageMetadata({
   };
 }
 
-const HOME_TITLE = "Technical Content & Developer Growth Agency for DevTools";
+const HOME_TITLE = "DevRel & Developer Marketing Agency for Devtools";
 const HOME_DESCRIPTION =
-  "Studio1 is a technical content and developer growth partner for SaaS and devtool teams. We produce tutorials, docs, videos, launches, and developer programs that drive adoption.";
+  "Studio1 is a DevRel and developer marketing agency for devtool, AI, and open-source teams: technical content, docs, video, launches, and GitHub growth.";
 
 export function homePageMetadata({
   title = HOME_TITLE,
@@ -142,6 +152,29 @@ export function homePageMetadata({
   };
 }
 
+/** Google shows about 60 characters of a title before cutting it off. */
+const SERP_TITLE_LIMIT = 60;
+
+/**
+ * Adds " | Studio1" only when the result still fits in a search result, so a
+ * long title is never cut off just to make room for the brand.
+ */
+/**
+ * The final <title>, always returned as `absolute`: a section layout that sets
+ * its own title (blog, case studies, careers…) stops the root "%s | Studio1"
+ * template from reaching the pages under it, so the suffix is added here.
+ * Titles that already name Studio1, or would pass the SERP limit, stay as is.
+ */
+function serpTitle(title: string) {
+  if (title.includes("Studio1")) {
+    return { meta: { absolute: title }, full: title };
+  }
+  const branded = `${title} | Studio1`;
+  return branded.length <= SERP_TITLE_LIMIT
+    ? { meta: { absolute: branded }, full: branded }
+    : { meta: { absolute: title }, full: title };
+}
+
 export function articlePageMetadata({
   title,
   description,
@@ -150,6 +183,8 @@ export function articlePageMetadata({
   keywords,
   image,
   imageAlt,
+  imageWidth = 1200,
+  imageHeight = 630,
   publishedTime,
   modifiedTime,
   author,
@@ -163,6 +198,8 @@ export function articlePageMetadata({
   keywords?: string[];
   image?: string;
   imageAlt?: string;
+  imageWidth?: number;
+  imageHeight?: number;
   publishedTime?: string;
   modifiedTime?: string;
   author?: string;
@@ -172,13 +209,19 @@ export function articlePageMetadata({
   const url = localizedUrl(path, locale, baseUrl);
   const ogImage = absoluteImageUrl(image);
   const ogImageAlt = imageAlt?.trim() || title;
-  const brandedTitle = `${title} | Studio1`;
+  const { meta: metaTitle, full: brandedTitle } = serpTitle(title);
   const authorList = authors?.length ? authors : author ? [author] : [];
+  // Named authors link to their profile page (rel="author", article:author).
+  const authorRefs = authorList.map((name) => {
+    const profile = getAuthorByName(name);
+    return profile ? { name, url: authorUrl(profile) } : { name };
+  });
 
   return {
-    title,
+    title: metaTitle,
     description,
     ...(keywords?.length ? { keywords } : {}),
+    ...(authorRefs.length ? { authors: authorRefs } : {}),
     alternates: {
       canonical: url,
     },
@@ -190,9 +233,18 @@ export function articlePageMetadata({
       type: "article",
       ...(publishedTime ? { publishedTime } : {}),
       ...(modifiedTime ? { modifiedTime } : {}),
-      ...(authorList.length ? { authors: authorList } : {}),
+      ...(authorRefs.length
+        ? { authors: authorRefs.map((ref) => ref.url ?? ref.name) }
+        : {}),
       ...(tags?.length ? { tags } : {}),
-      images: [{ url: ogImage, width: 1200, height: 630, alt: ogImageAlt }],
+      images: [
+        {
+          url: ogImage,
+          width: imageWidth,
+          height: imageHeight,
+          alt: ogImageAlt,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
@@ -202,6 +254,48 @@ export function articlePageMetadata({
       creator: "@Studio1HQ",
     },
   };
+}
+
+/** Full Person node for an author, as on their profile page. */
+export function authorPersonJsonLd(author: Author) {
+  return {
+    "@type": "Person",
+    "@id": authorPersonId(author),
+    name: author.name,
+    url: authorUrl(author),
+    image: absoluteImageUrl(author.image),
+    jobTitle: author.jobTitle,
+    description: author.bio,
+    worksFor: { "@id": ORGANIZATION_ID },
+    knowsAbout: author.knowsAbout,
+    sameAs: author.links.map((link) => link.href),
+  };
+}
+
+/**
+ * Article author nodes: named authors point at their profile's Person node,
+ * the team byline at the Studio1 Organization.
+ */
+export function articleAuthorsJsonLd(names: string[]) {
+  return names.map((name) => {
+    if (name === TEAM_AUTHOR) {
+      return {
+        "@type": "Organization",
+        "@id": ORGANIZATION_ID,
+        name: "Studio1",
+        url: baseUrl,
+      };
+    }
+    const author = getAuthorByName(name);
+    return author
+      ? {
+          "@type": "Person",
+          "@id": authorPersonId(author),
+          name: author.name,
+          url: authorUrl(author),
+        }
+      : { "@type": "Person", name };
+  });
 }
 
 export function breadcrumbJsonLd(items: { name: string; path: string }[]) {
@@ -272,9 +366,16 @@ export function jobPostingJsonLd(job: {
   const normalizedStatus = job.status?.toLowerCase() ?? "";
   const isUnavailable =
     normalizedStatus.includes("soon") || normalizedStatus.includes("closed");
-  const employmentType = job.type.toLowerCase().includes("contract")
-    ? "CONTRACTOR"
-    : "INTERN";
+  const jobType = job.type.toLowerCase();
+  const employmentType = jobType.includes("full-time")
+    ? "FULL_TIME"
+    : jobType.includes("contract")
+      ? "CONTRACTOR"
+      : jobType.includes("intern")
+        ? "INTERN"
+        : jobType.includes("part-time")
+          ? "PART_TIME"
+          : "OTHER";
 
   return {
     "@context": "https://schema.org",
@@ -313,6 +414,84 @@ export function jobPostingJsonLd(job: {
   };
 }
 
+/** Stable id so every page's schema points at the same Organization node. */
+export const ORGANIZATION_ID = `${baseUrl}/#organization`;
+
+export const ORGANIZATION_DESCRIPTION =
+  "Studio1 (studio1hq.com) is a DevRel and developer marketing agency for devtool, AI, and open-source teams. We ship technical content, docs and DX audits, developer videos, launches, GitHub growth, and community programs that drive developer adoption. Studio1 also maintains the open-source Awesome AI Apps collection and Awesome LLM Benchmarks.";
+
+export function organizationJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": ORGANIZATION_ID,
+    name: "Studio1",
+    legalName: "STUDI01HQ PRIVATE LIMITED",
+    alternateName: "Studio1HQ",
+    url: baseUrl,
+    logo: {
+      "@type": "ImageObject",
+      url: `${baseUrl}/icon.png`,
+    },
+    description: ORGANIZATION_DESCRIPTION,
+    email: "contact@studio1hq.com",
+    knowsAbout: [
+      "Developer relations",
+      "Developer marketing",
+      "Technical content marketing",
+      "GitHub growth",
+      "Open-source marketing",
+      "Developer documentation",
+      "Developer experience audits",
+      "Developer video production",
+      "Product launches for developer tools",
+    ],
+    founder: AUTHORS.map((author) => ({
+      "@type": "Person",
+      "@id": authorPersonId(author),
+      name: author.name,
+      url: authorUrl(author),
+      jobTitle: author.jobTitle,
+      sameAs: author.links.map((link) => link.href),
+    })),
+    sameAs: [
+      "https://x.com/Studio1HQ",
+      "https://www.linkedin.com/company/studio1hq/",
+      "https://github.com/Studio1HQ",
+      "https://www.youtube.com/@studio1hq",
+      "https://dev.to/studio1hq",
+      "https://www.instagram.com/studio1_hq/",
+    ],
+  };
+}
+
+export function serviceJsonLd({
+  name,
+  description,
+  path,
+  serviceType,
+}: {
+  name: string;
+  description: string;
+  path: string;
+  serviceType: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name,
+    description,
+    serviceType,
+    provider: { "@id": ORGANIZATION_ID },
+    areaServed: "Worldwide",
+    audience: {
+      "@type": "BusinessAudience",
+      audienceType: "Developer tool, AI, and open-source companies",
+    },
+    url: pageUrl(path),
+  };
+}
+
 export function websiteJsonLd() {
   return {
     "@context": "https://schema.org",
@@ -320,12 +499,7 @@ export function websiteJsonLd() {
     name: "Studio1",
     url: baseUrl,
     description: HOME_DESCRIPTION,
-    publisher: {
-      "@type": "Organization",
-      name: "Studio1",
-      url: baseUrl,
-      logo: `${baseUrl}/icon.png`,
-    },
+    publisher: { "@id": ORGANIZATION_ID },
   };
 }
 

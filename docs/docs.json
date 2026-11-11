@@ -1,5 +1,8 @@
 {
   "$schema": "https://mintlify.com/docs.json",
+  "seo": {
+    "metatags": { "robots": "noindex, nofollow" }
+  },
   "theme": "mint",
   "name": "Studio1 Documentation",
   "colors": {
@@ -8,6 +11,20 @@
     "dark": "#f97316"
   },
   "favicon": "/favicon.png",
+  "redirects": [
+    {
+      "source": "/services/blog-as-a-service",
+      "destination": "/services/technical-content"
+    },
+    {
+      "source": "/services/devrel-as-a-service",
+      "destination": "/services/developer-advocacy"
+    },
+    {
+      "source": "/contact",
+      "destination": "/about-us"
+    }
+  ],
   "navigation": {
     "tabs": [
       {

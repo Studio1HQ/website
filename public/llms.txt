@@ -1,55 +1,157 @@
 # Studio1
 
-> Technical content and developer growth partner for devtool, SaaS, and AI teams.
+> DevRel and developer marketing agency for devtool, AI, and open-source teams: technical content, docs, video, launches, GitHub growth, and community.
 
-Studio1 helps developer-focused companies grow adoption through technical content marketing, developer documentation and DX audits, developer video production, and developer relations growth campaigns. The team creates tutorials, guides, docs, demos, launch campaigns, community programs, organic distribution, and creator collaborations for products built for developers.
+Studio1 (studio1hq.com) is a DevRel and developer marketing agency. It helps developer-focused companies grow adoption through technical content marketing, GitHub and open-source growth, developer documentation and DX audits, developer video production, and developer relations campaigns. The team builds README and onboarding fixes, demo projects, tutorials, docs, videos, launches, community programs, and distribution across Reddit, daily.dev, X, LinkedIn, Dev.to, and live events.
+
+Selected results: Memori grew from launch to 12,000+ GitHub stars. Corsair went from about 300 to 2,000 GitHub stars in five weeks. OpenLore grew from ~135 to 1,700+ GitHub stars in one month. Nebius's open-source examples library reached 16K+ GitHub stars. Every number, with sources, is on the Results page.
 
 ## Services
 
-- [Technical Content Marketing](https://studio1hq.com/technical-content-marketing): Developer tutorials, integration guides, SEO articles, and code-rich content written by engineers.
-- [Developer Documentation & DX Audits](https://studio1hq.com/developer-documentation-dx-audit): Documentation audits, onboarding reviews, API clarity, quickstarts, reference docs, and developer experience improvements.
-- [Developer Video Production](https://studio1hq.com/developer-video-production): Technical demos, product walkthroughs, long-form tutorials, Shorts, scripts, edits, thumbnails, SEO titles, and publishing support.
-- [Developer Relations & Growth Campaigns](https://studio1hq.com/developer-relations-growth-campaigns): Developer advocacy, community programs, product launches, organic growth campaigns, and influencer management.
+- [All Services](https://www.studio1hq.com/services): Every Studio1 service on one page, grouped into content (technical content, docs, video) and growth (DevRel, GitHub, influencer management, launches, Reddit, distribution, AEO), with where to start.
+- [GitHub Growth Agency](https://www.studio1hq.com/github-growth-agency): Open-source and GitHub growth: README and onboarding fixes, demo projects, launch positioning, community distribution, talks, and hackathons.
+- [Technical Content Marketing Agency for Developer Tools](https://www.studio1hq.com/technical-content-marketing): Developer tutorials, integration guides, comparisons, SEO articles, and code-rich content written by engineers, plus distribution on Reddit, X, LinkedIn, Dev.to, and daily.dev.
+- [Developer Documentation & DX Audits](https://www.studio1hq.com/developer-documentation-dx-audit): Documentation audits, onboarding reviews, API clarity, quickstarts, reference docs, and developer experience improvements.
+- [Developer Video and Demo Production](https://www.studio1hq.com/developer-video-production): Product demo videos, demo projects developers can run, technical demos, product walkthroughs, long-form tutorials, Shorts, scripts, edits, thumbnails, and publishing support.
+- [Product Launch Service](https://www.studio1hq.com/product-launch-service): Developer tool launches: launch plan, demo video, launch posts, launch day across Reddit, Hacker News, X, LinkedIn, and Product Hunt, and a launch week that turns the spike into users.
+- [AEO Agency](https://www.studio1hq.com/aeo-agency): Answer engine optimization for developer tools: answer-ready content, comparison pages and docs, llms.txt and AI crawler access, and checks on whether a client shows up in ChatGPT, Perplexity, and Google AI.
+- [Reddit Marketing Agency](https://www.studio1hq.com/reddit-marketing-agency): Organic Reddit marketing for developer tools: subreddit research, technical posts, launch threads, and community engagement. 304K+ Reddit impressions for Entelligence AI; one Entelligence AI post reached 205K views.
+- [Developer Content Distribution](https://www.studio1hq.com/developer-content-distribution): Every piece rebuilt for Reddit, X, LinkedIn, daily.dev, Dev.to, and YouTube, with community engagement and measurement. 304K+ Reddit impressions for Entelligence AI; 100K+ impressions in one month for OpenLore.
+- [Influencer Marketing Agency](https://www.studio1hq.com/influencer-marketing-agency): Influencer management for developer tools and AI: creator campaigns on X, YouTube, LinkedIn, Instagram, and TikTok, UGC programs, launch amplification, and campaign reporting.
+- [Developer Relations & Growth Campaigns](https://www.studio1hq.com/developer-relations-growth-campaigns): DevRel as a service: developer advocacy, community programs, product launches, organic growth campaigns, and creator programs.
 
-## Key Pages
+## Comparisons
 
-- [Homepage](https://studio1hq.com/)
-- [Client Work](https://studio1hq.com/work): Tutorials, guides, and developer content Studio1 creates for client teams.
-- [Case Studies](https://studio1hq.com/case-studies): Outcomes from technical content, docs, DevRel, and growth work.
-- [Products](https://studio1hq.com/product): Studio1-built tools including Raah, AssetSnip, and selected Studio1 products.
-- [Our Blog](https://studio1hq.com/blog): Articles and insights from the Studio1 team.
-- [RSS Feed](https://studio1hq.com/feed.xml): Machine-readable feed of Studio1 blog posts.
-- [About Us](https://studio1hq.com/about-us)
-- [Careers](https://studio1hq.com/careers)
-- [Terms of Use](https://studio1hq.com/terms)
-- [Privacy Policy](https://studio1hq.com/privacy)
+- [Best Developer Marketing Agencies in 2026](https://www.studio1hq.com/best-developer-marketing-agencies): Studio1, Draft.dev, Hackmamba, Infrasity, Catchy, EveryDeveloper, Literally.dev, and Argot, with services, clients, and public pricing from each agency's own site.
+- [Studio1 vs Draft.dev](https://www.studio1hq.com/compare/studio1-vs-draft-dev): Services, GitHub and open-source growth, DevRel, pricing, and clients compared.
+- [Studio1 vs Infrasity](https://www.studio1hq.com/compare/studio1-vs-infrasity): Technical content, GitHub growth, launches, DevRel, and pricing compared.
+
+## Results and case studies
+
+- [Results](https://www.studio1hq.com/results): Every Studio1 result in one place, with links to case studies and public sources.
+- [Memori](https://www.studio1hq.com/case-studies/memori): 0 to 12,000+ GitHub stars through a community-led open-source launch; the Reddit launch post reached 50K+ impressions; 12 hands-on demo agents shipped.
+- [Corsair](https://www.studio1hq.com/case-studies/corsair): GitHub stars grew from about 300 to 2,000 in roughly five weeks through onboarding audits, example projects, README work, and student hackathons.
+- [OpenLore](https://www.studio1hq.com/case-studies/openlore): 12x GitHub star growth, from ~135 to 1,700+ in one month; 100K+ impressions across daily.dev, X, LinkedIn, and Reddit; #3 trending in Go on Trendshift.
+- [Entelligence AI](https://www.studio1hq.com/case-studies/entelligence-ai): 304K+ Reddit impressions from technical blogs, deep dives, and developer distribution.
+- [ScrapeGraphAI](https://www.studio1hq.com/case-studies/scrapegraph): 265K+ social and community reach from practical AI agent demo projects.
+- [Permit.io](https://www.studio1hq.com/case-studies/permit): First-page Google rankings for high-intent authorization queries such as "RBAC in Supabase".
+- [LiteLLM](https://www.studio1hq.com/case-studies/litellm): Documentation revamp with separate SDK and Gateway quickstarts, publicly endorsed by LiteLLM's CEO.
+- [Webcrumbs](https://www.studio1hq.com/case-studies/webcrumbs): Comparison SEO content for "v0 alternative" searches, distributed across DEV and Medium.
+- [Tensorlake](https://www.studio1hq.com/case-studies/tensorlake): Diagram-led AI infrastructure tutorials that surfaced in Google results for high-intent developer searches.
+- [Ittybit](https://www.studio1hq.com/case-studies/ittybit): Team-facing cookbooks and code examples verified against product behavior.
+- [Jozu](https://www.studio1hq.com/case-studies/jozu): DevRel for KitOps: DevFest Pune and KubeCon India representation, Jozu Champions program support, and technical content.
+
+## Guides
+
+### Developer marketing and DevRel
+
+- [What Is Developer Marketing? A Strategy Guide for Devtools](https://www.studio1hq.com/blog/what-is-developer-marketing): What developer marketing is, how developers find and adopt tools in 2026, the funnel and metrics per stage, channels, budgets, and a 90-day strategy.
+- [Developer Event Marketing: Hackathon and Conference Sponsorship Costs and ROI](https://www.studio1hq.com/blog/developer-event-marketing): 2026 sponsorship prices for KubeCon and PyCon, who attends, what hackathon research shows, how to run booths and hackathon tracks, and cost per activated developer.
+- [DevRel vs Developer Marketing](https://www.studio1hq.com/blog/devrel-vs-developer-marketing): The difference between DevRel and developer marketing, and how strong teams combine both.
+- [DevRel for Startups](https://www.studio1hq.com/blog/devrel-for-startups): What DevRel owns from pre-PMF to Series A, why founder-led DevRel works early, when to make the first DevRel hire, and how to measure it.
+- [Fractional DevRel](https://www.studio1hq.com/blog/fractional-devrel): What fractional DevRel is, what it costs, and who it is for.
+- [DevRel Agency vs In-House DevRel Hire](https://www.studio1hq.com/blog/devrel-agency-vs-in-house-devrel-hire): Costs, timelines, and when each option fits.
+- [How to Get Developer Adoption Without a DevRel Team](https://www.studio1hq.com/blog/developer-adoption-without-devrel-team): A playbook for early-stage devtools: split the DevRel job across the team, fix the first run, answer evaluation questions, distribute where developers talk, and know when to bring in outside help.
+- [How to Measure DevRel ROI](https://www.studio1hq.com/blog/how-to-measure-devrel-roi): A metric tree from reach to revenue, attribution that works for developers, and a monthly DevRel scorecard template.
+- [Common Mistakes Startups Make When Building Developer-First Products](https://www.studio1hq.com/blog/common-mistakes-developer-products): Developer adoption mistakes around onboarding, docs, communities, awareness, and DevRel timing.
+- [Why Active Developer Communities Matter for Early-Stage Startups](https://www.studio1hq.com/blog/why-developer-communities-matter): How DevRel, trust, technical education, and open communities help early developer products grow.
+
+### Technical content marketing
+
+- [Technical Content Marketing for Developer Tools: The Complete Guide](https://www.studio1hq.com/blog/technical-content-marketing-for-devtools): Content types for each stage, how to pick topics, a quality bar, AEO, and how to choose an agency.
+- [Is Technical Writing Dead? What AI Means for Your Docs, Blogs and Developer Content](https://www.studio1hq.com/blog/is-technical-writing-dead): How AI-written content performs in Google and AI answers, AI agents as docs readers, what to automate vs keep human, and how devtool teams should staff writing.
+- [How to Build a Content Calendar for a Developer Tool](https://www.studio1hq.com/blog/devtool-content-calendar): A 12-week developer content calendar: topic sources, a mix by job, cadence by team size, release anchors and review SLAs.
+- [Comparison and Alternatives Pages That Convert Developers](https://www.studio1hq.com/blog/comparison-alternatives-pages-for-developers): The four comparison page types, a template, honest verdicts, upkeep, AI citations, and how to measure signups.
+- [Technical Writer vs Content Agency](https://www.studio1hq.com/blog/technical-writer-vs-content-agency): Full-time, freelance, agency and hybrid options for a devtool: cost, time to first piece and red flags.
+- [How Developer Tool Companies Can Measure Content ROI Beyond Pageviews](https://www.studio1hq.com/blog/developer-tool-content-roi-beyond-pageviews): Measuring developer content ROI through intent, activation, and adoption.
+- [Why Software Companies Are Doubling Down on Content in 2026](https://www.studio1hq.com/blog/why-software-companies-invest-in-content): Why content compounds for software and devtool companies, and which types convert.
+
+### GitHub and open-source growth
+
+- [How to Grow an Open Source Project](https://www.studio1hq.com/blog/how-to-grow-an-open-source-project): 12 steps that bring real users and contributors: README, quickstart, beginner issues, launches, community, and a 30-day plan.
+- [How to Get More GitHub Stars for Your Open-Source Launch](https://www.studio1hq.com/blog/how-to-get-github-stars-open-source-launch): A step-by-step playbook: prelaunch prep, README, Show HN, Reddit, X, Product Hunt, demos, and community loops, with results from Memori, OpenLore, and Corsair.
+- [How to Write a GitHub README That Converts Visitors Into Users](https://www.studio1hq.com/blog/github-readme-best-practices): The first screen, a three-command quickstart, comparisons, the About sidebar, and a copy-paste README template.
+- [How to Get Your Repo on GitHub Trending and Trendshift](https://www.studio1hq.com/blog/how-to-trend-on-github): What seems to move GitHub trending, landing launch stars in 48 hours, fixing your repo's language, Trendshift, and avoiding fake stars.
+- [Open Source Metrics Beyond GitHub Stars](https://www.studio1hq.com/blog/open-source-metrics-beyond-stars): Traffic, downloads, dependents, CHAOSS health metrics, telemetry and a monthly scorecard that show real adoption.
+- [Build Your Own Grok Bot with OpenCrewBot](https://www.studio1hq.com/blog/build-your-own-grok-bot-opencrewbot): Set up OpenCrewBot, Studio1's open-source team of AI bots, try it without API keys, then connect models, tools, and apps.
+
+### Launches
+
+- [How to Launch a Developer Tool](https://www.studio1hq.com/blog/how-to-launch-a-developer-tool): A launch strategy from six weeks out to week two: launch types, a timeline, an asset checklist, channels, launch day and what to measure.
+- [How to Launch a Developer Tool on Product Hunt](https://www.studio1hq.com/blog/product-hunt-launch-playbook): A step-by-step launch playbook: prep, the listing, launch day, Show HN and launch week, with results from Webcrumbs and Permit.io.
+- [How to Launch on Hacker News: A Show HN Guide](https://www.studio1hq.com/blog/how-to-launch-on-hacker-news-show-hn): What qualifies, how to write the title and first comment, launch-day behavior, reposts, and how to measure results.
+- [How to Launch a Developer Tool on X](https://www.studio1hq.com/blog/how-to-launch-a-developer-tool-on-x): Data from 520 devtool launches in 2026, X's open-source ranking code, a creator plan, templates and 8 launches broken down.
+
+### Distribution, Reddit and creators
+
+- [How to Distribute Technical Content to Developers on Reddit, X and YouTube](https://www.studio1hq.com/blog/how-to-distribute-technical-content-reddit-x-youtube): A channel-by-channel distribution playbook for Reddit, X, YouTube, daily.dev, Hacker News, LinkedIn, and Dev.to, with a one-week repurposing schedule and results from Entelligence AI, OpenLore, Memori, and Nebius.
+- [Reddit Marketing for Developer Tools](https://www.studio1hq.com/blog/reddit-marketing-for-developer-tools): How to market a developer tool on Reddit: choosing subreddits, posts developers upvote, self-promotion rules, staying in the comments, and measuring, with real post data from Entelligence AI, Memori and Nebius.
+- [Dev.to, Hashnode, or Medium: Where to Cross-Post Technical Articles](https://www.studio1hq.com/blog/cross-posting-dev-to-hashnode-medium): Which platform fits, canonical setup on each, safe timing, and a copy-paste checklist.
+- [Developer Influencer Marketing: Costs, Formats, and Results](https://www.studio1hq.com/blog/developer-influencer-marketing): When paying creators works, formats and costs, how to vet them, a brief template, disclosure rules and tracking.
+- [Developer Influencer Marketing Strategy: Why Fit Beats Reach](https://www.studio1hq.com/blog/developer-influencer-marketing-strategy): How to find and seed the right creators, and a 90-day program judged on activation, not views.
+
+### Developer video
+
+- [Developer Video Marketing](https://www.studio1hq.com/blog/developer-video-marketing): The formats that work for devtools, who makes demo videos, a script template, repurposing, and the metrics that show it works.
+- [How to Script a Technical Demo Video Developers Will Watch](https://www.studio1hq.com/blog/how-to-script-a-technical-demo-video): Five beats, a time/screen/voiceover table, a filled-in example, terminal hygiene, edits and cutdowns.
+- [YouTube for Developer Tools](https://www.studio1hq.com/blog/youtube-for-developer-tools): What to publish, picking topics from search, titles, chapters, Shorts, creators, metrics and a 90-day channel plan.
+
+### Docs and developer experience
+
+- [Developer Documentation Best Practices](https://www.studio1hq.com/blog/developer-documentation-best-practices): Four doc types, quickstarts that work, tested code, helpful errors, AI-readable pages, a checklist and an audit plan.
+- [What a DX Audit Covers](https://www.studio1hq.com/blog/what-a-dx-audit-covers): What a developer experience audit reviews, the 10 problems it most often finds, and a 30-minute mini audit you can run today.
+- [Time to First Hello World](https://www.studio1hq.com/blog/time-to-first-hello-world): How to measure how long a new developer takes to get your product working, find the blockers, and cut onboarding time.
+
+### AI search (AEO and GEO) for devtools
+
+- [How to Get Your Tool Recommended by ChatGPT, Perplexity, and Google](https://www.studio1hq.com/blog/how-to-get-your-tool-recommended-by-chatgpt-perplexity-google): AEO, GEO, crawler access, documentation strategy, comparison pages, community mentions, schema, and llms.txt for developer tools.
+- [How to Measure Your Devtool's Visibility in AI Answers](https://www.studio1hq.com/blog/how-to-measure-devtool-visibility-in-ai-answers): A two-hour spreadsheet audit of how often AI tools mention, recommend, link to, and accurately describe your devtool.
+- [Developer Docs as Your Best AEO Asset](https://www.studio1hq.com/blog/developer-docs-as-aeo-asset): How to structure developer documentation so AI answers cite it.
+- [llms.txt Explained](https://www.studio1hq.com/blog/llms-txt-explained-developer-tools-guide): What llms.txt is, whether it improves AI visibility or SEO, and a practical template for developer tools.
+
+
+## Key pages
+
+- [Homepage](https://www.studio1hq.com/)
+- [Case Studies](https://www.studio1hq.com/case-studies): Outcomes from GitHub growth, technical content, docs, DevRel, and video work.
+- [Testimonials](https://www.studio1hq.com/testimonials): Named quotes from founders, DevRel leads, and marketers at client teams.
+- [About Us](https://www.studio1hq.com/about-us)
+- [Blog](https://www.studio1hq.com/blog): All articles, including AI model reviews and news.
+- [RSS Feed](https://www.studio1hq.com/feed.xml): Machine-readable feed of Studio1 blog posts.
+- Blog posts as Markdown: every post at https://www.studio1hq.com/blog/<slug> is also available as clean Markdown at https://www.studio1hq.com/blog/<slug>.md.
+- [llms-full.txt](https://www.studio1hq.com/llms-full.txt): This file plus the full text of every case study and guide listed here.
+- [Products](https://www.studio1hq.com/product): Studio1-built tools, including Raah and AssetSnip.
+- [Careers](https://www.studio1hq.com/careers)
+- [Open Source](https://www.studio1hq.com/oss): Studio1's open-source work: Awesome AI Apps (138 runnable LLM apps and agents covering RAG, MCP, voice, memory, multi-agent workflows and fine-tuning) and the Studio1-OSS GitHub org (OpenDuet, OpenCrewBot, NConnect, Codetrail and more), with a searchable index of hand-picked projects.
+- [DevRel Cohort](https://www.studio1hq.com/devrel-cohort): A four-week, hands-on program by Studio1 for people breaking into developer relations; top participants get interviews at Studio1 and partner referrals.
+- [Brand Assets](https://www.studio1hq.com/brand): The Studio1 brand page: the Studio1 Sans typeface (free under the SIL OFL), colors, logo files, and the design system with tokens, CSS, a Tailwind preset, and DESIGN.md rules for designers, developers, and AI tools. Downloads for the fonts and the full kit.
+- [Team](https://www.studio1hq.com/team): The Studio1 team: the two co-founders, then the writers, developer advocates and builders who do the work.
+- [Events](https://www.studio1hq.com/events): Conferences, hackathons, meetups, podcasts and livestreams the Studio1 team has spoken at, run or joined, from KubeCon and CityJS to campus hackathons across India.
+- [Calendar](https://www.studio1hq.com/calendar): Studio1 events laid out month by month, each linking to its entry on the Events page.
+- [DevRel Jobs](https://www.studio1hq.com/devrel-jobs): A curated board of developer relations, developer advocacy, and community roles.
+- [Terms of Use](https://www.studio1hq.com/terms)
+- [Privacy Policy](https://www.studio1hq.com/privacy)
+
+## Projects we run
+
+- [Awesome AI Apps](https://github.com/Arindam200/awesome-ai-apps): Open-source collection of 138 runnable LLM apps and agents (RAG, MCP, voice, memory, multi-agent workflows, fine-tuning), maintained by Studio1 co-founder Arindam Majumder.
+- [Awesome LLM Benchmarks](https://awesomellmbenchmarks.com/): Open-source platform that puts benchmarks for open and closed models in one place, with the methods published next to the scores.
 
 ## Products
 
 - [Raah](https://raah.dev): Web analytics and real-user observability for developers and SaaS teams.
 - [AssetSnip](https://assetsnip.com): Website asset extraction for design research and handoff.
 
-## Blog
-
-- [How to Get Your Tool Recommended by ChatGPT, Perplexity, and Google](https://studio1hq.com/blog/how-to-get-your-tool-recommended-by-chatgpt-perplexity-google): AEO, GEO, LLM SEO, crawler access, documentation strategy, comparison pages, community mentions, schema, and llms.txt guidance for developer tools.
-- [Claude Opus 5.5 Review: Motion Videos, Coding Tests, and What Breaks](https://studio1hq.com/blog/claude-opus-5-5-review-motion-videos): Claude Opus 5.5 review covering motion video generation, coding benchmarks, pricing, breaking changes, and whether teams should switch.
-- [10 Projects You Should Build with Jev](https://studio1hq.com/blog/10-projects-you-should-build-with-jev): Practical Jev project ideas for support triage, lead scoring, moderation, QA, workflow routing, and fast structured decisions.
-- [What is Jev? In 5 minutes](https://studio1hq.com/blog/what-is-jev): TypeSafe AI's Jev decision model, how it differs from LLMs, and where it fits in software workflows.
-- [How Developer Tool Companies Can Measure Content ROI Beyond Pageviews](https://studio1hq.com/blog/developer-tool-content-roi-beyond-pageviews): A practical framework for measuring developer content ROI through intent, activation, observability, and adoption.
-- [Common Mistakes Startups Make When Building Developer-First Products](https://studio1hq.com/blog/common-mistakes-developer-products): Developer adoption mistakes around onboarding, docs, communities, awareness, and DevRel timing.
-- [Why Active Developer Communities Matter for Early-Stage Startups](https://studio1hq.com/blog/why-developer-communities-matter): How DevRel, trust, technical education, and open communities help early-stage developer products grow.
-- [DevRel vs Developer Marketing: What's the Difference and Why It Matters](https://studio1hq.com/blog/devrel-vs-developer-marketing): The difference between DevRel and developer marketing, when to use each, and how strong teams combine both.
-- [Why Software Companies Are Doubling Down on Content in 2026](https://studio1hq.com/blog/why-software-companies-invest-in-content): Why content compounds for software and devtool companies, and what types of content convert.
-
 ## Team
 
-- **Arindam Majumder**: Co-founder and Content Lead. Developer advocate, open-source contributor, and technical writer who has reached 270k+ developers.
-- **Amitesh Anand**: Co-founder and Operations Lead. Technical writer and developer advocate with 80k+ published words across major tech platforms.
+- **[Arindam Majumder](https://www.studio1hq.com/blog/author/arindam-majumder)**: Co-founder. Developer advocate, open-source contributor, and technical writer who has reached 270k+ developers.
+- **[Amitesh Anand](https://www.studio1hq.com/blog/author/amitesh-anand)**: Co-founder. Technical writer and developer advocate with 80k+ published words across major tech platforms.
 - **Shivay Lamba**: ML engineer and open-source advocate.
 
 ## Contact
 
 - Email: contact@studio1hq.com
 - Book a call: https://cal.com/studio1/collab
-- X/Twitter: https://x.com/Studio1HQ
+- X: https://x.com/Studio1HQ
 - LinkedIn: https://www.linkedin.com/company/studio1hq/
+- GitHub: https://github.com/Studio1HQ

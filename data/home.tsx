@@ -1,19 +1,19 @@
-import IvanImg from "@/public/assets/Ivan.webp";
-import GabrielImg from "@/public/assets/Gabriel.webp";
-import JuliaImg from "@/public/assets/Julia.webp";
-import DavidImg from "@/public/assets/David.webp";
-import ColeImg from "@/public/assets/Cole.webp";
-import FerranImg from "@/public/assets/Ferran.webp";
-import AgitaImg from "@/public/assets/Agita.webp";
-import SauravImg from "@/public/assets/Saurav.webp";
-import NathanImg from "@/public/assets/Nathan.webp";
-import MarketaImg from "@/public/assets/Marketa.webp";
-import JesseImg from "@/public/assets/Jesse.webp";
-import PaulImg from "@/public/assets/Paul.webp";
-import DylanImg from "@/public/assets/Dylan.webp";
-import SakshiImg from "@/public/assets/sakshi-sen.webp";
-import TanmayImg from "@/public/assets/Tanmay.webp";
-import NovitaAiMarkGreen from "@/public/assets/novita-ai-mark-green.webp";
+import IvanImg from "@/public/assets/people/Ivan.webp";
+import GabrielImg from "@/public/assets/people/Gabriel.webp";
+import JuliaImg from "@/public/assets/people/Julia.webp";
+import DavidImg from "@/public/assets/people/David.webp";
+import ColeImg from "@/public/assets/people/Cole.webp";
+import FerranImg from "@/public/assets/people/Ferran.webp";
+import AgitaImg from "@/public/assets/people/Agita.webp";
+import SauravImg from "@/public/assets/people/Saurav.webp";
+import NathanImg from "@/public/assets/people/Nathan.webp";
+import MarketaImg from "@/public/assets/people/Marketa.webp";
+import JesseImg from "@/public/assets/people/Jesse.webp";
+import PaulImg from "@/public/assets/people/Paul.webp";
+import DylanImg from "@/public/assets/people/Dylan.webp";
+import SakshiImg from "@/public/assets/people/sakshi-sen.webp";
+import TanmayImg from "@/public/assets/people/Tanmay.webp";
+import NovitaAiMarkGreen from "@/public/assets/logos/novita-ai-mark-green.webp";
 import {
   ChartBar,
   ChatCenteredDots,
@@ -29,7 +29,7 @@ export const homeFeatures: Feature[] = [
   {
     title: "Quality",
     description:
-      "Premium tutorials, API docs, and developer onboarding content from a lean team that can support docs, content, and DevRel without a full in-house hire.",
+      "Tutorials, API docs, and onboarding content written by engineers, from a lean team that covers docs, content, and DevRel without a full in-house hire.",
     icon: CubeFocus,
   },
   {
@@ -47,13 +47,13 @@ export const homeFeatures: Feature[] = [
   {
     title: "Support",
     description:
-      "We operate as an embedded team with fast iterations and minimal oversight. Your success is our priority.",
+      "We work as an embedded team with fast iterations and minimal oversight.",
     icon: Headset,
   },
   {
     title: "Results",
     description:
-      "2M+ content views, 10+ high-impact developer events, and Product Hunt #1 launches driving real product growth.",
+      "3M+ content views, 40+ developer events, and a Product Hunt Product of the Day launch.",
     icon: ChartBar,
   },
   {
@@ -180,7 +180,7 @@ Highly recommended. 💯`,
   },
   {
     name: "Ivan Cordoba",
-    role: "CEO & Founder Opire",
+    role: "CEO & Founder, Opire",
     avatar: IvanImg.src,
     content: `Studio1 turned our ideas into clear and engaging content, helping us connect with our community and strengthen our identity.
 
@@ -207,9 +207,9 @@ So far, 10/10 experience!`,
   },
   {
     name: "Agita Jaunzeme",
-    role: "Community Manager, VDK(VMware)",
+    role: "Community Manager, VDK (VMware)",
     avatar: AgitaImg.src,
-    content: `Very fast, good-quality work, results! Nothing to add; I totally recommend working with Amitesh !`,
+    content: `Very fast, good-quality work, results! Nothing to add; I totally recommend working with Amitesh!`,
     highlights: ["Amitesh", "good-quality"],
   },
   {
@@ -235,9 +235,9 @@ The whole process was smooth!`,
     name: "Julia Machado",
     role: "Founder & CEO, WebCrumbs",
     avatar: JuliaImg.src,
-    content: `Arindam gave us a masterclass on how to launch on Product Hunt and I dare to say if it wasn't that we wouldn't have achieved 3rd in our first launch ever and with almost zero preparation.
+    content: `Arindam gave us a masterclass on how to launch on Product Hunt and I dare to say if it wasn't for that we wouldn't have achieved 3rd in our first launch ever and with almost zero preparation.
 
-He write great technical texts that reach an impressive audience.
+He wrote great technical texts that reached an impressive audience.
 
 We'll definitely work with him again!`,
     highlights: [

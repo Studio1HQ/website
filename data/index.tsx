@@ -1,18 +1,18 @@
-import IvanImg from "../public/assets/Ivan.webp";
-import GabrielImg from "../public/assets/Gabriel.webp";
-import JuliaImg from "../public/assets/Julia.webp";
-import DavidImg from "../public/assets/David.webp";
-import ColeImg from "../public/assets/Cole.webp";
-import FerranImg from "../public/assets/Ferran.webp";
-import AgitaImg from "../public/assets/Agita.webp";
-import SauravImg from "../public/assets/Saurav.webp";
-import NathanImg from "../public/assets/Nathan.webp";
-import MarketaImg from "../public/assets/Marketa.webp";
-import JesseImg from "@/public/assets/Jesse.webp";
-import PaulImg from "@/public/assets/Paul.webp";
-import DylanImg from "@/public/assets/Dylan.webp";
-import SakshiImg from "@/public/assets/sakshi-sen.webp";
-import TanmayImg from "../public/assets/Tanmay.webp";
+import IvanImg from "../public/assets/people/Ivan.webp";
+import GabrielImg from "../public/assets/people/Gabriel.webp";
+import JuliaImg from "../public/assets/people/Julia.webp";
+import DavidImg from "../public/assets/people/David.webp";
+import ColeImg from "../public/assets/people/Cole.webp";
+import FerranImg from "../public/assets/people/Ferran.webp";
+import AgitaImg from "../public/assets/people/Agita.webp";
+import SauravImg from "../public/assets/people/Saurav.webp";
+import NathanImg from "../public/assets/people/Nathan.webp";
+import MarketaImg from "../public/assets/people/Marketa.webp";
+import JesseImg from "@/public/assets/people/Jesse.webp";
+import PaulImg from "@/public/assets/people/Paul.webp";
+import DylanImg from "@/public/assets/people/Dylan.webp";
+import SakshiImg from "@/public/assets/people/sakshi-sen.webp";
+import TanmayImg from "../public/assets/people/Tanmay.webp";
 import React from "react";
 import Tensorlake from "@/public/case-studies/tensorlake/tensorlake-logo.webp";
 import {
@@ -36,7 +36,7 @@ import {
   Brightdata,
   ForgeCode,
   ScrapeGraph,
-  Enteligence,
+  Entelligence,
   Jozu,
   Dualite,
   CodeRabbit,
@@ -192,7 +192,7 @@ export const Data = {
     },
     {
       id: 2,
-      name: "Vmware",
+      name: "VMware",
       designation: "Virtualization",
       image: Vmware,
       href: "https://www.vmware.com/",
@@ -242,10 +242,10 @@ export const Data = {
     },
     {
       id: 8,
-      name: "Enteligence",
+      name: "Entelligence",
       designation: "AI Code Review",
-      image: Enteligence,
-      href: "https://enteligence.com/",
+      image: Entelligence,
+      href: "https://entelligence.ai/",
       description: "AI engineering intelligence platform.",
     },
     {
@@ -571,7 +571,7 @@ export const Data = {
     {
       title: "Results",
       description:
-        "2M+ content views, 10+ high-impact developer events, and Product Hunt #1 launches driving real product growth.",
+        "3M+ content views, 40+ developer events, and a Product Hunt Product of the Day launch.",
       icon: ChartBar,
     },
     {
@@ -1354,7 +1354,7 @@ They’re proactive, easy to work with, and really understand how to create deve
     },
     {
       name: "Ivan Cordoba",
-      role: "CEO & Founder Opire",
+      role: "CEO & Founder, Opire",
       avatar: IvanImg.src,
       content: `Studio1 turned our ideas into clear and engaging content, helping us connect with our community and strengthen our identity.
             
@@ -1381,9 +1381,9 @@ They’re proactive, easy to work with, and really understand how to create deve
     },
     {
       name: "Agita Jaunzeme",
-      role: "Community Manager, VDK(VMware)",
+      role: "Community Manager, VDK (VMware)",
       avatar: AgitaImg.src,
-      content: `Very fast, good-quality work, results! Nothing to add; I totally recommend working with Amitesh !`,
+      content: `Very fast, good-quality work, results! Nothing to add; I totally recommend working with Amitesh!`,
       highlights: ["Amitesh", "good-quality"],
     },
     {
@@ -1635,7 +1635,7 @@ They’re proactive, easy to work with, and really understand how to create deve
   BlogAsServiceTeam: [
     {
       name: "Arindam Majumder",
-      role: "Co-founder & Content Lead",
+      role: "Co-founder",
       image: "https://avatars.githubusercontent.com/u/109217591?v=4",
       bio: "Developer Advocate with expertise in technical writing and open-source. Has reached 270k+ developers through technical content, with notable contributions to Next.js and featured in their RC release blog. Specializes in creating developer-centric content that drives engagement and growth.",
       social: {
@@ -1646,8 +1646,8 @@ They’re proactive, easy to work with, and really understand how to create deve
     },
     {
       name: "Amitesh Anand",
-      role: "Co-founder & Operations Lead",
-      image: "/assets/amitesh.webp",
+      role: "Co-founder",
+      image: "/assets/team/amitesh.webp",
       bio: "Technical writer and developer advocate with expertise in creating scalable content. Published 80k+ words reaching thousands of readers across major tech platforms. Nominated for Noonies 2022 Tech Awards, focused on delivering high-impact technical content.",
       social: {
         twitter: "https://mobile.twitter.com/astrodevil_",
@@ -1755,7 +1755,7 @@ They’re proactive, easy to work with, and really understand how to create deve
     {
       name: "Amitesh Anand",
       role: "Technical writer and DevRel",
-      image: "/assets/amitesh.webp",
+      image: "/assets/team/amitesh.webp",
       bio: "",
       social: {
         twitter: "https://mobile.twitter.com/astrodevil_",

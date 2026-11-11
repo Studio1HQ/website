@@ -21,7 +21,7 @@ import {
   Brightdata,
   ForgeCode,
   ScrapeGraph,
-  Enteligence,
+  Entelligence,
   Jozu,
   Dualite,
   CodeRabbit,
@@ -155,7 +155,7 @@ export const companies = [
     },
     {
       id: 2,
-      name: "Vmware",
+      name: "VMware",
       designation: "Virtualization",
       image: Vmware,
       href: "https://www.vmware.com/",
@@ -205,10 +205,10 @@ export const companies = [
     },
     {
       id: 8,
-      name: "Enteligence",
+      name: "Entelligence",
       designation: "AI Code Review",
-      image: Enteligence,
-      href: "https://enteligence.com/",
+      image: Entelligence,
+      href: "https://entelligence.ai/",
       description: "AI engineering intelligence platform.",
     },
     {

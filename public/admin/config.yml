@@ -11,7 +11,7 @@ show_preview_links: true
 
 site_url: https://www.studio1hq.com
 display_url: https://www.studio1hq.com
-logo_url: /assets/logo.webp
+logo_url: /assets/site/logo.webp
 
 media_folder: public/blog/uploads
 public_folder: /blog/uploads
@@ -37,7 +37,20 @@ collections:
     editor:
       preview: true
     fields:
-      - { name: title, label: Title, widget: string }
+      - {
+          name: title,
+          label: Title,
+          widget: string,
+          hint: "The headline at the top of the post. If it runs past 60 characters, also fill in SEO Title below.",
+        }
+      - {
+          name: seoTitle,
+          label: SEO Title,
+          widget: string,
+          required: false,
+          pattern: ["^.{0,60}$", "Keep the SEO Title to 60 characters or fewer."],
+          hint: "Optional. A shorter title for Google results and social cards, 60 characters or fewer, main keyword first. Leave empty when the Title is already short. \" | Studio1\" is added automatically when it fits.",
+        }
       - {
           name: slug,
           label: URL Slug,
@@ -50,7 +63,8 @@ collections:
           name: description,
           label: SEO Description,
           widget: text,
-          hint: "Suggested: 140-160 characters. Used for Google snippets, social cards, AI answers, and blog cards.",
+          pattern: ["^[\\s\\S]{50,160}$", "Write 50 to 160 characters (140 to 160 is best); Google cuts off anything longer."],
+          hint: "Aim for 140-160 characters, with the main keyword early. Used for Google snippets, social cards, AI answers, and blog cards.",
         }
       - {
           name: tldrSummary,
@@ -86,6 +100,14 @@ collections:
           default: false,
         }
       - {
+          name: unlisted,
+          label: Hide from /blog,
+          widget: boolean,
+          required: false,
+          default: false,
+          hint: "Turn on for posts that aren't about Studio1's services. The post stays live at its URL and in search engines, but is left off /blog, the RSS feed, and the latest and next-article links.",
+        }
+      - {
           name: authors,
           label: Authors,
           widget: list,
@@ -102,23 +124,23 @@ collections:
           name: tags,
           label: Tags,
           widget: list,
-          hint: "Use 3-6 topical tags for SEO/GEO and article grouping.",
+          hint: "Use 3-6 topical tags for SEO/GEO and article grouping. Add one tag per item (click Add for the next one) rather than a comma-separated line. The first tag is shown as the post's topic label.",
           field: { name: tag, label: Tag, widget: string },
         }
       - {
           name: bannerImage,
-          label: Optional Social Share Image,
+          label: Banner Image,
           widget: image,
           required: false,
           choose_url: false,
-          hint: "Optional. Used for this blog card and LinkedIn/Twitter preview. Leave empty to use the default Studio1 image.",
+          hint: "Optional. Shown on the blog card and at the top of the post. Use a 1600x900 (16:9) image in the Studio1 paper style; leave empty to use the generated Studio1 cover.",
         }
       - {
           name: bannerImageAlt,
-          label: Social Share Image Alt Text,
+          label: Banner Image Alt Text,
           widget: string,
           required: false,
-          hint: "Optional. Only needed when a custom social share image is uploaded.",
+          hint: "Optional. Only needed when a banner image is set.",
         }
       - {
           name: body,

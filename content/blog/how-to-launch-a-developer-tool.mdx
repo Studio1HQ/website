@@ -1,0 +1,301 @@
+---
+title: "How to Launch a Developer Tool: A Launch Strategy From Prelaunch to Week Two"
+seoTitle: "How to Launch a Developer Tool: A Launch Strategy That Works"
+slug: how-to-launch-a-developer-tool
+description: "A developer tool launch strategy from six weeks out to week two: launch types, a timeline, an asset checklist, channels, launch day and what to measure."
+tldrSummary: "Launch something developers can try that day, build the quickstart, README, docs, demo video and posts four to six weeks out, and pick the two or three channels where your users already talk. Spend launch day replying to every comment, then judge the launch by activated and retained users, not upvotes or stars."
+tldrBullets:
+  - "Match the plan to the launch type: an open-source repo leads with the README and Show HN, a hosted product with the landing page and Product Hunt, an API with the quickstart, and a major version with existing users and a changelog."
+  - "Start six weeks out, have every asset ready a week early, and stop shipping to production the day before, as Supabase does for its launch weeks."
+  - "Pick two or three primary channels for your launch type, spread the rest across a launch week, and never ask for upvotes on Product Hunt, Hacker News or Reddit."
+  - "Measure activation and week-two retention by channel, then turn launch-day questions into tutorials, comparison pages and docs that keep bringing developers in."
+date: 2026-10-07
+updatedDate: 2026-10-07
+draft: false
+authors:
+  - Arindam Majumder
+tags:
+  - launches
+  - developer-marketing
+  - startups
+  - devrel
+bannerImage: /blog/uploads/how-to-launch-a-developer-tool/cover.png
+---
+**The short answer:** To launch a developer tool, ship something developers can try the same day (an open-source repo, a free tier or an API key with a working quickstart), and plan six weeks out. Build the README, docs, demo video and launch posts, pick two or three channels where your users already talk (Show HN, the right subreddits, X, Product Hunt), and reply to every comment on launch day. Judge it by activated and retained users, not upvotes, then turn the spike into tutorials and comparison pages.
+
+## What kind of developer tool launch are you running?
+
+The launch type decides your landing page, your lead channel and what "try it now" means. Get it wrong and you post a signup page to Show HN, which [the Show HN rules](https://news.ycombinator.com/showhn.html) exclude, or put a waitlist on Product Hunt, which [doesn't feature waitlisted products](https://help.producthunt.com/en/articles/9883485-product-hunt-featuring-guidelines) unless they give immediate access.
+
+| Launch type | What "try it now" means | Lead channels | What changes in the plan | Real example |
+| --- | --- | --- | --- | --- |
+| Open-source repo | Clone, install and see a result in minutes | Show HN, Reddit, X | The README is the landing page. Demos and talks matter more than a listing. | [Memori](/case-studies/memori), [OpenLore](/case-studies/openlore) |
+| Hosted product or free tier | Sign up and reach a first result without a sales call | Product Hunt, X, LinkedIn | The landing page and onboarding carry the launch. Load-test the free tier. | [Webcrumbs](/case-studies/webcrumbs) Frontend AI |
+| API or SDK | Get a key and make a first call from a copy-paste snippet | Show HN, Reddit, tutorials, newsletters | The docs and quickstart are the product. Launch with 2 or 3 demo apps. | [ScrapeGraphAI](/case-studies/scrapegraph) demo agents |
+| Major version or feature | Existing users upgrade or switch it on | Your users, community, changelog, launch week | Lead with what changed and the migration path. Public channels come second. | Permit.io's [launch week](https://www.permit.io/blog/launch-week-1-devex) |
+
+Two rules shape the last row. Show HN says new features and upgrades "generally aren't substantive enough", though "a major overhaul is probably ok". And under [Semantic Versioning](https://semver.org/), a major version means "incompatible API changes", so a major launch without a migration guide sends users straight to your issue tracker.
+
+**Key pointers:**
+
+* Write your launch type and your "try it now" moment in one sentence before you plan anything else.
+* If visitors can't use the product on launch day, move the date.
+* For a major version, email existing users with the migration guide before any public post.
+
+## Developer tool launch timeline: 6 weeks out to 2 weeks after
+
+Six weeks leaves time to fix the first-run experience before anyone sees it. Product Hunt lets you [schedule a launch up to a month ahead](https://www.producthunt.com/launch/preparing-for-launch), so lock the date at four weeks out.
+
+**Template: the six-week launch timeline**
+
+| When | Product and docs | Assets and content | Channels and community |
+| --- | --- | --- | --- |
+| 6 weeks out | Pick the one new thing. Run the quickstart on a clean machine. | Write the one-line pitch. List 10 questions you expect. | Pick 2 or 3 primary channels. Start commenting where you plan to post. |
+| 5 weeks out | Fix every gap the clean run found. | Start 2 or 3 demo projects. | Shortlist newsletters and creators. |
+| 4 weeks out | Docs for the top five tasks, plus pricing and limits. | Rewrite the README. Script the demo video. | Schedule the date. Tell users and your community. |
+| 3 weeks out | Freeze the launch scope. | Record the demo. Build the landing page. | Pitch newsletters. Brief partners. |
+| 2 weeks out | Someone outside the team runs the quickstart cold. | Draft the launch post, channel posts, changelog and FAQ replies. | Share a launch kit with supporters. |
+| 1 week out | Ship integrations and infra changes. Load-test signup. | Final review. UTM-tag every link. | Assign launch-day roles. |
+| Launch day | No deploys except fixes. | Publish the launch post and changelog. | Post channel by channel. Reply to everything. |
+| Days 1 to 3 | Fix docs gaps from questions. | Post an update on what you fixed. | Run the secondary channels. |
+| Week 1 after | Ship fixes with release notes. | Recap post. First tutorial. | Follow up with commenters who described a use case. |
+| Week 2 after | Compare activation with your baseline. | Publish a comparison page. | Check retention by channel. |
+
+The deploy freeze comes from Supabase, which ran its first Launch Week in March 2021 and later wrote that one lesson was ["to no longer ship to prod on the day of the Launch itself"](https://supabase.com/blog/2021/11/26/supabase-how-we-launch), moving major integrations to the week before.
+
+**Key pointers:**
+
+* Book the clean-machine quickstart test twice, at 6 weeks and at 2 weeks, with a new tester each time.
+* Join target communities at week 6. Product Hunt's own guide warns against [spamming Reddit or Indie Hackers on launch day](https://www.producthunt.com/launch/sharing-your-launch) if you haven't been active there.
+* Freeze production deploys 24 hours before launch, except for fixes.
+
+## The launch asset checklist
+
+Every channel sends people to the same few assets, so one weak asset leaks traffic from all of them.
+
+**Checklist: launch assets and when each one is ready**
+
+| Asset | Ready when |
+| --- | --- |
+| Working quickstart | Someone outside the team reaches a working result on a clean machine using only the docs. |
+| README | The first screen has a one-line pitch, a visual and the install command. |
+| Landing page | The headline matches the launch post, and the main button goes to signup or the quickstart, not "book a demo". |
+| Demo video | The product is working within the first few seconds, with no slides. |
+| Docs | The five tasks a new user tries first each have a page with copy-paste code. |
+| Launch post | It lives on your blog and covers the problem, what is new, how to try it and what is next. |
+| Changelog | Changes are grouped as Added, Changed, Deprecated, Removed, Fixed and Security, the format [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) recommends. |
+| Social posts | One version per channel, with the recording attached and links UTM-tagged. |
+| FAQ replies | Answers to the questions you expect are drafted in a shared doc. |
+
+For README detail, see [how to get more GitHub stars for your open-source launch](/blog/how-to-get-github-stars-open-source-launch), which shows OpenLore's README before and after.
+
+Spend the most time on the quickstart. Corsair's team used Studio1's onboarding audit to rework a quick start that [reaches a working example in under a minute](/case-studies/corsair). Here is a vague step and a clear one (an illustrative example):
+
+**Before:** "Install the SDK, configure your credentials and make your first request."
+
+**After:**
+
+```bash
+npm install @acme/sdk
+export ACME_API_KEY=sk_test_xxx   # from Dashboard > API keys
+npx acme hello   # prints: Connected to Acme (test mode)
+```
+
+For the demo video, Permit.io's 2023 launch is a good model: a short, plain-language video from a simple script, narrated and edited by its developer advocate, which passed [100K+ views on YouTube](https://permit.io/blog/producthunt-howto).
+
+**Template: the launch-day reply bank**
+
+```text
+How is this different from [closest alternative]?
+  One line on your approach, one on when the alternative is the better pick.
+What's the license? Is any part closed?
+Can I self-host it?
+What does the free tier include, and what are the limits?
+What data do you store, and where?
+```
+
+**Key pointers:**
+
+* Have someone outside the team record their screen while running the quickstart, and fix every pause.
+* Write the "how is this different from X" answer before launch day, including when X is the better choice.
+* Publish the changelog and launch post at the same moment, so every channel's links resolve.
+
+## Which launch channels fit a developer tool?
+
+Pick two or three primary channels for your launch type (the launch-type table at the top shows which), then use the rest to extend the launch over the following days.
+
+| Channel | Good for | Rule or fact to know |
+| --- | --- | --- |
+| Product Hunt | A day of early adopters and a lasting listing | Launching at 12:01 AM PST gives a full 24 hours |
+| Show HN | Feedback from engineers who try it on the spot | Easy to try, "ideally without barriers such as signups or emails" |
+| Reddit | Problem-first discussion in your niche | Each subreddit sets its own self-promotion rules |
+| X | Demo videos and founder threads | Post from the founder's or engineer's account |
+| LinkedIn | Engineering leaders in your network | Put the takeaway in the post itself |
+| daily.dev | Feed reach for an article | Corporate blogs can't be sources, so post directly or in a Squad |
+| Dev.to | Tutorials that pick up search traffic | Set `canonical_url`, up to four tags |
+| Newsletters | A curated mention developers trust | Console reviews tools by email submission and doesn't sell reviews |
+| Discord and Slack | Your users and adjacent projects | Post only where you are already active |
+| Launch week | A fresh reason to share every day | One announcement a day for a week |
+
+### Product Hunt
+
+Best for a hosted product. Product Hunt features launches that are [useful, novel, high craft or creative](https://help.producthunt.com/en/articles/9883485-product-hunt-featuring-guidelines), and its [points combine upvotes](https://help.producthunt.com/en/articles/11751186-product-of-the-day-week-month) with "meaningful engagement (like comments or shares)". The listing specs, maker comment and hour-by-hour plan are in our [Product Hunt launch playbook](/blog/product-hunt-launch-playbook).
+
+### Show HN
+
+Best for a repo or an API people can call without a sales step. Titles, the first comment and launch-day behavior are in our [Show HN guide](/blog/how-to-launch-on-hacker-news-show-hn). Set expectations: an [analysis of 188,085 Show HN posts](https://danfking.github.io/blog/2026/04/23/show-hn-by-the-numbers/) found the median post scores 2 points, and 50 points is the top 6%. Say what it is in plain words (an illustrative example):
+
+* **Before:** "Show HN: Acme, the AI-powered memory platform for next-gen agents"
+* **After:** "Show HN: Acme, open-source memory for AI agents, stored in Postgres"
+
+Framing counts too. Memori's plain Show HN post earned 17 points. A later post framed around a debate developers were already having, about how AI agents should store memory, reached 136 points and 63 comments.
+
+![Hacker News post for Memori with 136 points and 63 comments](/blog/uploads/how-to-launch-on-hacker-news-show-hn/memori-hn-debate-post.webp "Memori's debate-framed post: 136 points against 17 for its plain Show HN.")
+
+### Reddit
+
+Lead with the problem, post first in the one subreddit closest to your users, and stay in the comments. Memori's Reddit launch post reached 85+ upvotes and 50K+ impressions. Our [Reddit marketing playbook](/blog/reddit-marketing-for-developer-tools) has the title patterns and the rules to check.
+
+### X and LinkedIn
+
+On X, post a short screen recording with a thread or X Article. OpenLore's X Article on giving every coding agent the same memory reached 24K views. On LinkedIn, write the takeaway as the post. After OpenLore's talks and hackathons, developers wrote 200+ LinkedIn posts and comments about it. For the full X plan, read [how to launch a developer tool on X](/blog/how-to-launch-a-developer-tool-on-x), which draws on 520 devtool launches.
+
+### daily.dev and Dev.to
+
+daily.dev [excludes corporate and personal blogs](https://docs.daily.dev/docs/how-to-get-featured) as feed sources, but any user can post an article directly or in a Squad. One OpenLore daily.dev post reached 50K organic impressions. On DEV, republish with the [`canonical_url` field](https://dev.to/p/editor_guide) pointing at your blog. Webcrumbs' "v0 alternative" comparison on DEV kept earning reach through search after publication.
+
+### Newsletters
+
+Pick newsletters that review tools. Console, a weekly devtools newsletter, takes [submissions at hello@console.dev](https://console.dev/selection-criteria) and says "We do not do sponsored reviews". Pitch three weeks out with what it does, a link to try it and what is new.
+
+### Discord and Slack communities
+
+Your users are your first audience. For its 2023 launch, Permit.io [asked active users in its Slack community and maintainers of related open-source projects](https://permit.io/blog/producthunt-howto) to help, instead of doing cold outreach.
+
+### Launch week
+
+With several things to ship, give each one a day. Supabase asked "why just have one launch?" and [shipped 7 major features](https://supabase.com/blog/2021/11/26/supabase-how-we-launch) in its first Launch Week. Permit.io's [Launch Week Day 1](https://www.permit.io/blog/launch-week-1-devex) in October 2024 bundled four announcements, including an open-sourced CLI and a docs revamp. A day-by-day plan is in our [distribution playbook](/blog/how-to-distribute-technical-content-reddit-x-youtube).
+
+**Key pointers:**
+
+* Choose one lead channel: Show HN for a repo or API, Product Hunt for a hosted product, your own users for a major version.
+* Rewrite the post for each channel instead of pasting the same text everywhere.
+* Email three relevant newsletters three weeks out, with a link people can try that day.
+
+## How to run launch day
+
+Decide who does what before the day starts.
+
+| Role | Job on the day |
+| --- | --- |
+| Launch lead | Posts on schedule, watches every channel, makes the calls |
+| Repliers (the engineers who built it) | Answer every technical comment within minutes, with code or a docs link |
+| On-call fixer | Ships docs fixes and bug fixes only |
+| Metrics owner | Checks signups, quickstart completions and errors every hour |
+
+**Template: the launch-day run sheet**
+
+1. **Day before:** freeze deploys. Test signup, the quickstart and free-tier limits once more.
+2. **Hour 0:** publish the launch post and changelog, then post to your lead channel. On Product Hunt that is 12:01 AM PST, which [gives people a full 24 hours](https://www.producthunt.com/launch/preparing-for-launch). Add your first comment right away.
+3. **First two hours:** the team shares with its own networks. Permit.io did this and reported [over 300 upvotes within the first two hours](https://permit.io/blog/producthunt-howto).
+4. **US morning:** the second wave. Email your users, which Product Hunt calls ["one of your strongest tools"](https://www.producthunt.com/launch/sharing-your-launch), then post on X, LinkedIn and your community. Permit.io timed a second wave for the US East Coast morning.
+5. **All day:** reply to everything. Log each question with its channel, link, answer and fix type (docs, product, pricing or positioning).
+6. **Afternoon:** post an update with what people asked and what you fixed.
+
+Never ask for upvotes. Product Hunt asks you to request "feedback, comments, opinions, help spreading the word", and Hacker News says it will ["penalize or ban submissions, accounts, and sites"](https://news.ycombinator.com/newsfaq.html) that solicit votes. Permit.io also turned down paid agencies that used bots or fake accounts.
+
+**Key pointers:**
+
+* Put the engineers who built the feature on replies.
+* Keep a shared question log with a fix type on every row, and review it the next morning.
+* If Show HN is your lead channel, post when your repliers are awake, not on Product Hunt's clock.
+
+## What to measure after a developer tool launch
+
+Upvotes and stars show who saw the launch, not who uses the product. The [Show HN analysis](https://danfking.github.io/blog/2026/04/23/show-hn-by-the-numbers/) found HN score and GitHub stars correlate at only r = 0.29, about 8% of the variance, and comments barely predict stars (r = 0.10).
+
+Permit.io measured further down the funnel: [1.3K landing page hits in 24 hours, a 500% spike in signups and seven potential customer meetings](https://permit.io/blog/producthunt-howto), against about one meeting on average for similar activities.
+
+**Worksheet: launch metrics by stage**
+
+| Stage | Metric | Where to find it |
+| --- | --- | --- |
+| Attention | Rank, upvotes, views, stars | Each platform |
+| Visits | Sessions by UTM source | Web analytics |
+| Intent | Signups, installs, package downloads | Product analytics, package registry |
+| Activation | First successful run or API call within 24 hours of signup | Product events |
+| Retention | Still active in week 2 and week 4 | Product analytics |
+| Learning | Questions logged, fixes shipped | Your launch-day log |
+
+Define activation for your launch type before the day:
+
+* **Open-source repo:** ran the quickstart, then a second command.
+* **Hosted product:** created a first project and saw a real result.
+* **API or SDK:** made a first call that returned a 2xx response.
+* **Major version:** existing users upgraded or switched the feature on.
+
+Tag every launch link so the channels separate cleanly:
+
+```text
+https://yourtool.dev/?utm_source=hackernews&utm_medium=launch&utm_campaign=v2-launch
+https://yourtool.dev/?utm_source=reddit&utm_medium=launch&utm_campaign=v2-launch
+```
+
+**Key pointers:**
+
+* Record a 30-day baseline for signups, activation and stars before launch day.
+* Report activated users by channel, not total upvotes, in the launch retro.
+* Wait two weeks and check retention before you decide which channel worked.
+
+## How to turn the launch spike into lasting traffic
+
+In Stack Overflow's [2026 Developer Survey](https://stackoverflow.blog/2026/10/06/the-results-of-the-2026-developer-survey-are-here/), searching online (83%) and asking an AI agent (70%) were the top ways developers look for answers. Week two is when you build the pages those searches find.
+
+1. **Publish a comparison page** for the alternative named most often in launch comments. For Webcrumbs, ["v0 alternative" content](/case-studies/webcrumbs) kept bringing developers in long after launch week.
+2. **Turn the top three launch questions into tutorials.** Permit.io's "How to Implement RBAC in Supabase" ranks on Google's first page and doubles as an implementation path.
+3. **Ship demos people can run.** Memori launched with 12 hands-on demo agents, from a Wellness Coach to a Customer Support Voice Agent.
+4. **Check what AI assistants say about your category.** Ask ChatGPT and Perplexity the questions from your launch log, note which pages they cite, and write a page that answers better. Our [AEO agency](/aeo-agency) service tracks this.
+5. **Feed comments into the product.** Memori's 100+ Reddit comments shaped its onboarding, docs and v2 roadmap.
+6. **Plan the next moment.** Product Hunt asks you to [wait at least two months](https://help.producthunt.com/en/articles/484934-can-i-relaunch-my-product) and relaunch only for a significant update. On Hacker News, a few reposts are fine if a story [had no significant attention](https://news.ycombinator.com/newsfaq.html) in the last year or so.
+
+**Key pointers:**
+
+* Publish the comparison page within 14 days of launch, while the questions are fresh.
+* Answer each tutorial's question in its first two sentences, so search engines and AI assistants can quote it.
+* Put the next launch moment on the calendar before the retro ends.
+
+## How Studio1 has run developer tool launches
+
+**Webcrumbs.** With Studio1's launch guidance and almost no preparation time, Frontend AI by Webcrumbs finished [#3 of the day and #5 of the week](https://www.producthunt.com/products/frontendai-by-webcrumbs/awards) on its first Product Hunt launch, on August 6, 2024.
+
+> "Arindam gave us a masterclass on how to launch on Product Hunt and I dare to say if it wasn't for that we wouldn't have achieved 3rd in our first launch ever and with almost zero preparation. He wrote great technical texts that reached an impressive audience. We'll definitely work with him again!"
+>
+> **Julia Machado**, Founder & CEO, WebCrumbs
+
+**Open-source launches.** Memori's community-led launch, backed by 12 demo agents and a 150+ attendee meetup talk, grew it from launch to 12,000+ GitHub stars. OpenLore went from about 135 to 1,700+ stars in one month, with 100K+ impressions. Corsair went from about 300 to 2,000 stars in five weeks, with onboarding fixes before promotion. Read the [Memori](/case-studies/memori), [OpenLore](/case-studies/openlore) and [Corsair](/case-studies/corsair) case studies.
+
+**Product launches.** Studio1 supported Permit.io's Product Hunt launch of Permit Share-If, which drew more than 300 upvotes, and a ScrapeGraphAI campaign built on demo projects and social distribution reached 265K+ developers. For Nebius Token Factory, Studio1 supported both Product Hunt launches, the rebrand, a launch webinar and a day-0 model launch.
+
+If you want help with any part of this, our [product launch service](/product-launch-service) covers the plan, the demo video and launch posts, launch day across Reddit, Hacker News, X, LinkedIn and Product Hunt, and the week after. For an open-source repo, our [GitHub growth service](/github-growth-agency) runs the same work around the repo.
+
+## FAQ
+
+### How far ahead should I plan a developer tool launch?
+
+Four to six weeks. That leaves time to fix the quickstart, write docs, record a demo video, draft channel posts and warm up your community. Product Hunt lets you schedule a launch up to a month ahead.
+
+### Should I launch on Product Hunt or Hacker News?
+
+Use Show HN for an open-source repo or an API developers can try without signing up, since Show HN excludes landing pages and sign-up pages. Use Product Hunt for a hosted product or free tier. Many teams do both, on different days of one launch week, so each channel gets full attention.
+
+### Can I launch a developer tool with a waitlist?
+
+Not on the main developer channels. Product Hunt doesn't feature waitlisted products unless they give immediate access, and Show HN asks for something people can try, ideally without signups or emails. Launch when developers can use the product that day.
+
+### What metrics show that a developer tool launch worked?
+
+Activated users and week-two retention, by channel. Upvotes and stars show reach, but one Show HN analysis found HN score explains only about 8% of the variance in GitHub stars. Track signups, first successful runs or API calls, and who is still active two weeks later.
+
+### How often can I relaunch a developer tool?
+
+On Product Hunt, wait at least two months, and relaunch only for a significant update, not a new UI or pricing change. On Hacker News, a few reposts are fine if the story got no significant attention in the last year or so. In between, use launch weeks, integrations and tutorials to give developers new reasons to look.

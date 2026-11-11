@@ -1,0 +1,270 @@
+/* ========================================================
+   Studio1 Design System: one import for fonts, tokens,
+   base typography and core components (the paper design).
+   Usage: <link rel="stylesheet" href="design-system/css/studio1.css">
+   ======================================================== */
+@import "./fonts.css";
+@import "./tokens.css";
+
+:root {
+  font-synthesis: none;
+}
+
+/* Base: Studio1 Sans 16px, -0.03em, 1.6, ink on paper. Put class="s1" on <body>. */
+.s1 {
+  font-family: var(--s1-font-sans);
+  font-size: var(--s1-text-body);
+  font-weight: var(--s1-weight-regular);
+  line-height: var(--s1-leading-relaxed);
+  letter-spacing: var(--s1-tracking-base);
+  color: var(--s1-text);
+  background: var(--s1-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Type roles */
+.s1-hero     { font-size: var(--s1-text-hero);    font-weight: 500; line-height: var(--s1-leading-tight); letter-spacing: var(--s1-tracking-tight); text-wrap: balance; }
+.s1-display  { font-size: var(--s1-text-display); font-weight: 500; line-height: var(--s1-leading-snug);  letter-spacing: var(--s1-tracking-tight); text-wrap: balance; }
+.s1-title    { font-size: var(--s1-text-title);   font-weight: 500; line-height: var(--s1-leading-snug);  letter-spacing: var(--s1-tracking-tight); text-wrap: balance; }
+.s1-heading  { font-size: var(--s1-text-heading); font-weight: 500; line-height: var(--s1-leading-base);  letter-spacing: -0.035em; }
+.s1-subhead  { font-size: var(--s1-text-subhead); font-weight: 500; line-height: var(--s1-leading-base);  letter-spacing: -0.025em; }
+.s1-body-lg  { font-size: var(--s1-text-body-lg); font-weight: 400; line-height: var(--s1-leading-relaxed); }
+.s1-body     { font-size: var(--s1-text-body);    font-weight: 400; line-height: var(--s1-leading-relaxed); }
+.s1-body-sm  { font-size: var(--s1-text-body-sm); font-weight: 400; line-height: var(--s1-leading-base); }
+.s1-caption  { font-size: var(--s1-text-caption); font-weight: 400; line-height: var(--s1-leading-base); color: var(--s1-text-muted); }
+.s1-label    { font-size: var(--s1-text-caption); font-weight: 500; line-height: var(--s1-leading-base); letter-spacing: var(--s1-tracking-caps); text-transform: uppercase; color: var(--s1-text-muted); }
+.s1-muted    { color: var(--s1-text-secondary); }
+.s1-number   { font-weight: 500; letter-spacing: var(--s1-tracking-tight); font-variant-numeric: tabular-nums; }
+
+/* One or two headline keywords, and the "+" in stats */
+.s1-accent { color: var(--s1-accent); }
+
+.s1-link {
+  color: var(--s1-link);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+  transition: color var(--s1-duration-fast) var(--s1-ease);
+}
+.s1-link:hover { color: var(--s1-link-hover); }
+
+/* Code */
+.s1-code,
+.s1 code,
+.s1 pre {
+  font-family: var(--s1-font-mono);
+  font-size: var(--s1-text-code);
+  letter-spacing: var(--s1-tracking-none);
+}
+
+.s1 :not(pre) > code {
+  padding: 1px 5px;
+  border-radius: var(--s1-radius-sm);
+  background: var(--s1-surface);
+}
+
+.s1-codeblock {
+  font-family: var(--s1-font-mono);
+  font-size: var(--s1-text-code);
+  line-height: 1.6;
+  letter-spacing: 0;
+  padding: var(--s1-space-4) var(--s1-space-6);
+  border-radius: var(--s1-radius-md);
+  background: var(--s1-night);
+  color: var(--s1-paper);
+  overflow-x: auto;
+}
+.s1-codeblock .k { color: var(--s1-print-500); }      /* keywords */
+.s1-codeblock .s { color: var(--s1-print-200); }      /* strings */
+.s1-codeblock .c { color: var(--s1-paper-60); }       /* comments */
+.s1-codeblock .f { color: var(--s1-white); font-weight: 500; } /* functions */
+
+/* Buttons: pills. Add .s1-btn__dot for the orange circle that holds the icon. */
+.s1-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s1-space-3);
+  height: 48px;
+  padding: 0 var(--s1-space-6);
+  font: 500 15px / 1 var(--s1-font-sans);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  border-radius: var(--s1-radius-full);
+  border: var(--s1-border-frame) solid var(--s1-inverse-bg);
+  background: var(--s1-inverse-bg);
+  color: var(--s1-inverse-text);
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity var(--s1-duration-fast) var(--s1-ease), background var(--s1-duration-fast) var(--s1-ease), color var(--s1-duration-fast) var(--s1-ease);
+}
+.s1-btn:hover { opacity: 0.88; }
+.s1-btn:has(.s1-btn__dot) { padding-right: 6px; }
+
+.s1-btn__dot {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--s1-radius-full);
+  background: var(--s1-accent);
+  color: var(--s1-white);
+}
+.s1-btn__dot svg { width: 16px; height: 16px; }
+
+.s1-btn--lg { height: 56px; padding: 0 var(--s1-space-8); font-size: 16px; }
+.s1-btn--lg .s1-btn__dot { width: 40px; height: 40px; }
+
+.s1-btn--secondary {
+  background: transparent;
+  color: var(--s1-text);
+  border-color: var(--s1-text);
+}
+.s1-btn--secondary:hover { opacity: 1; background: var(--s1-card); }
+
+.s1-btn:focus-visible,
+.s1-input:focus-visible,
+.s1 a:focus-visible {
+  outline: 2px solid var(--s1-focus);
+  outline-offset: 2px;
+}
+
+/* Inputs */
+.s1-input {
+  height: 44px;
+  padding: 0 var(--s1-space-3);
+  font: 400 var(--s1-text-body) / 1 var(--s1-font-sans);
+  letter-spacing: var(--s1-tracking-base);
+  color: var(--s1-text);
+  background: var(--s1-card);
+  border: var(--s1-border-width) solid var(--s1-border);
+  border-radius: var(--s1-radius-md);
+}
+
+/* Surfaces */
+/* Stat and UI cards: white, square, a 1px soft bottom shadow */
+.s1-card {
+  padding: var(--s1-space-4) var(--s1-space-4);
+  background: var(--s1-card);
+  border-radius: var(--s1-radius-none);
+  box-shadow: var(--s1-shadow-card);
+}
+
+/* Content tiles (service cards, links): 6px radius, hairline ring */
+.s1-tile {
+  padding: var(--s1-space-6);
+  background: var(--s1-card);
+  border: var(--s1-border-width) solid var(--s1-border);
+  border-radius: var(--s1-radius-md);
+  transition: box-shadow var(--s1-duration-fast) var(--s1-ease);
+}
+.s1-tile:hover { box-shadow: var(--s1-shadow-raised); }
+
+.s1-panel {
+  padding: var(--s1-space-6);
+  background: var(--s1-surface);
+  border-radius: var(--s1-radius-md);
+}
+
+/* Tags and badges: square. Print orange with ink text, or ink with paper text. */
+.s1-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 7px;
+  font-size: var(--s1-text-caption);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  border-radius: var(--s1-radius-none);
+  background: var(--s1-accent);
+  color: var(--s1-on-accent);
+}
+.s1-badge--ink { background: var(--s1-inverse-bg); color: var(--s1-inverse-text); }
+.s1-badge--soft { background: var(--s1-accent-soft); color: var(--s1-text); }
+
+.s1-divider {
+  border: 0;
+  border-top: var(--s1-border-width) solid var(--s1-border);
+}
+
+/* Paper grain over any surface. The element needs position: relative. */
+.s1-grain { position: relative; isolation: isolate; }
+.s1-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: var(--s1-grain);
+  mix-blend-mode: multiply;
+  opacity: 0.3;
+}
+
+/* Block print: a flat orange block with ink texture, holding a cream dithered image or the mark */
+.s1-print {
+  position: relative;
+  overflow: hidden;
+  background: var(--s1-print-500);
+}
+.s1-print::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: var(--s1-grain);
+  mix-blend-mode: multiply;
+  opacity: 0.4;
+}
+.s1-print img { filter: brightness(0) invert(96%) sepia(8%); } /* white artwork -> cream */
+
+/* Selection frame, as in a design file:
+   <div class="s1-frame"><i></i><i></i><i></i><i></i><b>card-metrics</b> … </div>
+   The <b> is the layer label (bottom right); add .s1-frame--label-top to move it. */
+.s1-frame {
+  position: relative;
+  padding: 6px;
+  border: var(--s1-border-frame) solid var(--s1-accent);
+}
+.s1-frame > i {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border: var(--s1-border-frame) solid var(--s1-accent);
+  background: var(--s1-bg);
+}
+.s1-frame > i:nth-of-type(1) { left: -5px; top: -5px; }
+.s1-frame > i:nth-of-type(2) { right: -5px; top: -5px; }
+.s1-frame > i:nth-of-type(3) { left: -5px; bottom: -5px; }
+.s1-frame > i:nth-of-type(4) { right: -5px; bottom: -5px; }
+.s1-frame > b {
+  position: absolute;
+  right: -1.5px;
+  bottom: -22px;
+  padding: 3px 6px;
+  white-space: nowrap;
+  font-size: var(--s1-text-frame);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--s1-white);
+  background: var(--s1-accent);
+}
+.s1-frame--label-top > b { top: -22px; bottom: auto; left: -1.5px; right: auto; }
+
+/* Cursor: <svg class="s1-cursor" viewBox="0 0 24 24"><path d="M3.5 2.5 21 10.2l-7.6 2.3-3.3 7.8z"/></svg> */
+.s1-cursor { width: 32px; height: 32px; fill: var(--s1-text); }
+
+::selection {
+  background: var(--s1-print-500);
+  color: var(--s1-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .s1 *,
+  .s1 *::before,
+  .s1 *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

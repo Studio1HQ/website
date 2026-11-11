@@ -1,0 +1,79 @@
+/* Studio1 Tailwind v4 theme: the paper design. Mirrors tokens/tokens.json.
+   app.css:
+     @import "tailwindcss";
+     @import "./design-system/css/fonts.css";
+     @import "./design-system/tailwind/theme.css";
+*/
+@theme {
+  --font-sans: "Studio1 Sans", "Inter", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+
+  --text-frame: 11px;
+  --text-caption: 12px;
+  --text-body-sm: 14px;
+  --text-body: 16px;
+  --text-body-lg: 18px;
+  --text-subhead: 20px;
+  --text-heading: 24px;
+  --text-title: 32px;
+  --text-display: 46px;
+  --text-hero: 68px;
+  --text-code: 13px;
+
+  --tracking-tight-s1: -0.045em;
+  --tracking-s1: -0.03em;
+  --tracking-caps: 0.1em;
+
+  --color-paper: #f4efe7;
+  --color-ink: #141414;
+  --color-night: #0d0d0d;
+  --color-white: #ffffff;
+  --color-surface: #ece6dc;
+
+  --color-neutral-0: #ffffff;
+  --color-neutral-100: #f4efe7;
+  --color-neutral-200: #ece6dc;
+  --color-neutral-300: #ddd5c8;
+  --color-neutral-400: #c4bbad;
+  --color-neutral-500: #8f877b;
+  --color-neutral-600: #7a7268;
+  --color-neutral-700: #5e574e;
+  --color-neutral-800: #3a352f;
+  --color-neutral-900: #141414;
+  --color-neutral-950: #0d0d0d;
+
+  --color-print-50: #fdf0e4;
+  --color-print-200: #fbd9bd;
+  --color-print-300: #f9bb8c;
+  --color-print-400: #f89a5c;
+  --color-print-500: #f97316;
+  --color-print-600: #e2620d;
+  --color-print-700: #c2410c;
+  --color-print-800: #9a3412;
+  --color-print: #f97316;
+
+  --color-brand-red: #f97316;
+  --color-brand-orange: #f97316;
+
+  --color-success: #1a7f37;
+  --color-success-bg: #dafbe1;
+  --color-warning: #9a6700;
+  --color-warning-bg: #fff8c5;
+  --color-danger: #cf222e;
+  --color-danger-bg: #ffebe9;
+
+  --radius-none: 0px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+
+  --shadow-card: 0 1px 0 rgba(27, 23, 20, 0.06);
+  --shadow-raised: 0 8px 30px -10px rgba(0, 0, 0, 0.12);
+  --shadow-print: 0 30px 60px -30px rgba(90, 30, 0, 0.55);
+
+  --ease-s1: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Ink and paper tints: use opacity modifiers, e.g. text-ink/70, text-ink/60, border-ink/14, text-paper/70. */

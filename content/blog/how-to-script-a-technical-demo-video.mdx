@@ -1,0 +1,247 @@
+---
+title: "How to Script a Technical Demo Video Developers Will Watch"
+seoTitle: "Demo Video Script: A Template for Technical Product Demos"
+slug: how-to-script-a-technical-demo-video
+description: "A demo video script template for developer tools: five beats, a time, screen and voiceover table, a filled-in example, terminal hygiene, edits and cutdowns."
+tldrSummary: "A good product demo for developers shows one real job from start to finish: the outcome in the first seconds, setup in one step, the core moment with real code and real output, the result working, and one next step. Script it as a table of time, screen and voiceover, record a clean environment in segments, then cut the waits and caption it."
+tldrBullets:
+  - "Pick one job a developer would search for, write it as a single sentence, and cut every scene that doesn't serve it."
+  - "Script five beats in a time, on-screen and voiceover table, and budget about 130 spoken words per minute, the pace of Anthropic's and Vercel's product demos."
+  - "Record with a large font, a short prompt, seeded sample data, a throwaway API key and one take per beat, and never open a .env file on camera."
+  - "Cut the waits, zoom in on the line that matters, sync captions from your script, and export separate cuts for the landing page, Product Hunt, the README, YouTube and X."
+date: 2026-10-18
+updatedDate: 2026-10-18
+draft: false
+authors:
+  - Arindam Majumder
+tags:
+  - developer-video
+  - technical-content
+  - developer-marketing
+bannerImage: /blog/uploads/how-to-script-a-technical-demo-video/cover.png
+---
+**The short answer:** A good product demo for developers shows one real job from start to finish, in a real terminal or editor. Script it in five beats: the outcome or problem in the first seconds, setup in one step, the core moment with real code and real output, the result working, and one next step. Write the voiceover for the ear, record a clean environment in short segments, cut the waits, add captions, and make a separate cut for each place the video will live.
+
+## Pick one job, not a feature tour
+
+A demo answers one question: can this tool do my job? Pick one job a developer would search for, and write it as one sentence first. For where demos fit among the other video formats, read our [developer video marketing guide](/blog/developer-video-marketing).
+
+**Formula: the one-job sentence**
+
+```text
+A [developer] uses [product] to [verb] [thing] in [one command / N steps], and sees [visible proof].
+```
+
+**Before and after** (Stubhouse is a made-up tool, the worked example in this post)
+
+| | Feature tour | One job |
+| --- | --- | --- |
+| Title | "Stubhouse overview: record, replay, matchers, CI, dashboard" | "Run your API integration tests offline with one command" |
+| Proof on screen | Five settings screens | 42 tests passing with the Wi-Fi off |
+
+Anthropic's [Introducing Claude Code](https://www.youtube.com/watch?v=AJpK3YTTKZ4) spends 3:54 on one job in one Next.js app: understand an unfamiliar codebase, replace the sidebar with a chat history, add tests, fix the build, then commit and push. Vercel's [v0 for Engineers](https://www.youtube.com/watch?v=Bm8fhmISZYo) follows one scenario: an app that fetches order history from an internal API and summarizes it with an LLM. Bun's 9-minute [Bun 1.0 is here](https://www.youtube.com/watch?v=BsnCpESUEqM) is a deliberate tour of the whole toolkit, which suits a 1.0 announcement to an audience already following the project, not a tool nobody knows yet.
+
+**Key pointers:**
+- Put the one-job sentence at the top of the script, and delete every scene that doesn't serve it.
+- Choose the job your quickstart already teaches, so the video and the docs back each other up.
+
+## The five beats of a demo video script
+
+### 1. The outcome or problem, in the first seconds
+
+YouTube's [audience retention report](https://support.google.com/youtube/answer/9314415) has an Intro metric: the percentage of viewers still watching after the first 30 seconds. Open on the finished output, or on the problem in one sentence. Three real openings:
+
+- Studio1's arXiv Researcher demo for Memori opens straight on the running app, with no title card.
+- v0 for Engineers says what v0 does in its opening sentence and starts its scenario at about 0:30.
+- Introducing Claude Code opens with banter and introductions, defines the tool at 0:24 and shows the project at 0:31. An established company can spend 30 seconds on people. A new tool usually can't.
+
+### 2. Setup in one step
+
+Show the install command, or one line about the starting state ("I've cloned the sample repo"), and do the rest off camera. [VHS](https://github.com/charmbracelet/vhs), Charm's tool for scripting terminal GIFs, has `Hide` and `Show` commands for exactly this. If real users need five steps, say so and link the quickstart.
+
+### 3. The core moment, with real code and real output
+
+Run the real command and leave the output up long enough to read. The code must match the repo viewers can clone. At about 1:55, v0's presenter says "in case you're wondering, here's the code" and shows it. Developers do wonder.
+
+### 4. The result working
+
+Check the result the way a user would, in one uncut take. At 2:08 in the Claude Code video, the presenter opens the app, starts a new chat, checks the previous one is still saved and says "Great, it's all working."
+
+### 5. One next step
+
+End on one link, said aloud and shown on screen. v0's demo closes with "Try yourself today at v0.app."
+
+**Key pointers:**
+- Get the output or the problem on screen in the first 10 seconds, before any logo.
+- Keep the "it works" beat as one uncut take, and end on the URL that goes first in the description.
+
+## Demo video script template (time, on screen, voiceover)
+
+Write the script as a two-column audio and video table, with a time column on the left, so you decide what the viewer sees at every moment.
+
+Budget about 130 spoken words per minute. By our count of their published captions, that is the pace of both demos above: about 525 words in 3:54 for Claude Code, and 370 in 2:49 for v0. A 90-second demo holds about 190 words, and fewer is better when output needs time on screen.
+
+**Template: 90-second demo video script**
+
+| Time | On screen | Voiceover |
+| --- | --- | --- |
+| 0:00 to 0:08 | The finished output, or the problem happening | One sentence: the result, or the problem in the viewer's words |
+| 0:08 to 0:20 | The one setup command, or the starting state (repo, version) | "Here's where we start: ..." |
+| 0:20 to 0:55 | The real command or code, then the real output | Say the action, run it, point at the line that matters |
+| 0:55 to 1:15 | The result, checked the way a user would, in one take | What you're checking, then what just happened |
+| 1:15 to 1:30 | One URL on screen | The next step, with the URL said aloud |
+
+**Illustrative example: a filled-in script for Stubhouse (a made-up tool)**
+
+Stubhouse is invented for this example: a CLI that records the responses your tests get from a staging API, then replays them offline.
+
+| Time | On screen | Voiceover |
+| --- | --- | --- |
+| 0:00 | Menu bar shows Wi-Fi off. Terminal: `npm test`, 42 passed | "These 42 API tests just passed with the Wi-Fi off. Here's how." |
+| 0:06 | `npm install --save-dev stubhouse` | "First, install Stubhouse as a dev dependency. That's the only setup." |
+| 0:15 | Wi-Fi on. `npx stubhouse record -- npm test` | "I'll run the tests once in record mode. They call staging for real." |
+| 0:28 | Output: `Recorded 42 responses to .stubhouse/` | "Stubhouse saved every response as a file. Forty-two tests, forty-two files." |
+| 0:38 | Zoom on `.stubhouse/get-orders-1042.json` in the editor | "Each file is plain JSON, so you can review it in a pull request." |
+| 0:50 | Wi-Fi off. `npx stubhouse replay -- npm test` | "Now I'll turn the Wi-Fi off and run the same tests in replay mode." |
+| 1:00 | Output: 42 passed, in one uncut take | "All 42 pass, from the saved files, with no network." |
+| 1:12 to 1:30 | The CI guide URL on screen | "To run replay mode in CI, open the CI guide linked below." |
+
+**Key pointers:**
+- Fill in the on-screen column first, and cut any line that has nothing to show.
+- Read the voiceover column aloud with a timer before you record anything.
+- Have the engineer who built the feature run every command on a clean machine.
+
+## Write the voiceover for the ear
+
+Viewers can't reread a sentence. Keep one idea per sentence, name things the way the screen does, and say what a line of code does instead of reading it out. Above all, say what you're about to do, do it, then say what happened. The Claude Code video does this throughout: "Let's check if I can start a new chat while keeping the previous one saved," then the click, then the confirmation.
+
+**Before and after: written for the eye, rewritten for the ear**
+
+| Written for the eye | Written for the ear |
+| --- | --- |
+| "Stubhouse intercepts outbound HTTP calls via a lightweight proxy and persists responses as fixtures, enabling deterministic offline test runs." | "Stubhouse sits between your tests and the API. It saves every response. Next time, your tests read the saved copy." |
+| "Simply run the replay command and, as you can see, you're done!" | "Now I'll run the same tests in replay mode. All 42 pass." |
+
+**Key pointers:**
+- Rewrite any sentence you can't say in one breath, and announce each action before you type it.
+- Cut "simply", "just" and "as you can see". They tell a confused viewer they shouldn't be.
+
+## Screen and terminal hygiene
+
+- **Font size.** The example tape in the [VHS README](https://github.com/charmbracelet/vhs) sets a 46px font on a 1200 × 600 terminal. In an editor, zoom until your longest line fits without wrapping.
+- **A clean prompt.** Drop the username, hostname, git glyphs and clock for the recording session:
+
+```bash
+export PS1='$ '
+clear
+```
+
+- **A hidden desktop.** Record one window or a fixed region, not the full screen. Turn on Do Not Disturb, and use a fresh browser profile.
+- **No secrets.** Use a throwaway, narrowly scoped API key, never open `.env` on camera, and revoke the key afterwards. The README for [Brieflane](https://github.com/Studio1HQ/brieflane), a Corsair demo app, lists seven environment variables, including `LINEAR_API_KEY`, `SLACK_BOT_TOKEN` and `OPENAI_API_KEY`: seven chances to leak a secret. In the arXiv Researcher video, both API key fields stay masked even when the camera zooms onto them.
+- **Pre-seeded data.** Load realistic sample data off camera, never customer data, so the first query returns something worth showing.
+- **A pinned version.** Record against a tagged release and show the version once, so viewers can tell when the video has gone stale.
+
+**Key pointers:**
+- Make a "demo" terminal profile with a large font and the short prompt, and reuse it.
+- Scrub the export frame by frame anywhere a config file, shell history or settings page appears.
+
+## Record in segments, at 1080p, with a real mic
+
+- **Resolution.** Record a 1920 × 1080 region. YouTube's [upload encoding settings](https://support.google.com/youtube/answer/1722171) give 16:9 as the standard aspect ratio on a computer, and X's [media best practices](https://docs.x.com/x-api/media/quickstart/best-practices) recommend 1280 × 720 for horizontal video, which 1080p scales down to exactly. Keep the action near the center if you plan a square or vertical cut.
+- **Frame rate.** YouTube says to upload at the frame rate you recorded.
+- **Mic.** Any external mic close to your mouth beats a laptop's built-in one. Record 10 seconds of silence and play it back on headphones to hear fans and echo.
+- **Segments.** Record one take per beat, named by beat (`01-outcome.mov`), so a fumble costs one beat, not the whole video. [OBS Studio](https://obsproject.com/) is free, open source, and builds scenes from window captures, so switching from terminal to browser is one click. If typing and talking at once trips you up, record the screen first and read the voiceover over it.
+
+**Key pointers:**
+- Set the capture region before the first take, not in the edit.
+- Watch a 20-second test clip on a phone before the real session.
+
+## The editing pass: cut the waits, zoom, caption
+
+**Cut the waits.** Installs, builds and model responses don't need to play in real time. Bridge each cut with a line, as the Claude Code video does at 2:57: "After a few minutes, it looks like we're good to go." If you speed footage up instead, label it on screen ("2× speed").
+
+**Zoom in on what matters.** A full-screen terminal line is a few pixels tall on a phone. The arXiv Researcher video zooms from the full app to the title, the API key fields and the question box within its first 10 seconds.
+
+**Caption it.** [WCAG 2.2 success criterion 1.2.2](https://www.w3.org/WAI/WCAG22/Understanding/captions-prerecorded.html) makes captions for prerecorded audio in synchronized media, such as a narrated demo, a Level A requirement. On YouTube, paste your voiceover column into auto-sync and YouTube sets the timings ([YouTube Help](https://support.google.com/youtube/answer/2734796)). Automatic captions "might misrepresent the spoken content", YouTube [warns](https://support.google.com/youtube/answer/6373554), so check every product name and flag. Burn captions into landing page and social cuts: Chrome's [autoplay policy](https://developer.chrome.com/blog/autoplay) always allows muted autoplay but needs a user interaction for sound.
+
+**Add chapters on YouTube.** The first timestamp in the description must be 00:00, you need at least three in ascending order, and each chapter must run at least 10 seconds ([YouTube Help](https://support.google.com/youtube/answer/9884579)). Vercel's v0 demo lists nine, from "0:00 Introduction to v0" to "2:37 Conclusion". Your five beats are a ready-made chapter list.
+
+**Key pointers:**
+- Label every speed-up on screen.
+- Paste the voiceover column into YouTube's auto-sync instead of fixing automatic captions line by line.
+
+## Cut a version for each placement
+
+One recording, five cuts. Where a platform sets a length or limit, it's linked. Where none does, the length is Studio1's working guidance, labelled as such.
+
+| Placement | What changes in the cut | Length |
+| --- | --- | --- |
+| Landing page hero | Starts muted, so burn in captions and open on the output | Studio1 guidance: 30 to 60 seconds, outcome and core moment only |
+| Launch listing (Product Hunt) | A YouTube link, not private, full URL. [Product Hunt says](https://www.producthunt.com/launch/preparing-for-launch) about 53% of products that reached Product of the Day since 2021 include a video | No length guidance from Product Hunt. Studio1 guidance: the full 60 to 120 second demo |
+| README GIF | No voice. Setup and core moment as a loop, scripted with VHS | [GitHub caps](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/attaching-files) attached images and GIFs at 10 MB. Studio1 guidance: 5 to 15 seconds |
+| YouTube | Full walkthrough with chapters and the docs link first in the description. Shorts cut from the result beat | Long-form: as long as the job takes. [Shorts](https://support.google.com/youtube/answer/15424877): up to 3 minutes, square or vertical |
+| X | Captions burned in, result first, the one-job sentence as the post text | Up to 20 minutes on default accounts, per X's media docs. Studio1's arXiv Researcher demo ran about 38 seconds |
+
+For where each cut goes next, see our [distribution playbook](/blog/how-to-distribute-technical-content-reddit-x-youtube). For the demo's place in a launch, see the [Product Hunt launch playbook](/blog/product-hunt-launch-playbook) and our guide to [GitHub stars at launch](/blog/how-to-get-github-stars-open-source-launch).
+
+**Key pointers:**
+- Keep the README GIF's VHS tape in the repo. With VHS's GitHub Action, `vhs-action`, an update is a re-render, not a re-shoot.
+- Upload the Product Hunt cut to YouTube days early, and check the link while logged out.
+
+## Pre-record checklist
+
+**Checklist: before you press record** (copy it into your script doc)
+
+- [ ] The one-job sentence is at the top of the script.
+- [ ] The voiceover, read aloud with a timer, fits the time column.
+- [ ] The engineer who built the feature ran every command on a clean machine.
+- [ ] The repo is at a tagged release, and the version appears on screen once.
+- [ ] Sample data is seeded. No real customer data anywhere.
+- [ ] A throwaway API key is in place, with a reminder to revoke it.
+- [ ] `.env`, shell history and password managers stay closed.
+- [ ] Large font, short prompt, cleared screen.
+- [ ] Capture region set to 1920 × 1080, with only the demo windows in it.
+- [ ] Do Not Disturb on, and the mic's silence test sounds clean.
+- [ ] The final URL loads, and it is the first link in the description.
+
+## How Studio1 builds demo videos
+
+Studio1 adds one step in front of everything above: engineers build the demo project first, then script, record and edit the video around it, and package it with titles, thumbnails, descriptions and chapters. Building first keeps the script honest, because every command in it has already run.
+
+### Memori: 12 demo agents and a 38-second launch video
+
+For Memori, an open-source memory layer for AI agents, Studio1 built 12 hands-on demo agents, amplified them through the Awesome AI Apps repository, and packaged them into formats like the [project launch video on X](https://x.com/Arindam_1729/status/1993348266730443065). That post, for the arXiv Researcher agent, lists three things the agent does: search arXiv and write reports, save findings with persistent memory, and recall past sessions. The 38-second video shows a research report first, then switches to memory mode and ends on the agent recalling that research, the part Memori provides. Memori grew to 12,000+ GitHub stars. [Read the Memori case study](/case-studies/memori).
+
+![X post introducing the arXiv Researcher Agent built with Memori, Nebius and Tavily: three jobs listed, then a demo video opening on the app](/blog/uploads/how-to-script-a-technical-demo-video/memori-arxiv-agent-demo-post.webp "The post names three jobs. The video opens on the app and shows them.")
+
+### Corsair: a demo app first, then the walkthrough
+
+For Corsair, an open-source integration layer for AI agents, Studio1 built Brieflane, which turns meeting transcripts into Linear issues, risks, decisions and Slack updates, and shared it as an open-source demo with a walkthrough video. Alongside a second demo, onboarding audits, hackathons and posts, the engagement took the repo from about 300 to 2,000 GitHub stars in roughly five weeks. [Read the Corsair case study](/case-studies/corsair).
+
+### ScrapeGraphAI: demos packaged with the problem they solve
+
+Each ScrapeGraphAI demo was scoped around a practical developer workflow and packaged with a short technical narrative about the problem it solved, plus workflow GIFs. The campaign reached 265K+ developers across social and community channels. [Read the ScrapeGraphAI case study](/case-studies/scrapegraph).
+
+If you have a product worth demoing and nobody with time to build the project behind the video, our [developer video production](/developer-video-production) team builds the demo project and its repo, then scripts, records and edits the video and cuts Shorts and launch clips from it.
+
+## FAQ
+
+### How long should a product demo video for developers be?
+
+It depends on where it plays. YouTube Shorts run up to 3 minutes, and Product Hunt gives no length guidance. Studio1's working guidance is a 60 to 120 second core demo, cut to 30 to 60 seconds for a landing page and 5 to 15 seconds for a README GIF.
+
+### Should I write the voiceover word for word?
+
+Yes. A written voiceover keeps you near 130 words a minute and doubles as your caption transcript. Read it aloud before recording, and rewrite every sentence you stumble on.
+
+### Do I need to show my face in a demo video?
+
+No. The screen is the proof. Anthropic's Claude Code launch opens with its engineer and product manager introducing themselves, which suits a launch where the team is part of the story, but a landing page loop or README GIF only needs the product.
+
+### How do I keep a demo video from going out of date?
+
+Record against a tagged release, show the version once, and keep the demo repo public. For terminal GIFs, keep the VHS tape in the repo and re-render it when the CLI changes, which VHS's GitHub Action can do in CI.
+
+### Should a demo video show errors?
+
+Show an error when a new user is likely to hit it, followed by the fix. Cut unrelated mistakes, and re-record the beat rather than leave a fumble in the core moment.

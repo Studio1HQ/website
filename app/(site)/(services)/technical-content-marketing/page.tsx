@@ -1,18 +1,23 @@
+import Link from "next/link";
 import Process from "@/components/pages/blogs-as-a-service/process";
 import type { Metadata } from "next";
 import Hero from "@/components/pages/blogs-as-a-service/hero";
 import Services from "@/components/pages/blogs-as-a-service/services";
-import FAQ, { type FAQItem } from "@/components/landing/faq";
-import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
+import type { FAQItem } from "@/components/landing/faq";
+import { PaperSection } from "@/components/paper/paper-sections";
+import { PaperServiceFaq } from "@/components/pages/shared/paper-service-kit";
+import { PAPER_SCOPE } from "@/lib/paper";
+import { breadcrumbJsonLd, pageMetadata, serviceJsonLd } from "@/lib/seo";
 import {
-  ServiceDetailSection,
-} from "@/components/pages/shared/service-detail-sections";
+  StoryCards,
+  StoryLogos,
+  StoryProof,
+} from "@/components/pages/shared/service-story";
+import { PaperCta } from "@/components/paper/paper-sections";
 import { getTranslations } from "next-intl/server";
 import { DEFAULT_LOCALE } from "@/lib/i18n";
-import {
-  CaseStudyResult,
-  type CaseStudyResultData,
-} from "@/components/case-studies/case-study-result";
+import { Container } from "@/components/home/ui";
+import type { CaseStudyResultData } from "@/components/case-studies/case-study-result";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations({
@@ -29,6 +34,18 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const blogFaqItems: FAQItem[] = [
+  {
+    question:
+      "What does a technical content marketing agency for developer tools do?",
+    answer:
+      "It plans, writes, and distributes the content developers use to evaluate a tool: tutorials, integration guides, comparison posts, deep dives, and SEO articles that answer the questions developers search for. Studio1 does this for devtool, AI, and open-source teams with engineers and technical writers matched to your stack, and can distribute each piece on Reddit, X, LinkedIn, Dev.to, and daily.dev. For Bright Data, that meant 50+ live posts on brightdata.com in a year.",
+  },
+  {
+    question:
+      "Why hire a technical content agency instead of a general content agency?",
+    answer:
+      "Developers check the code before they trust the claim. A technical content agency writes with people who run the code, test every example, and know the stack, so tutorials work on the first try and comparisons hold up to scrutiny. General content agencies usually need your engineers to fix drafts, which is the time you were trying to save.",
+  },
   {
     question: "What types of technical content do you create?",
     answer:
@@ -65,9 +82,9 @@ const blogFaqItems: FAQItem[] = [
       "We usually start with a topic, then send an outline and overview for approval. After your team approves the direction, we write the draft, review it internally, send it for client review, revise, and then publish on the agreed channel.",
   },
   {
-    question: "Can content publish from Studio1 or individual author profiles?",
+    question: "Where does the content get published?",
     answer:
-      "Yes. Depending on the goal, content can publish on your company blog, your Dev.to or Medium profile, Studio1 profiles, or individual author profiles. We also support social posts from either your channels or ours when that fits the campaign.",
+      "Wherever your developers will find it. Most pieces publish on your company blog, and many are also syndicated to developer platforms such as Dev.to and Medium with canonical links back to you. We plan the channels with you for each piece, along with the social posts that go with it.",
   },
 ];
 
@@ -108,11 +125,11 @@ const contentWorkflow = [
   {
     title: "Publishing on the right channel",
     description:
-      "Content can ship on your company blog, Dev.to, Medium, or from Studio1/team profiles depending on the goal and audience.",
+      "Content ships on your company blog and the developer platforms that fit the goal and audience.",
     points: [
       "Company blog publishing",
-      "Studio1 or author profile publishing",
-      "Dev.to and Medium syndication",
+      "Developer platform syndication",
+      "Dev.to and Medium distribution",
       "Canonical and attribution guidance",
     ],
   },
@@ -134,7 +151,7 @@ const contentCaseStudyProofs: CaseStudyResultData[] = [
     company: "Entelligence AI",
     category: "Technical Content & Distribution",
     href: "/case-studies/entelligence-ai",
-    heroValue: "275K+",
+    heroValue: "304K+",
     heroLabel: "Reddit impressions generated from developer distribution",
     proof:
       "Technical blogs, deep dives, feature-launch content, and social distribution for an AI engineering audience.",
@@ -174,63 +191,17 @@ const contentCaseStudyProofs: CaseStudyResultData[] = [
   },
 ];
 
-function TechnicalContentProofGrid() {
-  const [featuredStudy, ...supportingStudies] = contentCaseStudyProofs;
-
-  return (
-    <section id="proof" className="relative scroll-mt-28 px-4 py-20 md:py-24">
-      <div className="mx-auto max-w-7xl">
-        <div className="mx-auto mb-10 max-w-3xl text-center">
-          <p className="font-secondary text-sm font-medium tracking-wide text-primary">
-            Proof
-          </p>
-          <h2 className="mt-4 text-balance font-inter text-4xl font-normal leading-tight tracking-tight text-foreground md:text-5xl">
-            Case studies from technical content work
-          </h2>
-          <p className="mx-auto mt-5 max-w-xl text-sm leading-relaxed text-muted-foreground md:text-base">
-            Blogs, guides, deep dives, and developer education shaped around real technical topics.
-          </p>
-        </div>
-
-        <div className="mx-auto grid max-w-5xl gap-6">
-          {featuredStudy ? (
-            <CaseStudyResult
-              study={featuredStudy}
-              variant="featured"
-              density="dense"
-            />
-          ) : null}
-
-          <div className="grid gap-6 md:grid-cols-2">
-            {supportingStudies.map((study) => (
-              <CaseStudyResult key={study.href} study={study} />
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 export default function Page() {
-  const serviceSchema = {
-    "@context": "https://schema.org",
-    "@type": "Service",
-    name: "Technical Content Marketing Services",
+  const serviceSchema = serviceJsonLd({
+    name: "Technical Content Marketing Agency for Developer Tools",
     description:
-      "Technical content marketing for developer products: tutorials, integration guides, SEO articles, and code-rich content that builds trust and drives adoption.",
-    provider: {
-      "@type": "Organization",
-      name: "Studio1",
-      url: "https://studio1hq.com",
-    },
-    serviceType: "Technical Content Writing",
-    areaServed: "Worldwide",
-    url: "https://studio1hq.com/technical-content-marketing",
-  };
+      "Technical content marketing agency for developer tools, AI, and open-source teams: engineer-written tutorials, integration guides, comparisons, and SEO articles that build trust and drive adoption.",
+    path: "/technical-content-marketing",
+    serviceType: "Technical Content Marketing",
+  });
 
   return (
-    <div className="">
+    <div className="overflow-x-clip" style={PAPER_SCOPE}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
@@ -242,7 +213,7 @@ export default function Page() {
             breadcrumbJsonLd([
               { name: "Home", path: "/" },
               {
-                name: "Technical Content Marketing Services",
+                name: "Technical Content Marketing Agency",
                 path: "/technical-content-marketing",
               },
             ]),
@@ -250,19 +221,52 @@ export default function Page() {
         }}
       />
       <Hero />
+      <StoryLogos />
       <Services />
-      <TechnicalContentProofGrid />
-      <ServiceDetailSection
-        eyebrow="How the content engine works"
+      <StoryCards
+        index={2}
         title="From topic idea to published technical content"
         description="We align topic, outline, draft, review, publishing, and optional repurposing around one developer goal."
-        items={contentWorkflow}
-        columns="three"
+        steps={contentWorkflow}
+        workflow="technical-content.yml"
       />
-      <Process />
-      <FAQ
-        subtitle="Common questions about our technical content marketing services."
-        items={blogFaqItems}
+      <Process index={3} />
+      <StoryProof
+        index={4}
+        title="Case studies from technical content work"
+        description="Blogs, guides, deep dives, and developer education shaped around real technical topics."
+        studies={contentCaseStudyProofs}
+      />
+      <PaperSection tone="paper">
+        <Container>
+          <PaperServiceFaq
+            index={5}
+            subtitle="Common questions about our technical content marketing services."
+            items={blogFaqItems}
+          />
+          <p className="mt-8 text-center text-[15px] text-[var(--p-muted)]">
+            Planning your content? Read our{" "}
+            <Link
+              href="/blog/technical-content-marketing-for-devtools"
+              className="font-medium text-[#141414] underline decoration-[#141414]/25 decoration-2 underline-offset-[6px] transition-colors hover:decoration-[#f97316]"
+            >
+              technical content marketing guide
+            </Link>{" "}
+            and{" "}
+            <Link
+              href="/blog/is-technical-writing-dead"
+              className="font-medium text-[#141414] underline decoration-[#141414]/25 decoration-2 underline-offset-[6px] transition-colors hover:decoration-[#f97316]"
+            >
+              what AI changes for docs, blogs and developer content
+            </Link>
+            .
+          </p>
+        </Container>
+      </PaperSection>
+      <PaperCta
+        index={6}
+        title="Need Technical Content Developers Trust?"
+        description="Engineer-written tutorials, integration guides, and SEO articles that developers read, run, and share."
       />
     </div>
   );

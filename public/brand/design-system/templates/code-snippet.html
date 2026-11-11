@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<!-- Studio1 code snippet card for posts, docs and social, in the paper design.
+     Paste code into <pre>, keep it under ~18 lines, screenshot the .stage element. -->
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Studio1 Code Snippet</title>
+    <link rel="stylesheet" href="../css/studio1.css" />
+    <style>
+      body.s1 { margin: 0; }
+      /* The paper sheet the card sits on */
+      .stage { display: inline-block; padding: 56px 64px 64px; background: var(--s1-paper); }
+      .snippet {
+        width: 720px;
+        border-radius: var(--s1-radius-md);
+        overflow: hidden;
+        background: var(--s1-night);
+        box-shadow: var(--s1-shadow-raised);
+      }
+      .snippet-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 20px;
+        border-bottom: 1px solid var(--s1-paper-14);
+        font-size: 12px;
+        color: var(--s1-paper-60);
+      }
+      .snippet-file { font-family: var(--s1-font-mono); letter-spacing: 0; color: var(--s1-paper-70); }
+      .snippet-brand { display: flex; align-items: center; gap: 8px; font-weight: 500; color: var(--s1-paper); }
+      .snippet-brand img { width: 18px; height: 18px; }
+      .snippet pre { margin: 0; padding: 20px 24px 24px; color: var(--s1-paper); font-size: 14px; line-height: 1.65; }
+      /* Syntax colours: paper, white and the print ramp only */
+      .k { color: var(--s1-print-500); }
+      .s { color: var(--s1-print-200); }
+      .c { color: var(--s1-paper-60); }
+      .f { color: var(--s1-white); font-weight: 500; }
+    </style>
+  </head>
+  <body class="s1">
+    <div class="stage s1-grain">
+      <div class="s1-frame s1-frame--label-top">
+        <i></i><i></i><i></i><i></i><b>client.ts</b>
+        <div class="snippet">
+          <div class="snippet-bar">
+            <span class="snippet-file">client.ts</span>
+            <span class="snippet-brand"><img src="../logo/studio1-mark-dark.svg" alt="" />Studio1</span>
+          </div>
+<pre><code><span class="c">// Create a client and fetch your first project</span>
+<span class="k">import</span> { Client } <span class="k">from</span> <span class="s">"@acme/sdk"</span>;
+
+<span class="k">const</span> client = <span class="k">new</span> <span class="f">Client</span>({ apiKey: process.env.ACME_KEY });
+<span class="k">const</span> project = <span class="k">await</span> client.projects.<span class="f">get</span>(<span class="s">"docs-site"</span>);
+
+console.<span class="f">log</span>(project.name);</code></pre>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

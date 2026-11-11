@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<!-- Studio1 featured image / OG card, 1200x630, in the paper design.
+     Edit the text, open in a browser, screenshot the .og element at 1200x630
+     (or render headless: chromium --screenshot --window-size=1200,630).
+     Colour one or two keywords of the title with .s1-accent. Keep the title under ~70 characters. -->
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Studio1 OG Image</title>
+    <link rel="stylesheet" href="../css/studio1.css" />
+    <style>
+      body.s1 { margin: 0; background: var(--s1-neutral-300); }
+      .og {
+        position: relative;
+        width: 1200px;
+        height: 630px;
+        box-sizing: border-box;
+        padding: 72px 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        overflow: hidden;
+        background: var(--s1-paper);
+        color: var(--s1-ink);
+      }
+      .og--night { background: var(--s1-night); color: var(--s1-paper); }
+      .og--night .og-meta { color: var(--s1-paper-60); }
+      .og--night .s1-cursor { fill: var(--s1-paper); }
+      .og--night .s1-frame > i { background: var(--s1-night); }
+      .og--night.s1-grain::after { opacity: 0; }
+
+      /* faint 50px grid, fading out toward the edges */
+      .og-grid {
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(to right, var(--s1-ink-05) 1px, transparent 1px),
+          linear-gradient(to bottom, var(--s1-ink-05) 1px, transparent 1px);
+        background-size: 50px 50px;
+        -webkit-mask-image: radial-gradient(80% 90% at 50% 50%, #000 30%, transparent 85%);
+        mask-image: radial-gradient(80% 90% at 50% 50%, #000 30%, transparent 85%);
+      }
+      .og--night .og-grid { display: none; }
+      .og > :not(.og-grid) { position: relative; }
+
+      .og-top { display: flex; align-items: center; justify-content: space-between; }
+      .og-brand { display: flex; align-items: center; gap: 10px; font-size: 30px; font-weight: 500; letter-spacing: -0.04em; }
+      .og-brand img { width: 40px; height: 40px; }
+      .og-tag-wrap { position: relative; }
+      .og-tag { height: 34px; padding: 0 14px; font-size: 18px; }
+      .og-tag-wrap .s1-cursor { position: absolute; right: -30px; bottom: -38px; }
+
+      .og-title { font-size: 72px; font-weight: 500; line-height: 1.05; letter-spacing: -0.045em; max-width: 1000px; margin: 0; }
+      .og-meta { font-size: 22px; color: var(--s1-ink-60); letter-spacing: -0.03em; display: flex; gap: 24px; }
+    </style>
+  </head>
+  <body class="s1">
+    <!-- Paper (default) -->
+    <div class="og s1-grain">
+      <div class="og-grid"></div>
+      <div class="og-top">
+        <div class="og-brand"><img src="../logo/studio1-mark-gradient.svg" alt="" />Studio1</div>
+        <div class="og-tag-wrap">
+          <div class="s1-frame"><i></i><i></i><i></i><i></i><b>tag-guide</b><span class="s1-badge og-tag">Guide</span></div>
+          <svg class="s1-cursor" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 2.5 21 10.2l-7.6 2.3-3.3 7.8z" /></svg>
+        </div>
+      </div>
+      <h1 class="og-title">How to write <span class="s1-accent">API docs</span> developers actually finish reading</h1>
+      <div class="og-meta"><span>studio1hq.com</span><span>8 min read</span></div>
+    </div>
+
+    <!-- Night variant: add og--night and use the dark-mode mark -->
+    <div class="og og--night s1-grain">
+      <div class="og-grid"></div>
+      <div class="og-top">
+        <div class="og-brand"><img src="../logo/studio1-mark-dark.svg" alt="" />Studio1</div>
+        <div class="og-tag-wrap">
+          <div class="s1-frame"><i></i><i></i><i></i><i></i><b>tag-launch</b><span class="s1-badge og-tag">Launch</span></div>
+          <svg class="s1-cursor" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 2.5 21 10.2l-7.6 2.3-3.3 7.8z" /></svg>
+        </div>
+      </div>
+      <h1 class="og-title">Shipping a developer tool? Make the docs part of the <span class="s1-accent">launch</span>.</h1>
+      <div class="og-meta"><span>studio1hq.com</span><span>DevRel</span></div>
+    </div>
+  </body>
+</html>

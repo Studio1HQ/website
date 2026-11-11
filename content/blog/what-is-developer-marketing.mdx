@@ -1,0 +1,214 @@
+---
+title: "What Is Developer Marketing? A Strategy Guide for Devtools (2026)"
+seoTitle: "What Is Developer Marketing? A Devtool Strategy Guide"
+slug: what-is-developer-marketing
+description: "What developer marketing is, how developers find and adopt tools in 2026, the funnel and metrics that matter, and a 90-day developer marketing strategy."
+tldrSummary: "Developer marketing is how a company that sells to developers gets found, tried and adopted by them. It works through what developers already use to decide: documentation, working examples, search and AI answers, and other developers. Map your work to a funnel from discovery to team adoption, measure activation rather than reach, and put most of your effort into the places developers evaluate tools, not into ads."
+tldrBullets:
+  - "Technical documentation is still the top way developers learn: 59% used it in Stack Overflow's 2026 survey, ahead of AI coding tools at 53%."
+  - "69.9% of developers now ask an AI agent first when they need an answer, so docs and content have to be good enough for AI to cite."
+  - "Free-to-paid conversion is low: the 2026 median across 200 software products is 8%, and 2023 devtool data showed 5%, so most of the funnel's leakage happens after the signup."
+  - "62% of developer marketing teams are increasing budgets for 2026, and 64% say community and events deliver their highest ROI (Draft.dev survey, vendor data)."
+date: 2026-11-09
+updatedDate: 2026-11-09
+draft: false
+authors:
+  - Amitesh Anand
+tags:
+  - developer-marketing
+  - devrel
+  - content-marketing
+  - strategy
+---
+**The short answer:** Developer marketing is how a company that sells to developers gets found, tried and adopted by them. Developers judge a tool by using it, so developer marketing works through the places they make that call: documentation, working examples, search and AI answers, GitHub, and what other developers say. A developer marketing strategy maps that work to a funnel, from discovery to team adoption, and measures whether developers reach a working first result, not how many people saw an ad.
+
+This guide covers what the term means, what 2026 survey data says about how developers choose tools, the funnel and metrics to track, the channels for each stage, and a 90-day plan you can start this week. I co-founded Studio1, where we have done this work for 35+ devtool, AI and open-source teams, so the last sections show how we apply it.
+
+## Developer marketing, defined
+
+Developer marketing is the set of activities that make developers aware of a product, help them evaluate it, and get them to a working result: technical content, documentation, demos, launches, community, events and distribution in the places developers already spend time.
+
+Matthew Revell, who founded DevRelCon, puts it this way in his guide [What is developer relations?](https://developerrelations.com/guides/what-is-developer-relations): "Developer marketing is about reaching the right developers, surfacing your technology at the right time, and making sure they understand its value."
+
+Two things make it different from other B2B marketing:
+
+1. **The user decides before the buyer.** Developers try a tool, often for free, long before anyone signs a contract. If the first hour goes badly, there is no sales call to rescue it.
+2. **Developers discount claims they can't check.** Adam DuVander's book title, *Developer Marketing Does Not Exist*, makes the point. As [Nordic APIs' review of the book](https://nordicapis.com/book-review-developer-marketing-does-not-exist/) quotes him: "How you approach developers will determine whether the marketing is visible." Marketing that teaches or solves a problem gets read. Marketing that only promotes gets skipped.
+
+## How developers find and choose tools in 2026
+
+The clearest public data comes from the [Stack Overflow 2026 Developer Survey](https://survey.stackoverflow.co/2026/), with 30,903 responses from 169 countries, collected between June 23 and August 5, 2026. Here is what it says about how developers learn and decide:
+
+1. **Documentation is still the first place developers learn.** Stack Overflow's [data on how developers learn](https://survey.stackoverflow.co/2026/community) shows 59% used technical documentation to learn in the past year, ahead of AI code generation tools at 53%, videos at 41%, Stack Overflow at 34% and blogs or podcasts at 28%. In the [2025 survey](https://survey.stackoverflow.co/2025/developers), the figure for documentation was nearly 68%.
+
+![Stack Overflow 2026 Developer Survey chart of learning resources: technical docs 59%, AI codegen tools 53%, other online resources 52%, videos 41%, Stack Overflow 34%](/blog/uploads/what-is-developer-marketing/stack-overflow-2026-learning-resources.webp "Technical documentation is still the top learning resource for developers. Source: Stack Overflow 2026 Developer Survey.")
+
+2. **AI is now the second place developers look for answers.** When they hit a problem, 82.7% of developers turn to online search first and 69.9% ask an AI agent, while only 8% post in a public forum, according to Stack Overflow's [data on how developers find answers](https://survey.stackoverflow.co/2026/community).
+
+![Stack Overflow 2026 Developer Survey chart of where developers turn first for answers, with 70% asking an AI agent](/blog/uploads/what-is-developer-marketing/stack-overflow-2026-first-place-for-answers.webp "About 70% of developers ask an AI agent when they need an answer. Source: Stack Overflow 2026 Developer Survey.")
+
+3. **Developers trust AI answers they can check.** More than 87% have some level of trust in AI output, but 48% trust it only when the result is easy to verify. Stack Overflow's [data on trust in AI answers](https://survey.stackoverflow.co/2026/knowledge) shows 93% call source attribution at least somewhat important when deciding whether to trust one.
+4. **Accuracy beats price when developers adopt a tool.** Asked what makes them adopt or expand AI tools, 30.7% of respondents chose useful, accurate results, 28.7% security and privacy, and 27.0% an acceptable price.
+5. **The public platforms developers use are GitHub, Stack Overflow, YouTube and Reddit.** 69.5% worked with public GitHub projects, 68.6% with Stack Overflow, 58.4% with YouTube and 53.8% with Reddit.
+
+Two conclusions follow. First, your documentation is a marketing asset, not a support cost. Second, a growing share of developers will meet your product through an AI answer, so your docs and content need to be clear, specific and easy to cite. Our guide on [getting your tool recommended by ChatGPT, Perplexity and Google](/blog/how-to-get-your-tool-recommended-by-chatgpt-perplexity-google) covers how.
+
+Vercel gave one early sign of where this goes. In [How we're adapting SEO for LLMs and AI search](https://vercel.com/blog/how-were-adapting-seo-for-llms-and-ai-search), published in June 2025, Vercel reported that ChatGPT referred around 10% of its new signups, up from 1% six months earlier. That is one company's figure, so treat it as directional.
+
+## Your docs now have two readers: developers and their agents
+
+AI coding agents now read developer documentation more than people do on some platforms. In its [2026 midyear report on docs traffic](https://www.mintlify.com/blog/state-of-docs-traffic), Mintlify counted 213 million agent requests in July 2026 against 105 million human page loads across the docs it hosts. By October, its [modern docs playbook](https://www.mintlify.com/blog/modern-docs-playbook) reported 471 million agent requests against 134 million human page loads, or 78% of traffic.
+
+![Mintlify chart of monthly agent requests and human visits to Mintlify-hosted docs from January to July 2026: agent requests rise to 213 million while human visits fall to 105 million](/blog/uploads/what-is-developer-marketing/mintlify-2026-agent-vs-human-docs-traffic.webp "Agent requests passed human visits on Mintlify-hosted docs in mid-2026. Source: Mintlify, The state of docs traffic: a 2026 midyear report.")
+
+Other platforms see the same shift, measured differently. GitBook's [April 2026 research](https://www.gitbook.com/blog/ai-docs-data-april-2026) found AI agents made 51.8% of intentional documentation reads across 61.2 million page views. Both are vendor figures with different methods, but they point the same way.
+
+Agents also read docs differently from people. In test runs described in Vercel's guide to [making documentation readable by AI agents](https://vercel.com/kb/guide/make-your-documentation-readable-by-ai-agents), agents asked for the Markdown version of a page in 65.1% of web fetches. Mintlify's [2026 State of Knowledge Report](https://www.mintlify.com/state-of-knowledge/2026/report) counted about 10.8 million fetches of `/llms.txt` in August 2026 alone.
+
+Most API teams haven't caught up. Postman's [2025 State of the API Report](https://www.postman.com/state-of-api/2025/), a survey of more than 5,700 developers, architects and executives, found that only 24% of developers design APIs with AI agents in mind, and 55% struggle with inconsistent documentation.
+
+People who track developer marketing closely draw the same conclusion. Helen Min put it plainly in October 2025 in [Developer Marketing in the Age of AI](https://www.helenmin.com/blog/developer-marketing-in-the-age-of-ai): "Your audience includes agents now." And Adam DuVander, who follows which devtools AI models recommend, told [RedMonk in September 2026](https://redmonk.com/videos/adam-duvander/) that "there's a 50% chance that if they asked a second model, they'd get a different recommendation."
+
+For developer marketing, that means every docs page has to work for a person skimming it and an agent parsing it: clear headings, complete code samples, a Markdown version and an llms.txt file. Our guides to [llms.txt](/blog/llms-txt-explained-developer-tools-guide) and [developer docs as an AEO asset](/blog/developer-docs-as-aeo-asset) cover how.
+
+## How big the developer audience is
+
+The audience keeps growing, which is why developer marketing has become its own discipline.
+
+GitHub's [Octoverse 2026 report](https://github.blog/news-insights/octoverse/octoverse-commits-pushes-reach-new-highs-in-2026-as-developers-build-with-agents/) says it now serves more than 225 million developers. The United States (38.3 million) and India (32 million) are the two largest communities, and each added more than 10 million developers in the year to September 2026.
+
+SlashData's [developer population research](https://www.slashdata.co/research/developer-population) puts the number of developers worldwide at 48.4 million, updated in Q3 2025. SlashData counts people and GitHub counts accounts, so the two figures are not comparable.
+
+Agents now write a growing share of code too. The same Octoverse report found that by September 2026 more than 40% of pull requests on GitHub started with an agent's first draft, up from 17% in March. For devtools, that means the "developer" choosing your SDK is sometimes an agent reading your docs.
+
+![GitHub Octoverse 2026 panels: more than 40% of pull requests are agent generated, 110 million pull requests were started by an agent in September 2026, and agent-generated pull requests grew 6x in six months](/blog/uploads/what-is-developer-marketing/octoverse-2026-agent-pull-requests.webp "Agents now open a large share of pull requests on GitHub. Source: GitHub Octoverse 2026.")
+
+## The developer marketing funnel, stage by stage
+
+A developer marketing funnel runs from the first time a developer hears about your product to the point where their team depends on it. Each stage has one question the developer is answering, and one or two numbers that tell you whether you are winning it.
+
+| Stage | The developer's question | What to measure |
+| --- | --- | --- |
+| Discover | "Does something solve my problem?" | Search and AI-answer visibility, referral traffic, GitHub stars as a visibility signal |
+| Evaluate | "Is this one better than what I use now?" | Docs and comparison page visits, visitor-to-signup rate |
+| Activate | "Can I get it working?" | Time to first successful call or result, activation rate |
+| Adopt | "Will I keep using it?" | 7-day and 28-day retention, weekly active projects |
+| Expand | "Should my team use it?" | Seats or projects per account, free-to-paid conversion |
+
+Benchmarks help you see where your funnel leaks. The newest public data is general rather than devtool-specific: ChartMogul's [2026 Conversion Report](https://chartmogul.com/reports/saas-conversion-report/), built with Growth Unhinged and ProductLed from 200 software products, puts median free-to-paid conversion at **8%**, and freemium products at about **9%** visitor-to-signup. For devtools specifically, the most recent public benchmarks are older: Boldstart Ventures' [summary of OpenView's 2023 data](https://boldstart.vc/?p=1596) found the median devtool kept **30%** of signups after 7 days and **23%** after 28 days, and converted only **5%** from free to paid within six months. The shape is the same in both: most of the loss happens after the signup, not before it.
+
+That is why activation gets so much attention. Postman's post [Improve your time to first API call by 20x](https://blog.postman.com/improve-your-time-to-first-api-call-by-20x/) calls time to first call "the most important API metric" and defines it as "how long it takes a developer to make their first successful API call". We go deeper on measuring and shortening it in [Time to First Hello World](/blog/time-to-first-hello-world).
+
+Adoption also takes longer than most launch plans assume. In Instruqt's [2026 State of Developer Adoption](https://instruqt.com/blog/the-2026-state-of-developer-adoption-ai-is-shipping-faster-than-developers-can-adopt-heres-whats-working), a survey of 424 North American practitioners run by SlashData, 55% said it takes **one to three months** for developers to fully adopt a product. Instruqt sells hands-on labs, so read it as directional.
+
+## Channels for each stage
+
+The right channel depends on the stage you are trying to fix. This table maps the common developer marketing channels to the stage they serve best, with our deeper guides for each.
+
+| Stage | Channels that work | Guides |
+| --- | --- | --- |
+| Discover | SEO tutorials, AI-answer visibility, Reddit and Hacker News, launches, creators, GitHub | [Technical content marketing](/blog/technical-content-marketing-for-devtools), [Reddit](/blog/reddit-marketing-for-developer-tools), [launch strategy](/blog/how-to-launch-a-developer-tool), [developer influencers](/blog/developer-influencer-marketing) |
+| Evaluate | Docs, comparison and alternatives pages, demo videos, README | [Comparison pages](/blog/comparison-alternatives-pages-for-developers), [README best practices](/blog/github-readme-best-practices), [developer video](/blog/developer-video-marketing) |
+| Activate | Quickstarts, examples repos, tested code samples, onboarding fixes | [Documentation best practices](/blog/developer-documentation-best-practices), [time to first hello world](/blog/time-to-first-hello-world) |
+| Adopt | Integration guides, community, office hours, workshops | [DevRel for startups](/blog/devrel-for-startups), [Developer event marketing](/blog/developer-event-marketing) |
+| Expand | Case studies, team features, events, partner integrations | [Measuring DevRel ROI](/blog/how-to-measure-devrel-roi) |
+
+Two rules apply across all of them. Distribute every piece where developers already read, which our [distribution playbook](/blog/how-to-distribute-technical-content-reddit-x-youtube) covers channel by channel. And make each piece useful on its own: a tutorial that solves a real problem gets shared, while a feature announcement rarely does.
+
+## Developer marketing vs DevRel
+
+Developer marketing and developer relations (DevRel) overlap, and small teams usually run both. The difference is in the goal.
+
+- **Developer marketing** creates and converts demand: it gets the product found, evaluated and tried.
+- **DevRel** builds trust and long-term relationships with the developer community. Mary Thengvall, author of *The Business Value of Developer Relations*, told [ShiftMag in 2024](https://shiftmag.dev/mary-thengvall-developer-relations-3094/) that where DevRel meets other teams, "the biggest overlap is our desire to build vibrant technical communities."
+
+Revell's [guide to developer relations](https://developerrelations.com/guides/what-is-developer-relations) treats developer marketing as one of four DevRel pillars, next to advocacy, enablement and community. In practice, the content, docs and events overlap, but developer marketing owns reach and conversion while DevRel owns trust and feedback. We compare the two in detail in [DevRel vs Developer Marketing](/blog/devrel-vs-developer-marketing).
+
+## How to build a developer marketing strategy in 90 days
+
+A developer marketing strategy answers four questions: which developers you want, what problem they search for, where they will first try your product, and which number will tell you it worked. Here is the 90-day plan we use with early-stage devtool teams.
+
+### Days 1 to 15: find where developers drop off
+
+1. **Pick one developer profile.** Write down the language, stack, role and problem. "Python developers building AI agents who need memory" beats "developers".
+2. **Run your own first hour.** Sign up from scratch, follow the quickstart, and time how long it takes to reach a working result. Note every place you get stuck.
+3. **Check your visibility.** Search the five questions your developer would ask, in Google and in ChatGPT, Perplexity and Claude. Record whether your product appears and which page is cited.
+4. **Pull the funnel numbers.** Visitor-to-signup, signup-to-activation and 7-day retention. Compare them with the benchmarks above to see which stage leaks most.
+
+### Days 16 to 45: fix the leaking stage first
+
+5. **If activation leaks**, fix the quickstart, add a copy-paste example and an examples repo before you buy any reach. Traffic sent to a broken first run is wasted.
+6. **If evaluation leaks**, publish the pages developers use to compare: an honest comparison or alternatives page, a two-minute demo video, and a README that says what the tool does in one line.
+7. **If discovery leaks**, publish tutorials that answer the exact problems your developer searches for, then distribute each one on Reddit, Dev.to, daily.dev, X and LinkedIn.
+
+### Days 46 to 90: build a repeatable engine
+
+8. **Publish on a schedule.** Two to four useful pieces a month, planned with a [content calendar](/blog/devtool-content-calendar), beats a burst followed by silence.
+9. **Run one launch.** A feature or version launch across Product Hunt, Hacker News, Reddit and X gives the team a deadline and a spike to learn from.
+10. **Show up in person.** One meetup talk, workshop or hackathon per month puts the product in front of developers who will try it while you are in the room.
+11. **Review monthly.** Track the stage numbers, not page views. Keep what moved activation and adoption, and stop what only moved reach.
+
+## How much to budget, and where
+
+Public budget data for developer marketing is thin, so treat these figures as directional.
+
+Draft.dev's [2026 Developer Marketing Survey](https://draft.dev/2026-developer-marketing-survey) found that 62% of teams are increasing developer marketing budgets for 2026, 73% are investing more in community and events, and 64% say community and events deliver their highest ROI. Draft.dev is a vendor and the survey doesn't state a sample size.
+
+![Draft.dev 2026 Developer Marketing Survey key findings: 62% increasing dev marketing budgets, 73% investing more in community and events, 51% increasing content and SEO investment, 64% say community and events deliver the highest ROI](/blog/uploads/what-is-developer-marketing/draft-dev-2026-developer-marketing-survey.webp "Most developer marketing teams are increasing budgets for 2026. Source: Draft.dev 2026 Developer Marketing Survey.")
+
+For how to split the money, daily.dev's [developer marketing budget planning guide](https://business.daily.dev/resources/developer-marketing-budget-planning-allocate-spend-channels/) puts content at 25–30% of developer marketing budgets and suggests, for Series B and later, 25–35% paid, 25% content and SEO, and 15–30% events and community.
+
+For a seed or Series A devtool, we usually suggest weighting the budget toward the stage that leaks most, then toward content and community that compound, before paying for ads.
+
+## Common developer marketing mistakes
+
+1. **Buying reach before fixing activation.** Paid traffic and launch spikes can't fix a quickstart that fails. Fix the first hour first.
+2. **Measuring views and followers.** Reach is easy to count and weakly linked to adoption. Measure signups, activation and retention by channel.
+3. **Writing for the buyer instead of the user.** Developers decide first. Content that leads with business value and hides the code loses them.
+4. **Treating docs as support.** Documentation is the top learning resource for developers, and the page an AI assistant will most likely cite.
+5. **Posting promotion in communities.** Reddit and Hacker News punish self-promotion. Lead with the problem and the code, and stay in the comments.
+6. **Launching once and going quiet.** A launch is a spike. Adoption comes from the months of content, community and events after it.
+7. **Ignoring AI answers.** If ChatGPT or Perplexity can't describe your product accurately, fix the docs and pages they read.
+
+## How Studio1 does developer marketing
+
+Studio1 is a DevRel and developer marketing agency for devtool, AI and open-source teams. We have worked with 35+ teams, our content has passed 3M+ views, and we have been part of 40+ developer events as speakers, mentors, sponsors and attendees, engaging more than 6,000 developers. We usually start with the stage of the funnel that leaks most, and fix it before adding reach. In practice, that means:
+
+- Auditing the path from a developer's first visit to a working result, and fixing the docs, quickstart and examples where people drop off.
+- Creating technical content that answers the questions developers and AI assistants ask, written by engineers who run the code.
+- Planning launches and open-source growth around communities developers already trust, then distributing every piece across the channels that fit it.
+- Measuring activation, GitHub stars and inbound interest rather than views alone.
+
+Our [case studies](/case-studies) and [results](/results) pages show the outcomes by team.
+
+If you want help choosing where to start, see our [developer marketing services](/services) or [book a strategy call](https://cal.com/studio1/collab).
+
+## FAQ
+
+### What is developer marketing?
+
+Developer marketing is how a company that sells to developers gets found, tried and adopted by them. It uses technical content, documentation, demos, launches, community and events in the places developers already spend time, and it measures success by whether developers reach a working result, not by reach alone.
+
+### How is developer marketing different from traditional B2B marketing?
+
+In developer marketing, the user decides before the buyer. Developers usually try a tool for free and judge it by using it, so docs, examples and the first hour of use matter more than ads or sales outreach. Developers also discount claims they can't check, so useful content outperforms promotional messaging.
+
+### What is the difference between developer marketing and DevRel?
+
+Developer marketing creates and converts demand: it gets a product found, evaluated and tried. DevRel builds long-term trust and relationships with developers and brings their feedback back to the product team. Small teams often run both, and the content, docs and events overlap.
+
+### What are the most important developer marketing metrics?
+
+Measure each funnel stage: visibility in search and AI answers for discovery, visitor-to-signup rate for evaluation, time to first successful result and activation rate for activation, 7-day and 28-day retention for adoption, and free-to-paid conversion for expansion. Page views and followers are weak signals on their own.
+
+### Which channels work best for developer marketing?
+
+It depends on the stage you need to fix. Tutorials, SEO, AI-answer visibility, Reddit, Hacker News and launches drive discovery. Docs, comparison pages and demo videos drive evaluation. Quickstarts and examples drive activation. Community, workshops and events drive adoption.
+
+### How long does developer marketing take to show results?
+
+A launch or a well-distributed post can bring signups within days, but adoption takes longer. In a 2026 Instruqt survey run by SlashData, 55% of practitioners said developers take one to three months to fully adopt a product. Plan for at least a quarter before judging a strategy.
+
+### Should a devtool startup hire a developer marketing agency?
+
+An agency makes sense when you need content, launches and community work quickly and can't yet hire a full team. Look for one that has done the work for products like yours and shows results with public sources. Our post on [DevRel agency vs in-house hire](/blog/devrel-agency-vs-in-house-devrel-hire) compares the options.

@@ -1,0 +1,384 @@
+"use client";
+
+import Image from "next/image";
+import { motion, useReducedMotion } from "motion/react";
+import {
+  ArrowUpRight,
+  BookOpenText,
+  BracketsCurly,
+  Code,
+  GitBranch,
+  Megaphone,
+  PenNib,
+  Sparkle,
+  TerminalWindow,
+  VideoCamera,
+  type Icon,
+} from "@phosphor-icons/react";
+import { Container, EASE } from "@/components/home/ui";
+import { PaperSection } from "@/components/paper/paper-sections";
+import { PrintBlock, SelectionFrame } from "@/components/paper/paper-hero";
+import Logo from "@/components/ui/svgs/logo";
+import { homeTestimonials } from "@/data/home";
+import { GRAIN, INK, PAPER, PRINT } from "@/lib/paper";
+import { cn } from "@/lib/utils";
+
+/*
+ * Studio overview as three cards: a wide statement card with the Studio1
+ * mark in a selection frame and the leadership as chips, a map of how the
+ * services connect, and a "developer-first" card with a large 3D tile.
+ * Copy is reused from elsewhere on the site.
+ */
+
+type Node = {
+  name: string;
+  sub: string;
+  icon?: Icon;
+  badge?: string;
+};
+
+const ROOT: Node = {
+  name: "Studio1",
+  sub: "35+ teams helped",
+  badge: "Partner",
+};
+const CONTENT: Node = {
+  name: "Technical Content",
+  sub: "400+ tutorials & guides",
+  icon: PenNib,
+};
+const DEVREL: Node = {
+  name: "DevRel & Growth",
+  sub: "40+ developer events",
+  icon: Megaphone,
+};
+const DOCS: Node = {
+  name: "Docs & DX",
+  sub: "15+ docs audits",
+  icon: BookOpenText,
+};
+const VIDEO: Node = {
+  name: "Video Production",
+  sub: "Demos · Tutorials · Shorts",
+  icon: VideoCamera,
+};
+
+/* Dotted connector pieces. Columns are centred at 23% and 77%. */
+const V =
+  "s1-flow-v absolute w-[2px] -translate-x-1/2 origin-top bg-[repeating-linear-gradient(to_bottom,rgba(20,20,20,0.45)_0_2px,transparent_2px_6px)]";
+const H =
+  "s1-flow-h absolute h-[2px] -translate-y-1/2 origin-left bg-[repeating-linear-gradient(to_right,rgba(20,20,20,0.45)_0_2px,transparent_2px_6px)]";
+
+function Dot({ className }: { className: string }) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "absolute size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#141414]",
+        className,
+      )}
+    />
+  );
+}
+
+function MapNode({ node, delay }: { node: Node; delay: number }) {
+  const reduceMotion = useReducedMotion();
+  const NodeIcon = node.icon;
+  return (
+    <motion.div
+      className="rounded-[6px] bg-[#3d3631] p-3 text-white shadow-[0_12px_24px_-16px_rgba(42,15,0,0.55)] ring-1 ring-inset ring-white/[0.06]"
+      initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, ease: EASE, delay }}
+    >
+      <div className="flex items-center gap-2">
+        <span
+          className="flex size-6 shrink-0 items-center justify-center rounded-full"
+          style={{ background: PRINT }}
+        >
+          {NodeIcon ? (
+            <NodeIcon weight="bold" className="size-3.5" />
+          ) : (
+            <Logo className="size-3.5 brightness-0 invert" />
+          )}
+        </span>
+        <span className="truncate text-[13px] font-medium">{node.name}</span>
+        {node.badge ? (
+          <span className="ml-auto rounded-full bg-[#f97316] px-2 py-0.5 text-[10px] font-medium">
+            {node.badge}
+          </span>
+        ) : null}
+      </div>
+      <p className="mt-2 border-t border-dashed border-white/20 pt-2 text-[11.5px] text-white/70">
+        {node.sub}
+      </p>
+    </motion.div>
+  );
+}
+
+/** How the services connect, as a small org chart with dotted connectors. */
+function ServiceMap() {
+  return (
+    <div className="mx-auto flex h-full w-full max-w-[520px] flex-col justify-center">
+      <div className="mx-auto w-[46%]">
+        <MapNode node={ROOT} delay={0} />
+      </div>
+
+      {/* Root splits into two columns */}
+      <div aria-hidden className="relative h-10">
+        <span className={cn(V, "left-1/2 top-0 h-1/2")} />
+        <span className={cn(H, "left-[23%] right-[23%] top-1/2")} />
+        <span className={cn(V, "left-[23%] top-1/2 h-1/2")} />
+        <span className={cn(V, "left-[77%] top-1/2 h-1/2")} />
+        <Dot className="left-1/2 top-0" />
+        <Dot className="left-[23%] top-full" />
+        <Dot className="left-[77%] top-full" />
+      </div>
+
+      <div className="grid grid-cols-2 gap-[8%]">
+        <MapNode node={CONTENT} delay={0.1} />
+        <MapNode node={DEVREL} delay={0.15} />
+      </div>
+
+      <div aria-hidden className="relative h-8">
+        <span className={cn(V, "left-[23%] top-0 h-full")} />
+        <span className={cn(V, "left-[77%] top-0 h-full")} />
+        <Dot className="left-[23%] top-0" />
+        <Dot className="left-[23%] top-full" />
+        <Dot className="left-[77%] top-0" />
+      </div>
+
+      <div className="relative grid grid-cols-2 gap-[8%]">
+        <MapNode node={DOCS} delay={0.2} />
+        <span aria-hidden className={cn(V, "left-[77%] top-0 h-full")} />
+      </div>
+
+      {/* Both columns join into Video */}
+      <div aria-hidden className="relative h-10">
+        <span className={cn(V, "left-[23%] top-0 h-1/2")} />
+        <span className={cn(V, "left-[77%] top-0 h-1/2")} />
+        <span className={cn(H, "left-[23%] right-[23%] top-1/2")} />
+        <span className={cn(V, "left-1/2 top-1/2 h-1/2")} />
+        <Dot className="left-[23%] top-0" />
+        <Dot className="left-1/2 top-full" />
+      </div>
+
+      <div className="mx-auto w-[46%]">
+        <MapNode node={VIDEO} delay={0.25} />
+      </div>
+    </div>
+  );
+}
+
+/* Clients quoted on the home page; their photos sit around the mark. */
+const VOICES = homeTestimonials
+  .filter((item) =>
+    ["Jesse Williams", "Dylan Bristot", "Sakshi Sen"].includes(item.name),
+  )
+  .map((item) => ({ name: item.name, role: item.role, image: item.avatar }));
+
+/** The work behind the principle. */
+const PROOF = [
+  { label: "Tutorials & guides", value: "400+" },
+  { label: "Docs audits", value: "15+" },
+  { label: "Developer events", value: "40+" },
+];
+
+/** The craft's tools, as an even icon grid that fades into the card. */
+const SKETCH: Icon[] = [
+  BookOpenText,
+  PenNib,
+  BracketsCurly,
+  Code,
+  Megaphone,
+  Sparkle,
+  GitBranch,
+  VideoCamera,
+  BookOpenText,
+  PenNib,
+  BracketsCurly,
+  TerminalWindow,
+  Megaphone,
+  Sparkle,
+  GitBranch,
+  VideoCamera,
+  BookOpenText,
+  PenNib,
+  BracketsCurly,
+  TerminalWindow,
+  Megaphone,
+  Sparkle,
+  GitBranch,
+  VideoCamera,
+];
+
+function Sketches() {
+  const reduceMotion = useReducedMotion();
+  return (
+    <motion.div
+      aria-hidden
+      className="pointer-events-none absolute right-6 top-6 hidden grid-cols-4 gap-x-7 gap-y-6 [mask-image:radial-gradient(ellipse_130%_110%_at_top_right,black_40%,transparent_95%)] sm:grid md:right-10 md:top-10"
+      initial={reduceMotion ? false : { opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 1.2, ease: EASE, delay: 0.2 }}
+    >
+      {SKETCH.map((SketchIcon, i) => (
+        <SketchIcon
+          key={i}
+          weight="light"
+          className={cn(
+            "size-6",
+            SketchIcon === Code ? "text-[#f97316]" : "text-[#141414]/30",
+          )}
+        />
+      ))}
+    </motion.div>
+  );
+}
+
+export function StudioBento() {
+  const reduceMotion = useReducedMotion();
+  const enter = (delay: number) => ({
+    initial: reduceMotion ? false : { opacity: 0, y: 24 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true, margin: "-60px" },
+    transition: { duration: 0.9, ease: EASE, delay },
+  });
+
+  return (
+    <PaperSection tone="paper" className="pb-10 pt-0 md:pb-14 md:pt-0">
+      <Container>
+        <div className="relative isolate grid gap-3 lg:grid-cols-2">
+          {/* Wide statement card */}
+          <motion.div
+            {...enter(0)}
+            className="relative grid overflow-hidden rounded-[6px] bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)] p-7 md:p-12 lg:col-span-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center"
+          >
+            <div className="relative z-10 max-w-[460px]">
+              <h2 className="text-[34px] font-semibold leading-[1.02] tracking-[-0.05em] text-[#141414] sm:text-[44px] md:text-[52px]">
+                We help devtool teams reach more developers
+              </h2>
+              <p className="mt-5 text-[15px] leading-[1.6] text-[#141414]/[0.62]">
+                Turn technical complexity into developer-friendly storytelling.
+                Drive measurable growth with every project.
+              </p>
+              <a
+                href="https://cal.com/studio1/collab"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group mt-8 inline-flex h-11 items-center gap-2 rounded-[6px] px-5 text-[14px] font-medium transition-transform duration-300 hover:-translate-y-0.5"
+                style={{ background: INK, color: PAPER }}
+              >
+                Book a call
+                <ArrowUpRight
+                  weight="bold"
+                  className="size-4 transition-transform duration-300 group-hover:rotate-45"
+                />
+              </a>
+            </div>
+
+            <div className="relative mt-12 flex justify-center lg:mt-0">
+              <SelectionFrame
+                label="studio1-mark"
+                labelPosition="top-left"
+                className="p-3"
+              >
+                <PrintBlock className="flex size-[200px] rotate-[-3deg] items-center justify-center rounded-[6px] shadow-[0_30px_60px_-30px_rgba(20,20,20,0.45)] sm:size-[260px]">
+                  <Logo className="relative size-[58%] brightness-0 invert" />
+                </PrintBlock>
+              </SelectionFrame>
+
+              {/* Client voices from the home page, as one avatar stack */}
+              <motion.div
+                className="absolute -bottom-4 right-0 flex items-center gap-3 rounded-full bg-[#fbf9f5] py-1.5 pl-1.5 pr-4 shadow-[0_18px_34px_-18px_rgba(60,20,0,0.45)] ring-1 ring-[#141414]/[0.06] sm:right-[4%]"
+                initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.7, ease: EASE, delay: 0.3 }}
+              >
+                <span className="flex -space-x-3">
+                  {VOICES.map((voice) => (
+                    <span
+                      key={voice.name}
+                      title={`${voice.name}, ${voice.role}`}
+                      className="relative size-11 overflow-hidden rounded-full border-[3px] border-white bg-[#ece5da]"
+                    >
+                      <Image
+                        src={voice.image}
+                        alt={`${voice.name}, ${voice.role}`}
+                        fill
+                        sizes="44px"
+                        className="object-cover object-top"
+                      />
+                    </span>
+                  ))}
+                </span>
+                <span className="leading-tight">
+                  <span className="block text-[13px] font-medium text-[#141414]">
+                    Trusted by 35+ teams
+                  </span>
+                  <span className="block text-[11.5px] text-[#141414]/55">
+                    across devtools, AI &amp; open source
+                  </span>
+                </span>
+              </motion.div>
+            </div>
+          </motion.div>
+
+          {/* How the services connect */}
+          <motion.div
+            {...enter(0.1)}
+            className="relative isolate overflow-hidden rounded-[6px] bg-[#fbf9f5] p-6 shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)] ring-1 ring-inset ring-[#141414]/[0.07] md:p-10"
+          >
+            {/* Paper grain on a flat paper sheet */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 -z-10 opacity-30 mix-blend-multiply"
+              style={{ backgroundImage: GRAIN }}
+            />
+            <ServiceMap />
+          </motion.div>
+
+          {/* Developer-first card: the principle, then the proof */}
+          <motion.div
+            {...enter(0.18)}
+            className="relative flex min-h-[420px] flex-col justify-between overflow-hidden rounded-[6px] bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)] p-6 md:p-10"
+          >
+            <div className="relative z-[1]">
+              <span className="inline-flex rounded-full bg-[#f97316] px-4 py-1.5 font-mono text-[13px] uppercase tracking-[0.08em] text-white">
+                Developer-first
+              </span>
+              <p className="mt-6 max-w-[440px] text-[32px] font-medium leading-[1.08] tracking-[-0.045em] text-[#141414] md:text-[40px]">
+                Content developers{" "}
+                <span style={{ color: PRINT }}>actually read.</span>
+              </p>
+              <p className="mt-4 max-w-[360px] text-[15px] leading-[1.6] text-[#141414]/60">
+                Written by engineers, with code samples that run.
+              </p>
+            </div>
+
+            {/* The proof, each number on its own paper tile */}
+            <Sketches />
+            <dl className="relative z-[1] mt-10 grid grid-cols-3 gap-2">
+              {PROOF.map((item) => (
+                <div
+                  key={item.label}
+                  className="relative flex min-w-0 flex-col-reverse justify-end rounded-[6px] bg-[#f4efe7] px-4 py-4 ring-1 ring-inset ring-[#141414]/[0.08] md:px-5 md:py-5"
+                >
+                  <dt className="mt-2 text-[12.5px] leading-snug text-[#141414]/60 md:text-[13px]">
+                    {item.label}
+                  </dt>
+                  <dd className="text-[28px] font-medium leading-none tracking-[-0.05em] tabular-nums text-[#f97316] md:text-[34px]">
+                    {item.value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </motion.div>
+        </div>
+      </Container>
+    </PaperSection>
+  );
+}

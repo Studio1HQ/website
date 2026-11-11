@@ -37,6 +37,7 @@ next-env.d.ts
 
 # IDE / local tooling
 .cursor/
+.commandcode/
 
 # pnpm is the package manager (see AGENTS.md); do not commit npm lockfile
 package-lock.json
@@ -47,3 +48,14 @@ package-lock.json
 .pnpm-store
 claude-audit
 .gstack/
+
+# Original Notion export of the event photos (large; the site uses the
+# compressed copies in public/assets/events)
+/archive/notion-events-export/
+/archive/team-originals/
+
+# Team operations notes kept out of the public repo
+supabase/OPERATIONS.local.md
+
+# Local working notes (e.g. notes/ai-offer-experiment.local.md)
+*.local.md

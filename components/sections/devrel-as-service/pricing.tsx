@@ -8,7 +8,7 @@ const DevRelPricing = () => {
       <div className="container max-w-4xl">
         <div className="text-center mb-6 font-semibold lg:text-5xl text-2xl pb-4">
           Our{" "}
-          <span className="font-bold text-transparent bg-clip-text bg-gradient-to-b from-orange-400 via-orange-500 to-orange-600">
+          <span className="font-bold text-[#f97316]">
             Pricing
           </span>
           <p className="mt-4 max-w-2xl mx-auto text-xl text-gray-500">
@@ -17,7 +17,7 @@ const DevRelPricing = () => {
         </div>
 
         <CardWithGrid>
-          <div className="flex flex-col p-8 rounded-lg border border-orange-400 bg-black/50 backdrop-blur-sm hover:shadow-lg transition-all">
+          <div className="flex flex-col p-8 rounded-[6px] border border-[#f97316] bg-black/50 transition-all">
             <div className="text-center mb-6">
               <p className="text-lg text-muted-foreground">
                 Every organization has unique requirements for their DevRel
@@ -29,7 +29,7 @@ const DevRelPricing = () => {
             <div className="mt-auto">
               <a
                 href="mailto:contact@studio1hq.com"
-                className="flex items-center justify-center gap-2 w-full px-6 py-3 text-center text-lg font-semibold rounded-md bg-gradient-to-b from-orange-500 to-orange-600 text-white hover:shadow-xl transition duration-200"
+                className="flex items-center justify-center gap-2 w-full px-6 py-3 text-center text-lg font-semibold rounded-md bg-[#f97316] text-white transition duration-200 hover:bg-[#141414]"
               >
                 Get Custom Quote <ArrowRight className="w-5 h-5" />
               </a>

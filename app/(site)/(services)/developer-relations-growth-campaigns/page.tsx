@@ -1,19 +1,26 @@
+import Process from "@/components/pages/devrel-as-a-service/process";
 import React from "react";
 import Impact from "@/components/sections/devrel-as-service/impact";
 import Services from "@/components/sections/devrel-as-service/services";
 import Team from "@/components/sections/devrel-as-service/team";
-import Process from "@/components/pages/devrel-as-a-service/process";
 import DevRelPricing from "@/components/sections/devrel-as-service/pricing";
 import type { Metadata } from "next";
 import Hero from "@/components/pages/devrel-as-a-service/hero";
-import FAQ, { type FAQItem } from "@/components/landing/faq";
-import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
+import type { FAQItem } from "@/components/landing/faq";
+import { Container } from "@/components/home/ui";
+import { PaperSection } from "@/components/paper/paper-sections";
+import { PaperServiceFaq } from "@/components/pages/shared/paper-service-kit";
+import { PAPER_SCOPE } from "@/lib/paper";
 import {
-  ServiceDetailSection,
-  ServiceProofSection,
-} from "@/components/pages/shared/service-detail-sections";
+  StoryCards,
+  StoryLogos,
+  StoryProof,
+} from "@/components/pages/shared/service-story";
+import { PaperCta } from "@/components/paper/paper-sections";
+import { breadcrumbJsonLd, pageMetadata, serviceJsonLd } from "@/lib/seo";
 import { getTranslations } from "next-intl/server";
 import { DEFAULT_LOCALE } from "@/lib/i18n";
+import Link from "next/link";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations({
@@ -31,14 +38,20 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const devrelFaqItems: FAQItem[] = [
   {
-    question: "What do Developer Relations & Growth Campaigns include?",
+    question: "Can a startup get developer adoption without a DevRel team?",
     answer:
-      "Our developer relations and growth service covers community building, developer education, advocacy, project tutorials, product launches, organic distribution, creator collaborations, integrations, and event support. We operate as an embedded extension of your team.",
+      "Yes. Most of the work a first DevRel hire does can be split up: engineers fix the first run and docs, founders answer in the communities where users already talk, and an outsourced DevRel team handles the content, demos, launches, and events. Studio1 runs that outsourced part for devtool and AI startups. For Memori it took an open-source project from launch to 12,000+ GitHub stars.",
   },
   {
-    question: "How is this different from hiring an in-house DevRel team?",
+    question:
+      "Should we hire an outsourced DevRel agency or an in-house advocate?",
     answer:
-      "With Studio1, you get a hands-on DevRel team with writers, engineers, community managers, and advocates without the overhead of hiring, onboarding, and managing multiple roles. We ramp up fast, require minimal oversight, and stay leaner than building every function in-house.",
+      "Hire in-house when you need one person to own the community for years and sit close to the product. Use an agency when you need writers, engineers, and community work running in weeks without hiring, onboarding, and managing each role, or for launches and defined pushes. Many teams combine both: an internal owner sets priorities and Studio1 ships the content, demos, and events.",
+  },
+  {
+    question: "What does a DevRel and growth campaign service include?",
+    answer:
+      "Our developer relations and growth service covers community building, developer education, advocacy, project tutorials, product launches, organic distribution, creator collaborations, integrations, and event support. We operate as an embedded extension of your team.",
   },
   {
     question: "What kind of community building do you do?",
@@ -58,12 +71,12 @@ const devrelFaqItems: FAQItem[] = [
   {
     question: "Can you work alongside our existing DevRel team?",
     answer:
-      "Absolutely. Most of our engagements complement existing DevRel or marketing teams. Your team handles product positioning while we handle execution: community programs, campaign coordination, launch support, creator management, and distribution at scale.",
+      "Yes. Most of our engagements complement existing DevRel or marketing teams. Your team handles product positioning while we handle execution: community programs, campaign coordination, launch support, creator management, and distribution at scale.",
   },
   {
     question: "What is the onboarding process like?",
     answer:
-      "We start with a Discovery phase where we audit your existing developer programs, analyze community engagement, and identify growth opportunities. Within the first two weeks, we deliver an actionable assessment and a tailored DevRel roadmap aligned to your goals.",
+      "We start with a discovery phase: we audit your existing developer programs, look at community engagement, and find the growth opportunities. Within the first two weeks, you get a written assessment and a DevRel roadmap built around your goals.",
   },
   {
     question: "Do you run growth campaigns and influencer programs?",
@@ -157,24 +170,16 @@ const memoriProof = {
 };
 
 export default function DevRel() {
-  const serviceSchema = {
-    "@context": "https://schema.org",
-    "@type": "Service",
+  const serviceSchema = serviceJsonLd({
     name: "Developer Relations & Growth Campaigns",
     description:
       "Developer relations and growth campaigns for developer products: advocacy, community programs, product launches, organic distribution, and influencer management.",
-    provider: {
-      "@type": "Organization",
-      name: "Studio1",
-      url: "https://studio1hq.com",
-    },
+    path: "/developer-relations-growth-campaigns",
     serviceType: "Developer Relations and Growth Campaigns",
-    areaServed: "Worldwide",
-    url: "https://studio1hq.com/developer-relations-growth-campaigns",
-  };
+  });
 
   return (
-    <div className="">
+    <div className="overflow-x-clip" style={PAPER_SCOPE}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
@@ -194,23 +199,67 @@ export default function DevRel() {
         }}
       />
       <Hero />
+      <StoryLogos />
       <Services />
-      <ServiceDetailSection
-        eyebrow="DevRel and growth scope"
+      <StoryCards
+        index={2}
+        name="DevRel and growth scope"
         title="The execution layer behind developer adoption"
         description="We support docs, content, social, open-source, partnerships, hackathons, creator campaigns, launches, and feedback loops."
-        items={devrelScope}
-        columns="three"
+        steps={devrelScope}
+        workflow="devrel-growth.yml"
       />
-      <Process />
-      <ServiceProofSection
-        title="Open-source growth through validation, demos, and meaningful collaborations"
+      <Process index={3} />
+      <StoryProof
+        index={4}
+        title="Case studies from DevRel and growth work"
         description="Memori combined early product validation, demo agents, community education, feedback loops, and relevant developer collaborations."
-        study={memoriProof}
+        studies={[memoriProof]}
       />
-      <FAQ
-        subtitle="Common questions about our developer relations and growth campaign services."
-        items={devrelFaqItems}
+      <PaperSection tone="paper">
+        <Container>
+          <PaperServiceFaq
+            index={5}
+            subtitle="Common questions about our developer relations and growth campaign services."
+            items={devrelFaqItems}
+          />
+          <p className="mt-8 text-center text-[15px] text-[var(--p-muted)]">
+            No DevRel hire yet? Read{" "}
+            <Link
+              href="/blog/developer-adoption-without-devrel-team"
+              className="font-medium text-[#141414] underline decoration-[#141414]/25 decoration-2 underline-offset-[6px] transition-colors hover:decoration-[#f97316]"
+            >
+              how to get developer adoption without a DevRel team
+            </Link>{" "}
+            or compare a{" "}
+            <Link
+              href="/blog/devrel-agency-vs-in-house-devrel-hire"
+              className="font-medium text-[#141414] underline decoration-[#141414]/25 decoration-2 underline-offset-[6px] transition-colors hover:decoration-[#f97316]"
+            >
+              DevRel agency with an in-house hire
+            </Link>
+            . Planning events? See{" "}
+            <Link
+              href="/blog/developer-event-marketing"
+              className="font-medium text-[#141414] underline decoration-[#141414]/25 decoration-2 underline-offset-[6px] transition-colors hover:decoration-[#f97316]"
+            >
+              what developer events cost and return
+            </Link>
+            , or start with{" "}
+            <Link
+              href="/blog/what-is-developer-marketing"
+              className="font-medium text-[#141414] underline decoration-[#141414]/25 decoration-2 underline-offset-[6px] transition-colors hover:decoration-[#f97316]"
+            >
+              what developer marketing is
+            </Link>
+            .
+          </p>
+        </Container>
+      </PaperSection>
+      <PaperCta
+        index={6}
+        title="Need a DevRel Team Without the Hiring?"
+        description="Developer advocacy, community growth, launch campaigns, organic distribution, and creator programs for developer products."
       />
       {/* <DevRelPricing /> */}
       {/* <PricingSection /> */}

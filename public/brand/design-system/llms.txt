@@ -1,0 +1,21 @@
+# Studio1 Design System
+
+> Brand fonts, colours, tokens, logos and templates for Studio1 (studio1hq.com), a technical content and DevRel agency for developer-tool companies. This is the paper design: warm paper #f4efe7, ink #141414 and one print-orange accent #f97316, with selection frames, cursors and dithered block prints. Typography is Studio1 Sans (Inter renamed for Studio1), 400/500 only, with -0.03em letter spacing. Code uses the system monospace font.
+
+## Core
+- [DESIGN.md](DESIGN.md): the full rules for type, colour, spacing, components, logo, per-format recipes, imagery, voice, AI prompts and don'ts
+- [AGENTS.md](AGENTS.md): short checklist for AI agents
+- [tokens/tokens.json](tokens/tokens.json): all values in W3C Design Tokens format
+
+## Implementation
+- [css/studio1.css](css/studio1.css): one import with fonts, tokens, base type and components (buttons, cards, tiles, badges, selection frames, block prints, grain)
+- [css/tokens.css](css/tokens.css): `--s1-*` CSS variables, paper (light) and Night (dark) modes
+- [css/fonts.css](css/fonts.css): self-hosted @font-face rules
+- [tailwind/preset.cjs](tailwind/preset.cjs): Tailwind v3 preset
+- [tailwind/theme.css](tailwind/theme.css): Tailwind v4 @theme
+
+## Assets
+- [fonts/](fonts/): Studio1 Sans Regular and Medium, WOFF2 for web and TTF for desktop (SIL OFL 1.1)
+- [logo/](logo/): the main Studio1 logo (gradient mark + wordmark), the dark-mode logo (gradient mark with white cut-outs), and the mark alone in the brand gradient, in dark mode, in black and in white (SVG)
+- [templates/og-image.html](templates/og-image.html): 1200×630 featured image, paper and Night
+- [templates/code-snippet.html](templates/code-snippet.html): code snippet card

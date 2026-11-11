@@ -1,6 +1,10 @@
 "use client";
 
-import { Globe, LinkedinLogo, XLogo } from "@phosphor-icons/react/dist/ssr";
+import {
+  GlobeSimple,
+  LinkedinLogo,
+  XLogo,
+} from "@phosphor-icons/react/dist/ssr";
 import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, type MouseEvent } from "react";
@@ -8,9 +12,24 @@ import { useEffect, useRef, type MouseEvent } from "react";
 const socialLinks = (member: {
   social: { twitter: string; linkedin: string; website: string };
 }) => [
-  { href: member.social.twitter, label: "X (Twitter)", Icon: XLogo },
-  { href: member.social.linkedin, label: "LinkedIn", Icon: LinkedinLogo },
-  { href: member.social.website, label: "Website", Icon: Globe },
+  {
+    href: member.social.twitter,
+    label: "X (Twitter)",
+    Icon: XLogo,
+    weight: "bold" as const,
+  },
+  {
+    href: member.social.linkedin,
+    label: "LinkedIn",
+    Icon: LinkedinLogo,
+    weight: "fill" as const,
+  },
+  {
+    href: member.social.website,
+    label: "Website",
+    Icon: GlobeSimple,
+    weight: "bold" as const,
+  },
 ];
 
 export const TeamCard = ({
@@ -31,10 +50,7 @@ export const TeamCard = ({
   const tileRef = useRef<HTMLDivElement>(null);
   const glow = useRef({ x: 0, y: 0, tx: 0, ty: 0, raf: 0 });
 
-  useEffect(
-    () => () => cancelAnimationFrame(glow.current.raf),
-    [],
-  );
+  useEffect(() => () => cancelAnimationFrame(glow.current.raf), []);
 
   const animate = () => {
     const g = glow.current;
@@ -67,7 +83,7 @@ export const TeamCard = ({
   };
 
   return (
-    <div className="group flex h-full flex-col">
+    <div className="group flex h-full flex-col rounded-[6px] bg-white/80 p-3 shadow-[inset_0_1px_0_#fff] ring-1 ring-inset ring-[#141414]/[0.08] transition-[transform,box-shadow,background-color] duration-500 ease-out hover:-translate-y-1 hover:bg-white hover:shadow-[inset_0_1px_0_#fff,0_24px_40px_-28px_rgba(20,20,20,0.45)] motion-reduce:transform-none">
       {/* Portrait tile — the wrapper's 2px padding IS the border; the glow
           sits underneath and the opaque inner panel covers its center, so it
           can only ever be visible in the 2px ring */}
@@ -75,17 +91,18 @@ export const TeamCard = ({
         ref={tileRef}
         onMouseMove={handleMouseMove}
         onMouseEnter={handleMouseEnter}
-        className="group/tile relative rounded-2xl bg-border p-[2px]"
+        className="group/tile relative rounded-[6px] bg-[#141414]/[0.08] p-[2px]"
       >
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-500 ease-out group-hover/tile:opacity-100 [background:radial-gradient(200px_circle_at_var(--mouse-x,50%)_var(--mouse-y,50%),hsl(var(--primary))_0%,hsl(var(--primary)/0.4)_40%,transparent_75%)]"
+          className="pointer-events-none absolute inset-0 rounded-[6px] opacity-0 transition-opacity duration-500 ease-out group-hover/tile:opacity-100 [background:radial-gradient(200px_circle_at_var(--mouse-x,50%)_var(--mouse-y,50%),#f97316_0%,rgba(249,115,22,0.4)_40%,transparent_75%)]"
         />
-        <div className="relative aspect-[9/10] overflow-hidden rounded-[14px]">
-          <div aria-hidden className="absolute inset-0 bg-background" />
+        <div className="relative aspect-[4/4] overflow-hidden rounded-[6px]">
+          {/* Recessed paper tile the portrait stands in */}
+          <div aria-hidden className="absolute inset-0 bg-[#fbfaf7]" />
           <div
             aria-hidden
-            className="absolute inset-0 bg-accent backdrop-blur-2xl dark:bg-muted-foreground/5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.22),inset_0_-1px_0_0_rgba(0,0,0,0.12)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),inset_0_-1px_0_0_rgba(0,0,0,0.2)]"
+            className="absolute inset-0 bg-gradient-to-b from-[#fbfaf7] to-[#ece5da] shadow-[inset_0_3px_10px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08)]"
           />
           {typeof member.image === "string" ? (
             <Image
@@ -108,31 +125,30 @@ export const TeamCard = ({
         </div>
       </div>
 
-      {/* Caption — pure typography, no chrome */}
-      <div className="flex flex-1 flex-col px-1 pt-5">
-        <div className="flex items-baseline justify-between gap-3">
-          <h3 className="font-primary text-lg font-semibold leading-tight tracking-tight">
+      {/* Caption: name + role on the left, socials in one slim capsule */}
+      <div className="flex flex-1 items-end justify-between gap-3 px-2 pb-1.5 pt-5">
+        <div className="min-w-0">
+          <h3 className="truncate text-[19px] font-medium leading-tight tracking-[-0.03em] text-[#141414]">
             {member.name}
           </h3>
-          <div className="flex items-center gap-1 text-muted-foreground">
-            {socialLinks(member).map(({ href, label, Icon }) => (
-              <Link
-                key={label}
-                href={href}
-                target="_blank"
-                rel="noreferrer"
-                aria-label={`${member.name} on ${label}`}
-                className="flex size-7 items-center justify-center transition-colors duration-300 hover:text-primary"
-              >
-                <Icon className="size-4" />
-              </Link>
-            ))}
-          </div>
+          <p className="mt-1.5 text-[13px] leading-snug text-[#141414]/[0.62]">
+            {member.role}
+          </p>
         </div>
-        <p className="mt-1 text-sm leading-snug text-muted-foreground">
-          {member.role}
-        </p>
-        <div className="mt-4 h-px w-full bg-border/60 transition-colors duration-500 group-hover:bg-primary/40" />
+        <div className="flex shrink-0 items-center rounded-full bg-[#141414]/[0.03] p-0.5 ring-1 ring-inset ring-[#141414]/10">
+          {socialLinks(member).map(({ href, label, Icon, weight }) => (
+            <Link
+              key={label}
+              href={href}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={`${member.name} on ${label}`}
+              className="flex size-8 items-center justify-center rounded-full text-[#141414] opacity-70 transition-[color,background-color,opacity] duration-300 hover:bg-[#f97316]/10 hover:text-[#f97316] hover:opacity-100"
+            >
+              <Icon weight={weight} className="size-[17px]" />
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );

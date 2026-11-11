@@ -10,9 +10,9 @@ type CaseStudyHighlightQuotesProps = {
   className?: string;
 };
 
-/** Shared surface with CaseStudyHighlightStats — hero testimonial glass. */
+/** Shared surface with CaseStudyHighlightStats: a flat white card with a hairline. */
 export const caseStudyHighlightCardClassName =
-  "rounded-2xl border border-border/50 bg-gradient-to-br from-background/95 via-background/90 to-primary/[0.06] px-5 py-5 backdrop-blur-xl shadow-elevated-card ring-1 ring-primary/10 text-foreground dark:border-white/[0.08] dark:from-white/[0.04] dark:to-white/[0.01] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] dark:ring-white/[0.04] md:px-6 md:py-6";
+  "relative rounded-[6px] bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)] px-5 py-5 text-[#141414] md:px-7 md:py-7";
 
 /**
  * Single editorial pull quote when a study has no verified metrics.
@@ -28,7 +28,7 @@ export function CaseStudyHighlightQuotes({
       aria-label="Client highlight"
       className={cn(caseStudyHighlightCardClassName, className)}
     >
-      <p className="mb-4 text-[11px] font-medium uppercase tracking-[0.14em] text-primary dark:text-primary/70">
+      <p className="mb-4 text-[12px] font-medium uppercase tracking-[0.12em] text-[#c2410c]">
         {fromOutcomes ? `Key outcome with ${client}` : `What ${client} said`}
       </p>
 
