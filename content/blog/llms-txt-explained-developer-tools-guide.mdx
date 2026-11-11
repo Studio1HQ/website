@@ -116,7 +116,6 @@ Need? No. Should you make one? For your docs, yes.
 **It does help people using coding assistants.** Developers already point their tools at these files:
 
 * Google's Agent Development Kit docs [show how to point Gemini CLI, Claude Code, and Cursor at their llms.txt](https://google.github.io/adk-docs/tutorials/coding-with-ai).
-* Bright Data's docs tell developers to [save its llms.txt into their project](https://docs.brightdata.com/quickstart-coding-agent.md), in a Cursor rules file or an `AGENTS.md`.
 * Vercel publishes [an llms.txt and an llms-full.txt](https://vercel.com/docs/agent-resources) and explains how to use them with Claude Code.
 
 Howard says in v2 that coding assistants now use these files reliably. That's a smaller audience than "all of AI search," but it's the one a developer tool cares about.
@@ -263,7 +262,7 @@ How to fill it in:
 
 Probably not at first. llms.txt is the table of contents. llms-full.txt is the whole book in one Markdown file.
 
-Bright Data's docs give a sensible rule: for a live assistant session, [load llms.txt first and fetch single pages as needed](https://docs.brightdata.com/quickstart-coding-agent.md). Use the full file for pipelines and tools that need everything at once. It can be very large. Suppose your docs platform generates both; great. If you write by hand, start with llms.txt.
+A sensible rule: for a live assistant session, load llms.txt first and fetch single pages as needed. Use the full file for pipelines and tools that need everything at once. It can be very large. Suppose your docs platform generates both; great. If you write by hand, start with llms.txt.
 
 ## How to add llms.txt to your site
 

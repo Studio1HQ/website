@@ -367,7 +367,7 @@ export function PaperLogos() {
             return (
               <li
                 key={cell}
-                className="relative h-24 overflow-hidden rounded-[6px] bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)]"
+                className="relative h-16 overflow-hidden rounded-[6px] bg-[#fbf9f5] sm:h-24 ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)]"
               >
                 {cellLogos.map((item, index) => (
                   <span
@@ -1179,8 +1179,12 @@ function MarkedSummary({ text, mark }: { text: string; mark: string }) {
   );
 }
 
-/** The case studies featured on the home page; the rest live on /case-studies. */
-const FEATURED = ["Nebius", "Bright Data", "Memori", "LiteLLM"];
+/**
+ * The case studies featured on the home page; the rest live on /case-studies.
+ * Bright Data is off the home page for now: add "Bright Data" back after
+ * "Nebius" to show its sheet again.
+ */
+const FEATURED = ["Nebius", "Memori", "LiteLLM"];
 
 /** Official GitHub and Google marks, set inline right before the word. */
 function BrandMark({ brand }: { brand: "GitHub" | "Google" }) {
@@ -2610,22 +2614,30 @@ export function PaperReach() {
 /* 09 — Contact (paper)                                                */
 /* ------------------------------------------------------------------ */
 
-/** Flat print-orange banner with a hairline rising horizon, copy centred. */
+/** Orange banner with a soft rising horizon, copy centred. */
 export function PrintBanner({ children }: { children: ReactNode }) {
   return (
     <div
       className="relative isolate mt-10 overflow-hidden rounded-[6px] px-6 pb-24 pt-20 text-center text-white md:pb-32 md:pt-24"
-      style={{ background: PRINT }}
+      style={{
+        background:
+          "radial-gradient(60% 70% at 0% 0%, #ff3a00 0%, transparent 70%), radial-gradient(60% 70% at 100% 0%, #ff3a00 0%, transparent 70%), linear-gradient(180deg, #fb8a1e 0%, #f7a54a 38%, #e9b8a6 72%, #f2b38a 100%)",
+      }}
     >
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 opacity-[0.14] mix-blend-multiply"
+        className="pointer-events-none absolute inset-0 -z-10 opacity-25 mix-blend-multiply"
         style={{ backgroundImage: GRAIN }}
       />
-      {/* Horizon: a large hairline arc rising from the bottom edge */}
+      {/* Horizon: a large glowing arc rising from the bottom edge */}
       <span
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-[68%] -z-10 aspect-square w-[150%] -translate-x-1/2 rounded-full border border-white/40 md:top-[62%] md:w-[120%]"
+        className="pointer-events-none absolute left-1/2 top-[68%] -z-10 aspect-square w-[150%] -translate-x-1/2 rounded-full md:top-[62%] md:w-[120%]"
+        style={{
+          background:
+            "radial-gradient(closest-side, #fb8a1e 0%, #f9a53f 55%, #f6c78a 92%, rgba(255,240,215,0.9) 97%, transparent 100%)",
+          boxShadow: "0 -20px 60px -10px rgba(255,236,210,0.55)",
+        }}
       />
       {children}
     </div>
@@ -2649,7 +2661,7 @@ export function PaperCta({
       <Container>
         <IndexBar index={index} name="Contact" aside="contact@studio1hq.com" />
         <PrintBanner>
-          <h2 className="mx-auto max-w-[760px] text-[32px] font-medium leading-[1.15] tracking-[-0.045em] sm:text-[40px] lg:text-[52px]">
+          <h2 className="mx-auto max-w-[760px] text-[32px] font-medium leading-[1.15] tracking-[-0.045em] [text-shadow:0_1px_18px_rgba(160,50,0,0.18)] sm:text-[40px] lg:text-[52px]">
             {title ?? `${t("titleLine1")} ${t("titleLine2")}`}
           </h2>
           <p className="mx-auto mt-4 max-w-[480px] text-[16px] leading-[1.6] text-white/85 md:text-[17px]">
@@ -2659,7 +2671,7 @@ export function PaperCta({
             href="https://cal.com/studio1/collab"
             target="_blank"
             rel="noopener noreferrer"
-            className="group mt-9 inline-flex h-12 items-center gap-3 rounded-full py-1.5 pl-6 pr-1.5 text-[15px] font-medium transition-transform duration-300 hover:-translate-y-0.5"
+            className="group mt-9 inline-flex h-12 items-center gap-3 rounded-full py-1.5 pl-6 pr-1.5 text-[15px] font-medium shadow-[0_14px_30px_-14px_rgba(80,20,0,0.6)] transition-transform duration-300 hover:-translate-y-0.5"
             style={{ background: INK, color: PAPER }}
           >
             {t("button")}

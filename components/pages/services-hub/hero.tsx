@@ -17,7 +17,7 @@ export default function Hero() {
       stats={[
         { value: "16K+", label: "GitHub stars on Nebius's examples" },
         { value: "100K+", label: "OpenLore impressions in one month" },
-        { value: "50+", label: "technical posts for Bright Data" },
+        { value: "400+", label: "tutorials and guides written" },
         { value: "35+", label: "devtool teams served" },
       ]}
       highlights={["Content, DevRel, and growth"]}

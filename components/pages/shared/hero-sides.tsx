@@ -292,7 +292,7 @@ function DiffCard() {
 function DocsCard() {
   const pages = ["Overview", "Architecture", "Quick start", "API"];
   return (
-    <Shell title="Docs" tag="Bright Data" tagIcon={FileText}>
+    <Shell title="Docs" tag="Architecture" tagIcon={FileText}>
       <div className="flex gap-2 px-1">
         <ul className="shrink-0 space-y-1 border-r border-[#141414]/10 pr-2 text-[10px] text-[#141414]/50">
           {pages.map((page) => (
@@ -312,7 +312,7 @@ function DocsCard() {
         </ul>
         <div className="min-w-0 flex-1">
           <p className="text-[11.5px] font-medium leading-tight tracking-[-0.01em]">
-            Deep Research Agent Architecture
+            Agent Architecture Guide
           </p>
           {/* A layered diagram, as on the page */}
           <div className="mt-2 space-y-1">
@@ -1029,7 +1029,7 @@ export const CONTENT_SIDES: HeroSides = {
 export const DOCS_SIDES: HeroSides = {
   cards: [
     { label: "README.md · diff", card: <DiffCard /> },
-    { label: "brightdata · docs", card: <DocsCard /> },
+    { label: "docs · architecture", card: <DocsCard /> },
   ],
   stats: [
     {

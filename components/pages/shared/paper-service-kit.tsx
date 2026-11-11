@@ -669,7 +669,7 @@ function ProcessStory({
   return (
     <div
       ref={trackRef}
-      className="relative mt-8 hidden lg:block"
+      className="relative mt-8 hidden xl:block"
       style={{ height: `${steps.length * 130 + 40}vh` }}
     >
       <div className="sticky top-0 h-[100svh]">
@@ -899,7 +899,7 @@ export function PaperServiceProcess({
         stepLabel={stepLabel}
       />
       {/* Phones and tablets: the orange panel and step cards in one outer card */}
-      <div className="mt-8 rounded-[6px] lg:hidden bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)] p-2 sm:p-2.5">
+      <div className="mt-8 min-w-0 rounded-[6px] xl:hidden bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)] p-2 sm:p-2.5">
         <div className="grid gap-2 sm:gap-2.5 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
           <div className="lg:sticky lg:top-28 lg:self-start">
             <div

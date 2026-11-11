@@ -169,7 +169,7 @@ export const AWESOME_STACK = [
 /** Sponsors listed in the Awesome AI Apps README. */
 export const AWESOME_SPONSORS = [
   "Nebius Token Factory",
-  "Bright Data",
+  // "Bright Data", hidden while its case study is in review
   "ScrapeGraphAI",
   "Memori",
   "CopilotKit",

@@ -16,7 +16,7 @@
     "services": {
       "technicalContent": {
         "title": "Marketing de contenu technique pour devtools",
-        "description": "Marketing de contenu technique pour équipes devtool et IA : tutoriels écrits par des ingénieurs, guides d’intégration, SEO. 50+ articles pour Bright Data."
+        "description": "Marketing de contenu technique pour équipes devtool et IA : tutoriels écrits par des ingénieurs, guides d’intégration, SEO. 400+ tutoriels et guides rédigés."
       },
       "docs": {
         "title": "Audit d’expérience développeur et services docs",
@@ -115,6 +115,8 @@
     "descriptionRich": "Les ingénieurs et developer advocates de Studio1 créent le contenu technique, les docs et les démos<br></br>auxquels les développeurs font confiance, puis mènent les lancements et programmes communautaires qui font adopter votre produit.",
     "primaryCta": "Réserver un appel stratégique",
     "secondaryCta": "Voir nos réalisations",
+    "primaryCtaShort": "Prendre RDV",
+    "secondaryCtaShort": "Nos projets",
     "trustedAria": "Plus de 35 équipes devtool nous font confiance",
     "trustedPrefix": "Déjà",
     "trustedSuffix": "équipes devtool nous font confiance"

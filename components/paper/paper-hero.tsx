@@ -263,7 +263,14 @@ function CyclingLabel({ items }: { items: string[]; offset: number }) {
  * whole pill, the label nudges left and the handset rings once as its sound
  * waves draw out; it all eases back on leave. A small press-in on click.
  */
-function StrategyCallButton({ label }: { label: string }) {
+function StrategyCallButton({
+  label,
+  shortLabel,
+}: {
+  label: string;
+  /** Shown on phones, where the full label won't sit beside the second CTA. */
+  shortLabel: string;
+}) {
   const reduceMotion = useReducedMotion();
   const ease = [0.65, 0, 0.35, 1] as const;
 
@@ -276,7 +283,7 @@ function StrategyCallButton({ label }: { label: string }) {
       animate="rest"
       whileHover={reduceMotion ? undefined : "hover"}
       whileTap={reduceMotion ? undefined : { scale: 0.97 }}
-      className="relative isolate inline-flex h-14 items-center gap-4 overflow-hidden rounded-full pl-8 pr-2 text-[16px] font-medium text-[#f4efe7]"
+      className="relative isolate inline-flex h-12 items-center gap-3 overflow-hidden whitespace-nowrap rounded-full pl-5 pr-1.5 text-[15px] font-medium text-[#f4efe7] sm:h-14 sm:gap-4 sm:pl-8 sm:pr-2 sm:text-[16px]"
       style={{ background: INK }}
     >
       <motion.span
@@ -284,9 +291,10 @@ function StrategyCallButton({ label }: { label: string }) {
         variants={{ rest: { x: 0 }, hover: { x: -4 } }}
         transition={{ duration: 0.5, ease }}
       >
-        {label}
+        <span className="sm:hidden">{shortLabel}</span>
+        <span className="hidden sm:inline">{label}</span>
       </motion.span>
-      <span className="relative flex size-10 items-center justify-center">
+      <span className="relative flex size-9 items-center justify-center sm:size-10">
         {/* At rest: a soft "incoming call" ring every few seconds */}
         {!reduceMotion ? (
           <motion.span
@@ -661,26 +669,31 @@ export default function PaperHero() {
             {t("description")}
           </motion.p>
 
+          {/* Side by side from phones up; wraps only if a locale's labels run long */}
           <motion.div
             {...enter(0.7)}
-            className="mt-12 flex flex-col items-center gap-6 sm:flex-row"
+            className="mt-12 flex flex-wrap items-center justify-center gap-x-2 gap-y-6 sm:gap-6"
           >
             <div className="relative">
               <SelectionFrame
                 label="button-filled-enabled"
                 labelPosition="top-left"
-                className="p-1.5"
+                className="p-1 sm:p-1.5"
               >
-                <StrategyCallButton label={t("primaryCta")} />
+                <StrategyCallButton
+                  label={t("primaryCta")}
+                  shortLabel={t("primaryCtaShort")}
+                />
               </SelectionFrame>
               <Cursor className="absolute -bottom-8 -right-6 hidden sm:block" />
             </div>
             <a
               href="/case-studies"
-              className="group inline-flex h-14 items-center gap-2 rounded-full border-[1.5px] px-7 text-[16px] font-medium transition-colors hover:bg-white"
+              className="group inline-flex h-12 items-center gap-2 whitespace-nowrap rounded-full border-[1.5px] px-4 text-[15px] font-medium transition-colors hover:bg-white sm:h-14 sm:px-7 sm:text-[16px]"
               style={{ borderColor: INK }}
             >
-              {t("secondaryCta")}
+              <span className="sm:hidden">{t("secondaryCtaShort")}</span>
+              <span className="hidden sm:inline">{t("secondaryCta")}</span>
               <ArrowUpRight
                 weight="bold"
                 className="size-4 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"

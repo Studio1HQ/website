@@ -64,7 +64,7 @@ const CONTENT: Service[] = [
     icon: PenNib,
     description:
       "Engineer-written tutorials, integration guides, comparisons, and SEO articles.",
-    proof: { value: "50+", label: "posts live on brightdata.com" },
+    proof: { value: "400+", label: "tutorials and guides written" },
   },
   {
     name: "Developer Video Production",

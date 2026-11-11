@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { DEFAULT_LOCALE } from "@/lib/i18n";
 import { products } from "@/constants/products";
 import ProductHero from "@/components/product/product-hero";
 import RaahChapter from "@/components/product/raah-chapter";
@@ -10,7 +11,10 @@ import { softwareApplicationJsonLd } from "@/lib/seo";
 import { PAPER_SCOPE } from "@/lib/paper";
 
 export default async function ProductPage() {
-  const t = await getTranslations("ProductPage.cta");
+  const t = await getTranslations({
+    locale: DEFAULT_LOCALE,
+    namespace: "ProductPage.cta",
+  });
   const productSchemas = products
     .filter((p) => p.status !== "upcoming")
     .map((product) =>

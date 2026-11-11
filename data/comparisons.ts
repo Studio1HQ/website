@@ -32,7 +32,7 @@ const STUDIO1 = {
     "DevRel and developer marketing for devtool, AI, and open-source teams",
   team: "Studio1's own engineers and writers",
   pricing: "No public price list. Book a call to scope it.",
-  clients: "Nebius, Memori, LiteLLM, Bright Data, Permit.io, Jozu",
+  clients: "Nebius, Memori, LiteLLM, Permit.io, Jozu",
 };
 
 export const COMPARISONS: Comparison[] = [

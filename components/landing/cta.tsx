@@ -23,7 +23,7 @@ const RING_SHOTS = [
   "/case-studies/corsair/slideflow-demo.webp",
   "/case-studies/jozu/kubecon-jozu-booth.webp",
   "/case-studies/tensorlake/Toon-blog.webp",
-  "/case-studies/brightdata/brightdata-homepage.webp",
+  "/case-studies/openlore/openlore-homepage.webp",
   "/case-studies/nebius/workshop-dublin-poster.webp",
   "/case-studies/corsair/corsair-homepage.webp",
   "/case-studies/tensorlake/tensorlake-home.webp",
@@ -32,7 +32,7 @@ const RING_SHOTS = [
   "/case-studies/entelligence-ai/entelligence-homepage.webp",
   "/case-studies/tensorlake/Claude-Cowork-dev.webp",
   "/case-studies/nebius/workshop-dublin-recap.webp",
-  "/case-studies/brightdata/docs-deep-research-architecture.webp",
+  "/case-studies/openlore/openlore-readme-after.webp",
 ];
 
 /**
