@@ -1,21 +1,9 @@
+import { AI_AGENTS, AI_ROBOTS_TOKENS } from "@/lib/ai-agents";
 import { baseUrl } from "@/lib/site";
 
 // AI search and assistant crawlers. These only work once Cloudflare's managed
 // robots.txt and "Block AI bots" settings stop overriding them at the edge.
-const agentUserAgents = [
-  "GPTBot",
-  "OAI-SearchBot",
-  "ChatGPT-User",
-  "ClaudeBot",
-  "Claude-SearchBot",
-  "Claude-User",
-  "PerplexityBot",
-  "Perplexity-User",
-  "Google-Extended",
-  "Applebot-Extended",
-  "DeepSeekBot",
-  "ora-agent",
-];
+const agentUserAgents = [...AI_AGENTS, ...AI_ROBOTS_TOKENS];
 
 export default function robots() {
   return {

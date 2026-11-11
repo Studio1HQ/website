@@ -56,3 +56,6 @@ claude-audit
 
 # Team operations notes kept out of the public repo
 supabase/OPERATIONS.local.md
+
+# Local working notes (e.g. notes/ai-offer-experiment.local.md)
+*.local.md

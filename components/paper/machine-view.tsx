@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { Check, Copy, X } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
+import { pageToMarkdown } from "@/lib/page-markdown";
 
 type Mode = "human" | "machine";
 
@@ -24,215 +25,6 @@ type LenisLike = {
 const RISE = { duration: 0.45, ease: [0.22, 1, 0.36, 1] } as const;
 /** Going back is quicker, so the page returns without a wait. */
 const FALL = { duration: 0.28, ease: [0.4, 0, 1, 1] } as const;
-
-const SITE = "https://www.studio1hq.com";
-
-/** An absolute link to the live site, without query strings. */
-function toUrl(href: string) {
-  const url = new URL(href, SITE);
-  if (url.hostname === window.location.hostname)
-    return `${SITE}${url.pathname}`;
-  url.search = "";
-  return url.href;
-}
-
-/** Text of an element with whitespace collapsed. */
-const clean = (value: string | null | undefined) =>
-  (value ?? "").replace(/\s+/g, " ").trim();
-
-/**
- * Turns the page the visitor is on into plain markdown: headings, paragraphs,
- * lists, quotes, code, figures and links, in reading order. Navigation, the
- * footer, decoration and anything hidden are left out.
- */
-/** What the page's own structured data says about it (JSON-LD). */
-function pageFacts() {
-  const facts: Record<string, string> = {};
-  const nodes: Record<string, unknown>[] = [];
-  document
-    .querySelectorAll('script[type="application/ld+json"]')
-    .forEach((script) => {
-      try {
-        const data = JSON.parse(script.textContent ?? "");
-        const list = Array.isArray(data) ? data : (data["@graph"] ?? [data]);
-        nodes.push(...list);
-      } catch {
-        // Ignore malformed blocks
-      }
-    });
-  const main =
-    nodes.find((n) =>
-      /Article|BlogPosting|CaseStudy|Service|CollectionPage|AboutPage|WebPage/.test(
-        String(n["@type"]),
-      ),
-    ) ?? nodes[0];
-  if (!main) return facts;
-  const author = main.author as
-    { name?: string } | { name?: string }[] | undefined;
-  const authorName = Array.isArray(author) ? author[0]?.name : author?.name;
-  if (main["@type"]) facts.type = String(main["@type"]);
-  if (authorName) facts.author = authorName;
-  if (main.datePublished)
-    facts.published = String(main.datePublished).slice(0, 10);
-  if (main.dateModified) facts.updated = String(main.dateModified).slice(0, 10);
-  return facts;
-}
-
-function pageToMarkdown(pathname: string) {
-  const root =
-    document.querySelector<HTMLElement>("main") ??
-    document.querySelector<HTMLElement>("#__next") ??
-    document.body;
-  const lines: string[] = [];
-  const seen = new Set<string>();
-  const push = (line: string) => {
-    if (!line || seen.has(line)) return;
-    seen.add(line);
-    lines.push(line);
-  };
-
-  const skip = (el: Element) =>
-    el.closest(
-      "nav, footer, header[data-site-header], [aria-hidden='true'], script, style, noscript, [data-machine-view]",
-    ) !== null;
-
-  // Only start at the page's first heading: everything before it is chrome.
-  const firstHeading = root.querySelector("h1");
-  let started = !firstHeading;
-  const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
-  let node = walker.currentNode as Element | null;
-  while (node) {
-    const el = node as HTMLElement;
-    if (el === firstHeading) started = true;
-    if (started && !skip(el)) {
-      const tag = el.tagName;
-      const text = clean(el.innerText);
-      if (/^H[1-6]$/.test(tag) && text) {
-        push(`${"#".repeat(Number(tag[1]))} ${text}`);
-      } else if (tag === "P" && text && !el.closest("li, blockquote")) {
-        push(text);
-      } else if (tag === "LI" && text && !el.querySelector("li")) {
-        const link = el.querySelector("a[href]");
-        const href = link?.getAttribute("href");
-        push(
-          href && !href.startsWith("#")
-            ? `- [${text}](${toUrl(href)})`
-            : `- ${text}`,
-        );
-      } else if (tag === "BLOCKQUOTE" && text) {
-        push(`> ${text}`);
-      } else if (tag === "PRE" && text) {
-        push("```\n" + (el.innerText ?? "").trim() + "\n```");
-      } else if (tag === "IMG") {
-        const alt = clean(el.getAttribute("alt"));
-        if (alt) push(`![${alt}]`);
-      } else if (tag === "A" && !el.closest("p, li, h1, h2, h3, h4, h5, h6")) {
-        const href = el.getAttribute("href");
-        if (text && href && !href.startsWith("#") && text.length < 80) {
-          push(`- [${text}](${toUrl(href)})`);
-        }
-      } else if (tag === "DT" && text) {
-        const value = clean(el.nextElementSibling?.textContent);
-        push(`- **${text}:** ${value}`);
-      }
-    }
-    node = walker.nextNode() as Element | null;
-  }
-
-  const title = clean(document.title);
-  const description = clean(
-    document.querySelector('meta[name="description"]')?.getAttribute("content"),
-  );
-  const url = `${SITE}${pathname}`;
-  const facts = pageFacts();
-  const body = lines.join(" ");
-  const words = body.split(/\s+/).filter(Boolean).length;
-  const sections = lines.filter((line) => /^#{2} /.test(line)).length;
-
-  // What kind of page this is, from its address
-  const kind =
-    pathname === "/"
-      ? "Home page"
-      : /^\/case-studies\/./.test(pathname)
-        ? "Case study"
-        : /^\/case-studies/.test(pathname)
-          ? "Case study index"
-          : /^\/blog\/./.test(pathname)
-            ? "Article"
-            : /^\/blog/.test(pathname)
-              ? "Blog index"
-              : /services|marketing|devrel|seo|launch|aeo|reddit|content/.test(
-                    pathname,
-                  )
-                ? "Service"
-                : "Page";
-
-  // The page's main sections, and the lines that carry its numbers
-  const outline = lines
-    .filter((line) => /^## /.test(line))
-    .map((line) => `- ${line.replace(/^## /, "")}`);
-  const keyFacts = lines
-    .filter(
-      (line) =>
-        !/^#/.test(line) &&
-        /(?<![a-zA-Z])\d[\d,.]*\s?(?:[KMB%x]|\+)/.test(line) &&
-        line.length > 12 &&
-        line.length < 180,
-    )
-    .slice(0, 8)
-    .map((line) => (line.startsWith("- ") ? line : `- ${line}`));
-
-  const block = (heading: string, rows: string[]) =>
-    rows.length ? `## ${heading}\n\n${rows.join("\n")}` : "";
-
-  const content = lines
-    .map((line, k) =>
-      k > 0 && line.startsWith("- ") && lines[k - 1].startsWith("- ")
-        ? `\n${line}`
-        : `\n\n${line}`,
-    )
-    .join("")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
-
-  const frontMatter = [
-    "---",
-    `title: ${title}`,
-    `url: ${url}`,
-    `page_type: ${kind}`,
-    description ? `description: ${description}` : "",
-    facts.type ? `schema_type: ${facts.type}` : "",
-    facts.author ? `author: ${facts.author}` : "",
-    facts.published ? `published: ${facts.published}` : "",
-    facts.updated && facts.updated !== facts.published
-      ? `updated: ${facts.updated}`
-      : "",
-    sections ? `sections: ${sections}` : "",
-    `words: ${words.toLocaleString("en-US")}`,
-    `reading_time: ${Math.max(1, Math.round(words / 230))} min`,
-    "publisher: Studio1 (https://www.studio1hq.com)",
-    "site_index: https://www.studio1hq.com/llms.txt",
-    "sitemap: https://www.studio1hq.com/sitemap.xml",
-    "---",
-  ].filter(Boolean);
-
-  return [
-    frontMatter.join("\n"),
-    description ? block("Summary", [description]) : "",
-    block("On this page", outline),
-    block("Key facts", keyFacts),
-    content,
-    block("About Studio1", [
-      "Studio1 is a DevRel and developer marketing agency for devtool, AI, and open-source teams, covering technical content, docs, video, launches, and community.",
-      "- Services: technical content, SEO and AEO, developer relations, documentation, product launches and community growth",
-      "- Clients include Memori, Nebius, LiteLLM, Bright Data, Permit.io, Jozu, OpenLore and ScrapeGraphAI",
-      "- Contact: contact@studio1hq.com · https://cal.com/studio1/collab",
-    ]),
-    block("Cite this page", [`${title}. Studio1. ${url}`]),
-  ]
-    .filter(Boolean)
-    .join("\n\n");
-}
 
 /** Professional syntax colouring for the machine/LLM markdown view. */
 function MarkdownLine({
@@ -410,7 +202,12 @@ export function MachineToggle() {
   useEffect(() => setMounted(true), []);
 
   const open = useCallback(() => {
-    setMarkdown(pageToMarkdown(pathname ?? "/"));
+    setMarkdown(
+      pageToMarkdown(document, {
+        pathname: pathname ?? "/",
+        ownHosts: [window.location.hostname],
+      }),
+    );
     setMode("machine");
   }, [pathname]);
 

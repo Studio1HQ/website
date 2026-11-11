@@ -1,11 +1,15 @@
 import type { NextConfig } from "next";
 import nextMDX from "@next/mdx";
 import createNextIntlPlugin from "next-intl/plugin";
+import { AI_AGENT_HEADER_PATTERN } from "./lib/ai-agents";
 
 const withMDX = nextMDX();
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 const nextConfig: NextConfig = {
   pageExtensions: ["js", "jsx", "mdx", "ts", "tsx"],
+  // linkedom (app/ai-md) breaks when bundled: its optional canvas support
+  // resolves to a stub. Load it from node_modules at runtime instead.
+  serverExternalPackages: ["linkedom"],
   turbopack: {
     root: process.cwd(),
   },
@@ -30,13 +34,30 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
-    // Markdown version of every blog post, for LLMs and AI tools.
-    return [
-      { source: "/blog/:slug.md", destination: "/blog-md/:slug" },
-      // The brand page (Studio1 Sans, design system, downloads): a static
-      // build in public/brand, refreshed with scripts/sync-brand.mjs.
-      { source: "/brand", destination: "/brand/index.html" },
+    // AI agents (lib/ai-agents.ts, never search engines) get the markdown
+    // version of English pages from app/ai-md. People get the normal page.
+    const aiAgent = [
+      { type: "header" as const, key: "user-agent", value: AI_AGENT_HEADER_PATTERN },
     ];
+    return {
+      beforeFiles: [
+        { source: "/", has: aiAgent, destination: "/ai-md" },
+        {
+          source:
+            "/:path((?!(?:_next|api|ai-md|blog-md|blog-cover|blog-og|brand|admin|assets|fonts|fr|es|hi|zh)(?:/|$))[^.]+|llms\\.txt|llms-full\\.txt)",
+          has: aiAgent,
+          destination: "/ai-md/:path",
+        },
+      ],
+      afterFiles: [
+        // Markdown version of every blog post, for LLMs and AI tools.
+        { source: "/blog/:slug.md", destination: "/blog-md/:slug" },
+        // The brand page (Studio1 Sans, design system, downloads): a static
+        // build in public/brand, refreshed with scripts/sync-brand.mjs.
+        { source: "/brand", destination: "/brand/index.html" },
+      ],
+      fallback: [],
+    };
   },
   async headers() {
     return [

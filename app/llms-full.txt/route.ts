@@ -1,7 +1,8 @@
 import fs from "fs";
 import path from "path";
 import { getPostBySlug, type BlogPost } from "@/lib/blog";
-import { absolutize, buildPostMarkdown } from "@/lib/blog-markdown";
+import { buildPostMarkdown } from "@/lib/blog-markdown";
+import { caseStudyMarkdown } from "@/lib/case-study-markdown";
 import { getAllCaseStudies, getCaseStudyBySlug } from "@/lib/case-studies";
 import { DEFAULT_LOCALE } from "@/lib/i18n";
 import { baseUrl } from "@/lib/site";
@@ -16,21 +17,6 @@ function guideSlugs(llmsTxt: string): string[] {
   const section = llmsTxt.split(/^## Guides$/m)[1]?.split(/^## /m)[0] ?? "";
   return [...section.matchAll(/\/blog\/([a-z0-9-]+)\)/g)].map(
     (match) => match[1],
-  );
-}
-
-/** Case study MDX as plain Markdown: images become ![alt](src), other tags go. */
-function caseStudyMarkdown(content: string): string {
-  const withImages = content.replace(/<img\b[^>]*>/g, (tag) => {
-    const src = tag.match(/\bsrc="([^"]+)"/)?.[1];
-    const alt = tag.match(/\balt="([^"]*)"/)?.[1] ?? "";
-    return src ? `![${alt}](${src})` : "";
-  });
-  return absolutize(
-    withImages
-      .replace(/<\/?[A-Za-z][^>]*>/g, "")
-      .replace(/\n{3,}/g, "\n\n")
-      .trim(),
   );
 }
 
