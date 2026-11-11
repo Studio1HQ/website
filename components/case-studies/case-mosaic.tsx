@@ -72,7 +72,7 @@ function HoverLabel({ name, below }: { name: string; below?: boolean }) {
       )}
     >
       {name}
-      <span className="ml-1.5 text-[#fb923c]">↗</span>
+      <span className="ml-1.5 text-[#f97316]">↗</span>
     </span>
   );
 }
@@ -236,7 +236,7 @@ export function CaseMosaic({
               href={`/case-studies/${item.slug}`}
               aria-label={`${item.client} case study`}
               className={cn(
-                "relative size-[64px] shrink-0 overflow-hidden rounded-[6px] shadow-[0_10px_20px_-12px_rgba(20,20,20,0.5)]",
+                "relative size-[64px] shrink-0 overflow-hidden rounded-[6px] shadow-[0_1px_0_rgba(27,23,20,0.06)]",
               )}
             >
               <Image

@@ -72,7 +72,7 @@ const STEPS = [
 function InstallCard() {
   return (
     <div
-      className="flex min-w-0 flex-col rounded-[6px] p-5 text-[#f4efe7] shadow-[0_40px_80px_-48px_rgba(20,20,20,0.7)] sm:p-6"
+      className="flex min-w-0 flex-col rounded-[6px] p-5 text-[#f4efe7] shadow-[0_1px_0_rgba(27,23,20,0.06)] sm:p-6"
       style={{ background: NIGHT }}
     >
       <div className="flex items-center justify-between gap-4">

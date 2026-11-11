@@ -50,11 +50,10 @@ export function availabilityOf(status: string): Availability {
 }
 
 /** Departments grouped into the teams a candidate would join. */
-/** Glass card and engraved well, shared by this page's blocks. */
+/** White card and paper tile, shared by this page's blocks. */
 const GLASS_CARD =
   "rounded-[6px] bg-[#fbf9f5] shadow-[0_20px_44px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.06]";
-const WELL =
-  "bg-[#f1ece4] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)]";
+const WELL = "bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08]";
 
 const TEAMS = [
   { key: "engineering", label: "Engineering", departments: ["Engineering"] },
@@ -223,12 +222,12 @@ function HiringFlyer({ jobs }: { jobs: JobOpening[] }) {
   return (
     <div className="relative w-full">
       <div
-        className="relative isolate overflow-hidden text-white shadow-[0_44px_80px_-44px_rgba(90,25,0,0.75)]"
+        className="relative isolate overflow-hidden text-white shadow-[0_44px_80px_-44px_rgba(20,20,20,0.55)]"
         style={{ background: PRINT }}
       >
         <span
           aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10 opacity-40 mix-blend-multiply"
+          className="pointer-events-none absolute inset-0 -z-10 opacity-[0.14] mix-blend-multiply"
           style={{ backgroundImage: GRAIN }}
         />
         <div className="px-6 pb-7 pt-9 sm:px-8">
@@ -279,7 +278,7 @@ function HiringFlyer({ jobs }: { jobs: JobOpening[] }) {
                 >
                   <span
                     aria-hidden
-                    className="pointer-events-none absolute inset-0 -z-10 opacity-40 mix-blend-multiply"
+                    className="pointer-events-none absolute inset-0 -z-10 opacity-[0.14] mix-blend-multiply"
                     style={{ backgroundImage: GRAIN }}
                   />
                   <span className="flex h-full rotate-180 items-center justify-end gap-2.5 py-3.5 [writing-mode:vertical-rl]">
@@ -369,7 +368,7 @@ function CareersHero({ jobs }: { jobs: JobOpening[] }) {
             <SeeRolesButton label="See open roles" />
           </div>
 
-          {/* Facts: engraved tiles in one glass card */}
+          {/* Facts: paper tiles in one white card */}
           <motion.dl
             className={cn(
               "mt-14 grid max-w-[680px] grid-cols-2 gap-2 p-2 sm:grid-cols-4",
@@ -430,14 +429,10 @@ export function RoleRow({ job, index }: { job: JobOpening; index: number }) {
         CELL,
       )}
     >
-      {/* Hover: an orange wash rises from the right edge */}
+      {/* Hover: a flat orange tint slides in from the right edge */}
       <span
         aria-hidden
-        className="pointer-events-none !absolute inset-0 -z-[5] translate-x-8 opacity-0 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0 group-hover:opacity-100 motion-reduce:translate-x-0"
-        style={{
-          background:
-            "radial-gradient(40% 140% at 104% 50%, rgba(249,115,22,0.22) 0%, rgba(249,115,22,0) 70%)",
-        }}
+        className="pointer-events-none !absolute inset-0 -z-[5] translate-x-8 bg-[#f97316]/[0.06] opacity-0 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0 group-hover:opacity-100 motion-reduce:translate-x-0"
       />
       <span
         className={cn(
@@ -668,7 +663,7 @@ function OpenRoles({
                       WELL,
                     )}
                   >
-                    <span className="flex size-9 shrink-0 items-center justify-center rounded-[6px] bg-white text-[#f97316] shadow-[0_4px_10px_-6px_rgba(20,20,20,0.35)]">
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-[6px] bg-white text-[#f97316] ring-1 ring-inset ring-[#141414]/[0.07]">
                       <RoleIcon title={job.title} className="size-4" />
                     </span>
                     <span className="min-w-0 flex-1 leading-tight">
@@ -757,7 +752,7 @@ function WhyStudio1() {
               {WORK_TYPES.map((type) => (
                 <li
                   key={type}
-                  className="rounded-full bg-white/70 px-3 py-1 text-[12px] font-medium ring-1 ring-inset ring-[#141414]/10"
+                  className="rounded-full bg-[#f4efe7] px-3 py-1 text-[12px] font-medium ring-1 ring-inset ring-[#141414]/[0.08]"
                 >
                   {type}
                 </li>
@@ -778,7 +773,7 @@ function WhyStudio1() {
                 <div
                   className={cn(
                     "grid grid-cols-[48px_minmax(0,1fr)] gap-x-4 rounded-[6px] p-5 md:grid-cols-[60px_minmax(0,1fr)] md:p-6",
-                    "bg-white shadow-[inset_0_2px_6px_rgba(20,20,20,0.06),inset_0_1px_2px_rgba(20,20,20,0.05)]",
+                    "bg-white ring-1 ring-inset ring-[#141414]/[0.07]",
                   )}
                 >
                   <span
@@ -878,9 +873,9 @@ function HiringProcess() {
                 },
               }}
             >
-              <div className="flex h-full flex-col rounded-[6px] bg-white p-5 shadow-[inset_0_2px_6px_rgba(20,20,20,0.06),inset_0_1px_2px_rgba(20,20,20,0.05)]">
+              <div className="flex h-full flex-col rounded-[6px] bg-white p-5 ring-1 ring-inset ring-[#141414]/[0.07]">
                 <div className="flex items-center justify-between">
-                  {/* Number tile: engraved, then lit orange in turn */}
+                  {/* Number tile: paper, then lit orange in turn */}
                   <span
                     className={cn(
                       "relative flex size-11 items-center justify-center overflow-hidden rounded-[6px] text-[14px] font-semibold tabular-nums",

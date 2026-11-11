@@ -37,7 +37,7 @@ const BRANDS: { pattern: RegExp; icon: Icon; color: string }[] = [
     pattern:
       /^(events?|Events?|meetups?|Meetups?|workshops?|Workshops?|hackathons?|Hackathons?|conferences?|Conferences?)$/,
     icon: CalendarDots,
-    color: "#ea580c",
+    color: "#f97316",
   },
 ];
 
@@ -90,7 +90,7 @@ export function ClientMark({
   return (
     <span
       className={cn(
-        "flex shrink-0 items-center justify-center overflow-hidden rounded-[6px] bg-[#f8f6f2] p-1.5 shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10)]",
+        "flex shrink-0 items-center justify-center overflow-hidden rounded-[6px] bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08] p-1.5",
         className,
       )}
     >

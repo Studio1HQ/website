@@ -7,7 +7,7 @@ import { GRAIN } from "@/lib/paper";
 const EASE = [0.16, 1, 0.3, 1] as const;
 
 const RIM =
-  "relative flex size-[92px] items-center justify-center rounded-full bg-[radial-gradient(circle_at_32%_24%,#ffffff_0%,#ffffff_40%,#f5f2ed_72%,#e6e0d6_100%)] p-[8px] shadow-[0_24px_40px_-18px_rgba(0,0,0,0.7),inset_0_1px_0_#fff] md:size-[108px]";
+  "relative flex size-[92px] items-center justify-center rounded-full bg-white p-[8px] shadow-[0_24px_40px_-18px_rgba(0,0,0,0.7)] ring-1 ring-inset ring-[#141414]/[0.07] md:size-[108px]";
 
 /**
  * The hero artwork, drawn rather than photographed: Studio1 and the client
@@ -49,7 +49,7 @@ export function CaseVisual({
           Case study
         </p>
         <p className="mt-2 text-[26px] font-medium leading-[1.05] tracking-[-0.045em] md:text-[30px]">
-          Studio1 <span className="text-[#fb923c]">×</span> {client}
+          Studio1 <span className="text-[#f97316]">×</span> {client}
         </p>
       </motion.div>
 

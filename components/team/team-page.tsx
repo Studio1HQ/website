@@ -19,7 +19,7 @@ import {
   PaperSection,
 } from "@/components/paper/paper-sections";
 import { TEAM, type TeamMember } from "@/data/team";
-import { PAPER_SCOPE } from "@/lib/paper";
+import { GRAIN, PAPER_SCOPE, PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 
 /** Head-and-shoulders as a dot grid: the open seat's dithered portrait. */
@@ -98,10 +98,10 @@ function PersonCard({ member }: { member: TeamMember }) {
         ) : (
           <PixelPortrait src={member.portrait} alt={member.name ?? ""} />
         )}
-        {/* Engraved glass, as on the About Us portraits */}
+        {/* Hairline edge, as on the About Us portraits */}
         <span
           aria-hidden
-          className="pointer-events-none absolute inset-0 rounded-[6px] shadow-[inset_0_6px_16px_rgba(20,20,20,0.16),inset_0_1px_3px_rgba(20,20,20,0.18),inset_0_-1px_0_rgba(255,255,255,0.7)] ring-1 ring-inset ring-white/50"
+          className="pointer-events-none absolute inset-0 rounded-[6px] ring-1 ring-inset ring-[#141414]/[0.07]"
         />
       </div>
 
@@ -129,7 +129,7 @@ function PersonCard({ member }: { member: TeamMember }) {
                 target="_blank"
                 rel="noreferrer"
                 aria-label={`${member.name} on ${label}`}
-                className="flex size-8 items-center justify-center rounded-full bg-[#141414]/[0.04] shadow-[inset_0_1px_2px_rgba(20,20,20,0.12),inset_0_-1px_0_rgba(255,255,255,0.85)] ring-1 ring-inset ring-[#141414]/[0.06] text-[#141414]/60 transition-colors duration-200 hover:bg-[#141414] hover:text-white"
+                className="flex size-8 items-center justify-center rounded-full bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08] text-[#141414]/60 transition-colors duration-200 hover:bg-[#141414] hover:text-white"
               >
                 <Icon weight={weight} className="size-[17px]" />
               </Link>
@@ -139,7 +139,7 @@ function PersonCard({ member }: { member: TeamMember }) {
                 key={label}
                 aria-hidden
                 title={`${label} coming soon`}
-                className="flex size-8 items-center justify-center rounded-full bg-[#141414]/[0.04] shadow-[inset_0_1px_2px_rgba(20,20,20,0.12),inset_0_-1px_0_rgba(255,255,255,0.85)] ring-1 ring-inset ring-[#141414]/[0.06] cursor-default text-[#141414]/25"
+                className="flex size-8 items-center justify-center rounded-full bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08] cursor-default text-[#141414]/25"
               >
                 <Icon weight={weight} className="size-[17px]" />
               </span>
@@ -213,7 +213,7 @@ export function TeamPage() {
                     </p>
                     <Link
                       href="/careers"
-                      className="mt-5 flex h-11 items-center justify-center gap-2 rounded-[6px] bg-[#141414] text-[14px] font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_10px_24px_-14px_rgba(20,20,20,0.7)] transition-colors hover:bg-[#2a2522]"
+                      className="mt-5 flex h-11 items-center justify-center gap-2 rounded-[6px] bg-[#141414] text-[14px] font-medium text-white shadow-[0_10px_24px_-14px_rgba(20,20,20,0.7)] transition-colors hover:bg-[#2a2522]"
                     >
                       View open roles
                       <ArrowUpRight weight="bold" className="size-4" />
@@ -240,6 +240,7 @@ export function TeamPage() {
                       ? "bg-white/80 ring-[#141414]/10"
                       : "bg-[#f97316] ring-[#c2410c]/25",
                   )}
+                  style={i === 1 ? undefined : { background: PRINT }}
                 >
                   <DitherField
                     still
@@ -304,7 +305,7 @@ export function TeamPage() {
         <Container>
           <Link
             href="/careers"
-            className="group flex flex-wrap items-center justify-between gap-4 rounded-[6px] bg-[#fbf9f5] p-6 shadow-[0_30px_60px_-46px_rgba(20,20,20,0.5),inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-inset ring-white/80 md:p-8"
+            className="group flex flex-wrap items-center justify-between gap-4 rounded-[6px] bg-[#fbf9f5] p-6 shadow-[0_30px_60px_-46px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/[0.07] md:p-8"
           >
             <span>
               <span className="block text-[24px] font-medium tracking-[-0.04em]">

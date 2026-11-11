@@ -7,7 +7,7 @@ import { EASE } from "@/components/home/ui";
 import { useCountdown } from "@/components/hackathons/flap-countdown";
 import { InkPill } from "@/components/hackathons/hackathon-ui";
 import { FORMAT_LABEL, type HackathonCard } from "@/lib/hackathons";
-import { PRINT } from "@/lib/paper";
+import { GRAIN, PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 
 /** The event the hub puts in the spotlight: live now, else the next one. */
@@ -84,9 +84,13 @@ function MonthCalendar({
 
       <div className="relative overflow-hidden rounded-[6px] bg-white shadow-[0_22px_40px_-24px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/[0.08]">
         <div
-          className="flex items-end justify-between px-4 pb-2 pt-5 text-white"
-          style={{ background: `linear-gradient(180deg, #fb923c, ${PRINT})` }}
+          className="relative isolate flex items-end justify-between px-4 pb-2 pt-5 text-white"
+          style={{ background: PRINT }}
         >
+          <span
+            className="pointer-events-none absolute inset-0 -z-10 opacity-[0.14] mix-blend-multiply"
+            style={{ backgroundImage: GRAIN }}
+          />
           <span className="text-[15px] font-semibold tracking-[-0.01em]">
             {monthName}
           </span>
@@ -186,12 +190,12 @@ export function LiveSpotlight({ spotlight }: { spotlight: Spotlight }) {
   return (
     <motion.article
       aria-label={`${live ? "Happening now" : "Up next"}: ${card.name}`}
-      className="relative isolate grid gap-8 rounded-[6px] bg-[#fbf9f5] p-5 shadow-[0_40px_80px_-56px_rgba(20,20,20,0.55),inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-inset ring-white/80 [--cw:26px] sm:p-7 sm:[--cw:32px] lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-center lg:gap-10 xl:[--cw:36px]"
+      className="relative isolate grid gap-8 rounded-[6px] bg-[#fbf9f5] p-5 shadow-[0_40px_80px_-56px_rgba(20,20,20,0.55)] ring-1 ring-inset ring-[#141414]/[0.07] [--cw:26px] sm:p-7 sm:[--cw:32px] lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-center lg:gap-10 xl:[--cw:36px]"
       initial={reduceMotion ? false : { opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.9, ease: EASE, delay: 0.25 }}
     >
-      <style>{`@keyframes s1-tick{from{transform:translateY(-60%);opacity:0}to{transform:translateY(0);opacity:1}}@keyframes s1-halo{0%,100%{box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(249,115,22,.25),0 6px 18px -6px rgba(249,115,22,.35),0 0 22px rgba(251,146,60,.18)}50%{box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(249,115,22,.4),0 8px 24px -6px rgba(249,115,22,.5),0 0 40px rgba(251,146,60,.35)}}@keyframes s1-meter{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}`}</style>
+      <style>{`@keyframes s1-tick{from{transform:translateY(-60%);opacity:0}to{transform:translateY(0);opacity:1}}@keyframes s1-halo{0%,100%{box-shadow:0 0 0 1px rgba(249,115,22,.25)}50%{box-shadow:0 0 0 1px rgba(249,115,22,.7)}}@keyframes s1-meter{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}`}</style>
 
       {live ? (
         // The Live ribbon, folded over the card's top edge
@@ -201,20 +205,13 @@ export function LiveSpotlight({ spotlight }: { spotlight: Spotlight }) {
         >
           <svg
             viewBox="0 0 64 92"
-            className="h-[92px] w-16 drop-shadow-[0_8px_10px_rgba(124,45,18,0.25)]"
+            className="h-[92px] w-16 drop-shadow-[0_8px_10px_rgba(20,20,20,0.2)]"
           >
-            <defs>
-              <linearGradient id="s1-ribbon" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0" stopColor="#ea580c" />
-                <stop offset="0.5" stopColor="#f97316" />
-                <stop offset="1" stopColor="#ea580c" />
-              </linearGradient>
-            </defs>
             {/* The fold where it tucks over the edge */}
             <path d="M0 7 L6 0 V7 Z" fill="#9a3412" />
             <path d="M64 7 L58 0 V7 Z" fill="#9a3412" />
             {/* The ribbon */}
-            <path d="M6 0 H58 V90 L32 76 L6 90 Z" fill="url(#s1-ribbon)" />
+            <path d="M6 0 H58 V90 L32 76 L6 90 Z" fill={PRINT} />
             {/* A fine inset line */}
             <path
               d="M11 0 V80 L32 69 L53 80 V0"
@@ -260,7 +257,7 @@ export function LiveSpotlight({ spotlight }: { spotlight: Spotlight }) {
             className={cn(
               "inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11.5px] font-semibold uppercase tracking-[0.18em]",
               live
-                ? "bg-[#fbf9f5] text-[#c2410c] ring-1 ring-inset ring-white/80"
+                ? "bg-[#f4efe7] text-[#c2410c] ring-1 ring-inset ring-[#141414]/[0.08]"
                 : "bg-[#141414]/[0.05] text-[#141414]/70 ring-1 ring-inset ring-[#141414]/10",
             )}
             style={
@@ -311,7 +308,7 @@ export function LiveSpotlight({ spotlight }: { spotlight: Spotlight }) {
           ].map(([term, value]) => (
             <div
               key={term}
-              className="flex min-w-0 flex-col-reverse rounded-[6px] bg-[#ebe6de] px-3.5 py-3 shadow-[inset_0_2px_6px_rgba(20,20,20,0.09),inset_0_1px_2px_rgba(20,20,20,0.07),inset_0_-1px_0_rgba(255,255,255,0.8)]"
+              className="flex min-w-0 flex-col-reverse rounded-[6px] bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)] px-3.5 py-3"
             >
               <dd className="mt-0.5 text-[15px] font-medium">{value}</dd>
               <dt className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-[#141414]/50">
@@ -324,7 +321,7 @@ export function LiveSpotlight({ spotlight }: { spotlight: Spotlight }) {
 
       {/* The clock and the way in */}
       <div className="flex flex-col items-start gap-5 lg:items-end lg:pt-14">
-        {/* The clock: each unit engraved into the card */}
+        {/* The clock: each unit on its own flat tile */}
         <div
           role="timer"
           aria-label={`${label} ${units.map(([value, unit]) => `${Number(value)} ${unit.toLowerCase()}`).join(", ")}`}
@@ -337,13 +334,13 @@ export function LiveSpotlight({ spotlight }: { spotlight: Spotlight }) {
             {units.map(([value, unit]) => (
               <div
                 key={unit}
-                className="flex w-[84px] flex-col items-center rounded-[6px] bg-[#ebe6de] pb-3 pt-3.5 shadow-[inset_0_2px_6px_rgba(20,20,20,0.09),inset_0_1px_2px_rgba(20,20,20,0.07),inset_0_-1px_0_rgba(255,255,255,0.8)] sm:w-[96px]"
+                className="flex w-[84px] flex-col items-center rounded-[6px] bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)] pb-3 pt-3.5 sm:w-[96px]"
               >
                 <span className="relative h-[44px] overflow-hidden text-[42px] font-medium leading-[44px] tracking-[-0.04em] tabular-nums sm:h-[52px] sm:text-[48px] sm:leading-[52px]">
                   <span
                     key={value}
                     className="block [animation:s1-tick_420ms_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:[animation:none]"
-                    style={{ color: live ? "#ea580c" : "#141414" }}
+                    style={{ color: live ? PRINT : "#141414" }}
                   >
                     {value}
                   </span>

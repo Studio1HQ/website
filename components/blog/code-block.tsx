@@ -44,7 +44,7 @@ export function CodeBlock({ code, language = "text" }: CodeBlockProps) {
   }
 
   return (
-    <figure className="not-prose my-8 overflow-hidden rounded-[6px] bg-[#0c0908] text-zinc-100 shadow-[0_30px_70px_-40px_rgba(0,0,0,0.8)] ring-1 ring-black/10">
+    <figure className="not-prose my-8 overflow-hidden rounded-[6px] bg-[#0c0908] text-zinc-100 shadow-[0_1px_0_rgba(27,23,20,0.06)] ring-1 ring-black/10">
       <div className="flex items-center justify-between border-b border-white/[0.08] px-4 py-2.5">
         <div className="flex items-center gap-3">
           <span aria-hidden className="flex gap-1.5">
@@ -59,10 +59,10 @@ export function CodeBlock({ code, language = "text" }: CodeBlockProps) {
         <button
           type="button"
           onClick={copyCode}
-          className="inline-flex items-center gap-1.5 rounded-full border border-white/10 px-2.5 py-1 text-[12px] text-zinc-300 transition-colors hover:border-[#fb923c]/50 hover:text-white"
+          className="inline-flex items-center gap-1.5 rounded-full border border-white/10 px-2.5 py-1 text-[12px] text-zinc-300 transition-colors hover:border-[#f97316]/50 hover:text-white"
         >
           {copied ? (
-            <Check className="size-3.5 text-[#fb923c]" />
+            <Check className="size-3.5 text-[#f97316]" />
           ) : (
             <Copy className="size-3.5" />
           )}

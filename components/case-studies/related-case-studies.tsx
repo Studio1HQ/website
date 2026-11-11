@@ -10,11 +10,10 @@ type RelatedCaseStudiesProps = {
   studies: CaseStudyMeta[];
 };
 
-const WELL =
-  "bg-[#f1ece4] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)]";
+const WELL = "bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.06]";
 
 const RIM =
-  "flex size-[68px] items-center justify-center rounded-full bg-[radial-gradient(circle_at_32%_24%,#ffffff_0%,#ffffff_40%,#f5f2ed_72%,#ebe6de_100%)] p-[7px] shadow-[0_14px_24px_-14px_rgba(20,20,20,0.35),inset_0_1px_0_#fff]";
+  "flex size-[68px] items-center justify-center rounded-full bg-white p-[7px] shadow-[0_14px_24px_-14px_rgba(20,20,20,0.35)] ring-1 ring-inset ring-[#141414]/[0.07]";
 
 /** One related study: Studio1 and the client, paired, then the story. */
 function RelatedCard({ study }: { study: CaseStudyMeta }) {
@@ -28,9 +27,9 @@ function RelatedCard({ study }: { study: CaseStudyMeta }) {
   return (
     <Link
       href={`/case-studies/${study.slug}`}
-      className="group flex h-full flex-col rounded-[6px] bg-[#fbf9f5] p-2 shadow-[0_30px_60px_-46px_rgba(20,20,20,0.5),inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-inset ring-white/80 transition-[background-color,box-shadow] duration-500 hover:bg-[#f4efe7] hover:shadow-[0_36px_70px_-44px_rgba(20,20,20,0.55),inset_0_1px_0_#fff]"
+      className="group flex h-full flex-col rounded-[6px] bg-[#fbf9f5] p-2 shadow-[0_30px_60px_-46px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/[0.07] transition-[background-color,box-shadow] duration-500 hover:bg-[#f4efe7] hover:shadow-[0_36px_70px_-44px_rgba(20,20,20,0.55)]"
     >
-      {/* Engraved: Studio1 and the client, overlapping; closer on hover */}
+      {/* Studio1 and the client, overlapping; closer on hover */}
       <div
         className={`relative flex h-[148px] flex-col items-center justify-center rounded-[6px] ${WELL}`}
       >

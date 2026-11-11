@@ -237,10 +237,6 @@ export function PaperErrorCanvas({
         className="pointer-events-none absolute inset-0 -z-10 opacity-30 mix-blend-multiply"
         style={{ backgroundImage: GRAIN }}
       />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[70%] bg-[radial-gradient(ellipse_60%_80%_at_50%_0%,rgba(249,115,22,0.10),transparent_70%)]"
-      />
       <CanvasArtefacts missingLayer={frameLabel} />
 
       <Container className="relative flex min-h-[calc(100svh/var(--s1-zoom,1))] flex-col pb-10 pt-32 sm:pt-36">
@@ -358,7 +354,7 @@ export function PaperNotFound() {
             <li key={key} className="min-w-0">
               <Link
                 href={href}
-                className="group flex h-full items-center gap-4 rounded-[6px] bg-white/80 p-4 ring-1 ring-inset ring-[#141414]/10 transition-colors duration-300 hover:bg-white"
+                className="group flex h-full items-center gap-4 rounded-[6px] bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)] p-4"
               >
                 <span
                   className="flex size-11 shrink-0 items-center justify-center text-[#f4efe7]"

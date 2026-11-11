@@ -26,14 +26,20 @@ type SitemapEntry = {
  * change a page's copy, so crawlers and AI search see honest freshness.
  */
 const PAGE_LAST_MODIFIED: Record<string, string> = {
-  "/": "2026-11-09",
+  "/": "2026-11-10",
   "/technical-content-marketing": "2026-10-30",
   "/developer-documentation-dx-audit": "2026-10-29",
   "/developer-video-production": "2026-11-08",
   "/developer-relations-growth-campaigns": "2026-11-08",
-  "/about-us": "2026-10-29",
+  "/about-us": "2026-11-10",
   "/product": "2026-11-02",
-  "/case-studies": "2026-11-05",
+  "/case-studies": "2026-11-10",
+  "/services": "2026-11-10",
+  "/github-growth-agency": "2026-11-10",
+  "/product-launch-service": "2026-11-10",
+  "/aeo-agency": "2026-11-10",
+  "/reddit-marketing-agency": "2026-11-10",
+  "/developer-content-distribution": "2026-11-10",
   "/careers": "2026-11-10",
   "/devrel-jobs": "2026-11-10",
   "/team": "2026-11-08",
@@ -91,32 +97,32 @@ export async function GET() {
   const englishOnlyPaths: SitemapEntry[] = [
     {
       path: "/services",
-      lastModified: GROWTH_PAGES_LAST_MODIFIED,
+      lastModified: PAGE_LAST_MODIFIED["/services"] ?? GROWTH_PAGES_LAST_MODIFIED,
       priority: 0.9,
     },
     {
       path: "/github-growth-agency",
-      lastModified: GROWTH_PAGES_LAST_MODIFIED,
+      lastModified: PAGE_LAST_MODIFIED["/github-growth-agency"] ?? GROWTH_PAGES_LAST_MODIFIED,
       priority: 0.9,
     },
     {
       path: "/product-launch-service",
-      lastModified: GROWTH_PAGES_LAST_MODIFIED,
+      lastModified: PAGE_LAST_MODIFIED["/product-launch-service"] ?? GROWTH_PAGES_LAST_MODIFIED,
       priority: 0.9,
     },
     {
       path: "/aeo-agency",
-      lastModified: GROWTH_PAGES_LAST_MODIFIED,
+      lastModified: PAGE_LAST_MODIFIED["/aeo-agency"] ?? GROWTH_PAGES_LAST_MODIFIED,
       priority: 0.9,
     },
     {
       path: "/reddit-marketing-agency",
-      lastModified: GROWTH_PAGES_LAST_MODIFIED,
+      lastModified: PAGE_LAST_MODIFIED["/reddit-marketing-agency"] ?? GROWTH_PAGES_LAST_MODIFIED,
       priority: 0.9,
     },
     {
       path: "/developer-content-distribution",
-      lastModified: GROWTH_PAGES_LAST_MODIFIED,
+      lastModified: PAGE_LAST_MODIFIED["/developer-content-distribution"] ?? GROWTH_PAGES_LAST_MODIFIED,
       priority: 0.9,
     },
     {

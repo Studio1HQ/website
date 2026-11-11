@@ -61,7 +61,7 @@ export function PostAiActions({
   };
 
   const button =
-    "inline-flex h-8 items-center gap-1.5 rounded-full bg-white/80 px-3 text-[12.5px] font-medium text-[#141414] shadow-[inset_0_1px_0_#fff] ring-1 ring-inset ring-[#141414]/[0.08] transition-colors duration-200 hover:bg-white hover:text-[#c2410c]";
+    "inline-flex h-8 items-center gap-1.5 rounded-full bg-white px-3 text-[12.5px] font-medium text-[#141414] ring-1 ring-inset ring-[#141414]/[0.08] transition-colors duration-200 hover:text-[#c2410c]";
 
   return (
     <div className={cn("flex flex-wrap items-center gap-2", className)}>

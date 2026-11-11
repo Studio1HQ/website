@@ -66,8 +66,8 @@ function StudioIntroVideo() {
   return (
     <section className="relative mx-auto w-full max-w-[65rem]">
       <EdgeChips />
-      <div className="rounded-[6px] bg-white/80 p-2 shadow-[inset_0_1px_0_#fff,0_40px_80px_-48px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/10 sm:p-2.5">
-        <div className="aspect-video w-full overflow-hidden rounded-[6px] bg-[#fbfaf7] shadow-[inset_0_3px_10px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08)]">
+      <div className="rounded-[6px] bg-white p-2 shadow-[0_1px_0_rgba(27,23,20,0.06)] ring-1 ring-inset ring-[#141414]/[0.07] sm:p-2.5">
+        <div className="aspect-video w-full overflow-hidden rounded-[6px] bg-[#fbfaf7] ring-1 ring-inset ring-[#141414]/[0.07]">
           <iframe
             className="h-full w-full"
             src="https://www.youtube-nocookie.com/embed/86fFNr5Dyqk?rel=0"
@@ -123,7 +123,7 @@ export default function AboutUs() {
                 initial={reduceMotion ? false : { opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 + 0.05 * index, duration: 0.4 }}
-                className="inline-flex items-center gap-2 rounded-full bg-[#f8f6f2] px-4 py-2 text-[13px] font-medium text-[#141414] shadow-[inset_0_2px_6px_rgba(20,20,20,0.09),inset_0_1px_2px_rgba(20,20,20,0.07)]"
+                className="inline-flex items-center gap-2 rounded-full bg-[#f4efe7] px-4 py-2 text-[13px] font-medium text-[#141414] ring-1 ring-inset ring-[#141414]/[0.08]"
               >
                 <tag.icon
                   weight="duotone"

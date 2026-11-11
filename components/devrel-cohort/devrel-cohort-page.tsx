@@ -58,13 +58,14 @@ import { cn } from "@/lib/utils";
 /* Shared bits                                                         */
 /* ------------------------------------------------------------------ */
 
-/** Glass card and engraved well, as on the careers page. */
+/** Paper cards with a hairline; flat chips and panels inside them. */
 const GLASS_CARD =
   "rounded-[6px] bg-[#fbf9f5] shadow-[0_20px_44px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.06]";
-const WELL =
-  "bg-[#f1ece4] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)]";
-const INSET_WHITE =
-  "bg-white shadow-[inset_0_2px_6px_rgba(20,20,20,0.06),inset_0_1px_2px_rgba(20,20,20,0.05)]";
+/** Flat paper chip, for small tiles and icons inside a card. */
+const WELL = "bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08]";
+/** Flat panel inside a card. */
+const PANEL = "bg-white ring-1 ring-inset ring-[#141414]/[0.07]";
+const INSET_WHITE = PANEL;
 
 const pad = (value: number) => String(value).padStart(2, "0");
 
@@ -240,7 +241,7 @@ function CohortBadge() {
                   className="relative flex flex-col items-center text-center"
                 >
                   <motion.span
-                    className="flex size-9 items-center justify-center rounded-full bg-white ring-[1.5px] ring-inset ring-[#f97316] shadow-[0_0_0_4px_#ffffff,0_6px_14px_-8px_rgba(249,115,22,0.7)]"
+                    className="flex size-9 items-center justify-center rounded-full bg-white ring-[1.5px] ring-inset ring-[#f97316] shadow-[0_0_0_4px_#ffffff]"
                     style={{ color: PRINT }}
                     initial={reduceMotion ? false : { scale: 0.6, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
@@ -284,7 +285,7 @@ function CohortBadge() {
       >
         <span
           aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10 opacity-40 mix-blend-multiply"
+          className="pointer-events-none absolute inset-0 -z-10 opacity-[0.14] mix-blend-multiply"
           style={{ backgroundImage: GRAIN }}
         />
         <span className="text-[22px] font-semibold uppercase leading-none tracking-[0.12em]">
@@ -387,7 +388,7 @@ function CohortHero() {
             {facts.map(([value, label], index) => (
               <motion.div
                 key={label}
-                className={cn("rounded-[6px] px-4 py-4", WELL)}
+                className={cn("rounded-[6px] px-4 py-4", PANEL)}
                 variants={{
                   hidden: { opacity: 0, y: 14, scale: 0.97 },
                   visible: {
@@ -593,10 +594,7 @@ function Curriculum() {
                 <div className="flex items-center gap-4 lg:flex-col lg:items-start">
                   <span
                     className="relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-[6px] text-[18px] font-semibold tabular-nums text-white"
-                    style={{
-                      background:
-                        "linear-gradient(150deg,#fb923c,#f97316 50%,#ea580c)",
-                    }}
+                    style={{ background: PRINT }}
                   >
                     W{index + 1}
                   </span>
@@ -641,7 +639,7 @@ function Curriculum() {
                 <div
                   className={cn(
                     "flex flex-col justify-between gap-5 rounded-[6px] p-5",
-                    WELL,
+                    PANEL,
                   )}
                 >
                   <div>
@@ -737,7 +735,7 @@ function Outcomes() {
           >
             <span
               aria-hidden
-              className="pointer-events-none absolute inset-0 -z-10 opacity-40 mix-blend-multiply"
+              className="pointer-events-none absolute inset-0 -z-10 opacity-[0.14] mix-blend-multiply"
               style={{ backgroundImage: GRAIN }}
             />
             <div className="flex items-center justify-between text-[11px] font-medium uppercase tracking-[0.16em] text-white/80">

@@ -370,7 +370,7 @@ function PipelineRun({
         <Container>
           <div
             aria-hidden
-            className="overflow-hidden rounded-[6px] bg-white/85 shadow-[inset_0_1px_0_#fff,0_50px_90px_-60px_rgba(60,20,0,0.55)] ring-1 ring-inset ring-[#141414]/10"
+            className="overflow-hidden rounded-[6px] bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)]"
           >
             {/* Title bar: workflow file, jobs passed, run status */}
             <div className="relative flex h-12 items-center gap-4 border-b border-[#141414]/[0.08] px-4">
@@ -416,8 +416,8 @@ function PipelineRun({
               />
             </div>
 
-            {/* Job graph on an engraved dot grid */}
-            <div className="mx-3 mt-3 flex items-stretch rounded-[6px] bg-[#fbfaf7] px-5 pb-5 pt-10 shadow-[inset_0_3px_10px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06)] [background-image:radial-gradient(rgba(20,20,20,0.13)_1px,transparent_1px)] [background-size:16px_16px]">
+            {/* Job graph on a flat dot grid */}
+            <div className="mx-3 mt-3 flex items-stretch rounded-[6px] bg-[#fbfaf7] px-5 pb-5 pt-10 ring-1 ring-inset ring-[#141414]/[0.07] [background-image:radial-gradient(rgba(20,20,20,0.13)_1px,transparent_1px)] [background-size:16px_16px]">
               {steps.map((item, index) => {
                 const status = statuses[index];
                 const active = index === job;
@@ -496,7 +496,7 @@ function PipelineRun({
                 className="flex min-h-0 flex-col p-5 pr-2"
               >
                 <div className="flex items-center gap-3">
-                  <span className="flex size-11 items-center justify-center rounded-[6px] bg-[#f6f1e9] shadow-[inset_0_2px_5px_rgba(20,20,20,0.10),inset_0_1px_1px_rgba(20,20,20,0.08)]">
+                  <span className="flex size-11 items-center justify-center rounded-[6px] bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08]">
                     <StepGlyph title={step.title} className="size-6" />
                   </span>
                   <span className="text-[13px] font-medium tabular-nums text-[#141414]/50">
@@ -540,7 +540,7 @@ function PipelineRun({
                 </div>
               </motion.div>
 
-              <div className="flex min-h-0 flex-col overflow-hidden rounded-[6px] bg-[#0d0d0d] p-5 font-mono text-[14px] leading-[1.5] shadow-[0_24px_50px_-30px_rgba(20,20,20,0.7)]">
+              <div className="flex min-h-0 flex-col overflow-hidden rounded-[6px] bg-[#0d0d0d] p-5 font-mono text-[14px] leading-[1.5]">
                 <div className="flex items-center justify-between text-[11.5px] text-white/40">
                   <span>logs</span>
                   {jobComplete ? (
@@ -653,7 +653,7 @@ function PipelineJob({
       <span className="absolute left-0 top-6 flex size-8 items-center justify-center rounded-full bg-[#f4efe7] sm:left-1">
         <StatusMark status={status} />
       </span>
-      <div className="rounded-[6px] bg-white/80 p-5 ring-1 ring-inset ring-[#141414]/10 sm:p-6">
+      <div className="rounded-[6px] bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)] p-5 sm:p-6">
         <div className="flex items-center gap-2.5 text-[12.5px] font-medium tabular-nums text-[#141414]/50">
           <StepGlyph title={step.title} className="size-5 text-[#141414]" />
           Job {pad2(position + 1)} of {pad2(count)}

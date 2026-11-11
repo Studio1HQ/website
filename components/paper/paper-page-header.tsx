@@ -20,7 +20,6 @@ export function PaperPageHeader({
           className="absolute inset-0 opacity-30 mix-blend-multiply"
           style={{ backgroundImage: GRAIN }}
         />
-        <div className="absolute inset-x-0 top-0 h-[70%] bg-[radial-gradient(ellipse_60%_80%_at_50%_0%,rgba(249,115,22,0.10),transparent_70%)]" />
       </div>
       <div className="relative">{children}</div>
     </header>

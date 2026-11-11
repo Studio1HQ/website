@@ -107,7 +107,7 @@ function Blueprint() {
     <div
       ref={ref}
       aria-hidden
-      className="relative min-h-[340px] overflow-hidden bg-[#fbfaf7] shadow-[inset_0_3px_10px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08)] [background-image:radial-gradient(rgba(20,20,20,0.16)_1px,transparent_1px)] [background-size:18px_18px] lg:min-h-0"
+      className="relative min-h-[340px] overflow-hidden bg-[#fbfaf7] [background-image:radial-gradient(rgba(20,20,20,0.16)_1px,transparent_1px)] [background-size:18px_18px] lg:min-h-0"
     >
       <Construction className="absolute -right-6 -top-4 w-[180px] opacity-[0.18]" />
 
@@ -199,7 +199,7 @@ function Blueprint() {
       </div>
 
       {/* Building, with no promise of when */}
-      <div className="absolute bottom-4 left-4 flex items-center gap-2.5 rounded-full bg-white/90 py-1.5 pl-2.5 pr-3.5 text-[12px] font-medium ring-1 ring-inset ring-[#141414]/10">
+      <div className="absolute bottom-4 left-4 flex items-center gap-2.5 rounded-full bg-white py-1.5 pl-2.5 pr-3.5 text-[12px] font-medium ring-1 ring-inset ring-[#141414]/[0.08]">
         <span className="relative h-1.5 w-12 overflow-hidden rounded-full bg-[#141414]/10">
           <span
             className="absolute inset-y-0 w-1/2 animate-sweep rounded-full [animation-duration:1.6s] motion-reduce:hidden"
@@ -219,7 +219,7 @@ export default function NextProduct({ index }: { index: number }) {
       <Container>
         <IndexBar index={index} name={t("indexName")} aside={t("aside")} />
 
-        <div className="mt-8 grid overflow-hidden rounded-[6px] bg-white/80 shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
+        <div className="mt-8 grid overflow-hidden rounded-[6px] bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
           <div className="flex flex-col p-6 sm:p-8 md:p-10">
             <div className="flex items-center gap-3">
               <span className="flex size-12 items-center justify-center rounded-[6px] border-[1.5px] border-dashed border-[#141414]/25">

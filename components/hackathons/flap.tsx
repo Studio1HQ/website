@@ -57,7 +57,7 @@ export function FlapTile({
           "relative",
           glass
             ? tone === "live"
-              ? "text-[#ea580c]"
+              ? "text-[#f97316]"
               : "text-[#141414]"
             : TONE_TEXT[tone],
           flipOnChange &&

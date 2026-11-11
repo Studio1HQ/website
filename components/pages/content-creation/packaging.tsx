@@ -83,16 +83,7 @@ export default function Packaging({ index = 4 }: { index?: number }) {
                       CELL,
                     )}
                   >
-                    {/* Orange wash rising from the bottom on hover */}
-                    <span
-                      aria-hidden
-                      className="pointer-events-none absolute inset-0 -z-10 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-                      style={{
-                        background:
-                          "radial-gradient(120% 80% at 50% 120%, rgba(249,115,22,0.18), transparent 70%)",
-                      }}
-                    />
-                    <span className="flex size-12 items-center justify-center rounded-[6px] transition-colors duration-500 group-hover:text-[#ea580c] bg-[#f8f6f2] text-[#141414] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10)]">
+                    <span className="flex size-12 items-center justify-center rounded-[6px] transition-colors duration-500 group-hover:text-[#f97316] bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08] text-[#141414]">
                       <layer.icon
                         className="size-6"
                         stroke={1.6}

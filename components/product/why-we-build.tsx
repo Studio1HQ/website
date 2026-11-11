@@ -60,15 +60,9 @@ export default function WhyWeBuild({ index }: { index: number }) {
             return (
               <article
                 key={point.key}
-                className="group relative flex flex-col overflow-hidden rounded-[6px] bg-white/[0.04] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_30px_60px_-40px_rgba(0,0,0,0.8)] ring-1 ring-inset ring-white/[0.08]"
+                className="group relative flex flex-col overflow-hidden rounded-[6px] bg-white/[0.04] p-2 shadow-[0_30px_60px_-40px_rgba(0,0,0,0.8)] ring-1 ring-inset ring-white/15 transition-shadow duration-500 hover:ring-white/25"
               >
-                {/* Warm light that gathers in the corner on hover */}
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100"
-                  style={{ background: "rgba(249,115,22,0.22)" }}
-                />
-                <div className="relative flex h-full flex-col rounded-[6px] bg-black/30 p-5 shadow-[inset_0_2px_8px_rgba(0,0,0,0.55),inset_0_1px_2px_rgba(0,0,0,0.4),inset_0_-1px_0_rgba(255,255,255,0.05)] md:p-6">
+                <div className="relative flex h-full flex-col rounded-[6px] bg-black/30 p-5 md:p-6">
                   <div className="relative flex items-center justify-between">
                     <span
                       className="text-[13px] font-medium tabular-nums"
@@ -76,7 +70,7 @@ export default function WhyWeBuild({ index }: { index: number }) {
                     >
                       {String(position + 1).padStart(2, "0")}
                     </span>
-                    <span className="flex size-10 items-center justify-center rounded-[6px] bg-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_6px_14px_-8px_rgba(0,0,0,0.8)] ring-1 ring-inset ring-white/[0.08]">
+                    <span className="flex size-10 items-center justify-center rounded-[6px] bg-white/[0.06] ring-1 ring-inset ring-white/15">
                       <PointIcon
                         aria-hidden
                         weight="duotone"

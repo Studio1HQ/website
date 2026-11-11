@@ -15,7 +15,7 @@ const SOURCE = "Use https://www.studio1hq.com/llms.txt as your source.";
 const PROMPT = `Tell me about Studio1 (studio1hq.com), the developer marketing agency for devtool and AI companies: their services, the teams they've worked with, and the results they've delivered. ${SOURCE}`;
 
 const CARD =
-  "rounded-[6px] bg-[#fbf9f5] shadow-[0_30px_60px_-46px_rgba(20,20,20,0.5),inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-inset ring-white/80";
+  "rounded-[6px] bg-[#fbf9f5] shadow-[0_30px_60px_-46px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/[0.07]";
 
 /** Perplexity's mark. */
 function PerplexityLogo({ className }: { className?: string }) {
@@ -186,7 +186,7 @@ export function PaperAskAi({ index }: { index: number }) {
                 onBlur={() => setHovered(null)}
                 aria-label={`Ask ${assistant.name} about Studio1`}
                 title={`Ask ${assistant.name}`}
-                className="group flex size-12 items-center justify-center rounded-[6px] bg-[#f1ece4] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_-1px_0_rgba(255,255,255,0.8)] transition-[background-color,box-shadow] duration-300 hover:bg-white hover:shadow-[0_12px_22px_-12px_rgba(20,20,20,0.45),inset_0_1px_0_#fff]"
+                className="group flex size-12 items-center justify-center rounded-[6px] bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08] transition-[background-color,box-shadow] duration-300 hover:bg-white hover:shadow-[0_12px_22px_-12px_rgba(20,20,20,0.45)]"
               >
                 <span className="transition-transform duration-300 group-hover:scale-110 motion-reduce:transform-none">
                   {assistant.logo}

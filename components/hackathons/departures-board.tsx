@@ -199,7 +199,7 @@ function Row({
           past && "opacity-60 hover:opacity-100",
           // The live row is lit, like a gate that's boarding now
           live &&
-            "bg-[#f97316]/[0.16] shadow-[inset_0_0_0_1px_rgba(249,115,22,0.55)] hover:bg-[#f97316]/[0.22] focus-visible:bg-[#f97316]/[0.22]",
+            "bg-[#f97316]/[0.16] ring-1 ring-inset ring-[#f97316]/55 hover:bg-[#f97316]/[0.22] focus-visible:bg-[#f97316]/[0.22]",
         )}
       >
         {/* Live marker */}

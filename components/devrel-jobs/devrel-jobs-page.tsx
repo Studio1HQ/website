@@ -50,13 +50,16 @@ import { useLocale, useTranslations } from "next-intl";
 const JOBS_PER_PAGE = 12;
 
 /** White pill on the paper header, holding one hero stat. */
-/** Frosted glass card, the outer layer of every block on the page. */
+/** Solid paper card with a hairline, the outer layer of every block on the page. */
 const GLASS_CARD =
   "rounded-[6px] bg-[#fbf9f5] shadow-[0_20px_44px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.06] transition-[transform,background-color,box-shadow] duration-500 ease-out";
 
-/** Engraved well, set into a glass card. */
-const WELL =
-  "bg-[#f1ece4] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)]";
+/** Frosted glass, kept only for the toolbar that sticks over the list. */
+const STICKY_GLASS =
+  "rounded-[6px] bg-white/60 shadow-[0_20px_44px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.06] backdrop-blur-xl backdrop-saturate-150";
+
+/** Flat chip on paper, for controls and tags inside a card. */
+const WELL = "bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08]";
 
 const statPillClassName =
   "inline-flex items-center gap-2 rounded-full bg-[#fbf9f5] shadow-[0_20px_44px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.06] px-4 py-2 text-[13px] font-medium text-[#141414]";
@@ -152,7 +155,7 @@ function FilterDropdown({
           "flex h-11 w-full items-center justify-between gap-3 rounded-[6px] px-4 text-[13px] font-medium transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316]/50",
           isActive
             ? "bg-[#141414] text-[#f4efe7]"
-            : "bg-[#f1ece4] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)] text-[#141414] hover:text-[#141414]",
+            : "bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08] text-[#141414] hover:text-[#141414]",
         )}
       >
         <span className="truncate">{value ?? allLabel}</span>
@@ -248,23 +251,20 @@ function JobRow({ job, locale }: { job: DevRelJob; locale: string }) {
         rel="noopener noreferrer"
         aria-label={`${job.title} at ${job.company}`}
         className={cn(
-          "group relative isolate grid grid-cols-[44px_minmax(0,1fr)] gap-x-4 gap-y-4 overflow-hidden p-5 outline-none hover:-translate-y-0.5 hover:bg-white/80 focus-visible:ring-2 focus-visible:ring-[#f97316]/50 md:p-6 lg:grid-cols-[44px_minmax(0,1fr)_230px_auto] lg:items-center lg:gap-x-6 [&>*]:relative",
+          "group relative isolate grid grid-cols-[44px_minmax(0,1fr)] gap-x-4 gap-y-4 overflow-hidden p-5 outline-none hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[#f97316]/50 md:p-6 lg:grid-cols-[44px_minmax(0,1fr)_230px_auto] lg:items-center lg:gap-x-6 [&>*]:relative",
           GLASS_CARD,
         )}
       >
-        {/* Hover: an orange wash rises from the right edge */}
+        {/* Hover: a flat print edge slides in from the right */}
         <span
           aria-hidden
-          className="pointer-events-none !absolute inset-0 -z-[5] translate-x-8 opacity-0 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0 group-hover:opacity-100 motion-reduce:translate-x-0"
-          style={{
-            background:
-              "radial-gradient(40% 140% at 104% 50%, rgba(249,115,22,0.22) 0%, rgba(249,115,22,0) 70%)",
-          }}
+          className="pointer-events-none !absolute inset-y-0 right-0 -z-[5] w-[3px] translate-x-2 opacity-0 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0 group-hover:opacity-100 motion-reduce:translate-x-0"
+          style={{ background: PRINT }}
         />
 
         <span
           aria-hidden
-          className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-[6px] bg-[#f1ece4] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)] p-2"
+          className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-[6px] bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08] p-2"
         >
           {job.logo && !hasLogoError ? (
             <span className="relative block size-7">
@@ -305,7 +305,7 @@ function JobRow({ job, locale }: { job: DevRelJob; locale: string }) {
             {job.title}
           </h3>
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center rounded-full bg-[#f1ece4] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)] px-2.5 py-1 text-[12px] font-medium text-[#141414]/80">
+            <span className="inline-flex items-center rounded-full bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08] px-2.5 py-1 text-[12px] font-medium text-[#141414]/80">
               {job.category}
             </span>
             {isNew ? (
@@ -505,7 +505,7 @@ export function DevRelJobsPage({ jobs }: DevRelJobsPageProps) {
 
           {/* Sticky toolbar */}
           <div className="sticky top-24 z-30 mt-6">
-            <div className={cn(GLASS_CARD, "p-2.5 sm:p-3")}>
+            <div className={cn(STICKY_GLASS, "p-2.5 sm:p-3")}>
               <div className="grid gap-2 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,2fr)]">
                 <div className="relative min-w-0">
                   <MagnifyingGlass
@@ -521,7 +521,7 @@ export function DevRelJobsPage({ jobs }: DevRelJobsPageProps) {
                     }}
                     placeholder={t("searchPlaceholder")}
                     aria-label={t("searchLabel")}
-                    className="h-11 rounded-[6px] border-0 bg-[#f1ece4] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)] pl-10 pr-10 text-[14px] text-[#141414] ring-0 placeholder:text-[#141414]/45 focus-visible:ring-2 focus-visible:ring-[#f97316]/50 focus-visible:ring-offset-0"
+                    className="h-11 rounded-[6px] border-0 bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08] pl-10 pr-10 text-[14px] text-[#141414] placeholder:text-[#141414]/45 focus-visible:ring-2 focus-visible:ring-[#f97316]/50 focus-visible:ring-offset-0"
                   />
                   {query ? (
                     <button
@@ -714,14 +714,8 @@ export function DevRelJobsPage({ jobs }: DevRelJobsPageProps) {
             />
             <span
               aria-hidden
-              className="pointer-events-none absolute -right-24 -top-24 -z-10 size-[360px] rounded-full bg-[radial-gradient(closest-side,rgba(249,115,22,0.18),transparent)]"
-            />
-            <span
-              aria-hidden
               className="pointer-events-none absolute inset-x-10 top-0 h-px"
-              style={{
-                background: `linear-gradient(90deg, transparent, ${PRINT}, transparent)`,
-              }}
+              style={{ background: PRINT }}
             />
             <div className="grid gap-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:items-end lg:gap-16">
               <div>

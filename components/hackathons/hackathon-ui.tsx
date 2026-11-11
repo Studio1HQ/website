@@ -222,7 +222,7 @@ export function HackathonFaqList({ items }: { items: HackathonFaq[] }) {
               </span>
               <span
                 aria-hidden
-                className="flex size-8 shrink-0 items-center justify-center rounded-[6px] bg-[#f8f6f2] text-[#141414]/55 shadow-[inset_0_2px_5px_rgba(20,20,20,0.10)] transition-colors group-data-[state=open]:bg-[#f97316] group-data-[state=open]:text-white group-data-[state=open]:shadow-none"
+                className="flex size-8 shrink-0 items-center justify-center rounded-[6px] bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08] text-[#141414]/55 transition-colors group-data-[state=open]:bg-[#f97316] group-data-[state=open]:text-white group-data-[state=open]:ring-0"
               >
                 <Plus
                   weight="bold"

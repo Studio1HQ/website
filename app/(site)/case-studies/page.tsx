@@ -57,9 +57,9 @@ export default async function CaseStudiesPage() {
       alt: "OpenLore talk at Hackspire",
     },
     {
-      slug: "nebius",
-      src: "/case-studies/nebius/meetup-talk.webp",
-      alt: "Nebius meetup talk",
+      slug: "openlore",
+      src: "/case-studies/openlore/openlore-ship-it-together-talk.webp",
+      alt: "OpenLore talk at Ship It Together",
     },
     {
       slug: "jozu",

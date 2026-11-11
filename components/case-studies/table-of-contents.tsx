@@ -135,7 +135,7 @@ export function TableOfContents({
         className="sticky top-28 hidden w-[300px] shrink-0 self-start xl:block"
       >
         <div>
-          <div className="rounded-[6px] bg-white p-2 shadow-[0_24px_50px_-34px_rgba(20,20,20,0.5),0_2px_6px_-4px_rgba(20,20,20,0.12)] ring-1 ring-inset ring-[#141414]/[0.06]">
+          <div className="rounded-[6px] bg-white p-2 shadow-[0_1px_0_rgba(27,23,20,0.06)] ring-1 ring-inset ring-[#141414]/[0.07]">
             {/* The client, and how far through their story you are */}
             <div className={cn("rounded-[6px] p-4", WELL)}>
               <div className="flex items-center gap-2.5">
@@ -160,9 +160,9 @@ export function TableOfContents({
                   {progress}%
                 </span>
               </div>
-              <div className="mt-3 h-[5px] overflow-hidden rounded-full bg-[#141414]/[0.07] shadow-[inset_0_1px_2px_rgba(20,20,20,0.12)]">
+              <div className="mt-3 h-[5px] overflow-hidden rounded-full bg-[#141414]/[0.07]">
                 <div
-                  className="h-full rounded-full bg-[linear-gradient(90deg,#fb923c,#ea580c)] transition-[width] duration-300 ease-out motion-reduce:transition-none"
+                  className="h-full rounded-full bg-[#f97316] transition-[width] duration-300 ease-out motion-reduce:transition-none"
                   style={{ width: `${progress}%` }}
                 />
               </div>
@@ -217,7 +217,7 @@ export function TableOfContents({
                             <span
                               className={cn(
                                 "w-4 shrink-0 text-[11px] font-medium tabular-nums leading-[1.6] transition-colors duration-300",
-                                active ? "text-[#ea580c]" : "text-[#141414]/30",
+                                active ? "text-[#f97316]" : "text-[#141414]/30",
                               )}
                             >
                               {String(chapter).padStart(2, "0")}
@@ -236,7 +236,7 @@ export function TableOfContents({
             href="https://cal.com/studio1/collab"
             target="_blank"
             rel="noopener noreferrer"
-            className="group mt-2 flex items-center gap-3 rounded-[6px] bg-[#141414] p-2 pr-4 text-[13px] font-medium text-white shadow-[0_16px_30px_-18px_rgba(20,20,20,0.7),inset_0_1px_0_rgba(255,255,255,0.12)] transition-colors hover:bg-[#262626]"
+            className="group mt-2 flex items-center gap-3 rounded-[6px] bg-[#141414] p-2 pr-4 text-[13px] font-medium text-white shadow-[0_1px_0_rgba(27,23,20,0.06)] transition-colors hover:bg-[#262626]"
           >
             {/* The calendar; on hover the Studio1 mark slides in and merges */}
             <span className="relative flex h-8 w-8 shrink-0 items-center transition-[width] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:w-[46px] motion-reduce:transition-none">

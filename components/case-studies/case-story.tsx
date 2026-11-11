@@ -21,7 +21,7 @@ import { NumericText } from "@/components/ui/num";
 import { cn } from "@/lib/utils";
 
 const WELL =
-  "bg-[#f1ece4] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)]";
+  "bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)]";
 
 const CHAPTER_COUNT: Record<number, string> = {
   1: "One",
@@ -59,7 +59,7 @@ function ChapterRow({
       className="relative grid grid-cols-[44px_minmax(0,1fr)] gap-x-5 pb-10 last:pb-0 md:grid-cols-[52px_minmax(0,1fr)] md:gap-x-7"
       style={reduceMotion ? undefined : { opacity: fade }}
     >
-      {/* Marker: engraved, then filled orange as the story reaches it */}
+      {/* Marker: outlined, then filled print orange as the story reaches it */}
       <span
         className={cn(
           "relative z-[1] flex size-11 items-center justify-center overflow-hidden rounded-full md:size-[52px]",
@@ -208,7 +208,7 @@ export function CaseStory({ study }: { study: CaseStudyMeta }) {
               <dd
                 className={cn(
                   "text-[30px] font-medium leading-none tracking-[-0.05em] tabular-nums md:text-[34px]",
-                  i === 0 ? "text-[#ea580c]" : "text-[#141414]",
+                  i === 0 ? "text-[#f97316]" : "text-[#141414]",
                 )}
               >
                 {metric.value}
@@ -230,11 +230,11 @@ export function CaseStory({ study }: { study: CaseStudyMeta }) {
       aria-label={`The ${study.client} story`}
       id="case-story"
       data-story-start
-      className="mt-16 rounded-[6px] bg-[#fbf9f5] p-6 shadow-[0_30px_60px_-46px_rgba(20,20,20,0.5),inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-inset ring-white/80 md:p-10"
+      className="mt-16 rounded-[6px] bg-[#fbf9f5] p-6 shadow-[0_30px_60px_-46px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/[0.07] md:p-10"
     >
       <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[#141414]/[0.08] pb-6">
         <h2 className="text-[26px] font-medium leading-tight tracking-[-0.04em] md:text-[32px]">
-          The <span className="text-[#ea580c]">{study.client}</span> story
+          The <span className="text-[#f97316]">{study.client}</span> story
         </h2>
         <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-[#141414]/45">
           {CHAPTER_COUNT[chapters.length] ?? chapters.length}{" "}
@@ -250,7 +250,7 @@ export function CaseStory({ study }: { study: CaseStudyMeta }) {
         />
         <motion.span
           aria-hidden
-          className="absolute left-[21px] top-6 w-[2px] origin-top rounded-full bg-[linear-gradient(180deg,#fb923c,#ea580c)] md:left-[25px]"
+          className="absolute left-[21px] top-6 w-[2px] origin-top rounded-full bg-[#f97316] md:left-[25px]"
           style={{
             bottom: 24,
             scaleY: reduceMotion ? 1 : progress,

@@ -12,6 +12,7 @@ import {
   useTransform,
 } from "motion/react";
 import { ArrowUpRight, X } from "@phosphor-icons/react";
+import { GRAIN, PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 
 export type ChapterStudy = {
@@ -42,8 +43,7 @@ export type Act = {
   studies: ChapterStudy[];
 };
 
-const WELL =
-  "bg-[#f1ece4] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)]";
+const CHIP = "bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08]";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -69,7 +69,7 @@ function Chapter({
       <Link
         href={`/case-studies/${study.slug}`}
         className={cn(
-          "group grid gap-3 rounded-[6px] bg-white/60 p-3 shadow-[0_30px_60px_-46px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/[0.06] transition-[background-color,box-shadow] duration-500 hover:bg-white/90 hover:shadow-[0_40px_70px_-44px_rgba(194,65,12,0.35)]",
+          "group grid gap-3 rounded-[6px] bg-white p-3 shadow-[0_1px_0_rgba(27,23,20,0.06)] ring-1 ring-inset ring-[#141414]/[0.07] transition-[box-shadow] duration-500 hover:ring-[#141414]/[0.14]",
           flip
             ? "md:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)]"
             : "md:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]",
@@ -115,7 +115,7 @@ function Chapter({
                 key={service}
                 className={cn(
                   "rounded-full px-3 py-1 text-[12px] font-medium text-[#141414]/70",
-                  WELL,
+                  CHIP,
                 )}
               >
                 {service}
@@ -134,17 +134,24 @@ function Chapter({
         {/* The value: the result, or the client's words */}
         <div
           className={cn(
-            "relative flex min-h-[200px] flex-col justify-between overflow-hidden rounded-[6px] p-6",
+            "relative isolate flex min-h-[200px] flex-col justify-between overflow-hidden rounded-[6px] p-6",
             flip && "md:order-1",
-            study.metric
-              ? "bg-[#f97316] text-white"
-              : "bg-[#141414] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]",
+            study.metric ? "text-white" : "bg-[#141414] text-white",
           )}
+          style={study.metric ? { background: PRINT } : undefined}
         >
+          {study.metric ? (
+            // Ink grain over flat print orange, as on the home page hero
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 -z-10 opacity-[0.14] mix-blend-multiply"
+              style={{ backgroundImage: GRAIN }}
+            />
+          ) : null}
           <p
             className={cn(
               "text-[11.5px] font-medium uppercase tracking-[0.14em]",
-              study.metric ? "text-white/75" : "text-[#fb923c]",
+              study.metric ? "text-white/75" : "text-[#f97316]",
             )}
           >
             {study.metric
@@ -353,14 +360,6 @@ export function CaseChapters({ acts }: { acts: Act[] }) {
         aria-hidden
         className="pointer-events-none absolute bottom-0 left-0 top-0 hidden w-20 lg:block"
       >
-        <svg aria-hidden className="absolute size-0">
-          <defs>
-            <linearGradient id="chapter-ribbon" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor="#fb923c" />
-              <stop offset="1" stopColor="#ea580c" />
-            </linearGradient>
-          </defs>
-        </svg>
         {/* The full path, faint */}
         {band("#141414", 0.07, 6)}
         {/* The read part, in orange, revealed down to where you are */}
@@ -368,14 +367,14 @@ export function CaseChapters({ acts }: { acts: Act[] }) {
           className="absolute inset-0"
           style={{ clipPath: reduceMotion ? "none" : clip }}
         >
-          {band("url(#chapter-ribbon)", 1, 6)}
+          {band(PRINT, 1, 6)}
         </motion.div>
         {/* Studio1 + the study being read, riding the leading edge */}
         {reduceMotion ? null : (
           <motion.span
             // Fixed across the rail, so it covers the ribbon wherever it sways and
             // never reaches the cards; only its height follows the scroll
-            className="absolute left-[36px] -ml-[46px] -mt-[22px] flex items-center gap-1.5 rounded-[6px] bg-[#fbf9f5] p-1.5 shadow-[0_14px_30px_-14px_rgba(20,20,20,0.5),inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-inset ring-white/80"
+            className="absolute left-[36px] -ml-[46px] -mt-[22px] flex items-center gap-1.5 rounded-[6px] bg-[#fbf9f5] p-1.5 shadow-[0_14px_30px_-14px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/[0.07]"
             style={{ top: tipTop }}
           >
             <span className="relative flex size-8 items-center justify-center rounded-[6px] bg-white ring-1 ring-[#141414]/[0.08]">

@@ -17,7 +17,11 @@ import {
   type EventKind,
   type StudioEvent,
 } from "@/data/events";
+import { GRAIN, PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
+
+/** The grain tile's data URI, for use inside SVG. */
+const GRAIN_SRC = GRAIN.slice(5, -2);
 
 const MONTHS = [
   "January",
@@ -238,9 +242,9 @@ function Photo({
   );
 }
 
-/** Clear glass: the page and the ribbon show through, softly. */
+/** Solid paper card with a hairline, as on the home page. */
 const GLASS =
-  "bg-[#fbf9f5] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_30px_60px_-44px_rgba(20,20,20,0.35)] ring-1 ring-[#141414]/[0.06]";
+  "bg-[#fbf9f5] shadow-[0_30px_60px_-44px_rgba(20,20,20,0.35)] ring-1 ring-[#141414]/[0.06]";
 
 /** Storyboard entrance: slides in from its own side, no zoom. */
 const slide = (fromRight: boolean, reduceMotion: boolean, delay = 0) => ({
@@ -250,9 +254,9 @@ const slide = (fromRight: boolean, reduceMotion: boolean, delay = 0) => ({
   transition: { duration: 0.9, ease: EASE, delay },
 });
 
-/** Engraved panel for the writing, pressed into the glass. */
+/** Inner panel for the writing: flat white with a hairline. */
 const ENGRAVED =
-  "rounded-[6px] bg-[#141414]/[0.025] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.75)]";
+  "rounded-[6px] bg-white ring-1 ring-inset ring-[#141414]/[0.07]";
 
 /** The event's photos, changing on their own; thumbnails on glass inside. */
 function Slideshow({ event }: { event: StudioEvent }) {
@@ -515,7 +519,7 @@ function NextUp({
           ENGRAVED,
         )}
       >
-        <span className="flex shrink-0 items-center gap-2 rounded-full bg-white/70 px-3 py-1 text-[12px] font-medium text-[#141414] shadow-[0_1px_2px_rgba(20,20,20,0.08)]">
+        <span className="flex shrink-0 items-center gap-2 rounded-full bg-[#f4efe7] px-3 py-1 text-[12px] font-medium text-[#141414] ring-1 ring-inset ring-[#141414]/[0.08]">
           <CalendarDots weight="bold" className="size-3.5 text-[#f97316]" />
           Coming up
         </span>
@@ -730,25 +734,34 @@ export function EventGallery({
             height={h}
           >
             <defs>
-              <linearGradient
-                id="events-ribbon"
-                gradientUnits="userSpaceOnUse"
-                x1="0"
-                y1="0"
-                x2="0"
-                y2={h}
+              {/* The home page's ink grain, tiled over the flat print ribbon */}
+              <pattern
+                id="events-ribbon-grain"
+                patternUnits="userSpaceOnUse"
+                width="160"
+                height="160"
               >
-                <stop offset="0%" stopColor="#fdba74" />
-                <stop offset="50%" stopColor="#fb923c" />
-                <stop offset="100%" stopColor="#f97316" />
-              </linearGradient>
+                <image href={GRAIN_SRC} width="160" height="160" />
+              </pattern>
             </defs>
             <motion.path
               ref={pathRef}
               d={d}
               style={{ pathLength: reduceMotion ? 1 : drawn }}
               fill="none"
-              stroke="url(#events-ribbon)"
+              stroke={PRINT}
+              strokeWidth={vw < 768 ? 40 : 84}
+              strokeLinecap="round"
+            />
+            <motion.path
+              d={d}
+              style={{
+                pathLength: reduceMotion ? 1 : drawn,
+                mixBlendMode: "multiply",
+              }}
+              fill="none"
+              stroke="url(#events-ribbon-grain)"
+              strokeOpacity={0.4}
               strokeWidth={vw < 768 ? 40 : 84}
               strokeLinecap="round"
             />

@@ -1,15 +1,10 @@
 "use client";
 
-import {
-  useEffect,
-  useRef,
-  useState,
-  type PointerEvent as ReactPointerEvent,
-  type ReactNode,
-} from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
+import { isCaseStudyPublic } from "@/constants/case-study-visibility";
 import { useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "motion/react";
 import {
@@ -52,9 +47,8 @@ import { cn } from "@/lib/utils";
 
 const pad2 = (value: number) => String(value).padStart(2, "0");
 
-/** Brand gradient for the accent words in headlines. */
-const GRADIENT_TEXT =
-  "bg-[linear-gradient(100deg,#fe3c34_0%,#f97316_45%,#fb8a1e_100%)] bg-clip-text text-transparent";
+/** Flat print orange for the accent words in headlines. */
+const ACCENT_TEXT = "text-[#f97316]";
 
 /**
  * Card reveal: each card rises out of a soft blur as it enters the screen,
@@ -173,7 +167,7 @@ function BookCall({
         "group relative isolate inline-flex h-12 items-center gap-3 whitespace-nowrap rounded-full py-1.5 pl-6 pr-1.5 text-[15px] font-medium transition-transform duration-300 hover:-translate-y-0.5 motion-reduce:transform-none",
         tone === "ink"
           ? "shadow-[0_14px_30px_-16px_rgba(20,20,20,0.6)]"
-          : "shadow-[0_14px_30px_-14px_rgba(120,40,0,0.55)]",
+          : "shadow-[0_14px_30px_-16px_rgba(20,20,20,0.35)]",
       )}
       style={
         tone === "ink"
@@ -252,7 +246,7 @@ export function StoryHero({
         >
           <a
             href={secondaryHref}
-            className="group inline-flex items-center gap-2.5 rounded-full bg-white/70 py-1 pl-1 pr-3.5 text-[13px] font-medium text-[#141414] shadow-[inset_0_1px_0_#fff] ring-1 ring-inset ring-[#141414]/[0.08] transition-colors hover:bg-white"
+            className="group inline-flex items-center gap-2.5 rounded-full bg-white py-1 pl-1 pr-3.5 text-[13px] font-medium text-[#141414] shadow-[0_1px_0_rgba(27,23,20,0.06)] ring-1 ring-inset ring-[#141414]/[0.08]"
           >
             <span
               className="rounded-full px-2.5 py-1 text-[12px] text-white"
@@ -364,7 +358,7 @@ export type StoryOffer = {
   anchorIds?: string[];
 };
 
-/** Raised 3D key that holds an offer's icon; it lifts and tilts on hover. */
+/** Flat white key that holds an offer's icon; it lifts and tilts on hover. */
 function OfferKey({
   icon: OfferIcon,
   core,
@@ -382,17 +376,15 @@ function OfferKey({
         large ? "size-[92px] rounded-[6px]" : "size-[68px] rounded-[6px]",
       )}
       style={{
-        background: core
-          ? "linear-gradient(150deg, #ffffff 0%, #fff1e4 55%, #ffd9b8 100%)"
-          : "linear-gradient(150deg, #ffffff 0%, #f7f2ea 60%, #ece3d6 100%)",
+        background: "#ffffff",
         boxShadow: core
-          ? "inset 0 2px 0 #ffffff, inset 0 -5px 0 rgba(160,60,0,0.16), 0 5px 0 #f3b98c, 0 26px 40px -16px rgba(110,30,0,0.6)"
-          : "inset 0 2px 0 #ffffff, inset 0 -5px 0 rgba(20,20,20,0.07), 0 5px 0 #e2d7c7, 0 24px 36px -18px rgba(20,20,20,0.4)",
+          ? "0 1px 0 rgba(27,23,20,0.06)"
+          : "inset 0 0 0 1px rgba(20,20,20,0.07), 0 1px 0 rgba(27,23,20,0.06)",
       }}
     >
       <OfferIcon
         weight="duotone"
-        className={cn("text-[#ea580c]", large ? "size-11" : "size-8")}
+        className={cn("text-[#f97316]", large ? "size-11" : "size-8")}
       />
     </span>
   );
@@ -412,74 +404,45 @@ function OfferCard({
   bento: boolean;
 }) {
   const reduceMotion = useReducedMotion();
-  const ref = useRef<HTMLLIElement>(null);
   const core = position === 0;
   // Side cards in the bento lay the stage beside the copy.
   const beside = bento && !core;
   const number = pad2(position + 1);
 
-  // A soft spotlight follows the cursor, written straight to CSS variables.
-  const trackPointer = (event: ReactPointerEvent<HTMLLIElement>) => {
-    const card = ref.current;
-    if (!card) return;
-    const box = card.getBoundingClientRect();
-    card.style.setProperty("--mx", `${event.clientX - box.left}px`);
-    card.style.setProperty("--my", `${event.clientY - box.top}px`);
-  };
-
   return (
     <motion.li
-      ref={ref}
       id={offer.id}
-      onPointerMove={trackPointer}
       {...cardReveal(reduceMotion, position)}
       className={cn(
-        "group relative isolate flex scroll-mt-28 flex-col gap-1 rounded-[6px] p-2.5 transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 motion-reduce:transform-none",
+        "group relative isolate flex scroll-mt-28 flex-col gap-1 rounded-[6px] p-2.5 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 motion-reduce:transform-none",
         core
-          ? "text-white shadow-[0_30px_60px_-36px_rgba(160,50,0,0.7)]"
-          : "bg-white/80 ring-1 ring-inset ring-[#141414]/10 hover:shadow-[0_24px_48px_-32px_rgba(20,20,20,0.4)]",
+          ? "text-white"
+          : "bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)]",
         bento && (core ? "lg:col-span-7 lg:row-span-2" : "lg:col-span-5"),
         beside && "sm:grid sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]",
       )}
-      style={
-        core
-          ? {
-              background:
-                "linear-gradient(160deg, #fe3c34 0%, #f97316 45%, #fb8a1e 100%)",
-            }
-          : undefined
-      }
+      style={core ? { background: PRINT } : undefined}
     >
       {core ? (
         <span
           aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10 rounded-[6px] opacity-30 mix-blend-multiply"
+          className="pointer-events-none absolute inset-0 -z-10 rounded-[6px] opacity-[0.14] mix-blend-multiply"
           style={{ backgroundImage: GRAIN }}
         />
       ) : null}
-      {/* Spotlight under the content, following the cursor */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 rounded-[6px] opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-        style={{
-          background: `radial-gradient(360px circle at var(--mx, 50%) var(--my, 0%), ${
-            core ? "rgba(255,255,255,0.22)" : "rgba(249,115,22,0.14)"
-          }, transparent 65%)`,
-        }}
-      />
       {offer.anchorIds?.map((anchorId) => (
         <span key={anchorId} id={anchorId} className="absolute -top-28" />
       ))}
 
-      {/* Stage: a recessed window with drifting dither and the icon key */}
+      {/* Stage: a flat window with drifting dither and the icon key */}
       <div
         className={cn(
           "relative isolate overflow-hidden rounded-[4px] [perspective:700px]",
           core ? "min-h-[230px] flex-1 md:min-h-[270px]" : "min-h-[170px]",
           beside && "sm:min-h-full",
           core
-            ? "bg-[#9a3412]/20 shadow-[inset_0_3px_14px_rgba(110,30,0,0.35),inset_0_1px_2px_rgba(110,30,0,0.25)]"
-            : "bg-[#f6f1ea] shadow-[inset_0_3px_12px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08)]",
+            ? "ring-1 ring-inset ring-white/40"
+            : "bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08]",
         )}
       >
         <DitherField
@@ -543,7 +506,7 @@ function OfferCard({
                       className={cn(
                         "absolute left-1/2 top-0 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full",
                         core
-                          ? "bg-white shadow-[0_0_10px_rgba(255,255,255,0.8)]"
+                          ? "bg-white"
                           : "bg-[#f97316]",
                       )}
                     />
@@ -567,7 +530,7 @@ function OfferCard({
                   >
                     <span
                       className={cn(
-                        "block whitespace-nowrap rounded-full bg-white/25 px-3.5 py-1.5 text-[13px] font-medium text-white shadow-[0_10px_24px_-12px_rgba(110,30,0,0.6)] ring-1 ring-inset ring-white/40 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
+                        "block whitespace-nowrap rounded-full bg-white/25 px-3.5 py-1.5 text-[13px] font-medium text-white ring-1 ring-inset ring-white/40 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
                         slot === 0
                           ? "rotate-[4deg] group-hover:-translate-y-1.5"
                           : "-rotate-[3deg] group-hover:translate-x-1.5",
@@ -597,8 +560,8 @@ function OfferCard({
               className={cn(
                 "rounded-full px-2.5 py-1 text-[12px] font-medium",
                 core
-                  ? "bg-white/20 text-white"
-                  : "bg-[#141414]/[0.05] text-[#141414]/70",
+                  ? "text-white ring-1 ring-inset ring-white/40"
+                  : "bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08] text-[#141414]/70",
               )}
             >
               {badge}
@@ -614,7 +577,7 @@ function OfferCard({
               : "mt-4 text-[28px] md:text-[32px]",
           )}
         >
-          <span className={core ? undefined : GRADIENT_TEXT}>
+          <span className={core ? undefined : ACCENT_TEXT}>
             {offer.accent}
           </span>
           {offer.rest ? (
@@ -643,7 +606,7 @@ function OfferCard({
                 key={feature}
                 className="flex items-center gap-3 rounded-[6px] bg-white/[0.14] px-3.5 py-3 text-[14px] font-medium leading-snug ring-1 ring-inset ring-white/25"
               >
-                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-white text-[#ea580c] shadow-[0_4px_10px_-4px_rgba(110,30,0,0.6)]">
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-white text-[#f97316]">
                   <Check weight="bold" className="size-3.5" />
                 </span>
                 {feature}
@@ -657,7 +620,7 @@ function OfferCard({
                 key={feature}
                 className="flex items-start gap-2.5 text-[14px] leading-snug text-[#141414]/80"
               >
-                <span className="mt-px flex size-[18px] shrink-0 items-center justify-center rounded-full bg-[#f97316]/[0.13] text-[#ea580c]">
+                <span className="mt-px flex size-[18px] shrink-0 items-center justify-center rounded-full bg-[#f97316]/[0.13] text-[#f97316]">
                   <Check weight="bold" className="size-3" />
                 </span>
                 {feature}
@@ -750,11 +713,11 @@ function MoreProofCard() {
     <Link
       href="/case-studies"
       // Same top offset, height, and corners as the case cards beside it.
-      className="group relative isolate mt-8 flex h-full min-h-[300px] flex-col overflow-hidden rounded-[6px] bg-[#efe8dd] p-7 shadow-[inset_0_3px_10px_rgba(20,20,20,0.08)] ring-1 ring-inset ring-[#141414]/[0.06] sm:p-8"
+      className="group relative isolate mt-8 flex h-full min-h-[300px] flex-col overflow-hidden rounded-[6px] bg-[#ece2d3] p-7 ring-1 ring-inset ring-[#141414]/[0.07] sm:p-8"
     >
       <p className="text-[13px] font-medium text-[#141414]/50">More proof</p>
       <p className="mt-3 max-w-[260px] text-[26px] font-medium leading-[1.15] tracking-[-0.04em]">
-        Developer adoption, <span className={GRADIENT_TEXT}>case by case</span>
+        Developer adoption, <span className={ACCENT_TEXT}>case by case</span>
       </p>
       <span className="mt-auto inline-flex items-center gap-2 pt-8 text-[14px] font-medium text-[#141414]">
         View all case studies
@@ -848,7 +811,9 @@ export function StoryProof({
   id?: string;
 }) {
   const reduceMotion = useReducedMotion();
-  const [featured, ...rest] = studies;
+  const [featured, ...rest] = studies.filter((study) =>
+    isCaseStudyPublic(study.href),
+  );
   return (
     <Band id={id} index={index} name={name} className="py-12 md:py-16">
       <Container>

@@ -37,7 +37,7 @@ export function LatestArticles({ posts }: { posts: BlogPostMeta[] }) {
               className="group flex flex-col items-center text-center"
             >
               <div
-                className={`relative aspect-[16/9] w-full overflow-hidden rounded-[6px] ${post.bannerImage ? "bg-[#0b0b0b]" : "bg-[#f4efe7]"} shadow-[0_24px_50px_-36px_rgba(20,20,20,0.55)]`}
+                className={`relative aspect-[16/9] w-full overflow-hidden rounded-[6px] ${post.bannerImage ? "bg-[#0b0b0b]" : "bg-[#f4efe7]"} ring-1 ring-inset ring-[#141414]/[0.07]`}
               >
                 <Image
                   src={

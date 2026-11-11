@@ -68,7 +68,7 @@ function CapturePanel() {
   const code = [...before, ...colours, ...after].join("\n");
 
   return (
-    <div className="flex min-w-0 flex-col rounded-[6px] bg-[#fbf9f5] p-5 shadow-[inset_0_1px_0_#fff,0_40px_80px_-48px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/[0.07] sm:p-6">
+    <div className="flex min-w-0 flex-col rounded-[6px] bg-[#fbf9f5] p-5 shadow-[0_40px_80px_-48px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/[0.07] sm:p-6">
       {/* Scan summary */}
       <div className="flex items-end justify-between gap-4">
         <div>
@@ -133,7 +133,7 @@ function CapturePanel() {
       <div
         role="radiogroup"
         aria-label="Captured palette"
-        className="mt-5 grid grid-cols-6 gap-1.5 rounded-[6px] p-2.5 bg-[#f1ece4] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)]"
+        className="mt-5 grid grid-cols-6 gap-1.5 rounded-[6px] p-2.5 bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08]"
       >
         {PALETTE.map((colour, index) => {
           const active = picked === index;
@@ -148,7 +148,7 @@ function CapturePanel() {
               className="group flex min-w-0 flex-col items-center gap-1.5"
             >
               <span
-                className="relative block aspect-square w-full rounded-[6px] shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_6px_12px_-8px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-black/[0.06] transition-transform duration-300 group-hover:-translate-y-0.5 motion-reduce:transform-none"
+                className="relative block aspect-square w-full rounded-[6px] ring-1 ring-inset ring-black/[0.06] transition-transform duration-300 group-hover:-translate-y-0.5 motion-reduce:transform-none"
                 style={{ background: colour.hex }}
               >
                 {active ? (
@@ -178,7 +178,7 @@ function CapturePanel() {
       <div
         role="group"
         aria-label="Export format"
-        className="mt-5 inline-flex self-start rounded-full p-1 bg-[#f1ece4] shadow-[inset_0_2px_6px_rgba(20,20,20,0.08),inset_0_1px_2px_rgba(20,20,20,0.06),inset_0_-1px_0_rgba(255,255,255,0.8)]"
+        className="mt-5 inline-flex self-start rounded-full p-1 bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08]"
       >
         {FORMATS.map((option) => (
           <button
@@ -197,7 +197,7 @@ function CapturePanel() {
               <motion.span
                 layoutId="assetsnip-format"
                 aria-hidden
-                className="absolute inset-0 rounded-full bg-white shadow-[0_1px_3px_rgba(20,20,20,0.18)]"
+                className="absolute inset-0 rounded-full bg-white ring-1 ring-inset ring-[#141414]/[0.08]"
                 transition={{ duration: 0.3, ease: EASE }}
               />
             ) : null}
@@ -207,7 +207,7 @@ function CapturePanel() {
       </div>
 
       <div
-        className="relative mt-2.5 flex-1 rounded-[6px] text-[#f4efe7] shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)]"
+        className="relative mt-2.5 flex-1 rounded-[6px] text-[#f4efe7] ring-1 ring-inset ring-white/15"
         style={{ background: NIGHT }}
       >
         <CopyButton text={code} className="absolute right-2.5 top-2.5 z-[1]" />

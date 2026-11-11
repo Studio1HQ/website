@@ -7,7 +7,7 @@ import type { CaseStudyMeta } from "@/lib/case-studies";
 type Quote = CaseStudyMeta["quotes"][number];
 
 const GLASS =
-  "rounded-[6px] bg-[#fbf9f5] shadow-[0_30px_60px_-46px_rgba(20,20,20,0.5),inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-inset ring-white/80";
+  "rounded-[6px] bg-[#fbf9f5] shadow-[0_30px_60px_-46px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/[0.07]";
 
 const initials = (name: string) =>
   name

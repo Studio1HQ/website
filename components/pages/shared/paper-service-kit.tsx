@@ -121,12 +121,12 @@ export function PaperPoints({
 /* Case study proof card (paper)                                       */
 /* ------------------------------------------------------------------ */
 
-/** Inset "engraved" tile used for result numbers, as on the home page. */
+/** Flat tile used for result numbers, as on the home page. */
 const ENGRAVED =
-  "rounded-[6px] bg-[#ece5da] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10)]";
+  "rounded-[6px] bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08]";
 
 const CARD =
-  "group relative isolate overflow-hidden rounded-[6px] bg-white/80 ring-1 ring-inset ring-[#141414]/[0.08] shadow-[inset_0_1px_0_#fff,0_24px_50px_-36px_rgba(20,20,20,0.45)] transition-[transform,box-shadow,background-color] duration-500 ease-out hover:-translate-y-1 hover:bg-white hover:shadow-[inset_0_1px_0_#fff,0_30px_60px_-34px_rgba(249,115,22,0.45)] motion-reduce:transform-none after:pointer-events-none after:absolute after:inset-0 after:-z-10 after:bg-[radial-gradient(120%_70%_at_50%_110%,rgba(249,115,22,0.20),transparent_70%)] after:opacity-0 after:transition-opacity after:duration-500 hover:after:opacity-100";
+  "group relative isolate overflow-hidden rounded-[6px] bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)] transition-transform duration-500 ease-out hover:-translate-y-1 motion-reduce:transform-none";
 
 /** A real image from each client's case study, for the featured banner. */
 const CASE_ART: Record<string, string> = {
@@ -211,7 +211,7 @@ function CaseFrame({
   imageHeight: string;
 }) {
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-[6px] bg-white p-1.5 text-[#141414] shadow-[0_30px_60px_-34px_rgba(60,20,0,0.55)] ring-1 ring-[#141414]/[0.05] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1">
+    <div className="flex h-full flex-col overflow-hidden rounded-[6px] bg-white p-1.5 text-[#141414] shadow-[0_1px_0_rgba(27,23,20,0.06)] ring-1 ring-[#141414]/[0.07] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1">
       <div className="flex items-center gap-2 px-2 pb-2 pt-1">
         <ClientMark href={study.href} className="size-6 rounded-[5px] p-0.5" />
         <span className="truncate text-[12.5px] font-medium">
@@ -251,10 +251,13 @@ function CaseFrame({
 function CaseChips({
   stats,
   dark,
+  print,
 }: {
   stats?: CaseStudyResultData["stats"];
-  /** Chips on a dark or orange card. */
+  /** Chips on a dark card. */
   dark?: boolean;
+  /** Chips on the flat print-orange card. */
+  print?: boolean;
 }) {
   if (!stats?.length) return null;
   return (
@@ -264,15 +267,19 @@ function CaseChips({
           key={`${stat.value}-${index}`}
           className={cn(
             "flex items-center gap-2 rounded-full py-1 pl-1 pr-3.5 text-[12.5px] font-medium ring-1 ring-inset",
-            dark
-              ? "bg-white/12 text-white ring-white/20"
-              : "bg-white/70 text-[#141414] ring-[#141414]/[0.06]",
+            print
+              ? "text-white ring-white/40"
+              : dark
+                ? "bg-white/12 text-white ring-white/20"
+                : "bg-white/70 text-[#141414] ring-[#141414]/[0.06]",
           )}
         >
           <span
             className={cn(
               "rounded-full px-2.5 py-0.5 text-[11px] font-semibold",
-              dark ? "bg-white text-[#141414]" : "bg-[#141414] text-white",
+              dark || print
+                ? "bg-white text-[#141414]"
+                : "bg-[#141414] text-white",
             )}
           >
             {stat.value}
@@ -297,7 +304,7 @@ function EdgeChip({
     <span
       aria-hidden
       className={cn(
-        "pointer-events-none absolute z-10 hidden items-center gap-2 rounded-full bg-[#fbf9f5] py-1.5 pl-1.5 pr-4 text-[12.5px] font-medium text-[#141414] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_14px_30px_-14px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-white/70 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1 md:flex",
+        "pointer-events-none absolute z-10 hidden items-center gap-2 rounded-full bg-[#fbf9f5] py-1.5 pl-1.5 pr-4 text-[12.5px] font-medium text-[#141414] shadow-[0_14px_30px_-14px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/[0.07] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1 md:flex",
         className,
       )}
     >
@@ -328,14 +335,11 @@ export function PaperCaseStudyCard({
       <Link
         href={study.href}
         className="group relative isolate mt-8 grid overflow-visible rounded-[6px] text-white md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]"
-        style={{
-          background:
-            "linear-gradient(140deg, #fe3c34 0%, #f97316 55%, #fb8a1e 100%)",
-        }}
+        style={{ background: PRINT }}
       >
         <span
           aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10 rounded-[6px] opacity-30 mix-blend-multiply"
+          className="pointer-events-none absolute inset-0 -z-10 rounded-[6px] opacity-[0.14] mix-blend-multiply"
           style={{ backgroundImage: GRAIN }}
         />
         {/* Large, faint Reddit marks in the background, where the reach came from */}
@@ -371,7 +375,7 @@ export function PaperCaseStudyCard({
           <p className="max-w-[520px] text-[15.5px] leading-[1.6] text-white/85">
             {study.proof}
           </p>
-          <CaseChips stats={study.stats?.slice(1)} dark />
+          <CaseChips stats={study.stats?.slice(1)} print />
           <div className="mt-auto pt-2">
             <CasePill bg="#141414" ink="#f4efe7" company={study.company} />
           </div>
@@ -450,10 +454,7 @@ export function PaperCaseStudyCard({
 /* Process: orange panel and step cards inside one outer card          */
 /* ------------------------------------------------------------------ */
 
-const ORANGE_PANEL = {
-  background:
-    "linear-gradient(165deg, #fe3200 8%, #fc8c04 48%, rgba(242,138,111,0) 86%), linear-gradient(90deg, #fc8c04, #fc8c04)",
-};
+const ORANGE_PANEL = { background: PRINT };
 
 /** Real Studio1 event photos behind the process scene, one per step. */
 const STORY_PHOTOS = [
@@ -741,7 +742,7 @@ function ProcessStory({
           </div>
 
           {/* Centre: a blurred event photo holding the working card */}
-          <div className="relative isolate h-full overflow-hidden rounded-[6px] bg-[#1b120c] shadow-[0_50px_90px_-50px_rgba(60,20,0,0.65)]">
+          <div className="relative isolate h-full overflow-hidden rounded-[6px] bg-[#1b120c]">
             <AnimatePresence initial={false}>
               <motion.div
                 key={`photo-${active}`}
@@ -765,7 +766,7 @@ function ProcessStory({
               className="pointer-events-none absolute inset-0 -z-10"
               style={{
                 background:
-                  "radial-gradient(80% 60% at 30% 100%, rgba(249,115,22,0.35), transparent 70%), linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.35))",
+                  "linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.35))",
               }}
             />
 
@@ -898,7 +899,7 @@ export function PaperServiceProcess({
         stepLabel={stepLabel}
       />
       {/* Phones and tablets: the orange panel and step cards in one outer card */}
-      <div className="mt-8 rounded-[6px] lg:hidden bg-white/70 p-2 shadow-[0_30px_60px_-44px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08] sm:p-2.5">
+      <div className="mt-8 rounded-[6px] lg:hidden bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)] p-2 sm:p-2.5">
         <div className="grid gap-2 sm:gap-2.5 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
           <div className="lg:sticky lg:top-28 lg:self-start">
             <div
@@ -907,7 +908,7 @@ export function PaperServiceProcess({
             >
               <div
                 aria-hidden
-                className="pointer-events-none absolute inset-0 -z-10 opacity-30 mix-blend-multiply"
+                className="pointer-events-none absolute inset-0 -z-10 opacity-[0.14] mix-blend-multiply"
                 style={{ backgroundImage: GRAIN }}
               />
               <h2 className="max-w-[520px] text-[32px] font-medium leading-[1.15] tracking-[-0.045em] sm:text-[40px] lg:text-[44px]">
@@ -934,8 +935,8 @@ export function PaperServiceProcess({
             </div>
           </div>
 
-          {/* Engraved tray holding one white card per step */}
-          <ol className="flex flex-col gap-2 rounded-[4px] bg-[#f3eee6] p-2 shadow-[inset_0_3px_10px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08)] sm:p-2.5">
+          {/* Flat paper tray holding one white card per step */}
+          <ol className="flex flex-col gap-2 rounded-[4px] bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08] p-2 sm:p-2.5">
             {steps.map((step, position) => {
               const StepIcon = step.icon;
               return (
@@ -954,10 +955,10 @@ export function PaperServiceProcess({
                   }}
                   viewport={{ once: false, margin: "0px 0px -12% 0px" }}
                   transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-                  className="group rounded-[4px] bg-white p-5 shadow-[0_1px_2px_rgba(20,20,20,0.06),0_10px_24px_-18px_rgba(20,20,20,0.35)] ring-1 ring-inset ring-[#141414]/[0.06] transition-shadow duration-500 hover:shadow-[0_1px_2px_rgba(20,20,20,0.06),0_16px_30px_-22px_rgba(20,20,20,0.35)] sm:p-6"
+                  className="group rounded-[4px] bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)] p-5 sm:p-6"
                 >
                   <div className="flex items-start gap-4">
-                    <span className="flex size-11 shrink-0 items-center justify-center rounded-[6px] bg-[#f8f6f2] text-[#141414] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10)] transition-colors duration-500 group-hover:text-[#ea580c]">
+                    <span className="flex size-11 shrink-0 items-center justify-center rounded-[6px] bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08] text-[#141414] transition-colors duration-500 group-hover:text-[#f97316]">
                       <StepIcon className="size-5" />
                     </span>
                     <div className="min-w-0 flex-1">
@@ -977,7 +978,7 @@ export function PaperServiceProcess({
                   <p className={cn("mt-4 text-[15px] leading-[1.6]", MUTED)}>
                     {step.description}
                   </p>
-                  <ul className="mt-5 grid gap-x-5 gap-y-2.5 rounded-[4px] bg-[#f8f6f2] p-4 shadow-[inset_0_2px_6px_rgba(20,20,20,0.07)] sm:grid-cols-2">
+                  <ul className="mt-5 grid gap-x-5 gap-y-2.5 rounded-[4px] bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08] p-4 sm:grid-cols-2">
                     {step.details.map((detail, detailIndex) => (
                       <li
                         key={detailIndex}
@@ -1073,7 +1074,7 @@ export function PaperServiceFaq({
       />
       <div className="mt-10">
         {/* Questions in one white card, hairline rows */}
-        <div className="min-w-0 rounded-[6px] bg-white/80 px-6 py-2 ring-1 ring-inset ring-[#141414]/10 sm:px-8">
+        <div className="min-w-0 rounded-[6px] bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)] px-6 py-2 sm:px-8">
           <Accordion type="single" collapsible className="w-full">
             {items.map((item, position) => (
               <AccordionItem
@@ -1096,7 +1097,7 @@ export function PaperServiceFaq({
                   </span>
                   <span
                     aria-hidden
-                    className="flex size-8 shrink-0 items-center justify-center rounded-[6px] bg-[#f8f6f2] text-[#141414]/55 shadow-[inset_0_2px_5px_rgba(20,20,20,0.10)] transition-colors group-data-[state=open]:bg-[#f97316] group-data-[state=open]:text-white group-data-[state=open]:shadow-none"
+                    className="flex size-8 shrink-0 items-center justify-center rounded-[6px] bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08] text-[#141414]/55 transition-colors group-data-[state=open]:bg-[#f97316] group-data-[state=open]:text-white group-data-[state=open]:ring-[#f97316]"
                   >
                     <Plus
                       weight="bold"

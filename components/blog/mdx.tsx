@@ -192,7 +192,7 @@ function BlogImage({
   if (!src || typeof src !== "string") return null;
 
   return (
-    <figure className="not-prose mx-auto my-12 w-fit max-w-full overflow-hidden rounded-[6px] bg-white p-2 shadow-[0_24px_50px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08]">
+    <figure className="not-prose mx-auto my-12 w-fit max-w-full overflow-hidden rounded-[6px] bg-white p-2 shadow-[0_1px_0_rgba(27,23,20,0.06)] ring-1 ring-inset ring-[#141414]/[0.08]">
       <div className="w-fit max-w-full overflow-hidden rounded-[6px] bg-[#f4efe7]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -273,7 +273,7 @@ function BlogPre({ children }: ComponentPropsWithoutRef<"pre">) {
 
 function YouTubeEmbed({ url }: { url: string }) {
   return (
-    <figure className="not-prose mx-auto my-12 w-full overflow-hidden rounded-[6px] bg-white p-2 shadow-[0_24px_50px_-34px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08]">
+    <figure className="not-prose mx-auto my-12 w-full overflow-hidden rounded-[6px] bg-white p-2 shadow-[0_1px_0_rgba(27,23,20,0.06)] ring-1 ring-inset ring-[#141414]/[0.08]">
       <div className="aspect-video w-full overflow-hidden rounded-[6px] bg-[#141414]">
         <iframe
           src={url}

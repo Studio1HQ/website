@@ -136,12 +136,12 @@ function ApplicationTicket({
         className="absolute -top-4 left-1/2 z-10 h-8 w-28 -translate-x-1/2 -rotate-[3deg] bg-[#f4efe7]/75 shadow-[0_2px_6px_-2px_rgba(20,20,20,0.25)] ring-1 ring-[#141414]/[0.06]"
       />
       <div
-        className="relative isolate text-white shadow-[0_40px_80px_-40px_rgba(90,25,0,0.75)]"
+        className="relative isolate text-white shadow-[0_40px_80px_-40px_rgba(20,20,20,0.45)]"
         style={{ background: PRINT }}
       >
         <span
           aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10 opacity-40 mix-blend-multiply"
+          className="pointer-events-none absolute inset-0 -z-10 opacity-[0.14] mix-blend-multiply"
           style={{ backgroundImage: GRAIN }}
         />
         <div className="px-6 pb-6 pt-8">

@@ -20,7 +20,7 @@ import { PaperSection } from "@/components/paper/paper-sections";
 import { PrintBlock, SelectionFrame } from "@/components/paper/paper-hero";
 import Logo from "@/components/ui/svgs/logo";
 import { homeTestimonials } from "@/data/home";
-import { GRAIN, PAPER, PRINT } from "@/lib/paper";
+import { GRAIN, INK, PAPER, PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 
 /*
@@ -65,16 +65,16 @@ const VIDEO: Node = {
 
 /* Dotted connector pieces. Columns are centred at 23% and 77%. */
 const V =
-  "s1-flow-v absolute w-[2px] -translate-x-1/2 origin-top bg-[repeating-linear-gradient(to_bottom,rgba(42,15,0,0.6)_0_2px,transparent_2px_6px)]";
+  "s1-flow-v absolute w-[2px] -translate-x-1/2 origin-top bg-[repeating-linear-gradient(to_bottom,rgba(20,20,20,0.45)_0_2px,transparent_2px_6px)]";
 const H =
-  "s1-flow-h absolute h-[2px] -translate-y-1/2 origin-left bg-[repeating-linear-gradient(to_right,rgba(42,15,0,0.6)_0_2px,transparent_2px_6px)]";
+  "s1-flow-h absolute h-[2px] -translate-y-1/2 origin-left bg-[repeating-linear-gradient(to_right,rgba(20,20,20,0.45)_0_2px,transparent_2px_6px)]";
 
 function Dot({ className }: { className: string }) {
   return (
     <span
       aria-hidden
       className={cn(
-        "absolute size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#2a0f00]",
+        "absolute size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#141414]",
         className,
       )}
     />
@@ -230,7 +230,7 @@ function Sketches() {
           weight="light"
           className={cn(
             "size-6",
-            SketchIcon === Code ? "text-[#ea580c]" : "text-[#141414]/30",
+            SketchIcon === Code ? "text-[#f97316]" : "text-[#141414]/30",
           )}
         />
       ))}
@@ -254,17 +254,13 @@ export function StudioBento() {
           {/* Wide statement card */}
           <motion.div
             {...enter(0)}
-            className="relative grid overflow-hidden rounded-[6px] p-7 md:p-12 lg:col-span-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center"
-            style={{
-              background:
-                "linear-gradient(180deg, #e6ddd2 0%, #f3cfa8 70%, #f9b77c 100%)",
-            }}
+            className="relative grid overflow-hidden rounded-[6px] bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)] p-7 md:p-12 lg:col-span-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center"
           >
             <div className="relative z-10 max-w-[460px]">
-              <h2 className="text-[34px] font-semibold leading-[1.02] tracking-[-0.05em] text-[#2a0f00] sm:text-[44px] md:text-[52px]">
+              <h2 className="text-[34px] font-semibold leading-[1.02] tracking-[-0.05em] text-[#141414] sm:text-[44px] md:text-[52px]">
                 We help devtool teams reach more developers
               </h2>
-              <p className="mt-5 text-[15px] leading-[1.6] text-[#2a0f00]/75">
+              <p className="mt-5 text-[15px] leading-[1.6] text-[#141414]/[0.62]">
                 Turn technical complexity into developer-friendly storytelling.
                 Drive measurable growth with every project.
               </p>
@@ -273,7 +269,7 @@ export function StudioBento() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group mt-8 inline-flex h-11 items-center gap-2 rounded-[6px] px-5 text-[14px] font-medium transition-transform duration-300 hover:-translate-y-0.5"
-                style={{ background: "#2a0f00", color: PAPER }}
+                style={{ background: INK, color: PAPER }}
               >
                 Book a call
                 <ArrowUpRight
@@ -289,7 +285,7 @@ export function StudioBento() {
                 labelPosition="top-left"
                 className="p-3"
               >
-                <PrintBlock className="flex size-[200px] rotate-[-3deg] items-center justify-center rounded-[6px] shadow-[0_30px_60px_-30px_rgba(120,40,0,0.7)] sm:size-[260px]">
+                <PrintBlock className="flex size-[200px] rotate-[-3deg] items-center justify-center rounded-[6px] shadow-[0_30px_60px_-30px_rgba(20,20,20,0.45)] sm:size-[260px]">
                   <Logo className="relative size-[58%] brightness-0 invert" />
                 </PrintBlock>
               </SelectionFrame>
@@ -334,16 +330,12 @@ export function StudioBento() {
           {/* How the services connect */}
           <motion.div
             {...enter(0.1)}
-            className="relative isolate overflow-hidden rounded-[6px] p-6 md:p-10"
-            style={{
-              background:
-                "linear-gradient(180deg, #ebe5dc 0%, #f6dcbf 55%, #fbc28a 100%)",
-            }}
+            className="relative isolate overflow-hidden rounded-[6px] bg-[#fbf9f5] p-6 shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)] ring-1 ring-inset ring-[#141414]/[0.07] md:p-10"
           >
-            {/* Paper grain over the wash */}
+            {/* Paper grain on a flat paper sheet */}
             <span
               aria-hidden
-              className="pointer-events-none absolute inset-0 -z-10 opacity-40 mix-blend-multiply"
+              className="pointer-events-none absolute inset-0 -z-10 opacity-30 mix-blend-multiply"
               style={{ backgroundImage: GRAIN }}
             />
             <ServiceMap />
@@ -352,7 +344,7 @@ export function StudioBento() {
           {/* Developer-first card: the principle, then the proof */}
           <motion.div
             {...enter(0.18)}
-            className="relative flex min-h-[420px] flex-col justify-between overflow-hidden rounded-[6px] bg-[#ebe7e1] p-6 md:p-10"
+            className="relative flex min-h-[420px] flex-col justify-between overflow-hidden rounded-[6px] bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)] p-6 md:p-10"
           >
             <div className="relative z-[1]">
               <span className="inline-flex rounded-full bg-[#f97316] px-4 py-1.5 font-mono text-[13px] uppercase tracking-[0.08em] text-white">
@@ -367,18 +359,18 @@ export function StudioBento() {
               </p>
             </div>
 
-            {/* The proof, each number engraved into its own well */}
+            {/* The proof, each number on its own paper tile */}
             <Sketches />
             <dl className="relative z-[1] mt-10 grid grid-cols-3 gap-2">
               {PROOF.map((item) => (
                 <div
                   key={item.label}
-                  className="relative flex min-w-0 flex-col-reverse justify-end rounded-[6px] bg-[#e3ddd3] px-4 py-4 shadow-[inset_0_2px_6px_rgba(20,20,20,0.1),inset_0_1px_2px_rgba(20,20,20,0.08),inset_0_-1px_0_rgba(255,255,255,0.8)] md:px-5 md:py-5"
+                  className="relative flex min-w-0 flex-col-reverse justify-end rounded-[6px] bg-[#f4efe7] px-4 py-4 ring-1 ring-inset ring-[#141414]/[0.08] md:px-5 md:py-5"
                 >
                   <dt className="mt-2 text-[12.5px] leading-snug text-[#141414]/60 md:text-[13px]">
                     {item.label}
                   </dt>
-                  <dd className="text-[28px] font-medium leading-none tracking-[-0.05em] tabular-nums text-[#ea580c] md:text-[34px]">
+                  <dd className="text-[28px] font-medium leading-none tracking-[-0.05em] tabular-nums text-[#f97316] md:text-[34px]">
                     {item.value}
                   </dd>
                 </div>

@@ -38,7 +38,7 @@ const SPOTS: Spot[] = [
 const INSET: Record<string, { scale: number; bg: string }> = {
   openlore: { scale: 0.8, bg: "#574191" },
 };
-/** The glossy white rim round each logo, on the 1000-wide board. */
+/** The white rim round each logo, on the 1000-wide board. */
 const RIM = 14;
 
 const pctX = (n: number) => `${(n / 10).toFixed(2)}%`;
@@ -97,7 +97,7 @@ function Piece({
 }
 
 /**
- * The clients as a cluster of round logos in glossy white rims. They pop
+ * The clients as a cluster of round logos in white rims. They pop
  * in one after another; paired logos glide together and their rims melt
  * into one, like liquid.
  */
@@ -133,13 +133,13 @@ export function LogoCloud({ logos }: { logos: CloudLogo[] }) {
 
       {/* Tablet and up: the cluster */}
       <div className="relative hidden aspect-[1000/520] w-full md:block">
-        {/* Glossy white rims; partners share the filter and melt together */}
+        {/* White rims; partners share the filter and melt together */}
         <div
           aria-hidden
           className="absolute inset-0"
           style={{
             filter:
-              "url(#cloud-goo) drop-shadow(0 16px 22px rgba(20,20,20,0.1)) drop-shadow(0 2px 3px rgba(20,20,20,0.06))",
+              "url(#cloud-goo) drop-shadow(0 0 0.5px rgba(20,20,20,0.3)) drop-shadow(0 12px 18px rgba(20,20,20,0.08))",
           }}
         >
           {spots.map((spot, i) => (
@@ -150,7 +150,7 @@ export function LogoCloud({ logos }: { logos: CloudLogo[] }) {
               index={i}
               from={arrival[i]}
             >
-              <span className="block aspect-square rounded-full bg-[radial-gradient(circle_at_32%_24%,#ffffff_0%,#ffffff_40%,#f5f2ed_72%,#ebe6de_100%)]" />
+              <span className="block aspect-square rounded-full bg-white" />
             </Piece>
           ))}
         </div>
@@ -192,7 +192,7 @@ export function LogoCloud({ logos }: { logos: CloudLogo[] }) {
         })}
       </div>
 
-      {/* Phones: the same glossy rims, wrapped at a readable size */}
+      {/* Phones: the same white rims, wrapped at a readable size */}
       <ul className="flex flex-wrap justify-center gap-3 md:hidden">
         {spots.map((spot, i) => {
           const item = bySlug.get(spot.slug)!;
@@ -212,7 +212,7 @@ export function LogoCloud({ logos }: { logos: CloudLogo[] }) {
               <Link
                 href={`/case-studies/${item.slug}`}
                 aria-label={`${item.client} case study`}
-                className="block size-[68px] rounded-full bg-[radial-gradient(circle_at_32%_24%,#ffffff_0%,#ffffff_40%,#f5f2ed_72%,#ebe6de_100%)] p-[6px] shadow-[0_12px_22px_-14px_rgba(20,20,20,0.35),inset_0_1px_0_#fff]"
+                className="block size-[68px] rounded-full bg-white p-[6px] shadow-[0_12px_22px_-14px_rgba(20,20,20,0.35)] ring-1 ring-inset ring-[#141414]/[0.07]"
               >
                 <span
                   className="relative block size-full overflow-hidden rounded-full bg-white"
@@ -251,7 +251,7 @@ export function LogoCloud({ logos }: { logos: CloudLogo[] }) {
           onPointerLeave={() => setJoining(false)}
           onFocus={() => setJoining(true)}
           onBlur={() => setJoining(false)}
-          className="group/cta inline-flex items-center gap-2.5 rounded-full bg-[#141414] py-1.5 pl-1.5 pr-4 text-[13px] font-medium text-white shadow-[0_14px_28px_-16px_rgba(20,20,20,0.7),inset_0_1px_0_rgba(255,255,255,0.12)] transition-colors hover:bg-[#262626]"
+          className="group/cta inline-flex items-center gap-2.5 rounded-full bg-[#141414] py-1.5 pl-1.5 pr-4 text-[13px] font-medium text-white shadow-[0_14px_28px_-16px_rgba(20,20,20,0.7)] transition-colors hover:bg-[#262626]"
         >
           {/* Your seat and Studio1 slide together until they overlap */}
           <motion.span

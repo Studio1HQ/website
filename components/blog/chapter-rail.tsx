@@ -157,7 +157,7 @@ export function ChapterRail({
             {isActive ? (
               <motion.span
                 layoutId={onPick ? "chapter-active-sheet" : "chapter-active"}
-                className="absolute inset-0 rounded-[6px] bg-white/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_8px_20px_-12px_rgba(90,30,0,0.45)] ring-1 ring-[var(--home-line)]"
+                className="absolute inset-0 rounded-[6px] bg-white shadow-[0_1px_0_rgba(27,23,20,0.06)] ring-1 ring-[var(--home-line)]"
                 transition={{ type: "spring", stiffness: 380, damping: 34 }}
               />
             ) : null}
@@ -238,7 +238,7 @@ export function ChapterRail({
   const totalBar = (
     <div className="h-[3px] w-full overflow-hidden rounded-full bg-[var(--home-line)]">
       <div
-        className="h-full rounded-full bg-gradient-to-r from-[#fdba74] via-primary to-[#c2410c] transition-[width] duration-150 ease-out"
+        className="h-full rounded-full bg-[#f97316] transition-[width] duration-150 ease-out"
         style={{ width: `${total * 100}%` }}
       />
     </div>
@@ -250,7 +250,7 @@ export function ChapterRail({
       <nav
         aria-label="Chapters"
         className={cn(
-          "hidden bg-white/80 p-5 ring-1 ring-inset ring-[#141414]/10",
+          "hidden bg-white p-5 ring-1 ring-inset ring-[#141414]/10",
           variant === "full" && "xl:block",
         )}
       >

@@ -58,7 +58,7 @@ function formatDate(value: string) {
 }
 
 /** White sheet with a hairline ring, as the landing page's cards. */
-const sheet = "bg-white/80 ring-1 ring-inset ring-[#141414]/10";
+const sheet = "bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)]";
 
 /** Same width and gutters as the landing page's Container. */
 const frame = "mx-auto w-full max-w-[1300px] px-4 sm:px-6 lg:px-8";
@@ -267,7 +267,7 @@ export function PostLayout({
 
           <div className="relative mx-auto mt-12 w-full max-w-[1000px]">
             <figure
-              className={`relative aspect-[16/9] overflow-hidden rounded-[6px] ${bannerImage ? "bg-[#0b0b0b]" : "bg-[#f4efe7]"} shadow-[0_40px_80px_-50px_rgba(20,20,20,0.6)] ring-1 ring-inset ring-[#141414]/10`}
+              className={`relative aspect-[16/9] overflow-hidden rounded-[6px] ${bannerImage ? "bg-[#0b0b0b]" : "bg-[#f4efe7]"} shadow-[0_1px_0_rgba(27,23,20,0.06)] ring-1 ring-inset ring-[#141414]/10`}
             >
               <Image
                 src={bannerImage || blogCoverUrl(slug, updatedDate || date)}
@@ -336,7 +336,7 @@ export function PostLayout({
 
             <div
               data-mdx-content
-              className="prose prose-neutral mt-12 max-w-[720px] prose-headings:scroll-mt-28 prose-headings:font-medium prose-headings:tracking-[-0.035em] prose-headings:text-[var(--p-fg)] prose-h2:mb-5 prose-h2:mt-16 prose-h2:border-t prose-h2:border-[var(--p-line)] prose-h2:pt-10 prose-h2:text-[28px] prose-h2:leading-[1.2] md:prose-h2:text-[32px] prose-h3:mb-3 prose-h3:mt-10 prose-h3:text-[21px] prose-h3:leading-[1.3] prose-p:my-5 prose-p:text-[17.5px] prose-p:leading-[1.8] prose-p:text-[#141414]/[0.74] prose-a:font-medium prose-a:text-[#c2410c] prose-a:underline prose-a:decoration-[#f97316]/40 prose-a:decoration-[1.5px] prose-a:underline-offset-[5px] hover:prose-a:decoration-[#f97316] prose-blockquote:my-10 prose-blockquote:rounded-r-[6px] prose-blockquote:border-l-[3px] prose-blockquote:border-l-[#f97316] prose-blockquote:bg-white/70 prose-blockquote:py-4 prose-blockquote:pl-6 prose-blockquote:pr-5 prose-blockquote:font-medium prose-blockquote:not-italic prose-blockquote:text-[#141414] prose-strong:font-semibold prose-strong:text-[var(--p-fg)] prose-code:before:content-none prose-code:after:content-none prose-ol:my-6 prose-ul:my-6 prose-li:my-2 prose-li:text-[17.5px] prose-li:leading-[1.75] prose-li:text-[#141414]/[0.74] prose-li:marker:font-medium prose-li:marker:text-[#f97316] prose-img:rounded-none prose-hr:my-14 prose-hr:border-[var(--p-line)] prose-th:text-[var(--p-fg)] prose-td:text-[var(--home-ink-soft)]"
+              className="prose prose-neutral mt-12 max-w-[720px] prose-headings:scroll-mt-28 prose-headings:font-medium prose-headings:tracking-[-0.035em] prose-headings:text-[var(--p-fg)] prose-h2:mb-5 prose-h2:mt-16 prose-h2:border-t prose-h2:border-[var(--p-line)] prose-h2:pt-10 prose-h2:text-[28px] prose-h2:leading-[1.2] md:prose-h2:text-[32px] prose-h3:mb-3 prose-h3:mt-10 prose-h3:text-[21px] prose-h3:leading-[1.3] prose-p:my-5 prose-p:text-[17.5px] prose-p:leading-[1.8] prose-p:text-[#141414]/[0.74] prose-a:font-medium prose-a:text-[#c2410c] prose-a:underline prose-a:decoration-[#f97316]/40 prose-a:decoration-[1.5px] prose-a:underline-offset-[5px] hover:prose-a:decoration-[#f97316] prose-blockquote:my-10 prose-blockquote:rounded-r-[6px] prose-blockquote:border-l-[3px] prose-blockquote:border-l-[#f97316] prose-blockquote:bg-white prose-blockquote:py-4 prose-blockquote:pl-6 prose-blockquote:pr-5 prose-blockquote:font-medium prose-blockquote:not-italic prose-blockquote:text-[#141414] prose-strong:font-semibold prose-strong:text-[var(--p-fg)] prose-code:before:content-none prose-code:after:content-none prose-ol:my-6 prose-ul:my-6 prose-li:my-2 prose-li:text-[17.5px] prose-li:leading-[1.75] prose-li:text-[#141414]/[0.74] prose-li:marker:font-medium prose-li:marker:text-[#f97316] prose-img:rounded-none prose-hr:my-14 prose-hr:border-[var(--p-line)] prose-th:text-[var(--p-fg)] prose-td:text-[var(--home-ink-soft)]"
             >
               {children}
             </div>

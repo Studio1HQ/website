@@ -667,7 +667,7 @@ function PartnerSection() {
               {tier.featured ? (
                 <span
                   aria-hidden
-                  className="pointer-events-none absolute inset-0 -z-10 opacity-40 mix-blend-multiply"
+                  className="pointer-events-none absolute inset-0 -z-10 opacity-[0.14] mix-blend-multiply"
                   style={{ backgroundImage: GRAIN }}
                 />
               ) : null}

@@ -17,7 +17,7 @@ const TONES: Record<
     fg: "#ffffff",
     line: "rgba(255,255,255,0.34)",
     accent: INK,
-    grain: "opacity-40 mix-blend-multiply",
+    grain: "opacity-[0.14] mix-blend-multiply",
   },
   night: {
     bg: NIGHT,
@@ -31,7 +31,7 @@ const TONES: Record<
     fg: INK,
     line: "rgba(20,20,20,0.16)",
     accent: PRINT,
-    grain: "opacity-40 mix-blend-multiply",
+    grain: "opacity-[0.14] mix-blend-multiply",
   },
 };
 

@@ -109,7 +109,7 @@ function MomentsCollage({ reduceMotion }: { reduceMotion: boolean }) {
         >
           <a
             href={`#${m.slug}`}
-            className="group relative block size-full overflow-hidden rounded-[6px] bg-[#e6e1d9] shadow-[0_18px_40px_-28px_rgba(20,20,20,0.55)] ring-1 ring-inset ring-[#141414]/[0.06]"
+            className="group relative block size-full overflow-hidden rounded-[6px] bg-[#e6e1d9] shadow-[0_1px_0_rgba(27,23,20,0.06)] ring-1 ring-inset ring-[#141414]/[0.06]"
           >
             <Image
               src={m.src}
@@ -184,8 +184,8 @@ export function EventsPage({
           {/* A few moments first, then the record and the timeline */}
           <MomentsCollage reduceMotion={!!reduceMotion} />
 
-          {/* The record, engraved into the page */}
-          <dl className="mt-3 grid grid-cols-2 overflow-hidden rounded-[6px] bg-[#ebe6de] shadow-[inset_0_2px_6px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08),inset_0_-1px_0_rgba(255,255,255,0.85)] md:mt-4 md:grid-cols-4">
+          {/* The record, on a flat card */}
+          <dl className="mt-3 grid grid-cols-2 overflow-hidden rounded-[6px] bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)] md:mt-4 md:grid-cols-4">
             {stats.map(([value, label, StatIcon], i) => (
               <div
                 key={label}
@@ -196,13 +196,13 @@ export function EventsPage({
                   i === 2 && "md:border-l md:border-[#141414]/[0.08]",
                 )}
               >
-                <span className="flex size-8 shrink-0 items-center sm:size-10 justify-center rounded-full bg-[#f4efe7] text-[#f97316] shadow-[0_1px_2px_rgba(20,20,20,0.1),inset_0_1px_0_rgba(255,255,255,0.9)]">
+                <span className="flex size-8 shrink-0 items-center sm:size-10 justify-center rounded-full bg-[#f4efe7] text-[#f97316] ring-1 ring-inset ring-[#141414]/[0.08]">
                   <StatIcon weight="bold" className="size-[18px]" />
                 </span>
-                <dd className="text-[26px] font-medium leading-none sm:text-[32px] tracking-[-0.05em] tabular-nums text-[#141414]/85 [text-shadow:0_1px_0_rgba(255,255,255,0.9)] md:text-[40px]">
+                <dd className="text-[26px] font-medium leading-none sm:text-[32px] tracking-[-0.05em] tabular-nums text-[#141414]/85 md:text-[40px]">
                   {value}
                 </dd>
-                <dt className="min-w-0 text-[12px] leading-tight text-[#141414]/55 sm:text-[13px] [text-shadow:0_1px_0_rgba(255,255,255,0.8)]">
+                <dt className="min-w-0 text-[12px] leading-tight text-[#141414]/55 sm:text-[13px]">
                   {label}
                 </dt>
               </div>

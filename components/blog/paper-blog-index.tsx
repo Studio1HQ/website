@@ -150,7 +150,7 @@ function FeaturedPost({
     <div className="relative mt-14">
       <Link
         href={`/blog/${post.slug}`}
-        className="group grid overflow-hidden rounded-[6px] bg-white shadow-[0_30px_60px_-44px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/[0.06] lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]"
+        className="group grid overflow-hidden rounded-[6px] bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)] lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]"
       >
         <PostCover
           post={post}
@@ -274,7 +274,7 @@ function Pagination({
   if (totalPages < 2) return null;
   const step =
     "flex size-11 items-center justify-center rounded-full text-[14px] font-medium tabular-nums transition-colors";
-  const idle = "bg-white/70 ring-1 ring-inset ring-[#141414]/10 hover:bg-white";
+  const idle = "bg-white ring-1 ring-inset ring-[#141414]/10 hover:ring-[#141414]/20";
   const arrow = (page: number, label: string, icon: React.ReactNode) =>
     page >= 1 && page <= totalPages ? (
       <Link

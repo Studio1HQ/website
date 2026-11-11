@@ -3,7 +3,7 @@
 import { motion, useReducedMotion } from "motion/react";
 import { PlayCircle, type Icon } from "@phosphor-icons/react";
 import Logo from "@/components/ui/svgs/logo";
-import { GRAIN } from "@/lib/paper";
+import { GRAIN, INK, PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 import {
   Cursor,
@@ -12,8 +12,8 @@ import {
 } from "@/components/paper/paper-hero";
 
 /**
- * An icon tile printed on paper: a square in brand orange (or ink) with a
- * fine print grid and grain, a light top edge, and a white glyph.
+ * An icon tile printed on paper: a flat square in print orange (or ink)
+ * with a fine print grid and ink grain, and a white glyph.
  */
 export function Icon3D({
   icon: Glyph,
@@ -34,6 +34,7 @@ export function Icon3D({
           : "bg-[#f97316]",
         className,
       )}
+      style={{ background: ink ? INK : PRINT }}
     >
       {/* Printed flat, with a light paper grain */}
       <span
@@ -61,7 +62,7 @@ const ARROWS: {
   },
 ];
 
-/** A frosted glass label tab with an ink or orange icon tile. */
+/** A white label tab with an ink or orange icon tile. */
 export function GlassTab({
   icon: Glyph,
   label,
@@ -76,13 +77,13 @@ export function GlassTab({
   return (
     <span
       className={cn(
-        "flex items-center gap-2.5 rounded-[6px] bg-[#fbf9f5] py-2 pl-2 pr-4 text-[13px] font-medium text-[#141414] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),inset_0_0_0_1px_rgba(255,255,255,0.55),0_16px_32px_-20px_rgba(20,20,20,0.45)] ring-1 ring-[#141414]/[0.06]",
+        "flex items-center gap-2.5 rounded-[6px] bg-[#fbf9f5] py-2 pl-2 pr-4 text-[13px] font-medium text-[#141414] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.55),0_16px_32px_-20px_rgba(20,20,20,0.45)] ring-1 ring-[#141414]/[0.06]",
         className,
       )}
     >
       <span
         className="flex size-7 items-center justify-center rounded-[6px] text-[#f4efe7]"
-        style={{ background: ink ? "#141414" : "#f97316" }}
+        style={{ background: ink ? INK : PRINT }}
       >
         <Glyph weight="regular" className="size-4" />
       </span>

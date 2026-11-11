@@ -146,7 +146,7 @@ export function BrowserFrame({ product }: { product: Product }) {
   const reduceMotion = useReducedMotion();
   const media = product.media;
   return (
-    <div className="flex min-w-0 flex-col rounded-[6px] bg-white/80 p-1.5 shadow-[inset_0_1px_0_#fff,0_40px_80px_-48px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/10">
+    <div className="flex min-w-0 flex-col rounded-[6px] bg-white p-1.5 shadow-[0_1px_0_rgba(27,23,20,0.06)] ring-1 ring-inset ring-[#141414]/[0.07]">
       <div className="flex h-9 items-center gap-3 px-2.5">
         <span aria-hidden className="flex gap-1.5">
           {["#ff5f57", "#febc2e", "#28c840"].map((dot) => (
@@ -189,30 +189,25 @@ export function BrowserFrame({ product }: { product: Product }) {
             className="object-cover object-top"
           />
         )}
-        {/* Light catching the glass across the top */}
-        <span
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[linear-gradient(160deg,rgba(255,255,255,0.14)_0%,transparent_32%)]"
-        />
       </div>
     </div>
   );
 }
 
-/** A feature as a white tile: icon in an engraved well, label, one line. */
+/** A feature as a white tile: icon on a paper chip, label, one line. */
 export function FeatureTile({
   feature,
   children,
 }: {
   feature: Product["features"][number];
-  /** Optional visual, set in an engraved well above the text. */
+  /** Optional visual, set on a paper panel above the text. */
   children?: ReactNode;
 }) {
   const FeatureIcon = feature.icon;
   return (
-    <article className="flex min-w-0 flex-col rounded-[6px] bg-white/80 p-4 ring-1 ring-inset ring-[#141414]/10 sm:p-5">
+    <article className="flex min-w-0 flex-col rounded-[6px] bg-white p-4 shadow-[0_1px_0_rgba(27,23,20,0.06)] ring-1 ring-inset ring-[#141414]/[0.07] sm:p-5">
       <div className="flex items-center gap-2.5">
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-[6px] bg-[#f6f1e9] shadow-[inset_0_2px_5px_rgba(20,20,20,0.10),inset_0_1px_1px_rgba(20,20,20,0.08)]">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-[6px] bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08]">
           <FeatureIcon
             aria-hidden
             weight="duotone"
@@ -225,7 +220,7 @@ export function FeatureTile({
         </h3>
       </div>
       {children ? (
-        <div className="mt-4 flex-1 rounded-[6px] bg-[#fbfaf7] p-4 shadow-[inset_0_3px_10px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08)]">
+        <div className="mt-4 flex-1 rounded-[6px] bg-[#fbfaf7] p-4 ring-1 ring-inset ring-[#141414]/[0.07]">
           {children}
         </div>
       ) : null}

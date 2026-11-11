@@ -59,10 +59,11 @@ export async function generateMetadata(): Promise<Metadata> {
 /** Counts, ranks, and multiples ("12,000+", "#3", "~300"), not worded results. */
 const isNumeric = (value: string) => /^[~#]?\d/.test(value);
 
-const CARD = "rounded-[6px] bg-white/80 ring-1 ring-inset ring-[#141414]/10";
+const CARD =
+  "rounded-[6px] bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)]";
 /** The paper sections' hover lift, for cards that are links. */
 const LIFT =
-  "transition-[transform,box-shadow,background-color] duration-500 ease-out hover:-translate-y-1 hover:bg-white hover:shadow-[0_24px_40px_-28px_rgba(20,20,20,0.45)] motion-reduce:transform-none";
+  "transition-[transform,box-shadow,background-color] duration-500 ease-out hover:-translate-y-1 hover:shadow-[0_24px_40px_-28px_rgba(20,20,20,0.45)] motion-reduce:transform-none";
 /** Makes a card's one link cover the whole card; other links sit above it. */
 const STRETCH = "after:absolute after:inset-0";
 const KICKER =
@@ -130,7 +131,7 @@ function ClientMark({
   return (
     <span
       className={cn(
-        "flex shrink-0 items-center justify-center rounded-[6px] bg-[#f8f6f2] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10)]",
+        "flex shrink-0 items-center justify-center rounded-[6px] bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08]",
         className,
       )}
       style={{ width: size, height: size, padding: Math.round(size * 0.15) }}
@@ -761,7 +762,7 @@ export default function ResultsPage() {
                 <li key={study.slug} className="shrink-0">
                   <a
                     href={`#${study.slug}`}
-                    className="inline-flex h-9 items-center gap-2 rounded-full bg-white/80 pl-1.5 pr-3.5 text-[13px] font-medium ring-1 ring-inset ring-[#141414]/10 transition-colors hover:bg-white hover:ring-[#141414]/25"
+                    className="inline-flex h-9 items-center gap-2 rounded-full bg-white pl-1.5 pr-3.5 text-[13px] font-medium ring-1 ring-inset ring-[#141414]/[0.08] transition-colors hover:ring-[#141414]/25"
                   >
                     <ClientMark
                       slug={study.slug}

@@ -9,12 +9,14 @@ import { motion, useReducedMotion } from "motion/react";
 import { getClientLogo } from "@/components/case-studies/client-logos";
 import { Container, EASE } from "@/components/home/ui";
 import { IndexBar, PaperSection } from "@/components/paper/paper-sections";
+import { isCaseStudyPublic } from "@/constants/case-study-visibility";
+import { GRAIN, PRINT } from "@/lib/paper";
 
 /*
- * Selected work as glass folders, grouped by what we did. Each folder holds
- * the case study's image like a print tucked inside; on hover (or tap) the
- * print slides up out of the folder. The client and result are written on
- * the folder's glass front.
+ * Selected work as print-orange folders, grouped by what we did. Each folder
+ * holds the case study's image like a print tucked inside; on hover (or tap)
+ * the print slides up out of the folder. The client and result are written
+ * on the folder's white front pocket.
  */
 
 type Tab = "devrel" | "content" | "docs";
@@ -136,10 +138,9 @@ const PROJECTS: Project[] = [
 
 const TINTS = [
   {
-    tab: "#fbcfa6",
-    from: "#fde2cb",
-    to: "#f9b98a",
-    glass: "rgba(255,255,255,0.8)",
+    tab: PRINT,
+    back: PRINT,
+    pocket: "#ffffff",
   },
 ];
 
@@ -178,16 +179,20 @@ function Folder({
           {/* Back of the folder, with its tab */}
           <span
             aria-hidden
-            className="absolute -top-[14px] left-0 h-[18px] w-[38%] rounded-t-[6px] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] after:absolute after:-right-3 after:bottom-0 after:size-3 after:bg-[radial-gradient(circle_at_100%_0,transparent_11px,var(--tab)_12px)]"
+            className="absolute -top-[14px] left-0 h-[18px] w-[38%] rounded-t-[6px] after:absolute after:-right-3 after:bottom-0 after:size-3 after:bg-[radial-gradient(circle_at_100%_0,transparent_11px,var(--tab)_12px)]"
             style={{ background: colors.tab, ["--tab" as string]: colors.tab }}
           />
           <span
             aria-hidden
-            className="absolute inset-0 rounded-[6px] rounded-tl-none shadow-[inset_0_1px_0_#fff,inset_0_0_0_1px_rgba(255,255,255,0.7),0_12px_24px_-20px_rgba(20,20,20,0.25)] ring-1 ring-[#141414]/[0.06]"
-            style={{
-              background: `linear-gradient(180deg, ${colors.from}, ${colors.to})`,
-            }}
-          />
+            className="absolute inset-0 overflow-hidden rounded-[6px] rounded-tl-none shadow-[0_1px_0_rgba(27,23,20,0.06)]"
+            style={{ background: colors.back }}
+          >
+            {/* ink grain over the print */}
+            <span
+              className="absolute inset-0 opacity-[0.14] mix-blend-multiply"
+              style={{ backgroundImage: GRAIN }}
+            />
+          </span>
 
           {/* The print inside; slides up and out on hover */}
           <motion.div
@@ -206,10 +211,10 @@ function Folder({
             </div>
           </motion.div>
 
-          {/* Glass front pocket with the writing */}
+          {/* White front pocket with the writing */}
           <div
-            className="absolute inset-x-0 bottom-0 h-[56%] overflow-hidden rounded-[6px] shadow-[0_-1px_0_rgba(20,20,20,0.04)]"
-            style={{ background: colors.glass }}
+            className="absolute inset-x-0 bottom-0 h-[56%] overflow-hidden rounded-[6px] shadow-[0_-1px_0_rgba(20,20,20,0.04)] ring-1 ring-inset ring-[#141414]/[0.07]"
+            style={{ background: colors.pocket }}
           >
             {/* the pocket's lip: a light edge and a faint orange hairline */}
             <span
@@ -219,11 +224,6 @@ function Folder({
             <span
               aria-hidden
               className="pointer-events-none absolute inset-x-10 top-px h-px bg-[linear-gradient(90deg,transparent,rgba(249,115,22,0.45),transparent)]"
-            />
-            {/* light catching the glass */}
-            <span
-              aria-hidden
-              className="pointer-events-none absolute inset-0 bg-[linear-gradient(160deg,rgba(255,255,255,0.7)_0%,transparent_40%)]"
             />
             <div className="relative flex h-full flex-col p-5">
               <div className="flex items-center gap-2.5">
@@ -250,7 +250,7 @@ function Folder({
               </p>
               <span
                 aria-hidden
-                className="absolute bottom-4 right-4 flex size-8 items-center justify-center rounded-full bg-white/70 text-[#141414]/70 shadow-[inset_0_1px_0_#fff] transition-all duration-300 group-hover:rotate-45 group-hover:bg-[#141414] group-hover:text-white"
+                className="absolute bottom-4 right-4 flex size-8 items-center justify-center rounded-full bg-[#f4efe7] text-[#141414]/70 ring-1 ring-inset ring-[#141414]/[0.08] transition-all duration-300 group-hover:rotate-45 group-hover:bg-[#141414] group-hover:text-white"
               >
                 <ArrowUpRight weight="bold" className="size-3.5" />
               </span>
@@ -274,6 +274,7 @@ function GroupRow({
   const rowRef = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
   const items = group.slugs
+    .filter((slug) => isCaseStudyPublic(slug))
     .map((slug) => PROJECTS.find((p) => p.slug === slug))
     .filter((p): p is Project => Boolean(p));
   const scrollRow = (direction: 1 | -1) =>
@@ -286,10 +287,10 @@ function GroupRow({
 
   return (
     <div className="grid gap-6 border-t border-[#141414]/[0.1] pt-8 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-6">
-      {/* Group panel: a frosted card the height of the folders */}
-      <div className="relative flex flex-col overflow-hidden rounded-[6px] bg-[linear-gradient(180deg,rgba(255,255,255,0.78),rgba(254,232,214,0.75))] p-6 shadow-[inset_0_1px_0_#fff,0_12px_24px_-20px_rgba(20,20,20,0.25)] ring-1 ring-[#141414]/[0.06] lg:mt-10 lg:h-[324px] lg:self-start">
+      {/* Group panel: a white card the height of the folders */}
+      <div className="relative flex flex-col overflow-hidden rounded-[6px] bg-white p-6 shadow-[0_1px_0_rgba(27,23,20,0.06)] ring-1 ring-inset ring-[#141414]/[0.07] lg:mt-10 lg:h-[324px] lg:self-start">
         <div className="flex items-center justify-end">
-          <span className="rounded-full bg-white/80 px-2.5 py-1 text-[11.5px] font-medium tabular-nums text-[#141414]/60 ring-1 ring-[#141414]/[0.06]">
+          <span className="rounded-full bg-[#f4efe7] px-2.5 py-1 text-[11.5px] font-medium tabular-nums text-[#141414]/60 ring-1 ring-inset ring-[#141414]/[0.08]">
             {items.length} projects
           </span>
         </div>
@@ -335,7 +336,7 @@ function GroupRow({
                   type="button"
                   onClick={() => scrollRow(dir)}
                   aria-label={dir === -1 ? "Previous" : "Next"}
-                  className="flex size-9 items-center justify-center rounded-full bg-white text-[#141414] shadow-[0_10px_22px_-14px_rgba(20,20,20,0.5)] ring-1 ring-[#141414]/[0.08] transition-colors hover:bg-[#141414] hover:text-white"
+                  className="flex size-9 items-center justify-center rounded-full bg-white text-[#141414] shadow-[0_1px_0_rgba(27,23,20,0.06)] ring-1 ring-inset ring-[#141414]/[0.08] transition-colors hover:bg-[#141414] hover:text-white"
                 >
                   <Icon weight="bold" className="size-3.5" />
                 </button>

@@ -173,7 +173,7 @@ export function SectionIntro({
   );
 }
 
-/** Frosted glass tile holding an icon, lit from above with a warm underglow. */
+/** Flat tile holding an icon, for dark surfaces: hairline ring, print-orange glyph. */
 export function GlassIcon({
   children,
   className,
@@ -185,9 +185,8 @@ export function GlassIcon({
     <span
       className={cn(
         "relative flex size-12 shrink-0 items-center justify-center rounded-[6px]",
-        "bg-gradient-to-b from-white/[0.16] to-white/[0.03] ring-1 ring-inset ring-white/20",
-        "shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_10px_28px_-10px_rgba(249,115,22,0.75)]",
-        "text-[#fdba74] [&_svg]:size-6",
+        "bg-white/[0.06] ring-1 ring-inset ring-white/15",
+        "text-[#f97316] [&_svg]:size-6",
         className,
       )}
     >

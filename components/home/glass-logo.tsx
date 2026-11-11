@@ -43,7 +43,7 @@ function GlassFace({
         </linearGradient>
         <linearGradient id={`${id}-glow`} x1="0" y1="0" x2="1" y2="0">
           <stop offset="0" stopColor="#F97316" />
-          <stop offset="1" stopColor="#FB923C" />
+          <stop offset="1" stopColor="#F97316" />
         </linearGradient>
         <linearGradient id={`${id}-rim`} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#ffffff" />
@@ -134,9 +134,8 @@ export default function GlassLogo() {
     <div
       ref={ref}
       aria-hidden
-      className="relative mx-auto size-[132px] drop-shadow-[0_24px_40px_rgba(90,30,0,0.3)] [perspective:900px] dark:drop-shadow-[0_24px_40px_rgba(0,0,0,0.7)] sm:size-[152px]"
+      className="relative mx-auto size-[132px] drop-shadow-[0_24px_40px_rgba(20,20,20,0.25)] [perspective:900px] dark:drop-shadow-[0_24px_40px_rgba(0,0,0,0.7)] sm:size-[152px]"
     >
-      <div className="absolute inset-x-3 -bottom-5 h-7 rounded-[50%] bg-[radial-gradient(ellipse,rgba(234,88,12,0.35),transparent_70%)] blur-md" />
       <motion.div
         className="relative size-full will-change-transform [transform-style:preserve-3d]"
         style={reduceMotion ? undefined : { rotateX, rotateY }}

@@ -9,6 +9,7 @@ import { companies } from "@/data/companies";
 import { EASE } from "@/components/home/ui";
 import { cn } from "@/lib/utils";
 import { tick } from "@/lib/tick";
+import { isCaseStudyPublic } from "@/constants/case-study-visibility";
 
 /*
  * Partner logos as a white jigsaw: one logo per piece, the pieces locked
@@ -256,7 +257,8 @@ export function LogoPuzzle({ className }: { className?: string }) {
     (item, index) => {
       const r = Math.floor(index / COLS);
       const c = index % COLS;
-      const study = CASE_STUDY[item.name];
+      const slug = CASE_STUDY[item.name];
+      const study = slug && isCaseStudyPublic(slug) ? slug : undefined;
       return {
         c,
         node: (

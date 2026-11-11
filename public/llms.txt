@@ -32,8 +32,6 @@ Selected results: Memori grew from launch to 12,000+ GitHub stars. Corsair went 
 - [Memori](https://www.studio1hq.com/case-studies/memori): 0 to 12,000+ GitHub stars through a community-led open-source launch; the Reddit launch post reached 50K+ impressions; 12 hands-on demo agents shipped.
 - [Corsair](https://www.studio1hq.com/case-studies/corsair): GitHub stars grew from about 300 to 2,000 in roughly five weeks through onboarding audits, example projects, README work, and student hackathons.
 - [OpenLore](https://www.studio1hq.com/case-studies/openlore): 12x GitHub star growth, from ~135 to 1,700+ in one month; 100K+ impressions across daily.dev, X, LinkedIn, and Reddit; #3 trending in Go on Trendshift.
-- [Nebius](https://www.studio1hq.com/case-studies/nebius): An open-source library of 130+ agent examples reached 16K+ GitHub stars and trended on GitHub twice; 29 framework integrations; 400+ deliverables over nearly two years.
-- [Bright Data](https://www.studio1hq.com/case-studies/brightdata): 50+ technical articles on brightdata.com over a year; 12 of 30 developer queries checked returned a Studio1 post in Google's top five results.
 - [Entelligence AI](https://www.studio1hq.com/case-studies/entelligence-ai): 304K+ Reddit impressions from technical blogs, deep dives, and developer distribution.
 - [ScrapeGraphAI](https://www.studio1hq.com/case-studies/scrapegraph): 265K+ social and community reach from practical AI agent demo projects.
 - [Permit.io](https://www.studio1hq.com/case-studies/permit): First-page Google rankings for high-intent authorization queries such as "RBAC in Supabase".

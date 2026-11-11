@@ -111,7 +111,7 @@ export const LINE = "border-[var(--p-line)]";
 export const GRID = "grid gap-2";
 /** The hero's card: white, hairline ring, rounded corners. */
 export const CELL =
-  "rounded-[6px] bg-white/80 ring-1 ring-inset ring-[#141414]/10 transition-[transform,box-shadow,background-color] duration-500 ease-out hover:-translate-y-1 hover:bg-white hover:shadow-[0_24px_40px_-28px_rgba(20,20,20,0.45)] motion-reduce:transform-none";
+  "rounded-[6px] bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)] transition-transform duration-500 ease-out hover:-translate-y-1 motion-reduce:transform-none";
 
 export function PaperSection({
   id,
@@ -367,7 +367,7 @@ export function PaperLogos() {
             return (
               <li
                 key={cell}
-                className="relative h-24 overflow-hidden rounded-[6px] bg-white/80 ring-1 ring-inset ring-[#141414]/10"
+                className="relative h-24 overflow-hidden rounded-[6px] bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)]"
               >
                 {cellLogos.map((item, index) => (
                   <span
@@ -487,7 +487,7 @@ function RevealChip({
     >
       <motion.span
         style={{ scale, rotate, background: PRINT }}
-        className="inline-flex size-[1em] translate-y-[0.12em] items-center justify-center rounded-[0.18em] text-white shadow-[0_6px_14px_-6px_rgba(249,115,22,0.7)] [&_svg]:size-[0.62em]"
+        className="inline-flex size-[1em] translate-y-[0.12em] items-center justify-center rounded-[0.18em] text-white [&_svg]:size-[0.62em]"
       >
         {icon}
       </motion.span>
@@ -625,7 +625,9 @@ export function CountUp({
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { margin: "-15% 0px" });
   const reduceMotion = useReducedMotion();
-  const [shown, setShown] = useState(reduceMotion ? value : 0);
+  // The server HTML carries the real number, for crawlers and AI agents that
+  // don't run JavaScript; it resets to zero in the browser to count up.
+  const [shown, setShown] = useState(value);
 
   useEffect(() => {
     if (reduceMotion) return;
@@ -685,33 +687,14 @@ export function PaperPositioning() {
                 )}
                 style={isPrint ? { background: PRINT } : undefined}
               >
-                {/* One soft gradient per card, each on its own slow path */}
-                <motion.span
-                  aria-hidden
-                  className="pointer-events-none !absolute -z-10 size-[140%] rounded-full blur-2xl"
-                  style={{
-                    left: ["-60%", "10%", "-40%", "30%"][index],
-                    top: ["30%", "35%", "-70%", "40%"][index],
-                    background: isPrint
-                      ? "radial-gradient(closest-side, rgba(254,50,0,0.75), transparent)"
-                      : "radial-gradient(closest-side, rgba(249,115,22,0.20), transparent)",
-                  }}
-                  animate={
-                    reduceMotion
-                      ? undefined
-                      : [
-                          { x: ["0%", "30%", "0%"], y: ["0%", "-12%", "0%"] },
-                          { x: ["0%", "-35%", "0%"], y: ["0%", "-20%", "0%"] },
-                          { x: ["0%", "-20%", "0%"], y: ["0%", "35%", "0%"] },
-                          { x: ["0%", "-40%", "0%"], y: ["0%", "-18%", "0%"] },
-                        ][index]
-                  }
-                  transition={{
-                    duration: [10, 12, 11, 13][index],
-                    ease: "easeInOut",
-                    repeat: Infinity,
-                  }}
-                />
+                {/* Ink grain over the print card, as on the hero */}
+                {isPrint ? (
+                  <span
+                    aria-hidden
+                    className="pointer-events-none !absolute inset-0 -z-10 opacity-[0.14] mix-blend-multiply"
+                    style={{ backgroundImage: GRAIN }}
+                  />
+                ) : null}
                 <p className="text-[40px] font-medium leading-[0.95] tracking-[-0.05em] md:text-[46px]">
                   <CountUp value={stat.value} suffix={stat.suffix} />
                   {isPrint ? "+" : <Accent>+</Accent>}
@@ -838,18 +821,20 @@ export function PaperServices() {
                 <Link
                   href={OFFERING_LINKS[id]}
                   className={cn(
-                    "group relative isolate flex h-full min-h-[220px] flex-col overflow-hidden rounded-[6px] bg-white/80 p-5 ring-1 ring-inset ring-[#141414]/[0.08] shadow-[inset_0_1px_0_#fff] transition-[background-color,box-shadow,transform] duration-500 hover:-translate-y-1 hover:bg-white hover:shadow-[inset_0_1px_0_#fff,0_24px_40px_-28px_rgba(20,20,20,0.45)] [&>*:not(canvas)]:relative",
+                    "group relative isolate flex h-full min-h-[220px] flex-col overflow-hidden rounded-[6px] bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)] p-5 transition-transform duration-500 hover:-translate-y-1 [&>*:not(canvas)]:relative",
                   )}
                 >
-                  {/* Hover: an orange wash rises from the bottom edge */}
+                  {/* Hover: flat print orange with ink grain rises from the bottom edge */}
                   <span
                     aria-hidden
-                    className="pointer-events-none !absolute inset-0 -z-[5] translate-y-8 opacity-0 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-0 group-hover:opacity-100 motion-reduce:translate-y-0 [filter:saturate(1.05)]"
-                    style={{
-                      background:
-                        "radial-gradient(80% 55% at 90% 108%, rgba(254,50,0,0.75) 0%, rgba(254,50,0,0) 72%), radial-gradient(150% 130% at 35% 115%, #fc8c04 0%, rgba(252,140,4,0.95) 46%, rgba(253,170,90,0.75) 64%, rgba(252,224,196,0.35) 82%, rgba(244,239,231,0) 100%)",
-                    }}
-                  />
+                    className="pointer-events-none !absolute inset-0 -z-[5] translate-y-8 opacity-0 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-0 group-hover:opacity-100 motion-reduce:translate-y-0"
+                    style={{ background: PRINT }}
+                  >
+                    <span
+                      className="absolute inset-0 opacity-[0.14] mix-blend-multiply"
+                      style={{ backgroundImage: GRAIN }}
+                    />
+                  </span>
                   <span className="flex w-full items-start justify-between">
                     <span
                       className="flex size-11 items-center justify-center text-[#f4efe7]"
@@ -1038,7 +1023,8 @@ const WORK = [
     headline: "Page-one Google rankings from 50+ technical articles",
     mark: "docs architecture for AI engineers",
     logo: "/assets/logos/brightdata.webp",
-    href: "/case-studies/brightdata",
+    // No href while the case study is a draft (content/case-studies/en/brightdata.mdx).
+    // Add `href: "/case-studies/brightdata"` back when it is published.
     image: "/case-studies/brightdata/brightdata-homepage.webp",
     ratio: 2000 / 1150,
     metrics: [
@@ -1137,7 +1123,8 @@ function useCountUp(value: string, start: boolean) {
   const reduceMotion = useReducedMotion();
   const match = value.match(/^([\d,]+)(.*)$/);
   const target = match ? Number(match[1].replace(/,/g, "")) : 0;
-  const [shown, setShown] = useState(match && !reduceMotion ? 0 : target);
+  // Real number in the server HTML (see CountUp); counts from zero on start.
+  const [shown, setShown] = useState(target);
 
   useEffect(() => {
     if (!match || !start || reduceMotion) return;
@@ -1472,7 +1459,7 @@ function RubberStamp({ text, active }: { text: string; active: boolean }) {
     <motion.svg
       aria-hidden
       viewBox="0 0 100 100"
-      className="size-[84px] drop-shadow-[0_8px_10px_rgba(90,20,0,0.4)] lg:size-[96px]"
+      className="size-[84px] drop-shadow-[0_8px_10px_rgba(20,20,20,0.3)] lg:size-[96px]"
       initial={reduceMotion ? false : { opacity: 0, scale: 1.5, rotate: -30 }}
       animate={
         active || reduceMotion
@@ -1482,21 +1469,12 @@ function RubberStamp({ text, active }: { text: string; active: boolean }) {
       transition={{ type: "spring", stiffness: 420, damping: 18, delay: 0.55 }}
     >
       <defs>
-        <radialGradient id={`${id}-wax`} cx="38%" cy="32%" r="75%">
-          <stop offset="0" stopColor="#f97316" />
-          <stop offset="0.55" stopColor="#c2410c" />
-          <stop offset="1" stopColor="#7c2d12" />
-        </radialGradient>
-        <radialGradient id={`${id}-well`} cx="60%" cy="65%" r="70%">
-          <stop offset="0" stopColor="#ea580c" />
-          <stop offset="1" stopColor="#9a3412" />
-        </radialGradient>
         <path id={id} d="M50 50 m-29 0 a29 29 0 1 1 58 0 a29 29 0 1 1 -58 0" />
       </defs>
       {/* the poured wax */}
-      <path d={`M ${WAX_EDGE} Z`} fill={`url(#${id}-wax)`} />
+      <path d={`M ${WAX_EDGE} Z`} fill={PRINT} />
       {/* pressed ring: dark groove with a light lip below it */}
-      <circle cx="50" cy="50" r="37" fill={`url(#${id}-well)`} />
+      <circle cx="50" cy="50" r="37" fill={PRINT} />
       <circle
         cx="50"
         cy="50"
@@ -1807,7 +1785,7 @@ function ProofSheet({
         <div className="mt-5 grid min-h-0 flex-1 gap-10 lg:mt-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.08fr)] lg:grid-rows-[minmax(0,1fr)] lg:gap-10">
           <div className="flex min-h-0 flex-col">
             <div className="flex items-center gap-3">
-              <span className="relative size-9 shrink-0 overflow-hidden rounded-[6px] bg-[#f8f6f2] shadow-[inset_0_3px_8px_rgba(20,20,20,0.12),inset_0_1px_2px_rgba(20,20,20,0.10)]">
+              <span className="relative size-9 shrink-0 overflow-hidden rounded-[6px] bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08]">
                 <Image
                   src={work.logo}
                   alt=""
@@ -2099,13 +2077,10 @@ const REASON_SHOTS = [
 ];
 
 /** Full-bleed split panels shared by Why Studio1 and Process. */
-const ORANGE_PANEL: CSSProperties = {
-  background:
-    "linear-gradient(165deg, #fe3200 8%, #fc8c04 48%, rgba(242,138,111,0) 86%), linear-gradient(90deg, #fc8c04, #fc8c04)",
-};
+const ORANGE_PANEL: CSSProperties = { background: PRINT };
 /** Left padding that lines panel content up with the Container's edge. */
 const EDGE_PAD = "md:pl-[max(32px,calc((100vw-1300px)/2+32px))]";
-const LIGHT_PANEL = "bg-white/70";
+const LIGHT_PANEL = "bg-white";
 
 const ROW = 88; // px per pill row in the scroller
 const COPIES = 4; // the list is repeated so the column never runs out
@@ -2181,6 +2156,11 @@ export function PaperReasons() {
           onPointerEnter={() => (paused.current = true)}
           onPointerLeave={() => (paused.current = false)}
         >
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 opacity-[0.14] mix-blend-multiply"
+            style={{ backgroundImage: GRAIN }}
+          />
           <div className="absolute inset-0 [mask-image:linear-gradient(to_bottom,transparent,black_20%,black_80%,transparent)]">
             <motion.ul
               role="list"
@@ -2206,8 +2186,8 @@ export function PaperReasons() {
                       className={cn(
                         "whitespace-nowrap rounded-full px-7 py-3.5 text-[26px] font-medium leading-none tracking-[-0.03em] transition-[background-color,color,box-shadow] duration-[420ms] ease-[cubic-bezier(0.4,0,0.2,1)] md:text-[34px]",
                         isActive
-                          ? "bg-white text-[#141414] shadow-[0_0_36px_rgba(255,255,255,0.5),0_18px_36px_-18px_rgba(120,30,0,0.5)]"
-                          : "bg-white/[0.18] text-white/90 shadow-[0_0_24px_rgba(255,255,255,0.16),inset_0_1px_0_rgba(255,255,255,0.4),inset_0_0_0_1px_rgba(255,255,255,0.14)] hover:bg-white/25",
+                          ? "bg-white text-[#141414] ring-1 ring-inset ring-white"
+                          : "text-white/90 ring-1 ring-inset ring-white/40 hover:ring-white/80",
                       )}
                     >
                       {item.title}
@@ -2341,7 +2321,7 @@ export function PaperTestimonials() {
                         "flex h-12 w-full items-center gap-3 rounded-[6px] px-3.5 text-left text-[15px] font-medium tracking-[-0.02em] transition-all duration-300",
                         isActive
                           ? "bg-white text-[#141414] shadow-[0_10px_24px_-16px_rgba(20,20,20,0.45)] ring-2 ring-inset ring-[#f97316]"
-                          : "bg-[#f5f1ea] text-[#141414]/65 shadow-[inset_0_2px_6px_rgba(20,20,20,0.07),inset_0_1px_2px_rgba(20,20,20,0.05)] hover:text-[#141414]",
+                          : "bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08] text-[#141414]/65 hover:text-[#141414]",
                       )}
                     >
                       {/* Logo lockup: mark + name; marks stay mono until selected */}
@@ -2469,7 +2449,7 @@ export function PaperProcess() {
         >
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 -z-10 opacity-30 mix-blend-multiply"
+            className="pointer-events-none absolute inset-0 -z-10 opacity-[0.14] mix-blend-multiply"
             style={{ backgroundImage: GRAIN }}
           />
           <h2 className="max-w-[520px] text-[32px] font-medium leading-[1.2] tracking-[-0.045em] sm:text-[40px] lg:text-[46px]">
@@ -2630,30 +2610,22 @@ export function PaperReach() {
 /* 09 — Contact (paper)                                                */
 /* ------------------------------------------------------------------ */
 
-/** Orange banner with a soft rising horizon, copy centred. */
+/** Flat print-orange banner with a hairline rising horizon, copy centred. */
 export function PrintBanner({ children }: { children: ReactNode }) {
   return (
     <div
       className="relative isolate mt-10 overflow-hidden rounded-[6px] px-6 pb-24 pt-20 text-center text-white md:pb-32 md:pt-24"
-      style={{
-        background:
-          "radial-gradient(60% 70% at 0% 0%, #ff3a00 0%, transparent 70%), radial-gradient(60% 70% at 100% 0%, #ff3a00 0%, transparent 70%), linear-gradient(180deg, #fb8a1e 0%, #f7a54a 38%, #e9b8a6 72%, #f2b38a 100%)",
-      }}
+      style={{ background: PRINT }}
     >
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 opacity-25 mix-blend-multiply"
+        className="pointer-events-none absolute inset-0 -z-10 opacity-[0.14] mix-blend-multiply"
         style={{ backgroundImage: GRAIN }}
       />
-      {/* Horizon: a large glowing arc rising from the bottom edge */}
+      {/* Horizon: a large hairline arc rising from the bottom edge */}
       <span
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-[68%] -z-10 aspect-square w-[150%] -translate-x-1/2 rounded-full md:top-[62%] md:w-[120%]"
-        style={{
-          background:
-            "radial-gradient(closest-side, #fb8a1e 0%, #f9a53f 55%, #f6c78a 92%, rgba(255,240,215,0.9) 97%, transparent 100%)",
-          boxShadow: "0 -20px 60px -10px rgba(255,236,210,0.55)",
-        }}
+        className="pointer-events-none absolute left-1/2 top-[68%] -z-10 aspect-square w-[150%] -translate-x-1/2 rounded-full border border-white/40 md:top-[62%] md:w-[120%]"
       />
       {children}
     </div>
@@ -2677,7 +2649,7 @@ export function PaperCta({
       <Container>
         <IndexBar index={index} name="Contact" aside="contact@studio1hq.com" />
         <PrintBanner>
-          <h2 className="mx-auto max-w-[760px] text-[32px] font-medium leading-[1.15] tracking-[-0.045em] [text-shadow:0_1px_18px_rgba(160,50,0,0.18)] sm:text-[40px] lg:text-[52px]">
+          <h2 className="mx-auto max-w-[760px] text-[32px] font-medium leading-[1.15] tracking-[-0.045em] sm:text-[40px] lg:text-[52px]">
             {title ?? `${t("titleLine1")} ${t("titleLine2")}`}
           </h2>
           <p className="mx-auto mt-4 max-w-[480px] text-[16px] leading-[1.6] text-white/85 md:text-[17px]">
@@ -2687,7 +2659,7 @@ export function PaperCta({
             href="https://cal.com/studio1/collab"
             target="_blank"
             rel="noopener noreferrer"
-            className="group mt-9 inline-flex h-12 items-center gap-3 rounded-full py-1.5 pl-6 pr-1.5 text-[15px] font-medium shadow-[0_14px_30px_-14px_rgba(80,20,0,0.6)] transition-transform duration-300 hover:-translate-y-0.5"
+            className="group mt-9 inline-flex h-12 items-center gap-3 rounded-full py-1.5 pl-6 pr-1.5 text-[15px] font-medium transition-transform duration-300 hover:-translate-y-0.5"
             style={{ background: INK, color: PAPER }}
           >
             {t("button")}

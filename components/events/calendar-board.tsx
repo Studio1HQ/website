@@ -181,7 +181,7 @@ export function CalendarBoard({
     : "";
 
   return (
-    <div className="flex flex-1 flex-col rounded-[6px] bg-[#141414] p-5 text-white shadow-[0_40px_80px_-50px_rgba(20,20,20,0.8)] md:p-8 lg:grid lg:grid-cols-[300px_minmax(0,1fr)] lg:gap-10">
+    <div className="flex flex-1 flex-col rounded-[6px] bg-[#141414] p-5 text-white shadow-[0_1px_0_rgba(27,23,20,0.06)] md:p-8 lg:grid lg:grid-cols-[300px_minmax(0,1fr)] lg:gap-10">
       {/* Margin: the month number, then the chosen day's events */}
       <aside className="flex flex-col">
         <div className="flex items-start justify-between gap-4">

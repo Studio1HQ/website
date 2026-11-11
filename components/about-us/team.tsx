@@ -15,6 +15,7 @@ import {
   XLogo,
 } from "@phosphor-icons/react/dist/ssr";
 import { teamMembers } from "@/constants/data";
+import { PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 import { PixelPortrait } from "@/components/about-us/pixel-portrait";
 import { Container, EASE } from "@/components/home/ui";
@@ -76,10 +77,10 @@ function LeaderCard({ member }: { member: Member }) {
       >
         {/* Ordered-dither portrait; its pixels shift around the cursor */}
         <PixelPortrait src={portrait} alt={member.name} />
-        {/* Engraved glass: inner shadow along the top, light catch below */}
+        {/* Hairline edge, like the paper cards */}
         <span
           aria-hidden
-          className="pointer-events-none absolute inset-0 rounded-[6px] shadow-[inset_0_6px_16px_rgba(20,20,20,0.16),inset_0_1px_3px_rgba(20,20,20,0.18),inset_0_-1px_0_rgba(255,255,255,0.7)] ring-1 ring-inset ring-white/50"
+          className="pointer-events-none absolute inset-0 rounded-[6px] ring-1 ring-inset ring-[#141414]/[0.07]"
         />
       </div>
 
@@ -101,7 +102,7 @@ function LeaderCard({ member }: { member: Member }) {
               target="_blank"
               rel="noreferrer"
               aria-label={`${member.name} on ${label}`}
-              className="flex size-8 items-center justify-center rounded-full bg-[#141414]/[0.04] text-[#141414]/60 shadow-[inset_0_1px_2px_rgba(20,20,20,0.12),inset_0_-1px_0_rgba(255,255,255,0.85)] ring-1 ring-inset ring-[#141414]/[0.06] transition-colors duration-200 hover:bg-[#141414] hover:text-white"
+              className="flex size-8 items-center justify-center rounded-full bg-[#f4efe7] text-[#141414]/60 ring-1 ring-inset ring-[#141414]/[0.08] transition-colors duration-200 hover:bg-[#141414] hover:text-white"
             >
               <Icon weight={weight} className="size-[17px]" />
             </Link>
@@ -161,7 +162,7 @@ function TeamPanel() {
               : "left-[calc(50%+446px)] right-[calc(50%-50vw)]",
           )}
         >
-          {/* The hero's reaching hand, in its peach print colour */}
+          {/* The hero's reaching hand, in flat print orange */}
           <motion.span
             className="absolute inset-0 will-change-transform"
             animate={reduceMotion ? undefined : { y: [0, -6, 0] }}
@@ -172,7 +173,7 @@ function TeamPanel() {
               delay: side === "left" ? 0 : 0.9,
             }}
             style={{
-              background: "linear-gradient(90deg, #f7b98e, #f39a5f)",
+              background: PRINT,
               maskImage: `url(/assets/site/hand-${side}.png)`,
               WebkitMaskImage: `url(/assets/site/hand-${side}.png)`,
               maskSize: "contain",
@@ -223,7 +224,7 @@ export const Team = ({ showHeader = true, className }: TeamProps) => {
           <div className="mt-10 flex justify-center md:mt-12">
             <Link
               href="/team"
-              className="group inline-flex h-11 items-center gap-2 rounded-full bg-[#141414] pl-5 pr-4 text-[14px] font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_10px_24px_-14px_rgba(20,20,20,0.7)] transition-colors duration-200 hover:bg-[#f97316]"
+              className="group inline-flex h-11 items-center gap-2 rounded-full bg-[#141414] pl-5 pr-4 text-[14px] font-medium text-white shadow-[0_10px_24px_-14px_rgba(20,20,20,0.7)] transition-colors duration-200 hover:bg-[#f97316]"
             >
               Meet the full team
               <ArrowUpRight

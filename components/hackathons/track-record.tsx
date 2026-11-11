@@ -147,7 +147,7 @@ export function TrackRecord({
               ].map(([value, label]) => (
                 <p
                   key={label}
-                  className="flex items-baseline gap-2 rounded-[6px] px-5 py-4 bg-[#ebe6de] shadow-[inset_0_2px_6px_rgba(20,20,20,0.09),inset_0_1px_2px_rgba(20,20,20,0.07),inset_0_-1px_0_rgba(255,255,255,0.8)]"
+                  className="flex items-baseline gap-2 rounded-[6px] px-5 py-4 bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)]"
                 >
                   <span className="text-[44px] font-medium leading-none tracking-[-0.05em] tabular-nums sm:text-[56px]">
                     {value}
@@ -176,11 +176,11 @@ export function TrackRecord({
                   >
                     {pad(i + 1)}
                   </span>
-                  {/* The city's landmark, engraved into a small tile */}
+                  {/* The city's landmark, on a small flat tile */}
                   <span
                     className={cn(
-                      "flex size-11 items-center justify-center rounded-[6px] text-[#141414]/70 transition-colors duration-300 group-hover:text-[#ea580c]",
-                      "bg-[#ebe6de] shadow-[inset_0_2px_6px_rgba(20,20,20,0.09),inset_0_1px_2px_rgba(20,20,20,0.07),inset_0_-1px_0_rgba(255,255,255,0.8)]",
+                      "flex size-11 items-center justify-center rounded-[6px] text-[#141414]/70 transition-colors duration-300 group-hover:text-[#f97316]",
+                      "bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08]",
                     )}
                   >
                     <CityIcon city={item.city} className="size-9" />

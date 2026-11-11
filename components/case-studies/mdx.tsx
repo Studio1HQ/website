@@ -34,7 +34,7 @@ function Frame({
 }) {
   return (
     // A glassy rim with the image set into it, like the cards around it
-    <figure className="not-prose my-10 w-fit max-w-full rounded-[6px] bg-[#fbf9f5] p-2 shadow-[0_30px_60px_-44px_rgba(20,20,20,0.5),inset_0_1px_0_rgba(255,255,255,0.95)] ring-1 ring-inset ring-white/80">
+    <figure className="not-prose my-10 w-fit max-w-full rounded-[6px] bg-[#fbf9f5] p-2 shadow-[0_30px_60px_-44px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/[0.07]">
       <div className="w-fit max-w-full overflow-hidden rounded-[6px] bg-[#f1ece4] shadow-[inset_0_0_0_1px_rgba(20,20,20,0.06)] [&_img]:block">
         {children}
       </div>
