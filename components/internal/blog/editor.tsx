@@ -15,7 +15,6 @@ import {
 import {
   ArrowLeft,
   ArrowSquareOut,
-  ChatCircle,
   CheckCircle,
   CircleNotch,
   Eye,
@@ -34,11 +33,13 @@ import {
   deleteDraft,
   publish,
   requestReview,
+  resolveComment,
   review,
   saveDraft,
 } from "@/app/internal/(dashboard)/blog/actions";
 import { COVER_ARTS, autoCoverArt, coverArtName, isCoverArt } from "@/lib/blog-cover-art";
 import {
+  commentThreads,
   nameFromEmail,
   normalizeTag,
   postChecks,
@@ -50,6 +51,7 @@ import {
 } from "@/lib/internal/blog/shared";
 import type { BlogAccess } from "@/lib/internal/roles";
 import { cn } from "@/lib/utils";
+import { CommentsPanel, SelectionCommentButton, useQuoteHighlights } from "@/components/internal/blog/comments";
 import { BlogStatusBadge } from "@/components/internal/blog/status";
 import { useToast } from "@/components/internal/toast";
 import { Avatar, Card, buttonClass, formatDate, relativeDate } from "@/components/internal/ui";
@@ -212,7 +214,7 @@ function eventLine(event: BlogEvent) {
     case "published":
       return { icon: <RocketLaunch size={13} className="text-sky-600" />, text: `${who} published`, note: "", link: event.body };
     default:
-      return { icon: <ChatCircle size={13} />, text: who, note: event.body };
+      return { icon: <PaperPlaneTilt size={13} />, text: who, note: event.body };
   }
 }
 
@@ -243,11 +245,18 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
   const [panel, setPanel] = useState<"request" | "review" | null>(null);
   const [picked, setPicked] = useState<string[]>(() => post.reviewers.filter((email) => email !== me.email));
   const [message, setMessage] = useState("");
-  const [commentText, setCommentText] = useState("");
+  const [pendingQuote, setPendingQuote] = useState("");
+  const [activeThread, setActiveThread] = useState<string | null>(null);
   const [showArt, setShowArt] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmForce, setConfirmForce] = useState<string | null>(null);
   const [published, setPublished] = useState<{ url: string; commitUrl: string } | null>(null);
+
+  const writingRef = useRef<HTMLDivElement | null>(null);
+  const composerRef = useRef<HTMLTextAreaElement | null>(null);
+  const threads = useMemo(() => commentThreads(events), [events]);
+  const timeline = useMemo(() => events.filter((event) => event.kind !== "comment"), [events]);
+  const { missing, reveal } = useQuoteHighlights(writingRef, threads, activeThread, version);
 
   const fieldsRef = useRef(fields);
   fieldsRef.current = fields;
@@ -430,10 +439,19 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
     }
   };
 
-  const sendComment = async () => {
-    const ok = await run("comment", () => comment(post.id, commentText), "Comment added.");
-    if (ok) setCommentText("");
+  const sendComment = (text: string, options: { quote?: string; threadId?: string }) =>
+    run("comment", () => comment(post.id, text, options.quote, options.threadId), options.threadId ? "Reply added." : "Comment added.");
+
+  const resolveThread = (threadId: string, resolved: boolean) =>
+    void run("comment", () => resolveComment(post.id, threadId, resolved), resolved ? "Resolved." : "Opened again.");
+
+  const commentOnSelection = (quote: string) => {
+    setPendingQuote(quote);
+    setActiveThread(null);
+    composerRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+    composerRef.current?.focus({ preventScroll: true });
   };
+
 
   const remove = async () => {
     setBusy("delete");
@@ -684,7 +702,8 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
             aria-label="Title"
             className="mb-3 w-full resize-none overflow-hidden bg-transparent text-[30px] font-medium leading-tight tracking-[-0.02em] outline-none placeholder:text-[var(--i-faint)] [field-sizing:content]"
           />
-          <div className="rounded-xl border border-[var(--i-line)] bg-[var(--i-panel)] shadow-[var(--i-shadow-sm)]">
+          <div ref={writingRef} className="relative rounded-xl border border-[var(--i-line)] bg-[var(--i-panel)] shadow-[var(--i-shadow-sm)]">
+            <SelectionCommentButton containerRef={writingRef} onComment={commentOnSelection} />
             <MarkdownEditor
               markdown={post.body}
               onChange={(body) => {
@@ -698,7 +717,7 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
           </div>
           <p className="mt-2 text-[12px] text-[var(--i-faint)]">
             Saves automatically. Paste from Notion or Google Docs to keep links and headings. Drop or paste images
-            to upload them. Use ## for section headings.
+            to upload them. Use ## for section headings. Select text to comment on it.
           </p>
         </div>
 
@@ -905,6 +924,22 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
             ) : null}
           </Card>
 
+          <CommentsPanel
+            threads={threads}
+            missing={missing}
+            activeId={activeThread}
+            onActivate={(thread) => {
+              setActiveThread(thread.root.id);
+              if (thread.root.quote && !reveal(thread.root.quote)) toast("error", "That text isn't in the post anymore.");
+            }}
+            pendingQuote={pendingQuote}
+            clearQuote={() => setPendingQuote("")}
+            composerRef={composerRef}
+            busy={busy === "comment"}
+            onSend={sendComment}
+            onResolve={resolveThread}
+          />
+
           <Card className="p-4">
             <p className="mb-3 text-[13px] font-medium">Activity</p>
             <ol className="space-y-3">
@@ -917,7 +952,7 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
                   </span>
                 </span>
               </li>
-              {events.map((event) => {
+              {timeline.map((event) => {
                 const line = eventLine(event);
                 return (
                   <li key={event.id} className="flex gap-2 text-[12.5px]">
@@ -945,23 +980,6 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
                 );
               })}
             </ol>
-            <div className="mt-3 border-t border-[var(--i-line)] pt-3">
-              <textarea
-                value={commentText}
-                onChange={(event) => setCommentText(event.target.value)}
-                rows={2}
-                placeholder="Leave a comment"
-                className={inputClass}
-              />
-              <button
-                type="button"
-                disabled={!commentText.trim() || busy === "comment"}
-                onClick={() => void sendComment()}
-                className={cn(buttonClass("secondary", "sm"), "mt-2")}
-              >
-                <ChatCircle size={14} /> Comment
-              </button>
-            </div>
           </Card>
 
           {!isLive && (isOwner || isReviewer) ? (

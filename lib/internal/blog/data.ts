@@ -78,10 +78,53 @@ export async function listEvents(postId: string): Promise<BlogEvent[]> {
   return result.ok ? result.rows : [];
 }
 
-export async function addEvent(postId: string, actor: string, kind: BlogEventKind, body = "") {
-  const result = await insertRow(EVENTS, { post_id: postId, actor, kind, body: body.slice(0, 5000) });
+export async function addEvent(
+  postId: string,
+  actor: string,
+  kind: BlogEventKind,
+  body = "",
+  extra: { quote?: string; parent_id?: string } = {},
+) {
+  const id = randomUUID();
+  const row: Record<string, unknown> = { id, post_id: postId, actor, kind, body: body.slice(0, 5000) };
+  // Only sent when used, so plain events still save before the threads migration.
+  if (extra.quote) row.quote = extra.quote;
+  if (extra.parent_id) row.parent_id = extra.parent_id;
+  const result = await insertRow(EVENTS, row);
   if (!result.ok) console.error(`[blog] saving a ${kind} event failed: ${result.message}`);
+  return result.ok ? id : null;
 }
+
+/** A thread's first comment on this post, or null. */
+export async function getThread(postId: string, threadId: string) {
+  if (!UUID.test(threadId)) return null;
+  const result = await selectRows<BlogEvent>(
+    EVENTS,
+    new URLSearchParams({ select: "*", id: `eq.${threadId}`, post_id: `eq.${postId}`, kind: "eq.comment", parent_id: "is.null", limit: "1" }),
+  );
+  return result.ok ? (result.rows[0] ?? null) : null;
+}
+
+/** Everyone who wrote in a thread. */
+export async function threadPeople(threadId: string) {
+  const result = await selectRows<{ actor: string }>(
+    EVENTS,
+    new URLSearchParams({ select: "actor", or: `(id.eq.${threadId},parent_id.eq.${threadId})`, limit: "200" }),
+  );
+  return result.ok ? [...new Set(result.rows.map((row) => row.actor))] : [];
+}
+
+/** Resolves a thread, or opens it again. */
+export async function resolveThread(postId: string, threadId: string, by: string, resolved: boolean) {
+  const result = await updateRows(
+    EVENTS,
+    new URLSearchParams({ id: `eq.${threadId}`, post_id: `eq.${postId}`, kind: "eq.comment", parent_id: "is.null" }),
+    resolved ? { resolved_at: new Date().toISOString(), resolved_by: by } : { resolved_at: null, resolved_by: null },
+  );
+  if (!result.ok) console.error(`[blog] resolving a thread on ${postId} failed: ${result.message}`);
+  return result.ok && result.count > 0;
+}
+
 
 /** Starts a post. The author defaults to the writer's name. */
 export async function createPost(staff: BlogStaff) {

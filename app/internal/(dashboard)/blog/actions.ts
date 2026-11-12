@@ -8,11 +8,14 @@ import {
   createPost,
   deletePost,
   getPost,
+  getThread,
   importSitePost,
   isReviewer,
   nameFromEmail,
+  resolveThread,
   savePost,
   setStatus,
+  threadPeople,
   type SaveResult,
 } from "@/lib/internal/blog/data";
 import { draftImages, removeImages } from "@/lib/internal/blog/media";
@@ -20,6 +23,7 @@ import { notifyPeople } from "@/lib/internal/blog/notify";
 import { publishPost, type PublishResult } from "@/lib/internal/blog/publish";
 import { membersWith } from "@/lib/internal/members";
 import { requireBlog } from "@/lib/internal/session";
+import { cleanQuote } from "@/lib/internal/blog/shared";
 
 /*
  * Server actions are public endpoints: every one checks the session, the
@@ -114,18 +118,47 @@ export async function review(id: unknown, verdict: unknown, message: unknown): P
   return { ok: true };
 }
 
-export async function comment(id: unknown, message: unknown): Promise<ActionResult> {
+/**
+ * A comment. With `quote` it's about text selected in the editor; with
+ * `threadId` it's a reply in that thread (which opens it again if resolved).
+ */
+export async function comment(id: unknown, message: unknown, quote?: unknown, threadId?: unknown): Promise<ActionResult> {
   const staff = await requireBlog("writer");
   const post = typeof id === "string" ? await getPost(staff, id) : null;
   if (!post) return { ok: false, message: "This post doesn't exist or isn't yours." };
   const text = note(message);
   if (!text) return { ok: false, message: "Write a comment first." };
-  await addEvent(post.id, staff.email, "comment", text);
-  await notifyPeople([post.created_by, ...post.reviewers], staff.email, post.id, {
-    subject: `New comment: ${post.title.trim() || "Untitled post"}`,
-    text: `${nameFromEmail(staff.email)} commented on ${quoted(post.title)}.`,
+
+  let thread = null;
+  if (threadId !== undefined && threadId !== null && threadId !== "") {
+    thread = typeof threadId === "string" ? await getThread(post.id, threadId) : null;
+    if (!thread) return { ok: false, message: "That thread isn't on this post anymore." };
+  }
+  const saved = await addEvent(post.id, staff.email, "comment", text, thread ? { parent_id: thread.id } : { quote: cleanQuote(quote) });
+  if (!saved) return { ok: false, message: "Couldn't save the comment. Try again in a minute." };
+  if (thread?.resolved_at) await resolveThread(post.id, thread.id, staff.email, false);
+
+  const people = thread ? await threadPeople(thread.id) : [];
+  const about = thread?.quote || cleanQuote(quote);
+  await notifyPeople([post.created_by, ...post.reviewers, ...people], staff.email, post.id, {
+    subject: `${thread ? "New reply" : "New comment"}: ${post.title.trim() || "Untitled post"}`,
+    text: `${nameFromEmail(staff.email)} ${thread ? "replied to a comment on" : "commented on"} ${quoted(post.title)}${about ? `, about: “${about}”` : ""}.`,
     note: text,
   });
+  refresh(post.id);
+  return { ok: true };
+}
+
+/** Marks a thread resolved, or opens it again. Anyone on the post can. */
+export async function resolveComment(id: unknown, threadId: unknown, resolved: unknown): Promise<ActionResult> {
+  const staff = await requireBlog("writer");
+  const post = typeof id === "string" ? await getPost(staff, id) : null;
+  if (!post) return { ok: false, message: "This post doesn't exist or isn't yours." };
+  const thread = typeof threadId === "string" ? await getThread(post.id, threadId) : null;
+  if (!thread) return { ok: false, message: "That thread isn't on this post anymore." };
+  if (!(await resolveThread(post.id, thread.id, staff.email, resolved === true))) {
+    return { ok: false, message: "Couldn't save. Try again in a minute." };
+  }
   refresh(post.id);
   return { ok: true };
 }

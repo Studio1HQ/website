@@ -155,6 +155,22 @@
   color: var(--i-accent-text);
 }
 
+/* Text that open comments point at (components/internal/blog/comments.tsx,
+   CSS Custom Highlight API). */
+::highlight(blog-comment) {
+  background-color: rgb(250 204 21 / 0.28);
+}
+::highlight(blog-comment-active) {
+  background-color: rgb(250 204 21 / 0.6);
+}
+.dark ::highlight(blog-comment) {
+  background-color: rgb(250 204 21 / 0.18);
+}
+.dark ::highlight(blog-comment-active) {
+  background-color: rgb(250 204 21 / 0.4);
+  color: #fff;
+}
+
 /* The Markdown view and code blocks (CodeMirror) in the dashboard's colors,
    so they match in light and dark mode. */
 .internal-ui .blog-editor .cm-editor {

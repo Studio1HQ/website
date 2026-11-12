@@ -26,8 +26,8 @@ admin API if needed, and the link only works in the browser that asked for
 it. Setup:
 
 1. Run `migrations/*_internal_dashboard.sql`, `migrations/*_internal_team.sql`,
-   `migrations/*_blog_and_roles.sql` and `migrations/*_email_delivery.sql`,
-   in that order.
+   `migrations/*_blog_and_roles.sql`, `migrations/*_email_delivery.sql` and
+   `migrations/*_blog_threads_and_schedule.sql`, in that order.
 2. Authentication → URL Configuration: set Site URL to
    `https://www.studio1hq.com` and add these Redirect URLs:
    `https://www.studio1hq.com/internal/auth/callback` and, for local
@@ -54,6 +54,10 @@ Drafts and their review history live in `blog_posts` and `blog_events`.
 Images uploaded while drafting go to the private `blog-media` bucket as WebP.
 Publishing commits the MDX file and its images to the site's GitHub repo
 (`GITHUB_TOKEN`, see `.env.example`), and Vercel deploys it.
+
+Comments work like Google Docs: select text in the editor and press Comment.
+The thread keeps that text as its quote (`blog_events.quote`), the editor
+highlights it, and threads take replies (`parent_id`) and can be resolved.
 
 Access: Arindam and Amitesh (`lib/internal/roles.ts`) are owners and always
 admins. Anyone else with a `@studio1hq.com` address who signs in is added to

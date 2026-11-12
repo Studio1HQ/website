@@ -76,7 +76,61 @@ export type BlogEvent = {
   actor: string;
   kind: BlogEventKind;
   body: string;
+  /** The text a comment is about, selected in the editor. */
+  quote?: string | null;
+  /** A reply's thread: the id of the thread's first comment. */
+  parent_id?: string | null;
+  resolved_at?: string | null;
+  resolved_by?: string | null;
 };
+
+/** A comment and its replies, oldest first. */
+export type CommentThread = { root: BlogEvent; replies: BlogEvent[] };
+
+/** Groups comments into threads; replies whose thread is gone are dropped. */
+export function commentThreads(events: readonly BlogEvent[]): CommentThread[] {
+  const threads = new Map<string, CommentThread>();
+  for (const event of events) {
+    if (event.kind === "comment" && !event.parent_id) threads.set(event.id, { root: event, replies: [] });
+  }
+  for (const event of events) {
+    if (event.kind === "comment" && event.parent_id) threads.get(event.parent_id)?.replies.push(event);
+  }
+  return [...threads.values()];
+}
+
+/** Quotes are kept short: one or two sentences is plenty to point at. */
+export const MAX_QUOTE = 300;
+
+export function cleanQuote(value: unknown) {
+  return typeof value === "string" ? value.replace(/\s+/g, " ").trim().slice(0, MAX_QUOTE) : "";
+}
+
+/**
+ * Finds a quote in a run of text pieces (the editor's text nodes), ignoring
+ * whitespace, which differs between a selection's text and the nodes (line
+ * breaks between paragraphs). Returns where it starts and ends as
+ * [piece, offset] pairs, the end offset exclusive, or null when it isn't there.
+ */
+export function locateQuote(pieces: readonly string[], quote: string) {
+  const needle = quote.replace(/\s+/g, "");
+  if (!needle) return null;
+  let squashed = "";
+  const at: [number, number][] = [];
+  pieces.forEach((piece, index) => {
+    for (let offset = 0; offset < piece.length; offset++) {
+      if (/\s/.test(piece[offset])) continue;
+      squashed += piece[offset];
+      at.push([index, offset]);
+    }
+  });
+  const found = squashed.indexOf(needle);
+  if (found < 0) return null;
+  const [startPiece, startOffset] = at[found];
+  const [endPiece, endOffset] = at[found + needle.length - 1];
+  return { start: [startPiece, startOffset] as const, end: [endPiece, endOffset + 1] as const };
+}
+
 
 /** "arindam.majumder@…" → "Arindam Majumder". */
 export function nameFromEmail(email: string) {
@@ -156,7 +210,9 @@ export function postChecks(post: BlogFields, takenSlugs: readonly string[] = [])
   }
 
   if (post.tags.length === 0) add("tags", "error", "Add at least one tag. The first one is the post's topic label.");
-  else if (post.tags.length < 3 || post.tags.length > 6) add("tags", "warning", `${post.tags.length} tags. Use 3 to 6.`);
+  else if (post.tags.length < 3 || post.tags.length > 6) {
+    add("tags", "warning", `${post.tags.length} tag${post.tags.length === 1 ? "" : "s"}. Use 3 to 6.`);
+  }
   if (post.authors.length === 0) add("authors", "error", "Add at least one author.");
 
   if (!body) add("body", "error", "The post is empty.");
