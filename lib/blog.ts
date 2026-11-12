@@ -3,7 +3,8 @@ import path from "path";
 import matter from "gray-matter";
 import { blogCoverUrl, blogOgUrl } from "@/lib/blog-cover";
 
-const DEFAULT_AUTHOR = "Amitesh Anand";
+/** Shown when a post names no author; the dashboard editor starts from it too. */
+export const DEFAULT_AUTHOR = "Amitesh Anand";
 const DEFAULT_POST_IMAGE = "/opengraph-image.png";
 const postsDirectory = path.join(process.cwd(), "content/blog");
 
@@ -38,6 +39,8 @@ export type BlogPostMeta = {
   imageAlt: string;
   bannerImage?: string;
   bannerImageAlt: string;
+  /** The cover illustration the writer picked (lib/blog-cover-art.ts); unset picks from the title. */
+  coverArt?: string;
   socialImage: string;
   /** 1200x630 share card (og:image), the cover's art at Open Graph size. */
   ogImage: string;
@@ -62,6 +65,7 @@ type Frontmatter = {
   imageAlt?: string;
   bannerImage?: string;
   bannerImageAlt?: string;
+  coverArt?: string;
   tldrSummary?: string;
   tldrBullets?: string[];
 };
@@ -292,6 +296,7 @@ function postMetaFromFile(fileName: string): BlogPostMeta {
     imageAlt: d.imageAlt ?? title,
     bannerImage,
     bannerImageAlt: d.bannerImageAlt ?? d.imageAlt ?? title,
+    coverArt: d.coverArt?.trim() || undefined,
     socialImage: blogCoverUrl(slug, normalizeDate(d.updatedDate, date)),
     ogImage: blogOgUrl(slug, normalizeDate(d.updatedDate, date)),
     tldrSummary,
