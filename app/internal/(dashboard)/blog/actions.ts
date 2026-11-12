@@ -138,9 +138,13 @@ export async function comment(id: unknown, message: unknown, quote?: unknown, th
   if (!saved) return { ok: false, message: "Couldn't save the comment. Try again in a minute." };
   if (thread?.resolved_at) await resolveThread(post.id, thread.id, staff.email, false);
 
-  const people = thread ? await threadPeople(thread.id) : [];
+  // Only people who can still open the post: its writer, and current blog
+  // reviewers and admins. Someone whose role was taken away since they
+  // reviewed or replied gets nothing more.
+  const current = new Set(await membersWith(["admin", "blog_reviewer"]));
+  const people = [...post.reviewers, ...(thread ? await threadPeople(thread.id) : [])].filter((email) => current.has(email));
   const about = thread?.quote || cleanQuote(quote);
-  await notifyPeople([post.created_by, ...post.reviewers, ...people], staff.email, post.id, {
+  await notifyPeople([post.created_by, ...people], staff.email, post.id, {
     subject: `${thread ? "New reply" : "New comment"}: ${post.title.trim() || "Untitled post"}`,
     text: `${nameFromEmail(staff.email)} ${thread ? "replied to a comment on" : "commented on"} ${quoted(post.title)}${about ? `, about: “${about}”` : ""}.`,
     note: text,
