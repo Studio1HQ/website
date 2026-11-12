@@ -957,7 +957,7 @@ const WORK = [
   },
   {
     client: "Memori",
-    span: "Launch to today",
+    span: "From day one",
     shipped: [
       "Open-source launch",
       "12 demo agents",
@@ -968,7 +968,7 @@ const WORK = [
       kind: "growth" as const,
       from: "0",
       to: "12,000+",
-      label: "GitHub stars, from launch to today",
+      label: "GitHub stars, grown from 0",
     },
     outcomeNote:
       "50K+ impressions on the launch post and 100+ developer comments that shaped onboarding.",
@@ -987,7 +987,7 @@ const WORK = [
     image: "/case-studies/memori/memori-launch-reddit-redacted.png",
     ratio: 1488 / 968,
     metrics: [
-      [Star, "12,000+", "GitHub stars, from launch to today"],
+      [Star, "12,000+", "GitHub stars, grown from 0"],
       [Eye, "50K+", "impressions on the Reddit launch post"],
       [Robot, "12", "hands-on demo agents shipped"],
     ],

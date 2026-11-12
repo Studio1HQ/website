@@ -167,7 +167,7 @@ const redditCaseStudyProofs: CaseStudyResultData[] = [
     stats: [
       { value: "85+", label: "launch upvotes" },
       { value: "100+", label: "comments on one thread" },
-      { value: "12,000+", label: "GitHub stars, launch to today" },
+      { value: "12,000+", label: "GitHub stars, grown from 0" },
     ],
   },
   {

@@ -145,7 +145,7 @@ const launchCaseStudyProofs: CaseStudyResultData[] = [
     stats: [
       { value: "85+", label: "Reddit upvotes" },
       { value: "12", label: "demo agents behind the launch" },
-      { value: "12,000+", label: "GitHub stars, launch to today" },
+      { value: "12,000+", label: "GitHub stars, grown from 0" },
     ],
   },
   {
