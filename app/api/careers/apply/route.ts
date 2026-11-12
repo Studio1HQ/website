@@ -158,6 +158,17 @@ export async function POST(request: Request) {
   after(() =>
     sendConfirmation("jobs", { id, name: values.name, email: values.email, program: job.title }),
   );
-  after(() => alertNewEntry({ form: "jobs", id, program: job.title, place: values.location }));
+  after(() =>
+    alertNewEntry({
+      form: "jobs",
+      id,
+      name: values.name,
+      points: [
+        ["Role", job.title],
+        ["Location", values.location],
+        ["Can start", values.start],
+      ],
+    }),
+  );
   return NextResponse.json({ ok: true });
 }

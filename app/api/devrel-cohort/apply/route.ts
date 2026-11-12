@@ -101,6 +101,17 @@ export async function POST(request: Request) {
       program: `DevRel ${COHORT.edition}`,
     }),
   );
-  after(() => alertNewEntry({ form: "cohort", id, program: `DevRel ${COHORT.edition}`, place: values.location }));
+  after(() =>
+    alertNewEntry({
+      form: "cohort",
+      id,
+      name: values.name,
+      points: [
+        ["Cohort", `DevRel ${COHORT.edition}`],
+        ["Background", values.role],
+        ["Location", values.location],
+      ],
+    }),
+  );
   return NextResponse.json({ ok: true });
 }

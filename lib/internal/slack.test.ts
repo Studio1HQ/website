@@ -21,18 +21,75 @@ describe("slack alerts", () => {
     expect(webhookFor("jobs", { SLACK_WEBHOOK_URL: "http://hooks.slack.com/services/x" })).toBeNull();
   });
 
-  it("says what and where, links to the entry, and nothing personal", () => {
+  it("is a title with the name, a few points and a button to the entry", () => {
     const message = slackMessage(
-      { form: "jobs", id: "abc", program: "Growth Lead", place: "  Bengaluru,\n India <b>" },
+      {
+        form: "jobs",
+        id: "abc",
+        name: " Ada\n Lovelace ",
+        points: [
+          ["Role", "Growth Lead"],
+          ["Location", "  Bengaluru,\n India"],
+          ["Can start", "Immediately"],
+        ],
+      },
       "https://www.studio1hq.com",
     );
-    expect(message.text).toBe("New job application · Growth Lead · Bengaluru, India &lt;b&gt;");
-    expect(JSON.stringify(message)).toContain("https://www.studio1hq.com/internal/jobs/abc");
+    expect(message.text).toBe("New job application: Ada Lovelace · Growth Lead · Bengaluru, India · Immediately");
+    expect(message.blocks).toEqual([
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: ":briefcase: *New job application: Ada Lovelace*\n• *Role:* Growth Lead\n• *Location:* Bengaluru, India\n• *Can start:* Immediately",
+        },
+      },
+      {
+        type: "actions",
+        elements: [
+          {
+            type: "button",
+            text: { type: "plain_text", text: "Open in dashboard" },
+            url: "https://www.studio1hq.com/internal/jobs/abc",
+            style: "primary",
+          },
+        ],
+      },
+    ]);
   });
 
-  it("works without a place", () => {
-    expect(slackMessage({ form: "cohort", id: "x", program: "DevRel Cohort 2" }, "https://s").text).toBe(
-      "New DevRel Cohort application · DevRel Cohort 2",
+  it("escapes what people typed, so nobody can ping the channel or hide a link", () => {
+    const message = slackMessage(
+      {
+        form: "hackathons",
+        id: "x",
+        name: "<!channel> & co",
+        points: [["Track", "<https://evil.example|click>"]],
+      },
+      "https://s",
     );
+    const json = JSON.stringify(message);
+    expect(json).not.toContain("<!channel>");
+    expect(json).not.toContain("<https://evil");
+    expect(message.text).toBe("New hackathon registration: &lt;!channel&gt; &amp; co · &lt;https://evil.example|click&gt;");
+  });
+
+  it("skips empty points and shows at most three", () => {
+    const message = slackMessage(
+      {
+        form: "cohort",
+        id: "x",
+        name: "Ada",
+        points: [
+          ["Cohort", "DevRel Cohort 2"],
+          ["Background", "  "],
+          ["Location", "Pune"],
+          ["Experience", "Beginner"],
+          ["Extra", "never shown"],
+        ],
+      },
+      "https://s",
+    );
+    expect(message.text).toBe("New DevRel Cohort application: Ada · DevRel Cohort 2 · Pune · Beginner");
   });
 });

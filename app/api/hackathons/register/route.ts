@@ -111,6 +111,17 @@ export async function POST(request: Request) {
   after(() =>
     sendConfirmation("hackathons", { id, name: values.name, email: values.email, program: hackathon.name }),
   );
-  after(() => alertNewEntry({ form: "hackathons", id, program: hackathon.name, place: values.country }));
+  after(() =>
+    alertNewEntry({
+      form: "hackathons",
+      id,
+      name: values.name,
+      points: [
+        ["Hackathon", hackathon.name],
+        ["Track", values.track],
+        ["Experience", values.experience],
+      ],
+    }),
+  );
   return NextResponse.json({ ok: true });
 }
