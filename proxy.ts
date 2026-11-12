@@ -7,6 +7,7 @@ import {
   shouldBypassLocale,
   splitLocaleFromPathname,
 } from "@/lib/i18n";
+import { SESSION_COOKIE, devBypassEmail, readSession } from "@/lib/internal/token";
 
 const legacyRedirects: Record<string, string> = {
   "/blog-as-service": "/technical-content-marketing",
@@ -20,9 +21,42 @@ const legacyRedirects: Record<string, string> = {
   "/influencer-management": "/developer-relations-growth-campaigns",
 };
 
-export function proxy(request: NextRequest) {
+/**
+ * The internal dashboard: only signed-in Studio1 staff get past the login
+ * page. Pages and data reads check the session again (lib/internal/session.ts);
+ * this turns everyone else away early and keeps the pages out of search.
+ */
+async function internalGate(request: NextRequest) {
+  const { pathname, search } = request.nextUrl;
+  const open =
+    pathname === "/internal/login" || pathname.startsWith("/internal/auth/");
+  let response: NextResponse;
+  if (
+    open ||
+    devBypassEmail(request.headers.get("host")) ||
+    (await readSession(request.cookies.get(SESSION_COOKIE)?.value))
+  ) {
+    response = NextResponse.next();
+  } else {
+    const url = request.nextUrl.clone();
+    url.pathname = "/internal/login";
+    url.search = "";
+    if (pathname !== "/internal") url.searchParams.set("next", pathname + search);
+    response = NextResponse.redirect(url);
+  }
+  response.headers.set("X-Robots-Tag", "noindex, nofollow");
+  response.headers.set("Referrer-Policy", "no-referrer");
+  response.headers.set("Cache-Control", "private, no-store");
+  return response;
+}
+
+export async function proxy(request: NextRequest) {
   const { nextUrl } = request;
   const { pathname } = nextUrl;
+
+  if (pathname === "/internal" || pathname.startsWith("/internal/")) {
+    return internalGate(request);
+  }
 
   if (shouldBypassLocale(pathname)) {
     return NextResponse.next();

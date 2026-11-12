@@ -10,6 +10,15 @@ const nextConfig: NextConfig = {
   // linkedom (app/ai-md) breaks when bundled: its optional canvas support
   // resolves to a stub. Load it from node_modules at runtime instead.
   serverExternalPackages: ["linkedom"],
+  // The dashboard's blog pages read posts and the cover fonts at request time
+  // (the public blog reads them at build time), so ship those files with them.
+  outputFileTracingIncludes: {
+    "/internal/**": [
+      "./content/blog/**/*.mdx",
+      "./app/fonts/Studio1Sans-Regular.ttf",
+      "./app/fonts/Studio1Sans-Medium.ttf",
+    ],
+  },
   turbopack: {
     root: process.cwd(),
   },
@@ -44,7 +53,7 @@ const nextConfig: NextConfig = {
         { source: "/", has: aiAgent, destination: "/ai-md" },
         {
           source:
-            "/:path((?!(?:_next|api|ai-md|blog-md|blog-cover|blog-og|og|brand|admin|assets|fonts|fr|es|hi|zh)(?:/|$))[^.]+|llms\\.txt|llms-full\\.txt)",
+            "/:path((?!(?:_next|api|ai-md|blog-md|blog-cover|blog-og|og|brand|admin|internal|unsubscribe|assets|fonts|fr|es|hi|zh)(?:/|$))[^.]+|llms\\.txt|llms-full\\.txt)",
           has: aiAgent,
           destination: "/ai-md/:path",
         },
@@ -76,6 +85,12 @@ const nextConfig: NextConfig = {
   async redirects() {
     // Keep old service URLs alive while the public pages use SEO-friendly names.
     return [
+      // A short, easy link for writers to the dashboard's blog editor.
+      {
+        source: "/blog/write",
+        destination: "/internal/blog",
+        permanent: false,
+      },
       {
         source: "/sitemap",
         destination: "/sitemap.xml",

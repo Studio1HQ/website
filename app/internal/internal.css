@@ -1,0 +1,345 @@
+/* Internal dashboard tokens: warm neutrals with Studio1 orange as the one
+   accent. Dark mode follows the system theme like the rest of the site.
+   .internal-pop carries them into Radix popovers, which render in a portal. */
+.internal-ui,
+.internal-pop {
+  --i-bg: #f7f6f3;
+  --i-sidebar: #f2f0ec;
+  --i-panel: #ffffff;
+  --i-sunken: #faf9f7;
+  --i-ink: #1c1917;
+  --i-ink-2: #44403c;
+  --i-muted: #78716c;
+  --i-faint: #a8a29e;
+  --i-line: #e7e5e4;
+  --i-line-strong: #d6d3d1;
+  --i-hover: #f5f4f2;
+  --i-selected: #fff7ed;
+  --i-accent: #ea580c;
+  --i-accent-text: #c2410c;
+  --i-accent-soft: rgba(234, 88, 12, 0.1);
+  --i-bar: #ea580c;
+  --i-track: #f0eeea;
+  --i-ring: rgba(234, 88, 12, 0.4);
+  --i-shadow-sm: 0 1px 2px rgba(28, 25, 23, 0.05);
+  --i-shadow: 0 1px 3px rgba(28, 25, 23, 0.07), 0 1px 2px rgba(28, 25, 23, 0.04);
+  --i-shadow-pop: 0 12px 32px -12px rgba(28, 25, 23, 0.28),
+    0 0 0 1px rgba(28, 25, 23, 0.06);
+  color-scheme: light;
+  color: var(--i-ink);
+  font-family: var(--font-studio1-sans), Inter, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.internal-ui {
+  min-height: 100vh;
+  background: var(--i-bg);
+}
+
+.dark .internal-ui,
+.dark .internal-pop {
+  --i-bg: #0f0e0d;
+  --i-sidebar: #0b0a09;
+  --i-panel: #171615;
+  --i-sunken: #131211;
+  --i-ink: #f5f5f4;
+  --i-ink-2: #d6d3d1;
+  --i-muted: #a8a29e;
+  --i-faint: #78716c;
+  --i-line: #292524;
+  --i-line-strong: #3a3532;
+  --i-hover: #1d1b19;
+  --i-selected: #261a12;
+  --i-accent: #f97316;
+  --i-accent-text: #fb923c;
+  --i-accent-soft: rgba(249, 115, 22, 0.14);
+  --i-bar: #ea580c;
+  --i-track: #24211f;
+  --i-ring: rgba(249, 115, 22, 0.45);
+  --i-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --i-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --i-shadow-pop: 0 16px 40px -12px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(255, 255, 255, 0.06);
+  color-scheme: dark;
+}
+
+.internal-ui :focus-visible {
+  outline: 2px solid var(--i-ring);
+  outline-offset: 1px;
+}
+
+.internal-ui ::selection {
+  background: var(--i-accent-soft);
+}
+
+@keyframes internal-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.internal-pop[data-state="open"] {
+  animation: internal-pop-in 120ms ease-out;
+}
+
+/* Centred dialogs keep their translate while they fade in. */
+@keyframes internal-dialog-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 6px)) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.internal-pop.internal-dialog[data-state="open"] {
+  animation: internal-dialog-in 160ms ease-out;
+}
+
+@keyframes internal-rise {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.internal-rise {
+  animation: internal-rise 160ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .internal-pop[data-state="open"],
+  .internal-pop.internal-dialog[data-state="open"],
+  .internal-rise {
+    animation: none;
+  }
+}
+
+/* Blog editor (components/internal/blog/markdown-editor.tsx, MDXEditor). */
+.internal-ui .blog-editor {
+  font-family: inherit;
+  --baseBg: var(--i-panel);
+  --basePageBg: var(--i-panel);
+}
+.internal-ui .blog-editor [role="toolbar"] {
+  position: sticky;
+  top: 52px;
+  z-index: 10;
+  border-radius: 12px 12px 0 0;
+  border-bottom: 1px solid var(--i-line);
+  background: var(--i-sunken);
+}
+.internal-ui .blog-editor-content {
+  min-height: 520px;
+  padding: 22px 30px 48px;
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--i-ink);
+}
+.internal-ui .blog-editor-content img {
+  max-width: 100%;
+  border-radius: 6px;
+}
+.internal-ui .blog-editor-content a {
+  color: var(--i-accent-text);
+}
+
+/* The Markdown view and code blocks (CodeMirror) in the dashboard's colors,
+   so they match in light and dark mode. */
+.internal-ui .blog-editor .cm-editor {
+  background: var(--i-panel);
+  color: var(--i-ink);
+}
+.internal-ui .blog-editor .cm-gutters {
+  border-right: 1px solid var(--i-line);
+  background: var(--i-sunken);
+  color: var(--i-faint);
+}
+.internal-ui .blog-editor .cm-activeLine,
+.internal-ui .blog-editor .cm-activeLineGutter {
+  background: var(--i-hover);
+}
+.internal-ui .blog-editor .cm-cursor {
+  border-left-color: var(--i-ink);
+}
+.internal-ui .blog-editor .cm-selectionBackground {
+  background: var(--i-accent-soft) !important;
+}
+
+/* The editor's popups (the link popover, the block type and code language
+   menus) render in .mdxeditor-popup-container on <body>, outside
+   .internal-ui. It carries the editor's classes, so .internal-pop gives it
+   the dashboard's tokens; MDXEditor's own colors map onto them here.
+   Without this they stay white in dark mode (its dark theme never changes
+   --basePageBg) with dark fields and blue buttons. The image dialog is our
+   own (components/internal/blog/image-dialog.tsx). MDXEditor's class names
+   are CSS-module hashes, so these match their stable prefix (version pinned
+   in package.json). */
+.mdxeditor-popup-container.blog-editor {
+  --basePageBg: var(--i-panel);
+  --baseBase: var(--i-panel);
+  --baseBgSubtle: var(--i-sunken);
+  --baseBg: var(--i-hover);
+  --baseBgHover: var(--i-hover);
+  --baseBgActive: var(--i-selected);
+  --baseLine: var(--i-line);
+  --baseBorder: var(--i-line);
+  --baseBorderHover: var(--i-line-strong);
+  --baseText: var(--i-muted);
+  --baseTextContrast: var(--i-ink);
+  color: var(--i-ink);
+  font-size: 13px;
+}
+
+.mdxeditor-popup-container.blog-editor [class*="_linkDialogPopoverContent_"] {
+  padding: 4px;
+  border: 1px solid var(--i-line);
+  border-radius: 10px;
+  background: var(--i-panel);
+  color: var(--i-ink);
+  box-shadow: var(--i-shadow-pop);
+  filter: none;
+}
+
+.mdxeditor-popup-container.blog-editor form[class*="_multiFieldForm_"] {
+  width: min(360px, calc(100vw - 48px));
+  gap: 14px;
+  padding: 10px;
+}
+.mdxeditor-popup-container.blog-editor form [class*="_formField_"] {
+  gap: 6px;
+}
+.mdxeditor-popup-container.blog-editor form [class*="_formField_"] label {
+  color: var(--i-muted);
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* Fields, like the dashboard's own. */
+.mdxeditor-popup-container.blog-editor [class*="_textInput_"],
+.mdxeditor-popup-container.blog-editor [class*="_downshiftInputWrapper_"] {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 34px;
+  border: 1px solid var(--i-line);
+  border-radius: 8px;
+  background: var(--i-sunken);
+  color: var(--i-ink);
+  font-size: 13px;
+  transition: border-color 120ms, background-color 120ms, box-shadow 120ms;
+}
+.mdxeditor-popup-container.blog-editor [class*="_textInput_"] {
+  padding: 0 12px;
+}
+.mdxeditor-popup-container.blog-editor [class*="_downshiftInput_"] {
+  width: 100%;
+  min-width: 0;
+  padding: 7px 12px;
+  color: var(--i-ink);
+  font-size: 13px;
+  cursor: text;
+}
+.mdxeditor-popup-container.blog-editor [class*="_downshiftInputWrapper_"] > button {
+  padding: 0 10px 0 4px;
+  color: var(--i-muted);
+  cursor: pointer;
+}
+.mdxeditor-popup-container.blog-editor [class*="_downshiftInput_"]:focus-visible {
+  outline: none;
+}
+.mdxeditor-popup-container.blog-editor [class*="_textInput_"]::placeholder,
+.mdxeditor-popup-container.blog-editor [class*="_downshiftInput_"]::placeholder {
+  color: var(--i-faint);
+}
+.mdxeditor-popup-container.blog-editor [class*="_textInput_"]:focus,
+.mdxeditor-popup-container.blog-editor [class*="_downshiftInputWrapper_"]:focus-within {
+  border-color: var(--i-line-strong);
+  background: var(--i-panel);
+  box-shadow: 0 0 0 3px var(--i-accent-soft);
+}
+.mdxeditor-popup-container.blog-editor [class*="_downshiftAutocompleteContainer_"] ul {
+  border-color: var(--i-line);
+  background: var(--i-panel);
+}
+
+/* Menus (block type, code language): a panel that stands off the page. */
+.mdxeditor-popup-container.blog-editor [class*="_toolbarNodeKindSelectContainer_"],
+.mdxeditor-popup-container.blog-editor [class*="_toolbarButtonDropdownContainer_"],
+.mdxeditor-popup-container.blog-editor [class*="_toolbarCodeBlockLanguageSelectContent_"],
+.mdxeditor-popup-container.blog-editor [class*="_selectContainer_"] {
+  min-width: 160px;
+  padding: 4px;
+  border: 1px solid var(--i-line);
+  border-radius: 10px;
+  background: var(--i-panel);
+  box-shadow: var(--i-shadow-pop);
+  filter: none;
+  font-size: 13px;
+}
+.mdxeditor-popup-container.blog-editor [class*="_toolbarNodeKindSelectItem_"],
+.mdxeditor-popup-container.blog-editor [class*="_selectItem_"] {
+  padding: 6px 10px;
+  border-radius: 6px;
+  color: var(--i-ink-2);
+  cursor: pointer;
+}
+.mdxeditor-popup-container.blog-editor [class*="_toolbarNodeKindSelectItem_"][data-state="checked"],
+.mdxeditor-popup-container.blog-editor [class*="_selectItem_"][data-state="checked"] {
+  color: var(--i-accent-text);
+  font-weight: 500;
+}
+
+/* Buttons: Cancel then Save, like every other dashboard dialog. */
+.mdxeditor-popup-container.blog-editor form[class*="_multiFieldForm_"] > div:last-child {
+  margin-top: 4px;
+}
+.mdxeditor-popup-container.blog-editor [class*="_primaryButton_"],
+.mdxeditor-popup-container.blog-editor [class*="_secondaryButton_"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 120ms, opacity 120ms;
+}
+.mdxeditor-popup-container.blog-editor [class*="_primaryButton_"] {
+  order: 2;
+  border: 0;
+  background: var(--i-ink);
+  color: var(--i-panel);
+  box-shadow: var(--i-shadow-sm);
+}
+.mdxeditor-popup-container.blog-editor [class*="_primaryButton_"]:hover {
+  opacity: 0.9;
+}
+.mdxeditor-popup-container.blog-editor [class*="_secondaryButton_"] {
+  order: 1;
+  border: 1px solid var(--i-line);
+  background: var(--i-panel);
+  color: var(--i-ink);
+}
+.mdxeditor-popup-container.blog-editor [class*="_secondaryButton_"]:hover {
+  background: var(--i-hover);
+}
+.mdxeditor-popup-container.blog-editor :focus-visible {
+  outline: 2px solid var(--i-ring);
+  outline-offset: 1px;
+}

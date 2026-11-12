@@ -94,6 +94,7 @@ const FIELD_ORDER: readonly RegistrationField[] = [
   "idea",
   "agree",
   "contactConsent",
+  "emailUpdates",
 ];
 
 function RegistrationForm({
@@ -395,7 +396,7 @@ function RegistrationForm({
             id={id}
             purpose="registration"
             values={values}
-            error={errors.contactConsent}
+            errors={errors}
             onChange={(field, checked) => set(field, checked)}
           />
         </div>

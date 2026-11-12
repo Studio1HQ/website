@@ -1,7 +1,9 @@
-import { NextResponse } from "next/server";
+import { randomUUID } from "crypto";
+import { NextResponse, after } from "next/server";
 import { getHackathon } from "@/data/hackathons";
 import { looksAutomated } from "@/lib/form-guard";
 import { readJsonBody } from "@/lib/read-body";
+import { sendConfirmation } from "@/lib/confirmation-email";
 import { validateRegistration } from "@/lib/hackathon-registration";
 import { HACKATHONS_PUBLIC, isRegistrationOpen } from "@/lib/hackathons";
 import { insertRow, isSupabaseConfigured } from "@/lib/supabase-server";
@@ -92,7 +94,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const saved = await insertRow("hackathon_registrations", row);
+  const id = randomUUID();
+  const saved = await insertRow("hackathon_registrations", { id, ...row });
   if (!saved.ok) {
     // A repeat answers like a first registration, so the response never
     // reveals whether an email is registered. The first registration stands.
@@ -104,5 +107,8 @@ export async function POST(request: Request) {
     );
   }
 
+  after(() =>
+    sendConfirmation("hackathons", { id, name: values.name, email: values.email, program: hackathon.name }),
+  );
   return NextResponse.json({ ok: true });
 }

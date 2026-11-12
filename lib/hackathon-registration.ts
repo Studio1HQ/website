@@ -9,6 +9,7 @@ import {
   readConsent,
   type ContactConsentValues,
 } from "@/lib/contact-consent";
+import { looksLikeLink, nameError, placeError } from "@/lib/form-checks";
 
 export const ROLE_OPTIONS = [
   "Student",
@@ -130,14 +131,14 @@ export function validateRegistration(
   };
 
   const errors: RegistrationErrors = {};
-  if (values.name.length < 2 || values.name.length > 80)
-    errors.name = "Enter your full name.";
+  const name = nameError(values.name);
+  if (name) errors.name = name;
   if (!EMAIL.test(values.email) || values.email.length > 254)
     errors.email = "Enter a valid email address.";
   if (!GITHUB_HANDLE.test(values.github))
     errors.github = "Enter your GitHub username, like octocat.";
-  if (values.country.length < 2 || values.country.length > 60)
-    errors.country = "Enter the country you're based in.";
+  const country = placeError(values.country, "Enter the country you're based in.", 60);
+  if (country) errors.country = country;
   if (!(ROLE_OPTIONS as readonly string[]).includes(values.role))
     errors.role = "Pick the option that fits best.";
   if (!(EXPERIENCE_OPTIONS as readonly string[]).includes(values.experience))
@@ -148,6 +149,8 @@ export function validateRegistration(
     errors.teamName = "Add your team's name.";
   if (values.teamName.length > 60)
     errors.teamName = "Keep it under 60 characters.";
+  else if (looksLikeLink(values.teamName))
+    errors.teamName = "Enter your team's name, not a link.";
   if (![...tracks, UNDECIDED_TRACK].includes(values.track))
     errors.track = "Pick a track, or choose not sure yet.";
   if (values.idea.length > IDEA_MAX)

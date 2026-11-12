@@ -9,6 +9,7 @@ import {
   readConsent,
   type ContactConsentValues,
 } from "@/lib/contact-consent";
+import { nameError, placeError } from "@/lib/form-checks";
 
 export const ROLE_OPTIONS = [
   "Student",
@@ -116,12 +117,12 @@ export function validateApplication(
   };
 
   const errors: ApplicationErrors = {};
-  if (values.name.length < 2 || values.name.length > 80)
-    errors.name = "Enter your full name.";
+  const name = nameError(values.name);
+  if (name) errors.name = name;
   if (!EMAIL.test(values.email) || values.email.length > 254)
     errors.email = "Enter a valid email address.";
-  if (values.location.length < 2 || values.location.length > 80)
-    errors.location = "Enter your city and country.";
+  const location = placeError(values.location, "Enter your city and country.");
+  if (location) errors.location = location;
   if (!(ROLE_OPTIONS as readonly string[]).includes(values.role))
     errors.role = "Pick the option that fits best.";
   if (!values.profileUrl || values.profileUrl.length > 300)

@@ -171,43 +171,62 @@ export function Segments({
 const CHECKBOX = "mt-0.5 size-[18px] shrink-0 cursor-pointer accent-[#f97316]";
 
 /**
- * The last thing before submit on every form: a required tick to store the
- * entry and email about it, and an optional opt-in to future emails.
+ * The last thing before submit on every form: two required ticks, one to
+ * store the entry and email about it, one to subscribe to email updates.
  * Values and validation live in lib/contact-consent.ts.
  */
 export function ContactConsent({
   id,
   purpose,
   values,
-  error,
+  errors = {},
   onChange,
 }: {
-  /** Base id; the error gets `${id}-contactConsent-error`. */
+  /** Base id; errors get `${id}-contactConsent-error` / `${id}-emailUpdates-error`. */
   id: string;
   /** What they're sending, e.g. "application" or "registration". */
   purpose: string;
   values: { contactConsent: boolean; emailUpdates: boolean };
-  error?: string;
+  errors?: { contactConsent?: string; emailUpdates?: string };
   onChange: (
     field: "contactConsent" | "emailUpdates",
     checked: boolean,
   ) => void;
 }) {
-  const errorId = `${id}-contactConsent-error`;
+  const box = (
+    field: "contactConsent" | "emailUpdates",
+    label: ReactNode,
+  ) => {
+    const error = errors[field];
+    const errorId = `${id}-${field}-error`;
+    return (
+      <div>
+        <label className="flex cursor-pointer gap-3 text-[14px] leading-snug">
+          <input
+            type="checkbox"
+            name={field}
+            checked={values[field]}
+            onChange={(event) => onChange(field, event.target.checked)}
+            aria-required="true"
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? errorId : undefined}
+            className={CHECKBOX}
+          />
+          <span>{label}</span>
+        </label>
+        {error ? (
+          <p id={errorId} className={cn(ERROR_TEXT, "mt-1.5 pl-[30px]")}>
+            {error}
+          </p>
+        ) : null}
+      </div>
+    );
+  };
   return (
     <div className="space-y-3">
-      <label className="flex cursor-pointer gap-3 text-[14px] leading-snug">
-        <input
-          type="checkbox"
-          name="contactConsent"
-          checked={values.contactConsent}
-          onChange={(event) => onChange("contactConsent", event.target.checked)}
-          aria-required="true"
-          aria-invalid={error ? true : undefined}
-          aria-describedby={error ? errorId : undefined}
-          className={CHECKBOX}
-        />
-        <span>
+      {box(
+        "contactConsent",
+        <>
           I agree that Studio1 can store the details I&apos;ve shared and email
           me about this {purpose} and next steps. See our{" "}
           <a
@@ -219,26 +238,16 @@ export function ContactConsent({
             Privacy Policy
           </a>
           .
-        </span>
-      </label>
-      {error ? (
-        <p id={errorId} className={cn(ERROR_TEXT, "pl-[30px]")}>
-          {error}
-        </p>
-      ) : null}
-      <label className="flex cursor-pointer gap-3 text-[14px] leading-snug text-[#141414]/70">
-        <input
-          type="checkbox"
-          name="emailUpdates"
-          checked={values.emailUpdates}
-          onChange={(event) => onChange("emailUpdates", event.target.checked)}
-          className={CHECKBOX}
-        />
-        <span>
-          Also email me about future Studio1 roles, cohorts and events.
-          Unsubscribe anytime. Optional.
-        </span>
-      </label>
+        </>,
+      )}
+      {box(
+        "emailUpdates",
+        <>
+          I&apos;m subscribing to Studio1&apos;s email updates about new roles,
+          cohorts and events. I can unsubscribe at any time, and that
+          won&apos;t affect my {purpose}.
+        </>,
+      )}
     </div>
   );
 }

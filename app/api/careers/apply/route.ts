@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto";
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { getJobById, getJobIds } from "@/lib/careers";
+import { sendConfirmation } from "@/lib/confirmation-email";
 import { looksAutomated } from "@/lib/form-guard";
 import { readFormBody } from "@/lib/read-body";
 import {
@@ -121,7 +122,9 @@ export async function POST(request: Request) {
     );
   }
 
+  const id = randomUUID();
   const saved = await insertRow("job_applications", {
+    id,
     job_id: job.id,
     job_title: job.title,
     requisition_id: job.requisitionId,
@@ -151,5 +154,8 @@ export async function POST(request: Request) {
     );
   }
 
+  after(() =>
+    sendConfirmation("jobs", { id, name: values.name, email: values.email, program: job.title }),
+  );
   return NextResponse.json({ ok: true });
 }

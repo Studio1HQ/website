@@ -1,5 +1,7 @@
-import { NextResponse } from "next/server";
+import { randomUUID } from "crypto";
+import { NextResponse, after } from "next/server";
 import { COHORT } from "@/data/devrel-cohort";
+import { sendConfirmation } from "@/lib/confirmation-email";
 import { validateApplication } from "@/lib/devrel-cohort-application";
 import { looksAutomated } from "@/lib/form-guard";
 import { readJsonBody } from "@/lib/read-body";
@@ -76,7 +78,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const saved = await insertRow("devrel_cohort_applications", row);
+  const id = randomUUID();
+  const saved = await insertRow("devrel_cohort_applications", { id, ...row });
   if (!saved.ok) {
     // A repeat answers like a first application, so the response never
     // reveals whether an email has applied. The first application stands.
@@ -88,5 +91,14 @@ export async function POST(request: Request) {
     );
   }
 
+  after(() =>
+    sendConfirmation("cohort", {
+      id,
+      name: values.name,
+      email: values.email,
+      // Matches programOf in lib/internal/data.ts, as the dashboard emails say it.
+      program: `DevRel ${COHORT.edition}`,
+    }),
+  );
   return NextResponse.json({ ok: true });
 }

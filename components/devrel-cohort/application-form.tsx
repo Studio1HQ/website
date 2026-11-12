@@ -43,6 +43,7 @@ const FIELD_ORDER: ApplicationField[] = [
   "source",
   "commitment",
   "contactConsent",
+  "emailUpdates",
 ];
 
 const CARD =
@@ -399,7 +400,7 @@ export function CohortApplicationForm() {
             id={id}
             purpose="application"
             values={values}
-            error={errors.contactConsent}
+            errors={errors}
             onChange={(field, checked) => set(field, checked)}
           />
         </div>
