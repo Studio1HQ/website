@@ -36,6 +36,7 @@ import {
 } from "@/components/paper/paper-hero";
 import { INK, NIGHT, PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
+import { ReplyCard } from "@/components/pages/shared/paper-endorsement";
 
 /*
  * The service hero's flanks, set like the home hero's design-file artefacts:
@@ -49,6 +50,8 @@ type SideCard = {
   /** Layer name on the selection frame. */
   label: string;
   card: ReactNode;
+  /** Runs a little wider than the flank, for a short wide card. */
+  wide?: boolean;
 };
 
 /** A headline number from a case study, set as a block on its own. */
@@ -959,7 +962,11 @@ export function HeroFlanks({ sides }: { sides: HeroSides }) {
       <div className="relative mx-auto h-full max-w-[1480px]">
         <div className="absolute inset-y-0 left-[1.5%] flex w-[19%] max-w-[290px] flex-col justify-between">
           <div className="relative">
-            <Framed side={sides.cards[0]} labelPosition="top-left" />
+            <Framed
+              side={sides.cards[0]}
+              labelPosition="top-left"
+              className={cn(sides.cards[0].wide && "w-[118%]")}
+            />
             <Cursor className="absolute -bottom-7 right-[14%]" />
           </div>
           <StatBlock
@@ -1005,7 +1012,7 @@ export function HeroWorkRow({ sides }: { sides: HeroSides }) {
 
 export const CONTENT_SIDES: HeroSides = {
   cards: [
-    { label: "tensorlake/toon-vs-json.mdx", card: <ArticleCard /> },
+    { label: "reply / x", card: <ReplyCard />, wide: true },
     { label: "serp · toon vs json", card: <SearchCard /> },
   ],
   stats: [
@@ -1202,7 +1209,7 @@ export const SERVICES_SIDES: HeroSides = {
     {
       label: "stat · github",
       value: "12,000+",
-      text: "GitHub stars, launch to today",
+      text: "GitHub stars, grown from 0",
       client: "Memori",
       icon: Star,
     },

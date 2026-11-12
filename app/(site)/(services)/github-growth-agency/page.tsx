@@ -134,7 +134,7 @@ const githubCaseStudyProofs: CaseStudyResultData[] = [
     category: "Open-Source Launch",
     href: "/case-studies/memori",
     heroValue: "12,000+",
-    heroLabel: "GitHub stars, from launch to today",
+    heroLabel: "GitHub stars, grown from 0",
     proof:
       "A community-led launch, 12 hands-on demo agents, and thought leadership that brought 100+ detailed developer comments into onboarding, docs, and the roadmap.",
     stats: [
