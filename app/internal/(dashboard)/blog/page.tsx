@@ -5,6 +5,7 @@ import { BlogStatusBadge } from "@/components/internal/blog/status";
 import { Avatar, Card, EmptyState, Notice, PageHeader, buttonClass, formatDate, relativeDate } from "@/components/internal/ui";
 import { listPosts, sitePosts, type BlogListItem, type SitePost } from "@/lib/internal/blog/data";
 import { isGithubConfigured } from "@/lib/internal/blog/github";
+import { isSearchConsoleConfigured, searchStats, type SearchNumbers } from "@/lib/internal/search-console";
 import { nameFromEmail } from "@/lib/internal/blog/shared";
 import { requireBlog } from "@/lib/internal/session";
 import { cn } from "@/lib/utils";
@@ -21,7 +22,26 @@ const TABS = [
 ] as const;
 type TabKey = (typeof TABS)[number]["key"];
 
-function PostRow({ post, me }: { post: BlogListItem; me: string }) {
+const count = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 });
+
+/** Google Search for one post: clicks, impressions, average position. */
+function SearchCell({ numbers }: { numbers: SearchNumbers | null | undefined }) {
+  return (
+    <span className="grid w-[188px] grid-cols-3 gap-2 text-right text-[12px] tabular-nums text-[var(--i-muted)]">
+      {numbers ? (
+        <>
+          <span className="font-medium text-[var(--i-ink)]">{count.format(numbers.clicks)}</span>
+          <span>{count.format(numbers.impressions)}</span>
+          <span>{numbers.impressions ? numbers.position.toFixed(1) : "–"}</span>
+        </>
+      ) : (
+        <span className="col-span-3 text-[var(--i-faint)]">no search data</span>
+      )}
+    </span>
+  );
+}
+
+function PostRow({ post, me, search }: { post: BlogListItem; me: string; search?: SearchNumbers | null }) {
   const waitingOnMe = post.status === "in_review" && post.reviewers.includes(me);
   return (
     <li className="border-b border-[var(--i-line)] last:border-b-0">
@@ -37,6 +57,7 @@ function PostRow({ post, me }: { post: BlogListItem; me: string }) {
           </p>
         </div>
         <BlogStatusBadge status={post.status} live={Boolean(post.source_path)} />
+        {search !== undefined ? <SearchCell numbers={search} /> : null}
         <div className="flex w-[150px] items-center gap-2 text-[12.5px] text-[var(--i-muted)]">
           <Avatar name={nameFromEmail(post.created_by)} email={post.created_by} size={24} />
           <span className="truncate">{nameFromEmail(post.created_by)}</span>
@@ -54,7 +75,7 @@ function PostRow({ post, me }: { post: BlogListItem; me: string }) {
   );
 }
 
-function SiteRow({ post }: { post: SitePost }) {
+function SiteRow({ post, search }: { post: SitePost; search?: SearchNumbers | null }) {
   return (
     <li className="flex flex-wrap items-center gap-x-4 gap-y-1.5 border-b border-[var(--i-line)] px-5 py-3 last:border-b-0">
       <div className="min-w-0 flex-1 basis-[280px]">
@@ -64,6 +85,7 @@ function SiteRow({ post }: { post: SitePost }) {
           {post.unlisted ? " · hidden from /blog" : ""}
         </p>
       </div>
+      {search !== undefined ? <SearchCell numbers={search} /> : null}
       <span className="text-[12px] text-[var(--i-faint)]">{post.date}</span>
       <a href={`/blog/${post.slug}`} target="_blank" rel="noreferrer" className={buttonClass("ghost", "sm")}>
         <ArrowSquareOut size={14} /> View
@@ -105,6 +127,17 @@ export default async function BlogPage({ searchParams }: Props) {
       ? "review"
       : "drafts";
   const error = typeof params.error === "string" ? params.error.slice(0, 200) : null;
+
+  // Google Search numbers on the Live tab (lib/internal/search-console.ts).
+  const search = tab === "live" && isSearchConsoleConfigured() ? await searchStats() : null;
+  const numbers = search?.ok ? search.posts : null;
+  const byClicks = tab === "live" && numbers !== null && params.sort === "clicks";
+  const clicksOf = (slug: string) => numbers?.[slug]?.clicks ?? -1;
+  if (byClicks) {
+    groups.live.sort((a, b) => clicksOf(b.slug) - clicksOf(a.slug));
+    siteOnly.sort((a, b) => clicksOf(b.slug) - clicksOf(a.slug));
+  }
+  const searchFor = (slug: string) => (numbers ? (numbers[slug] ?? null) : undefined);
   const rows = groups[tab];
 
   return (
@@ -166,11 +199,48 @@ export default async function BlogPage({ searchParams }: Props) {
         ))}
       </nav>
 
+      {tab === "live" && reviewer && !isSearchConsoleConfigured() ? (
+        <div className="mb-4">
+          <Notice tone="info">
+            Connect Google Search Console to see each post&apos;s clicks, impressions and average position here. Setup is in
+            supabase/README.md under &quot;Search numbers&quot;.
+          </Notice>
+        </div>
+      ) : null}
+      {search && !search.ok ? (
+        <div className="mb-4">
+          <Notice tone="warning">Couldn&apos;t load Google Search numbers: {search.message}</Notice>
+        </div>
+      ) : null}
+      {search?.ok ? (
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2 px-1 text-[12px] text-[var(--i-muted)]">
+          <span>
+            Google Search, {search.start} to {search.end} · clicks, impressions, average position
+          </span>
+          <span className="flex gap-1">
+            <Link
+              href="/internal/blog?tab=live"
+              aria-current={!byClicks ? "page" : undefined}
+              className={cn("rounded-md px-2 py-0.5", !byClicks ? "bg-[var(--i-sunken)] text-[var(--i-ink)]" : "hover:bg-[var(--i-hover)]")}
+            >
+              Newest
+            </Link>
+            <Link
+              href="/internal/blog?tab=live&sort=clicks"
+              aria-current={byClicks ? "page" : undefined}
+              className={cn("rounded-md px-2 py-0.5", byClicks ? "bg-[var(--i-sunken)] text-[var(--i-ink)]" : "hover:bg-[var(--i-hover)]")}
+            >
+              Most clicks
+            </Link>
+          </span>
+        </div>
+      ) : null}
+
       <Card>
         {rows.length ? (
           <ul>
             {rows.map((post) => (
-              <PostRow key={post.id} post={post} me={staff.email} />
+              <PostRow key={post.id} post={post} me={staff.email} search={tab === "live" ? searchFor(post.slug) : undefined} />
             ))}
           </ul>
         ) : tab !== "live" || !siteOnly.length ? (
@@ -183,7 +253,7 @@ export default async function BlogPage({ searchParams }: Props) {
             </p>
             <ul>
               {siteOnly.map((post) => (
-                <SiteRow key={post.path} post={post} />
+                <SiteRow key={post.path} post={post} search={searchFor(post.slug)} />
               ))}
             </ul>
           </>

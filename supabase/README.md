@@ -71,3 +71,19 @@ layout, with a "Book a call" button where it fits, and are logged in
 each person's unsubscribe link for the newsletter tool.
 
 The review fields, views and saved queries the team uses are documented in the team's private docs, not in this public repo.
+
+### Search numbers
+
+The Blog page's Live tab shows each post's Google Search clicks,
+impressions and average position for the last 28 days
+(`lib/internal/search-console.ts`). To connect it:
+
+1. In Google Cloud, create a project (or pick one), turn on the "Google
+   Search Console API", and create a service account. Under its Keys, add a
+   JSON key and download it.
+2. In Search Console, open the studio1hq.com property → Settings → Users and
+   permissions → Add user: the service account's email, Restricted.
+3. In Vercel, set `GSC_CLIENT_EMAIL` (the service account email) and
+   `GSC_PRIVATE_KEY` (the JSON file's `private_key`), both Production and
+   Sensitive. If the property is a URL-prefix one rather than a domain one,
+   also set `GSC_SITE_URL` to `https://www.studio1hq.com/`.
