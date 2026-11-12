@@ -2,6 +2,7 @@ import { randomUUID } from "crypto";
 import { NextResponse, after } from "next/server";
 import { COHORT } from "@/data/devrel-cohort";
 import { sendConfirmation } from "@/lib/confirmation-email";
+import { alertNewEntry } from "@/lib/internal/slack";
 import { validateApplication } from "@/lib/devrel-cohort-application";
 import { looksAutomated } from "@/lib/form-guard";
 import { readJsonBody } from "@/lib/read-body";
@@ -100,5 +101,6 @@ export async function POST(request: Request) {
       program: `DevRel ${COHORT.edition}`,
     }),
   );
+  after(() => alertNewEntry({ form: "cohort", id, program: `DevRel ${COHORT.edition}`, place: values.location }));
   return NextResponse.json({ ok: true });
 }

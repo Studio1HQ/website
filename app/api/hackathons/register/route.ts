@@ -4,6 +4,7 @@ import { getHackathon } from "@/data/hackathons";
 import { looksAutomated } from "@/lib/form-guard";
 import { readJsonBody } from "@/lib/read-body";
 import { sendConfirmation } from "@/lib/confirmation-email";
+import { alertNewEntry } from "@/lib/internal/slack";
 import { validateRegistration } from "@/lib/hackathon-registration";
 import { HACKATHONS_PUBLIC, isRegistrationOpen } from "@/lib/hackathons";
 import { insertRow, isSupabaseConfigured } from "@/lib/supabase-server";
@@ -110,5 +111,6 @@ export async function POST(request: Request) {
   after(() =>
     sendConfirmation("hackathons", { id, name: values.name, email: values.email, program: hackathon.name }),
   );
+  after(() => alertNewEntry({ form: "hackathons", id, program: hackathon.name, place: values.country }));
   return NextResponse.json({ ok: true });
 }

@@ -72,6 +72,15 @@ each person's unsubscribe link for the newsletter tool.
 
 The review fields, views and saved queries the team uses are documented in the team's private docs, not in this public repo.
 
+### Slack alerts
+
+Each new job application, hackathon registration and DevRel Cohort
+application posts to Slack: what they applied for, the city or country they
+gave and a link into the dashboard. Never their name, email or answers. Make an incoming webhook (Slack
+→ Apps → Incoming Webhooks → Add to a channel) and set `SLACK_WEBHOOK_URL`;
+`SLACK_WEBHOOK_URL_JOBS`, `_HACKATHONS` and `_COHORT` send a form to its own
+channel.
+
 ### Search numbers
 
 The Blog page's Live tab shows each post's Google Search clicks,

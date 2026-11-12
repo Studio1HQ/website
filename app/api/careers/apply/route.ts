@@ -2,6 +2,7 @@ import { randomUUID } from "crypto";
 import { NextResponse, after } from "next/server";
 import { getJobById, getJobIds } from "@/lib/careers";
 import { sendConfirmation } from "@/lib/confirmation-email";
+import { alertNewEntry } from "@/lib/internal/slack";
 import { looksAutomated } from "@/lib/form-guard";
 import { readFormBody } from "@/lib/read-body";
 import {
@@ -157,5 +158,6 @@ export async function POST(request: Request) {
   after(() =>
     sendConfirmation("jobs", { id, name: values.name, email: values.email, program: job.title }),
   );
+  after(() => alertNewEntry({ form: "jobs", id, program: job.title, place: values.location }));
   return NextResponse.json({ ok: true });
 }
