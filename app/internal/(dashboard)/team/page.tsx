@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { listMembers } from "@/lib/internal/members";
+import { isOwner } from "@/lib/internal/roles";
 import { requireStaff } from "@/lib/internal/session";
 import { TeamView } from "@/components/internal/team-view";
 import { Notice, PageHeader } from "@/components/internal/ui";
@@ -14,10 +15,10 @@ export default async function TeamPage() {
       <PageHeader
         eyebrow="Settings"
         title="Team"
-        description="Invite people, approve teammates who signed in, and choose their roles. One person can have several. Arindam and Amitesh are owners and always admins."
+        description="Anyone who signs in with an @studio1hq.com address waits here until Arindam or Amitesh approves them and picks their roles. Only they can invite people, change roles or turn access off."
       />
       {members ? (
-        <TeamView members={members} me={admin.email} />
+        <TeamView members={members} me={admin.email} canManage={isOwner(admin.email)} />
       ) : (
         <Notice tone="error">
           Couldn&apos;t load the team. Run the team migration in Supabase

@@ -13,10 +13,14 @@
  *                    approve and publish
  *   blog_writer      write their own posts and ask for a review. Nothing else:
  *                    no applicant data, no other people's drafts
+ *   community_manager  run the community area: events, guest lists, sponsors,
+ *                    campus partners, budget, tasks and growth numbers
+ *   community_viewer read the community area; tick off their own tasks
  *
  * The owners are always admins and can't be changed. Staff (@studio1hq.com)
- * ask for access when they first sign in; an admin approves them with roles.
- * Anyone else can only be invited by an admin, and only as a blog writer.
+ * ask for access when they first sign in; only an owner approves them with
+ * roles, changes them or turns access off (app/internal/(dashboard)/team).
+ * Anyone else can only be invited by an owner, and only as a blog writer.
  */
 
 export const STAFF_DOMAIN = "studio1hq.com";
@@ -29,10 +33,15 @@ export const ROLE_KEYS = [
   "hiring_viewer",
   "blog_reviewer",
   "blog_writer",
+  "community_manager",
+  "community_viewer",
 ] as const;
 export type RoleKey = (typeof ROLE_KEYS)[number];
 
-export const ROLE_INFO: Record<RoleKey, { label: string; area: "All" | "Hiring" | "Blog"; description: string }> = {
+export const ROLE_INFO: Record<
+  RoleKey,
+  { label: string; area: "All" | "Hiring" | "Blog" | "Community"; description: string }
+> = {
   admin: {
     label: "Admin",
     area: "All",
@@ -57,6 +66,16 @@ export const ROLE_INFO: Record<RoleKey, { label: string; area: "All" | "Hiring" 
     label: "Blog writer",
     area: "Blog",
     description: "Write their own posts and ask for a review. Can't see anything else.",
+  },
+  community_manager: {
+    label: "Community manager",
+    area: "Community",
+    description: "Run the community area: events, guest lists, sponsors, campus partners, budget, tasks and analytics.",
+  },
+  community_viewer: {
+    label: "Community viewer",
+    area: "Community",
+    description: "Read the community area and tick off their own tasks. No other changes.",
   },
 };
 
@@ -90,6 +109,15 @@ export type BlogAccess = "reviewer" | "writer";
 export function blogAccess(roles: readonly RoleKey[]): BlogAccess | null {
   if (roles.includes("admin") || roles.includes("blog_reviewer")) return "reviewer";
   if (roles.includes("blog_writer")) return "writer";
+  return null;
+}
+
+export type CommunityAccess = "manager" | "viewer";
+
+/** What a set of roles may do in the community area, or null for nothing. */
+export function communityAccess(roles: readonly RoleKey[]): CommunityAccess | null {
+  if (roles.includes("admin") || roles.includes("community_manager")) return "manager";
+  if (roles.includes("community_viewer")) return "viewer";
   return null;
 }
 

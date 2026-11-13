@@ -1,3 +1,4 @@
+import "server-only";
 /**
  * Sends email through Resend's API (https://resend.com): the dashboard's
  * applicant emails and the forms' automatic confirmations. No SMTP, no mail
@@ -59,11 +60,18 @@ export type MailMessage = {
   text: string;
   replyTo?: string;
   headers?: Record<string, string>;
+  /** Files to attach, e.g. a payslip PDF. Not for batches. */
+  attachments?: { filename: string; content: Uint8Array | Buffer; contentType?: string }[];
 };
 
 export type SendOptions = {
   /** ISO 8601 time to send at instead of now; Resend holds it up to 30 days. */
   scheduledAt?: string;
+  /**
+   * Stops a repeat of the same request sending the email twice: Resend
+   * answers a key it has seen in the last 24 hours with the first result.
+   */
+  idempotencyKey?: string;
 };
 
 function toResend(message: MailMessage, from: string, stream?: MailStream, options: SendOptions = {}) {
@@ -77,6 +85,15 @@ function toResend(message: MailMessage, from: string, stream?: MailStream, optio
     ...(replyTo ? { reply_to: replyTo } : {}),
     ...(message.headers && Object.keys(message.headers).length ? { headers: message.headers } : {}),
     ...(options.scheduledAt ? { scheduled_at: options.scheduledAt } : {}),
+    ...(message.attachments?.length
+      ? {
+          attachments: message.attachments.map((file) => ({
+            filename: file.filename,
+            content: Buffer.from(file.content).toString("base64"),
+            ...(file.contentType ? { content_type: file.contentType } : {}),
+          })),
+        }
+      : {}),
   };
 }
 
@@ -132,6 +149,7 @@ export async function sendMail(message: MailMessage, stream?: MailStream, option
   const json = (await sendWithFallback("/emails", (from) => toResend(message, from, stream, options), {
     stream,
     timeoutMs: 15_000,
+    idempotencyKey: options.idempotencyKey,
   })) as { id?: unknown } | null;
   return { id: typeof json?.id === "string" ? json.id : null };
 }

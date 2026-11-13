@@ -1,13 +1,11 @@
 import type { SectionKey } from "@/lib/internal/sections";
 import { baseUrl } from "@/lib/site";
 import { firstName } from "@/lib/first-name";
-
-/** The greeting name rule lives in lib/first-name.ts; re-exported for the senders. */
-export { firstName };
 import {
   EMAIL_SECTION_NAMES,
   bannerFor,
   bannerPath,
+  isEmailPipeline,
   type EmailPipeline,
 } from "@/lib/internal/email-banners";
 
@@ -300,10 +298,28 @@ export function fillTemplate(text: string, vars: EmailVars) {
 }
 
 /**
- * "ada lovelace" → "Ada"; "there" when there's no usable name. Keeps only
- * letters, apostrophes and hyphens: entries saved before the form's name
- * check (lib/form-checks.ts) can hold anything, links included.
+ * The name a teammate signs emails with, from their address:
+ * "priya.sharma@studio1hq.com" → "Priya". The one rule for the composer,
+ * the bulk dialog, the templates page and the server, so a preview and the
+ * email that goes out always agree.
  */
+export function senderName(staffEmail: string) {
+  const name = firstName(staffEmail.split("@")[0].replace(/[._+-]+/g, " "));
+  return name === "there" ? "Studio1" : name;
+}
+
+/**
+ * The template a dashboard email says it was written from, checked against
+ * the pipeline's own list: the key picks the header image and is saved in
+ * the email log, so it never comes straight from the browser. Nothing sent
+ * means "custom"; an unknown pipeline or key gives null.
+ */
+export function composerTemplate(pipeline: unknown, key: unknown): { pipeline: EmailPipeline; key: string } | null {
+  if (!isEmailPipeline(pipeline)) return null;
+  const wanted = key === undefined || key === null ? "custom" : key;
+  const found = (EMAIL_TEMPLATES[pipeline] ?? []).find((template) => template.key === wanted);
+  return found ? { pipeline, key: found.key } : null;
+}
 
 /** The footer line saying why someone got the email. */
 export function reasonFor(form: string, program: string) {
@@ -328,6 +344,15 @@ const PRINT = "#f97316";
 
 /** [label](https://…) links, the only markup a body supports besides "- " lists. */
 const LINK = /\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)/g;
+
+/**
+ * For text that came from outside (an emailed invoice's subject, a comment,
+ * a post title): takes the [ ] ( ) out so it can't turn into a link in a
+ * Studio1 email.
+ */
+export function withoutLinks(text: string) {
+  return text.replace(/[\[\]()]/g, " ").replace(/[ \t]{2,}/g, " ").trim();
+}
 
 function inlineHtml(text: string) {
   let html = "";
@@ -359,6 +384,8 @@ export function renderEmail({
   program,
   siteUrl = "https://www.studio1hq.com",
   assetBase,
+  section: sectionName,
+  hideBanner = false,
 }: {
   body: string;
   call?: { label: string; url: string } | null;
@@ -371,11 +398,15 @@ export function renderEmail({
   siteUrl?: string;
   /** Where images and fonts load from; "" in dashboard previews (this server). */
   assetBase?: string;
+  /** The index line's name ("01 — Payroll"), for emails outside the pipelines. */
+  section?: string;
+  /** Leaves out the header image: team and payment emails have none. */
+  hideBanner?: boolean;
 }) {
   const assets = assetBase ?? siteUrl;
   const pipeline = banner?.pipeline ?? "jobs";
   const header = bannerFor(pipeline, banner?.template ?? "custom");
-  const section = banner ? EMAIL_SECTION_NAMES[pipeline] : "Studio1";
+  const section = sectionName ?? (banner ? EMAIL_SECTION_NAMES[pipeline] : "Studio1");
 
   const blocks = body.trim().split(/\n{2,}/);
   const html_blocks = blocks.map((block) => {
@@ -416,7 +447,7 @@ export function renderEmail({
 
   const fonts = `@font-face{font-family:'Studio1 Sans';font-weight:400;src:url('${assets}/brand/design-system/fonts/Studio1Sans-Regular.woff2') format('woff2');}@font-face{font-family:'Studio1 Sans';font-weight:500;src:url('${assets}/brand/design-system/fonts/Studio1Sans-Medium.woff2') format('woff2');}`;
 
-  const html = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"><title>${escapeHtml(header.banner.title)}</title><style>${fonts}a{color:${INK};}</style></head>
+  const html = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"><title>${escapeHtml(hideBanner ? section : header.banner.title)}</title><style>${fonts}a{color:${INK};}</style></head>
 <body style="margin:0;padding:0;background:${PAPER};">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" background="${escapeHtml(assets)}/email/grain.png" style="background:${PAPER} url('${escapeHtml(assets)}/email/grain.png') repeat;"><tr><td align="center" style="padding:32px 12px 40px;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;">
@@ -426,7 +457,7 @@ export function renderEmail({
 <td align="right" style="font:13px/20px ${FONT};color:${MUTED};">${escapeHtml(program ?? "studio1hq.com")}</td>
 </tr></table>
 </td></tr>
-<tr><td style="padding:0 0 8px;"><a href="${escapeHtml(siteUrl)}" style="text-decoration:none;"><img src="${escapeHtml(assets)}${bannerPath(header.key)}" width="600" alt="${escapeHtml(header.banner.title)}" style="display:block;width:100%;max-width:600px;height:auto;border:1px solid ${HAIRLINE};border-radius:6px;background:${PAPER};"></a></td></tr>
+${hideBanner ? "" : `<tr><td style="padding:0 0 8px;"><a href="${escapeHtml(siteUrl)}" style="text-decoration:none;"><img src="${escapeHtml(assets)}${bannerPath(header.key)}" width="600" alt="${escapeHtml(header.banner.title)}" style="display:block;width:100%;max-width:600px;height:auto;border:1px solid ${HAIRLINE};border-radius:6px;background:${PAPER};"></a></td></tr>`}
 <tr><td style="background:${CELL};border:1px solid ${HAIRLINE};border-radius:6px;padding:34px 36px 18px;">
 ${content}
 </td></tr>

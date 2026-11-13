@@ -704,6 +704,7 @@ function Register({
           slug={hackathon.slug}
           hackathonName={hackathon.name}
           tracks={hackathon.tracks.map((track) => track.name)}
+          questions={hackathon.questions}
           tasks={hackathon.tasks}
           registrationOpen={view.registrationOpen}
           closedTitle={closedTitle}

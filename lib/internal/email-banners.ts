@@ -54,17 +54,26 @@ const BANNERS: Record<EmailPipeline, Record<string, Banner>> = {
 /** Bump to redraw every header (the images cache for a year). */
 export const BANNER_VERSION = 2;
 
+export function isEmailPipeline(value: unknown): value is EmailPipeline {
+  return typeof value === "string" && Object.hasOwn(BANNERS, value);
+}
+
+/** The header for a template; anything without one of its own gets the note. */
 export function bannerFor(pipeline: EmailPipeline, template: string): { key: string; banner: Banner } {
-  const banner = BANNERS[pipeline][template] ?? BANNERS[pipeline].custom;
-  const key = BANNERS[pipeline][template] ? `${pipeline}-${template}` : `${pipeline}-custom`;
-  return { key, banner };
+  // hasOwn, so a key like "constructor" can't pick something off Object.
+  const known = Object.hasOwn(BANNERS[pipeline], template);
+  return {
+    key: known ? `${pipeline}-${template}` : `${pipeline}-custom`,
+    banner: known ? BANNERS[pipeline][template] : BANNERS[pipeline].custom,
+  };
 }
 
 /** For the image route: the banner a key names, or null. */
 export function bannerByKey(key: string): Banner | null {
   const match = /^(jobs|cohort|hackathons)-([a-z-]+)$/.exec(key);
   if (!match) return null;
-  return BANNERS[match[1] as EmailPipeline][match[2]] ?? null;
+  const banners = BANNERS[match[1] as EmailPipeline];
+  return Object.hasOwn(banners, match[2]) ? banners[match[2]] : null;
 }
 
 export function bannerPath(key: string) {

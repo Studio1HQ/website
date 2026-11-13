@@ -38,6 +38,25 @@ export type HackathonTask = {
   note?: string;
 };
 
+/**
+ * An extra question on one hackathon's registration form, asked after the
+ * standard fields. `id` is saved with every answer, so never rename or reuse
+ * one once people have registered; add a new question instead.
+ */
+export type HackathonQuestion = {
+  id: string;
+  label: string;
+  /**
+   * short: one line (up to 200 characters). long: a paragraph (up to 1,000).
+   * choice: one of `options`. yesno: Yes or No.
+   */
+  type: "short" | "long" | "choice" | "yesno";
+  /** The answers to pick from, for "choice". */
+  options?: string[];
+  required?: boolean;
+  hint?: string;
+};
+
 export type HackathonCriterion = {
   name: string;
   /** Percent of the total score. */
@@ -81,6 +100,8 @@ export type Hackathon = {
   judging: HackathonCriterion[];
   rules: string[];
   faqs: HackathonFaq[];
+  /** This event's own questions, added to the standard registration form. */
+  questions?: HackathonQuestion[];
   /** Placeholder content, not a confirmed event. */
   placeholder: boolean;
 };
@@ -429,6 +450,27 @@ export const HACKATHONS: Hackathon[] = [
         name: "Agent observability",
         description:
           "Traces, costs, and dashboards that explain what an agent did and why.",
+      },
+    ],
+    // PLACEHOLDER questions, to show how an event adds its own.
+    questions: [
+      {
+        id: "framework",
+        label: "Which agent framework do you use most?",
+        type: "choice",
+        options: ["LangGraph", "CrewAI", "OpenAI Agents SDK", "Mastra", "My own", "None yet"],
+        required: true,
+      },
+      {
+        id: "shipped-agent",
+        label: "Have you shipped an agent that real users rely on?",
+        type: "yesno",
+      },
+      {
+        id: "college",
+        label: "College or company",
+        type: "short",
+        hint: "Helps us plan campus meetups.",
       },
     ],
   }),

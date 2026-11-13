@@ -17,9 +17,24 @@ const FORM_TABLES = [
 
 const encoder = new TextEncoder();
 
+let warnedNoSecret = false;
+
+/**
+ * The signing key. Which variable signs is fixed: links in emails already
+ * sent have to keep verifying. With neither set (or one under 32
+ * characters), emails go out with no unsubscribe link and old links stop
+ * working, so that is logged loudly, once per server start.
+ */
 function secret() {
   const key = process.env.INTERNAL_AUTH_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY;
-  return key && key.length >= 32 ? `studio1-unsubscribe:${key}` : null;
+  if (key && key.length >= 32) return `studio1-unsubscribe:${key}`;
+  if (!warnedNoSecret) {
+    warnedNoSecret = true;
+    console.error(
+      "[unsubscribe] NO SIGNING SECRET: set INTERNAL_AUTH_SECRET (32+ characters). Until then emails carry no unsubscribe link and existing links don't work.",
+    );
+  }
+  return null;
 }
 
 function base64url(bytes: ArrayBuffer) {
@@ -51,7 +66,11 @@ export async function unsubscribeUrl(email: string) {
 
 /**
  * List-Unsubscribe headers for an unsubscribe link, so mail apps show their
- * own Unsubscribe button, which posts to the one-click route.
+ * own Unsubscribe button, which posts to the one-click route. Only for
+ * email that unsubscribing really stops (the updates about new roles,
+ * cohorts and events). Emails about someone's own application or
+ * registration don't carry it: the button would promise something it can't
+ * do, and the next click is "Report spam".
  */
 export function unsubscribeHeaders(url: string | null): Record<string, string> {
   if (!url) return {};

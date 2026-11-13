@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { renderEmail } from "@/lib/internal/email-templates";
 import { decideMember, inviteMember, type MemberStatus } from "@/lib/internal/members";
-import { ROLE_INFO, isStaffEmail, rolesLabel, type RoleKey } from "@/lib/internal/roles";
+import { isOwner, isRoleKey, isStaffEmail, rolesLabel, type RoleKey } from "@/lib/internal/roles";
 import { requireStaff } from "@/lib/internal/session";
 import { emailAddress } from "@/lib/internal/token";
 import { isMailerConfigured, sendMail } from "@/lib/mailer";
@@ -11,12 +11,24 @@ import { baseUrl } from "@/lib/site";
 
 export type TeamResult = { ok: true; message?: string } | { ok: false; message: string };
 
+const OWNERS_ONLY = "Only Arindam and Amitesh can approve, invite, change or turn off access.";
+
 function roleList(value: unknown): RoleKey[] {
-  return Array.isArray(value) ? (value.filter((key) => typeof key === "string" && key in ROLE_INFO) as RoleKey[]) : [];
+  return Array.isArray(value) ? value.filter(isRoleKey) : [];
 }
 
 /**
- * Approve, decline, change roles, or turn access off and on. Admins only;
+ * Who gets in is the owners' call (OWNERS in lib/internal/roles.ts): other
+ * admins can see the team but not change it, so no admin can let someone in,
+ * or keep someone in, on their own.
+ */
+async function requireOwner() {
+  const admin = await requireStaff("admin");
+  return isOwner(admin.email) ? admin : null;
+}
+
+/**
+ * Approve, decline, change roles, or turn access off and on. Owners only;
  * server actions are public endpoints, so every input is checked here.
  */
 export async function updateMember(
@@ -24,7 +36,8 @@ export async function updateMember(
   status: unknown,
   roles: unknown,
 ): Promise<TeamResult> {
-  const admin = await requireStaff("admin");
+  const admin = await requireOwner();
+  if (!admin) return { ok: false, message: OWNERS_ONLY };
   const target = emailAddress(email);
   if (!target || (status !== "active" && status !== "disabled")) {
     return { ok: false, message: "That change isn't valid." };
@@ -42,12 +55,13 @@ export async function updateMember(
 }
 
 /**
- * Gives someone access now. Staff can get any roles; anyone outside
- * @studio1hq.com only the Blog writer role. Emails them a sign-in link when
- * the mailer is set up.
+ * Gives someone access now, skipping the waitlist, so owners only. Staff can
+ * get any roles; anyone outside @studio1hq.com only the Blog writer role.
+ * Emails them a sign-in link when the mailer is set up.
  */
 export async function invite(email: unknown, roles: unknown): Promise<TeamResult> {
-  const admin = await requireStaff("admin");
+  const admin = await requireOwner();
+  if (!admin) return { ok: false, message: OWNERS_ONLY };
   const target = emailAddress(email);
   if (!target) return { ok: false, message: "Enter a valid email address." };
   if (target === admin.email) return { ok: false, message: "You already have access." };

@@ -6,6 +6,13 @@ import { alertNewEntry } from "@/lib/internal/slack";
 import { looksAutomated } from "@/lib/form-guard";
 import { readFormBody } from "@/lib/read-body";
 import {
+  TOO_MANY_FOR_ADDRESS,
+  TOO_MANY_FROM_NETWORK,
+  addressWithinLimit,
+  IP_UPLOAD_LIMIT,
+  networkWithinLimit,
+} from "@/lib/rate-limit";
+import {
   APPLICATION_LIMITS,
   isJobOpen,
   resumeError,
@@ -33,6 +40,11 @@ export async function POST(request: Request) {
       },
       { status: 503 },
     );
+  }
+
+  // Before the upload is read: one network can only send so many an hour.
+  if (!(await networkWithinLimit("jobs", request, IP_UPLOAD_LIMIT))) {
+    return NextResponse.json({ error: TOO_MANY_FROM_NETWORK }, { status: 429 });
   }
 
   // Résumé cap plus room for the text fields, counted on the bytes read.
@@ -113,6 +125,10 @@ export async function POST(request: Request) {
   }
 
   const { values, links } = result;
+  // Counted per inbox ("+tags" ignored), before anything is stored.
+  if (!(await addressWithinLimit(values.email))) {
+    return NextResponse.json({ error: TOO_MANY_FOR_ADDRESS }, { status: 429 });
+  }
   const path = `${job.id}/${new Date().toISOString().slice(0, 10)}-${randomUUID()}.pdf`;
   const upload = await uploadFile(BUCKET, path, file!, "application/pdf");
   if (!upload.ok) {

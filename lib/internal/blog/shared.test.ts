@@ -60,6 +60,8 @@ describe("postChecks", () => {
     expect(ids(post({ body: `${post().body}\n\n<iframe src="x"></iframe>` }))).toContain("error:html");
     expect(ids(post({ body: `${post().body}\n\nUse \`<div>\` here.\n\n\`\`\`html\n<div></div>\n\`\`\`` }))).not.toContain("error:html");
     expect(ids(post({ body: `${post().body}\n\nH<sub>2</sub>O` }))).not.toContain("error:html");
+    expect(ids(post({ body: `${post().body}\n\n\\\`<script src="x"></script>\\\`` }))).toContain("error:html");
+    expect(ids(post({ body: `${post().body}\n\n<iframe\n  srcdoc="x"\n></iframe\n>` }))).toContain("error:html");
   });
 
   it("needs alt text and no Notion-hosted images", () => {
@@ -86,6 +88,14 @@ describe("toMdx", () => {
     expect(mdx).toContain('faq:\n  - {"q":"a"}');
     expect(mdx).not.toContain("unlisted");
     expect(mdx.trim().endsWith("(/product-launch-service).")).toBe(true);
+  });
+
+  it("keeps a date-shaped title as text", () => {
+    const mdx = toMdx(post({ title: "2026-01-01", tldr_summary: "2026-01-02" }), { date: "2026-11-10", updatedDate: "2026-11-11" });
+    expect(mdx).toContain('title: "2026-01-01"');
+    expect(mdx).toContain('tldrSummary: "2026-01-02"');
+    expect(mdx).toContain("\ndate: 2026-11-10\n");
+    expect(mdx).toContain("\nupdatedDate: 2026-11-11\n");
   });
 
   it("escapes quotes in values", () => {

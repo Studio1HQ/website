@@ -167,7 +167,8 @@ export function facetOptions(rows: Row[], section: Section, filters: Filters): F
       value,
       count,
       label:
-        facet.labels?.[value] ??
+        // hasOwn: a value typed into the URL ("constructor") is not a label.
+        (facet.labels && Object.hasOwn(facet.labels, value) ? facet.labels[value] : undefined) ??
         labelFor.get(value) ??
         (facet.column === "review_status" ? statusLabel(value) : value),
     }));

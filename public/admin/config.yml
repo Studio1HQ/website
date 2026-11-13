@@ -5,7 +5,9 @@ backend:
   base_url: https://www.studio1hq.com
   auth_endpoint: /api/cms/auth
 
-local_backend: true
+# No local_backend here: this file is served in production. To edit against
+# a local checkout, add "local_backend: true" while running npx decap-server,
+# and don't commit it.
 publish_mode: editorial_workflow
 show_preview_links: true
 

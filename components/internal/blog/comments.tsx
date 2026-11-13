@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState, type RefObject } from "react"
 import { ArrowBendUpLeft, ChatCircle, CheckCircle, CircleNotch, Quotes, X } from "@phosphor-icons/react";
 import { cleanQuote, locateQuote, nameFromEmail, type CommentThread } from "@/lib/internal/blog/shared";
 import { cn } from "@/lib/utils";
-import { Avatar, Card, buttonClass, formatDate, relativeDate } from "@/components/internal/ui";
+import { Avatar, Card, buttonClass, formatDate, relativeDate, textareaClass } from "@/components/internal/ui";
 
 /*
  * Comments on a post, Google Docs style: select text in the editor and press
@@ -16,9 +16,6 @@ import { Avatar, Card, buttonClass, formatDate, relativeDate } from "@/component
 
 const HIGHLIGHT = "blog-comment";
 const HIGHLIGHT_ACTIVE = "blog-comment-active";
-
-const inputClass =
-  "w-full rounded-lg border border-[var(--i-line)] bg-[var(--i-panel)] px-3 py-1.5 text-[13px] outline-none transition-colors placeholder:text-[var(--i-faint)] focus:border-[var(--i-line-strong)] focus:ring-2 focus:ring-[var(--i-ring)]/30 disabled:opacity-60";
 
 function editorContent(container: HTMLElement | null) {
   return container?.querySelector<HTMLElement>(".blog-editor-content") ?? null;
@@ -263,7 +260,7 @@ function Thread({
             }}
             rows={2}
             placeholder="Reply"
-            className={inputClass}
+            className={textareaClass}
           />
           <div className="mt-1.5 flex gap-1.5">
             <button
@@ -391,7 +388,7 @@ export function CommentsPanel({
           }}
           rows={2}
           placeholder={pendingQuote ? "Comment on the selected text" : "Comment on the whole post"}
-          className={inputClass}
+          className={textareaClass}
         />
         <button type="button" disabled={!text.trim() || busy} onClick={() => void send()} className={cn(buttonClass("secondary", "sm"), "mt-2")}>
           {busy ? <CircleNotch size={14} className="animate-spin" /> : <ChatCircle size={14} />} Comment

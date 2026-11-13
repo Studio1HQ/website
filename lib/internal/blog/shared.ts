@@ -142,6 +142,8 @@ export function nameFromEmail(email: string) {
     .join(" ");
 }
 
+export const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
 /** Where uploaded draft images are served from (app/internal/blog-media). */
 export const MEDIA_PREFIX = "/internal/blog-media/";
 
@@ -165,6 +167,33 @@ export const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 export type Check = { id: string; level: "error" | "warning"; message: string };
 
+/**
+ * The only HTML tags a post may use, and only without attributes. Anything
+ * else (other tags, components, {code}, import/export) is refused when a
+ * post is saved and again when it's published (safe-mdx.ts).
+ */
+export const SAFE_TAGS: ReadonlySet<string> = new Set(["br", "sup", "sub", "kbd"]);
+
+/**
+ * A quick look for HTML tags, for the editor's live checks and for text the
+ * site can't parse at all. The real check reads the post the way the site
+ * does (findUnsafeMdx in safe-mdx.ts) and runs on the server on every save
+ * and publish. Returns what it found, like "<script>".
+ */
+export function roughHtml(body: string) {
+  const prose = body
+    .replace(/```[\s\S]*?```/g, "")
+    // An escaped backtick doesn't start inline code, so it can't hide a tag.
+    .replace(/\\`/g, "")
+    .replace(/`[^`\n]*`/g, "")
+    // A link or image address may be wrapped in < >: ![alt](</blog/a b.webp>).
+    .replace(/\]\(\s*<[^>\n]*>/g, "](");
+  // A tag's name, then a space, line break, "/" or ">": tags may run over several lines.
+  return [...prose.matchAll(/<\/?([a-zA-Z][\w.-]*)(?=[\s/>])/g)]
+    .filter((match) => !SAFE_TAGS.has(match[1].toLowerCase()))
+    .map((match) => `<${match[1]}>`);
+}
+
 /** Markdown images: ![alt](src "title"). */
 const IMAGE = /!\[([^\]]*)\]\(\s*<?([^)\s>]+)>?(?:\s+"[^"]*")?\s*\)/g;
 
@@ -184,9 +213,11 @@ function words(body: string) {
 /**
  * Everything a post needs before it goes live. Errors block Publish;
  * warnings are house style and SEO advice the reviewer can overrule.
- * `takenSlugs` are other posts' slugs, live or in the dashboard.
+ * `takenSlugs` are other posts' slugs, live or in the dashboard. `unsafe`
+ * is the HTML and code the server found by parsing the post (safe-mdx.ts);
+ * without it (in the editor) a quick look for tags stands in.
  */
-export function postChecks(post: BlogFields, takenSlugs: readonly string[] = []): Check[] {
+export function postChecks(post: BlogFields, takenSlugs: readonly string[] = [], unsafe?: readonly string[]): Check[] {
   const checks: Check[] = [];
   const add = (id: string, level: Check["level"], message: string) => checks.push({ id, level, message });
   const title = post.title.trim();
@@ -231,13 +262,10 @@ export function postChecks(post: BlogFields, takenSlugs: readonly string[] = [])
     if (!/\]\((?:\/(?!\/)|https?:\/\/(?:www\.)?studio1hq\.com)/.test(body)) {
       add("internal-link", "warning", "Link to at least one Studio1 service page or related post.");
     }
-    // Raw HTML could run scripts on the site (writers can be outside the team).
-    const prose = body.replace(/```[\s\S]*?```/g, "").replace(/`[^`\n]*`/g, "");
-    const html = [...prose.matchAll(/<\/?([a-zA-Z][\w-]*)\b[^>\n]*>/g)]
-      .map((match) => match[1].toLowerCase())
-      .filter((tag) => !["br", "sup", "sub", "kbd"].includes(tag));
+    // Raw HTML and code could run scripts on the site.
+    const html = unsafe ?? roughHtml(body);
     if (html.length) {
-      add("html", "error", `Raw HTML isn't allowed in posts (<${html[0]}>). Use the editor's formatting, or put code in a code block.`);
+      add("html", "error", `Raw HTML and code aren't allowed in posts (${html[0]}). Use the editor's formatting, or put code in a code block.`);
     }
     if (/[–—]/.test(body) || /[–—]/.test(title) || /[–—]/.test(description)) {
       add("dashes", "warning", "House style: no em or en dashes (— –). Use a colon, comma or full stop.");
@@ -264,7 +292,9 @@ export function toMdx(
       if (!value.length) return;
       lines.push(`${key}:`, ...value.map((item) => `  - ${JSON.stringify(item)}`));
     } else if (typeof value === "string") {
-      lines.push(`${key}: ${/^\d{4}-\d{2}-\d{2}$/.test(value) ? value : JSON.stringify(value)}`);
+      // Only the two dates go in bare; a title like "2026-01-01" stays text.
+      const bare = (key === "date" || key === "updatedDate") && /^\d{4}-\d{2}-\d{2}$/.test(value);
+      lines.push(`${key}: ${bare ? value : JSON.stringify(value)}`);
     } else {
       lines.push(`${key}: ${JSON.stringify(value)}`);
     }

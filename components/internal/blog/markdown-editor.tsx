@@ -132,6 +132,11 @@ export default function MarkdownEditor({
     <MDXEditor
       ref={editorRef}
       markdown={markdown}
+      // Never build HTML elements from a post's text: a tag in someone's
+      // draft would run in the browser of whoever opens it. Posts can't be
+      // saved with tags either (safe-mdx.ts); one that has some opens in
+      // Markdown view.
+      suppressHtmlProcessing
       onChange={(value, initialNormalize) => {
         if (!initialNormalize) onChange(value);
       }}

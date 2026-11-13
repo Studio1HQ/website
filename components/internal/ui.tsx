@@ -70,12 +70,30 @@ export function Avatar({
   email,
   size = 32,
   className,
+  src,
 }: {
   name: string;
   email?: string;
-  size?: 24 | 28 | 32 | 40 | 48;
+  size?: 20 | 24 | 28 | 32 | 40 | 48 | 64;
   className?: string;
+  /** A profile photo (team people); initials when there's none. */
+  src?: string | null;
 }) {
+  if (src) {
+    return (
+      // Private, already-small WebP from /internal/team-file: no optimizer.
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={src}
+        alt=""
+        aria-hidden
+        width={size}
+        height={size}
+        className={cn("inline-block shrink-0 rounded-full bg-[var(--i-sunken)] object-cover ring-1 ring-[var(--i-line)]", className)}
+        style={{ width: size, height: size }}
+      />
+    );
+  }
   const key = (email || name).toLowerCase();
   let hash = 0;
   for (const char of key) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
@@ -233,6 +251,31 @@ export function buttonClass(
       "border border-rose-200 bg-[var(--i-panel)] text-rose-700 hover:bg-rose-50 dark:border-rose-500/30 dark:text-rose-300 dark:hover:bg-rose-500/10",
   );
 }
+
+/* ---------------------------------------------------------------- fields */
+
+/**
+ * Text inputs, textareas and select triggers: a sunken well that turns white
+ * on focus. No height, so textareas can use it; inputs use `inputClass`.
+ */
+export const fieldClass =
+  "block w-full min-w-0 rounded-lg border border-[var(--i-line)] bg-[var(--i-sunken)] px-3 text-[13px] text-[var(--i-ink)] outline-none transition-colors placeholder:text-[var(--i-faint)] focus:border-[var(--i-line-strong)] focus:bg-[var(--i-panel)] disabled:cursor-not-allowed disabled:opacity-60";
+
+/** md (h-9) in forms and dialogs, sm (h-8) in toolbars, xs (h-7) in table rows. */
+export function inputClass(size: "xs" | "sm" | "md" = "md") {
+  return cn(fieldClass, size === "xs" ? "h-7 px-2" : size === "sm" ? "h-8" : "h-9");
+}
+
+export const textareaClass = cn(fieldClass, "resize-y py-2 leading-relaxed");
+
+/* ----------------------------------------------------------------- menus */
+
+/** Dropdown menus, popover lists and select lists. */
+export const menuContentClass =
+  "internal-pop z-50 min-w-[12rem] overflow-hidden rounded-xl border border-[var(--i-line)] bg-[var(--i-panel)] p-1 text-[13px] text-[var(--i-ink)] shadow-[var(--i-shadow-pop)]";
+
+export const menuItemClass =
+  "flex cursor-default select-none items-center gap-2.5 rounded-md px-2 py-1.5 outline-none data-[highlighted]:bg-[var(--i-hover)] data-[disabled]:opacity-50";
 
 export function Kbd({ children }: { children: ReactNode }) {
   return (

@@ -8,6 +8,7 @@ import {
   fillTemplate,
   reasonFor,
   renderEmail,
+  senderName,
   templatesFor,
   type FormKey,
 } from "@/lib/internal/email-templates";
@@ -34,9 +35,7 @@ export default async function TemplatesPage({ searchParams }: Props) {
   const selected = items.find((item) => item.key === params.t) ?? items[0];
   const vars = {
     ...SAMPLE_VARS[pipeline],
-    sender: selected.automatic
-      ? "The Studio1 team"
-      : (staff.email.split("@")[0].split(/[._+-]/)[0] || "Arindam").replace(/^./, (c) => c.toUpperCase()),
+    sender: selected.automatic ? "The Studio1 team" : senderName(staff.email),
   };
   const { html } = renderEmail({
     body: fillTemplate(selected.body || "Hi {first_name},\n\n(Your message.)\n\n{sender}\nStudio1", vars),

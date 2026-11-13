@@ -9,6 +9,8 @@
  *   GITHUB_BRANCH  default main (Vercel deploys it to production)
  */
 
+import { createHash } from "node:crypto";
+
 const API = "https://api.github.com";
 
 function config() {
@@ -85,6 +87,18 @@ export async function repoFileSha(path: string): Promise<string | null | undefin
   const file = await readRepoFile(path);
   if (file.ok) return file.sha;
   return file.notFound ? null : undefined;
+}
+
+/** The sha git gives a file with this content, to tell whether the branch already has it. */
+export function blobSha(content: string | Buffer) {
+  const bytes = typeof content === "string" ? Buffer.from(content, "utf8") : content;
+  return createHash("sha1").update(`blob ${bytes.length}\0`).update(bytes).digest("hex");
+}
+
+/** A file's page on GitHub, on the publishing branch. */
+export function repoFileUrl(path: string) {
+  const github = config();
+  return github ? `https://github.com/${github.repo}/blob/${encodePath(github.branch)}/${encodePath(path)}` : "";
 }
 
 export type CommitResult =

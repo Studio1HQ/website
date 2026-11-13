@@ -1,3 +1,4 @@
+import "server-only";
 /**
  * Minimal server-side Supabase client over the REST and Storage APIs, so the
  * site needs no Supabase SDK. Import it only from route handlers or other

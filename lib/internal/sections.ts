@@ -86,6 +86,8 @@ export type Section = {
   description: string;
   path: string;
   table: string;
+  /** The column that tells rows apart; also settles ties when rows load in pages. */
+  idColumn: string;
   /** Rows link to a detail page in this section. */
   detail: boolean;
   /** The date a row is "received" on, for sorting and the date filter. */
@@ -125,6 +127,7 @@ export const SECTIONS: Record<SectionKey, Section> = {
     description: "Everyone who applied through the careers pages.",
     path: "/internal/jobs",
     table: "job_applications",
+    idColumn: "id",
     detail: true,
     dateColumn: "created_at",
     search: ["name", "email", "location", "job_title"],
@@ -162,6 +165,7 @@ export const SECTIONS: Record<SectionKey, Section> = {
     description: "Everyone who registered for a Studio1 hackathon.",
     path: "/internal/hackathons",
     table: "hackathon_registrations",
+    idColumn: "id",
     detail: true,
     dateColumn: "created_at",
     search: ["name", "email", "github", "country", "team_name"],
@@ -216,6 +220,7 @@ export const SECTIONS: Record<SectionKey, Section> = {
     description: "Everyone who applied to the DevRel Cohort.",
     path: "/internal/cohort",
     table: "devrel_cohort_applications",
+    idColumn: "id",
     detail: true,
     dateColumn: "created_at",
     search: ["name", "email", "location", "role", "favorite_tool"],
@@ -261,6 +266,7 @@ export const SECTIONS: Record<SectionKey, Section> = {
       "Everyone who opted in to emails about future roles, cohorts and events, one row per address.",
     path: "/internal/subscribers",
     table: "email_subscribers",
+    idColumn: "email",
     detail: false,
     dateColumn: "last_seen",
     search: ["email", "name"],
@@ -298,6 +304,7 @@ export const SECTIONS: Record<SectionKey, Section> = {
       "Cohort applicants and hackathon registrants who agreed that Studio1 can refer them to partner companies.",
     path: "/internal/partner-pool",
     table: "partner_referral_pool",
+    idColumn: "record_id",
     detail: false,
     dateColumn: "created_at",
     search: ["name", "email", "role", "location", "program"],

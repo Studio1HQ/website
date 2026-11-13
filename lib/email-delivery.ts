@@ -1,4 +1,5 @@
-import { inList, insertRows, selectRows, upsertRows } from "@/lib/supabase-server";
+import { createHash } from "node:crypto";
+import { inList, insertRows, selectRows, updateRows, upsertRows } from "@/lib/supabase-server";
 
 /**
  * What happened to each email after Resend accepted it, from Resend's
@@ -57,34 +58,47 @@ export async function recordAccepted(
   if (!result.ok) console.error(`[email-delivery] recording sent emails failed: ${result.message}`);
 }
 
-/** Applies one delivery event, unless the email already has a later state. */
+/**
+ * Applies one delivery event, unless the email already has a later state.
+ * The rank check happens inside the UPDATE's own filter, not in a read
+ * beforehand, so two events arriving together can't put an earlier state
+ * back over a later one.
+ */
 export async function recordDelivery(event: {
   resendId: string;
   to: string;
   status: DeliveryStatus;
   detail?: string | null;
 }): Promise<{ ok: true; changed: boolean } | { ok: false; message: string }> {
-  const current = await selectRows<{ status: DeliveryStatus }>(
-    "email_delivery",
-    new URLSearchParams({ select: "status", resend_id: `eq.${event.resendId}`, limit: "1" }),
-  );
-  if (!current.ok) return { ok: false, message: current.message };
-  const previous = current.rows[0]?.status;
-  if (previous && RANK[previous] > RANK[event.status]) return { ok: true, changed: false };
-  const result = await upsertRows(
-    "email_delivery",
-    [
-      {
-        resend_id: event.resendId,
-        to_email: event.to.toLowerCase(),
-        status: event.status,
-        detail: event.detail ?? null,
-        updated_at: new Date().toISOString(),
-      },
-    ],
-    { onConflict: "resend_id" },
-  );
-  return result.ok ? { ok: true, changed: true } : result;
+  const row = {
+    resend_id: event.resendId,
+    to_email: event.to.toLowerCase(),
+    status: event.status,
+    detail: event.detail ?? null,
+    updated_at: new Date().toISOString(),
+  };
+  // Only a row whose state this event may replace matches.
+  const replaceable = (Object.keys(RANK) as DeliveryStatus[]).filter((status) => RANK[status] <= RANK[event.status]);
+  const update = () =>
+    updateRows(
+      "email_delivery",
+      new URLSearchParams({ resend_id: `eq.${event.resendId}`, status: inList(replaceable) }),
+      row,
+      "resend_id",
+    );
+
+  const first = await update();
+  if (!first.ok) return first;
+  if (first.count > 0) return { ok: true, changed: true };
+
+  // No match: the email has no row yet, or it has a later state. Add the
+  // row if it's missing (an existing one is left alone), then try once
+  // more, in case another event added an earlier state in between.
+  const added = await upsertRows("email_delivery", [row], { onConflict: "resend_id", keepExisting: true });
+  if (!added.ok) return added;
+  const second = await update();
+  if (!second.ok) return second;
+  return { ok: true, changed: second.count > 0 };
 }
 
 /** The blocked addresses among `emails` (lowercased), with why. */
@@ -131,15 +145,90 @@ export async function deliveriesFor(resendIds: string[]): Promise<Map<string, De
 
 /**
  * Adds rows to internal_email_log. If the delivery migration hasn't run yet
- * (no resend_id or scheduled_for column), it logs them without those.
+ * (no resend_id or scheduled_for column), it logs them without those. An
+ * email that's already in the log (same Resend id) isn't added again: a
+ * retried send that Resend answered from its idempotency key went out once,
+ * so it's listed once.
  */
 export async function logEmails(rows: Record<string, unknown>[]) {
-  const first = await insertRows("internal_email_log", rows);
+  const ids = rows.map((row) => row.resend_id).filter((id): id is string => typeof id === "string" && id !== "");
+  let fresh = rows;
+  if (ids.length) {
+    const logged = await selectRows<{ resend_id: string }>(
+      "internal_email_log",
+      new URLSearchParams({ select: "resend_id", resend_id: inList(ids) }),
+    );
+    if (logged.ok && logged.rows.length) {
+      const seen = new Set(logged.rows.map((row) => row.resend_id));
+      fresh = rows.filter((row) => typeof row.resend_id !== "string" || !seen.has(row.resend_id));
+    }
+  }
+  const first = await insertRows("internal_email_log", fresh);
   if (first.ok || !/resend_id|scheduled_for/.test(first.message)) return first;
   return insertRows(
     "internal_email_log",
-    rows.map(({ resend_id: _id, scheduled_for: _when, ...row }) => row),
+    fresh.map(({ resend_id: _id, scheduled_for: _when, ...row }) => row),
   );
+}
+
+/** The most one teammate can send from the dashboard in an hour. */
+export const HOURLY_SEND_CAP = 300;
+
+/**
+ * How many more emails this teammate can send this hour, from the email
+ * log. A brake on a runaway script or a stolen session, far above a normal
+ * day's sending. If the log can't be read, sending carries on.
+ */
+export async function sendsLeftThisHour(sentBy: string, now = Date.now()) {
+  const counted = await selectRows(
+    "internal_email_log",
+    new URLSearchParams({
+      select: "id",
+      sent_by: `eq.${sentBy}`,
+      created_at: `gte.${new Date(now - 60 * 60 * 1000).toISOString()}`,
+      limit: "1",
+    }),
+    { count: true },
+  );
+  if (!counted.ok) {
+    console.error(`[email-delivery] counting this hour's emails failed: ${counted.message}`);
+    return HOURLY_SEND_CAP;
+  }
+  return Math.max(0, HOURLY_SEND_CAP - (counted.total ?? 0));
+}
+
+/**
+ * Resend's idempotency key for a send from the dashboard: the same sender,
+ * recipients, text and send time always give the same key, so a retry after
+ * a timeout, or a double click, can't send the email twice (Resend keeps
+ * keys for 24 hours). `nonce` comes from the open composer: closing it and
+ * starting again gives a new one, so sending the same reminder twice on
+ * purpose still works.
+ */
+export function sendKey(parts: {
+  sender: string;
+  table: string;
+  ids: string[];
+  subject: string;
+  body: string;
+  extra?: (string | null | undefined)[];
+  nonce?: string;
+}) {
+  const payload = JSON.stringify([
+    parts.sender.toLowerCase(),
+    parts.table,
+    [...new Set(parts.ids.map((id) => id.toLowerCase()))].sort(),
+    parts.subject,
+    parts.body,
+    (parts.extra ?? []).map((item) => item ?? ""),
+    parts.nonce ?? "",
+  ]);
+  return `dash-${createHash("sha256").update(payload).digest("hex").slice(0, 48)}`;
+}
+
+/** A composer's nonce: a short token, or nothing. */
+export function cleanNonce(value: unknown) {
+  return typeof value === "string" && /^[A-Za-z0-9-]{8,64}$/.test(value) ? value : undefined;
 }
 
 /** Resend holds scheduled email for up to 30 days. */

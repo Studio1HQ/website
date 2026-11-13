@@ -48,7 +48,7 @@ export async function requestSignInLink(
   formData: FormData,
 ): Promise<LoginState> {
   if (!authSecret()) {
-    console.error("[internal] SUPABASE_SERVICE_ROLE_KEY is missing");
+    console.error("[internal] INTERNAL_AUTH_SECRET (32+ characters) is missing");
     return { status: "error", message: "Sign-in isn't set up yet." };
   }
 

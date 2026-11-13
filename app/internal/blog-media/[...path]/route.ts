@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { UUID, getPost } from "@/lib/internal/blog/data";
-import { mediaPath, readImage, saveImage } from "@/lib/internal/blog/media";
+import { draftImages, mediaPath, readImage, saveImage } from "@/lib/internal/blog/media";
 import { requireBlog } from "@/lib/internal/session";
 
 type Props = { params: Promise<{ path: string[] }> };
@@ -30,13 +30,12 @@ export async function GET(_: NextRequest, { params }: Props) {
 export async function POST(request: NextRequest, { params }: Props) {
   const staff = await requireBlog("writer");
   const [postId, extra] = (await params).path;
-  if (!postId || extra || !UUID.test(postId) || !(await getPost(staff, postId))) {
-    return NextResponse.json({ error: "Unknown post." }, { status: 404 });
-  }
+  const post = postId && !extra && UUID.test(postId) ? await getPost(staff, postId) : null;
+  if (!post) return NextResponse.json({ error: "Unknown post." }, { status: 404 });
   const form = await request.formData().catch(() => null);
   const file = form?.get("file");
   if (!(file instanceof File)) return NextResponse.json({ error: "No image was sent." }, { status: 400 });
-  const saved = await saveImage(postId, file);
+  const saved = await saveImage(post.id, file, draftImages(post.id, post.body, post.banner_image));
   return saved.ok
     ? NextResponse.json({ url: saved.url })
     : NextResponse.json({ error: saved.message }, { status: 400 });

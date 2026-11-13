@@ -22,6 +22,13 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: process.cwd(),
   },
+  experimental: {
+    // Dashboard uploads (profile photos, expense receipts) go through server
+    // actions; Next's default is 1 MB. Vercel caps request bodies at 4.5 MB.
+    // The upload limits (MAX_UPLOAD_BYTES in lib/internal/team/shared.ts,
+    // MAX_CSV_BYTES in lib/internal/community) are sized to fit under this.
+    serverActions: { bodySizeLimit: "4mb" },
+  },
   images: {
     // Serve compact modern formats and reuse optimized derivatives on repeat visits.
     formats: ["image/avif", "image/webp"],
@@ -70,6 +77,17 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      // The dashboard and the CMS can't be put in a frame on another site.
+      // proxy.ts adds the dashboard's full script policy; this also covers
+      // the paths the proxy doesn't see (file-like URLs).
+      ...["/internal/:path*", "/admin/:path*", "/admin"].map((source) => ({
+        source,
+        headers: [
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+        ],
+      })),
       {
         source: "/assets/:path*",
         headers: [

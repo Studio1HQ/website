@@ -93,7 +93,9 @@ export function transformBlogMdxContent(content: string): string {
       const embedUrl = getYouTubeEmbedUrl(source);
       if (!embedUrl) return match;
 
-      return `${indent}<YouTubeEmbed url={${JSON.stringify(embedUrl)}} />`;
+      // A plain text attribute: next-mdx-remote drops {expressions}, and the
+      // embed URL has no characters that need escaping.
+      return `${indent}<YouTubeEmbed url="${embedUrl}" />`;
     },
   );
 }
@@ -271,7 +273,9 @@ function BlogPre({ children }: ComponentPropsWithoutRef<"pre">) {
   return <CodeBlock code={code} language={language} />;
 }
 
-function YouTubeEmbed({ url }: { url: string }) {
+function YouTubeEmbed({ url }: { url?: string }) {
+  // Only ever a YouTube embed, whatever the post says.
+  if (!url || !/^https:\/\/www\.youtube\.com\/embed\/[A-Za-z0-9_-]{6,}$/.test(url)) return null;
   return (
     <figure className="not-prose mx-auto my-12 w-full overflow-hidden rounded-[6px] bg-white p-2 shadow-[0_1px_0_rgba(27,23,20,0.06)] ring-1 ring-inset ring-[#141414]/[0.08]">
       <div className="aspect-video w-full overflow-hidden rounded-[6px] bg-[#141414]">

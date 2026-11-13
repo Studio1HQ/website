@@ -15,10 +15,21 @@ const TEAM: Record<string, string> = {
   looking: "Looking for a team",
 };
 
+/** The event's own questions, as saved: [{ id, question, answer }]. */
+function eventAnswers(value: unknown) {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item) =>
+    item && typeof item === "object" && typeof item.question === "string" && typeof item.answer === "string"
+      ? [{ id: String(item.id ?? item.question), question: item.question, answer: item.answer }]
+      : [],
+  );
+}
+
 export default async function HackathonRegistrationPage({ params, searchParams }: Props) {
   const data = await loadRecord("hackathons", params, searchParams);
   const { record } = data;
   const github = text(record.github).replace(/^@/, "");
+  const answers = eventAnswers(record.answers);
   return (
     <RecordView
       sectionKey="hackathons"
@@ -53,6 +64,17 @@ export default async function HackathonRegistrationPage({ params, searchParams }
           <Field label="Open to partner referrals">{record.partner_consent ? "Yes" : "No"}</Field>
         </Fields>
       </Answers>
+      {answers.length ? (
+        <Answers title={`Questions for ${text(record.hackathon_name) || "this hackathon"}`}>
+          <Fields>
+            {answers.map((item) => (
+              <Field key={item.id} label={item.question}>
+                {item.answer}
+              </Field>
+            ))}
+          </Fields>
+        </Answers>
+      ) : null}
       <Answers title="Idea">
         <LongText value={record.idea} />
       </Answers>

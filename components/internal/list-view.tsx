@@ -50,6 +50,7 @@ import { cn } from "@/lib/utils";
 import { BulkEmailDialog } from "@/components/internal/bulk-email-dialog";
 import { FilterMenu } from "@/components/internal/filter-menu";
 import { EMAIL_TEMPLATES } from "@/lib/internal/email-templates";
+import { mailtoHref } from "@/lib/form-checks";
 import { programOf } from "@/lib/internal/program";
 import { TagPicker, type TagState } from "@/components/internal/tag-picker";
 import { useToast } from "@/components/internal/toast";
@@ -63,6 +64,9 @@ import {
   TagChip,
   buttonClass,
   formatDate,
+  inputClass,
+  menuContentClass,
+  menuItemClass,
   prettyUrl,
   relativeDate,
   safeUrl,
@@ -70,11 +74,6 @@ import {
 } from "@/components/internal/ui";
 
 type Override = { status?: string; tags?: string[] };
-
-const menuContent =
-  "internal-pop z-50 min-w-[12rem] overflow-hidden rounded-xl border border-[var(--i-line)] bg-[var(--i-panel)] p-1 text-[13px] text-[var(--i-ink)] shadow-[var(--i-shadow-pop)]";
-const menuItem =
-  "flex cursor-default select-none items-center gap-2.5 rounded-md px-2 py-1.5 outline-none data-[highlighted]:bg-[var(--i-hover)] data-[disabled]:opacity-50";
 
 export function ListView({
   sectionKey,
@@ -89,12 +88,15 @@ export function ListView({
   overdue,
   sender,
   mailerReady,
+  rowLimit,
 }: {
   role: Role;
   overdue: number;
   /** The signed-in teammate's first name, for email sign-offs. */
   sender: string;
   mailerReady: boolean;
+  /** Set when the table holds more rows than the dashboard reads: that many. */
+  rowLimit: number | null;
   sectionKey: SectionKey;
   rows: Row[];
   total: number;
@@ -179,7 +181,7 @@ export function ListView({
 
   const listQuery = filterParams(filters, { page: false });
   const view = rows.map((row) => {
-    const id = String(row.id ?? row.record_id ?? row.email);
+    const id = String(row[section.idColumn]);
     const override = overrides[id];
     return {
       ...row,
@@ -486,6 +488,15 @@ export function ListView({
         </nav>
       ) : null}
 
+      {rowLimit ? (
+        <div className="mb-4">
+          <Notice tone="warning">
+            This list is longer than the dashboard reads at once. Only the newest {rowLimit.toLocaleString("en-IN")} entries
+            are shown, counted{canExport ? " and exported" : ""}; older ones are still in Supabase.
+          </Notice>
+        </div>
+      ) : null}
+
       {section.tags && !tagsReady ? (
         <div className="mb-4">
           <Notice tone="warning">
@@ -509,7 +520,7 @@ export function ListView({
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search name, email, tags…"
               aria-label="Search"
-              className="h-8 w-full rounded-lg border border-[var(--i-line)] bg-[var(--i-sunken)] pl-8 pr-8 text-[13px] outline-none transition-colors placeholder:text-[var(--i-faint)] focus:border-[var(--i-line-strong)] focus:bg-[var(--i-panel)] [&::-webkit-search-cancel-button]:hidden"
+              className={cn(inputClass("sm"), "pl-8 pr-8 [&::-webkit-search-cancel-button]:hidden")}
             />
             <span className="pointer-events-none absolute right-2 top-1/2 hidden -translate-y-1/2 sm:block">
               {search ? null : <Kbd>/</Kbd>}
@@ -534,7 +545,7 @@ export function ListView({
               </button>
             </Menu.Trigger>
             <Menu.Portal>
-              <Menu.Content align="start" sideOffset={6} className={menuContent}>
+              <Menu.Content align="start" sideOffset={6} className={menuContentClass}>
                 <Menu.RadioGroup
                   value={filters.sort}
                   onValueChange={(sort) =>
@@ -542,7 +553,7 @@ export function ListView({
                   }
                 >
                   {(Object.keys(SORTS) as SortKey[]).map((key) => (
-                    <Menu.RadioItem key={key} value={key} className={menuItem}>
+                    <Menu.RadioItem key={key} value={key} className={menuItemClass}>
                       <span className="flex-1">{SORTS[key]}</span>
                       <Menu.ItemIndicator>
                         <Check size={14} className="text-[var(--i-accent)]" />
@@ -765,9 +776,9 @@ export function ListView({
               </button>
             </Menu.Trigger>
             <Menu.Portal>
-              <Menu.Content side="top" align="start" sideOffset={8} className={menuContent}>
+              <Menu.Content side="top" align="start" sideOffset={8} className={menuContentClass}>
                 {(section.statuses ?? []).map((value) => (
-                  <Menu.Item key={value} className={menuItem} onSelect={() => setStatus(selectedIds, value)}>
+                  <Menu.Item key={value} className={menuItemClass} onSelect={() => setStatus(selectedIds, value)}>
                     <StatusDot status={value} />
                     {statusLabel(value)}
                   </Menu.Item>
@@ -855,16 +866,16 @@ function RowMenu({
         </button>
       </Menu.Trigger>
       <Menu.Portal>
-        <Menu.Content align="end" sideOffset={6} collisionPadding={12} className={menuContent}>
+        <Menu.Content align="end" sideOffset={6} collisionPadding={12} className={menuContentClass}>
           <Menu.Sub>
-            <Menu.SubTrigger className={menuItem}>
+            <Menu.SubTrigger className={menuItemClass}>
               <CheckCircle size={15} className="text-[var(--i-muted)]" />
               <span className="flex-1">Set status</span>
             </Menu.SubTrigger>
             <Menu.Portal>
-              <Menu.SubContent sideOffset={6} className={menuContent}>
+              <Menu.SubContent sideOffset={6} className={menuContentClass}>
                 {statuses.map((value) => (
-                  <Menu.Item key={value} className={menuItem} onSelect={() => onStatus(value)}>
+                  <Menu.Item key={value} className={menuItemClass} onSelect={() => onStatus(value)}>
                     <StatusDot status={value} />
                     <span className="flex-1">{statusLabel(value)}</span>
                     {row.review_status === value ? <Check size={14} className="text-[var(--i-accent)]" /> : null}
@@ -875,12 +886,12 @@ function RowMenu({
           </Menu.Sub>
           {tags.length ? (
             <Menu.Sub>
-              <Menu.SubTrigger className={menuItem}>
+              <Menu.SubTrigger className={menuItemClass}>
                 <Tag size={15} className="text-[var(--i-muted)]" />
                 <span className="flex-1">Tags</span>
               </Menu.SubTrigger>
               <Menu.Portal>
-                <Menu.SubContent sideOffset={6} className={cn(menuContent, "max-h-72 overflow-y-auto")}>
+                <Menu.SubContent sideOffset={6} className={cn(menuContentClass, "max-h-72 overflow-y-auto")}>
                   {tags.map((option) => {
                     const on = own.includes(option.value.toLowerCase());
                     return (
@@ -889,7 +900,7 @@ function RowMenu({
                         checked={on}
                         onSelect={(event) => event.preventDefault()}
                         onCheckedChange={() => onTag(option.value, !on)}
-                        className={menuItem}
+                        className={menuItemClass}
                       >
                         <span
                           aria-hidden
@@ -911,11 +922,11 @@ function RowMenu({
           <Menu.Separator className="my-1 h-px bg-[var(--i-line)]" />
           {email ? (
             <>
-              <Menu.Item className={menuItem} onSelect={onCopy}>
+              <Menu.Item className={menuItemClass} onSelect={onCopy}>
                 <Copy size={15} className="text-[var(--i-muted)]" /> Copy email
               </Menu.Item>
-              <Menu.Item className={menuItem} asChild>
-                <a href={`mailto:${email}`}>
+              <Menu.Item className={menuItemClass} asChild>
+                <a href={mailtoHref(email)}>
                   <EnvelopeSimple size={15} className="text-[var(--i-muted)]" /> Send email
                 </a>
               </Menu.Item>

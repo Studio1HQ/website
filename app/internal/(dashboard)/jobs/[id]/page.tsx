@@ -79,15 +79,16 @@ export default async function JobApplicationPage({ params, searchParams }: Props
       <Answers title="Why Studio1">
         <LongText value={record.why} />
       </Answers>
-      {data.resumeUrl ? (
+      {record.resume_path ? (
         <Answers title="Résumé">
+          {/* Through the résumé route, so every load checks the session. */}
           <iframe
-            src={data.resumeUrl}
+            src={`/internal/jobs/${record.id}/resume`}
             title={`Résumé of ${text(record.name)}`}
             className="h-[780px] w-full rounded-lg border border-[var(--i-line)] bg-[var(--i-sunken)]"
           />
           <p className="mt-2 text-[12px] text-[var(--i-faint)]">
-            The preview link lasts 10 minutes. Reload the page if it stops working.
+            If the preview is blank, use Open résumé at the top of the page.
           </p>
         </Answers>
       ) : null}

@@ -1,15 +1,16 @@
 import { blockedAddresses, blockedReason, logEmails, recordAccepted } from "@/lib/email-delivery";
+import { firstName } from "@/lib/first-name";
 import { isMailerConfigured, sendMail } from "@/lib/mailer";
 import {
   AUTOMATIC_SENDER,
   CONFIRMATION_EMAILS,
   fillTemplate,
-  firstName,
   reasonFor,
   renderEmail,
   type FormKey,
 } from "@/lib/internal/email-templates";
-import { unsubscribeHeaders, unsubscribeUrl } from "@/lib/unsubscribe";
+import { confirmationWithinLimit } from "@/lib/rate-limit";
+import { unsubscribeUrl } from "@/lib/unsubscribe";
 
 const TABLES: Record<FormKey, string> = {
   jobs: "job_applications",
@@ -20,9 +21,14 @@ const TABLES: Record<FormKey, string> = {
 /**
  * The "we've received it" email a form sends once it has saved an entry.
  * Call it inside `after()` so it runs once the response has gone: a slow or
- * failed send never holds up or fails the submission. Does nothing when SMTP
- * isn't set up. Repeat submissions (blocked as duplicates) and bot entries
- * never get here, so nobody gets it twice for the same entry.
+ * failed send never holds up or fails the submission. Does nothing when
+ * Resend isn't set up. Repeat submissions (blocked as duplicates) and bot
+ * entries never get here, so nobody gets it twice for the same entry, and
+ * one inbox gets only a few a day whatever "+tag" the address carries
+ * (lib/rate-limit.ts).
+ *
+ * No List-Unsubscribe header: this is an email about the entry itself,
+ * which unsubscribing doesn't stop. The footer link turns off the updates.
  *
  * The email is logged on the entry, so the dashboard shows it under
  * "Emails sent" as sent automatically.
@@ -35,6 +41,10 @@ export async function sendConfirmation(
   const blocked = await blockedAddresses([entry.email]);
   if (blocked.size) {
     console.warn(`[${form}] confirmation skipped: the address ${blockedReason([...blocked.values()][0])} before`);
+    return;
+  }
+  if (!(await confirmationWithinLimit(entry.email))) {
+    console.warn(`[${form}] confirmation skipped: this address has had its confirmation emails for today`);
     return;
   }
   const template = CONFIRMATION_EMAILS[form];
@@ -52,7 +62,7 @@ export async function sendConfirmation(
   let resendId: string | null;
   try {
     ({ id: resendId } = await sendMail(
-      { to: entry.email, subject, html, text, headers: unsubscribeHeaders(unsubscribe) },
+      { to: entry.email, subject, html, text },
       form,
     ));
   } catch (error) {

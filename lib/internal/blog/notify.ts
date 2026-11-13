@@ -1,4 +1,5 @@
-import { renderEmail } from "@/lib/internal/email-templates";
+import { renderEmail, withoutLinks } from "@/lib/internal/email-templates";
+import { membersWith } from "@/lib/internal/members";
 import { isMailerConfigured, sendMail } from "@/lib/mailer";
 import { baseUrl } from "@/lib/site";
 import { nameFromEmail } from "@/lib/internal/blog/data";
@@ -6,8 +7,14 @@ import { nameFromEmail } from "@/lib/internal/blog/data";
 /**
  * Emails about a post's review: a review request to the chosen reviewers,
  * and changes requested, approvals, comments and publishes to the people
- * on the post. The person who acted never gets their own email. Without
- * SMTP nothing is sent; the dashboard's Blog badge still shows what's waiting.
+ * on the post. The person who acted never gets their own email, and
+ * neither does anyone who can't open the blog anymore (turned off, or the
+ * role taken away). Without SMTP nothing is sent; the dashboard's Blog badge
+ * still shows what's waiting.
+ *
+ * `text` is the dashboard's own sentence; callers take links out of any
+ * title or quote they put in it. `note` is what a person typed: it goes in
+ * as plain text, never as a link.
  */
 export async function notifyPeople(
   recipients: string[],
@@ -15,12 +22,16 @@ export async function notifyPeople(
   postId: string,
   message: { subject: string; text: string; note?: string },
 ) {
-  const to = [...new Set(recipients.map((email) => email.toLowerCase()))].filter((email) => email !== actor);
-  if (!to.length || !isMailerConfigured()) return;
+  const asked = [...new Set(recipients.map((email) => email.toLowerCase()))].filter((email) => email !== actor);
+  if (!asked.length || !isMailerConfigured()) return;
+  const active = new Set(await membersWith(["admin", "blog_reviewer", "blog_writer"]));
+  const to = asked.filter((email) => active.has(email));
+  if (!to.length) return;
+  const note = withoutLinks(message.note?.trim().slice(0, 2000) ?? "");
   const body = [
     "Hi,",
     message.text,
-    message.note ? `${nameFromEmail(actor)} wrote:\n${message.note.trim().slice(0, 2000)}` : "",
+    note ? `${nameFromEmail(actor)} wrote:\n${note}` : "",
     "The Studio1 blog",
   ]
     .filter(Boolean)

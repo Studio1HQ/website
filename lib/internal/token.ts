@@ -27,20 +27,21 @@ const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
 /**
- * The session signing key: INTERNAL_AUTH_SECRET when set (change it to sign
- * everyone out), otherwise derived from the Supabase secret key, so the
- * dashboard needs no extra setup. The environment is part of the key, so a
- * session made on a dev machine never works on the live site.
+ * The session signing key. The live site needs INTERNAL_AUTH_SECRET (32+
+ * random characters; change it to sign everyone out), so sessions don't
+ * depend on the database key. Local development falls back to a key derived
+ * from the Supabase secret key, so it needs no extra setup. The environment
+ * is part of the key, so a session made on a dev machine never works on the
+ * live site.
  */
 export function authSecret(): string | null {
   const secret = process.env.INTERNAL_AUTH_SECRET;
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const base =
-    secret && secret.length >= 32
-      ? secret
-      : supabaseKey && supabaseKey.length >= 32
-        ? supabaseKey
-        : null;
+  const fallback =
+    process.env.NODE_ENV !== "production" && supabaseKey && supabaseKey.length >= 32
+      ? supabaseKey
+      : null;
+  const base = secret && secret.length >= 32 ? secret : fallback;
   return base
     ? `studio1-internal-session:${process.env.NODE_ENV}:${base}`
     : null;

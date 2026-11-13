@@ -54,7 +54,7 @@ import { cn } from "@/lib/utils";
 import { CommentsPanel, SelectionCommentButton, useQuoteHighlights } from "@/components/internal/blog/comments";
 import { BlogStatusBadge } from "@/components/internal/blog/status";
 import { useToast } from "@/components/internal/toast";
-import { Avatar, Card, buttonClass, formatDate, relativeDate } from "@/components/internal/ui";
+import { Avatar, Card, buttonClass, formatDate, inputClass, relativeDate, textareaClass } from "@/components/internal/ui";
 
 const MarkdownEditor = dynamic(() => import("@/components/internal/blog/markdown-editor"), {
   ssr: false,
@@ -67,13 +67,12 @@ const MarkdownEditor = dynamic(() => import("@/components/internal/blog/markdown
 
 const SITE = "https://www.studio1hq.com";
 const AUTOSAVE_MS = 1200;
+/** After a save fails (the connection, the database), try again this much later. */
+const RETRY_MS = 5000;
 /** Vercel caps request bodies near 4.5 MB, so big images shrink in the browser first. */
 const SHRINK_OVER_BYTES = 4 * 1024 * 1024;
 
 type SaveState = "saved" | "dirty" | "saving" | "error" | "conflict";
-
-const inputClass =
-  "w-full rounded-lg border border-[var(--i-line)] bg-[var(--i-panel)] px-3 py-1.5 text-[13px] outline-none transition-colors placeholder:text-[var(--i-faint)] focus:border-[var(--i-line-strong)] focus:ring-2 focus:ring-[var(--i-ring)]/30 disabled:opacity-60";
 
 function fieldsOf(post: BlogPostRow): BlogFields {
   return {
@@ -251,6 +250,8 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmForce, setConfirmForce] = useState<string | null>(null);
   const [published, setPublished] = useState<{ url: string; commitUrl: string } | null>(null);
+  /** Why the server refused the text (raw HTML), until it's edited and saves. */
+  const [rejection, setRejection] = useState<string | null>(null);
 
   const writingRef = useRef<HTMLDivElement | null>(null);
   const composerRef = useRef<HTMLTextAreaElement | null>(null);
@@ -264,6 +265,7 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
   const dirty = useRef(new Set<keyof BlogFields>());
   const saving = useRef(false);
   const conflict = useRef(false);
+  const retry = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const update = useCallback(<K extends keyof BlogFields>(key: K, value: BlogFields[K]) => {
     setFields((current) => ({ ...current, [key]: value }));
@@ -284,23 +286,39 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
       message: "Couldn't save. Check your connection.",
     }));
     saving.current = false;
+    if (retry.current) clearTimeout(retry.current);
+    retry.current = null;
     if (result.ok) {
       baseRef.current = result.updated_at;
       setBase(result.updated_at);
       setStatus(result.status);
+      setRejection(null);
       setSaveState(dirty.current.size ? "dirty" : "saved");
       if (dirty.current.size) setVersion((v) => v + 1);
+      if (result.slugTaken) toast("error", "Another post already uses that URL. Everything else is saved: pick a different URL.");
       return;
     }
     keys.forEach((key) => dirty.current.add(key));
     if ("conflict" in result && result.conflict) {
       conflict.current = true;
       setSaveState("conflict");
+    } else if ("rejected" in result && result.rejected) {
+      // The text itself was refused: the next edit tries again, a timer wouldn't help.
+      setSaveState("error");
+      setRejection(result.message);
     } else {
       setSaveState("error");
       toast("error", result.message);
+      retry.current = setTimeout(() => setVersion((v) => v + 1), RETRY_MS);
     }
   }, [post.id, toast]);
+
+  useEffect(
+    () => () => {
+      if (retry.current) clearTimeout(retry.current);
+    },
+    [],
+  );
 
   // Autosave a moment after the last change.
   useEffect(() => {
@@ -372,7 +390,10 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
   const autoArt = autoCoverArt(fields.title, fields.tags);
   const art = isCoverArt(fields.cover_art) ? fields.cover_art : autoArt;
   const isOwner = post.created_by === me.email;
-  const canRequest = status !== "published" || !isLive;
+  // A live post with nothing changed has nothing to review or publish.
+  const canRequest = status !== "published";
+  // Publishing needs an approval, except for the reviewer's own post.
+  const canPublish = status === "approved" || (isOwner && status !== "published");
   const liveUrl = `${SITE}/blog/${liveSlug ?? fields.slug}`;
 
   const setTitle = (title: string) => {
@@ -425,12 +446,13 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
       return;
     }
     setBusy("publish");
-    const result = await publish(post.id, force).catch(() => ({ ok: false as const, message: "Couldn't publish. Try again." }));
+    const result = await publish(post.id, baseRef.current, force).catch(() => ({ ok: false as const, message: "Couldn't publish. Try again." }));
     setBusy(null);
     if (result.ok) {
       setConfirmForce(null);
       setPublished({ url: result.url, commitUrl: result.commitUrl });
-      toast("success", "Published. It goes live in a few minutes.");
+      if (result.warning) toast("error", result.warning);
+      else toast("success", "Published. It goes live in a few minutes.");
       router.refresh();
     } else if ("conflict" in result && result.conflict) {
       setConfirmForce(result.message);
@@ -508,12 +530,22 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
             href={`/internal/blog-preview/${post.id}`}
             target="_blank"
             rel="noreferrer"
-            onClick={() => void saveNow()}
+            onClick={(event) => {
+              // Save first, so the preview shows what's on screen. The tab opens
+              // straight away (browsers block one opened after a wait).
+              event.preventDefault();
+              const href = event.currentTarget.href;
+              const tab = window.open("", "_blank");
+              void saveNow().then(() => {
+                if (tab) tab.location.href = href;
+                else window.location.href = href;
+              });
+            }}
             className={buttonClass("secondary", "sm")}
           >
             <Eye size={14} /> Preview
           </a>
-          {canRequest && (isOwner || isReviewer) ? (
+          {canRequest ? (
             <button
               type="button"
               onClick={() => setPanel(panel === "request" ? null : "request")}
@@ -535,15 +567,17 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
               ) : null}
               <button
                 type="button"
-                disabled={busy === "publish" || errors.length > 0 || !githubReady || (status === "published" && isLive)}
+                disabled={busy === "publish" || errors.length > 0 || !githubReady || !canPublish}
                 title={
                   !githubReady
                     ? "Publishing isn't set up yet (GITHUB_TOKEN)"
                     : errors.length
                       ? "Fix the checks marked in red first"
-                      : status === "published" && isLive
+                      : status === "published"
                         ? "Already live. Edit something to publish again."
-                        : "Commit the post to the site. It goes live in a few minutes."
+                        : !canPublish
+                          ? "Approve this post first (Review), then publish it."
+                          : "Commit the post to the site. It goes live in a few minutes."
                 }
                 onClick={() => void doPublish()}
                 className={buttonClass("accent", "sm")}
@@ -563,6 +597,13 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
           <button type="button" onClick={() => window.location.reload()} className={buttonClass("secondary", "sm")}>
             Reload
           </button>
+        </div>
+      ) : null}
+
+      {rejection && saveState === "error" ? (
+        <div className="mb-4 flex flex-wrap items-center gap-3 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-[13px] text-rose-900 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200">
+          <WarningCircle size={16} />
+          Not saved. {rejection}
         </div>
       ) : null}
 
@@ -634,7 +675,7 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
             onChange={(event) => setMessage(event.target.value)}
             rows={2}
             placeholder="A note for the reviewers (optional)"
-            className={inputClass}
+            className={textareaClass}
           />
           <div className="mt-3 flex gap-2">
             <button
@@ -665,7 +706,7 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
             onChange={(event) => setMessage(event.target.value)}
             rows={3}
             placeholder="What should change? (needed for Request changes, optional for Approve)"
-            className={inputClass}
+            className={textareaClass}
           />
           <div className="mt-3 flex flex-wrap gap-2">
             <button
@@ -758,18 +799,18 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
                 value={fields.seo_title}
                 onChange={(event) => update("seo_title", event.target.value)}
                 placeholder={fields.title.length > 60 ? "Required: the title is over 60 characters" : "Optional when the title is short"}
-                className={inputClass}
+                className={inputClass()}
               />
             </div>
             <div>
               <Label hint={liveSlug ? "a live post's URL can't change" : undefined}>URL</Label>
-              <div className="flex items-center rounded-lg border border-[var(--i-line)] bg-[var(--i-sunken)] pl-3 text-[13px] text-[var(--i-muted)] focus-within:border-[var(--i-line-strong)]">
+              <div className="flex h-9 items-center rounded-lg border border-[var(--i-line)] bg-[var(--i-sunken)] pl-3 text-[13px] text-[var(--i-muted)] transition-colors focus-within:border-[var(--i-line-strong)] focus-within:bg-[var(--i-panel)]">
                 /blog/
                 <input
                   value={fields.slug}
                   disabled={Boolean(liveSlug)}
                   onChange={(event) => update("slug", event.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""))}
-                  className="h-8 min-w-0 flex-1 rounded-r-lg bg-[var(--i-panel)] px-1.5 text-[var(--i-ink)] outline-none disabled:opacity-60"
+                  className="h-full min-w-0 flex-1 rounded-r-lg bg-transparent pl-0.5 pr-3 text-[var(--i-ink)] outline-none disabled:cursor-not-allowed disabled:opacity-60"
                 />
               </div>
             </div>
@@ -780,7 +821,7 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
                 onChange={(event) => update("description", event.target.value.replace(/\n/g, " "))}
                 rows={3}
                 placeholder="140 to 160 characters, main keyword early. Shown in Google and on blog cards."
-                className={inputClass}
+                className={textareaClass}
               />
             </div>
             <div>
@@ -809,7 +850,7 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
                   type="date"
                   value={fields.publish_date ?? ""}
                   onChange={(event) => update("publish_date", event.target.value || null)}
-                  className={inputClass}
+                  className={inputClass()}
                 />
               </div>
               <label className="flex cursor-pointer items-end gap-2 pb-1.5 text-[12.5px] text-[var(--i-ink-2)]">
@@ -828,7 +869,7 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
                 value={fields.tldr_summary}
                 onChange={(event) => update("tldr_summary", event.target.value)}
                 rows={2}
-                className={inputClass}
+                className={textareaClass}
               />
             </div>
             <div>
@@ -837,7 +878,7 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
                 value={fields.tldr_bullets.join("\n")}
                 onChange={(event) => update("tldr_bullets", event.target.value.split("\n").slice(0, 4))}
                 rows={4}
-                className={inputClass}
+                className={textareaClass}
               />
             </div>
           </Card>
@@ -867,7 +908,7 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
                 value={fields.banner_image_alt ?? ""}
                 onChange={(event) => update("banner_image_alt", event.target.value)}
                 placeholder="Describe the image (alt text)"
-                className={cn(inputClass, "mt-2")}
+                className={cn(inputClass(), "mt-2")}
               />
             ) : (
               <p className="mt-2 text-[12px] text-[var(--i-muted)]">

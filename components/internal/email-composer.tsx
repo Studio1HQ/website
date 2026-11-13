@@ -4,23 +4,27 @@ import { useMemo, useState, useTransition } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { EnvelopeSimple, PaperPlaneTilt, X } from "@phosphor-icons/react";
 import { sendEntryEmail } from "@/app/internal/(dashboard)/email-actions";
+import { mailtoHref } from "@/lib/form-checks";
 import {
   DEFAULT_CALL_URL,
   EMAIL_TEMPLATES,
   TEMPLATE_GROUPS,
   fillTemplate,
+  reasonFor,
   renderEmail,
   type EmailVars,
 } from "@/lib/internal/email-templates";
-import type { EmailPipeline } from "@/lib/internal/email-banners";
+import { isEmailPipeline } from "@/lib/internal/email-banners";
 import { statusLabel, type SectionKey } from "@/lib/internal/sections";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/internal/toast";
 import { SendLaterField, defaultSendLater, formatSendLater, sendLaterIso } from "@/components/internal/email-delivery";
-import { Notice, buttonClass } from "@/components/internal/ui";
+import { Notice, buttonClass, inputClass, textareaClass } from "@/components/internal/ui";
 
-const field =
-  "block w-full rounded-lg border border-[var(--i-line)] bg-[var(--i-sunken)] px-3 text-[13px] outline-none transition-colors placeholder:text-[var(--i-faint)] focus:border-[var(--i-line-strong)] focus:bg-[var(--i-panel)]";
+/** A token for one send, for the server's idempotency key. */
+function newNonce() {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+}
 
 /** Pick a template, edit it, preview the paper email, send. */
 export function EmailComposer({
@@ -51,6 +55,9 @@ export function EmailComposer({
   const [move, setMove] = useState(Boolean(template?.status));
   const [later, setLater] = useState(false);
   const [sendAt, setSendAt] = useState(defaultSendLater);
+  // One per open composer: a retry of the same send goes out once, and a
+  // new send after this one gets a fresh token.
+  const [nonce, setNonce] = useState(newNonce);
 
   const choose = (key: string) => {
     const next = templates.find((item) => item.key === key);
@@ -67,9 +74,9 @@ export function EmailComposer({
       renderEmail({
         body,
         call: call ? { label: "Book a call", url: callUrl } : null,
-        reason: `You're getting this because you ${sectionKey === "hackathons" ? "registered for" : "applied for"} ${vars.program} at Studio1.`,
+        reason: reasonFor(sectionKey, vars.program),
         unsubscribeUrl: "#",
-        banner: { pipeline: sectionKey as EmailPipeline, template: templateKey },
+        banner: isEmailPipeline(sectionKey) ? { pipeline: sectionKey, template: templateKey } : undefined,
         program: vars.program,
         assetBase: "",
       }).html,
@@ -77,9 +84,10 @@ export function EmailComposer({
   );
 
   const moveTo = template?.status && template.status !== currentStatus ? template.status : undefined;
-  const mailto = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(
-    call ? `${body}\n\nBook a call: ${callUrl}` : body,
-  )}`;
+  const mailto = mailtoHref(
+    to,
+    `?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(call ? `${body}\n\nBook a call: ${callUrl}` : body)}`,
+  );
 
   const send = () =>
     startSending(async () => {
@@ -91,12 +99,15 @@ export function EmailComposer({
         callUrl,
         status: move && moveTo ? moveTo : undefined,
         sendAt: sendLaterIso(later, sendAt),
+        nonce,
       });
       if (result.ok) {
         toast(
           "success",
           result.scheduledFor ? `Email to ${to} scheduled for ${formatSendLater(result.scheduledFor)}` : `Email sent to ${to}`,
         );
+        if (result.warning) toast("error", result.warning);
+        setNonce(newNonce());
         setOpen(false);
       } else {
         toast("error", result.message);
@@ -167,7 +178,7 @@ export function EmailComposer({
               </div>
               <label className="block space-y-1.5">
                 <span className="text-[12px] text-[var(--i-muted)]">Subject</span>
-                <input value={subject} onChange={(event) => setSubject(event.target.value)} maxLength={200} className={cn(field, "h-9")} />
+                <input value={subject} onChange={(event) => setSubject(event.target.value)} maxLength={200} className={inputClass()} />
               </label>
               <label className="block space-y-1.5">
                 <span className="text-[12px] text-[var(--i-muted)]">Message</span>
@@ -176,7 +187,7 @@ export function EmailComposer({
                   onChange={(event) => setBody(event.target.value)}
                   rows={12}
                   maxLength={10_000}
-                  className={cn(field, "resize-y py-2 leading-relaxed")}
+                  className={textareaClass}
                 />
               </label>
               <div className="space-y-2.5 rounded-xl border border-[var(--i-line)] p-3">
@@ -190,7 +201,7 @@ export function EmailComposer({
                     onChange={(event) => setCallUrl(event.target.value)}
                     aria-label="Call booking link"
                     placeholder="https://cal.com/…"
-                    className={cn(field, "h-8")}
+                    className={inputClass("sm")}
                   />
                 ) : null}
                 {moveTo ? (
@@ -206,7 +217,7 @@ export function EmailComposer({
                     onEnabledChange={setLater}
                     value={sendAt}
                     onValueChange={setSendAt}
-                    inputClassName={cn(field, "h-8 w-auto")}
+                    inputClassName={cn(inputClass("sm"), "w-auto")}
                   />
                 ) : null}
               </div>

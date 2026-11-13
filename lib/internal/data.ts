@@ -1,6 +1,6 @@
 import { selectRows, signedFileUrl, updateRows } from "@/lib/supabase-server";
 import { blockedAddresses, deliveriesFor, type Delivery } from "@/lib/email-delivery";
-import { requireStaff } from "@/lib/internal/session";
+import { isAdmin, requireStaff } from "@/lib/internal/session";
 import {
   facetOptions,
   filterRows,
@@ -45,22 +45,41 @@ function missingColumn(message: string, column: string) {
   );
 }
 
-async function loadAll(table: string, select: string, order: string) {
+type AllRows = { ok: true; rows: Row[]; truncated: boolean } | { ok: false; message: string };
+
+/**
+ * Every row of a table, read a page at a time, up to MAX_ROWS. `order` ends
+ * with a unique column, so rows that share a timestamp can't swap places
+ * between pages and show up twice or not at all. The first page also asks
+ * for the full count: reading stops when every row is in, however many rows
+ * Supabase returns per request, and `truncated` says when the table holds
+ * more than was read.
+ */
+async function loadAll(table: string, select: string, order: string): Promise<AllRows> {
   const rows: Row[] = [];
-  for (let offset = 0; offset < MAX_ROWS; offset += BATCH) {
+  let total: number | null = null;
+  while (rows.length < MAX_ROWS) {
     const result = await selectRows(
       table,
-      new URLSearchParams({ select, order, limit: String(BATCH), offset: String(offset) }),
+      new URLSearchParams({
+        select,
+        order,
+        limit: String(Math.min(BATCH, MAX_ROWS - rows.length)),
+        offset: String(rows.length),
+      }),
+      { count: rows.length === 0 },
     );
     if (!result.ok) return result;
+    if (rows.length === 0) total = result.total;
     rows.push(...result.rows);
-    if (result.rows.length < BATCH) break;
+    if (result.rows.length === 0) break;
+    if (total !== null ? rows.length >= total : result.rows.length < BATCH) break;
   }
-  return { ok: true as const, rows };
+  return { ok: true, rows, truncated: total !== null ? total > rows.length : rows.length >= MAX_ROWS };
 }
 
 type Loaded =
-  | { ok: true; rows: Row[]; tagsReady: boolean }
+  | { ok: true; rows: Row[]; tagsReady: boolean; truncated: boolean }
   | { ok: false; message: string };
 
 function fail(section: Section, message: string): Loaded {
@@ -79,7 +98,7 @@ async function loadSection(section: Section, full = false): Promise<Loaded> {
     if (facet.labelColumn) columns.add(facet.labelColumn);
   }
   const base = full ? "*" : [...columns].join(",");
-  const order = `${section.dateColumn}.desc`;
+  const order = `${section.dateColumn}.desc,${section.idColumn}.desc`;
   if (section.tags && !full) {
     const withTags = await loadAll(section.table, `${base},tags`, order);
     if (withTags.ok) return { ...withTags, tagsReady: true };
@@ -102,6 +121,8 @@ export type ListView =
       tagsReady: boolean;
       /** Overdue entries under the other filters, for the Overdue chip. */
       overdue: number;
+      /** The table holds more rows than the dashboard reads (MAX_ROWS). */
+      truncated: boolean;
     }
   | { ok: false; message: string };
 
@@ -131,15 +152,19 @@ export async function listView(section: Section, filters: Filters): Promise<List
     facets: facetOptions(loaded.rows, section, filters),
     tags: tagOptions(loaded.rows, section, filters),
     tagsReady: loaded.tagsReady,
+    truncated: loaded.truncated,
   };
 }
+
+/** The most rows a list or an export reads from one table. */
+export const ROW_LIMIT = MAX_ROWS;
 
 /** Rows for the CSV export: the list's filters, or exactly `ids`. */
 export async function exportRows(
   section: Section,
   filters: Filters,
   ids: string[],
-): Promise<{ ok: true; rows: Row[] } | { ok: false; message: string }> {
+): Promise<{ ok: true; rows: Row[]; truncated: boolean } | { ok: false; message: string }> {
   await requireStaff("admin");
   const loaded = await loadSection(section, true);
   if (!loaded.ok) return loaded;
@@ -147,12 +172,14 @@ export async function exportRows(
     const wanted = new Set(ids);
     return {
       ok: true,
-      rows: loaded.rows.filter((row) => wanted.has(String(row.id ?? row.record_id))),
+      rows: loaded.rows.filter((row) => wanted.has(String(row[section.idColumn]))),
+      truncated: loaded.truncated,
     };
   }
   return {
     ok: true,
     rows: sortRows(filterRows(loaded.rows, section, filters), section, filters.sort),
+    truncated: loaded.truncated,
   };
 }
 
@@ -205,15 +232,31 @@ export type EntryChange = {
   removeTags?: string[];
 };
 
+/** A Postgres array literal for a list of tags: {"Strong fit","Maybe"}. */
+function arrayLiteral(values: string[]) {
+  return `{${values.map((value) => `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`).join(",")}}`;
+}
+
+/** How often a tag change is retried when someone else changed the tags first. */
+const TAG_ATTEMPTS = 3;
+
 /**
  * Applies one change to up to 200 entries: a status, notes, or tags added or
  * removed. Stamps reviewed_by (skipped while that column doesn't exist yet).
+ *
+ * Tags are saved with a check that they're still what was read ("only if
+ * the tags are still X"), and read again if not, so two people tagging the
+ * same entry at once both keep their tag. When the status or notes saved
+ * but the tags didn't, the message says so and `saved` is true.
  */
 export async function updateEntries(
   section: Section,
   ids: string[],
   change: EntryChange,
-): Promise<{ ok: true; tags?: Record<string, string[]> } | { ok: false; message: string }> {
+): Promise<
+  | { ok: true; tags?: Record<string, string[]> }
+  | { ok: false; message: string; /** Part of the change was saved. */ saved?: boolean }
+> {
   const staff = await requireStaff("reviewer");
   const unique = [...new Set(ids)];
   if (
@@ -226,8 +269,8 @@ export async function updateEntries(
     return { ok: false, message: "That change isn't valid." };
   }
 
-  const write = async (filter: string, values: Row) => {
-    const query = () => new URLSearchParams({ id: filter });
+  const write = async (filters: Record<string, string>, values: Row) => {
+    const query = () => new URLSearchParams(filters);
     let result = await updateRows(section.table, query(), { ...values, reviewed_by: staff.email });
     if (!result.ok && missingColumn(result.message, "reviewed_by")) {
       result = await updateRows(section.table, query(), values);
@@ -238,8 +281,9 @@ export async function updateEntries(
   const patch: Row = {};
   if (change.status !== undefined) patch.review_status = change.status;
   if (change.notes !== undefined) patch.review_notes = change.notes;
-  if (Object.keys(patch).length) {
-    const result = await write(`in.(${unique.join(",")})`, patch);
+  const patched = Object.keys(patch).length > 0;
+  if (patched) {
+    const result = await write({ id: `in.(${unique.join(",")})` }, patch);
     if (!result.ok) {
       console.error(`[internal] updating ${section.table} failed: ${result.message}`);
       return { ok: false, message: "Couldn't save. Try again in a minute." };
@@ -250,39 +294,65 @@ export async function updateEntries(
   const remove = (change.removeTags ?? []).map((tag) => tag.toLowerCase());
   if (!add.length && !remove.length) return { ok: true };
 
-  const current = await selectRows(
-    section.table,
-    new URLSearchParams({ select: "id,tags", id: `in.(${unique.join(",")})` }),
-  );
+  const tagsFailed = (message: string) => ({
+    ok: false as const,
+    message: patched ? `The status and notes were saved, but the tags weren't. ${message}` : message,
+    saved: patched,
+  });
+  const readTags = (wanted: string[]) =>
+    selectRows(section.table, new URLSearchParams({ select: "id,tags", id: `in.(${wanted.join(",")})` }));
+
+  let current = await readTags(unique);
   if (!current.ok) {
     console.error(`[internal] reading tags on ${section.table} failed: ${current.message}`);
-    return {
-      ok: false,
-      message: missingColumn(current.message, "tags")
+    return tagsFailed(
+      missingColumn(current.message, "tags")
         ? "Tags need the dashboard migration in Supabase first."
         : "Couldn't save the tags. Try again in a minute.",
-    };
+    );
   }
+
   const updated: Record<string, string[]> = {};
-  const results = await Promise.all(
-    current.rows.map(async (row) => {
-      const before = rowTags(row);
-      const next = before.filter((tag) => !remove.includes(tag.toLowerCase()));
-      for (const tag of add) {
-        if (!next.some((existing) => existing.toLowerCase() === tag.toLowerCase())) next.push(tag);
-      }
-      const kept = next.slice(0, 20);
-      updated[String(row.id)] = kept;
-      if (kept.join("\u0000") === before.join("\u0000")) return { ok: true as const };
-      return write(`eq.${row.id}`, { tags: kept });
-    }),
-  );
-  const failed = results.find((result) => !result.ok);
-  if (failed && !failed.ok) {
-    console.error(`[internal] tagging ${section.table} failed: ${failed.message}`);
-    return { ok: false, message: "Couldn't save the tags. Try again in a minute." };
+  let failure: string | null = null;
+  for (let attempt = 0; attempt < TAG_ATTEMPTS && current.ok; attempt += 1) {
+    // Nothing left to tag (an entry deleted in between leaves no row).
+    if (!current.rows.length) return { ok: true, tags: updated };
+    // The last try saves whatever it read, so tags that keep changing
+    // still end with this change applied.
+    const guarded = attempt < TAG_ATTEMPTS - 1;
+    const changedUnderneath: string[] = [];
+    const results = await Promise.all(
+      current.rows.map(async (row) => {
+        const id = String(row.id);
+        const before = rowTags(row);
+        const next = before.filter((tag) => !remove.includes(tag.toLowerCase()));
+        for (const tag of add) {
+          if (!next.some((existing) => existing.toLowerCase() === tag.toLowerCase())) next.push(tag);
+        }
+        const kept = next.slice(0, 20);
+        updated[id] = kept;
+        if (kept.join("\u0000") === before.join("\u0000")) return { ok: true as const };
+        // Only if the tags are still what was just read.
+        const unchanged = Array.isArray(row.tags) ? `eq.${arrayLiteral(before)}` : "is.null";
+        const result = await write({ id: `eq.${id}`, ...(guarded ? { tags: unchanged } : {}) }, { tags: kept });
+        if (!guarded) return result;
+        // Not saved (changed in between, or the guarded write was refused):
+        // goes round again.
+        if (!result.ok || result.count === 0) changedUnderneath.push(id);
+        return { ok: true as const };
+      }),
+    );
+    const failed = results.find((result) => !result.ok);
+    if (failed && !failed.ok) {
+      failure = failed.message;
+      break;
+    }
+    if (!changedUnderneath.length) return { ok: true, tags: updated };
+    // Someone else changed these in between: read them again and redo.
+    current = await readTags(changedUnderneath);
   }
-  return { ok: true, tags: updated };
+  console.error(`[internal] tagging ${section.table} failed: ${failure ?? (current.ok ? "unknown" : current.message)}`);
+  return tagsFailed("Couldn't save the tags. Try again in a minute.");
 }
 
 /** A two-minute link to an applicant's résumé PDF. */
@@ -344,13 +414,15 @@ export type LatestEntry = {
 };
 
 export async function overview() {
-  await requireStaff();
+  const staff = await requireStaff();
+  // The audiences are admin-only, so nobody else's page even counts them.
+  const admin = isAdmin(staff);
   const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
   const [pipelines, subscribers, partners, latest] = await Promise.all([
     Promise.all(
       PIPELINES.map(async (key): Promise<PipelineStats> => {
         const section = SECTIONS[key];
-        const result = await loadAll(section.table, "review_status,created_at", "created_at.desc");
+        const result = await loadAll(section.table, "review_status,created_at", "created_at.desc,id.desc");
         if (!result.ok) {
           console.error(`[internal] overview of ${section.table} failed: ${result.message}`);
           return { key, ok: false, total: 0, awaiting: 0, lastWeek: 0, overdue: 0, byStatus: [] };
@@ -375,8 +447,8 @@ export async function overview() {
         };
       }),
     ),
-    count(SECTIONS.subscribers.table),
-    count(SECTIONS["partner-pool"].table),
+    admin ? count(SECTIONS.subscribers.table) : Promise.resolve(null),
+    admin ? count(SECTIONS["partner-pool"].table) : Promise.resolve(null),
     selectRows(
       "submissions",
       new URLSearchParams({
@@ -407,8 +479,6 @@ export async function overview() {
   return { pipelines, subscribers, partners, latest: entries, latestOk: latest.ok };
 }
 
-export { programOf } from "@/lib/internal/program";
-
 export type EmailLogEntry = {
   id: string;
   created_at: string;
@@ -432,14 +502,15 @@ export type OtherEntry = {
 
 /**
  * What an entry page shows besides the record: emails sent from the
- * dashboard, the same person's other entries on any form, and (jobs) a
- * ten-minute résumé link for the inline viewer. Each part fails quietly.
+ * dashboard and the same person's other entries on any form. Each part
+ * fails quietly. The résumé isn't here: the page loads it through
+ * /internal/jobs/[id]/resume, which checks the session on every fetch.
  */
 export async function entryExtras(section: Section, record: Row) {
   await requireStaff(section.minRole);
   const id = String(record.id);
   const email = String(record.email ?? "").toLowerCase();
-  const [log, others, resume] = await Promise.all([
+  const [log, others] = await Promise.all([
     selectRows(
       "internal_email_log",
       new URLSearchParams({
@@ -462,9 +533,6 @@ export async function entryExtras(section: Section, record: Row) {
           }),
         )
       : Promise.resolve({ ok: true as const, rows: [] as Row[], total: 0 }),
-    section.key === "jobs" && typeof record.resume_path === "string" && record.resume_path
-      ? signedFileUrl("job-applications", record.resume_path, 600)
-      : Promise.resolve(null),
   ]);
   const sent = log.ok ? (log.rows as unknown as EmailLogEntry[]) : [];
   const [deliveries, blocked] = await Promise.all([
@@ -493,6 +561,5 @@ export async function entryExtras(section: Section, record: Row) {
           ];
         })
       : [],
-    resumeUrl: resume && resume.ok ? resume.url : null,
   };
 }

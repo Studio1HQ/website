@@ -1,6 +1,10 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { recordDelivery, type DeliveryStatus } from "@/lib/email-delivery";
+import { handleReceivedEmail, readCapped } from "@/lib/internal/team/inbound";
 import { unsubscribe } from "@/lib/unsubscribe";
+
+// An emailed invoice is read and its PDF copied to storage before answering.
+export const maxDuration = 60;
 
 /**
  * Resend's delivery events (set up in Resend → Webhooks, pointing here):
@@ -11,6 +15,9 @@ import { unsubscribe } from "@/lib/unsubscribe";
  * Resend signs with Svix: HMAC-SHA256 over "id.timestamp.body", keyed with
  * the base64 part of the whsec_ signing secret (RESEND_WEBHOOK_SECRET).
  * Any non-2xx answer makes Resend retry later.
+ *
+ * `email.received` (Resend Inbound) is the email intake instead: invoices
+ * and expense claims sent to the intake address (lib/internal/team/inbound.ts).
  */
 
 const STATUS_BY_EVENT: Record<string, DeliveryStatus> = {
@@ -26,6 +33,30 @@ const STATUS_BY_EVENT: Record<string, DeliveryStatus> = {
 
 /** How old a signed request may be before it's refused as a replay. */
 const TOLERANCE_SECONDS = 5 * 60;
+
+/** Resend's events are a few KB; anything bigger isn't one. */
+const MAX_BODY_BYTES = 200_000;
+
+/**
+ * Message ids handled in the last few minutes, so a captured request can't
+ * be replayed inside the tolerance window. Only ids that were answered 2xx
+ * are kept: Resend retries a failed delivery under the same id, and that
+ * retry has to get through. Kept per server instance, which is enough on
+ * top of the handlers themselves being safe to run twice.
+ */
+const handled = new Map<string, number>();
+
+function alreadyHandled(id: string) {
+  const cutoff = Date.now() - TOLERANCE_SECONDS * 2000;
+  for (const [key, at] of handled) if (at < cutoff) handled.delete(key);
+  return handled.has(id);
+}
+
+function done(id: string) {
+  if (handled.size > 5000) handled.clear();
+  handled.set(id, Date.now());
+  return new Response(null, { status: 204 });
+}
 
 function signatureMatches(secret: string, id: string, timestamp: string, header: string, body: string) {
   const key = Buffer.from(secret.replace(/^whsec_/, ""), "base64");
@@ -55,17 +86,22 @@ export async function POST(request: Request) {
   const id = request.headers.get("svix-id");
   const timestamp = request.headers.get("svix-timestamp");
   const signature = request.headers.get("svix-signature");
-  const body = await request.text();
-  if (!id || !timestamp || !signature || body.length > 200_000) {
-    return new Response("Bad request", { status: 400 });
-  }
+  if (!id || !timestamp || !signature) return new Response("Bad request", { status: 400 });
+  // The size is checked before the body is read, and again while reading
+  // (the header can be missing or wrong), so nothing big is ever buffered.
+  const declared = Number(request.headers.get("content-length"));
+  if (Number.isFinite(declared) && declared > MAX_BODY_BYTES) return new Response("Too large", { status: 413 });
   const age = Math.abs(Date.now() / 1000 - Number(timestamp));
   if (!Number.isFinite(age) || age > TOLERANCE_SECONDS) {
     return new Response("Stale request", { status: 400 });
   }
+  const bytes = await readCapped(request, MAX_BODY_BYTES).catch(() => null);
+  if (!bytes) return new Response("Too large", { status: 413 });
+  const body = new TextDecoder().decode(bytes);
   if (!signatureMatches(secret, id, timestamp, signature, body)) {
     return new Response("Bad signature", { status: 401 });
   }
+  if (alreadyHandled(id)) return new Response(null, { status: 204 });
 
   let event: ResendEvent;
   try {
@@ -73,12 +109,28 @@ export async function POST(request: Request) {
   } catch {
     return new Response("Bad JSON", { status: 400 });
   }
+  if (event.type === "email.received") {
+    try {
+      const result = await handleReceivedEmail(event.data);
+      if (!result.ok) {
+        console.error(`[resend webhook] intake failed: ${result.message}`);
+        if (result.retry) return new Response("Couldn't handle the email yet", { status: 500 });
+      } else if ("skipped" in result) {
+        console.info(`[resend webhook] intake skipped: ${result.skipped}`);
+      }
+      return done(id);
+    } catch (error) {
+      console.error("[resend webhook] intake failed", error);
+      return new Response("Couldn't handle the email", { status: 500 });
+    }
+  }
+
   let status = typeof event.type === "string" ? STATUS_BY_EVENT[event.type] : undefined;
   const resendId = event.data?.email_id;
   const to = Array.isArray(event.data?.to) ? event.data.to[0] : undefined;
   // Opens, clicks and anything else we don't track: acknowledge and move on.
   if (!status || typeof resendId !== "string" || typeof to !== "string") {
-    return new Response(null, { status: 204 });
+    return done(id);
   }
 
   let detail: string | null = null;
@@ -103,5 +155,5 @@ export async function POST(request: Request) {
     const unsubscribed = await unsubscribe(to);
     if (!unsubscribed.ok) console.error(`[resend webhook] unsubscribing a complaint failed: ${unsubscribed.message}`);
   }
-  return new Response(null, { status: 204 });
+  return done(id);
 }

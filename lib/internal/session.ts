@@ -1,13 +1,18 @@
+import "server-only";
 import { cache } from "react";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { accessFor } from "@/lib/internal/members";
+import { teamAccessFor } from "@/lib/internal/team/people";
+import type { TeamPerson } from "@/lib/internal/team/shared";
 import {
   atLeast,
   blogAccess,
+  communityAccess,
   hiringLevel,
   isStaffEmail,
   type BlogAccess,
+  type CommunityAccess,
   type Role,
   type RoleKey,
 } from "@/lib/internal/roles";
@@ -21,12 +26,47 @@ export type Staff = {
   role: Role | null;
   /** What they can do on the blog, or null for nothing. */
   blog: BlogAccess | null;
+  /** What they can do in the community area, or null for nothing. */
+  community: CommunityAccess | null;
   status: "owner" | "active" | "pending" | "disabled" | "unknown" | "uninvited";
+  /**
+   * Their row on the team list (employees and interns), if active. Being on
+   * it is enough to get in, to My day, without any other role.
+   */
+  person: TeamPerson | null;
+  /** Interns whose days this person logs. Enough to get in, to People. */
+  interns: string[];
   localPreview?: boolean;
 };
 
-function withRoles(base: { email: string; localPreview: boolean }, roles: RoleKey[], status: Staff["status"]): Staff {
-  return { ...base, roles, role: hiringLevel(roles), blog: blogAccess(roles), status };
+type BaseStaff = Omit<Staff, "person" | "interns">;
+
+function withRoles(base: { email: string; localPreview: boolean }, roles: RoleKey[], status: Staff["status"]): BaseStaff {
+  return {
+    ...base,
+    roles,
+    role: hiringLevel(roles),
+    blog: blogAccess(roles),
+    community: communityAccess(roles),
+    status,
+  };
+}
+
+/** Adds the team list: skipped for people turned off or never invited. */
+async function withTeam(staff: BaseStaff): Promise<Staff> {
+  if (staff.status === "disabled" || staff.status === "uninvited" || staff.status === "unknown") {
+    return { ...staff, person: null, interns: [] };
+  }
+  return { ...staff, ...(await teamAccessFor(staff.email)) };
+}
+
+export function isAdmin(staff: Pick<Staff, "roles">) {
+  return staff.roles.includes("admin");
+}
+
+/** True when someone has any way in: a role, the team list or interns to log. */
+export function hasAccess(staff: Staff) {
+  return staff.roles.length > 0 || staff.person !== null || staff.interns.length > 0;
 }
 
 /**
@@ -48,31 +88,62 @@ export const getStaff = cache(async (): Promise<Staff | null> => {
   const base = { email, localPreview };
   switch (access.kind) {
     case "owner":
-      return withRoles(base, ["admin"], "owner");
+      return withTeam(withRoles(base, ["admin"], "owner"));
     case "member":
-      return access.member.status === "active" && access.member.roles.length
-        ? withRoles(base, access.member.roles, "active")
-        : withRoles(base, [], access.member.status === "disabled" ? "disabled" : "pending");
+      return withTeam(
+        access.member.status === "active" && access.member.roles.length
+          ? withRoles(base, access.member.roles, "active")
+          : withRoles(base, [], access.member.status === "disabled" ? "disabled" : "pending"),
+      );
     case "none":
-      return withRoles(base, [], isStaffEmail(email) ? "pending" : "uninvited");
+      return withTeam(withRoles(base, [], isStaffEmail(email) ? "pending" : "uninvited"));
     default:
-      return withRoles(base, [], "unknown");
+      return withTeam(withRoles(base, [], "unknown"));
   }
 });
 
-/** Where someone with access but not to this page should go instead. */
-function homeFor(staff: Staff) {
-  if (staff.role) return "/internal";
+/** The dashboard areas someone can open, in sidebar order. */
+export function areasFor(staff: Staff) {
+  const areas: ("hiring" | "blog" | "community" | "team" | "money")[] = [];
+  if (staff.role) areas.push("hiring");
+  if (staff.blog) areas.push("blog");
+  if (staff.community) areas.push("community");
+  if (staff.person || staff.interns.length || isAdmin(staff)) areas.push("team");
+  if (isAdmin(staff)) areas.push("money");
+  return areas;
+}
+
+/**
+ * Where someone's dashboard starts. The Overview (/internal) gathers every
+ * area they can open, so it's home for admins, hiring staff and anyone with
+ * two or more areas. Everyone else goes straight to their one area's page:
+ * a community manager to Community, a writer to the Blog, an employee to
+ * My day.
+ */
+export function homeFor(staff: Staff) {
+  const areas = areasFor(staff);
+  if (isAdmin(staff) || staff.role || areas.length > 1) return "/internal";
   if (staff.blog) return "/internal/blog";
+  if (staff.community) return "/internal/community";
+  if (staff.person) return "/internal/me";
+  if (staff.interns.length) return "/internal/people";
   return "/internal/pending";
 }
 
-/** Any signed-in person with at least one role. */
+/** Any signed-in person with a way in: a role, the team list or interns. */
 export async function requireMember(): Promise<Staff> {
   const staff = await getStaff();
   if (!staff) redirect("/internal/login");
-  if (!staff.roles.length) redirect("/internal/pending");
+  if (!hasAccess(staff)) redirect("/internal/pending");
   return staff;
+}
+
+/** The People page: admins, and anyone who logs interns' days. */
+export async function requirePeople(): Promise<Staff & { admin: boolean }> {
+  const staff = await requireMember();
+  const admin = isAdmin(staff);
+  if (!admin && staff.interns.length === 0) redirect(homeFor(staff));
+  return { ...staff, admin };
 }
 
 /**
@@ -93,6 +164,19 @@ export async function requireBlog(minimum: BlogAccess = "writer"): Promise<Staff
   if (!staff.blog) redirect(homeFor(staff));
   if (minimum === "reviewer" && staff.blog !== "reviewer") redirect("/internal/blog?denied=1");
   return staff as Staff & { blog: BlogAccess };
+}
+
+/**
+ * Community pages and actions: "viewer" to read, "manager" to change
+ * anything (viewers may still tick off their own tasks).
+ */
+export async function requireCommunity(
+  minimum: CommunityAccess = "viewer",
+): Promise<Staff & { community: CommunityAccess }> {
+  const staff = await requireMember();
+  if (!staff.community) redirect(homeFor(staff));
+  if (minimum === "manager" && staff.community !== "manager") redirect("/internal/community?denied=1");
+  return staff as Staff & { community: CommunityAccess };
 }
 
 export function sessionCookieOptions(maxAge: number) {

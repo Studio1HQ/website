@@ -209,7 +209,10 @@ export default async function BlogPage({ searchParams }: Props) {
       ) : null}
       {search && !search.ok ? (
         <div className="mb-4">
-          <Notice tone="warning">Couldn&apos;t load Google Search numbers: {search.message}</Notice>
+          {/* The detail names the Google account and property: reviewers only. */}
+          <Notice tone="warning">
+            {reviewer ? `Couldn't load Google Search numbers: ${search.message}` : "Couldn't load Google Search numbers right now."}
+          </Notice>
         </div>
       ) : null}
       {search?.ok ? (

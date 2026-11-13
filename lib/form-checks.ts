@@ -13,6 +13,34 @@ export function looksLikeLink(value: string) {
   );
 }
 
+/**
+ * A plain email address: letters, digits and . _ + - before the @, then a
+ * normal domain. The same rule as the dashboard's sign-in addresses
+ * (emailAddress in lib/internal/token.ts), so an address can never carry
+ * "?subject=…", angle brackets, quotes or commas into an email or a mailto
+ * link. Case doesn't matter.
+ */
+export function isEmailAddress(value: string) {
+  const email = value.toLowerCase();
+  if (email.length > 254) return false;
+  const [name, domain, extra] = email.split("@");
+  if (extra !== undefined || !name || !domain) return false;
+  return (
+    /^[a-z0-9](?:[a-z0-9._+-]{0,62}[a-z0-9])?$/.test(name) &&
+    !name.includes("..") &&
+    /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,24}$/.test(domain)
+  );
+}
+
+/**
+ * A mailto: link for an address someone typed into a form. Everything but
+ * the @ is percent-encoded, so "?", "&" and "=" in an old entry's address
+ * can't add a subject, a body or more recipients to the draft.
+ */
+export function mailtoHref(email: string, query = "") {
+  return `mailto:${encodeURIComponent(email.trim()).replace(/%40/g, "@")}${query}`;
+}
+
 function letters(value: string) {
   return (value.match(/\p{L}/gu) ?? []).length;
 }

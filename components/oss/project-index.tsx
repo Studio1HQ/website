@@ -326,7 +326,7 @@ export function ProjectIndex({
               placeholder="Search projects, frameworks, use cases…"
               autoComplete="off"
               spellCheck={false}
-              className="h-14 w-full rounded-full bg-white pl-14 pr-24 text-[16px] outline-none ring-1 ring-inset ring-[#141414]/15 transition-shadow placeholder:text-[#141414]/40 focus-visible:ring-2 focus-visible:ring-[#141414] [&::-webkit-search-cancel-button]:hidden"
+              className="h-14 w-full rounded-full bg-white pl-14 pr-24 text-[16px] outline-none ring-1 ring-inset ring-[#141414]/15 transition-shadow placeholder:text-[#141414]/40 focus-visible:ring-2 focus-visible:ring-[#f97316] [&::-webkit-search-cancel-button]:hidden"
             />
             <span className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-2">
               {query ? (

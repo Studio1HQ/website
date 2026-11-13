@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { endAuthSession, exchangeAuthCode } from "@/lib/supabase-server";
 import { isInvited, requestAccess, touchMember } from "@/lib/internal/members";
+import { teamAccessFor } from "@/lib/internal/team/people";
 import { linkCookieOptions, sessionCookieOptions } from "@/lib/internal/session";
 import {
   NEXT_COOKIE,
@@ -51,8 +52,13 @@ export async function GET(request: NextRequest) {
 
   // First sign-in files an access request for an admin to approve; owners
   // and approved members go straight in (lib/internal/session.ts decides).
-  const requested = await requestAccess(email);
-  if (!requested.ok) console.error(`[internal] filing access request failed: ${requested.message}`);
+  // People on the team list (or who log interns' days) already have My day
+  // or People, so they don't need a request.
+  const team = await teamAccessFor(email);
+  if (!team.person && team.interns.length === 0) {
+    const requested = await requestAccess(email);
+    if (!requested.ok) console.error(`[internal] filing access request failed: ${requested.message}`);
+  }
   await touchMember(email);
 
   const now = nowSeconds();

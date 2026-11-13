@@ -7,11 +7,13 @@ import { isCoverArt } from "@/lib/blog-cover-art";
 import { deleteRows, insertRow, selectRows, updateRows } from "@/lib/supabase-server";
 import type { Staff } from "@/lib/internal/session";
 import { readRepoFile } from "@/lib/internal/blog/github";
+import { bodyProblem } from "@/lib/internal/blog/safe-mdx";
 import {
   BLOG_STATUSES,
   FIELD_KEYS,
   MANAGED_FRONTMATTER,
   MEDIA_PREFIX,
+  UUID,
   nameFromEmail,
   normalizeTag,
   slugify,
@@ -30,7 +32,6 @@ import {
 
 const POSTS = "blog_posts";
 const EVENTS = "blog_events";
-export const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const CONTENT_DIR = path.join(process.cwd(), "content/blog");
 
 type BlogStaff = Pick<Staff, "email" | "blog">;
@@ -43,7 +44,7 @@ export function isReviewer(staff: BlogStaff) {
   return staff.blog === "reviewer";
 }
 
-export { nameFromEmail };
+export { UUID, nameFromEmail };
 
 function migrationHint(message: string) {
   return /blog_posts|blog_events|relation .* does not exist|PGRST205/i.test(message)
@@ -70,12 +71,27 @@ export async function getPost(staff: BlogStaff, id: string): Promise<BlogPostRow
   return post && canSee(staff, post) ? post : null;
 }
 
+/** A post's history, oldest first: the newest 500 events when there are more. */
 export async function listEvents(postId: string): Promise<BlogEvent[]> {
   const result = await selectRows<BlogEvent>(
     EVENTS,
-    new URLSearchParams({ select: "*", post_id: `eq.${postId}`, order: "created_at.asc", limit: "500" }),
+    new URLSearchParams({ select: "*", post_id: `eq.${postId}`, order: "created_at.desc", limit: "500" }),
   );
-  return result.ok ? result.rows : [];
+  return result.ok ? result.rows.reverse() : [];
+}
+
+/**
+ * How many events of one kind someone added to a post in the last `minutes`,
+ * to keep one person from flooding inboxes. 0 when the count can't be read.
+ */
+export async function recentEvents(postId: string, actor: string, kind: BlogEventKind, minutes: number) {
+  const since = new Date(Date.now() - minutes * 60_000).toISOString();
+  const result = await selectRows(
+    EVENTS,
+    new URLSearchParams({ select: "id", post_id: `eq.${postId}`, actor: `eq.${actor}`, kind: `eq.${kind}`, created_at: `gte.${since}`, limit: "1" }),
+    { count: true },
+  );
+  return result.ok ? (result.total ?? 0) : 0;
 }
 
 export async function addEvent(
@@ -139,6 +155,8 @@ export async function createPost(staff: BlogStaff) {
 }
 
 const text = (value: unknown, max: number) => (typeof value === "string" ? value.slice(0, max) : "");
+/** Text that is one line on the site: line breaks become spaces. */
+const line = (value: unknown, max: number) => text(value, max).replace(/\s*[\r\n]+\s*/g, " ");
 const list = (value: unknown, items: number, max: number) =>
   Array.isArray(value) ? value.filter((item): item is string => typeof item === "string").slice(0, items).map((item) => item.slice(0, max)) : [];
 
@@ -151,16 +169,16 @@ export function cleanFields(postId: string, input: unknown): Partial<BlogFields>
     const value = fields[key];
     switch (key) {
       case "title":
-        out.title = text(value, 200);
+        out.title = line(value, 200);
         break;
       case "seo_title":
-        out.seo_title = text(value, 120);
+        out.seo_title = line(value, 120);
         break;
       case "slug":
         out.slug = text(value, 100).toLowerCase().replace(/[^a-z0-9-]/g, "");
         break;
       case "description":
-        out.description = text(value, 400);
+        out.description = line(value, 400);
         break;
       case "tldr_summary":
         out.tldr_summary = text(value, 600);
@@ -172,7 +190,7 @@ export function cleanFields(postId: string, input: unknown): Partial<BlogFields>
         out.tags = [...new Set(list(value, 12, 60).map(normalizeTag).filter(Boolean))];
         break;
       case "authors":
-        out.authors = list(value, 6, 80).map((name) => name.trim()).filter(Boolean);
+        out.authors = list(value, 6, 80).map((name) => line(name, 80).trim()).filter(Boolean);
         break;
       case "publish_date":
         out.publish_date = typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : null;
@@ -191,7 +209,7 @@ export function cleanFields(postId: string, input: unknown): Partial<BlogFields>
         break;
       }
       case "banner_image_alt":
-        out.banner_image_alt = text(value, 200) || null;
+        out.banner_image_alt = line(value, 200) || null;
         break;
       case "body":
         out.body = text(value, 400_000);
@@ -202,8 +220,11 @@ export function cleanFields(postId: string, input: unknown): Partial<BlogFields>
 }
 
 export type SaveResult =
-  | { ok: true; updated_at: string; status: BlogStatus }
-  | { ok: false; conflict?: boolean; message: string };
+  | { ok: true; updated_at: string; status: BlogStatus; slugTaken?: boolean }
+  /** `rejected`: the text itself was refused; trying again won't help until it changes. */
+  | { ok: false; conflict?: boolean; rejected?: boolean; message: string };
+
+const isDuplicate = (message: string) => /23505|duplicate key/i.test(message);
 
 /**
  * Autosave. `base` is the updated_at the editor last saw: when someone else
@@ -216,15 +237,26 @@ export async function savePost(staff: BlogStaff, id: string, input: unknown, bas
   const post = await getPost(staff, id);
   if (!post) return { ok: false, message: "This post doesn't exist or isn't yours." };
   const fields = cleanFields(id, input);
+  // Raw HTML never gets into a saved post: the editor would run it for the
+  // next person who opens the post, and so would the site.
+  if (fields.body !== undefined && fields.body !== post.body) {
+    const problem = await bodyProblem(fields.body);
+    if (problem) return { ok: false, rejected: true, message: problem };
+  }
   let status = post.status;
   if (status === "published") status = "draft";
   else if (status === "approved" && !isReviewer(staff)) status = "in_review";
   const updatedAt = new Date().toISOString();
-  const result = await updateRows(
-    POSTS,
-    new URLSearchParams({ id: `eq.${id}`, updated_at: `eq.${base}` }),
-    { ...fields, status, updated_at: updatedAt, updated_by: staff.email },
-  );
+  const filter = new URLSearchParams({ id: `eq.${id}`, updated_at: `eq.${base}` });
+  const patch = { ...fields, status, updated_at: updatedAt, updated_by: staff.email };
+  let result = await updateRows(POSTS, filter, patch);
+  // Another post took this slug (the unique index in 20261114110000_blog_fixes.sql):
+  // save everything else and say so.
+  let slugTaken = false;
+  if (!result.ok && isDuplicate(result.message) && "slug" in patch) {
+    slugTaken = true;
+    result = await updateRows(POSTS, filter, Object.fromEntries(Object.entries(patch).filter(([key]) => key !== "slug")));
+  }
   if (!result.ok) {
     console.error(`[blog] saving ${id} failed: ${result.message}`);
     return { ok: false, message: migrationHint(result.message) };
@@ -232,25 +264,59 @@ export async function savePost(staff: BlogStaff, id: string, input: unknown, bas
   if (result.count === 0) {
     return { ok: false, conflict: true, message: "Someone else saved this post since you opened it." };
   }
-  return { ok: true, updated_at: updatedAt, status };
+  return { ok: true, updated_at: updatedAt, status, ...(slugTaken ? { slugTaken } : {}) };
 }
 
-export async function setStatus(
-  id: string,
-  patch: { status: BlogStatus; reviewers?: string[] } & Record<string, unknown>,
-  by: string,
-) {
+/** A review step: the post's status and, with it, who reviews. Never touches the text. */
+export async function setStatus(id: string, patch: { status: BlogStatus; reviewers?: string[] }, by: string) {
   if (!BLOG_STATUSES.includes(patch.status)) return false;
-  // updated_at is the editor's save version: only content changes (a publish
-  // moving image links) bump it, so a review never collides with typing.
-  const touchesContent = "body" in patch || "banner_image" in patch;
+  // updated_at is the editor's save version and stays as it is, so a review
+  // never collides with typing.
   const result = await updateRows(POSTS, new URLSearchParams({ id: `eq.${id}` }), {
-    ...patch,
-    ...(touchesContent ? { updated_at: new Date().toISOString() } : {}),
+    status: patch.status,
+    ...(patch.reviewers ? { reviewers: patch.reviewers } : {}),
     updated_by: by,
   });
   if (!result.ok) console.error(`[blog] status change on ${id} failed: ${result.message}`);
   return result.ok && result.count > 0;
+}
+
+export type PublishedPatch = {
+  body: string;
+  banner_image: string | null;
+  publish_date: string;
+  source_path: string;
+  source_sha: string | null;
+  published_by: string;
+  published_commit: string | null;
+};
+
+/**
+ * Records that a post went live. `base` is the updated_at the publish read:
+ * when someone saved an edit while it was publishing, their text is kept
+ * ("edited": the post is live but has changes that aren't) instead of being
+ * replaced with what was published.
+ */
+export async function markPublished(id: string, patch: PublishedPatch, base: string): Promise<"ok" | "edited" | "failed"> {
+  const now = new Date().toISOString();
+  const { body, banner_image, ...where } = patch;
+  const record = { ...where, published_at: now, updated_by: patch.published_by };
+  const exact = await updateRows(
+    POSTS,
+    new URLSearchParams({ id: `eq.${id}`, updated_at: `eq.${base}` }),
+    { ...record, status: "published", body, banner_image, updated_at: now },
+  );
+  if (!exact.ok) {
+    console.error(`[blog] recording the publish of ${id} failed: ${exact.message}`);
+    return "failed";
+  }
+  if (exact.count > 0) return "ok";
+  const edited = await updateRows(POSTS, new URLSearchParams({ id: `eq.${id}` }), { ...record, status: "draft" });
+  if (!edited.ok || edited.count === 0) {
+    console.error(`[blog] recording the publish of ${id} failed: ${edited.ok ? "the post is gone" : edited.message}`);
+    return "failed";
+  }
+  return "edited";
 }
 
 /** Deletes a post that never went live (its history goes with it). */
@@ -379,9 +445,15 @@ export async function importSitePost(staff: BlogStaff, slug: string) {
     published_at: date ? `${date}T00:00:00Z` : null,
   });
   if (!inserted.ok) {
+    if (!inserted.duplicate) return { ok: false as const, message: migrationHint(inserted.message) };
     // Someone opened it at the same moment: use theirs.
-    if (inserted.duplicate) return importSitePost(staff, slug);
-    return { ok: false as const, message: migrationHint(inserted.message) };
+    const theirs = await selectRows<{ id: string }>(
+      POSTS,
+      new URLSearchParams({ select: "id", source_path: `eq.${site.path}`, limit: "1" }),
+    );
+    if (theirs.ok && theirs.rows[0]) return { ok: true as const, id: theirs.rows[0].id };
+    // Otherwise a draft is using this post's slug.
+    return { ok: false as const, message: `A draft already uses the slug "${postSlug}". Change that draft's slug, then open this post again.` };
   }
   return { ok: true as const, id };
 }

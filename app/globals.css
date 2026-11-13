@@ -1121,6 +1121,21 @@ html.theme-switching *::after {
   }
 }
 
+/* Radix places dropdowns and popovers in screen pixels, which the zoom above
+   would scale a second time. The wrapper undoes the zoom so the list lands
+   on its trigger, and its content puts the zoom back so text stays the page
+   size. Sizes taken from the trigger (--radix-*-trigger-width) are screen
+   pixels too, so classes divide them by --s1-zoom. */
+@media (min-width: 1800px) {
+  [data-radix-popper-content-wrapper] {
+    zoom: calc(1 / var(--s1-zoom, 1));
+  }
+
+  [data-radix-popper-content-wrapper] > * {
+    zoom: var(--s1-zoom, 1);
+  }
+}
+
 /* Lenis smooth scrolling (components/smooth-scroll.tsx): it handles the
    easing itself, so native smooth scrolling must be off while it runs. */
 html.lenis,

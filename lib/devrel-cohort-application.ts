@@ -9,7 +9,7 @@ import {
   readConsent,
   type ContactConsentValues,
 } from "@/lib/contact-consent";
-import { nameError, placeError } from "@/lib/form-checks";
+import { isEmailAddress, nameError, placeError } from "@/lib/form-checks";
 
 export const ROLE_OPTIONS = [
   "Student",
@@ -70,8 +70,6 @@ export const WHY_MIN = 30;
 export const WHY_MAX = 800;
 export const TOOL_MAX = 400;
 
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 const text = (value: unknown) =>
   typeof value === "string" ? value.trim() : "";
 
@@ -119,7 +117,7 @@ export function validateApplication(
   const errors: ApplicationErrors = {};
   const name = nameError(values.name);
   if (name) errors.name = name;
-  if (!EMAIL.test(values.email) || values.email.length > 254)
+  if (!isEmailAddress(values.email))
     errors.email = "Enter a valid email address.";
   const location = placeError(values.location, "Enter your city and country.");
   if (location) errors.location = location;

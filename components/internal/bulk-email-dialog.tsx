@@ -5,7 +5,8 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { Copy, EnvelopeSimple, PaperPlaneTilt, X } from "@phosphor-icons/react";
 import { sendBulkEmail } from "@/app/internal/(dashboard)/bulk-email-actions";
 import { firstName } from "@/lib/first-name";
-import type { EmailPipeline } from "@/lib/internal/email-banners";
+import { isEmailAddress } from "@/lib/form-checks";
+import { isEmailPipeline } from "@/lib/internal/email-banners";
 import {
   DEFAULT_CALL_URL,
   EMAIL_TEMPLATES,
@@ -18,12 +19,14 @@ import { statusLabel, type SectionKey } from "@/lib/internal/sections";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/internal/toast";
 import { SendLaterField, defaultSendLater, formatSendLater, sendLaterIso } from "@/components/internal/email-delivery";
-import { Avatar, Notice, buttonClass } from "@/components/internal/ui";
+import { Avatar, Notice, buttonClass, inputClass, textareaClass } from "@/components/internal/ui";
+
+/** A token for one send, for the server's idempotency key. */
+function newNonce() {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+}
 
 export type Recipient = { id: string; name: string; email: string; program: string };
-
-const field =
-  "block w-full rounded-lg border border-[var(--i-line)] bg-[var(--i-sunken)] px-3 text-[13px] outline-none transition-colors placeholder:text-[var(--i-faint)] focus:border-[var(--i-line-strong)] focus:bg-[var(--i-panel)]";
 
 /**
  * One template to everyone selected. The message keeps {first_name},
@@ -60,8 +63,11 @@ export function BulkEmailDialog({
   const [confirming, setConfirming] = useState(false);
   const [later, setLater] = useState(false);
   const [sendAt, setSendAt] = useState(defaultSendLater);
+  // One per send from this dialog: a retry of the same send goes out once,
+  // and the next send gets a fresh token.
+  const [nonce, setNonce] = useState(newNonce);
 
-  const reachable = recipients.filter((person) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(person.email));
+  const reachable = recipients.filter((person) => isEmailAddress(person.email));
   const unreachable = recipients.length - reachable.length;
   const previewPerson = reachable.find((person) => person.id === previewId) ?? reachable[0];
   const vars = useMemo(
@@ -88,7 +94,7 @@ export function BulkEmailDialog({
         call: call ? { label: "Book a call", url: callUrl } : null,
         reason: reasonFor(sectionKey, vars.program),
         unsubscribeUrl: "#",
-        banner: { pipeline: sectionKey as EmailPipeline, template: templateKey },
+        banner: isEmailPipeline(sectionKey) ? { pipeline: sectionKey, template: templateKey } : undefined,
         program: vars.program,
         assetBase: "",
       }).html,
@@ -108,6 +114,7 @@ export function BulkEmailDialog({
           callUrl,
           status: move && moveTo ? moveTo : undefined,
           sendAt: sendLaterIso(later, sendAt),
+          nonce,
         },
       );
       setConfirming(false);
@@ -122,6 +129,8 @@ export function BulkEmailDialog({
             result.scheduledFor ? ` for ${formatSendLater(result.scheduledFor)}` : ""
           }${skips.length ? `, ${skips.join(", ")}` : ""}`,
         );
+        if (result.warning) toast("error", result.warning);
+        setNonce(newNonce());
         setOpen(false);
         onSent();
       } else {
@@ -207,7 +216,7 @@ export function BulkEmailDialog({
                     setConfirming(false);
                   }}
                   maxLength={200}
-                  className={cn(field, "h-9")}
+                  className={inputClass()}
                 />
               </label>
               <label className="block space-y-1.5">
@@ -222,7 +231,7 @@ export function BulkEmailDialog({
                   }}
                   rows={11}
                   maxLength={10_000}
-                  className={cn(field, "resize-y py-2 leading-relaxed")}
+                  className={textareaClass}
                 />
               </label>
               <div className="space-y-2.5 rounded-xl border border-[var(--i-line)] p-3">
@@ -231,7 +240,7 @@ export function BulkEmailDialog({
                   Add a &ldquo;Book a call&rdquo; button
                 </label>
                 {call ? (
-                  <input value={callUrl} onChange={(event) => setCallUrl(event.target.value)} aria-label="Call booking link" className={cn(field, "h-8")} />
+                  <input value={callUrl} onChange={(event) => setCallUrl(event.target.value)} aria-label="Call booking link" className={inputClass("sm")} />
                 ) : null}
                 {moveTo ? (
                   <label className="flex cursor-pointer items-center gap-2.5 text-[13px]">
@@ -252,7 +261,7 @@ export function BulkEmailDialog({
                       setSendAt(next);
                       setConfirming(false);
                     }}
-                    inputClassName={cn(field, "h-8 w-auto")}
+                    inputClassName={cn(inputClass("sm"), "w-auto")}
                   />
                 ) : null}
               </div>

@@ -20,8 +20,9 @@ import {
   SubmitPill,
   focusFirstError,
 } from "@/components/paper/paper-form";
-import type { HackathonTask } from "@/data/hackathons";
+import type { HackathonQuestion, HackathonTask } from "@/data/hackathons";
 import {
+  ANSWER_MAX,
   EMPTY_REGISTRATION,
   EXPERIENCE_OPTIONS,
   IDEA_MAX,
@@ -29,6 +30,8 @@ import {
   SOURCE_OPTIONS,
   TEAM_OPTIONS,
   UNDECIDED_TRACK,
+  YES_NO,
+  answerField,
   validateRegistration,
   type RegistrationErrors,
   type RegistrationField,
@@ -97,15 +100,100 @@ const FIELD_ORDER: readonly RegistrationField[] = [
   "emailUpdates",
 ];
 
+/** One of the event's own questions, in the paper form style. */
+function QuestionField({
+  formId,
+  question,
+  value,
+  error,
+  onChange,
+}: {
+  formId: string;
+  question: HackathonQuestion;
+  value: string;
+  error?: string;
+  onChange: (value: string) => void;
+}) {
+  const name = answerField(question.id);
+  const fieldId = `${formId}-q-${question.id}`;
+  if (question.type === "yesno") {
+    return (
+      <div className="sm:col-span-2">
+        <Segments
+          name={name}
+          legend={question.required ? question.label : `${question.label} (optional)`}
+          value={value}
+          options={YES_NO.map((option) => ({ value: option, label: option }))}
+          onChange={onChange}
+          error={error}
+        />
+      </div>
+    );
+  }
+  const long = question.type === "long";
+  const hint = long
+    ? `${value.length}/${ANSWER_MAX.long}${question.hint ? ` · ${question.hint}` : ""}`
+    : question.hint;
+  const described = error ? `${fieldId}-error` : hint ? `${fieldId}-hint` : undefined;
+  return (
+    <Field
+      id={fieldId}
+      label={question.label}
+      optional={!question.required}
+      error={error}
+      hint={hint}
+      className="sm:col-span-2"
+    >
+      {question.type === "choice" ? (
+        <Select
+          id={fieldId}
+          name={name}
+          value={value}
+          onChange={onChange}
+          placeholder="Choose one"
+          options={question.options ?? []}
+          error={error}
+        />
+      ) : long ? (
+        <textarea
+          id={fieldId}
+          name={name}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={described}
+          rows={4}
+          maxLength={ANSWER_MAX.long}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className={cn(CONTROL, "resize-y py-3 leading-[1.55]")}
+        />
+      ) : (
+        <input
+          id={fieldId}
+          name={name}
+          type="text"
+          aria-invalid={error ? true : undefined}
+          aria-describedby={described}
+          maxLength={ANSWER_MAX.short}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className={cn(CONTROL, "h-12")}
+        />
+      )}
+    </Field>
+  );
+}
+
 function RegistrationForm({
   slug,
   hackathonName,
   tracks,
+  questions,
   onRegistered,
 }: {
   slug: string;
   hackathonName: string;
   tracks: string[];
+  questions: HackathonQuestion[];
   onRegistered: (name: string) => void;
 }) {
   const id = useId();
@@ -130,6 +218,28 @@ function RegistrationForm({
     });
   };
 
+  const setAnswer = (questionId: string, value: string) => {
+    setValues((current) => ({
+      ...current,
+      answers: { ...current.answers, [questionId]: value },
+    }));
+    const key = answerField(questionId);
+    setErrors((current) => {
+      if (!current[key]) return current;
+      const next = { ...current };
+      delete next[key];
+      return next;
+    });
+  };
+
+  // The event's questions sit right after the idea, so focus follows them.
+  const ideaAt = FIELD_ORDER.indexOf("idea") + 1;
+  const fieldOrder = [
+    ...FIELD_ORDER.slice(0, ideaAt),
+    ...questions.map((question) => answerField(question.id)),
+    ...FIELD_ORDER.slice(ideaAt),
+  ];
+
   const fieldProps = (field: RegistrationField) => ({
     id: `${id}-${field}`,
     name: field,
@@ -142,10 +252,10 @@ function RegistrationForm({
     if (submitting) return;
     setMessage("");
 
-    const check = validateRegistration(values, tracks);
+    const check = validateRegistration(values, tracks, questions);
     if (!check.ok) {
       setErrors(check.errors);
-      focusFirstError(formRef.current, FIELD_ORDER, check.errors);
+      focusFirstError(formRef.current, fieldOrder, check.errors);
       return;
     }
 
@@ -167,7 +277,7 @@ function RegistrationForm({
       if (!response.ok) {
         if (data.fields) {
           setErrors(data.fields);
-          focusFirstError(formRef.current, FIELD_ORDER, data.fields);
+          focusFirstError(formRef.current, fieldOrder, data.fields);
         }
         setMessage(data.error ?? "Something went wrong. Try again.");
         return;
@@ -346,6 +456,22 @@ function RegistrationForm({
             className={cn(CONTROL, "resize-y py-3 leading-[1.55]")}
           />
         </Field>
+
+        {questions.length ? (
+          <p className="border-t border-[#141414]/10 pt-6 text-[11px] font-medium uppercase tracking-[0.14em] text-[#141414]/55 sm:col-span-2">
+            A few questions for {hackathonName}
+          </p>
+        ) : null}
+        {questions.map((question) => (
+          <QuestionField
+            key={question.id}
+            formId={id}
+            question={question}
+            value={values.answers[question.id] ?? ""}
+            error={errors[answerField(question.id)]}
+            onChange={(value) => setAnswer(question.id, value)}
+          />
+        ))}
 
         <Honeypot
           value={values.website}
@@ -574,6 +700,7 @@ export function RegistrationSection({
   slug,
   hackathonName,
   tracks,
+  questions = [],
   tasks,
   registrationOpen,
   closedTitle,
@@ -584,6 +711,8 @@ export function RegistrationSection({
   slug: string;
   hackathonName: string;
   tracks: string[];
+  /** The event's own questions, asked after the standard fields. */
+  questions?: HackathonQuestion[];
   tasks: HackathonTask[];
   registrationOpen: boolean;
   closedTitle: string;
@@ -689,6 +818,7 @@ export function RegistrationSection({
         slug={slug}
         hackathonName={hackathonName}
         tracks={tracks}
+        questions={questions}
         onRegistered={markRegistered}
       />
     );

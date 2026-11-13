@@ -1,3 +1,4 @@
+import "server-only";
 import { insertRow, selectRows, updateRows } from "@/lib/supabase-server";
 import {
   OWNERS,

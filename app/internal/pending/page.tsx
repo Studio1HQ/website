@@ -5,7 +5,7 @@ import { Hourglass, Prohibit, WarningCircle } from "@phosphor-icons/react/dist/s
 import Logo from "@/components/ui/svgs/logo";
 import { buttonClass } from "@/components/internal/ui";
 import { requestAccess } from "@/lib/internal/members";
-import { getStaff } from "@/lib/internal/session";
+import { getStaff, hasAccess, homeFor } from "@/lib/internal/session";
 import { signOut } from "../(dashboard)/actions";
 
 export const metadata: Metadata = { title: "Waiting for approval" };
@@ -14,8 +14,8 @@ export const metadata: Metadata = { title: "Waiting for approval" };
 export default async function PendingPage() {
   const staff = await getStaff();
   if (!staff) redirect("/internal/login");
-  if (staff.role) redirect("/internal");
-  if (staff.blog) redirect("/internal/blog");
+  // Anyone with a way in goes to their own start page.
+  if (hasAccess(staff)) redirect(homeFor(staff));
   // Make sure an admin can see the request (signing in usually filed it).
   if (staff.status === "pending") await requestAccess(staff.email);
 

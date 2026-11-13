@@ -20,8 +20,10 @@ import {
   Card,
   CardTitle,
   EmptyState,
+  Notice,
   buttonClass,
   formatDate,
+  inputClass,
   relativeDate,
 } from "@/components/internal/ui";
 
@@ -76,7 +78,12 @@ function RolePicker({
   );
 }
 
-export function TeamView({ members, me }: { members: Member[]; me: string }) {
+/**
+ * The team list. Only owners (`canManage`) approve, invite, change roles or
+ * turn access off; other admins see it read-only. The server actions check
+ * this again, so hiding the controls is only for clarity.
+ */
+export function TeamView({ members, me, canManage }: { members: Member[]; me: string; canManage: boolean }) {
   const toast = useToast();
   const [busy, setBusy] = useState<string | null>(null);
   const [, startTransition] = useTransition();
@@ -117,6 +124,7 @@ export function TeamView({ members, me }: { members: Member[]; me: string }) {
 
   return (
     <div className="space-y-5">
+      {canManage ? (
       <Card>
         <CardTitle>Invite someone</CardTitle>
         <form onSubmit={submitInvite} className="space-y-3 px-5 py-4">
@@ -127,7 +135,7 @@ export function TeamView({ members, me }: { members: Member[]; me: string }) {
               value={inviteEmail}
               onChange={(event) => setInviteEmail(event.target.value)}
               placeholder="name@studio1hq.com or a writer's own email"
-              className="h-8 min-w-[260px] flex-1 rounded-lg border border-[var(--i-line)] bg-[var(--i-panel)] px-3 text-[13px] outline-none focus:border-[var(--i-line-strong)]"
+              className={cn(inputClass("sm"), "w-auto min-w-[260px] flex-1")}
             />
             <button type="submit" disabled={busy === "invite"} className={buttonClass("accent")}>
               <UserPlus size={15} /> Invite
@@ -143,6 +151,12 @@ export function TeamView({ members, me }: { members: Member[]; me: string }) {
           )}
         </form>
       </Card>
+      ) : (
+        <Notice tone="info">
+          Only Arindam and Amitesh can approve people, invite them, change roles or turn access off. You can see the
+          team here.
+        </Notice>
+      )}
 
       <Card>
         <CardTitle>
@@ -173,27 +187,33 @@ export function TeamView({ members, me }: { members: Member[]; me: string }) {
                       Asked {relativeDate(member.requested_at)}
                     </p>
                   </div>
-                  <RolePicker
-                    email={member.email}
-                    value={roles}
-                    onChange={(next) => setChosen((current) => ({ ...current, [member.email]: next }))}
-                  />
-                  <button
-                    type="button"
-                    disabled={busy === member.email || roles.length === 0}
-                    onClick={() => run(member.email, "active", roles, `Approved ${member.email} as ${rolesLabel(roles)}`)}
-                    className={buttonClass("accent")}
-                  >
-                    Approve
-                  </button>
-                  <button
-                    type="button"
-                    disabled={busy === member.email}
-                    onClick={() => run(member.email, "disabled", [], `Declined ${member.email}`)}
-                    className={buttonClass("ghost")}
-                  >
-                    Decline
-                  </button>
+                  {canManage ? (
+                    <>
+                      <RolePicker
+                        email={member.email}
+                        value={roles}
+                        onChange={(next) => setChosen((current) => ({ ...current, [member.email]: next }))}
+                      />
+                      <button
+                        type="button"
+                        disabled={busy === member.email || roles.length === 0}
+                        onClick={() => run(member.email, "active", roles, `Approved ${member.email} as ${rolesLabel(roles)}`)}
+                        className={buttonClass("accent")}
+                      >
+                        Approve
+                      </button>
+                      <button
+                        type="button"
+                        disabled={busy === member.email}
+                        onClick={() => run(member.email, "disabled", [], `Declined ${member.email}`)}
+                        className={buttonClass("ghost")}
+                      >
+                        Decline
+                      </button>
+                    </>
+                  ) : (
+                    <span className="text-[12.5px] text-[var(--i-muted)]">Waiting for Arindam or Amitesh</span>
+                  )}
                 </li>
               );
             })}
@@ -248,28 +268,30 @@ export function TeamView({ members, me }: { members: Member[]; me: string }) {
                 <RolePicker
                   email={member.email}
                   value={member.roles}
-                  disabled={busy === member.email || self || off}
+                  disabled={!canManage || busy === member.email || self || off}
                   onChange={(roles) =>
                     roles.length
                       ? run(member.email, "active", roles, `${member.email} is now ${rolesLabel(roles)}`)
                       : toast("error", "Keep at least one role, or turn their access off.")
                   }
                 />
-                <button
-                  type="button"
-                  disabled={busy === member.email || self}
-                  onClick={() =>
-                    run(
-                      member.email,
-                      off ? "active" : "disabled",
-                      member.roles,
-                      off ? `Turned on ${member.email}` : `Turned off ${member.email}`,
-                    )
-                  }
-                  className={buttonClass(off ? "secondary" : "danger", "sm")}
-                >
-                  {off ? "Turn on" : "Turn off"}
-                </button>
+                {canManage ? (
+                  <button
+                    type="button"
+                    disabled={busy === member.email || self}
+                    onClick={() =>
+                      run(
+                        member.email,
+                        off ? "active" : "disabled",
+                        member.roles,
+                        off ? `Turned on ${member.email}` : `Turned off ${member.email}`,
+                      )
+                    }
+                    className={buttonClass(off ? "secondary" : "danger", "sm")}
+                  >
+                    {off ? "Turn on" : "Turn off"}
+                  </button>
+                ) : null}
               </li>
             );
           })}

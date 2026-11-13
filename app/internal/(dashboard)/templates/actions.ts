@@ -6,12 +6,13 @@ import {
   fillTemplate,
   reasonFor,
   renderEmail,
+  senderName,
   templatesFor,
   type FormKey,
 } from "@/lib/internal/email-templates";
 import { requireStaff } from "@/lib/internal/session";
 import { isMailerConfigured, sendMail } from "@/lib/mailer";
-import { unsubscribeHeaders, unsubscribeUrl } from "@/lib/unsubscribe";
+import { unsubscribeUrl } from "@/lib/unsubscribe";
 
 const PIPELINES: FormKey[] = ["jobs", "cohort", "hackathons"];
 
@@ -31,9 +32,7 @@ export async function sendTestEmail(pipeline: unknown, templateKey: unknown): Pr
 
   const vars = {
     ...SAMPLE_VARS[form],
-    sender: template.automatic
-      ? "The Studio1 team"
-      : (staff.email.split("@")[0].split(/[._+-]/)[0] || "Studio1").replace(/^./, (c) => c.toUpperCase()),
+    sender: template.automatic ? "The Studio1 team" : senderName(staff.email),
   };
   const unsubscribe = await unsubscribeUrl(staff.email);
   const { html, text } = renderEmail({
@@ -52,7 +51,6 @@ export async function sendTestEmail(pipeline: unknown, templateKey: unknown): Pr
         subject: `[Test] ${fillTemplate(template.subject || "(You write the subject.)", vars)}`,
         html,
         text,
-        headers: unsubscribeHeaders(unsubscribe),
       },
       form,
     );

@@ -7,11 +7,13 @@ import {
   CaretRight,
   EnvelopeSimple,
 } from "@phosphor-icons/react/dist/ssr";
-import { entryExtras, listView, programOf, recordView } from "@/lib/internal/data";
-import { AUTOMATIC_SENDER } from "@/lib/internal/email-templates";
+import { ROW_LIMIT, entryExtras, listView, recordView } from "@/lib/internal/data";
+import { AUTOMATIC_SENDER, senderName } from "@/lib/internal/email-templates";
+import { programOf } from "@/lib/internal/program";
 import { blockedReason } from "@/lib/email-delivery";
 import { isMailerConfigured } from "@/lib/mailer";
 import { firstName } from "@/lib/first-name";
+import { mailtoHref } from "@/lib/form-checks";
 import { atLeast } from "@/lib/internal/roles";
 import { requireStaff } from "@/lib/internal/session";
 import { rowTags } from "@/lib/internal/query";
@@ -71,8 +73,9 @@ export async function SectionListPage({
           filters={filters}
           role={staff.role}
           overdue={data.overdue}
-          sender={firstName(staff.email.split("@")[0].replace(/[._+-]+/g, " "))}
+          sender={senderName(staff.email)}
           mailerReady={isMailerConfigured()}
+          rowLimit={data.truncated ? ROW_LIMIT : null}
         />
       ) : (
         <Notice tone="error">{data.message}</Notice>
@@ -211,11 +214,11 @@ export function RecordView({
                 vars={{
                   first_name: firstName(text(record.name)),
                   program: programOf(section, record),
-                  sender: (data.staff.email.split("@")[0].split(/[._+-]/)[0] || "Studio1").replace(/^./, (c) => c.toUpperCase()),
+                  sender: senderName(data.staff.email),
                 }}
               />
             ) : email ? (
-              <a href={`mailto:${email}`} className={buttonClass("secondary")}>
+              <a href={mailtoHref(email)} className={buttonClass("secondary")}>
                 <EnvelopeSimple size={15} /> Email
               </a>
             ) : null}

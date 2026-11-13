@@ -20,6 +20,7 @@ import {
   TagChip,
   buttonClass,
   statusTone,
+  textareaClass,
 } from "@/components/internal/ui";
 
 /** Status, tags and notes for one entry, saved as you go. */
@@ -237,7 +238,7 @@ export function RecordPanel({
             rows={5}
             maxLength={5000}
             placeholder="Interview feedback, next steps…"
-            className="block w-full resize-y rounded-lg border border-[var(--i-line)] bg-[var(--i-sunken)] px-3 py-2 text-[13px] leading-relaxed outline-none transition-colors placeholder:text-[var(--i-faint)] focus:border-[var(--i-line-strong)] focus:bg-[var(--i-panel)]"
+            className={textareaClass}
           />
           {canEdit ? (
             <div className="mt-2.5 flex items-center justify-between gap-3">

@@ -12,13 +12,10 @@ import {
 } from "@mdxeditor/editor";
 import { useEffect, useId, useRef, useState, type DragEvent, type FormEvent, type KeyboardEvent } from "react";
 import { cn } from "@/lib/utils";
-import { buttonClass } from "@/components/internal/ui";
+import { buttonClass, inputClass, textareaClass } from "@/components/internal/ui";
 
 /** Past this, screen readers tend to cut alt text short. */
 const ALT_LIMIT = 125;
-
-const field =
-  "block w-full rounded-lg border border-[var(--i-line)] bg-[var(--i-sunken)] px-3 py-2 text-[13px] leading-relaxed text-[var(--i-ink)] outline-none transition-colors placeholder:text-[var(--i-faint)] focus:border-[var(--i-line-strong)] focus:bg-[var(--i-panel)]";
 
 type Initial = { src?: string; altText?: string; title?: string };
 
@@ -252,7 +249,7 @@ function ImageForm({
                       onChange={(event) => setSrc(event.target.value)}
                       placeholder="or paste a link: https://… or /blog/uploads/…"
                       spellCheck={false}
-                      className={cn(field, "h-8 min-w-0 flex-1 py-0")}
+                      className={cn(inputClass("sm"), "min-w-0 flex-1 py-0")}
                     />
                   )}
                 </div>
@@ -283,7 +280,7 @@ function ImageForm({
                   onChange={(event) => setAlt(event.target.value.replace(/\s*\n\s*/g, " "))}
                   onKeyDown={enterSaves}
                   placeholder="What the image shows, e.g. Bar chart of AI Overview citations by month"
-                  className={cn(field, "max-h-40 min-h-[60px] resize-none [field-sizing:content]")}
+                  className={cn(textareaClass, "max-h-40 min-h-[60px] resize-none [field-sizing:content]")}
                 />
                 <p className="text-[12px] leading-relaxed text-[var(--i-faint)]">
                   {alt.length > ALT_LIMIT
@@ -303,7 +300,7 @@ function ImageForm({
                   onChange={(event) => setCaption(event.target.value.replace(/\s*\n\s*/g, " "))}
                   onKeyDown={enterSaves}
                   placeholder="Shown under the image on the blog"
-                  className={cn(field, "max-h-40 min-h-[60px] resize-none [field-sizing:content]")}
+                  className={cn(textareaClass, "max-h-40 min-h-[60px] resize-none [field-sizing:content]")}
                 />
               </div>
             </div>

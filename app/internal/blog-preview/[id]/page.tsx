@@ -58,8 +58,9 @@ export default async function BlogPreviewPage({ params }: Props) {
     ({ content: rendered } = await compileMDX({
       source: transformBlogMdxContent(content),
       components: blogMdxComponents,
-      // Never run a draft's raw HTML: writers can be outside the team.
-      options: { mdxOptions: { remarkPlugins: [remarkGfm, remarkSafeMdx] } },
+      // Never run a draft's raw HTML. The blog's own FAQ and YouTube
+      // components stay, so the preview matches the live page.
+      options: { mdxOptions: { remarkPlugins: [remarkGfm, [remarkSafeMdx, { generated: true }]] } },
     }));
   } catch (error) {
     rendered = (

@@ -1,10 +1,12 @@
-import { exportRows } from "@/lib/internal/data";
+import { toCsv } from "@/lib/internal/csv";
+import { ROW_LIMIT, exportRows } from "@/lib/internal/data";
 import { unsubscribeUrl } from "@/lib/unsubscribe";
 import { UUID_PATTERN, parseFilters, sectionFor } from "@/lib/internal/sections";
 
 /**
  * CSV of a section: the list's current filters, or exactly the selected
- * rows (`ids`). Up to 10,000 rows.
+ * rows (`ids`). Up to ROW_LIMIT rows; past that the file name ends in
+ * "-first-N-rows" and the list page shows a warning.
  */
 export async function GET(
   request: Request,
@@ -29,28 +31,32 @@ export async function GET(
     }
   }
 
+  // A hackathon's own questions become one column each, named after the
+  // question, instead of a JSON blob.
+  if (section.key === "hackathons") {
+    for (const row of result.rows) {
+      const answers = Array.isArray(row.answers) ? row.answers : [];
+      delete row.answers;
+      for (const item of answers) {
+        if (item && typeof item.question === "string") row[`Q: ${item.question}`] = String(item.answer ?? "");
+      }
+    }
+  }
+
   const columns = result.rows.length
     ? [...new Set(result.rows.flatMap((row) => Object.keys(row)))]
     : section.listSelect;
-  const lines = [
-    columns.map(csvCell).join(","),
-    ...result.rows.map((row) => columns.map((column) => csvCell(row[column])).join(",")),
-  ];
   // YYYY-MM-DD in IST, like the dates on the dashboard.
   const date = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date());
-  return new Response(`﻿${lines.join("\r\n")}\r\n`, {
+  // A table past the row limit exports only its newest rows: the file name
+  // and a header say so, so nobody takes a cut-off file for the whole list.
+  const name = `${section.key}-${date}${result.truncated ? `-first-${ROW_LIMIT}-rows` : ""}.csv`;
+  return new Response(toCsv(columns, result.rows), {
     headers: {
       "content-type": "text/csv; charset=utf-8",
-      "content-disposition": `attachment; filename="${section.key}-${date}.csv"`,
+      "content-disposition": `attachment; filename="${name}"`,
       "cache-control": "no-store",
+      ...(result.truncated ? { "x-export-truncated": String(ROW_LIMIT) } : {}),
     },
   });
-}
-
-function csvCell(value: unknown) {
-  if (value === null || value === undefined) return "";
-  let cell = Array.isArray(value) ? value.join("; ") : String(value);
-  // Form answers are untrusted: stop spreadsheets running them as formulas.
-  if (/^[=+\-@\t\r]/.test(cell)) cell = `'${cell}`;
-  return /[",\r\n]/.test(cell) ? `"${cell.replace(/"/g, '""')}"` : cell;
 }

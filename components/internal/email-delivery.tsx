@@ -118,6 +118,7 @@ export function CancelScheduledButton({ logId }: { logId: string }) {
       setConfirming(false);
       if (result.ok) {
         toast("success", "Scheduled email canceled");
+        if (result.warning) toast("error", result.warning);
         router.refresh();
       } else {
         toast("error", result.message);

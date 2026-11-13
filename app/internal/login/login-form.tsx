@@ -1,6 +1,8 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { cn } from "@/lib/utils";
+import { fieldClass } from "@/components/internal/ui";
 import { requestSignInLink, type LoginState } from "./actions";
 
 const initial: LoginState = { status: "idle" };
@@ -48,7 +50,7 @@ export function LoginForm({ next }: { next: string }) {
           autoComplete="email"
           autoFocus
           placeholder="you@studio1hq.com"
-          className="block w-full rounded-lg border border-[var(--i-line)] bg-[var(--i-panel)] px-3 py-2.5 text-[15px] outline-none placeholder:text-[var(--i-faint)] focus:border-[var(--i-accent)]"
+          className={cn(fieldClass, "h-11 text-[15px]")}
         />
       </label>
       {state.status === "error" ? (

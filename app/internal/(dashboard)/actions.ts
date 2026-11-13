@@ -10,7 +10,7 @@ import { SESSION_COOKIE } from "@/lib/internal/token";
 
 export type ActionResult =
   | { ok: true; tags?: Record<string, string[]> }
-  | { ok: false; message: string };
+  | { ok: false; message: string; /** Part of the change was saved. */ saved?: boolean };
 
 function strings(value: unknown, max: number): string[] | null {
   if (!Array.isArray(value) || value.length > max) return null;
@@ -46,7 +46,8 @@ export async function changeEntries(
   next.removeTags = remove.map((tag) => tag.slice(0, 32));
 
   const result = await updateEntries(section, idList, next);
-  if (result.ok) revalidatePath("/internal", "layout");
+  // Also when only part of it saved (the status, but not the tags).
+  if (result.ok || result.saved) revalidatePath("/internal", "layout");
   return result;
 }
 
