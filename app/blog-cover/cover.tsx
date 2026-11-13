@@ -19,14 +19,20 @@ const CREAM = "#f4efe7";
 const LOGO_PATH =
   "M0 35C0 16.6807 14.0744 1.64844 32 0.126953V141H51.0523C52.4308 137.344 54.7446 133.689 57.9938 130.033C61.1446 126.508 64.6892 123.44 68.6277 120.829C72.5662 118.349 76.3569 116.782 80 116.129V86.7544C75.4708 87.9292 71.3846 89.6919 67.7415 92.0415C64 94.5225 60.7508 97.46 57.9938 100.854C56.5345 102.72 55.2545 104.659 54.1539 106.671V0H125C144.33 0 160 15.6699 160 35V125C160 144.33 144.33 160 125 160H124V18H104.948C103.569 21.6816 101.255 25.3628 98.0062 29.0444C94.8554 32.5942 91.3108 35.6841 87.3723 38.314C83.4338 40.812 79.6431 42.3896 76 43.0474V72.6304C80.5292 71.4473 84.6154 69.6724 88.2585 67.3057C92 64.8076 95.2492 61.8491 98.0062 58.4307C99.4655 56.5513 100.745 54.5986 101.846 52.5723V160H35C15.67 160 0 144.33 0 125V35Z";
 
-/** The orange print panel: flat print orange, like the homepage contact banner. */
+/**
+ * The orange print panel: red-orange corners fading down to a warm peach
+ * horizon. This sunrise gradient is the Studio1 blog cover look; keep it
+ * even where the site pages themselves are flat paper.
+ */
 const PANEL: CSSProperties = {
-  backgroundColor: PRINT,
+  backgroundColor: "#fb8a1e",
+  backgroundImage:
+    "radial-gradient(circle at 0% 0%, #ff3a00 0%, rgba(255,58,0,0) 55%), radial-gradient(circle at 100% 0%, #ff3a00 0%, rgba(255,58,0,0) 55%), linear-gradient(180deg, #fb8a1e 0%, #f7a54a 40%, #eeb795 75%, #f2b38a 100%)",
 };
 
 const flex = (style: CSSProperties = {}): CSSProperties => ({ display: "flex", ...style });
 const card = (style: CSSProperties = {}): CSSProperties =>
-  flex({ flexDirection: "column", background: "#fff", boxShadow: "0 30px 60px -30px rgba(20,20,20,0.35)", ...style });
+  flex({ flexDirection: "column", background: "#fff", boxShadow: "0 30px 60px -30px rgba(90,30,0,0.55)", ...style });
 
 /** Small uppercase caption used across the illustrations. */
 function Caption({ children, color = MUTED }: { children: ReactNode; color?: string }) {
@@ -519,7 +525,7 @@ function Network() {
             color: index % 3 === 0 ? CREAM : INK,
             fontSize: 22,
             fontWeight: 500,
-            boxShadow: "0 18px 30px -18px rgba(20,20,20,0.4)",
+            boxShadow: "0 18px 30px -18px rgba(90,30,0,0.6)",
           })}
         >
           {initials}
@@ -562,7 +568,7 @@ function Tiles() {
               padding: 14,
               background: tone,
               color: dark ? "#fff" : INK,
-              boxShadow: "0 18px 30px -20px rgba(20,20,20,0.35)",
+              boxShadow: "0 18px 30px -20px rgba(90,30,0,0.55)",
             })}
           >
             <span style={{ fontSize: 30, fontWeight: 500, letterSpacing: "-0.04em" }}>{String(index + 1).padStart(2, "0")}</span>
@@ -617,7 +623,7 @@ function Terminal({ command, result = "→ decision ready" }: { command: string;
     { text: result, color: PRINT },
   ];
   return (
-    <div style={flex({ flexDirection: "column", width: 560, background: INK, boxShadow: "0 30px 60px -30px rgba(20,20,20,0.45)" })}>
+    <div style={flex({ flexDirection: "column", width: 560, background: INK, boxShadow: "0 30px 60px -30px rgba(60,20,0,0.7)" })}>
       <div style={flex({ alignItems: "center", gap: 8, padding: "16px 20px", borderBottom: "1px solid rgba(244,239,231,0.12)" })}>
         {[0, 1, 2].map((dot) => (
           <div key={dot} style={flex({ width: 12, height: 12, borderRadius: 999, background: "rgba(244,239,231,0.25)" })} />
@@ -1025,6 +1031,61 @@ function LaunchPost() {
   );
 }
 
+/** A launch post's views climbing over its 48 hours on X, with the creator quotes stacked in the first two. */
+function ViralLaunch() {
+  const W = 560;
+  const H = 210;
+  // Illustrative cumulative views: a steep climb while the quotes land, then a long flat tail.
+  const points: [number, number][] = [
+    [0, 204], [30, 196], [60, 168], [90, 120], [120, 78], [160, 50], [220, 32], [300, 22], [400, 15], [W, 10],
+  ];
+  const line = points.map(([x, y], index) => `${index ? "L" : "M"}${x} ${y}`).join(" ");
+  const quotes: [number, number][] = [[30, 196], [48, 182], [66, 160], [84, 130], [102, 102], [120, 78]];
+  return (
+    <div style={card({ width: 620, padding: "26px 30px 24px" })}>
+      <div style={flex({ alignItems: "center", gap: 14 })}>
+        <div style={flex({ width: 52, height: 52, borderRadius: 999, background: "rgba(20,20,20,0.18)" })} />
+        <div style={flex({ flexDirection: "column", gap: 8 })}>
+          <Bar width={150} height={12} color="rgba(20,20,20,0.5)" />
+          <Bar width={100} height={10} />
+        </div>
+        <div style={flex({ marginLeft: "auto" })}>
+          <Tag>launch</Tag>
+        </div>
+      </div>
+      <div style={flex({ justifyContent: "space-between", alignItems: "flex-end", marginTop: 20 })}>
+        <Caption>VIEWS, FIRST 48 HOURS</Caption>
+        <div style={flex({ fontSize: 40, fontWeight: 500, letterSpacing: "-0.04em", lineHeight: 1 })}>
+          <span>4.9</span>
+          <span style={{ color: PRINT }}>M</span>
+        </div>
+      </div>
+      <div style={flex({ position: "relative", width: W, height: H, flexShrink: 0, marginTop: 16 })}>
+        <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ position: "absolute", left: 0, top: 0 }}>
+          {[0.25, 0.5, 0.75].map((row) => (
+            <line key={row} x1="0" x2={W} y1={H * row} y2={H * row} stroke={LINE} strokeWidth="2" strokeDasharray="6 6" />
+          ))}
+          <rect x="0" y="0" width="120" height={H} fill={PRINT} fillOpacity="0.1" />
+          <line x1="120" x2="120" y1="0" y2={H} stroke={INK} strokeOpacity="0.5" strokeWidth="2" strokeDasharray="6 6" />
+          <path d={`${line} L${W} ${H} L0 ${H} Z`} fill={PRINT} fillOpacity="0.14" />
+          <path d={line} fill="none" stroke={PRINT} strokeWidth="5" strokeLinejoin="round" strokeLinecap="round" />
+          {quotes.map(([x, y]) => (
+            <circle key={x} cx={x} cy={y} r="8" fill={INK} stroke="#fff" strokeWidth="3" />
+          ))}
+        </svg>
+        <div style={flex({ position: "absolute", left: 132, top: 150 })}>
+          <Tag dark>creator quotes</Tag>
+        </div>
+      </div>
+      <div style={flex({ position: "relative", width: W, height: 32, marginTop: 14, borderTop: `1px solid ${LINE}`, fontSize: 15, color: MUTED })}>
+        <span style={{ position: "absolute", left: 0, top: 12 }}>Hour 0</span>
+        <span style={{ position: "absolute", left: 108, top: 12 }}>2h</span>
+        <span style={{ position: "absolute", right: 0, top: 12 }}>48h</span>
+      </div>
+    </div>
+  );
+}
+
 /** One canonical post fanning out to the platforms it is republished on. */
 function CrossPost() {
   const targets: [string, number][] = [
@@ -1196,6 +1257,7 @@ const ART: Record<CoverArtKey, (post: CoverPost) => Art> = {
   build: () => ({ label: "terminal", node: <Terminal command="pnpm install && pnpm dev" result="→ running locally" /> }),
   "hello-world": () => ({ label: "terminal", node: <Terminal command="npx create-your-app" result="→ Hello, world!" /> }),
   devrel: () => ({ label: "devrel.fig", node: <Network />, scale: 1.05 }),
+  "viral-launch": () => ({ label: "viral-launch.fig", node: <ViralLaunch />, scale: 1.1 }),
   "launch-post": () => ({ label: "launch-post.fig", node: <LaunchPost />, scale: 1.15 }),
   "launch-plan": () => ({ label: "launch-plan.fig", node: <LaunchPlan /> }),
   mark: () => ({ label: "studio1-mark", node: <PrintMark /> }),
@@ -1246,7 +1308,7 @@ export function Frame({ label, children }: { label: string; children: ReactNode 
 }
 
 /**
- * Flat orange panel with the horizon line and the framed illustration.
+ * Gradient orange panel with the glowing horizon and the framed illustration.
  * `zoom` shrinks the whole composition for smaller canvases (Open Graph cards),
  * so a cover and its share card are the same picture at two sizes.
  */
@@ -1267,23 +1329,29 @@ export function Panel({
     // No overflow clip here: next/og drops SVGs (icons, charts, the cursor) inside
     // the scaled frame when an ancestor clips. The canvas edge clips anyway.
     <div style={flex({ position: "relative", width, height: "100%", alignItems: "center", justifyContent: "center", ...PANEL })}>
-      {/* Horizon: a thin white arc rising from the bottom edge, as on the
-          homepage contact banner */}
+      {/* Horizon: a soft glowing arc rising from the bottom edge */}
       <svg
         width={width}
         height={height}
         viewBox={`0 0 ${width} ${height}`}
         style={{ position: "absolute", left: 0, top: 0 }}
       >
+        <defs>
+          <radialGradient id="horizon" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#fb8a1e" />
+            <stop offset="55%" stopColor="#f9a53f" />
+            <stop offset="92%" stopColor="#f6c78a" />
+            <stop offset="97%" stopColor="#fff0d7" stopOpacity="0.9" />
+            <stop offset="100%" stopColor="#fff0d7" stopOpacity="0" />
+          </radialGradient>
+        </defs>
         <ellipse
           cx={width / 2}
           cy={height + 420 * zoom}
           rx={Math.max(width * 0.72, 620 * zoom)}
           ry={680 * zoom}
-          fill="none"
-          stroke="#ffffff"
-          strokeOpacity="0.4"
-          strokeWidth="2"
+          fill="url(#horizon)"
+          opacity="0.9"
         />
       </svg>
       <div style={flex({ transform: `scale(${(art.scale ?? scale) * zoom})` })}>
