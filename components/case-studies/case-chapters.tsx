@@ -69,14 +69,14 @@ function Chapter({
       <Link
         href={`/case-studies/${study.slug}`}
         className={cn(
-          "group grid gap-3 rounded-[6px] bg-white p-3 shadow-[0_1px_0_rgba(27,23,20,0.06)] ring-1 ring-inset ring-[#141414]/[0.07] transition-[box-shadow] duration-500 hover:ring-[#141414]/[0.14]",
+          "group grid grid-cols-[minmax(0,1fr)] gap-3 rounded-[6px] bg-white p-3 shadow-[0_1px_0_rgba(27,23,20,0.06)] ring-1 ring-inset ring-[#141414]/[0.07] transition-[box-shadow] duration-500 hover:ring-[#141414]/[0.14]",
           flip
             ? "md:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)]"
             : "md:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]",
         )}
       >
         {/* The story */}
-        <div className={cn("flex flex-col p-5 md:p-8", flip && "md:order-2")}>
+        <div className={cn("flex min-w-0 flex-col p-5 md:p-8", flip && "md:order-2")}>
           <div className="flex items-center gap-3">
             {study.logo ? (
               <span className="relative size-11 shrink-0 overflow-hidden rounded-[6px]">
@@ -134,7 +134,7 @@ function Chapter({
         {/* The value: the result, or the client's words */}
         <div
           className={cn(
-            "relative isolate flex min-h-[200px] flex-col justify-between overflow-hidden rounded-[6px] p-6",
+            "relative isolate flex min-h-[200px] min-w-0 flex-col justify-between overflow-hidden rounded-[6px] p-6",
             flip && "md:order-1",
             study.metric ? "text-white" : "bg-[#141414] text-white",
           )}

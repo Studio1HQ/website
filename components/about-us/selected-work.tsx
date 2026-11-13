@@ -349,7 +349,7 @@ function GroupRow({
       {/* Row: scrolls sideways and fades out at its right edge */}
       <div
         ref={rowRef}
-        className="-mx-4 flex snap-x snap-mandatory gap-5 -mb-10 overflow-x-auto px-4 pb-16 [scrollbar-width:none] lg:mx-0 lg:px-0 lg:pr-24 [&::-webkit-scrollbar]:hidden"
+        className="-mx-4 flex min-w-0 snap-x snap-mandatory gap-5 -mb-10 overflow-x-auto px-4 pb-16 [scrollbar-width:none] lg:mx-0 lg:px-0 lg:pr-24 [&::-webkit-scrollbar]:hidden"
         style={{ maskImage: fade, WebkitMaskImage: fade }}
       >
         {items.map((project, i) => (

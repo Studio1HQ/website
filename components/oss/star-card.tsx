@@ -236,7 +236,7 @@ export function StarCard({
   const reduceMotion = useReducedMotion();
   return (
     <motion.div
-      className="relative mx-auto w-full max-w-[520px] lg:mr-0"
+      className="relative mx-auto w-full min-w-0 max-w-[520px] lg:mr-0"
       initial={reduceMotion ? false : { opacity: 0, y: 32 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 1, ease: EASE, delay: 0.25 }}

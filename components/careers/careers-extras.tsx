@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   animate,
   motion,
@@ -83,8 +83,22 @@ export function Hanging({ children }: { children: ReactNode }) {
     return `M ${WIDTH / 2 + 9} -900 Q ${(WIDTH / 2 + 9 + endX) / 2} ${(endY - 900) / 2} ${endX} ${endY}`;
   });
 
+  // The lanyard and the pull only make sense with room to hang: on phones
+  // and tablets the flyer simply sits in the page, full width.
+  const [hang, setHang] = useState(true);
   useEffect(() => {
-    if (reduceMotion) return;
+    const query = window.matchMedia("(min-width: 1024px)");
+    const update = () => setHang(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    if (reduceMotion || !hang) {
+      y.set(0);
+      return;
+    }
     const controls = animate(y, 0, {
       type: "spring",
       stiffness: 70,
@@ -93,7 +107,9 @@ export function Hanging({ children }: { children: ReactNode }) {
       delay: 0.3,
     });
     return () => controls.stop();
-  }, [reduceMotion, y]);
+  }, [reduceMotion, hang, y]);
+
+  if (!hang) return <div className="mx-auto w-full max-w-[400px]">{children}</div>;
 
   return (
     <motion.div
