@@ -1,73 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { endAuthSession, exchangeAuthCode } from "@/lib/supabase-server";
-import { isInvited, requestAccess, touchMember } from "@/lib/internal/members";
-import { teamAccessFor } from "@/lib/internal/team/people";
-import { linkCookieOptions, sessionCookieOptions } from "@/lib/internal/session";
-import {
-  NEXT_COOKIE,
-  SESSION_COOKIE,
-  SESSION_TTL_SECONDS,
-  VERIFIER_COOKIE,
-  authSecret,
-  emailAddress,
-  nowSeconds,
-  safeNext,
-  signToken,
-  staffEmail,
-} from "@/lib/internal/token";
 
 /**
- * Where Supabase's magic link lands. The `code` only turns into a session
- * with the PKCE verifier saved in this browser when the link was asked for,
- * so a forwarded or leaked link can't sign anyone in.
+ * Where Supabase's old magic links landed. Sign-in now uses an emailed code
+ * (app/internal/login/actions.ts), so a link from an older email just goes
+ * back to the login page with a note. Safe to delete once those have gone.
  */
-export async function GET(request: NextRequest) {
-  const fail = (reason: "expired" | "browser" | "denied") => {
-    const url = new URL("/internal/login", request.url);
-    url.searchParams.set("error", reason);
-    return NextResponse.redirect(url, 303);
-  };
-
-  const secret = authSecret();
-  const code = request.nextUrl.searchParams.get("code");
-  // Supabase sends error=… (e.g. otp_expired) instead of a code.
-  if (!secret || !code) return fail("expired");
-
-  const verifier = request.cookies.get(VERIFIER_COOKIE)?.value;
-  if (!verifier) return fail("browser");
-
-  const exchanged = await exchangeAuthCode(code, verifier);
-  if (!exchanged.ok) {
-    console.error(`[internal] magic link exchange failed: ${exchanged.message}`);
-    return fail("expired");
-  }
-  // We keep our own session; Supabase's isn't needed after this.
-  void endAuthSession(exchanged.accessToken);
-
-  // Staff, or an outside writer an admin invited (checked again here, in
-  // case the invite was withdrawn after the link went out).
-  const address = emailAddress(exchanged.user.email);
-  const email = address && (staffEmail(address) ?? ((await isInvited(address)) ? address : null));
-  if (!email || !exchanged.user.email_confirmed_at) return fail("denied");
-
-  // First sign-in files an access request for an admin to approve; owners
-  // and approved members go straight in (lib/internal/session.ts decides).
-  // People on the team list (or who log interns' days) already have My day
-  // or People, so they don't need a request.
-  const team = await teamAccessFor(email);
-  if (!team.person && team.interns.length === 0) {
-    const requested = await requestAccess(email);
-    if (!requested.ok) console.error(`[internal] filing access request failed: ${requested.message}`);
-  }
-  await touchMember(email);
-
-  const now = nowSeconds();
-  const session = await signToken({ email, iat: now, exp: now + SESSION_TTL_SECONDS }, secret);
-  const next = safeNext(request.cookies.get(NEXT_COOKIE)?.value);
-
-  const response = NextResponse.redirect(new URL(next, request.url), 303);
-  response.cookies.set(SESSION_COOKIE, session, sessionCookieOptions(SESSION_TTL_SECONDS));
-  response.cookies.set(VERIFIER_COOKIE, "", linkCookieOptions(0));
-  response.cookies.set(NEXT_COOKIE, "", linkCookieOptions(0));
-  return response;
+export function GET(request: NextRequest) {
+  const url = new URL("/internal/login", request.url);
+  url.searchParams.set("error", "expired");
+  return NextResponse.redirect(url, 303);
 }

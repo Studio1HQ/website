@@ -381,7 +381,7 @@ export async function signedFileUrl(
 }
 
 // ---------------------------------------------------------------------
-// Auth: magic-link sign-in for the internal dashboard (app/internal).
+// Auth: emailed-code sign-in for the internal dashboard (app/internal).
 // ---------------------------------------------------------------------
 
 async function authError(response: Response) {
@@ -424,40 +424,30 @@ export async function ensureAuthUser(email: string): Promise<{ ok: true } | Fail
   }
 }
 
-export type MagicLinkResult =
+export type SignInCodeResult =
   | { ok: true }
   | (Failure & { rateLimited: boolean });
 
 /**
- * Emails a magic link with the PKCE flow: the link comes back to
- * `redirectTo` with a `code` that only the holder of the verifier (the
- * browser that asked) can exchange for a session.
+ * Emails a one-time sign-in code (the "Magic link or OTP" template in
+ * Supabase → Authentication → Emails shows {{ .Token }} and no link). A
+ * code, not a link: mail scanners such as Zoho's open every link in an
+ * email within seconds, which spent our magic links before anyone clicked.
+ * Asking again replaces the last code; Supabase allows one email a minute.
  */
-export async function sendMagicLink(
-  email: string,
-  redirectTo: string,
-  codeChallenge: string,
-): Promise<MagicLinkResult> {
+export async function sendSignInCode(email: string): Promise<SignInCodeResult> {
   const supabase = config();
   if (!supabase) {
     return { ok: false, rateLimited: false, message: "Supabase isn't configured" };
   }
   try {
-    const response = await fetch(
-      `${supabase.url}/auth/v1/otp?redirect_to=${encodeURIComponent(redirectTo)}`,
-      {
-        method: "POST",
-        headers: { ...authHeaders(supabase.key), "content-type": "application/json" },
-        body: JSON.stringify({
-          email,
-          create_user: false,
-          code_challenge: codeChallenge,
-          code_challenge_method: "s256",
-        }),
-        cache: "no-store",
-        signal: AbortSignal.timeout(15_000),
-      },
-    );
+    const response = await fetch(`${supabase.url}/auth/v1/otp`, {
+      method: "POST",
+      headers: { ...authHeaders(supabase.key), "content-type": "application/json" },
+      body: JSON.stringify({ email, create_user: false }),
+      cache: "no-store",
+      signal: AbortSignal.timeout(15_000),
+    });
     if (response.ok) return { ok: true };
     const error = await authError(response);
     return {
@@ -472,29 +462,39 @@ export async function sendMagicLink(
 
 export type AuthUser = { id: string; email?: string; email_confirmed_at?: string | null };
 
-/** Trades a magic link's `code` and the PKCE verifier for the signed-in user. */
-export async function exchangeAuthCode(
-  code: string,
-  codeVerifier: string,
-): Promise<{ ok: true; user: AuthUser; accessToken: string } | Failure> {
+export type VerifyCodeResult =
+  | { ok: true; user: AuthUser; accessToken: string }
+  | (Failure & { reason: "invalid" | "rate_limited" | "error" });
+
+/** Checks a sign-in code; a right one is used up and signs the user in. */
+export async function verifySignInCode(email: string, code: string): Promise<VerifyCodeResult> {
   const supabase = config();
-  if (!supabase) return { ok: false, message: "Supabase isn't configured" };
+  if (!supabase) return { ok: false, reason: "error", message: "Supabase isn't configured" };
   try {
-    const response = await fetch(`${supabase.url}/auth/v1/token?grant_type=pkce`, {
+    const response = await fetch(`${supabase.url}/auth/v1/verify`, {
       method: "POST",
       headers: { ...authHeaders(supabase.key), "content-type": "application/json" },
-      body: JSON.stringify({ auth_code: code, code_verifier: codeVerifier }),
+      body: JSON.stringify({ type: "email", email, token: code }),
       cache: "no-store",
       signal: AbortSignal.timeout(10_000),
     });
-    if (!response.ok) return { ok: false, message: (await authError(response)).message };
+    if (!response.ok) {
+      const error = await authError(response);
+      const reason =
+        error.status === 429 || error.code.includes("rate_limit")
+          ? "rate_limited"
+          : error.status === 403 || error.code === "otp_expired"
+            ? "invalid"
+            : "error";
+      return { ok: false, reason, message: error.message };
+    }
     const body = (await response.json()) as { access_token?: string; user?: AuthUser };
     if (!body.user || !body.access_token) {
-      return { ok: false, message: "No user in the token response" };
+      return { ok: false, reason: "error", message: "No user in the verify response" };
     }
     return { ok: true, user: body.user, accessToken: body.access_token };
   } catch (error) {
-    return { ok: false, message: String(error) };
+    return { ok: false, reason: "error", message: String(error) };
   }
 }
 

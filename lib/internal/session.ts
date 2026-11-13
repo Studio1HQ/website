@@ -208,6 +208,7 @@ export function sessionCookieOptions(maxAge: number) {
   };
 }
 
-export function linkCookieOptions(maxAge: number) {
-  return { ...sessionCookieOptions(maxAge), path: "/internal/auth" };
+/** For the sign-in step's own cookies, which only the login page reads. */
+export function loginCookieOptions(maxAge: number) {
+  return { ...sessionCookieOptions(maxAge), path: "/internal/login" };
 }

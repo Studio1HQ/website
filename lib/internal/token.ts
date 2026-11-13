@@ -2,7 +2,7 @@
  * The internal dashboard's session cookie, on Web Crypto only so the same
  * code runs in proxy.ts and in server components.
  *
- * Supabase Auth proves the email address (magic link); the dashboard then
+ * Supabase Auth proves the email address (an emailed code); the dashboard then
  * keeps its own session: `<payload>.<signature>`, base64url JSON and an
  * HMAC-SHA256 of `session.<payload>`.
  */
@@ -12,14 +12,15 @@ import { STAFF_DOMAIN } from "@/lib/internal/roles";
 export { STAFF_DOMAIN };
 
 export const SESSION_COOKIE = "s1_internal_session";
-/** The PKCE verifier: a magic link only works in the browser that asked. */
-export const VERIFIER_COOKIE = "s1_internal_verifier";
-/** Where to go once the link is opened. */
-export const NEXT_COOKIE = "s1_internal_next";
+/**
+ * The address a sign-in code was just emailed to, so the code step survives
+ * a reload and a code is only checked in the browser that asked for it.
+ */
+export const PENDING_COOKIE = "s1_internal_pending";
 
 export const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
-/** Supabase's default magic-link lifetime (Email OTP Expiration). */
-export const LINK_TTL_SECONDS = 60 * 60;
+/** Supabase → Authentication → Sign In / Providers → Email OTP Expiration. */
+export const CODE_TTL_SECONDS = 60 * 60;
 
 export type SessionPayload = { email: string; iat: number; exp: number };
 
@@ -180,7 +181,7 @@ export async function verifyToken(
 
 /**
  * Checks a session cookie value: the signed-in email, or null. Sessions are
- * only ever issued to staff and invited writers (app/internal/auth/callback),
+ * only ever issued to staff and invited writers (app/internal/login/actions.ts),
  * and every page re-checks access (lib/internal/session.ts).
  */
 export async function readSession(token: string | undefined | null) {

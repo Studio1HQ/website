@@ -1,17 +1,16 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Logo from "@/components/ui/svgs/logo";
 import { getStaff } from "@/lib/internal/session";
-import { STAFF_DOMAIN, safeNext } from "@/lib/internal/token";
+import { PENDING_COOKIE, STAFF_DOMAIN, emailAddress, safeNext } from "@/lib/internal/token";
 import { LoginForm } from "./login-form";
 
 export const metadata: Metadata = { title: "Sign in" };
 
 const NOTICES: Record<string, string> = {
-  expired: "That sign-in link has expired or isn't valid. Ask for a new one.",
-  browser:
-    "Open the sign-in link in the same browser you asked for it from, or ask for a new link here.",
-  denied: `Only @${STAFF_DOMAIN} addresses and invited writers can sign in.`,
+  // Old sign-in links (before codes) still land here.
+  expired: "Sign-in now uses a code instead of a link. Enter your email to get one.",
   "signed-out": "You're signed out.",
 };
 
@@ -23,6 +22,7 @@ export default async function LoginPage({ searchParams }: Props) {
   const params = await searchParams;
   const next = safeNext(params.next);
   if (await getStaff()) redirect(next);
+  const pendingEmail = emailAddress((await cookies()).get(PENDING_COOKIE)?.value);
   const notice = typeof params.error === "string" ? NOTICES[params.error] : undefined;
   const signedOut = params["signed-out"] !== undefined;
 
@@ -40,7 +40,7 @@ export default async function LoginPage({ searchParams }: Props) {
           <h1 className="text-xl font-medium">Sign in</h1>
           <p className="mb-5 mt-1.5 text-sm leading-relaxed text-[var(--i-muted)]">
             For the Studio1 team and invited writers. Enter your @{STAFF_DOMAIN}{" "}
-            address, or the one you were invited with, and we&apos;ll email you a link.
+            address, or the one you were invited with, and we&apos;ll email you a code.
           </p>
           {notice || signedOut ? (
             <p
@@ -50,7 +50,7 @@ export default async function LoginPage({ searchParams }: Props) {
               {notice ?? NOTICES["signed-out"]}
             </p>
           ) : null}
-          <LoginForm next={next} />
+          <LoginForm next={next} pendingEmail={pendingEmail} />
         </div>
       </div>
     </main>
