@@ -9,7 +9,6 @@ import {
   defaultOgImages,
   organizationJsonLd,
 } from "@/lib/seo";
-import Script from "next/script";
 import { cn } from "@/lib/utils";
 import localFont from "next/font/local";
 
@@ -113,22 +112,6 @@ export default async function RootLayout({
             __html: JSON.stringify(organizationJsonLd()),
           }}
         />
-
-        <Script
-          src="https://t.raah.dev/script.js"
-          data-pid="proj_w60eqpxi5ax0dw36"
-          data-domain="studio1hq.com"
-          strategy="afterInteractive"
-        />
-        <div
-          data-raah-live=""
-          data-pid="proj_w60eqpxi5ax0dw36"
-          data-domain="studio1hq.com"
-          data-theme="light"
-          data-sticky="true"
-          data-position="bottom-left"
-        />
-        <Script src="https://t.raah.dev/badge.js" strategy="afterInteractive" />
       </body>
     </html>
   );

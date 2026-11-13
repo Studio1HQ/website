@@ -333,7 +333,7 @@ function CareersHero({ jobs }: { jobs: JobOpening[] }) {
         className="pointer-events-none absolute inset-0 -z-10 opacity-60 [background-image:linear-gradient(to_bottom,rgba(20,20,20,0.06)_1px,transparent_1px)] [background-size:100%_48px] [mask-image:linear-gradient(to_bottom,transparent,black_20%,black_70%,transparent)]"
       />
 
-      <Container className="grid items-center gap-x-16 gap-y-20 pb-20 pt-32 md:pt-40 lg:min-h-[calc(100svh/var(--s1-zoom,1))] lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:pb-16">
+      <Container className="grid grid-cols-[minmax(0,1fr)] items-center gap-x-16 gap-y-12 pb-20 pt-32 md:pt-40 lg:gap-y-20 lg:min-h-[calc(100svh/var(--s1-zoom,1))] lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:pb-16">
         <div>
           <p className="flex items-center gap-3 text-[13px] font-medium">
             <span className="relative flex size-2">

@@ -16,13 +16,8 @@ export function GET(request: NextRequest) {
   const missingEnv = getMissingEnv();
 
   if (missingEnv.length > 0) {
-    return NextResponse.json(
-      {
-        error: "CMS GitHub OAuth is not configured.",
-        missingEnv,
-      },
-      { status: 500 },
-    );
+    console.error(`[cms] GitHub OAuth is missing ${missingEnv.join(", ")}`);
+    return NextResponse.json({ error: "CMS GitHub OAuth is not configured." }, { status: 500 });
   }
 
   const siteUrl = getSiteUrl(request);

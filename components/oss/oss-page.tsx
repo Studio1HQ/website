@@ -446,7 +446,7 @@ function AwesomeSection({
             </p>
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex min-w-0 flex-col gap-2">
             <Quickstart />
             <div
               className={cn(

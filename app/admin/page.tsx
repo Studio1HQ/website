@@ -536,6 +536,13 @@ const adminCss = `
 
 const cmsAssetVersion = "2026-10-29-unlisted-v13";
 const decapCmsVersion = "3.16.3";
+/**
+ * The script's subresource-integrity hash, so the browser refuses a changed
+ * file from unpkg. It has to match the version above; get it with
+ *   curl -s https://unpkg.com/decap-cms@3.16.3/dist/decap-cms.js | openssl dgst -sha384 -binary | openssl base64 -A
+ * and put it here as "sha384-…". Change both together.
+ */
+const decapCmsIntegrity = "sha384-A/Gdn928CNLufmnGWGs9RM4Q9o8bSNLeJERqBFrBjwzL7FRpoLT3MPF8Tl0+Wd2p";
 
 export default function AdminPage() {
   return (
@@ -554,12 +561,9 @@ export default function AdminPage() {
         strategy="beforeInteractive"
       />
       <Script
-        src="https://identity.netlify.com/v1/netlify-identity-widget.js"
-        strategy="beforeInteractive"
-      />
-      <Script
         src={`https://unpkg.com/decap-cms@${decapCmsVersion}/dist/decap-cms.js`}
         strategy="afterInteractive"
+        {...(decapCmsIntegrity ? { integrity: decapCmsIntegrity, crossOrigin: "anonymous" as const } : {})}
       />
       <Script
         src={`/admin/blog-preview.js?v=${cmsAssetVersion}`}

@@ -1121,6 +1121,21 @@ html.theme-switching *::after {
   }
 }
 
+/* Radix places dropdowns and popovers in screen pixels, which the zoom above
+   would scale a second time. The wrapper undoes the zoom so the list lands
+   on its trigger, and its content puts the zoom back so text stays the page
+   size. Sizes taken from the trigger (--radix-*-trigger-width) are screen
+   pixels too, so classes divide them by --s1-zoom. */
+@media (min-width: 1800px) {
+  [data-radix-popper-content-wrapper] {
+    zoom: calc(1 / var(--s1-zoom, 1));
+  }
+
+  [data-radix-popper-content-wrapper] > * {
+    zoom: var(--s1-zoom, 1);
+  }
+}
+
 /* Lenis smooth scrolling (components/smooth-scroll.tsx): it handles the
    easing itself, so native smooth scrolling must be off while it runs. */
 html.lenis,
@@ -1345,6 +1360,40 @@ html::-webkit-scrollbar-thumb:hover {
   .s1-flow-v,
   .s1-flow-h {
     animation: none;
+  }
+}
+
+/* The About Us service map draws itself in: each dotted connector grows
+   from where it starts, in order, and its dots land as it arrives. */
+.s1-map .s1-flow-v {
+  scale: 1 0;
+  transition: scale 0.5s cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0s);
+}
+.s1-map .s1-flow-h {
+  scale: 0 1;
+  transform-origin: center;
+  transition: scale 0.55s cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0s);
+}
+.s1-map .s1-map-dot {
+  opacity: 0;
+  scale: 0.2;
+  transition:
+    opacity 0.25s ease var(--d, 0s),
+    scale 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) var(--d, 0s);
+}
+.s1-map.is-drawn .s1-flow-v,
+.s1-map.is-drawn .s1-flow-h,
+.s1-map.is-drawn .s1-map-dot {
+  scale: 1 1;
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .s1-map .s1-flow-v,
+  .s1-map .s1-flow-h,
+  .s1-map .s1-map-dot {
+    scale: 1 1;
+    opacity: 1;
+    transition: none;
   }
 }
 

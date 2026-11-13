@@ -142,6 +142,8 @@ export function shouldBypassLocale(pathname: string) {
   return (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api") ||
+    pathname === "/internal" ||
+    pathname.startsWith("/internal/") ||
     pathname.startsWith("/og/") ||
     pathname === "/og" ||
     pathname.includes(".") ||

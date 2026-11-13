@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useReducedMotion } from "motion/react";
+import { motion, useInView, useReducedMotion } from "motion/react";
+import { useRef, type CSSProperties } from "react";
 import {
   ArrowUpRight,
   BookOpenText,
@@ -69,12 +70,16 @@ const V =
 const H =
   "s1-flow-h absolute h-[2px] -translate-y-1/2 origin-left bg-[repeating-linear-gradient(to_right,rgba(20,20,20,0.45)_0_2px,transparent_2px_6px)]";
 
-function Dot({ className }: { className: string }) {
+/** When a connector piece starts drawing in, in seconds. */
+const at = (seconds: number) => ({ "--d": `${seconds}s` }) as CSSProperties;
+
+function Dot({ className, d = 0 }: { className: string; d?: number }) {
   return (
     <span
       aria-hidden
+      style={at(d)}
       className={cn(
-        "absolute size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#141414]",
+        "s1-map-dot absolute size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#141414]",
         className,
       )}
     />
@@ -119,21 +124,29 @@ function MapNode({ node, delay }: { node: Node; delay: number }) {
 
 /** How the services connect, as a small org chart with dotted connectors. */
 function ServiceMap() {
+  const ref = useRef<HTMLDivElement>(null);
+  const drawn = useInView(ref, { once: true, margin: "-80px" });
   return (
-    <div className="mx-auto flex h-full w-full max-w-[520px] flex-col justify-center">
+    <div
+      ref={ref}
+      className={cn(
+        "s1-map mx-auto flex h-full w-full max-w-[520px] flex-col justify-center",
+        drawn && "is-drawn",
+      )}
+    >
       <div className="mx-auto w-[46%]">
         <MapNode node={ROOT} delay={0} />
       </div>
 
       {/* Root splits into two columns */}
       <div aria-hidden className="relative h-10">
-        <span className={cn(V, "left-1/2 top-0 h-1/2")} />
-        <span className={cn(H, "left-[23%] right-[23%] top-1/2")} />
-        <span className={cn(V, "left-[23%] top-1/2 h-1/2")} />
-        <span className={cn(V, "left-[77%] top-1/2 h-1/2")} />
-        <Dot className="left-1/2 top-0" />
-        <Dot className="left-[23%] top-full" />
-        <Dot className="left-[77%] top-full" />
+        <span style={at(0.3)} className={cn(V, "left-1/2 top-0 h-1/2")} />
+        <span style={at(0.55)} className={cn(H, "left-[23%] right-[23%] top-1/2")} />
+        <span style={at(0.85)} className={cn(V, "left-[23%] top-1/2 h-1/2")} />
+        <span style={at(0.85)} className={cn(V, "left-[77%] top-1/2 h-1/2")} />
+        <Dot d={0.25} className="left-1/2 top-0" />
+        <Dot d={1.1} className="left-[23%] top-full" />
+        <Dot d={1.1} className="left-[77%] top-full" />
       </div>
 
       <div className="grid grid-cols-2 gap-[8%]">
@@ -142,26 +155,26 @@ function ServiceMap() {
       </div>
 
       <div aria-hidden className="relative h-8">
-        <span className={cn(V, "left-[23%] top-0 h-full")} />
-        <span className={cn(V, "left-[77%] top-0 h-full")} />
-        <Dot className="left-[23%] top-0" />
-        <Dot className="left-[23%] top-full" />
-        <Dot className="left-[77%] top-0" />
+        <span style={at(1.3)} className={cn(V, "left-[23%] top-0 h-full")} />
+        <span style={at(1.3)} className={cn(V, "left-[77%] top-0 h-full")} />
+        <Dot d={1.25} className="left-[23%] top-0" />
+        <Dot d={1.6} className="left-[23%] top-full" />
+        <Dot d={1.25} className="left-[77%] top-0" />
       </div>
 
       <div className="relative grid grid-cols-2 gap-[8%]">
         <MapNode node={DOCS} delay={0.2} />
-        <span aria-hidden className={cn(V, "left-[77%] top-0 h-full")} />
+        <span aria-hidden style={at(1.55)} className={cn(V, "left-[77%] top-0 h-full")} />
       </div>
 
       {/* Both columns join into Video */}
       <div aria-hidden className="relative h-10">
-        <span className={cn(V, "left-[23%] top-0 h-1/2")} />
-        <span className={cn(V, "left-[77%] top-0 h-1/2")} />
-        <span className={cn(H, "left-[23%] right-[23%] top-1/2")} />
-        <span className={cn(V, "left-1/2 top-1/2 h-1/2")} />
-        <Dot className="left-[23%] top-0" />
-        <Dot className="left-1/2 top-full" />
+        <span style={at(1.9)} className={cn(V, "left-[23%] top-0 h-1/2")} />
+        <span style={at(1.9)} className={cn(V, "left-[77%] top-0 h-1/2")} />
+        <span style={at(2.15)} className={cn(H, "left-[23%] right-[23%] top-1/2")} />
+        <span style={at(2.45)} className={cn(V, "left-1/2 top-1/2 h-1/2")} />
+        <Dot d={1.85} className="left-[23%] top-0" />
+        <Dot d={2.7} className="left-1/2 top-full" />
       </div>
 
       <div className="mx-auto w-[46%]">

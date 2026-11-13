@@ -12,19 +12,87 @@ key can't read or write anything here.
 
 The other "contact us" points on the site are `mailto:` links and store nothing.
 
-## Setup
+## Internal dashboard
 
-1. Create a Supabase project.
-2. In the SQL editor, run the files in `migrations/` in name order (or run
-   `supabase db push`). They're safe to run again. The last one,
-   `*_api_grants.sql`, matters on newer projects: with "Automatically expose
-   new tables" off (the default, and the safer choice), new tables have no
-   grants, and the site's inserts fail with "permission denied" until it runs.
-   Leave the tables unexposed under Data API → Exposed tables; the site only
-   uses the server key.
-3. Set `SUPABASE_URL` (Project URL, `https://<ref>.supabase.co`) and
-   `SUPABASE_SERVICE_ROLE_KEY` (Project Settings → API Keys → a secret key,
-   `sb_secret_...`) in the hosting environment, and in `.env.local` to save
-   entries locally. Never prefix them with `NEXT_PUBLIC_`.
+The team reads and reviews every form entry at `/internal` (`app/internal`):
+an overview, one page per table (Jobs, Hackathons, DevRel Cohort), the
+`email_subscribers` and `partner_referral_pool` views, CSV export, and a
+status and notes form on each entry (it records who changed it in
+`reviewed_by`). Résumés open through two-minute signed links.
+
+Sign-in is a Supabase Auth magic link (PKCE), for `@studio1hq.com`
+addresses and outside blog writers an admin invited. The site checks the address, creates the Auth user with the
+admin API if needed, and the link only works in the browser that asked for
+it. Setup:
+
+1. Run `migrations/*_internal_dashboard.sql`, `migrations/*_internal_team.sql`,
+   `migrations/*_blog_and_roles.sql`, `migrations/*_email_delivery.sql` and
+   `migrations/*_blog_threads_and_schedule.sql`, in that order.
+2. Authentication → URL Configuration: set Site URL to
+   `https://www.studio1hq.com` and add these Redirect URLs:
+   `https://www.studio1hq.com/internal/auth/callback` and, for local
+   testing, `http://localhost:3000/internal/auth/callback`.
+3. Email: Supabase's built-in sender only mails members of the Supabase
+   organization's team, 2 emails an hour. Either add each teammate under
+   Organization → Team, or use Resend for sign-in emails too
+   (Authentication → Emails → SMTP Settings: host `smtp.resend.com`, port
+   465, username `resend`, password your Resend API key).
+4. Recommended: turn off "Allow new users to sign up" (Authentication →
+   Sign In / Providers), so only the site's server can add users.
+5. Optional: edit the Magic Link email template (Authentication → Emails).
+
+### Roles and the blog
+
+People can hold several roles (`internal_members.roles`): `admin`,
+`hiring_reviewer`, `hiring_viewer`, `blog_reviewer` and `blog_writer`. Admins
+set them on `/internal/team`, where they can also invite people. Anyone
+outside `@studio1hq.com` can only be invited, and only as a blog writer (the
+table enforces it too).
+
+Blog posts are written at `/internal/blog` (short link: `/blog/write`).
+Drafts and their review history live in `blog_posts` and `blog_events`.
+Images uploaded while drafting go to the private `blog-media` bucket as WebP.
+Publishing commits the MDX file and its images to the site's GitHub repo
+(`GITHUB_TOKEN`, see `.env.example`), and Vercel deploys it.
+
+Comments work like Google Docs: select text in the editor and press Comment.
+The thread keeps that text as its quote (`blog_events.quote`), the editor
+highlights it, and threads take replies (`parent_id`) and can be resolved.
+
+Access: Arindam and Amitesh (`lib/internal/roles.ts`) are owners and always
+admins. Anyone else with a `@studio1hq.com` address who signs in is added to
+`internal_members` as pending, and an admin approves them on `/internal/team`
+as an Admin, Reviewer (status, tags, notes, emails) or Viewer (read only).
+
+Applicant emails go out through Resend (`RESEND_API_KEY` in `.env.example`) in the paper
+layout, with a "Book a call" button where it fits, and are logged in
+`internal_email_log`. Every email links to `/unsubscribe`, which turns
+`email_updates` off for that address; the subscribers CSV export includes
+each person's unsubscribe link for the newsletter tool.
 
 The review fields, views and saved queries the team uses are documented in the team's private docs, not in this public repo.
+
+### Slack alerts
+
+Each new job application, hackathon registration and DevRel Cohort
+application posts to Slack: what they applied for, the city or country they
+gave and a link into the dashboard. Never their name, email or answers. Make an incoming webhook (Slack
+→ Apps → Incoming Webhooks → Add to a channel) and set `SLACK_WEBHOOK_URL`;
+`SLACK_WEBHOOK_URL_JOBS`, `_HACKATHONS` and `_COHORT` send a form to its own
+channel.
+
+### Search numbers
+
+The Blog page's Live tab shows each post's Google Search clicks,
+impressions and average position for the last 28 days
+(`lib/internal/search-console.ts`). To connect it:
+
+1. In Google Cloud, create a project (or pick one), turn on the "Google
+   Search Console API", and create a service account. Under its Keys, add a
+   JSON key and download it.
+2. In Search Console, open the studio1hq.com property → Settings → Users and
+   permissions → Add user: the service account's email, Restricted.
+3. In Vercel, set `GSC_CLIENT_EMAIL` (the service account email) and
+   `GSC_PRIVATE_KEY` (the JSON file's `private_key`), both Production and
+   Sensitive. If the property is a URL-prefix one rather than a domain one,
+   also set `GSC_SITE_URL` to `https://www.studio1hq.com/`.

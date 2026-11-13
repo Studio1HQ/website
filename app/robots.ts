@@ -11,12 +11,12 @@ export default function robots() {
       ...agentUserAgents.map((userAgent) => ({
         userAgent,
         allow: "/",
-        disallow: ["/api/", "/admin/"],
+        disallow: ["/api/", "/admin/", "/internal/", "/unsubscribe"],
       })),
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/admin/"],
+        disallow: ["/api/", "/admin/", "/internal/", "/unsubscribe"],
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,

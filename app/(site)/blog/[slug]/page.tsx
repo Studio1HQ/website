@@ -15,6 +15,7 @@ import {
   blogMdxComponents,
   transformBlogMdxContent,
 } from "@/components/blog/mdx";
+import { remarkSafeMdx } from "@/lib/internal/blog/safe-mdx";
 import {
   absoluteImageUrl,
   articleAuthorsJsonLd,
@@ -152,7 +153,13 @@ export default async function BlogPostPage({ params }: Props) {
         <MDXRemote
           source={transformBlogMdxContent(post.content)}
           components={blogMdxComponents}
-          options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
+          // Posts are Markdown only: any HTML, component or code in a file is
+          // dropped, except the FAQ and YouTube components the blog writes itself.
+          options={{
+            mdxOptions: {
+              remarkPlugins: [remarkGfm, [remarkSafeMdx, { generated: true }]],
+            },
+          }}
         />
       </PostLayout>
     </>

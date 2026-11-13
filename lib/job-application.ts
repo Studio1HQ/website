@@ -9,6 +9,7 @@ import {
   readConsent,
   type ContactConsentValues,
 } from "@/lib/contact-consent";
+import { isEmailAddress, nameError, placeError } from "@/lib/form-checks";
 
 export const START_OPTIONS = [
   "Immediately",
@@ -55,8 +56,6 @@ export const EMPTY_APPLICATION: ApplicationValues = {
   ...EMPTY_CONSENT,
   website: "",
 };
-
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function isUrl(value: string) {
   if (value.length > 300) return false;
@@ -109,12 +108,12 @@ export function validateApplication(
   const links = splitLinks(values.workLinks);
 
   const errors: ApplicationErrors = {};
-  if (values.name.length < 2 || values.name.length > 80)
-    errors.name = "Enter your full name.";
-  if (!EMAIL.test(values.email) || values.email.length > 254)
+  const name = nameError(values.name);
+  if (name) errors.name = name;
+  if (!isEmailAddress(values.email))
     errors.email = "Enter a valid email address.";
-  if (values.location.length < 2 || values.location.length > 80)
-    errors.location = "Enter your city and country.";
+  const location = placeError(values.location, "Enter your city and country.");
+  if (location) errors.location = location;
   if (values.linkedin && !isUrl(values.linkedin))
     errors.linkedin = "Enter a full link to your profile.";
   if (values.portfolio && !isUrl(values.portfolio))

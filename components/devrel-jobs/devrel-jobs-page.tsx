@@ -9,7 +9,6 @@ import {
   ArrowsClockwise,
   Buildings,
   CalendarBlank,
-  CaretDown,
   Check,
   CurrencyDollar,
   GlobeHemisphereWest,
@@ -31,7 +30,7 @@ import {
   MUTED,
   PaperSection,
 } from "@/components/paper/paper-sections";
-import { Input } from "@/components/ui/input";
+import { CONTROL, FilterSelect } from "@/components/paper/paper-form";
 import {
   DEVREL_JOB_SUBMIT_URL,
   getDevRelJobCategories,
@@ -95,134 +94,6 @@ function useRiseVariants() {
       },
     },
   };
-}
-
-type FilterDropdownProps = {
-  id: string;
-  label: string;
-  value: string | null;
-  options: string[];
-  allLabel: string;
-  onChange: (value: string | null) => void;
-  className?: string;
-};
-
-function FilterDropdown({
-  id,
-  label,
-  value,
-  options,
-  allLabel,
-  onChange,
-  className,
-}: FilterDropdownProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const menuRef = React.useRef<HTMLDivElement>(null);
-  const isActive = value !== null;
-
-  React.useEffect(() => {
-    const closeMenu = (event: MouseEvent) => {
-      if (!menuRef.current?.contains(event.target as Node)) setIsOpen(false);
-    };
-
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setIsOpen(false);
-    };
-
-    document.addEventListener("mousedown", closeMenu);
-    document.addEventListener("keydown", closeOnEscape);
-    return () => {
-      document.removeEventListener("mousedown", closeMenu);
-      document.removeEventListener("keydown", closeOnEscape);
-    };
-  }, []);
-
-  const optionClassName = (selected: boolean) =>
-    cn(
-      "flex w-full items-center justify-between gap-3 rounded-[6px] px-3 py-2 text-left text-[13px] font-medium text-[#141414] transition-colors hover:bg-[#141414]/[0.05]",
-      selected && "bg-[#f97316]/10",
-    );
-
-  return (
-    <div ref={menuRef} className={cn("relative min-w-0", className)}>
-      <button
-        id={id}
-        type="button"
-        aria-haspopup="listbox"
-        aria-expanded={isOpen}
-        onClick={() => setIsOpen((open) => !open)}
-        className={cn(
-          "flex h-11 w-full items-center justify-between gap-3 rounded-[6px] px-4 text-[13px] font-medium transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f97316]/50",
-          isActive
-            ? "bg-[#141414] text-[#f4efe7]"
-            : "bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08] text-[#141414] hover:text-[#141414]",
-        )}
-      >
-        <span className="truncate">{value ?? allLabel}</span>
-        <CaretDown
-          aria-hidden
-          className={cn(
-            "size-3.5 shrink-0 transition-transform duration-200 motion-reduce:transition-none",
-            isActive ? "text-[#f97316]" : "text-[#141414]/50",
-            isOpen && "rotate-180",
-          )}
-          weight="bold"
-        />
-      </button>
-
-      {isOpen ? (
-        <div
-          role="listbox"
-          aria-label={label}
-          className="absolute left-0 top-[calc(100%+0.5rem)] z-50 max-h-72 w-full min-w-48 overflow-y-auto rounded-[6px] bg-[#fbf9f5] p-1.5 shadow-[0_24px_40px_-24px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-white"
-        >
-          <button
-            type="button"
-            role="option"
-            aria-selected={value === null}
-            onClick={() => {
-              onChange(null);
-              setIsOpen(false);
-            }}
-            className={optionClassName(value === null)}
-          >
-            {allLabel}
-            {value === null ? (
-              <Check
-                aria-hidden
-                weight="bold"
-                className="size-3.5 shrink-0"
-                style={{ color: PRINT }}
-              />
-            ) : null}
-          </button>
-          {options.map((option) => (
-            <button
-              key={option}
-              type="button"
-              role="option"
-              aria-selected={value === option}
-              onClick={() => {
-                onChange(option);
-                setIsOpen(false);
-              }}
-              className={optionClassName(value === option)}
-            >
-              <span className="truncate">{option}</span>
-              {value === option ? (
-                <Check
-                  aria-hidden
-                  weight="bold"
-                  className="size-3.5 shrink-0"
-                  style={{ color: PRINT }}
-                />
-              ) : null}
-            </button>
-          ))}
-        </div>
-      ) : null}
-    </div>
-  );
 }
 
 function formatPostedDate(value: string, locale: string) {
@@ -512,7 +383,7 @@ export function DevRelJobsPage({ jobs }: DevRelJobsPageProps) {
                     className="pointer-events-none absolute left-4 top-1/2 z-[1] size-4 -translate-y-1/2 text-[#141414]/50"
                     weight="bold"
                   />
-                  <Input
+                  <input
                     type="search"
                     value={query}
                     onChange={(event) => {
@@ -521,7 +392,10 @@ export function DevRelJobsPage({ jobs }: DevRelJobsPageProps) {
                     }}
                     placeholder={t("searchPlaceholder")}
                     aria-label={t("searchLabel")}
-                    className="h-11 rounded-[6px] border-0 bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08] pl-10 pr-10 text-[14px] text-[#141414] placeholder:text-[#141414]/45 focus-visible:ring-2 focus-visible:ring-[#f97316]/50 focus-visible:ring-offset-0"
+                    className={cn(
+                      CONTROL,
+                      "h-11 pl-10 pr-10 text-[14px] [&::-webkit-search-cancel-button]:hidden",
+                    )}
                   />
                   {query ? (
                     <button
@@ -536,7 +410,7 @@ export function DevRelJobsPage({ jobs }: DevRelJobsPageProps) {
                 </div>
 
                 <div className="grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-4">
-                  <FilterDropdown
+                  <FilterSelect
                     id="job-category"
                     label={t("categoryFilter")}
                     value={selectedCategory}
@@ -548,7 +422,7 @@ export function DevRelJobsPage({ jobs }: DevRelJobsPageProps) {
                     }}
                     className="w-full"
                   />
-                  <FilterDropdown
+                  <FilterSelect
                     id="job-type"
                     label={t("typeFilter")}
                     value={selectedType}
@@ -560,7 +434,7 @@ export function DevRelJobsPage({ jobs }: DevRelJobsPageProps) {
                     }}
                     className="w-full"
                   />
-                  <FilterDropdown
+                  <FilterSelect
                     id="job-location"
                     label={t("locationFilter")}
                     value={selectedLocation}
@@ -572,7 +446,7 @@ export function DevRelJobsPage({ jobs }: DevRelJobsPageProps) {
                     }}
                     className="w-full"
                   />
-                  <FilterDropdown
+                  <FilterSelect
                     id="job-level"
                     label={t("levelFilter")}
                     value={selectedLevel}

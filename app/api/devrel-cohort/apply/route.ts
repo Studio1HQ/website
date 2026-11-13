@@ -1,8 +1,17 @@
-import { NextResponse } from "next/server";
+import { randomUUID } from "crypto";
+import { NextResponse, after } from "next/server";
 import { COHORT } from "@/data/devrel-cohort";
+import { sendConfirmation } from "@/lib/confirmation-email";
+import { alertNewEntry } from "@/lib/internal/slack";
 import { validateApplication } from "@/lib/devrel-cohort-application";
 import { looksAutomated } from "@/lib/form-guard";
 import { readJsonBody } from "@/lib/read-body";
+import {
+  TOO_MANY_FOR_ADDRESS,
+  TOO_MANY_FROM_NETWORK,
+  addressWithinLimit,
+  networkWithinLimit,
+} from "@/lib/rate-limit";
 import { insertRow, isSupabaseConfigured } from "@/lib/supabase-server";
 
 /**
@@ -17,6 +26,10 @@ export async function POST(request: Request) {
       { error: "Applications for this cohort are closed." },
       { status: 409 },
     );
+  }
+
+  if (!(await networkWithinLimit("cohort", request))) {
+    return NextResponse.json({ error: TOO_MANY_FROM_NETWORK }, { status: 429 });
   }
 
   const parsed = await readJsonBody(request, 32 * 1024);
@@ -44,6 +57,10 @@ export async function POST(request: Request) {
   }
 
   const { values } = result;
+  // Counted per inbox ("+tags" ignored), before anything is stored.
+  if (!(await addressWithinLimit(values.email))) {
+    return NextResponse.json({ error: TOO_MANY_FOR_ADDRESS }, { status: 429 });
+  }
   const row = {
     cohort: COHORT.edition,
     name: values.name,
@@ -76,7 +93,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const saved = await insertRow("devrel_cohort_applications", row);
+  const id = randomUUID();
+  const saved = await insertRow("devrel_cohort_applications", { id, ...row });
   if (!saved.ok) {
     // A repeat answers like a first application, so the response never
     // reveals whether an email has applied. The first application stands.
@@ -88,5 +106,26 @@ export async function POST(request: Request) {
     );
   }
 
+  after(() =>
+    sendConfirmation("cohort", {
+      id,
+      name: values.name,
+      email: values.email,
+      // Matches programOf in lib/internal/program.ts, as the dashboard emails say it.
+      program: `DevRel ${COHORT.edition}`,
+    }),
+  );
+  after(() =>
+    alertNewEntry({
+      form: "cohort",
+      id,
+      name: values.name,
+      points: [
+        ["Cohort", `DevRel ${COHORT.edition}`],
+        ["Background", values.role],
+        ["Location", values.location],
+      ],
+    }),
+  );
   return NextResponse.json({ ok: true });
 }

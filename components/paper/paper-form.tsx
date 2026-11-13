@@ -1,7 +1,13 @@
 "use client";
 
 import { useId, type ReactNode } from "react";
-import { ArrowUpRight, CaretDown, CircleNotch } from "@phosphor-icons/react";
+import * as RadixSelect from "@radix-ui/react-select";
+import {
+  ArrowUpRight,
+  CaretDown,
+  Check,
+  CircleNotch,
+} from "@phosphor-icons/react";
 import { INK, PAPER, PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 
@@ -63,6 +69,58 @@ export function describedBy(id: string, error?: string, hint?: boolean) {
   } as const;
 }
 
+/* The open list for every paper dropdown: a cream card with ink type, the
+   chosen row tinted orange with an orange tick. */
+const MENU =
+  "z-50 max-h-[min(18rem,calc(var(--radix-select-content-available-height)/var(--s1-zoom,1)))] min-w-[max(calc(var(--radix-select-trigger-width)/var(--s1-zoom,1)),12rem)] overflow-hidden rounded-[6px] bg-[#fbf9f5] p-1.5 text-[#141414] shadow-[0_24px_40px_-24px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08]";
+const MENU_ITEM =
+  "flex cursor-pointer select-none items-center justify-between gap-3 rounded-[4px] px-3 py-2 font-medium outline-none transition-colors data-[disabled]:pointer-events-none data-[highlighted]:bg-[#141414]/[0.05] data-[state=checked]:bg-[#f97316]/10 data-[disabled]:opacity-40";
+
+/** Radix can't hold "" as an item value, so "All" rides on this. */
+const ALL = "__all__";
+
+function PaperMenu({
+  options,
+  textSize,
+}: {
+  options: readonly { value: string; label: string }[];
+  textSize: string;
+}) {
+  return (
+    <RadixSelect.Portal>
+      <RadixSelect.Content
+        position="popper"
+        sideOffset={8}
+        collisionPadding={16}
+        className={cn(MENU, textSize)}
+      >
+        <RadixSelect.Viewport>
+          {options.map((option) => (
+            <RadixSelect.Item
+              key={option.value}
+              value={option.value}
+              className={MENU_ITEM}
+            >
+              <span className="min-w-0 truncate">
+                <RadixSelect.ItemText>{option.label}</RadixSelect.ItemText>
+              </span>
+              <RadixSelect.ItemIndicator>
+                <Check
+                  aria-hidden
+                  weight="bold"
+                  className="size-3.5 shrink-0"
+                  style={{ color: PRINT }}
+                />
+              </RadixSelect.ItemIndicator>
+            </RadixSelect.Item>
+          ))}
+        </RadixSelect.Viewport>
+      </RadixSelect.Content>
+    </RadixSelect.Portal>
+  );
+}
+
+/** A form dropdown: the paper well as the trigger, then the paper list. */
 export function Select({
   id,
   name,
@@ -81,34 +139,94 @@ export function Select({
   error?: string;
 }) {
   return (
-    <div className="relative">
-      <select
+    <RadixSelect.Root value={value} onValueChange={onChange} name={name}>
+      <RadixSelect.Trigger
         id={id}
-        name={name}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
+        data-field={name}
         {...describedBy(id, error)}
         className={cn(
           CONTROL,
-          "h-12 appearance-none pr-10",
-          !value && "text-[#141414]/40",
+          "group flex h-12 items-center justify-between gap-3 pr-4 text-left data-[placeholder]:text-[#141414]/40",
         )}
       >
-        <option value="" disabled>
-          {placeholder}
-        </option>
-        {options.map((option) => (
-          <option key={option} value={option} className="text-[#141414]">
-            {option}
-          </option>
-        ))}
-      </select>
-      <CaretDown
-        weight="bold"
-        aria-hidden
-        className="pointer-events-none absolute right-4 top-1/2 size-3.5 -translate-y-1/2 text-[#141414]/50"
+        <span className="min-w-0 truncate">
+          <RadixSelect.Value placeholder={placeholder} />
+        </span>
+        <RadixSelect.Icon asChild>
+          <CaretDown
+            weight="bold"
+            className="size-3.5 shrink-0 text-[#141414]/50 transition-transform duration-200 group-data-[state=open]:rotate-180 motion-reduce:transition-none"
+          />
+        </RadixSelect.Icon>
+      </RadixSelect.Trigger>
+      <PaperMenu
+        options={options.map((option) => ({ value: option, label: option }))}
+        textSize="text-[14px]"
       />
-    </div>
+    </RadixSelect.Root>
+  );
+}
+
+/**
+ * A list filter: a paper well that turns ink once something is picked,
+ * with "All …" at the top of the list to clear it.
+ */
+export function FilterSelect({
+  id,
+  label,
+  value,
+  options,
+  allLabel,
+  onChange,
+  className,
+}: {
+  id: string;
+  /** Names the control for screen readers, e.g. "Category". */
+  label: string;
+  value: string | null;
+  options: readonly string[];
+  allLabel: string;
+  onChange: (value: string | null) => void;
+  className?: string;
+}) {
+  const active = value !== null;
+  return (
+    <RadixSelect.Root
+      value={value ?? ALL}
+      onValueChange={(next) => onChange(next === ALL ? null : next)}
+    >
+      <RadixSelect.Trigger
+        id={id}
+        aria-label={label}
+        className={cn(
+          "group flex h-11 w-full min-w-0 items-center justify-between gap-3 rounded-[6px] px-4 text-left text-[13px] font-medium outline-none transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-[#f97316]",
+          active
+            ? "bg-[#141414] text-[#f4efe7]"
+            : "bg-[#f8f5ef] text-[#141414] ring-1 ring-inset ring-[#141414]/[0.12] hover:bg-white",
+          className,
+        )}
+      >
+        <span className="min-w-0 truncate">
+          <RadixSelect.Value />
+        </span>
+        <RadixSelect.Icon asChild>
+          <CaretDown
+            weight="bold"
+            className={cn(
+              "size-3.5 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180 motion-reduce:transition-none",
+              active ? "text-[#f97316]" : "text-[#141414]/50",
+            )}
+          />
+        </RadixSelect.Icon>
+      </RadixSelect.Trigger>
+      <PaperMenu
+        options={[
+          { value: ALL, label: allLabel },
+          ...options.map((option) => ({ value: option, label: option })),
+        ]}
+        textSize="text-[13px]"
+      />
+    </RadixSelect.Root>
   );
 }
 
@@ -171,43 +289,62 @@ export function Segments({
 const CHECKBOX = "mt-0.5 size-[18px] shrink-0 cursor-pointer accent-[#f97316]";
 
 /**
- * The last thing before submit on every form: a required tick to store the
- * entry and email about it, and an optional opt-in to future emails.
+ * The last thing before submit on every form: two required ticks, one to
+ * store the entry and email about it, one to subscribe to email updates.
  * Values and validation live in lib/contact-consent.ts.
  */
 export function ContactConsent({
   id,
   purpose,
   values,
-  error,
+  errors = {},
   onChange,
 }: {
-  /** Base id; the error gets `${id}-contactConsent-error`. */
+  /** Base id; errors get `${id}-contactConsent-error` / `${id}-emailUpdates-error`. */
   id: string;
   /** What they're sending, e.g. "application" or "registration". */
   purpose: string;
   values: { contactConsent: boolean; emailUpdates: boolean };
-  error?: string;
+  errors?: { contactConsent?: string; emailUpdates?: string };
   onChange: (
     field: "contactConsent" | "emailUpdates",
     checked: boolean,
   ) => void;
 }) {
-  const errorId = `${id}-contactConsent-error`;
+  const box = (
+    field: "contactConsent" | "emailUpdates",
+    label: ReactNode,
+  ) => {
+    const error = errors[field];
+    const errorId = `${id}-${field}-error`;
+    return (
+      <div>
+        <label className="flex cursor-pointer gap-3 text-[14px] leading-snug">
+          <input
+            type="checkbox"
+            name={field}
+            checked={values[field]}
+            onChange={(event) => onChange(field, event.target.checked)}
+            aria-required="true"
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? errorId : undefined}
+            className={CHECKBOX}
+          />
+          <span>{label}</span>
+        </label>
+        {error ? (
+          <p id={errorId} className={cn(ERROR_TEXT, "mt-1.5 pl-[30px]")}>
+            {error}
+          </p>
+        ) : null}
+      </div>
+    );
+  };
   return (
     <div className="space-y-3">
-      <label className="flex cursor-pointer gap-3 text-[14px] leading-snug">
-        <input
-          type="checkbox"
-          name="contactConsent"
-          checked={values.contactConsent}
-          onChange={(event) => onChange("contactConsent", event.target.checked)}
-          aria-required="true"
-          aria-invalid={error ? true : undefined}
-          aria-describedby={error ? errorId : undefined}
-          className={CHECKBOX}
-        />
-        <span>
+      {box(
+        "contactConsent",
+        <>
           I agree that Studio1 can store the details I&apos;ve shared and email
           me about this {purpose} and next steps. See our{" "}
           <a
@@ -219,26 +356,16 @@ export function ContactConsent({
             Privacy Policy
           </a>
           .
-        </span>
-      </label>
-      {error ? (
-        <p id={errorId} className={cn(ERROR_TEXT, "pl-[30px]")}>
-          {error}
-        </p>
-      ) : null}
-      <label className="flex cursor-pointer gap-3 text-[14px] leading-snug text-[#141414]/70">
-        <input
-          type="checkbox"
-          name="emailUpdates"
-          checked={values.emailUpdates}
-          onChange={(event) => onChange("emailUpdates", event.target.checked)}
-          className={CHECKBOX}
-        />
-        <span>
-          Also email me about future Studio1 roles, cohorts and events.
-          Unsubscribe anytime. Optional.
-        </span>
-      </label>
+        </>,
+      )}
+      {box(
+        "emailUpdates",
+        <>
+          I&apos;m subscribing to Studio1&apos;s email updates about new roles,
+          cohorts and events. I can unsubscribe at any time, and that
+          won&apos;t affect my {purpose}.
+        </>,
+      )}
     </div>
   );
 }
@@ -312,7 +439,10 @@ export function FormAlert({ children }: { children: ReactNode }) {
   );
 }
 
-/** Focuses the first control (by `name`) that has an error. */
+/**
+ * Focuses the first control (by `name`) that has an error. A dropdown's
+ * visible trigger carries `data-field`; its `name` sits on a hidden select.
+ */
 export function focusFirstError(
   form: HTMLFormElement | null,
   order: readonly string[],
@@ -320,5 +450,8 @@ export function focusFirstError(
 ) {
   const field = order.find((name) => errors[name]);
   if (!field || !form) return;
-  form.querySelector<HTMLElement>(`[name="${field}"]`)?.focus();
+  (
+    form.querySelector<HTMLElement>(`[data-field="${field}"]`) ??
+    form.querySelector<HTMLElement>(`[name="${field}"]`)
+  )?.focus();
 }

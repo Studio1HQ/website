@@ -197,3 +197,70 @@ export async function renderPageCard({ kicker, title, cta }: { kicker: string; t
     { ...OG_SIZE, fonts: await loadFonts(), headers },
   );
 }
+
+/** Email headers: a slim strip across the top of a 600px email. */
+export const EMAIL_BANNER_SIZE = { width: 1200, height: 240 };
+
+/** Headlines end in print orange, like the site's titles ("Growth Lead."). */
+function OrangeEnd({ text }: { text: string }) {
+  const last = text.slice(-1);
+  return /[.?!]/.test(last) ? (
+    <>
+      {text.slice(0, -1)}
+      <span style={{ color: PRINT }}>{last}</span>
+    </>
+  ) : (
+    <>{text}</>
+  );
+}
+
+/**
+ * The slim paper strip at the top of every email (lib/internal/email-banners.ts):
+ * the Studio1 mark, kicker and headline on the paper, and a narrow orange
+ * print panel with the framed mark.
+ */
+export async function renderEmailBanner({ kicker, title, label }: { kicker: string; title: string; label: string }) {
+  const size = title.length <= 22 ? 54 : title.length <= 28 ? 48 : 42;
+  return new ImageResponse(
+    (
+      <div
+        style={flex({
+          width: "100%",
+          height: "100%",
+          fontFamily: "Studio1 Sans",
+          color: INK,
+          background: PAPER,
+        })}
+      >
+        <div style={flex({ flex: 1, alignItems: "center", gap: 30, padding: "0 48px 0 52px" })}>
+          <Mark size={64} color={PRINT} />
+          <div style={flex({ flexDirection: "column", gap: 10 })}>
+            <div style={flex({ alignItems: "center", gap: 12, fontSize: 22, color: MUTED })}>
+              <div style={flex({ width: 12, height: 12, background: PRINT })} />
+              {kicker}
+            </div>
+            <div
+              style={flex({
+                fontSize: size,
+                fontWeight: 500,
+                lineHeight: 1.05,
+                letterSpacing: "-0.04em",
+              })}
+            >
+              <span>
+                <OrangeEnd text={title} />
+              </span>
+            </div>
+          </div>
+        </div>
+        <Panel
+          art={{ label, node: <PrintMark /> }}
+          width={260}
+          height={EMAIL_BANNER_SIZE.height}
+          zoom={0.36}
+        />
+      </div>
+    ),
+    { ...EMAIL_BANNER_SIZE, fonts: await loadFonts(), headers },
+  );
+}

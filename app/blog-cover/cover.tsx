@@ -2,8 +2,9 @@ import { readFile } from "fs/promises";
 import path from "path";
 import type { CSSProperties, ReactNode } from "react";
 import { ImageResponse } from "next/og";
-import { getAllPosts, type BlogPostMeta } from "@/lib/blog";
+import { getAllPosts } from "@/lib/blog";
 import { BLOG_COVER_SIZE } from "@/lib/blog-cover";
+import { coverArtFor, titleLead, type CoverArtKey } from "@/lib/blog-cover-art";
 import { INK, PRINT } from "@/lib/paper";
 
 /*
@@ -1070,189 +1071,141 @@ export function PrintMark() {
 export type Art = { label: string; node: ReactNode; scale?: number };
 
 /** Picks the illustration from what the post is about. */
-function artFor(post: BlogPostMeta): Art {
-  const title = post.title;
-  const lead = title.split(":")[0].trim();
-  // The two pillar guides; narrow on purpose so other GEO and AEO posts keep their art.
-  if (/complete guide to geo\b/i.test(title)) return { label: "citations.fig", node: <Citations /> };
-  if (/complete guide to aeo\b/i.test(title)) return { label: "answer-box.fig", node: <AnswerBox />, scale: 1.2 };
-  if (/\bvs\b/i.test(lead)) {
-    const [left, right] = lead.split(/\s+vs\.?\s+/i);
-    return { label: "versus.fig", node: <Versus left={left} right={right} /> };
-  }
-  if (/\breviews?\b/i.test(title)) {
-    return { label: "benchmarks.fig", node: <Bench name={lead.replace(/\s+review$/i, "")} /> };
-  }
-  if (/\breadme\b/i.test(title)) {
+const doc = (file: string, lines: Parameters<typeof Doc>[0]["lines"]) => <Doc file={file} lines={lines} />;
+
+/** Each illustration's drawing; some take names from the title. */
+const ART: Record<CoverArtKey, (post: CoverPost) => Art> = {
+  citations: () => ({ label: "citations.fig", node: <Citations /> }),
+  "answer-box": () => ({ label: "answer-box.fig", node: <AnswerBox />, scale: 1.2 }),
+  versus: (post) => {
+    const [left, right] = titleLead(post.title).split(/\s+vs\.?\s+/i);
     return {
-      label: "README.md",
-      node: (
-        <Doc
-          file="README.md"
-          lines={[
-            { text: "# your-tool", accent: true },
-            { text: "> What it does, in one line" },
-            { text: "## Quickstart", accent: true },
-            { text: "npm install your-tool", indent: true },
-            { bar: 300, indent: true },
-            { bar: 220, accent: true },
-          ]}
-        />
-      ),
+      label: "versus.fig",
+      node: right ? <Versus left={left} right={right} /> : <Versus left="Incumbent" right="Your tool" />,
     };
-  }
-  if (/trending|trendshift/i.test(title)) return { label: "trending.fig", node: <Trending /> };
-  if (/\bmetrics\b/i.test(title) && /open[- ]source|github|stars/i.test(title)) return { label: "metrics.fig", node: <Metrics /> };
-  if (/hacker news|show hn/i.test(title)) return { label: "show-hn.fig", node: <RankedList /> };
-  if (/github|open[- ]source/i.test(title) || post.tags.some((tag) => /^(github|open-source)$/i.test(tag))) {
-    return { label: "star-history.fig", node: <StarHistory /> };
-  }
-  if (/llms\.txt/i.test(title)) {
-    return {
-      label: "llms.txt",
-     
-      node: (
-        <Doc
-          file="llms.txt"
-          lines={[
-            { text: "# Your devtool", accent: true },
-            { text: "> What it does, in one line" },
-            { text: "## Docs", accent: true },
-            { text: "- [Quickstart](/docs/start)", indent: true },
-            { text: "- [API reference](/docs/api)", indent: true },
-            { bar: 260, indent: true },
-          ]}
-        />
-      ),
-    };
-  }
-  if (/developer tutorial/i.test(title)) {
-    return {
-      label: "tutorial.md",
-      node: (
-        <Doc
-          file="tutorial.md"
-          lines={[
-            { text: "# Build a job queue", accent: true },
-            { text: "Step 1: Start the worker", accent: true },
-            { text: "You should see: Worker ready", indent: true },
-            { text: "Step 2: Submit a job", accent: true },
-            { text: "You should see: Job done", indent: true },
-            { bar: 260, accent: true },
-          ]}
-        />
-      ),
-    };
-  }
-  if (/documentation best practices/i.test(title)) {
-    return {
-      label: "docs/index.md",
-      node: (
-        <Doc
-          file="docs/index.md"
-          lines={[
-            { text: "# Docs", accent: true },
-            { text: "Tutorials: learn by doing", indent: true },
-            { text: "How-to guides: finish a task", indent: true },
-            { text: "Reference: look it up", indent: true },
-            { text: "Explanation: understand why", indent: true },
-            { bar: 300, accent: true },
-          ]}
-        />
-      ),
-    };
-  }
-  if (/\bdocs\b|documentation/i.test(title)) {
-    return {
-      label: "quickstart.md",
-     
-      node: (
-        <Doc
-          file="docs/quickstart.md"
-          lines={[
-            { text: "# Quickstart", accent: true },
-            { bar: 420 },
-            { bar: 340 },
-            { text: "Cited by AI answers", accent: true },
-            { bar: 380, accent: true },
-            { bar: 260 },
-          ]}
-        />
-      ),
-    };
-  }
-  if (/chatgpt|perplexity/i.test(title)) return { label: "answer.fig", node: <Answer /> };
-  if (/visibility/i.test(title)) return { label: "audit.fig", node: <Scorecard /> };
-  if (/\broi\b/i.test(title)) {
-    if (/devrel/i.test(title)) {
-      return { label: "devrel-roi.fig", node: <Funnel caption="DEVREL ROI" labels={["Reach", "Engaged", "Activated", "Revenue"]} /> };
-    }
-    return { label: "funnel.fig", node: <Funnel /> };
-  }
-  if (/\baudit\b/i.test(title)) {
-    return {
-      label: "dx-audit.fig",
-      node: (
-        <Checklist
-          caption="DX AUDIT"
-          tag="3 findings"
-          items={[
-            ["First result in minutes", false],
-            ["Quickstart up to date", true],
-            ["Errors say what to do", false],
-            ["Access in a few steps", true],
-            ["Docs AI can cite", false],
-          ]}
-        />
-      ),
-    };
-  }
-  if (/influencer/i.test(title) && /\bfit\b/i.test(title)) {
-    return { label: "creator-fit.fig", node: <Versus left="Reach" right="Fit" /> };
-  }
-  if (/influencer/i.test(title)) return { label: "creator-post.fig", node: <Creator /> };
-  if (/\bcosts?\b/i.test(title)) return { label: "pricing.fig", node: <Pricing /> };
-  if (/mistake/i.test(title)) return { label: "checklist.fig", node: <Checklist /> };
-  if (/communit/i.test(title)) return { label: "community.fig", node: <Network />, scale: 1.05 };
-  if (/projects/i.test(title)) return { label: "projects.fig", node: <Tiles /> };
-  if (/calendar/i.test(title)) return { label: "calendar.fig", node: <Calendar /> };
-  if (/alternatives?\b|comparison/i.test(title)) return { label: "alternatives.fig", node: <Versus left="Incumbent" right="Your tool" /> };
-  if (/cross-post|hashnode/i.test(title)) return { label: "cross-post.fig", node: <CrossPost /> };
-  if (/content/i.test(title)) return { label: "content.fig", node: <Pages />, scale: 1.05 };
-  if (/\bscript\b/i.test(title)) {
-    return {
-      label: "demo-script.md",
-      node: (
-        <Doc
-          file="demo-script.md"
-          lines={[
-            { text: "0:00  The problem, in one line", accent: true },
-            { bar: 380 },
-            { text: "0:20  Install and first call", accent: true },
-            { bar: 320 },
-            { text: "1:30  The real result", accent: true },
-            { bar: 260, accent: true },
-          ]}
-        />
-      ),
-    };
-  }
-  if (/\bvideos?\b/i.test(title)) return { label: "demo.fig", node: <Player file="demo.mp4" chapters={["Install", "First call", "Deploy"]} /> };
-  if (/youtube/i.test(title)) return { label: "channel.fig", node: <Player file="youtube / tutorial" chapters={["Intro", "Build", "Ship"]} /> };
-  if (/^what is/i.test(title)) {
-    const name = lead.replace(/^what is\s+/i, "").replace(/\?.*$/, "");
+  },
+  benchmarks: (post) => ({ label: "benchmarks.fig", node: <Bench name={titleLead(post.title).replace(/\s+review$/i, "")} /> }),
+  readme: () => ({
+    label: "README.md",
+    node: doc("README.md", [
+      { text: "# your-tool", accent: true },
+      { text: "> What it does, in one line" },
+      { text: "## Quickstart", accent: true },
+      { text: "npm install your-tool", indent: true },
+      { bar: 300, indent: true },
+      { bar: 220, accent: true },
+    ]),
+  }),
+  trending: () => ({ label: "trending.fig", node: <Trending /> }),
+  metrics: () => ({ label: "metrics.fig", node: <Metrics /> }),
+  "show-hn": () => ({ label: "show-hn.fig", node: <RankedList /> }),
+  "star-history": () => ({ label: "star-history.fig", node: <StarHistory /> }),
+  "llms-txt": () => ({
+    label: "llms.txt",
+    node: doc("llms.txt", [
+      { text: "# Your devtool", accent: true },
+      { text: "> What it does, in one line" },
+      { text: "## Docs", accent: true },
+      { text: "- [Quickstart](/docs/start)", indent: true },
+      { text: "- [API reference](/docs/api)", indent: true },
+      { bar: 260, indent: true },
+    ]),
+  }),
+  tutorial: () => ({
+    label: "tutorial.md",
+    node: doc("tutorial.md", [
+      { text: "# Build a job queue", accent: true },
+      { text: "Step 1: Start the worker", accent: true },
+      { text: "You should see: Worker ready", indent: true },
+      { text: "Step 2: Submit a job", accent: true },
+      { text: "You should see: Job done", indent: true },
+      { bar: 260, accent: true },
+    ]),
+  }),
+  "docs-index": () => ({
+    label: "docs/index.md",
+    node: doc("docs/index.md", [
+      { text: "# Docs", accent: true },
+      { text: "Tutorials: learn by doing", indent: true },
+      { text: "How-to guides: finish a task", indent: true },
+      { text: "Reference: look it up", indent: true },
+      { text: "Explanation: understand why", indent: true },
+      { bar: 300, accent: true },
+    ]),
+  }),
+  quickstart: () => ({
+    label: "quickstart.md",
+    node: doc("docs/quickstart.md", [
+      { text: "# Quickstart", accent: true },
+      { bar: 420 },
+      { bar: 340 },
+      { text: "Cited by AI answers", accent: true },
+      { bar: 380, accent: true },
+      { bar: 260 },
+    ]),
+  }),
+  answer: () => ({ label: "answer.fig", node: <Answer /> }),
+  scorecard: () => ({ label: "audit.fig", node: <Scorecard /> }),
+  funnel: (post) =>
+    /devrel/i.test(post.title)
+      ? { label: "devrel-roi.fig", node: <Funnel caption="DEVREL ROI" labels={["Reach", "Engaged", "Activated", "Revenue"]} /> }
+      : { label: "funnel.fig", node: <Funnel /> },
+  "dx-audit": () => ({
+    label: "dx-audit.fig",
+    node: (
+      <Checklist
+        caption="DX AUDIT"
+        tag="3 findings"
+        items={[
+          ["First result in minutes", false],
+          ["Quickstart up to date", true],
+          ["Errors say what to do", false],
+          ["Access in a few steps", true],
+          ["Docs AI can cite", false],
+        ]}
+      />
+    ),
+  }),
+  "creator-fit": () => ({ label: "creator-fit.fig", node: <Versus left="Reach" right="Fit" /> }),
+  "creator-post": () => ({ label: "creator-post.fig", node: <Creator /> }),
+  pricing: () => ({ label: "pricing.fig", node: <Pricing /> }),
+  checklist: () => ({ label: "checklist.fig", node: <Checklist /> }),
+  community: () => ({ label: "community.fig", node: <Network />, scale: 1.05 }),
+  projects: () => ({ label: "projects.fig", node: <Tiles /> }),
+  calendar: () => ({ label: "calendar.fig", node: <Calendar /> }),
+  alternatives: () => ({ label: "alternatives.fig", node: <Versus left="Incumbent" right="Your tool" /> }),
+  "cross-post": () => ({ label: "cross-post.fig", node: <CrossPost /> }),
+  content: () => ({ label: "content.fig", node: <Pages />, scale: 1.05 }),
+  "demo-script": () => ({
+    label: "demo-script.md",
+    node: doc("demo-script.md", [
+      { text: "0:00  The problem, in one line", accent: true },
+      { bar: 380 },
+      { text: "0:20  Install and first call", accent: true },
+      { bar: 320 },
+      { text: "1:30  The real result", accent: true },
+      { bar: 260, accent: true },
+    ]),
+  }),
+  video: () => ({ label: "demo.fig", node: <Player file="demo.mp4" chapters={["Install", "First call", "Deploy"]} /> }),
+  youtube: () => ({ label: "channel.fig", node: <Player file="youtube / tutorial" chapters={["Intro", "Build", "Ship"]} /> }),
+  "what-is": (post) => {
+    const name = titleLead(post.title).replace(/^what is\s+/i, "").replace(/\?.*$/, "") || "your-tool";
     return { label: "terminal", node: <Terminal command={`${name.toLowerCase()} --explain`} /> };
-  }
-  if (/^build\b|step-by-step/i.test(title)) {
-    return { label: "terminal", node: <Terminal command="pnpm install && pnpm dev" result="→ running locally" /> };
-  }
-  if (/hello world/i.test(title)) {
-    return { label: "terminal", node: <Terminal command="npx create-your-app" result="→ Hello, world!" /> };
-  }
-  if (/devrel for startups/i.test(title)) return { label: "devrel.fig", node: <Network />, scale: 1.05 };
-  if (/\blaunch/i.test(title) && /\bon x\b|twitter/i.test(title)) return { label: "launch-post.fig", node: <LaunchPost />, scale: 1.15 };
-  if (/\blaunch/i.test(title)) return { label: "launch-plan.fig", node: <LaunchPlan /> };
-  return { label: "studio1-mark", node: <PrintMark /> };
+  },
+  build: () => ({ label: "terminal", node: <Terminal command="pnpm install && pnpm dev" result="→ running locally" /> }),
+  "hello-world": () => ({ label: "terminal", node: <Terminal command="npx create-your-app" result="→ Hello, world!" /> }),
+  devrel: () => ({ label: "devrel.fig", node: <Network />, scale: 1.05 }),
+  "launch-post": () => ({ label: "launch-post.fig", node: <LaunchPost />, scale: 1.15 }),
+  "launch-plan": () => ({ label: "launch-plan.fig", node: <LaunchPlan /> }),
+  mark: () => ({ label: "studio1-mark", node: <PrintMark /> }),
+};
+
+/** What a cover needs from a post. Dashboard drafts pass the same shape. */
+export type CoverPost = { title: string; tags: readonly string[]; coverArt?: string | null };
+
+function artFor(post: CoverPost): Art {
+  return ART[coverArtFor(post)](post);
 }
 
 /* ------------------------------------------------------------------ */
@@ -1373,7 +1326,7 @@ export function coverStaticParams() {
  * page shows it). At OG_SIZE it is the post's share card: the same picture,
  * zoomed to the 1.91:1 canvas social networks expect.
  */
-export async function renderCover(post: BlogPostMeta, size: { width: number; height: number } = BLOG_COVER_SIZE) {
+export async function renderCover(post: CoverPost, size: { width: number; height: number } = BLOG_COVER_SIZE) {
   return new ImageResponse(
     (
       <div style={flex({ width: "100%", height: "100%", fontFamily: "Studio1 Sans", color: INK })}>

@@ -27,6 +27,8 @@ type PostLayoutProps = {
   description: string;
   date: string;
   updatedDate?: string;
+  /** Dashboard preview only: the draft's generated cover, loaded as is. */
+  previewCover?: string;
   /** The post's own banner; falls back to the generated paper cover. */
   bannerImage?: string;
   bannerImageAlt?: string;
@@ -85,6 +87,7 @@ export function PostLayout({
   updatedDate,
   bannerImage,
   bannerImageAlt,
+  previewCover,
   author,
   authors,
   tags,
@@ -270,10 +273,13 @@ export function PostLayout({
               className={`relative aspect-[16/9] overflow-hidden rounded-[6px] ${bannerImage ? "bg-[#0b0b0b]" : "bg-[#f4efe7]"} shadow-[0_1px_0_rgba(27,23,20,0.06)] ring-1 ring-inset ring-[#141414]/10`}
             >
               <Image
-                src={bannerImage || blogCoverUrl(slug, updatedDate || date)}
+                src={bannerImage || previewCover || blogCoverUrl(slug, updatedDate || date)}
                 alt={bannerImage ? bannerImageAlt || title : ""}
                 fill
                 priority
+                // The dashboard preview's images sit behind the sign-in cookie,
+                // which the image optimizer can't send.
+                unoptimized={Boolean(previewCover)}
                 className={bannerImage ? "object-contain" : "object-cover"}
                 sizes="(max-width: 960px) 100vw, 920px"
               />

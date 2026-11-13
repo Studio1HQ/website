@@ -10,8 +10,24 @@ const nextConfig: NextConfig = {
   // linkedom (app/ai-md) breaks when bundled: its optional canvas support
   // resolves to a stub. Load it from node_modules at runtime instead.
   serverExternalPackages: ["linkedom"],
+  // The dashboard's blog pages read posts and the cover fonts at request time
+  // (the public blog reads them at build time), so ship those files with them.
+  outputFileTracingIncludes: {
+    "/internal/**": [
+      "./content/blog/**/*.mdx",
+      "./app/fonts/Studio1Sans-Regular.ttf",
+      "./app/fonts/Studio1Sans-Medium.ttf",
+    ],
+  },
   turbopack: {
     root: process.cwd(),
+  },
+  experimental: {
+    // Dashboard uploads (profile photos, expense receipts) go through server
+    // actions; Next's default is 1 MB. Vercel caps request bodies at 4.5 MB.
+    // The upload limits (MAX_UPLOAD_BYTES in lib/internal/team/shared.ts,
+    // MAX_CSV_BYTES in lib/internal/community) are sized to fit under this.
+    serverActions: { bodySizeLimit: "4mb" },
   },
   images: {
     // Serve compact modern formats and reuse optimized derivatives on repeat visits.
@@ -44,7 +60,7 @@ const nextConfig: NextConfig = {
         { source: "/", has: aiAgent, destination: "/ai-md" },
         {
           source:
-            "/:path((?!(?:_next|api|ai-md|blog-md|blog-cover|blog-og|og|brand|admin|assets|fonts|fr|es|hi|zh)(?:/|$))[^.]+|llms\\.txt|llms-full\\.txt)",
+            "/:path((?!(?:_next|api|ai-md|blog-md|blog-cover|blog-og|og|brand|admin|internal|unsubscribe|assets|fonts|fr|es|hi|zh)(?:/|$))[^.]+|llms\\.txt|llms-full\\.txt)",
           has: aiAgent,
           destination: "/ai-md/:path",
         },
@@ -61,6 +77,17 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      // The dashboard and the CMS can't be put in a frame on another site.
+      // proxy.ts adds the dashboard's full script policy; this also covers
+      // the paths the proxy doesn't see (file-like URLs).
+      ...["/internal/:path*", "/admin/:path*", "/admin"].map((source) => ({
+        source,
+        headers: [
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+        ],
+      })),
       {
         source: "/assets/:path*",
         headers: [
@@ -76,6 +103,12 @@ const nextConfig: NextConfig = {
   async redirects() {
     // Keep old service URLs alive while the public pages use SEO-friendly names.
     return [
+      // A short, easy link for writers to the dashboard's blog editor.
+      {
+        source: "/blog/write",
+        destination: "/internal/blog",
+        permanent: false,
+      },
       {
         source: "/sitemap",
         destination: "/sitemap.xml",

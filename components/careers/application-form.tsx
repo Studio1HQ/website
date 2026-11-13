@@ -42,6 +42,7 @@ const FIELD_ORDER: readonly ApplicationField[] = [
   "why",
   "resume",
   "contactConsent",
+  "emailUpdates",
 ];
 
 /** Fields typed into; the consent checkboxes are set separately. */
@@ -374,7 +375,7 @@ export function ApplicationForm({
             id={id}
             purpose="application"
             values={values}
-            error={errors.contactConsent}
+            errors={errors}
             onChange={setFlag}
           />
         </div>
