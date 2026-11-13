@@ -13,6 +13,21 @@ openings: 1
 order: 3.4
 postedDate: 2026-11-11T00:00:00.000Z
 requisitionId: STU_GROWTH_LEAD_011
+questions:
+  - id: results
+    label: "What did the launches, campaigns or channels in your links grow, and by how much?"
+    type: long
+    hint: "Numbers help. Rough is fine."
+  - id: first-week-distribution
+    label: "How would you get one recent Studio1 post or case study in front of the right developers in its first week?"
+    type: long
+    required: true
+    hint: "Name the post. Short paragraphs or bullet points are fine."
+  - id: launch-angles
+    label: "Three angles you would use to launch a developer tool of your choice"
+    type: long
+    required: true
+    hint: "Name the tool, then a line or two per angle."
 ---
 
 Studio1 does DevRel and developer marketing for devtool, AI, and open-source teams. We have worked with 35+ teams and driven 3M+ content views. Content without distribution is just a draft sitting in a folder, so we are hiring someone to own how our work, and our clients' work, gets found and shared.
@@ -59,9 +74,7 @@ This is a full-time remote role for India-based candidates. You will work closel
 
 ## How to apply
 
-Use the Apply button and keep the subject line as: `Application: Growth Lead`.
-
-Send:
+Apply with the form on this page. Have these ready:
 
 1. Links to launches, campaigns, or channels you have run or grown. Numbers help.
 2. How you would get one recent Studio1 post or case study in front of the right developers in its first week.

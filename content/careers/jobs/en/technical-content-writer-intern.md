@@ -14,6 +14,12 @@ openings: 1
 order: 6
 postedDate: 2026-09-09T00:00:00.000Z
 requisitionId: STU_TECH_CONTENT_INTERN_005
+questions:
+  - id: blog-draft
+    label: "A short blog draft or outline on a trending LLM or AI topic, written for search"
+    type: link
+    required: true
+    hint: "One doc. Make sure anyone with the link can view it."
 ---
 
 Studio1 works with devtool, AI, and SaaS teams on technical content, DevRel, product launches, docs, and developer growth. Alongside client work, we also work on products like Raah and AssetSnip.
@@ -53,9 +59,7 @@ This is a 3-month remote internship for India-based candidates, with extension p
 
 ## How to apply
 
-Use the Apply button and keep the subject line as: `Application: Technical Content Writer Intern`.
-
-Include your resume, past writing samples if you have them, and one short blog draft or outline on a trending LLM or AI topic of your choice, optimized for search.
+Apply with the form on this page. Include your resume, past writing samples if you have them, and one short blog draft or outline on a trending LLM or AI topic of your choice, optimized for search.
 
 We usually respond within 1 week if there is a fit.
 

@@ -13,6 +13,22 @@ openings: 1
 order: 3.6
 postedDate: 2026-11-12T00:00:00.000Z
 requisitionId: STU_VIDEO_CREATOR_INTERN_013
+questions:
+  - id: results
+    label: "How did the videos in your links do?"
+    type: long
+    hint: "Views, followers, or what they led to. Rough is fine."
+  - id: explainer-video
+    label: "A 60-second video of you explaining a new LLM, framework or developer tool you've tried"
+    type: link
+    required: true
+    hint: "YouTube (unlisted is fine), Loom or Google Drive. Make sure anyone with the link can watch it."
+    placeholder: "youtube.com/… or loom.com/share/…"
+  - id: video-ideas
+    label: "Five video ideas for Studio1's channels on current tech trends"
+    type: long
+    required: true
+    hint: "A line or two each."
 ---
 
 Studio1 does DevRel and developer marketing for devtool, AI, and open-source teams. We work with new tech every week: new LLMs, new frameworks, new developer tools. We publish videos every day on YouTube, Instagram, X, and LinkedIn, and we are hiring a creative intern who knows the tech to make it happen.
@@ -57,9 +73,7 @@ This is a remote internship for India-based candidates, and the role is scoped f
 
 ## How to apply
 
-Use the Apply button and keep the subject line as: `Application: Video Creator Intern`.
-
-Send:
+Apply with the form on this page. Have these ready:
 
 1. Links to videos you have created: tutorials, explainers, Shorts, reels, or your channel. Work for companies is a plus, and numbers help.
 2. A 60-second video of you explaining a new LLM, framework, or developer tool you've tried.

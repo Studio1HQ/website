@@ -15,6 +15,12 @@ openings: 2
 order: 5
 postedDate: 2026-10-10T00:00:00.000Z
 requisitionId: STU_TECH_WRITER_CONTRACT_004
+questions:
+  - id: strongest-topics
+    label: "The technical topics you are strongest at"
+    type: long
+    required: true
+    hint: "A short note is enough. Put your 2-4 published samples in the links above."
 ---
 
 Studio1 is looking for contract Technical Writers who can work close to engineering teams, build or inspect technical workflows, and write clear developer content across AI, ML, authentication, agents, SaaS, APIs, SDKs, infrastructure, and devtool topics.
@@ -56,7 +62,7 @@ This is a remote contract role. Applications will open soon. Workload can vary b
 
 Applications for this contract role will open soon.
 
-When applications open, include your resume or profile, 2-4 published technical writing samples, and one short note on the technical topics you are strongest at.
+When applications open, apply with the form on this page. Include your resume or profile, 2-4 published technical writing samples, and one short note on the technical topics you are strongest at.
 
 Once applications open, response time will usually be 1 week if there is a fit.
 

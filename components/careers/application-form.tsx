@@ -10,6 +10,7 @@ import {
   Field,
   FormAlert,
   Honeypot,
+  Segments,
   Select,
   SubmitPill,
   describedBy,
@@ -26,27 +27,40 @@ import {
   type ApplicationValues,
 } from "@/lib/job-application";
 import type { ContactConsentValues } from "@/lib/contact-consent";
+import {
+  ANSWER_MAX,
+  YES_NO,
+  answerField,
+  type FormQuestion,
+} from "@/lib/form-questions";
 import { INK, PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 
-/** Order used to focus the first field with an error. */
-const FIELD_ORDER: readonly ApplicationField[] = [
-  "name",
-  "email",
-  "location",
-  "start",
-  "linkedin",
-  "portfolio",
-  "workLinks",
-  "planLink",
-  "why",
-  "resume",
-  "contactConsent",
-  "emailUpdates",
-];
+/** Order used to focus the first field with an error; the role's questions sit after the work links. */
+function fieldOrder(questions: readonly FormQuestion[]): ApplicationField[] {
+  return [
+    "name",
+    "email",
+    "location",
+    "start",
+    "linkedin",
+    "portfolio",
+    "workLinks",
+    ...(questions.length
+      ? questions.map((question) => answerField(question.id))
+      : (["planLink"] as const)),
+    "why",
+    "resume",
+    "contactConsent",
+    "emailUpdates",
+  ];
+}
 
-/** Fields typed into; the consent checkboxes are set separately. */
-type TextField = Exclude<keyof ApplicationValues, keyof ContactConsentValues>;
+/** Fields typed into; the consent checkboxes and answers are set separately. */
+type TextField = Exclude<
+  keyof ApplicationValues,
+  keyof ContactConsentValues | "answers"
+>;
 
 function formatBytes(bytes: number) {
   return bytes < 1024 * 1024
@@ -57,11 +71,15 @@ function formatBytes(bytes: number) {
 export function ApplicationForm({
   jobId,
   jobTitle,
+  questions = [],
 }: {
   jobId: string;
   jobTitle: string;
+  /** The role's own questions, asked in place of the generic plan link. */
+  questions?: FormQuestion[];
 }) {
   const id = useId();
+  const order = fieldOrder(questions);
   const formRef = useRef<HTMLFormElement>(null);
   const [values, setValues] = useState<ApplicationValues>(EMPTY_APPLICATION);
   const [resume, setResume] = useState<File | null>(null);
@@ -85,6 +103,14 @@ export function ApplicationForm({
     clearError(field);
   };
 
+  const setAnswer = (questionId: string, value: string) => {
+    setValues((current) => ({
+      ...current,
+      answers: { ...current.answers, [questionId]: value },
+    }));
+    clearError(answerField(questionId));
+  };
+
   const setFlag = (field: keyof ContactConsentValues, checked: boolean) => {
     setValues((current) => ({ ...current, [field]: checked }));
     clearError(field);
@@ -103,7 +129,7 @@ export function ApplicationForm({
     if (submitting) return;
     setMessage("");
 
-    const check = validateApplication(values);
+    const check = validateApplication(values, questions);
     const fileError = resumeError(resume);
     const found: ApplicationErrors = {
       ...(check.ok ? {} : check.errors),
@@ -111,13 +137,15 @@ export function ApplicationForm({
     };
     if (Object.keys(found).length > 0) {
       setErrors(found);
-      focusFirstError(formRef.current, FIELD_ORDER, found);
+      focusFirstError(formRef.current, order, found);
       return;
     }
 
     const body = new FormData();
-    for (const [key, value] of Object.entries(values))
-      body.append(key, String(value));
+    for (const [key, value] of Object.entries(values)) {
+      if (key !== "answers") body.append(key, String(value));
+    }
+    body.append("answers", JSON.stringify(values.answers));
     body.append("resume", resume!);
     body.append("jobId", jobId);
     body.append("fillMs", String(Date.now() - startedAt));
@@ -135,7 +163,7 @@ export function ApplicationForm({
       if (!response.ok) {
         if (data.fields) {
           setErrors(data.fields);
-          focusFirstError(formRef.current, FIELD_ORDER, data.fields);
+          focusFirstError(formRef.current, order, data.fields);
         }
         setMessage(data.error ?? "Something went wrong. Try again.");
         return;
@@ -279,22 +307,35 @@ export function ApplicationForm({
             className={cn(CONTROL, "resize-y py-3 leading-[1.55]")}
           />
         </Field>
-        <Field
-          id={ids("planLink")}
-          label="Your plan for the role"
-          error={errors.planLink}
-          hint="The short doc or plan this role asks for. Make sure anyone with the link can view it."
-          className="sm:col-span-2"
-        >
-          <input
-            {...control("planLink", true)}
-            type="url"
-            inputMode="url"
-            placeholder="docs.google.com/…"
-            onChange={(event) => set("planLink", event.target.value)}
-            className={cn(CONTROL, "h-12")}
-          />
-        </Field>
+        {questions.length ? (
+          questions.map((question) => (
+            <QuestionField
+              key={question.id}
+              formId={id}
+              question={question}
+              value={values.answers[question.id] ?? ""}
+              error={errors[answerField(question.id)]}
+              onChange={(value) => setAnswer(question.id, value)}
+            />
+          ))
+        ) : (
+          <Field
+            id={ids("planLink")}
+            label="Your plan for the role"
+            error={errors.planLink}
+            hint="The short doc or plan this role asks for. Make sure anyone with the link can view it."
+            className="sm:col-span-2"
+          >
+            <input
+              {...control("planLink", true)}
+              type="url"
+              inputMode="url"
+              placeholder="docs.google.com/…"
+              onChange={(event) => set("planLink", event.target.value)}
+              className={cn(CONTROL, "h-12")}
+            />
+          </Field>
+        )}
         <Field
           id={ids("why")}
           label="Why does this role fit you?"
@@ -392,5 +433,100 @@ export function ApplicationForm({
         </p>
       </div>
     </form>
+  );
+}
+
+/** One of the role's own questions, full width under the work links. */
+function QuestionField({
+  formId,
+  question,
+  value,
+  error,
+  onChange,
+}: {
+  formId: string;
+  question: FormQuestion;
+  value: string;
+  error?: string;
+  onChange: (value: string) => void;
+}) {
+  const name = answerField(question.id);
+  const fieldId = `${formId}-q-${question.id}`;
+  if (question.type === "yesno") {
+    return (
+      <div className="sm:col-span-2">
+        <Segments
+          name={name}
+          legend={
+            question.required ? question.label : `${question.label} (optional)`
+          }
+          value={value}
+          options={YES_NO.map((option) => ({ value: option, label: option }))}
+          onChange={onChange}
+          error={error}
+        />
+      </div>
+    );
+  }
+  const long = question.type === "long";
+  const hint = long
+    ? `${value.length}/${ANSWER_MAX.long}${question.hint ? ` · ${question.hint}` : ""}`
+    : question.hint;
+  const described = error
+    ? `${fieldId}-error`
+    : hint
+      ? `${fieldId}-hint`
+      : undefined;
+  return (
+    <Field
+      id={fieldId}
+      label={question.label}
+      optional={!question.required}
+      error={error}
+      hint={hint}
+      className="sm:col-span-2"
+    >
+      {question.type === "choice" ? (
+        <Select
+          id={fieldId}
+          name={name}
+          value={value}
+          onChange={onChange}
+          placeholder="Choose one"
+          options={question.options ?? []}
+          error={error}
+        />
+      ) : long ? (
+        <textarea
+          id={fieldId}
+          name={name}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={described}
+          rows={5}
+          maxLength={ANSWER_MAX.long}
+          placeholder={question.placeholder}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className={cn(CONTROL, "resize-y py-3 leading-[1.55]")}
+        />
+      ) : (
+        <input
+          id={fieldId}
+          name={name}
+          type={question.type === "link" ? "url" : "text"}
+          inputMode={question.type === "link" ? "url" : undefined}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={described}
+          maxLength={ANSWER_MAX[question.type === "link" ? "link" : "short"]}
+          placeholder={
+            question.placeholder ??
+            (question.type === "link" ? "docs.google.com/…" : undefined)
+          }
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className={cn(CONTROL, "h-12")}
+        />
+      )}
+    </Field>
   );
 }

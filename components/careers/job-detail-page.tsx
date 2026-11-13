@@ -59,6 +59,19 @@ const WHAT_TO_SEND = [
   "Why this role fits you",
 ];
 
+/** The checklist for a role with its own questions: those, between the basics. */
+function whatToSend(job: JobDetail) {
+  if (!job.questions.length) return WHAT_TO_SEND;
+  return [
+    "Your resume",
+    "Links to past work: repos, demos, blogs, docs or videos",
+    ...job.questions.map((question) =>
+      question.required ? question.label : `${question.label} (optional)`,
+    ),
+    "Why this role fits you",
+  ];
+}
+
 /** Ink pill with the orange arrow dot, as on the careers page. */
 function ApplyButton({
   href,
@@ -390,7 +403,7 @@ export function JobDetailPage({
                     </>
                   )}
                   <ol className="mt-3 space-y-3">
-                    {WHAT_TO_SEND.map((item, index) => (
+                    {whatToSend(job).map((item, index) => (
                       <li
                         key={item}
                         className="flex gap-3 text-[14px] leading-snug"
@@ -445,11 +458,15 @@ export function JobDetailPage({
                 )}
               >
                 One application per role. It takes about ten minutes if your
-                links and plan are ready.
+                links and {job.questions.length ? "answers" : "plan"} are ready.
               </p>
             </div>
             <div className="mt-10 max-w-[880px] rounded-[6px] bg-white/80 ring-1 ring-inset ring-[#141414]/10">
-              <ApplicationForm jobId={job.id} jobTitle={job.title} />
+              <ApplicationForm
+                jobId={job.id}
+                jobTitle={job.title}
+                questions={job.questions}
+              />
             </div>
           </Container>
         </PaperSection>

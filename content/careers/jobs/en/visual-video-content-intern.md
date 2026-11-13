@@ -14,6 +14,12 @@ openings: 1
 order: 2
 postedDate: 2026-08-10T00:00:00.000Z
 requisitionId: STU_VISUAL_VIDEO_INTERN_002
+questions:
+  - id: content-plan
+    label: "Your one-week visual or video content plan for Studio1, Raah or AssetSnip"
+    type: link
+    required: true
+    hint: "One short doc. Focus on the formats you are strongest at. Make sure anyone with the link can view it."
 ---
 
 Studio1 needs a Content Creator Intern who can turn rough ideas into clean memes, visuals, scripts, reels, and short videos. You will work with the Studio1 team to grow Studio1 socials and support product content for Raah and AssetSnip.
@@ -45,9 +51,7 @@ This is a 3-month remote internship for India-based candidates, with extension p
 
 ## How to apply
 
-Use the Apply button and keep the subject line as: `Application: Content Creator Intern`.
-
-Include your resume, past work links if you have them, and one clean short doc with a 1-week visual/video content plan for Studio1, Raah, or AssetSnip. You do not need to cover every format; focus only on the formats you are strongest at, such as memes, reels, Shorts, carousels, visual explainers, Canva graphics, AI-video experiments, or product clips.
+Apply with the form on this page. Include your resume, past work links if you have them, and one clean short doc with a 1-week visual/video content plan for Studio1, Raah, or AssetSnip. You do not need to cover every format; focus only on the formats you are strongest at, such as memes, reels, Shorts, carousels, visual explainers, Canva graphics, AI-video experiments, or product clips.
 
 We usually respond within 1 week if there is a fit.
 

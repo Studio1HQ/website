@@ -31,9 +31,9 @@ export async function GET(
     }
   }
 
-  // A hackathon's own questions become one column each, named after the
-  // question, instead of a JSON blob.
-  if (section.key === "hackathons") {
+  // A hackathon's or a role's own questions become one column each, named
+  // after the question, instead of a JSON blob.
+  if (section.key === "hackathons" || section.key === "jobs") {
     for (const row of result.rows) {
       const answers = Array.isArray(row.answers) ? row.answers : [];
       delete row.answers;
