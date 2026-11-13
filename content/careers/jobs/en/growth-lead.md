@@ -30,7 +30,7 @@ questions:
     hint: "Name the tool, then a line or two per angle."
 ---
 
-Studio1 does DevRel and developer marketing for devtool, AI, and open-source teams. We have worked with 35+ teams and driven 3M+ content views. Content without distribution is just a draft sitting in a folder, so we are hiring someone to own how our work, and our clients' work, gets found and shared.
+Content without distribution is just a draft sitting in a folder, so we are hiring someone to own how our work, and our clients' work, gets found and shared.
 
 This is a growth role for technical products. Your job is to get the right developers and buyers to see our work and turn that attention into leads. You will work closely with our Content Lead: they own what we make, you own where it goes and what it brings in.
 

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowUpRight, Check, Copy } from "@phosphor-icons/react";
 import { motion, useReducedMotion } from "motion/react";
 import { Container, EASE } from "@/components/home/ui";
+import { AboutStudio1 } from "@/components/careers/about-studio1";
 import { ApplicationForm } from "@/components/careers/application-form";
 import {
   IndexBar,
@@ -363,11 +364,14 @@ export function JobDetailPage({
         </Container>
       </section>
 
-      {/* ----- 01 — The brief ----- */}
-      <PaperSection id="brief" tone="paper" className="pt-4 md:pt-6">
+      {/* ----- 01 — About Studio1, for anyone landing here first ----- */}
+      <AboutStudio1 index={1} />
+
+      {/* ----- 02 — The brief ----- */}
+      <PaperSection id="brief" tone="paper">
         <Container>
           <IndexBar
-            index={1}
+            index={2}
             name="Role brief"
             aside={`Ref. ${job.requisitionId}`}
           />
@@ -437,12 +441,12 @@ export function JobDetailPage({
         </Container>
       </PaperSection>
 
-      {/* ----- 02 — Apply (when the form is on) ----- */}
+      {/* ----- 03 — Apply (when the form is on) ----- */}
       {useForm ? (
         <PaperSection id="apply" tone="paper" className="scroll-mt-24">
           <Container>
             <IndexBar
-              index={2}
+              index={3}
               name="Apply"
               aside={`Ref. ${job.requisitionId}`}
             />
@@ -477,7 +481,7 @@ export function JobDetailPage({
         <PaperSection id="more-roles" tone="paper">
           <Container>
             <IndexBar
-              index={useForm ? 3 : 2}
+              index={useForm ? 4 : 3}
               name="More open roles"
               aside={`${moreRoles.length} of ${
                 otherJobs.filter(

@@ -108,6 +108,42 @@ export async function withinLimit(kind: string, value: string, { limit, windowSe
   return true;
 }
 
+/** Tries at a dashboard sign-in code, per address (app/internal/login). */
+export const SIGN_IN_CODE_LIMIT: Limit = { limit: 10, windowSeconds: HOUR };
+
+/**
+ * The strict count, for sign-in: the attempt is saved first and counted
+ * after, so requests fired all at once still can't get more than `limit`
+ * through (each one's count includes every row saved before it). Unlike
+ * `withinLimit` it fails closed: if the count can't be made, the answer is
+ * "unavailable", never "allowed".
+ */
+export async function strictlyWithinLimit(
+  kind: string,
+  value: string,
+  { limit, windowSeconds }: Limit,
+  now = Date.now(),
+): Promise<"allowed" | "limited" | "unavailable"> {
+  if (!isSupabaseConfigured()) return "unavailable";
+  const key = limitKey(kind, value);
+  const saved = await insertRow(TABLE, { key });
+  if (!saved.ok) {
+    console.error(`[rate-limit] couldn't save a ${kind} attempt: ${saved.message}`);
+    return "unavailable";
+  }
+  const since = new Date(now - windowSeconds * 1000).toISOString();
+  const counted = await selectRows(
+    TABLE,
+    new URLSearchParams({ select: "id", key: `eq.${key}`, created_at: `gte.${since}`, limit: "1" }),
+    { count: true },
+  );
+  if (!counted.ok || counted.total === null) {
+    console.error(`[rate-limit] couldn't count ${kind} attempts: ${counted.ok ? "no total" : counted.message}`);
+    return "unavailable";
+  }
+  return counted.total <= limit ? "allowed" : "limited";
+}
+
 /** The form's limit for the visitor's network. Without an IP header, allows. */
 export async function networkWithinLimit(form: string, request: Request, limit: Limit = IP_LIMIT) {
   const ip = clientIp(request);

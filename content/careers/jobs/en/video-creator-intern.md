@@ -31,7 +31,7 @@ questions:
     hint: "A line or two each."
 ---
 
-Studio1 does DevRel and developer marketing for devtool, AI, and open-source teams. We work with new tech every week: new LLMs, new frameworks, new developer tools. We publish videos every day on YouTube, Instagram, X, and LinkedIn, and we are hiring a creative intern who knows the tech to make it happen.
+We work with new tech every week: new LLMs, new frameworks, new developer tools. We publish videos every day on YouTube, Instagram, X, and LinkedIn, and we are hiring a creative intern who knows the tech to make it happen.
 
 You know what you're talking about, and you find a fresh, interesting way to teach it. Tutorials, explainers, quick takes on a new release, a talk-style video on a trend: if it teaches the audience something new and people want to watch it, it fits.
 
