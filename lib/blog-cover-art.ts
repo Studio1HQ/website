@@ -40,6 +40,7 @@ export const COVER_ARTS = [
   { key: "build", name: "Terminal: build" },
   { key: "hello-world", name: "Terminal: hello world" },
   { key: "devrel", name: "DevRel network" },
+  { key: "viral-launch", name: "Viral launch curve" },
   { key: "launch-post", name: "Launch post" },
   { key: "launch-plan", name: "Launch plan" },
   { key: "mark", name: "Studio1 mark" },
@@ -100,6 +101,7 @@ const RULES: Rule[] = [
   ["build", (t) => /^build\b|step-by-step/i.test(t)],
   ["hello-world", (t) => /hello world/i.test(t)],
   ["devrel", (t) => /devrel for startups/i.test(t)],
+  ["viral-launch", (t) => /\bviral\b/i.test(t) && /\blaunch/i.test(t)],
   ["launch-post", (t) => /\blaunch/i.test(t) && /\bon x\b|twitter/i.test(t)],
   ["launch-plan", (t) => /\blaunch/i.test(t)],
 ];
