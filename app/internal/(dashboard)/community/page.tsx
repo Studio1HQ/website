@@ -6,6 +6,8 @@ import {
   CheckCircle,
 } from "@phosphor-icons/react/dist/ssr";
 import { requireCommunity } from "@/lib/internal/session";
+import { hackathonBreakdown } from "@/lib/internal/data";
+import { hackathonListHref } from "@/components/internal/hackathon-tabs";
 import {
   incomplete,
   loadEvents,
@@ -91,6 +93,7 @@ export default async function CommunityOverview({
     recent,
     refs,
     owners,
+    registrations,
   ] = await Promise.all([
     loadEvents(),
     loadGuestCounts(),
@@ -104,6 +107,7 @@ export default async function CommunityOverview({
     loadRecentActivity(8),
     refOptions(["event", "sponsor", "partner"]),
     ownerChoices(),
+    hackathonBreakdown(),
   ]);
 
   const header = (
@@ -151,6 +155,7 @@ export default async function CommunityOverview({
   // A read that failed shows as nothing; say so instead of "All clear".
   const partial =
     people === null ||
+    !registrations.ok ||
     incomplete(
       events,
       guestCounts,
@@ -257,6 +262,23 @@ export default async function CommunityOverview({
             ? formatTotals({ [deal.currency]: deal.amount })
             : "In kind",
         day: deal.due_on,
+      });
+    }
+  }
+  // New site registrations, per hackathon: managers review and reply.
+  if (canEdit && registrations.ok) {
+    for (const hackathon of registrations.events) {
+      const fresh = hackathon.byStatus.new ?? 0;
+      if (!fresh) continue;
+      attention.push({
+        key: `h${hackathon.slug}`,
+        href: hackathonListHref(hackathon.slug, "new"),
+        title: `${fresh} new ${fresh === 1 ? "registration" : "registrations"} for ${hackathon.name}`,
+        detail: hackathon.overdue
+          ? `${hackathon.overdue} waiting over 5 days`
+          : "Confirm, waitlist or reply",
+        // Waiting ones first: they're as urgent as anything due today.
+        day: hackathon.overdue ? addDays(today, -5) : today,
       });
     }
   }

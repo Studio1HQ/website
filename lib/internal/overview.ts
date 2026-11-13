@@ -1,9 +1,8 @@
 import { listPosts } from "@/lib/internal/blog/data";
 import { communityBadges } from "@/lib/internal/community/data";
-import { overview as hiringOverview } from "@/lib/internal/data";
+import { hackathonBreakdown, overview as hiringOverview } from "@/lib/internal/data";
 import { pendingCount } from "@/lib/internal/members";
-import { atLeast } from "@/lib/internal/roles";
-import { SECTIONS } from "@/lib/internal/sections";
+import { SECTIONS, sectionAccess } from "@/lib/internal/sections";
 import { isAdmin, type Staff } from "@/lib/internal/session";
 import { listDays } from "@/lib/internal/team/attendance";
 import { teamOverview } from "@/lib/internal/team/overview";
@@ -24,7 +23,7 @@ import {
  * area someone can't see, so the page is also the access boundary.
  */
 
-export type AreaKey = "hiring" | "blog" | "team" | "money" | "community" | "access";
+export type AreaKey = "hiring" | "hackathons" | "blog" | "team" | "money" | "community" | "access";
 
 export type Attention = {
   area: AreaKey;
@@ -78,24 +77,34 @@ export async function dashboardOverview(staff: Staff) {
   // People who log days but aren't admins see their own day and their interns'.
   const ownEmails = admin ? [] : [...(staff.person ? [staff.person.email] : []), ...staff.interns];
 
-  const [hiring, team, blog, requests, community, ownDays] = await Promise.all([
-    staff.role ? hiringOverview() : Promise.resolve(null),
+  const [pipelines, team, blog, requests, community, ownDays, hackathons] = await Promise.all([
+    // Every pipeline this person can open: the hiring ones and, for
+    // community staff and admins, hackathon registrations.
+    staff.role || staff.community ? hiringOverview() : Promise.resolve(null),
     admin ? teamOverview() : Promise.resolve(null),
     blogStaff ? blogSummary(blogStaff) : Promise.resolve(null),
     admin ? pendingCount() : Promise.resolve(0),
     staff.community ? communityBadges(staff.email) : Promise.resolve(null),
     ownEmails.length ? listDays({ from: now.date, to: now.date, emails: ownEmails }) : Promise.resolve(null),
+    staff.community ? hackathonBreakdown() : Promise.resolve(null),
   ]);
+
+  // The Hiring card: job and cohort pipelines only (hackathons have their own).
+  const hiring =
+    pipelines && staff.role
+      ? { ...pipelines, pipelines: pipelines.pipelines.filter((pipeline) => SECTIONS[pipeline.key].area === "hiring") }
+      : null;
 
   const todo: Attention[] = [];
 
-  // Hiring: only people who can act on an entry get it as a to-do.
-  if (hiring && atLeast(staff.role, "reviewer")) {
-    for (const pipeline of hiring.pipelines) {
+  // Pipelines: only people who can act on an entry get it as a to-do.
+  if (pipelines) {
+    for (const pipeline of pipelines.pipelines) {
       if (!pipeline.ok || pipeline.awaiting === 0) continue;
+      if (sectionAccess(staff, SECTIONS[pipeline.key]) !== "edit") continue;
       const noun = pipeline.key === "jobs" ? "job application" : pipeline.key === "hackathons" ? "hackathon registration" : "cohort application";
       todo.push({
-        area: "hiring",
+        area: pipeline.key === "hackathons" ? "hackathons" : "hiring",
         label: `${plural(pipeline.awaiting, noun)} to review`,
         detail: pipeline.overdue ? `${pipeline.overdue} waiting over 5 days` : undefined,
         href: `${SECTIONS[pipeline.key].path}?status=new`,
@@ -185,6 +194,9 @@ export async function dashboardOverview(staff: Staff) {
     now,
     todo,
     hiring,
+    /** Registrations per hackathon, for admins and community staff. */
+    hackathons: hackathons?.ok ? hackathons.events : null,
+    hackathonsOk: hackathons ? hackathons.ok : true,
     blog,
     team,
     community: staff.community !== null,

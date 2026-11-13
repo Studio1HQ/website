@@ -14,12 +14,12 @@ import { blockedReason } from "@/lib/email-delivery";
 import { isMailerConfigured } from "@/lib/mailer";
 import { firstName } from "@/lib/first-name";
 import { mailtoHref } from "@/lib/form-checks";
-import { atLeast } from "@/lib/internal/roles";
-import { requireStaff } from "@/lib/internal/session";
+import { requireSection } from "@/lib/internal/session";
 import { rowTags } from "@/lib/internal/query";
 import {
   SECTIONS,
   PAGE_SIZE,
+  canExportSection,
   filterParams,
   parseFilters,
   withQuery,
@@ -50,17 +50,21 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 export async function SectionListPage({
   sectionKey,
   searchParams,
+  before,
 }: {
   sectionKey: SectionKey;
   searchParams: SearchParams;
+  /** Shown between the header and the list (the hackathon tabs). */
+  before?: ReactNode;
 }) {
   const section = SECTIONS[sectionKey];
-  const staff = await requireStaff(section.minRole);
+  const staff = await requireSection(section);
   const filters = parseFilters(section, await searchParams);
   const data = await listView(section, filters);
   return (
     <>
       <PageHeader eyebrow={section.group} title={section.title} description={section.description} />
+      {before}
       {data.ok ? (
         <ListView
           sectionKey={sectionKey}
@@ -71,7 +75,8 @@ export async function SectionListPage({
           tags={data.tags}
           tagsReady={data.tagsReady}
           filters={filters}
-          role={staff.role}
+          canEdit={staff.access === "edit"}
+          canExport={canExportSection(staff, section)}
           overdue={data.overdue}
           sender={senderName(staff.email)}
           mailerReady={isMailerConfigured()}
@@ -93,7 +98,7 @@ export async function loadRecord(
   const [{ id }, query] = await Promise.all([params, searchParams]);
   const filters = parseFilters(section, query);
   const [staff, view] = await Promise.all([
-    requireStaff(section.minRole),
+    requireSection(section),
     recordView(section, id, filters),
   ]);
   if (!view) notFound();
@@ -102,7 +107,7 @@ export async function loadRecord(
     ...view,
     ...extras,
     filters,
-    canEdit: atLeast(staff.role, "reviewer"),
+    canEdit: staff.access === "edit",
     staff,
     mailerReady: isMailerConfigured(),
   };

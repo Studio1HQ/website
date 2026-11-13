@@ -26,7 +26,7 @@ import {
 } from "@/lib/internal/email-templates";
 import { programOf } from "@/lib/internal/program";
 import { UUID_PATTERN, sectionFor, statusLabel } from "@/lib/internal/sections";
-import { requireStaff } from "@/lib/internal/session";
+import { requireMember, requireSection } from "@/lib/internal/session";
 import { unsubscribeUrl } from "@/lib/unsubscribe";
 
 export type BulkResult =
@@ -47,7 +47,7 @@ const MAX_RECIPIENTS = 100;
 /**
  * One template to many entries: everyone gets their own copy, with their
  * own first name and role, in one request to Resend, now or at a set time
- * (`sendAt`, up to 30 days ahead). Reviewers and admins only. Recipients
+ * (`sendAt`, up to 30 days ahead). Whoever can edit the section. Recipients
  * always come from the stored entries, never the browser. Addresses that
  * bounced or complained before are skipped. Each email is logged on its
  * entry, and the status can move with it (straight away, even if scheduled).
@@ -67,8 +67,10 @@ export async function sendBulkEmail(
   ids: unknown,
   input: unknown,
 ): Promise<BulkResult> {
-  const staff = await requireStaff("reviewer");
   const section = sectionFor(sectionKey);
+  // The session is checked first, whatever was sent; an unknown section
+  // fails the checks below.
+  const staff = section ? await requireSection(section, "edit") : await requireMember();
   const idList = Array.isArray(ids) ? [...new Set(ids)] : [];
   const fields = (typeof input === "object" && input !== null ? input : {}) as Record<string, unknown>;
   const subject = typeof fields.subject === "string" ? fields.subject.trim() : "";

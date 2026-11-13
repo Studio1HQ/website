@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, PencilSimple } from "@phosphor-icons/react/dist/ssr";
+import { ArrowLeft, PencilSimple, Plus } from "@phosphor-icons/react/dist/ssr";
 import { requireCommunity } from "@/lib/internal/session";
 import {
   getRecord,
   incomplete,
   loadActivity,
   loadContacts,
+  loadEventPartners,
   loadEvents,
   loadGuestCounts,
   loadHackathonCounts,
@@ -18,6 +19,8 @@ import {
 } from "@/lib/internal/community/data";
 import {
   EVENT_KINDS,
+  EVENT_PARTNER_ROLES,
+  EVENT_PARTNERS_MIGRATION_HINT,
   EVENT_STATUSES,
   PARTNER_KINDS,
   PARTNER_STAGES,
@@ -48,6 +51,7 @@ import {
   Muted,
   OptionPill,
   Owner,
+  Pill,
   Stat,
 } from "@/components/internal/community/ui";
 
@@ -83,6 +87,7 @@ export default async function PartnerPage({
     activity,
     refs,
     owners,
+    links,
   ] = await Promise.all([
     loadContacts({ partner_id: partner.id }),
     loadEvents(),
@@ -93,6 +98,7 @@ export default async function PartnerPage({
     loadActivity({ partner_id: partner.id }),
     refOptions(["event", "sponsor", "partner"]),
     ownerChoices(),
+    loadEventPartners({ partner_id: partner.id }),
   ]);
   if (!contacts.ok) return <MigrationNotice message={contacts.message} />;
 
@@ -106,6 +112,17 @@ export default async function PartnerPage({
   const hosted = (events.ok ? events.rows : []).filter(
     (event) => event.partner_id && hostIds.has(event.partner_id),
   );
+  // Events it's part of in another role: co-host, venue, outreach…
+  const linkRows = links.ok ? links.rows : [];
+  const rolesByEvent = new Map<string, string[]>();
+  for (const link of linkRows) {
+    rolesByEvent.set(link.event_id, [...(rolesByEvent.get(link.event_id) ?? []), link.role]);
+  }
+  const hostedIds = new Set(hosted.map((event) => event.id));
+  const involved = (events.ok ? events.rows : []).filter(
+    (event) => hostedIds.has(event.id) || rolesByEvent.has(event.id),
+  );
+  const partnerOnly = involved.length - hosted.length;
   const turnout = turnouts(
     hosted,
     guestCounts.ok ? guestCounts.rows : [],
@@ -199,7 +216,14 @@ export default async function PartnerPage({
         <Stat
           label="Events hosted"
           value={hosted.filter((event) => event.status !== "cancelled").length}
-          note={children.length ? "Including its clubs" : undefined}
+          note={
+            [
+              children.length ? "Including its clubs" : "",
+              partnerOnly > 0 ? `+${partnerOnly} as a partner` : "",
+            ]
+              .filter(Boolean)
+              .join(" · ") || undefined
+          }
         />
         <Stat
           label="People reached"
@@ -235,11 +259,31 @@ export default async function PartnerPage({
             }}
           />
           <Card>
-            <CardTitle>Events</CardTitle>
-            {hosted.length ? (
+            <CardTitle
+              action={
+                canEdit && !(!links.ok && links.missing) ? (
+                  <RecordDialog
+                    entity="event_partner"
+                    refs={refs}
+                    defaults={{ partner_id: partner.id }}
+                    hidden={["partner_id"]}
+                    title="Add this partner to an event"
+                    trigger={
+                      <button type="button" className={buttonClass("secondary", "sm")}>
+                        <Plus size={13} /> Event
+                      </button>
+                    }
+                  />
+                ) : null
+              }
+            >
+              Events
+            </CardTitle>
+            {involved.length ? (
               <ul className="divide-y divide-[var(--i-line)]">
-                {hosted.map((event) => {
+                {involved.map((event) => {
                   const numbers = turnout.get(event.id);
+                  const roles = rolesByEvent.get(event.id) ?? [];
                   return (
                     <li key={event.id}>
                       <Link
@@ -257,8 +301,8 @@ export default async function PartnerPage({
                               today,
                             )}{" "}
                             · {labelOf(EVENT_KINDS, event.kind)}
-                            {event.partner_id !== partner.id
-                              ? ` · ${allPartners.find((item) => item.id === event.partner_id)?.name ?? ""}`
+                            {event.partner_id && event.partner_id !== partner.id
+                              ? ` · ${hostedIds.has(event.id) ? "" : "hosted by "}${allPartners.find((item) => item.id === event.partner_id)?.name ?? "another partner"}`
                               : ""}
                           </span>
                         </span>
@@ -268,6 +312,12 @@ export default async function PartnerPage({
                             : numbers?.signedUp
                               ? `${numbers.signedUp} signed up`
                               : ""}
+                        </span>
+                        <span className="flex shrink-0 flex-wrap justify-end gap-1">
+                          {hostedIds.has(event.id) ? <Pill tone="orange">Host</Pill> : null}
+                          {roles.map((role) => (
+                            <OptionPill key={role} list={EVENT_PARTNER_ROLES} value={role} />
+                          ))}
                         </span>
                         <OptionPill
                           list={EVENT_STATUSES}
@@ -282,9 +332,19 @@ export default async function PartnerPage({
               <p className="px-5 py-6 text-[13px] text-[var(--i-muted)]">
                 No events yet. Pick this{" "}
                 {labelOf(PARTNER_KINDS, partner.kind).toLowerCase()} as the host
-                when you add an event.
+                when you add an event, or add it to one as a co-host, venue or
+                community partner.
               </p>
             )}
+            {!links.ok && links.missing && canEdit ? (
+              <p className="border-t border-[var(--i-line)] px-5 py-2.5 text-[12px] text-[var(--i-muted)]">
+                {EVENT_PARTNERS_MIGRATION_HINT}
+              </p>
+            ) : involved.length && canEdit ? (
+              <p className="border-t border-[var(--i-line)] px-5 py-2.5 text-[12px] text-[var(--i-muted)]">
+                Change or remove a role on the event&apos;s page.
+              </p>
+            ) : null}
           </Card>
           {children.length ? (
             <Card>

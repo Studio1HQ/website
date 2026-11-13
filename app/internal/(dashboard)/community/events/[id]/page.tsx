@@ -8,13 +8,17 @@ import {
   Trophy,
 } from "@phosphor-icons/react/dist/ssr";
 import { requireCommunity } from "@/lib/internal/session";
+import { hackathonBreakdown } from "@/lib/internal/data";
+import { statusLabel } from "@/lib/internal/sections";
 import {
   getRecord,
   incomplete,
   loadActivity,
+  loadEventPartners,
   loadExpenses,
   loadGuests,
   loadHackathonCounts,
+  loadPartners,
   loadSponsors,
   loadSponsorships,
   loadTasks,
@@ -24,6 +28,7 @@ import {
 import {
   EVENT_FORMATS,
   EVENT_KINDS,
+  EVENT_PARTNERS_MIGRATION_HINT,
   PARTNER_KINDS,
   formatEventDate,
   formatTotals,
@@ -50,13 +55,16 @@ import {
   Field,
   Fields,
   PageHeader,
+  StatusDot,
   TagChip,
   buttonClass,
   safeUrl,
 } from "@/components/internal/ui";
+import { hackathonListHref } from "@/components/internal/hackathon-tabs";
 import { ActivityLog } from "@/components/internal/community/activity-log";
 import { GuestList } from "@/components/internal/community/guest-list";
 import {
+  EventPartnerList,
   ExpenseList,
   SponsorshipList,
   TaskList,
@@ -104,6 +112,9 @@ export default async function EventPage({
     activity,
     refs,
     owners,
+    breakdown,
+    links,
+    allPartners,
   ] = await Promise.all([
     loadGuests(event.id),
     event.hackathon_slug ? loadHackathonCounts() : Promise.resolve(null),
@@ -117,6 +128,9 @@ export default async function EventPage({
     loadActivity({ event_id: event.id }),
     refOptions(["event", "partner", "sponsor", "hackathon"]),
     ownerChoices(),
+    event.hackathon_slug ? hackathonBreakdown() : Promise.resolve(null),
+    loadEventPartners({ event_id: event.id }),
+    loadPartners(),
   ]);
 
   if (!guests.ok) {
@@ -135,6 +149,14 @@ export default async function EventPage({
     ? hackathons.rows.find((row) => row.hackathon_slug === event.hackathon_slug)
     : undefined;
   const turnout = turnoutOf(event, counts, hackathon, today);
+  // This hackathon's site registrations by review status.
+  const registrations =
+    breakdown?.ok && event.hackathon_slug
+      ? breakdown.events.find((item) => item.slug === event.hackathon_slug)
+      : undefined;
+  const partnerNames = Object.fromEntries(
+    (allPartners.ok ? allPartners.rows : []).map((item) => [item.id, item.name]),
+  );
   const money = moneyOf(
     expenses.ok ? expenses.rows : [],
     sponsorships.ok ? sponsorships.rows : [],
@@ -305,31 +327,53 @@ export default async function EventPage({
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="min-w-0 space-y-5">
-          {hackathon ? (
-            <Card className="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5">
-              <span className="flex items-center gap-2.5 text-[13px]">
-                <Trophy size={16} className="text-[var(--i-accent)]" />
-                <span>
-                  <strong className="font-medium">
-                    {hackathon.signed_up.toLocaleString("en-IN")}
-                  </strong>{" "}
-                  signed up on the site form
-                  {hackathon.attended
-                    ? `, ${hackathon.attended.toLocaleString("en-IN")} attended`
-                    : ""}
-                  {hackathon.waitlisted
-                    ? `, ${hackathon.waitlisted.toLocaleString("en-IN")} waitlisted`
-                    : ""}
-                  .
+          {hackathon || registrations ? (
+            <Card className="px-5 py-3.5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <span className="flex items-center gap-2.5 text-[13px]">
+                  <Trophy size={16} className="text-[var(--i-accent)]" />
+                  <span>
+                    <strong className="font-medium">
+                      {(registrations?.total ?? hackathon?.signed_up ?? 0).toLocaleString("en-IN")}
+                    </strong>{" "}
+                    registered on the site form
+                    {registrations?.lastWeek
+                      ? `, ${registrations.lastWeek.toLocaleString("en-IN")} in the last 7 days`
+                      : ""}
+                    .
+                  </span>
                 </span>
-              </span>
-              {staff.role ? (
-                <Link
-                  href={`/internal/hackathons?event=${encodeURIComponent(hackathon.hackathon_slug)}`}
-                  className={buttonClass("secondary", "sm")}
-                >
-                  Review in Hackathons
-                </Link>
+                {event.hackathon_slug ? (
+                  <Link
+                    href={hackathonListHref(event.hackathon_slug)}
+                    className={buttonClass("secondary", "sm")}
+                  >
+                    {canEdit ? "Review registrations" : "See registrations"}
+                  </Link>
+                ) : null}
+              </div>
+              {registrations && registrations.total ? (
+                <ul className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1 border-t border-[var(--i-line)] pt-2.5 text-[12.5px]">
+                  {Object.entries(registrations.byStatus)
+                    .filter(([, count]) => count > 0)
+                    .map(([status, count]) => (
+                      <li key={status}>
+                        <Link
+                          href={hackathonListHref(registrations.slug, status)}
+                          className="inline-flex items-center gap-1.5 text-[var(--i-ink-2)] hover:text-[var(--i-ink)]"
+                        >
+                          <StatusDot status={status} />
+                          <span className="font-medium tabular-nums">{count}</span>{" "}
+                          {statusLabel(status).toLowerCase()}
+                        </Link>
+                      </li>
+                    ))}
+                  {registrations.overdue ? (
+                    <li className="text-amber-700 dark:text-amber-300">
+                      {registrations.overdue} waiting over 5 days
+                    </li>
+                  ) : null}
+                </ul>
               ) : null}
             </Card>
           ) : null}
@@ -430,6 +474,17 @@ export default async function EventPage({
               </Fields>
             </div>
           </Card>
+          <EventPartnerList
+            side="event"
+            links={links.ok ? links.rows : []}
+            names={partnerNames}
+            host={partner ? { id: partner.id, name: partner.name } : null}
+            missing={!links.ok && links.missing ? EVENT_PARTNERS_MIGRATION_HINT : null}
+            canEdit={canEdit}
+            refs={refs}
+            defaults={{ event_id: event.id }}
+            hidden={["event_id"]}
+          />
           <TaskList
             tasks={tasks.ok ? tasks.rows : []}
             me={staff.email}

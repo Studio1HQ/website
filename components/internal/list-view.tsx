@@ -45,7 +45,6 @@ import {
   type SinceKey,
   type SortKey,
 } from "@/lib/internal/sections";
-import { atLeast, type Role } from "@/lib/internal/roles";
 import { cn } from "@/lib/utils";
 import { BulkEmailDialog } from "@/components/internal/bulk-email-dialog";
 import { FilterMenu } from "@/components/internal/filter-menu";
@@ -84,13 +83,17 @@ export function ListView({
   tags,
   tagsReady,
   filters,
-  role,
+  canEdit,
+  canExport,
   overdue,
   sender,
   mailerReady,
   rowLimit,
 }: {
-  role: Role;
+  /** Change status, tags and notes, and send email. */
+  canEdit: boolean;
+  /** Download the list as CSV. */
+  canExport: boolean;
   overdue: number;
   /** The signed-in teammate's first name, for email sign-offs. */
   sender: string;
@@ -117,10 +120,10 @@ export function ListView({
   const [overrides, setOverrides] = useState<Record<string, Override>>({});
   const [search, setSearch] = useState(filters.q ?? "");
   const searchRef = useRef<HTMLInputElement>(null);
-  // Viewers read only; reviewers change entries; admins also export.
-  const reviewable = Boolean(section.statuses) && atLeast(role, "reviewer");
-  const taggable = section.tags && tagsReady && atLeast(role, "reviewer");
-  const canExport = atLeast(role, "admin");
+  // Viewers read only; reviewers and community managers change entries;
+  // admins (and community managers, for hackathons) also export.
+  const reviewable = Boolean(section.statuses) && canEdit;
+  const taggable = section.tags && tagsReady && canEdit;
 
   // Fresh rows from the server replace any optimistic changes and selection.
   useEffect(() => {

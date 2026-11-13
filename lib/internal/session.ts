@@ -16,6 +16,7 @@ import {
   type Role,
   type RoleKey,
 } from "@/lib/internal/roles";
+import { canExportSection, sectionAccess, type Section } from "@/lib/internal/sections";
 import { SESSION_COOKIE, devBypassEmail, readSession } from "@/lib/internal/token";
 
 export type Staff = {
@@ -156,6 +157,24 @@ export async function requireStaff(minimum: Role = "viewer"): Promise<Staff & { 
   if (!staff.role) redirect(homeFor(staff));
   if (!atLeast(staff.role, minimum)) redirect("/internal?denied=1");
   return staff as Staff & { role: Role };
+}
+
+/**
+ * A section's pages, data reads and actions: "read" to open it, "edit" to
+ * change status, tags and notes or send email, "export" for its CSV. Hiring
+ * sections follow the pipelines roles, community sections (hackathon
+ * registrations) the community roles; see sectionAccess.
+ */
+export async function requireSection(
+  section: Section,
+  need: "read" | "edit" | "export" = "read",
+): Promise<Staff & { access: "edit" | "read" }> {
+  const staff = await requireMember();
+  const access = sectionAccess(staff, section);
+  if (!access) redirect(homeFor(staff));
+  if (need === "edit" && access !== "edit") redirect(`${section.path}?denied=1`);
+  if (need === "export" && !canExportSection(staff, section)) redirect(`${section.path}?denied=1`);
+  return { ...staff, access };
 }
 
 /** Blog pages and actions: "writer" for writing, "reviewer" for reviewing and publishing. */

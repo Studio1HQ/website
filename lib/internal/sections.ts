@@ -1,4 +1,4 @@
-import type { Role } from "@/lib/internal/roles";
+import { atLeast, type CommunityAccess, type Role } from "@/lib/internal/roles";
 
 /**
  * The internal dashboard's sections: one per form table, plus the two
@@ -81,8 +81,8 @@ export type Section = {
   title: string;
   /** Sidebar label. */
   nav: string;
-  /** Sidebar group. */
-  group: "Pipelines" | "Audiences";
+  /** Sidebar group (Community sections sit in the Community sidebar). */
+  group: "Pipelines" | "Audiences" | "Community";
   description: string;
   path: string;
   table: string;
@@ -105,7 +105,13 @@ export type Section = {
   tagPresets: string[];
   /** Columns the list needs from Supabase. */
   listSelect: string[];
-  /** The least role that can open this section. */
+  /**
+   * Whose section it is. "hiring": the pipelines roles, from `minRole` up.
+   * "community": the community roles (managers act, viewers read) and
+   * admins; the hiring roles don't see it.
+   */
+  area: "hiring" | "community";
+  /** The least pipelines role that can open a hiring section. */
   minRole: Role;
   /** What tells one entry from the same person's others (role, event…). */
   repeatLabel?: string;
@@ -155,14 +161,15 @@ export const SECTIONS: Record<SectionKey, Section> = {
       "id", "created_at", "updated_at", "name", "email", "job_id", "job_title",
       "location", "start_availability", "email_updates", "review_status",
     ],
+    area: "hiring",
     minRole: "viewer",
   },
   hackathons: {
     key: "hackathons",
     title: "Hackathon registrations",
     nav: "Hackathons",
-    group: "Pipelines",
-    description: "Everyone who registered for a Studio1 hackathon.",
+    group: "Community",
+    description: "Everyone who registered for a Studio1 hackathon on the site. Pick a hackathon to see its own list.",
     path: "/internal/hackathons",
     table: "hackathon_registrations",
     idColumn: "id",
@@ -210,6 +217,7 @@ export const SECTIONS: Record<SectionKey, Section> = {
       "hackathon_name", "role", "experience", "country", "team", "team_name", "track",
       "partner_consent", "review_status",
     ],
+    area: "community",
     minRole: "viewer",
   },
   cohort: {
@@ -255,6 +263,7 @@ export const SECTIONS: Record<SectionKey, Section> = {
       "id", "created_at", "updated_at", "name", "email", "cohort", "role", "location",
       "favorite_tool", "partner_consent", "outcome", "review_status",
     ],
+    area: "hiring",
     minRole: "viewer",
   },
   subscribers: {
@@ -293,6 +302,7 @@ export const SECTIONS: Record<SectionKey, Section> = {
     tags: false,
     tagPresets: [],
     listSelect: ["email", "name", "forms", "first_opted_in", "last_seen"],
+    area: "hiring",
     minRole: "admin",
   },
   "partner-pool": {
@@ -336,6 +346,7 @@ export const SECTIONS: Record<SectionKey, Section> = {
       "form", "record_id", "program", "name", "email", "location", "role", "profile",
       "work", "review_status", "outcome", "referred_to", "created_at",
     ],
+    area: "hiring",
     minRole: "admin",
   },
 };
@@ -354,6 +365,36 @@ export function sectionFor(key: unknown): Section | null {
   return typeof key === "string" && Object.hasOwn(SECTIONS, key)
     ? SECTIONS[key as SectionKey]
     : null;
+}
+
+/** Who's asking: their pipelines level and community access. */
+export type SectionViewer = { role: Role | null; community: CommunityAccess | null };
+
+/**
+ * What someone may do in a section: "edit" (status, tags, notes, email),
+ * "read", or null when it's hidden from them. Community sections follow the
+ * community roles, so a hiring reviewer can't open hackathon registrations
+ * and a community manager can review them.
+ */
+export function sectionAccess(who: SectionViewer, section: Pick<Section, "area" | "minRole">) {
+  if (section.area === "community") {
+    return who.community === "manager" ? "edit" : who.community === "viewer" ? "read" : null;
+  }
+  if (!atLeast(who.role, section.minRole)) return null;
+  return atLeast(who.role, "reviewer") ? "edit" : "read";
+}
+
+/**
+ * CSV exports: admins for every section; community managers for the
+ * community sections too (they run the events the lists are for).
+ */
+export function canExportSection(who: SectionViewer, section: Pick<Section, "area">) {
+  return who.role === "admin" || (section.area === "community" && who.community === "manager");
+}
+
+/** The sections someone can open, in sidebar order. */
+export function readableSections(who: SectionViewer, keys: readonly SectionKey[] = SECTION_ORDER) {
+  return keys.filter((key) => sectionAccess(who, SECTIONS[key]) !== null);
 }
 
 /** Which section a `form` value from the views belongs to. */

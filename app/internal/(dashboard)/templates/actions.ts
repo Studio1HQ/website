@@ -10,7 +10,8 @@ import {
   templatesFor,
   type FormKey,
 } from "@/lib/internal/email-templates";
-import { requireStaff } from "@/lib/internal/session";
+import { SECTIONS, sectionAccess } from "@/lib/internal/sections";
+import { requireMember } from "@/lib/internal/session";
 import { isMailerConfigured, sendMail } from "@/lib/mailer";
 import { unsubscribeUrl } from "@/lib/unsubscribe";
 
@@ -21,13 +22,15 @@ export type TestSendResult = { ok: true; to: string } | { ok: false; message: st
 /**
  * Sends one template, filled with the sample details, to the signed-in
  * person only: the real sender, layout and footer, with "[Test]" in the
- * subject. Nothing is logged against an entry. Reviewers and admins.
+ * subject. Nothing is logged against an entry. Whoever can email from that
+ * pipeline: reviewers and admins, community managers for hackathons.
  */
 export async function sendTestEmail(pipeline: unknown, templateKey: unknown): Promise<TestSendResult> {
-  const staff = await requireStaff("reviewer");
+  const staff = await requireMember();
   const form = PIPELINES.find((key) => key === pipeline);
   const template = form ? templatesFor(form).find((item) => item.key === templateKey) : undefined;
   if (!form || !template) return { ok: false, message: "Unknown template." };
+  if (sectionAccess(staff, SECTIONS[form]) !== "edit") return { ok: false, message: "You can't send emails from this pipeline." };
   if (!isMailerConfigured()) return { ok: false, message: "Sending email isn't set up yet (RESEND_API_KEY)." };
 
   const vars = {

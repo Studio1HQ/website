@@ -1,6 +1,8 @@
+import { HACKATHONS } from "@/data/hackathons";
 import { selectRows, signedFileUrl, updateRows } from "@/lib/supabase-server";
+import { todayKey } from "@/lib/internal/community/schema";
 import { blockedAddresses, deliveriesFor, type Delivery } from "@/lib/email-delivery";
-import { isAdmin, requireStaff } from "@/lib/internal/session";
+import { isAdmin, requireMember, requireSection } from "@/lib/internal/session";
 import {
   facetOptions,
   filterRows,
@@ -21,6 +23,8 @@ import {
   SECTIONS,
   UUID_PATTERN,
   cleanTag,
+  readableSections,
+  sectionAccess,
   type Filters,
   type Section,
   type SectionKey,
@@ -127,7 +131,7 @@ export type ListView =
   | { ok: false; message: string };
 
 export async function listView(section: Section, filters: Filters): Promise<ListView> {
-  await requireStaff(section.minRole);
+  await requireSection(section);
   const loaded = await loadSection(section);
   if (!loaded.ok) return loaded;
   const matching = sortRows(filterRows(loaded.rows, section, filters), section, filters.sort);
@@ -165,7 +169,7 @@ export async function exportRows(
   filters: Filters,
   ids: string[],
 ): Promise<{ ok: true; rows: Row[]; truncated: boolean } | { ok: false; message: string }> {
-  await requireStaff("admin");
+  await requireSection(section, "export");
   const loaded = await loadSection(section, true);
   if (!loaded.ok) return loaded;
   if (ids.length) {
@@ -196,7 +200,7 @@ export async function recordView(
   id: string,
   filters: Filters,
 ): Promise<RecordView | null> {
-  await requireStaff(section.minRole);
+  await requireSection(section);
   if (!UUID_PATTERN.test(id)) return null;
   const [one, loaded] = await Promise.all([
     selectRows(section.table, new URLSearchParams({ select: "*", id: `eq.${id}`, limit: "1" })),
@@ -257,7 +261,7 @@ export async function updateEntries(
   | { ok: true; tags?: Record<string, string[]> }
   | { ok: false; message: string; /** Part of the change was saved. */ saved?: boolean }
 > {
-  const staff = await requireStaff("reviewer");
+  const staff = await requireSection(section, "edit");
   const unique = [...new Set(ids)];
   if (
     !section.statuses ||
@@ -357,7 +361,7 @@ export async function updateEntries(
 
 /** A two-minute link to an applicant's résumé PDF. */
 export async function resumeUrl(id: string): Promise<string | null> {
-  await requireStaff();
+  await requireSection(SECTIONS.jobs);
   if (!UUID_PATTERN.test(id)) return null;
   const result = await selectRows(
     SECTIONS.jobs.table,
@@ -382,11 +386,11 @@ async function count(table: string, filters: Record<string, string> = {}) {
   return result.ok ? (result.total ?? 0) : null;
 }
 
-/** "New" entries per pipeline, for the sidebar. */
+/** "New" entries per pipeline this person can open, for the sidebar. */
 export async function awaitingCounts(): Promise<Partial<Record<SectionKey, number>>> {
-  await requireStaff();
+  const staff = await requireMember();
   const counts = await Promise.all(
-    PIPELINES.map(
+    readableSections(staff, PIPELINES).map(
       async (key) => [key, await count(SECTIONS[key].table, { review_status: "eq.new" })] as const,
     ),
   );
@@ -413,14 +417,20 @@ export type LatestEntry = {
   createdAt: string;
 };
 
+/**
+ * Numbers for the pipelines this person can open (hiring reviewers don't
+ * get hackathon registrations, community staff get only those), and the
+ * latest entries among them.
+ */
 export async function overview() {
-  const staff = await requireStaff();
+  const staff = await requireMember();
   // The audiences are admin-only, so nobody else's page even counts them.
   const admin = isAdmin(staff);
+  const readable = readableSections(staff, PIPELINES);
   const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
   const [pipelines, subscribers, partners, latest] = await Promise.all([
     Promise.all(
-      PIPELINES.map(async (key): Promise<PipelineStats> => {
+      readable.map(async (key): Promise<PipelineStats> => {
         const section = SECTIONS[key];
         const result = await loadAll(section.table, "review_status,created_at", "created_at.desc,id.desc");
         if (!result.ok) {
@@ -453,6 +463,8 @@ export async function overview() {
       "submissions",
       new URLSearchParams({
         select: "form,record_id,program,name,email,review_status,created_at",
+        // Only the forms behind the sections this person can open.
+        form: `in.(${Object.keys(FORM_SECTION).filter((form) => readable.includes(FORM_SECTION[form])).join(",") || "none"})`,
         order: "created_at.desc",
         limit: "8",
       }),
@@ -461,7 +473,7 @@ export async function overview() {
   const entries: LatestEntry[] = latest.ok
     ? latest.rows.flatMap((row) => {
         const section = FORM_SECTION[String(row.form)];
-        return section
+        return section && readable.includes(section)
           ? [
               {
                 section,
@@ -477,6 +489,94 @@ export async function overview() {
       })
     : [];
   return { pipelines, subscribers, partners, latest: entries, latestOk: latest.ok };
+}
+
+/** One hackathon's registrations, for its tab, its event page and the home page. */
+export type HackathonStats = {
+  slug: string;
+  name: string;
+  /** From data/hackathons.ts; null for a slug that's no longer listed there. */
+  startDate: string | null;
+  endDate: string | null;
+  registrationCloses: string | null;
+  /** "open": taking registrations; "upcoming": closed, not over; "past". */
+  phase: "open" | "upcoming" | "past" | "unlisted";
+  total: number;
+  byStatus: Record<string, number>;
+  lastWeek: number;
+  overdue: number;
+};
+
+/**
+ * Registrations per hackathon, by status: every hackathon on the site that
+ * is taking or has taken registrations, plus any older slug that still has
+ * some. Current ones first (by start date), then past ones (latest first).
+ */
+export async function hackathonBreakdown(): Promise<
+  { ok: true; events: HackathonStats[] } | { ok: false; message: string }
+> {
+  await requireSection(SECTIONS.hackathons);
+  const section = SECTIONS.hackathons;
+  const result = await loadAll(
+    section.table,
+    "hackathon_slug,hackathon_name,review_status,created_at",
+    "created_at.desc,id.desc",
+  );
+  if (!result.ok) {
+    console.error(`[internal] hackathon breakdown failed: ${result.message}`);
+    return { ok: false, message: "Couldn't load the hackathon registrations." };
+  }
+  const today = todayKey();
+  const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const bySlug = new Map<string, HackathonStats>();
+  const blank = (slug: string, name: string): HackathonStats => {
+    const listed = HACKATHONS.find((hackathon) => hackathon.slug === slug);
+    return {
+      slug,
+      name: listed?.name ?? name,
+      startDate: listed?.startDate ?? null,
+      endDate: listed?.endDate ?? null,
+      registrationCloses: listed?.registrationCloses ?? null,
+      phase: !listed
+        ? "unlisted"
+        : listed.endDate < today
+          ? "past"
+          : listed.registrationCloses >= today
+            ? "open"
+            : "upcoming",
+      total: 0,
+      byStatus: Object.fromEntries((section.statuses ?? []).map((status) => [status, 0])),
+      lastWeek: 0,
+      overdue: 0,
+    };
+  };
+  // Hackathons that take registrations on the site (not on Luma or Devpost).
+  for (const hackathon of HACKATHONS) {
+    if (!hackathon.registerUrl) bySlug.set(hackathon.slug, blank(hackathon.slug, hackathon.name));
+  }
+  for (const row of result.rows) {
+    const slug = String(row.hackathon_slug ?? "");
+    if (!slug) continue;
+    let stats = bySlug.get(slug);
+    if (!stats) {
+      stats = blank(slug, String(row.hackathon_name ?? slug));
+      bySlug.set(slug, stats);
+    }
+    const status = String(row.review_status ?? "new");
+    stats.total += 1;
+    stats.byStatus[status] = (stats.byStatus[status] ?? 0) + 1;
+    if (Date.parse(String(row.created_at)) >= weekAgo) stats.lastWeek += 1;
+    if (isOverdue(row, section)) stats.overdue += 1;
+  }
+  // Past hackathons nobody registered for (placeholders) aren't worth a tab.
+  const events = [...bySlug.values()].filter((event) => event.total > 0 || event.phase === "open" || event.phase === "upcoming");
+  const current = events
+    .filter((event) => event.phase === "open" || event.phase === "upcoming")
+    .sort((a, b) => String(a.startDate).localeCompare(String(b.startDate)));
+  const past = events
+    .filter((event) => event.phase === "past" || event.phase === "unlisted")
+    .sort((a, b) => String(b.startDate ?? "").localeCompare(String(a.startDate ?? "")));
+  return { ok: true, events: [...current, ...past] };
 }
 
 export type EmailLogEntry = {
@@ -507,7 +607,7 @@ export type OtherEntry = {
  * /internal/jobs/[id]/resume, which checks the session on every fetch.
  */
 export async function entryExtras(section: Section, record: Row) {
-  await requireStaff(section.minRole);
+  const staff = await requireSection(section);
   const id = String(record.id);
   const email = String(record.email ?? "").toLowerCase();
   const [log, others] = await Promise.all([
@@ -549,7 +649,9 @@ export async function entryExtras(section: Section, record: Row) {
     others: others.ok
       ? others.rows.flatMap((row): OtherEntry[] => {
           const target = FORM_SECTION[String(row.form)];
-          if (!target || String(row.record_id) === id) return [];
+          // Only entries on forms this person may open: a community manager
+          // doesn't learn that a participant also applied for a job.
+          if (!target || String(row.record_id) === id || !sectionAccess(staff, SECTIONS[target])) return [];
           return [
             {
               section: target,

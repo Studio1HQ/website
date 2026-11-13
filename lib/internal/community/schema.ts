@@ -82,6 +82,18 @@ export const PARTNER_STAGES = options([
   ["ended", "Ended", "rose"],
 ] as const);
 
+/**
+ * What a partner does for one event (community_event_partners.role). The
+ * main host is the event's own Host field (partner_id); these are the rest.
+ */
+export const EVENT_PARTNER_ROLES = options([
+  ["co_host", "Co-host", "violet"],
+  ["venue", "Venue", "sky"],
+  ["community", "Community partner", "emerald"],
+  ["outreach", "Outreach", "amber"],
+  ["other", "Other", "stone"],
+] as const);
+
 export const SPONSOR_STAGES = options([
   ["lead", "Lead", "stone"],
   ["contacted", "Contacted", "sky"],
@@ -262,6 +274,7 @@ export type FieldDef = {
 
 export type EntityKey =
   | "event"
+  | "event_partner"
   | "guest"
   | "partner"
   | "sponsor"
@@ -379,6 +392,43 @@ export const ENTITIES: Record<EntityKey, EntityDef> = {
       },
       TAGS,
       NOTES,
+    ],
+  },
+  event_partner: {
+    key: "event_partner",
+    table: "community_event_partners",
+    noun: "partner link",
+    fields: [
+      {
+        key: "event_id",
+        label: "Event",
+        type: "ref",
+        ref: "event",
+        required: true,
+      },
+      {
+        key: "partner_id",
+        label: "Partner",
+        type: "ref",
+        ref: "partner",
+        required: true,
+        help: "A college, club, venue or community from Campus partners.",
+      },
+      {
+        key: "role",
+        label: "Their role",
+        type: "select",
+        options: EVENT_PARTNER_ROLES,
+        initial: "community",
+      },
+      {
+        key: "notes",
+        label: "What they're doing",
+        type: "text",
+        max: 300,
+        wide: true,
+        placeholder: "Hall for 200, posting in their WhatsApp groups, two judges…",
+      },
     ],
   },
   guest: {
@@ -799,6 +849,14 @@ export type Guest = Stamps & {
   notes: string;
 };
 
+/** A partner's part in one event, besides the event's host (partner_id). */
+export type EventPartner = Stamps & {
+  event_id: string;
+  partner_id: string;
+  role: string;
+  notes: string;
+};
+
 export type Partner = Stamps & {
   name: string;
   kind: string;
@@ -917,6 +975,9 @@ export type ActionResult =
       warning?: string;
     }
   | { ok: false; message: string };
+
+export const EVENT_PARTNERS_MIGRATION_HINT =
+  "Run supabase/migrations/20261114140000_event_partners.sql in Supabase to link more partners to an event.";
 
 export const COMMUNITY_MIGRATION_HINT =
   "Run the community migration (supabase/migrations/20261113140000_community.sql) in Supabase first.";

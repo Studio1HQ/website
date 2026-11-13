@@ -159,7 +159,13 @@ export function InternalNav({
 
   // Community and Money are sections of their own: inside one, the sidebar
   // shows only that section's pages, so the main sidebar stays short.
-  const section = isActive("/internal/community") && community ? "community" : isActive("/internal/money") && team.money ? "money" : null;
+  // Hackathon registrations belong to Community.
+  const section =
+    (isActive("/internal/community") || isActive(SECTIONS.hackathons.path)) && community
+      ? "community"
+      : isActive("/internal/money") && team.money
+        ? "money"
+        : null;
   if (section) {
     const back = !home.startsWith(`/internal/${section}`);
     return (
@@ -214,6 +220,14 @@ export function InternalNav({
                 active={isActive("/internal/community/events")}
               />
               <NavLink
+                href={SECTIONS.hackathons.path}
+                label="Hackathon sign-ups"
+                icon={Trophy}
+                badge={awaiting.hackathons}
+                badgeTitle={`${awaiting.hackathons ?? 0} new ${awaiting.hackathons === 1 ? "registration" : "registrations"} to review`}
+                active={isActive(SECTIONS.hackathons.path)}
+              />
+              <NavLink
                 href="/internal/community/sponsors"
                 label="Sponsors"
                 icon={Megaphone}
@@ -257,7 +271,8 @@ export function InternalNav({
   }
 
   const moneyBadge = team.payrollBadge + team.paymentsBadge;
-  const communityBadge = community ? community.tasks + community.sponsors + community.partners : 0;
+  const hackathonsNew = community ? (awaiting.hackathons ?? 0) : 0;
+  const communityBadge = community ? community.tasks + community.sponsors + community.partners + hackathonsNew : 0;
 
   return (
     <nav
@@ -352,6 +367,9 @@ export function InternalNav({
                 community.sponsors + community.partners
                   ? `${community.sponsors + community.partners} follow-ups due`
                   : null,
+                hackathonsNew
+                  ? `${hackathonsNew} new hackathon ${hackathonsNew === 1 ? "registration" : "registrations"}`
+                  : null,
               ]
                 .filter(Boolean)
                 .join(" · ")}
@@ -375,7 +393,7 @@ export function InternalNav({
           ) : null}
         </NavGroup>
       ) : null}
-      {role ? (
+      {role || community ? (
         <div className="contents md:mt-5 md:block">
           <p className="hidden px-2.5 pb-1.5 text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--i-faint)] md:block">
             Settings

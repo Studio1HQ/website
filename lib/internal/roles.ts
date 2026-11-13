@@ -6,16 +6,18 @@
  *
  *   admin            everything: the team and invites, exports, the
  *                    subscriber and partner lists, every pipeline, the blog
- *   hiring_reviewer  change status, tags and notes on applications; email
- *                    applicants
- *   hiring_viewer    read the application pipelines (résumés included)
+ *   hiring_reviewer  change status, tags and notes on job and cohort
+ *                    applications; email applicants
+ *   hiring_viewer    read the job and cohort pipelines (résumés included)
  *   blog_reviewer    see every blog post, edit, comment, request changes,
  *                    approve and publish
  *   blog_writer      write their own posts and ask for a review. Nothing else:
  *                    no applicant data, no other people's drafts
  *   community_manager  run the community area: events, guest lists, sponsors,
- *                    campus partners, budget, tasks and growth numbers
- *   community_viewer read the community area; tick off their own tasks
+ *                    campus partners, budget, tasks and growth numbers, and
+ *                    hackathon registrations (review, email, export)
+ *   community_viewer read the community area and hackathon registrations;
+ *                    tick off their own tasks
  *
  * The owners are always admins and can't be changed. Staff (@studio1hq.com)
  * ask for access when they first sign in; only an owner approves them with
@@ -50,12 +52,12 @@ export const ROLE_INFO: Record<
   hiring_reviewer: {
     label: "Hiring reviewer",
     area: "Hiring",
-    description: "Review applications: change status, tags and notes, and email applicants.",
+    description: "Review job and cohort applications: change status, tags and notes, and email applicants.",
   },
   hiring_viewer: {
     label: "Hiring viewer",
     area: "Hiring",
-    description: "Read the application pipelines. No changes.",
+    description: "Read the job and cohort applications. No changes.",
   },
   blog_reviewer: {
     label: "Blog reviewer",
@@ -70,12 +72,13 @@ export const ROLE_INFO: Record<
   community_manager: {
     label: "Community manager",
     area: "Community",
-    description: "Run the community area: events, guest lists, sponsors, campus partners, budget, tasks and analytics.",
+    description:
+      "Run the community area: events, hackathon registrations, guest lists, sponsors, campus partners, budget, tasks and analytics.",
   },
   community_viewer: {
     label: "Community viewer",
     area: "Community",
-    description: "Read the community area and tick off their own tasks. No other changes.",
+    description: "Read the community area, hackathon registrations included, and tick off their own tasks. No other changes.",
   },
 };
 

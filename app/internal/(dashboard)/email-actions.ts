@@ -26,8 +26,8 @@ import {
   senderName,
 } from "@/lib/internal/email-templates";
 import { programOf } from "@/lib/internal/program";
-import { PIPELINES, SECTIONS, UUID_PATTERN, sectionFor, statusLabel } from "@/lib/internal/sections";
-import { requireStaff } from "@/lib/internal/session";
+import { PIPELINES, SECTIONS, UUID_PATTERN, sectionAccess, sectionFor, statusLabel } from "@/lib/internal/sections";
+import { requireMember, requireSection } from "@/lib/internal/session";
 import { unsubscribeUrl } from "@/lib/unsubscribe";
 
 export type SendResult =
@@ -41,7 +41,8 @@ export type SendResult =
 
 /**
  * Emails one applicant from the dashboard in the paper layout, now or at a
- * set time (`sendAt`, up to 30 days ahead). Reviewers and admins only. The
+ * set time (`sendAt`, up to 30 days ahead). Whoever can edit the section:
+ * reviewers and admins, community managers for hackathons. The
  * recipient always comes from the stored entry, never from the browser;
  * replies go to whoever sent it. Addresses that bounced or complained before
  * are refused.
@@ -60,8 +61,10 @@ export async function sendEntryEmail(
   id: unknown,
   input: unknown,
 ): Promise<SendResult> {
-  const staff = await requireStaff("reviewer");
   const section = sectionFor(sectionKey);
+  // The session is checked first, whatever was sent; an unknown section
+  // fails the checks below.
+  const staff = section ? await requireSection(section, "edit") : await requireMember();
   const fields = (typeof input === "object" && input !== null ? input : {}) as Record<string, unknown>;
   const subject = typeof fields.subject === "string" ? fields.subject.trim() : "";
   const body = typeof fields.body === "string" ? fields.body.trim() : "";
@@ -178,12 +181,13 @@ export async function sendEntryEmail(
 const PIPELINE_TABLES = PIPELINES.map((key) => SECTIONS[key].table);
 
 /**
- * Cancels an email scheduled from a pipeline entry, before it goes.
- * Reviewers and admins only; the log entry stays, marked canceled. Emails
- * logged by other parts of the dashboard aren't theirs to cancel.
+ * Cancels an email scheduled from a pipeline entry, before it goes. Only
+ * someone who can edit that entry's section; the log entry stays, marked
+ * canceled. Emails logged by other parts of the dashboard aren't theirs to
+ * cancel.
  */
 export async function cancelScheduledEmail(logId: unknown): Promise<SendResult> {
-  await requireStaff("reviewer");
+  const staff = await requireMember();
   if (typeof logId !== "string" || !UUID_PATTERN.test(logId)) return { ok: false, message: "Unknown email." };
   const found = await selectRows(
     "internal_email_log",
@@ -198,6 +202,10 @@ export async function cancelScheduledEmail(logId: unknown): Promise<SendResult> 
   const scheduledFor = typeof row?.scheduled_for === "string" ? Date.parse(row.scheduled_for) : Number.NaN;
   if (!row || !PIPELINE_TABLES.includes(String(row.source_table)) || !resendId || !(scheduledFor > Date.now())) {
     return { ok: false, message: "This email isn't waiting to be sent any more." };
+  }
+  const section = PIPELINES.map((key) => SECTIONS[key]).find((item) => item.table === row.source_table);
+  if (!section || sectionAccess(staff, section) !== "edit") {
+    return { ok: false, message: "You can't cancel emails in this section." };
   }
   try {
     await cancelScheduled(resendId);

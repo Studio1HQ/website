@@ -23,7 +23,7 @@ export default async function DashboardLayout({
   const staff = await requireMember();
   const admin = isAdmin(staff);
   const [awaiting, requests, blogWaiting, money, community] = await Promise.all([
-    staff.role ? awaitingCounts() : Promise.resolve({}),
+    staff.role || staff.community ? awaitingCounts() : Promise.resolve({}),
     admin ? pendingCount() : Promise.resolve(0),
     staff.blog ? blogBadge(staff) : Promise.resolve(0),
     admin ? teamBadges() : Promise.resolve({ payroll: 0, payments: 0 }),

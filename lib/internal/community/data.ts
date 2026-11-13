@@ -19,6 +19,7 @@ import { mergedStatus, type ImportedGuest } from "@/lib/internal/community/csv";
 import {
   COMMUNITY_MIGRATION_HINT,
   ENTITIES,
+  EVENT_PARTNERS_MIGRATION_HINT,
   EVENT_KINDS,
   PARTNER_CLOSED_STAGES,
   PARTNER_KINDS,
@@ -32,6 +33,7 @@ import {
   type CommunityEvent,
   type Contact,
   type EntityKey,
+  type EventPartner,
   type Expense,
   type Guest,
   type GuestCounts,
@@ -191,6 +193,16 @@ export const loadActivity = (filter: Filter) =>
     { ...filterParams(filter), order: "happened_on.desc,created_at.desc" },
     { cap: 2000 },
   );
+
+/**
+ * Partners linked to events with a role (besides each event's host): for
+ * one event, one partner, or all of them.
+ */
+export const loadEventPartners = (filter: Pick<Filter, "event_id" | "partner_id"> = {}) =>
+  selectAll<EventPartner>("community_event_partners", {
+    ...filterParams(filter),
+    order: "created_at.asc",
+  });
 
 export const loadGuests = (eventId: string) =>
   selectAll<Guest>("community_guests", {
@@ -372,13 +384,18 @@ export async function ownerChoices(): Promise<string[]> {
 
 function writeError(entity: EntityKey, message: string): ActionResult {
   if (isMissingTable(message))
-    return { ok: false, message: COMMUNITY_MIGRATION_HINT };
+    return {
+      ok: false,
+      message: entity === "event_partner" ? EVENT_PARTNERS_MIGRATION_HINT : COMMUNITY_MIGRATION_HINT,
+    };
   if (message.includes("23505")) {
     return {
       ok: false,
       message:
         entity === "guest"
           ? "That email is already on this guest list."
+          : entity === "event_partner"
+            ? "That partner already has this role on this event."
           : entity === "metric"
             ? "That channel already has a number for this date. Edit it instead."
             : "That one already exists.",

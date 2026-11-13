@@ -11,6 +11,7 @@ import {
   Handshake,
   IdentificationCard,
   NotePencil,
+  Trophy,
   UserGear,
 } from "@phosphor-icons/react/dist/ssr";
 import type { Icon } from "@phosphor-icons/react";
@@ -43,6 +44,7 @@ export const metadata: Metadata = { title: "Overview" };
 
 const AREAS: Record<AreaKey, { name: string; icon: Icon }> = {
   hiring: { name: "Hiring", icon: Briefcase },
+  hackathons: { name: "Hackathons", icon: Trophy },
   blog: { name: "Blog", icon: NotePencil },
   team: { name: "Team", icon: IdentificationCard },
   money: { name: "Money", icon: Bank },
@@ -182,7 +184,7 @@ export default async function OverviewPage({
   const firstName = (staff.person ? displayName(staff.person) : staff.email.split("@")[0].split(/[._+-]/)[0])
     .split(" ")[0]
     .replace(/^./, (letter) => letter.toUpperCase());
-  const pipelinesOk = hiring ? hiring.pipelines.every((pipeline) => pipeline.ok) : true;
+  const pipelinesOk = (hiring ? hiring.pipelines.every((pipeline) => pipeline.ok) : true) && data.hackathonsOk;
   const awaiting = hiring ? hiring.pipelines.reduce((sum, pipeline) => sum + pipeline.awaiting, 0) : 0;
 
   return (
@@ -334,6 +336,35 @@ export default async function OverviewPage({
         ) : null}
 
         {data.community ? <CommunitySummaryCard /> : null}
+
+        {data.hackathons && data.hackathons.length ? (
+          <AreaCard
+            area="hackathons"
+            href={SECTIONS.hackathons.path}
+            value={number(data.hackathons.reduce((sum, event) => sum + (event.byStatus.new ?? 0), 0))}
+            unit="new to review"
+            rows={data.hackathons.slice(0, 4).map((event) => [
+              event.name,
+              <>
+                {event.byStatus.new ? (
+                  <span className="font-medium text-[var(--i-accent-text)]">{event.byStatus.new} new</span>
+                ) : (
+                  <span className="text-[var(--i-faint)]">0 new</span>
+                )}
+                <span className="text-[var(--i-faint)]">
+                  {" "}
+                  · {number(event.byStatus.confirmed ?? 0)} confirmed · {number(event.total)} total
+                </span>
+              </>,
+            ])}
+            extra={
+              <p className="mt-1.5 text-[12px] text-[var(--i-faint)]">
+                {number(data.hackathons.reduce((sum, event) => sum + event.lastWeek, 0))} registered in the last 7 days
+                {data.hackathons.length > 4 ? ` · ${data.hackathons.length} hackathons` : ""}
+              </p>
+            }
+          />
+        ) : null}
       </div>
 
       {/* What came in lately */}

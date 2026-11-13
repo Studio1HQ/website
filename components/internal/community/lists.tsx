@@ -6,18 +6,21 @@ import {
   type ComponentProps,
   type ReactNode,
 } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   CheckCircle,
   Circle,
   EnvelopeSimple,
   LinkedinLogo,
+  PencilSimple,
   Phone,
   Plus,
   Star,
 } from "@phosphor-icons/react";
 import { setQuickField } from "@/app/internal/(dashboard)/community/actions";
 import {
+  EVENT_PARTNER_ROLES,
   EXPENSE_CATEGORIES,
   TASK_PRIORITIES,
   formatDay,
@@ -26,6 +29,7 @@ import {
   labelOf,
   todayKey,
   type Contact,
+  type EventPartner,
   type Expense,
   type RefOptions,
   type Sponsorship,
@@ -36,7 +40,7 @@ import { useToast } from "@/components/internal/toast";
 import { EmptyState, buttonClass, safeUrl } from "@/components/internal/ui";
 import { RecordDialog } from "@/components/internal/community/record-dialog";
 import { QuickSelect } from "@/components/internal/community/quick-select";
-import { DueDate, Owner, Pill } from "@/components/internal/community/ui";
+import { DueDate, OptionPill, Owner, Pill } from "@/components/internal/community/ui";
 
 /* Client lists with an add button and click-to-edit rows. */
 
@@ -283,6 +287,123 @@ export function SponsorshipList({
         entity="sponsorship"
         {...form}
         hidden={[]}
+        record={editor.editing ?? undefined}
+        readOnly={!canEdit}
+        {...editor.dialogProps}
+      />
+    </ListShell>
+  );
+}
+
+/* -------------------------------------------------------------- partners */
+
+/**
+ * Who's involved in an event besides Studio1 (on an event page), or the
+ * events a partner is part of (on a partner page): the main host first,
+ * then everyone linked with a role.
+ */
+export function EventPartnerList({
+  side,
+  links,
+  names,
+  host,
+  hosted = [],
+  missing,
+  title = "Partners",
+  canEdit,
+  ...form
+}: Shared & {
+  /** "event": rows are partners. "partner": rows are events. */
+  side: "event" | "partner";
+  links: EventPartner[];
+  /** Names of the partners (event side) or events (partner side). */
+  names: Record<string, string>;
+  /** Event side: the event's own host, from its Host field. */
+  host?: { id: string; name: string } | null;
+  /** Partner side: events this partner hosts (their Host field). */
+  hosted?: { id: string; name: string; when?: string }[];
+  /** Set when the table isn't there yet: what to run. */
+  missing?: string | null;
+  title?: ReactNode;
+}) {
+  const editor = useEditor<EventPartner>();
+  const hrefOf = (id: string) =>
+    side === "event" ? `/internal/community/campus/${id}` : `/internal/community/events/${id}`;
+  const fixed = side === "event" ? (host ? [{ ...host, when: undefined }] : []) : hosted;
+  const empty = !fixed.length && !links.length;
+  return (
+    <ListShell
+      title={title}
+      action={
+        canEdit && !missing ? (
+          <RecordDialog
+            entity="event_partner"
+            {...form}
+            title={side === "event" ? "Add a partner to this event" : "Link this partner to an event"}
+            trigger={<AddButton label={side === "event" ? "Partner" : "Event"} />}
+          />
+        ) : null
+      }
+      empty={
+        empty ? (
+          <p className="px-5 py-6 text-[13px] text-[var(--i-muted)]">
+            {missing && canEdit
+              ? missing
+              : side === "event"
+                ? "No partners yet. Set the host with Edit, and add co-hosts, the venue or community partners here."
+                : "Not part of any event yet."}
+          </p>
+        ) : undefined
+      }
+    >
+      <ul className="divide-y divide-[var(--i-line)]">
+        {fixed.map((item) => (
+          <li key={`host-${item.id}`} className="flex items-center gap-3 px-5 py-2.5 text-[13px]">
+            <span className="min-w-0 flex-1">
+              <Link href={hrefOf(item.id)} className="block truncate font-medium hover:text-[var(--i-accent-text)]">
+                {item.name}
+              </Link>
+              {item.when ? (
+                <span className="block truncate text-[12px] text-[var(--i-muted)]">{item.when}</span>
+              ) : null}
+            </span>
+            <Pill tone="orange">Host</Pill>
+          </li>
+        ))}
+        {links.map((link) => {
+          const other = side === "event" ? link.partner_id : link.event_id;
+          return (
+            <li key={link.id} className="flex items-center gap-3 px-5 py-2.5 text-[13px]">
+              <span className="min-w-0 flex-1">
+                <Link href={hrefOf(other)} className="block truncate font-medium hover:text-[var(--i-accent-text)]">
+                  {names[other] ?? (side === "event" ? "A partner" : "An event")}
+                </Link>
+                {link.notes ? (
+                  <span className="block truncate text-[12px] text-[var(--i-muted)]">{link.notes}</span>
+                ) : null}
+              </span>
+              <OptionPill list={EVENT_PARTNER_ROLES} value={link.role} />
+              {canEdit ? (
+                <button
+                  type="button"
+                  aria-label="Edit"
+                  title="Edit"
+                  onClick={() => editor.open(link)}
+                  className="flex size-7 shrink-0 items-center justify-center rounded-md text-[var(--i-muted)] hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)]"
+                >
+                  <PencilSimple size={14} />
+                </button>
+              ) : null}
+            </li>
+          );
+        })}
+      </ul>
+      {missing && canEdit && !empty ? (
+        <p className="border-t border-[var(--i-line)] px-5 py-2.5 text-[12px] text-[var(--i-muted)]">{missing}</p>
+      ) : null}
+      <RecordDialog
+        entity="event_partner"
+        {...form}
         record={editor.editing ?? undefined}
         readOnly={!canEdit}
         {...editor.dialogProps}

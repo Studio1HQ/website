@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ArrowsClockwise, CalendarBlank, Lightning } from "@phosphor-icons/react/dist/ssr";
 import {
   DEFAULT_CALL_URL,
@@ -12,11 +13,10 @@ import {
   templatesFor,
   type FormKey,
 } from "@/lib/internal/email-templates";
-import { atLeast } from "@/lib/internal/roles";
 import { isMailerConfigured } from "@/lib/mailer";
 import { TestSendButton } from "@/components/internal/test-send-button";
-import { SECTIONS, statusLabel } from "@/lib/internal/sections";
-import { requireStaff } from "@/lib/internal/session";
+import { SECTIONS, sectionAccess, statusLabel } from "@/lib/internal/sections";
+import { homeFor, requireMember } from "@/lib/internal/session";
 import { cn } from "@/lib/utils";
 import { Card, PageHeader, StatusBadge } from "@/components/internal/ui";
 
@@ -28,9 +28,13 @@ type Props = { searchParams: Promise<Record<string, string | string[] | undefine
 
 /** Every email the dashboard and the forms send, previewed with sample details. */
 export default async function TemplatesPage({ searchParams }: Props) {
-  const staff = await requireStaff();
+  const staff = await requireMember();
+  // Only the pipelines this person works on: hiring staff see job and cohort
+  // emails, community staff the hackathon ones.
+  const pipelines = PIPELINES.filter((key) => sectionAccess(staff, SECTIONS[key]));
+  if (!pipelines.length) redirect(homeFor(staff));
   const params = await searchParams;
-  const pipeline = PIPELINES.find((key) => key === params.for) ?? "jobs";
+  const pipeline = pipelines.find((key) => key === params.for) ?? pipelines[0];
   const items = templatesFor(pipeline);
   const selected = items.find((item) => item.key === params.t) ?? items[0];
   const vars = {
@@ -57,7 +61,7 @@ export default async function TemplatesPage({ searchParams }: Props) {
       />
 
       <nav aria-label="Pipeline" className="mb-5 flex gap-1">
-        {PIPELINES.map((key) => (
+        {pipelines.map((key) => (
           <Link
             key={key}
             href={`/internal/templates?for=${key}`}
@@ -114,7 +118,7 @@ export default async function TemplatesPage({ searchParams }: Props) {
             <p className="text-[12px] text-[var(--i-muted)]">Subject</p>
             <div className="flex flex-wrap items-start justify-between gap-3">
               <p className="text-[15px] font-medium">{fillTemplate(selected.subject || "(You write the subject.)", vars)}</p>
-              {atLeast(staff.role, "reviewer") ? (
+              {sectionAccess(staff, SECTIONS[pipeline]) === "edit" ? (
                 <TestSendButton pipeline={pipeline} template={selected.key} to={staff.email} ready={isMailerConfigured()} />
               ) : null}
             </div>
