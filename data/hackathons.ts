@@ -3,6 +3,28 @@
  *
  * DRAFT: the route is hidden (noindex, not in the sitemap or nav) and every
  * entry below is a placeholder. Swap in real events as partners sign on.
+ *
+ * Adding one: the community manager opens a "New hackathon" issue
+ * (.github/ISSUE_TEMPLATE/new-hackathon.yml; their guide is the dashboard's
+ * /internal/hackathons/setup). To build it:
+ *  1. Add `hackathon({ ... })` to HACKATHONS (not `placeholder()`). The slug
+ *     is the page URL and is saved with every registration, so never change
+ *     it once people have registered.
+ *  2. Leave out tasks, timeline, deliverables, judging, rules and FAQs to
+ *     get the standard ones. To add to them, spread the defaults, e.g.
+ *     `tasks: [...DEFAULT_TASKS, { id: "star-acme", ... }]`.
+ *  3. Extra form questions go in `questions`; their ids are stored with the
+ *     answers, so never rename or reuse one. A task that needs proof (a
+ *     sponsor wants to know who did it) also gets a "short" question asking
+ *     for that link or username. Choice and yes/no questions become
+ *     breakdowns in the dashboard's sponsor report.
+ *  4. Keep the timeline milestone labelled WINNERS_MILESTONE: the
+ *     dashboard's email plan dates the results email from it (or from
+ *     endDate + 7 without one).
+ *  5. `pnpm test`, check /hackathons/<slug> and its form, open a PR that
+ *     links the issue, and comment the preview link on the issue so the
+ *     community manager can check it.
+ *  6. With the first real event, delete the placeholders below.
  */
 
 export type HackathonFormat = "online" | "in-person" | "hybrid";
@@ -256,7 +278,7 @@ const DEFAULT_FAQS: HackathonFaq[] = [
   },
 ];
 
-type PlaceholderInput = Omit<
+type HackathonInput = Omit<
   Hackathon,
   | "timeline"
   | "tasks"
@@ -299,7 +321,7 @@ function teamCopy(teamSize: string) {
   };
 }
 
-function placeholder(input: PlaceholderInput): Hackathon {
+function placeholder(input: HackathonInput): Hackathon {
   const registrationCloses =
     input.registrationCloses ?? addDays(input.startDate, -1);
   return {
@@ -321,6 +343,14 @@ function placeholder(input: PlaceholderInput): Hackathon {
     registrationCloses,
     placeholder: true,
   };
+}
+
+/**
+ * A real, confirmed event: the same standard tasks, timeline, rules,
+ * judging and FAQs as a placeholder, for whatever the entry leaves out.
+ */
+export function hackathon(input: HackathonInput): Hackathon {
+  return { ...placeholder(input), placeholder: false };
 }
 
 /** Partner slots still open on a placeholder event. */

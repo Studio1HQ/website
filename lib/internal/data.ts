@@ -551,8 +551,9 @@ export async function hackathonBreakdown(): Promise<
     };
   };
   // Hackathons that take registrations on the site (not on Luma or Devpost).
+  // Placeholders get a tab only once someone registers for one.
   for (const hackathon of HACKATHONS) {
-    if (!hackathon.registerUrl) bySlug.set(hackathon.slug, blank(hackathon.slug, hackathon.name));
+    if (!hackathon.registerUrl && !hackathon.placeholder) bySlug.set(hackathon.slug, blank(hackathon.slug, hackathon.name));
   }
   for (const row of result.rows) {
     const slug = String(row.hackathon_slug ?? "");

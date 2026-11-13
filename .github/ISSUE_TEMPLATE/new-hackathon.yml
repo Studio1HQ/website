@@ -1,0 +1,216 @@
+name: New hackathon
+description: Ask for a new hackathon page and registration form on studio1hq.com/hackathons.
+title: "[Hackathon]: <name>"
+labels: ["hackathon"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A developer turns this into the hackathon's own page and registration form, then comments here with a link to check before it goes live.
+
+        **This issue is public.** Only write what will appear on the hackathon page. Sponsorship amounts, contacts and anything not agreed yet go in the dashboard (Community → Sponsors), never here.
+
+        Fill in what you know. Fields marked optional can stay blank: the standard tasks, timeline, rules, judging and FAQs are used. The full guide is in the dashboard: Hackathon sign-ups → Add a hackathon.
+
+  - type: markdown
+    attributes:
+      value: "## The basics"
+  - type: input
+    id: name
+    attributes:
+      label: Hackathon name
+      placeholder: Agents Build Day
+    validations:
+      required: true
+  - type: input
+    id: tagline
+    attributes:
+      label: Tagline
+      description: One line under the name.
+      placeholder: Ship an AI agent that real users rely on, in one day.
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What it's about
+      description: Two to four sentences for the top of the page.
+    validations:
+      required: true
+  - type: input
+    id: themes
+    attributes:
+      label: Themes (optional)
+      description: A few words, separated by commas.
+      placeholder: AI agents, MCP, Developer tools
+
+  - type: markdown
+    attributes:
+      value: "## When and where"
+  - type: input
+    id: start
+    attributes:
+      label: Start date
+      description: The first building day.
+      placeholder: "2026-12-14"
+    validations:
+      required: true
+  - type: input
+    id: end
+    attributes:
+      label: End date
+      description: The last building day. Submissions close at its end. For a one-day hackathon, the same as the start date.
+      placeholder: "2026-12-14"
+    validations:
+      required: true
+  - type: input
+    id: closes
+    attributes:
+      label: Registration closes (optional)
+      description: Leave blank for the day before it starts.
+  - type: dropdown
+    id: format
+    attributes:
+      label: Format
+      options:
+        - Online
+        - In person
+        - Hybrid
+    validations:
+      required: true
+  - type: input
+    id: location
+    attributes:
+      label: Location
+      description: City and venue, or "Online".
+      placeholder: Bengaluru, at the host college
+    validations:
+      required: true
+  - type: input
+    id: team
+    attributes:
+      label: Team size
+      placeholder: 1-4 people (or "Solo")
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: "## Registration"
+  - type: dropdown
+    id: register-where
+    attributes:
+      label: Where do people register?
+      options:
+        - On the hackathon page (our form, sign-ups show in the dashboard)
+        - Somewhere else (Luma, Devpost)
+    validations:
+      required: true
+  - type: input
+    id: register-url
+    attributes:
+      label: Registration link (only if somewhere else)
+      placeholder: https://lu.ma/...
+  - type: textarea
+    id: questions
+    attributes:
+      label: Extra questions for this hackathon's form (optional)
+      description: |
+        Every form already asks for: name, email, GitHub username, country, role, experience, team, track, how they heard about it, what they want to build, the rules tick, the optional "share my details with partners" tick, and the two consent ticks.
+        Add one question per line: the question | short answer, paragraph, choice or yes/no | the choices, separated by / | required or optional.
+      placeholder: |
+        Which agent framework do you use most? | choice | LangGraph / CrewAI / Mastra / None yet | required
+        Have you shipped an agent before? | yes/no | | optional
+        Link to something you've built | short answer | | optional
+
+  - type: markdown
+    attributes:
+      value: "## Sponsors and prizes"
+  - type: textarea
+    id: partners
+    attributes:
+      label: Sponsors and partners named on the page
+      description: |
+        One per line: name | Host partner, Track sponsor or Community partner | website.
+        Leave blank if none are confirmed yet; the page then shows open partner slots.
+      placeholder: |
+        Acme AI | Host partner | https://acme.ai
+        Campus Dev Club | Community partner | https://example.com
+  - type: input
+    id: summary
+    attributes:
+      label: Headline prize or perk
+      description: One short line for the hackathon's card.
+      placeholder: $3,000 in prizes + API credits
+    validations:
+      required: true
+  - type: input
+    id: pool
+    attributes:
+      label: Total prize pool in US dollars
+      description: A number. 0 if there's no cash prize.
+      placeholder: "3000"
+    validations:
+      required: true
+  - type: textarea
+    id: prizes
+    attributes:
+      label: Prizes
+      description: "One per line: prize | amount | what it's for."
+      placeholder: |
+        First place | $1,500 | Best project overall
+        Best use of Acme | $1,000 + credits | The build that makes the most of Acme's API
+    validations:
+      required: true
+  - type: textarea
+    id: tracks
+    attributes:
+      label: Tracks
+      description: "One per line: track | one line about it. People pick a track when they register, so give at least one."
+      placeholder: |
+        Agents for developers | Tools that help developers ship faster
+        Open track | Anything that uses the sponsor's product
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: "## Tasks"
+  - type: textarea
+    id: tasks
+    attributes:
+      label: Extra tasks before the hackathon, including sponsor tasks (optional)
+      description: |
+        The standard tasks are added anyway: submit the form, join the Discord, follow Studio1 on X, run the partner quickstart, read the rules.
+        Add one task per line: the task | link | which sponsor asked for it | proof needed (a link, a username, or none).
+        Proof becomes a question on the form, so you can see in the dashboard who did it.
+      placeholder: |
+        Star the Acme SDK on GitHub | https://github.com/acme/sdk | Acme AI | username
+        Create a free Acme account | https://acme.ai/signup | Acme AI | none
+
+  - type: markdown
+    attributes:
+      value: "## Anything different from the standard (optional)"
+  - type: textarea
+    id: changes
+    attributes:
+      label: Timeline, rules, judging, deliverables or FAQ changes
+      description: |
+        Standard timeline: registration closes, kickoff, submissions close, judging 3 days later, winners 7 days later.
+        Standard judging: usefulness 30%, technical execution 30%, use of the partner's product 25%, demo and write-up 15%.
+        Write only what should change or be added.
+  - type: input
+    id: go-live
+    attributes:
+      label: When should the page go up? (optional)
+      placeholder: As soon as it's ready, or a date
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Before you submit
+      options:
+        - label: Every sponsor and partner named above has agreed to be named publicly.
+          required: true
+        - label: Nothing above is private (sponsorship amounts, contacts, deals still being agreed).
+          required: true

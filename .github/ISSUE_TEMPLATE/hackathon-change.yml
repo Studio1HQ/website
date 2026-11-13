@@ -1,0 +1,58 @@
+name: Change a hackathon
+description: Ask for a change to a hackathon that's already on the site, such as new dates, a sponsor task or a form question.
+title: "[Hackathon change]: <name> - <what's changing>"
+labels: ["hackathon"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **This issue is public.** Only write what will appear on the hackathon page. Sponsorship amounts and contacts stay in the dashboard.
+
+        Good to know before asking:
+        - People who already registered aren't asked new form questions. Ask them by email from the dashboard instead.
+        - Questions people have already answered can't be removed or renamed, or their answers would no longer match. Ask for a new question instead.
+        - Changing the dates also moves the suggested days in the dashboard's email plan.
+  - type: input
+    id: hackathon
+    attributes:
+      label: Which hackathon?
+      description: Its name or its page link.
+      placeholder: https://www.studio1hq.com/hackathons/agents-build-day
+    validations:
+      required: true
+  - type: dropdown
+    id: what
+    attributes:
+      label: What's changing?
+      multiple: true
+      options:
+        - Dates or registration deadline
+        - Sponsors or partners
+        - Prizes
+        - Tasks (including sponsor tasks)
+        - Form questions
+        - Tracks
+        - Rules, judging, deliverables or FAQs
+        - Open or close registration
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: The change
+      description: Write it exactly as it should appear on the page. For tasks and questions, use the same one-per-line format as the New hackathon form.
+    validations:
+      required: true
+  - type: input
+    id: by
+    attributes:
+      label: Needed by (optional)
+      placeholder: "2026-12-01"
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Before you submit
+      options:
+        - label: Nothing above is private (sponsorship amounts, contacts, deals still being agreed).
+          required: true

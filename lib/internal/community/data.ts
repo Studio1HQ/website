@@ -345,7 +345,8 @@ export async function refOptions(
     }));
   }
   if (kinds.includes("hackathon")) {
-    // Hackathons on the site, plus any slug that has sign-ups.
+    // Hackathons on the site, plus any slug that has sign-ups. Placeholder
+    // events only show once someone has signed up for one.
     const counts = new Map(
       (hackathons?.ok ? hackathons.rows : []).map((row) => [
         row.hackathon_slug,
@@ -354,6 +355,7 @@ export async function refOptions(
     );
     const options = new Map<string, Option>();
     for (const hackathon of HACKATHONS) {
+      if (hackathon.placeholder && !counts.has(hackathon.slug)) continue;
       const signed = counts.get(hackathon.slug)?.signed_up ?? 0;
       options.set(hackathon.slug, {
         value: hackathon.slug,

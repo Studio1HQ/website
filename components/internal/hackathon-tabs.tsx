@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, CalendarBlank } from "@phosphor-icons/react/dist/ssr";
+import { ArrowRight, CalendarBlank, Plus } from "@phosphor-icons/react/dist/ssr";
 import type { HackathonStats } from "@/lib/internal/data";
 import { formatDay, formatEventDate, todayKey } from "@/lib/internal/community/schema";
 import { SECTIONS, statusLabel } from "@/lib/internal/sections";
@@ -12,6 +12,9 @@ const PHASE: Record<HackathonStats["phase"], string> = {
   past: "Over",
   unlisted: "No longer on the site",
 };
+
+/** The guide to adding a hackathon (it's built in code from a GitHub issue). */
+export const HACKATHON_SETUP_PATH = "/internal/hackathons/setup";
 
 /** The list page's link for one hackathon (or all of them), every other filter cleared. */
 export function hackathonListHref(slug?: string, status?: string) {
@@ -58,6 +61,9 @@ export function HackathonTabs({
             muted={event.phase === "past" || event.phase === "unlisted"}
           />
         ))}
+        <Link href={HACKATHON_SETUP_PATH} className={cn(buttonClass("ghost", "sm"), "ml-auto h-8")}>
+          <Plus size={13} aria-hidden /> Add a hackathon
+        </Link>
       </nav>
 
       {current ? (
