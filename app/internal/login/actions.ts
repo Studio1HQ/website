@@ -1,67 +1,66 @@
 "use server";
 
-import { cookies, headers } from "next/headers";
-import { baseUrl } from "@/lib/site";
-import { ensureAuthUser, sendMagicLink } from "@/lib/supabase-server";
-import { isInvited } from "@/lib/internal/members";
-import { linkCookieOptions } from "@/lib/internal/session";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { after } from "next/server";
 import {
-  LINK_TTL_SECONDS,
-  NEXT_COOKIE,
+  endAuthSession,
+  ensureAuthUser,
+  sendSignInCode,
+  verifySignInCode,
+} from "@/lib/supabase-server";
+import { isInvited, requestAccess, touchMember } from "@/lib/internal/members";
+import { teamAccessFor } from "@/lib/internal/team/people";
+import { loginCookieOptions, sessionCookieOptions } from "@/lib/internal/session";
+import {
+  CODE_TTL_SECONDS,
+  PENDING_COOKIE,
+  SESSION_COOKIE,
+  SESSION_TTL_SECONDS,
   STAFF_DOMAIN,
-  VERIFIER_COOKIE,
   authSecret,
   emailAddress,
-  randomToken,
+  nowSeconds,
   safeNext,
-  sha256,
+  signToken,
   staffEmail,
 } from "@/lib/internal/token";
 
-export type LoginState =
+export type RequestCodeState =
   | { status: "idle" }
-  | { status: "sent"; email: string }
+  | { status: "sent"; email: string; sentAt: number; note?: string }
   | { status: "error"; message: string };
 
-/**
- * Production links always point at the live site, never at whatever Host the
- * request claimed. Vercel previews and local dev use their own host so the
- * link lands in the same browser session. Each origin's callback must be in
- * Supabase → Authentication → URL Configuration → Redirect URLs.
- */
-async function siteOrigin() {
-  const host = (await headers()).get("host") ?? "";
-  if (
-    process.env.NODE_ENV === "development" &&
-    /^(?:localhost|127\.0\.0\.1)(?::\d+)?$/.test(host)
-  ) {
-    return `http://${host}`;
-  }
-  if (process.env.VERCEL_ENV === "preview" && /^[a-z0-9-]+\.vercel\.app$/.test(host)) {
-    return `https://${host}`;
-  }
-  return baseUrl;
+export type CheckCodeState = { status: "idle" } | { status: "error"; message: string };
+
+const NOT_ALLOWED = `Use your @${STAFF_DOMAIN} address. Writers from outside Studio1 need an invite from an admin first.`;
+
+/** Staff, or an outside writer an admin invited; anyone else gets null. */
+async function allowedEmail(input: unknown) {
+  const address = emailAddress(input);
+  if (!address) return null;
+  return staffEmail(address) ?? ((await isInvited(address)) ? address : null);
 }
 
-export async function requestSignInLink(
-  _previous: LoginState,
+/**
+ * Step one: email a sign-in code. Only staff addresses and invited writers
+ * ever reach Supabase. The address goes in a cookie for the login page, so
+ * the code is only checked in this browser and the step survives a reload.
+ */
+export async function requestSignInCode(
+  _previous: RequestCodeState,
   formData: FormData,
-): Promise<LoginState> {
+): Promise<RequestCodeState> {
   if (!authSecret()) {
     console.error("[internal] INTERNAL_AUTH_SECRET (32+ characters) is missing");
     return { status: "error", message: "Sign-in isn't set up yet." };
   }
 
-  // Only staff addresses and invited writers ever reach Supabase.
-  const address = emailAddress(formData.get("email"));
-  if (!address) return { status: "error", message: "Enter a valid email address." };
-  const email = staffEmail(address) ?? ((await isInvited(address)) ? address : null);
-  if (!email) {
-    return {
-      status: "error",
-      message: `Use your @${STAFF_DOMAIN} address. Writers from outside Studio1 need an invite from an admin first.`,
-    };
+  if (!emailAddress(formData.get("email"))) {
+    return { status: "error", message: "Enter a valid email address." };
   }
+  const email = await allowedEmail(formData.get("email"));
+  if (!email) return { status: "error", message: NOT_ALLOWED };
 
   const user = await ensureAuthUser(email);
   if (!user.ok) {
@@ -69,14 +68,21 @@ export async function requestSignInLink(
     return { status: "error", message: "Sign-in is unavailable right now. Try again in a minute." };
   }
 
-  const verifier = randomToken(48);
-  const sent = await sendMagicLink(
-    email,
-    `${await siteOrigin()}/internal/auth/callback`,
-    await sha256(verifier),
-  );
+  const resend = formData.get("resend") === "1";
+  const sent = await sendSignInCode(email);
+  const jar = await cookies();
   if (!sent.ok) {
-    console.error(`[internal] Supabase didn't send the magic link: ${sent.message}`);
+    // Supabase sends one email a minute per address; the last code still works.
+    if (sent.rateLimited && /only request this after/i.test(sent.message)) {
+      jar.set(PENDING_COOKIE, email, loginCookieOptions(CODE_TTL_SECONDS));
+      return {
+        status: "sent",
+        email,
+        sentAt: Date.now(),
+        note: "We sent you a code less than a minute ago. Use that one, or ask again in a minute.",
+      };
+    }
+    console.error(`[internal] Supabase didn't send the sign-in code: ${sent.message}`);
     return {
       status: "error",
       message: sent.rateLimited
@@ -85,8 +91,75 @@ export async function requestSignInLink(
     };
   }
 
+  jar.set(PENDING_COOKIE, email, loginCookieOptions(CODE_TTL_SECONDS));
+  return {
+    status: "sent",
+    email,
+    sentAt: Date.now(),
+    note: resend ? "New code sent. Only the newest code works." : undefined,
+  };
+}
+
+/**
+ * Step two: check the code for the address in this browser's cookie, then
+ * start the dashboard's own 7-day session.
+ */
+export async function checkSignInCode(
+  _previous: CheckCodeState,
+  formData: FormData,
+): Promise<CheckCodeState> {
+  const secret = authSecret();
+  if (!secret) return { status: "error", message: "Sign-in isn't set up yet." };
+
   const jar = await cookies();
-  jar.set(VERIFIER_COOKIE, verifier, linkCookieOptions(LINK_TTL_SECONDS));
-  jar.set(NEXT_COOKIE, safeNext(formData.get("next")), linkCookieOptions(LINK_TTL_SECONDS));
-  return { status: "sent", email };
+  const pending = emailAddress(jar.get(PENDING_COOKIE)?.value);
+  if (!pending) {
+    return { status: "error", message: "This code has run out. Ask for a new one." };
+  }
+  const code = String(formData.get("code") ?? "").replace(/\D/g, "");
+  if (code.length < 6 || code.length > 10) {
+    return { status: "error", message: "Enter the code from the email." };
+  }
+
+  const verified = await verifySignInCode(pending, code);
+  if (!verified.ok) {
+    if (verified.reason === "invalid") {
+      return {
+        status: "error",
+        message: "That code isn't right or has run out. Check the newest email, or ask for a new code.",
+      };
+    }
+    if (verified.reason === "rate_limited") {
+      return { status: "error", message: "Too many tries. Wait a few minutes and try again." };
+    }
+    console.error(`[internal] checking the sign-in code failed: ${verified.message}`);
+    return { status: "error", message: "Sign-in is unavailable right now. Try again in a minute." };
+  }
+  // We keep our own session; Supabase's isn't needed after this.
+  const accessToken = verified.accessToken;
+  after(() => endAuthSession(accessToken));
+
+  // Checked again here, in case an invite was withdrawn after the code went out.
+  const email = await allowedEmail(verified.user.email);
+  if (!email || email !== pending || !verified.user.email_confirmed_at) {
+    jar.set(PENDING_COOKIE, "", loginCookieOptions(0));
+    return { status: "error", message: NOT_ALLOWED };
+  }
+
+  // First sign-in files an access request for an owner to approve; owners
+  // and approved members go straight in (lib/internal/session.ts decides).
+  // People on the team list (or who log interns' days) already have My day
+  // or People, so they don't need a request.
+  const team = await teamAccessFor(email);
+  if (!team.person && team.interns.length === 0) {
+    const requested = await requestAccess(email);
+    if (!requested.ok) console.error(`[internal] filing access request failed: ${requested.message}`);
+  }
+  await touchMember(email);
+
+  const now = nowSeconds();
+  const session = await signToken({ email, iat: now, exp: now + SESSION_TTL_SECONDS }, secret);
+  jar.set(SESSION_COOKIE, session, sessionCookieOptions(SESSION_TTL_SECONDS));
+  jar.set(PENDING_COOKIE, "", loginCookieOptions(0));
+  redirect(safeNext(formData.get("next")));
 }
