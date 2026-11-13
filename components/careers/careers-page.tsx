@@ -11,6 +11,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import Logo from "@/components/ui/svgs/logo";
+import { STUDIO1_PRINCIPLES, STUDIO1_WORK_TYPES } from "@/components/careers/about-studio1";
 import {
   Hanging,
   IconText,
@@ -59,8 +60,8 @@ const TEAMS = [
   { key: "engineering", label: "Engineering", departments: ["Engineering"] },
   {
     key: "growth",
-    label: "Growth & DevRel",
-    departments: ["Growth", "Founder's Office"],
+    label: "Growth & Sales",
+    departments: ["Growth", "Sales", "Founder's Office"],
   },
   {
     key: "marketing",
@@ -689,39 +690,6 @@ function OpenRoles({
 /* 02 — Why Studio1 (paper): sticky headline, ruled principles         */
 /* ------------------------------------------------------------------ */
 
-const PRINCIPLES = [
-  {
-    title: "Real work from week one",
-    description:
-      "Demos, tutorials, docs, videos and launches for Studio1, Raah, AssetSnip and client products across AI, devtools and open source.",
-  },
-  {
-    title: "Proof over pedigree",
-    description:
-      "We hire on what you have built, written or shipped. Repos, live demos, blogs and videos count for more than titles.",
-  },
-  {
-    title: "Learn new tools fast",
-    description:
-      "New frameworks, SDKs, APIs and agent tools land every week. You learn them quickly enough to explain them accurately.",
-  },
-  {
-    title: "Small team, real ownership",
-    description:
-      "A remote-first team based in India. You own your work early and work directly with the people making the calls.",
-  },
-];
-
-const WORK_TYPES = [
-  "AI-agent demos",
-  "Tutorials",
-  "Docs",
-  "Videos",
-  "Launches",
-  "Community",
-  "Sample apps",
-];
-
 function WhyStudio1() {
   const t = useTranslations("CareersPage");
   return (
@@ -749,7 +717,7 @@ function WhyStudio1() {
               to ship work developers can actually use.
             </p>
             <ul role="list" className="mt-8 flex max-w-[460px] flex-wrap gap-2">
-              {WORK_TYPES.map((type) => (
+              {STUDIO1_WORK_TYPES.map((type) => (
                 <li
                   key={type}
                   className="rounded-full bg-[#f4efe7] px-3 py-1 text-[12px] font-medium ring-1 ring-inset ring-[#141414]/[0.08]"
@@ -761,7 +729,7 @@ function WhyStudio1() {
           </div>
 
           <ol className="grid gap-3">
-            {PRINCIPLES.map((principle, index) => (
+            {STUDIO1_PRINCIPLES.map((principle, index) => (
               <motion.li
                 key={principle.title}
                 className={cn("group p-2", GLASS_CARD)}

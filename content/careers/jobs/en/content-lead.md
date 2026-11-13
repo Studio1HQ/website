@@ -30,7 +30,7 @@ questions:
     hint: "One doc is fine. Make sure anyone with the link can view it."
 ---
 
-Studio1 does DevRel and developer marketing for devtool, AI, and open-source teams. We have worked with 35+ teams and driven 3M+ content views. We are hiring someone to own what we publish: Studio1's channels and the founders' personal profiles, every week, in a voice that sounds like real people with real opinions.
+We are hiring someone to own what we publish: Studio1's channels and the founders' personal profiles, every week, in a voice that sounds like real people with real opinions.
 
 This is a content role for technical audiences. You create and ship content yourself, and you run the system that keeps it coming. You will work closely with our Growth Lead: you own what we make, they own where it goes and what it brings in.
 
