@@ -10,6 +10,7 @@ import {
   verifySignInCode,
 } from "@/lib/supabase-server";
 import { isInvited, requestAccess, touchMember } from "@/lib/internal/members";
+import { SIGN_IN_CODE_LIMIT, strictlyWithinLimit } from "@/lib/rate-limit";
 import { teamAccessFor } from "@/lib/internal/team/people";
 import { loginCookieOptions, sessionCookieOptions } from "@/lib/internal/session";
 import {
@@ -119,6 +120,19 @@ export async function checkSignInCode(
   const code = String(formData.get("code") ?? "").replace(/\D/g, "");
   if (code.length < 6 || code.length > 10) {
     return { status: "error", message: "Enter the code from the email." };
+  }
+
+  // Every try counts against the address, so a script can't guess its way
+  // in: Supabase's own limit is per IP, and every check comes from our server.
+  const allowed = await strictlyWithinLimit("sign-in-code", pending, SIGN_IN_CODE_LIMIT);
+  if (allowed === "limited") {
+    return {
+      status: "error",
+      message: "Too many tries for this address. Wait an hour, then ask for a new code.",
+    };
+  }
+  if (allowed === "unavailable") {
+    return { status: "error", message: "Sign-in is unavailable right now. Try again in a minute." };
   }
 
   const verified = await verifySignInCode(pending, code);
