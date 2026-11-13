@@ -22,9 +22,17 @@ function htmlResponse(body: string, status = 200) {
   });
 }
 
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 function errorPage(message: string, status = 400) {
   return htmlResponse(
-    `<html><body><p>${message}</p><p>You can close this window and try logging in again.</p></body></html>`,
+    `<html><body><p>${escapeHtml(message)}</p><p>You can close this window and try logging in again.</p></body></html>`,
     status,
   );
 }
@@ -74,6 +82,10 @@ export async function GET(request: NextRequest) {
     provider: "github",
   }).replace(/</g, "\\u003c");
 
+  // The token only ever goes to a window on this site (the CMS at /admin).
+  // Posting to "*" would hand it to any page that opened this popup.
+  const siteOrigin = JSON.stringify(new URL(siteUrl).origin).replace(/</g, "\\u003c");
+
   const response = htmlResponse(`
     <html>
       <body>
@@ -81,13 +93,15 @@ export async function GET(request: NextRequest) {
         <script>
           (function () {
             var authMessage = "authorization:github:success:" + ${JSON.stringify(authPayload)};
+            var siteOrigin = ${siteOrigin};
 
             function sendToken() {
               if (!window.opener) return;
-              window.opener.postMessage(authMessage, "*");
+              window.opener.postMessage(authMessage, siteOrigin);
             }
 
-            window.addEventListener("message", function () {
+            window.addEventListener("message", function (event) {
+              if (event.origin !== siteOrigin) return;
               sendToken();
               window.setTimeout(function () {
                 window.close();
@@ -95,7 +109,7 @@ export async function GET(request: NextRequest) {
             });
 
             if (window.opener) {
-              window.opener.postMessage("authorizing:github", "*");
+              window.opener.postMessage("authorizing:github", siteOrigin);
               window.setTimeout(sendToken, 500);
               window.setTimeout(function () {
                 window.close();
