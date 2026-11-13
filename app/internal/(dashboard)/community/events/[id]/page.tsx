@@ -4,11 +4,13 @@ import { notFound } from "next/navigation";
 import {
   ArrowLeft,
   ArrowSquareOut,
+  ChartBar,
   PencilSimple,
   Trophy,
 } from "@phosphor-icons/react/dist/ssr";
 import { requireCommunity } from "@/lib/internal/session";
-import { hackathonBreakdown } from "@/lib/internal/data";
+import { hackathonBreakdown, hackathonRegistrationsFor } from "@/lib/internal/data";
+import { doorCounts, doorRows, type SiteRegistration } from "@/lib/internal/community/door";
 import { statusLabel } from "@/lib/internal/sections";
 import {
   getRecord,
@@ -115,6 +117,7 @@ export default async function EventPage({
     breakdown,
     links,
     allPartners,
+    siteRows,
   ] = await Promise.all([
     loadGuests(event.id),
     event.hackathon_slug ? loadHackathonCounts() : Promise.resolve(null),
@@ -131,6 +134,7 @@ export default async function EventPage({
     event.hackathon_slug ? hackathonBreakdown() : Promise.resolve(null),
     loadEventPartners({ event_id: event.id }),
     loadPartners(),
+    event.hackathon_slug ? hackathonRegistrationsFor(event.hackathon_slug) : Promise.resolve(null),
   ]);
 
   if (!guests.ok) {
@@ -138,17 +142,28 @@ export default async function EventPage({
   }
 
   const guestRows = guests.rows;
-  const counts: GuestCounts = {
-    signed_up: guestRows.filter((guest) => guest.status !== "cancelled").length,
-    attended: guestRows.filter((guest) => guest.status === "attended").length,
-    waitlisted: guestRows.filter((guest) => guest.status === "waitlisted")
-      .length,
-    no_show: guestRows.filter((guest) => guest.status === "no_show").length,
-  };
+  // A hackathon's site registrations join its guest list at the door.
+  const registrationRows: SiteRegistration[] | undefined = siteRows?.ok
+    ? siteRows.rows.map((row) => ({
+        id: String(row.id),
+        created_at: String(row.created_at ?? ""),
+        name: String(row.name ?? ""),
+        email: String(row.email ?? ""),
+        github: String(row.github ?? ""),
+        team: String(row.team ?? ""),
+        team_name: String(row.team_name ?? ""),
+        track: String(row.track ?? ""),
+        review_status: String(row.review_status ?? "new"),
+      }))
+    : undefined;
+  // Each person once, across the guest list and the site registrations.
+  const counts: GuestCounts = doorCounts(doorRows(guestRows, registrationRows ?? []));
   const hackathon = hackathons?.ok
     ? hackathons.rows.find((row) => row.hackathon_slug === event.hackathon_slug)
     : undefined;
-  const turnout = turnoutOf(event, counts, hackathon, today);
+  // With the registrations in the counts above, the per-hackathon view would
+  // count them twice.
+  const turnout = turnoutOf(event, counts, registrationRows ? undefined : hackathon, today);
   // This hackathon's site registrations by review status.
   const registrations =
     breakdown?.ok && event.hackathon_slug
@@ -221,6 +236,9 @@ export default async function EventPage({
               canEdit={canEdit}
               label="Event status"
             />
+            <Link href={`/internal/community/events/${event.id}/report`} className={buttonClass("secondary")}>
+              <ChartBar size={14} /> Report
+            </Link>
             {registrationUrl ? (
               <a
                 href={registrationUrl.toString()}
@@ -255,6 +273,8 @@ export default async function EventPage({
         show={incomplete(
           guests,
           hackathons,
+          siteRows,
+          breakdown,
           expenses,
           sponsorships,
           sponsors,
@@ -381,6 +401,7 @@ export default async function EventPage({
             eventId={event.id}
             eventName={event.name}
             guests={guestRows}
+            registrations={registrationRows}
             canEdit={canEdit}
             isOver={phase === "past"}
           />

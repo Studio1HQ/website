@@ -24,6 +24,7 @@ import {
   reasonFor,
   renderEmail,
   senderName,
+  unfilledParts,
 } from "@/lib/internal/email-templates";
 import { programOf } from "@/lib/internal/program";
 import { PIPELINES, SECTIONS, UUID_PATTERN, sectionAccess, sectionFor, statusLabel } from "@/lib/internal/sections";
@@ -87,6 +88,9 @@ export async function sendEntryEmail(
   ) {
     return { ok: false, message: "Check the subject, message and call link." };
   }
+  // Template parts like "[start time]" left as they were.
+  const unfilled = unfilledParts(`${subject}\n${body}`);
+  if (unfilled.length) return { ok: false, message: `Fill in "[${unfilled[0]}]" before sending.` };
   if (!isMailerConfigured()) {
     return { ok: false, notConfigured: true, message: "Sending email from the dashboard isn't set up yet." };
   }

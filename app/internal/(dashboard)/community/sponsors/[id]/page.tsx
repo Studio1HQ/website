@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, PencilSimple } from "@phosphor-icons/react/dist/ssr";
+import { ArrowLeft, ChartBar, PencilSimple } from "@phosphor-icons/react/dist/ssr";
 import { requireCommunity } from "@/lib/internal/session";
 import {
   getRecord,
@@ -85,6 +85,10 @@ export default async function SponsorPage({
   const eventNames = Object.fromEntries(
     (events.ok ? events.rows : []).map((event) => [event.id, event.name]),
   );
+  // Events this sponsor backs: each has a report with their name on it.
+  const sponsoredEvents = [
+    ...new Set(live.map((deal) => deal.event_id).filter((eventId): eventId is string => Boolean(eventId))),
+  ].filter((eventId) => eventNames[eventId]);
 
   return (
     <>
@@ -201,6 +205,25 @@ export default async function SponsorPage({
             }}
             hidden={["sponsor_id"]}
           />
+          {sponsoredEvents.length ? (
+            <Card>
+              <CardTitle>Reports for {sponsor.name}</CardTitle>
+              <ul className="divide-y divide-[var(--i-line)]">
+                {sponsoredEvents.map((eventId) => (
+                  <li key={eventId}>
+                    <Link
+                      href={`/internal/community/events/${eventId}/report?sponsor=${sponsor.id}`}
+                      className="flex items-center gap-3 px-5 py-2.5 text-[13px] hover:bg-[var(--i-hover)]"
+                    >
+                      <ChartBar size={15} className="text-[var(--i-muted)]" />
+                      <span className="min-w-0 flex-1 truncate font-medium">{eventNames[eventId]}</span>
+                      <span className="text-[12px] text-[var(--i-muted)]">Open report</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          ) : null}
         </div>
         <div className="min-w-0 space-y-5">
           <ContactList

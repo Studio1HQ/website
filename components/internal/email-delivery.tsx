@@ -33,7 +33,7 @@ export function DeliveryChip({ status, title }: { status: DeliveryStatus; title?
 }
 
 /** A Date as a datetime-local input value, in the browser's time zone. */
-function toLocalInput(date: Date) {
+export function toLocalInput(date: Date) {
   const pad = (value: number) => String(value).padStart(2, "0");
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }

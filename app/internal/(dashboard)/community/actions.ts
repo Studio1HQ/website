@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireCommunity } from "@/lib/internal/session";
+import { markHackathonNoShows } from "@/lib/internal/data";
 import { cleanField, isUuid } from "@/lib/internal/community/clean";
 import {
   MAX_CSV_BYTES,
@@ -27,6 +28,7 @@ import {
   quickField,
   todayKey,
   type ActionResult,
+  type CommunityEvent,
   type Task,
 } from "@/lib/internal/community/schema";
 
@@ -311,6 +313,18 @@ export async function markRestNoShow(eventId: unknown): Promise<ActionResult> {
     return { ok: false, message: "Unknown event." };
   const result = await markNoShows(eventId, staff.email);
   if (!result.ok) return result;
+  // A hackathon event's site registrations are on its door list too.
+  const event = await getRecord<CommunityEvent>("event", eventId);
+  let fromSite = 0;
+  if (event?.hackathon_slug) {
+    const site = await markHackathonNoShows(event.hackathon_slug);
+    if (!site.ok) {
+      refresh();
+      return { ok: false, message: `${result.count ?? 0} guests marked as no-show, but the site registrations weren't. ${site.message}` };
+    }
+    fromSite = site.count;
+    revalidatePath("/internal", "layout");
+  }
   refresh();
-  return { ok: true, message: `${result.count ?? 0} marked as no-show` };
+  return { ok: true, message: `${(result.count ?? 0) + fromSite} marked as no-show` };
 }

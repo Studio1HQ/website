@@ -1,6 +1,7 @@
-import { HACKATHONS } from "@/data/hackathons";
+import { HACKATHONS, getHackathon } from "@/data/hackathons";
 import { selectRows, signedFileUrl, updateRows } from "@/lib/supabase-server";
 import { todayKey } from "@/lib/internal/community/schema";
+import { PLAN_TEMPLATES, emailPlan, planSendTime, type PlanStep } from "@/lib/internal/hackathon-plan";
 import { blockedAddresses, deliveriesFor, type Delivery } from "@/lib/email-delivery";
 import { isAdmin, requireMember, requireSection } from "@/lib/internal/session";
 import {
@@ -59,13 +60,19 @@ type AllRows = { ok: true; rows: Row[]; truncated: boolean } | { ok: false; mess
  * Supabase returns per request, and `truncated` says when the table holds
  * more than was read.
  */
-async function loadAll(table: string, select: string, order: string): Promise<AllRows> {
+async function loadAll(
+  table: string,
+  select: string,
+  order: string,
+  filters: Record<string, string> = {},
+): Promise<AllRows> {
   const rows: Row[] = [];
   let total: number | null = null;
   while (rows.length < MAX_ROWS) {
     const result = await selectRows(
       table,
       new URLSearchParams({
+        ...filters,
         select,
         order,
         limit: String(Math.min(BATCH, MAX_ROWS - rows.length)),
@@ -578,6 +585,132 @@ export async function hackathonBreakdown(): Promise<
     .filter((event) => event.phase === "past" || event.phase === "unlisted")
     .sort((a, b) => String(b.startDate ?? "").localeCompare(String(a.startDate ?? "")));
   return { ok: true, events: [...current, ...past] };
+}
+
+/** Every site registration for one hackathon, oldest first (all columns). */
+export async function hackathonRegistrationsFor(
+  slug: string,
+): Promise<{ ok: true; rows: Row[]; truncated: boolean } | { ok: false; message: string }> {
+  await requireSection(SECTIONS.hackathons);
+  if (!/^[a-z0-9-]{1,80}$/.test(slug)) return { ok: true, rows: [], truncated: false };
+  const result = await loadAll(SECTIONS.hackathons.table, "*", "created_at.asc,id.asc", {
+    hackathon_slug: `eq.${slug}`,
+  });
+  if (!result.ok) {
+    console.error(`[internal] reading ${slug} registrations failed: ${result.message}`);
+    return { ok: false, message: "Couldn't load this hackathon's registrations." };
+  }
+  return result;
+}
+
+/**
+ * After the event: everyone registered on the site who wasn't checked in
+ * (New or Confirmed) becomes a no-show. Returns how many.
+ */
+export async function markHackathonNoShows(
+  slug: string,
+): Promise<{ ok: true; count: number } | { ok: false; message: string }> {
+  const staff = await requireSection(SECTIONS.hackathons, "edit");
+  if (!/^[a-z0-9-]{1,80}$/.test(slug)) return { ok: false, message: "Unknown hackathon." };
+  const query = () => new URLSearchParams({ hackathon_slug: `eq.${slug}`, review_status: "in.(new,confirmed)" });
+  let result = await updateRows(SECTIONS.hackathons.table, query(), {
+    review_status: "no_show",
+    reviewed_by: staff.email,
+  });
+  if (!result.ok && missingColumn(result.message, "reviewed_by")) {
+    result = await updateRows(SECTIONS.hackathons.table, query(), { review_status: "no_show" });
+  }
+  if (!result.ok) {
+    console.error(`[internal] marking ${slug} no-shows failed: ${result.message}`);
+    return { ok: false, message: "Couldn't mark the registrations as no-shows. Try again in a minute." };
+  }
+  return { ok: true, count: result.count ?? 0 };
+}
+
+export type PlanRecipient = { id: string; name: string; email: string; program: string };
+
+export type PlanStepStatus = PlanStep & {
+  /** 10:00 in India on the suggested day (ISO), for "send later". */
+  sendAt: string;
+  /** Everyone the step is for right now. */
+  total: number;
+  /** Of them, people it has gone to. */
+  sent: number;
+  /** Of them, people it's scheduled for (not canceled). */
+  scheduled: number;
+  nextScheduled: string | null;
+  lastSent: string | null;
+  /** Who still needs it: the step's people minus sent and scheduled. */
+  remaining: PlanRecipient[];
+};
+
+/**
+ * One hackathon's email plan with each step's progress, from the email log:
+ * someone counts as done for a step once its template went to them (or is
+ * scheduled to), whoever sent it and from wherever.
+ */
+export async function hackathonEmailPlan(
+  slug: string,
+): Promise<{ ok: true; steps: PlanStepStatus[] } | { ok: false; message: string } | null> {
+  await requireSection(SECTIONS.hackathons);
+  const hackathon = getHackathon(slug);
+  if (!hackathon) return null;
+  const [registrations, log] = await Promise.all([
+    hackathonRegistrationsFor(slug),
+    loadAll("internal_email_log", "*", "created_at.desc,id.desc", {
+      source_table: `eq.${SECTIONS.hackathons.table}`,
+      template: `in.(${PLAN_TEMPLATES.join(",")})`,
+    }),
+  ]);
+  if (!registrations.ok) return registrations;
+  if (!log.ok) {
+    console.error(`[internal] reading the email log for ${slug} failed: ${log.message}`);
+    return { ok: false, message: "Couldn't load which emails went out." };
+  }
+  const ids = new Set(registrations.rows.map((row) => String(row.id)));
+  const now = Date.now();
+  const entries = log.rows.filter((row) => ids.has(String(row.record_id)));
+  // Scheduled sends someone canceled don't count.
+  const pending = entries.filter((row) => typeof row.scheduled_for === "string" && Date.parse(row.scheduled_for) > now);
+  const deliveries = await deliveriesFor(pending.map((row) => String(row.resend_id ?? "")).filter(Boolean));
+  const canceled = (row: Row) =>
+    typeof row.resend_id === "string" && deliveries.get(row.resend_id)?.status === "canceled";
+
+  const steps = emailPlan(hackathon).map((step): PlanStepStatus => {
+    const people = registrations.rows.filter((row) => step.audience.includes(String(row.review_status ?? "new")));
+    const forStep = entries.filter((row) => row.template === step.template && !canceled(row));
+    const sentTo = new Map<string, string>();
+    const scheduledFor = new Map<string, string>();
+    for (const row of forStep) {
+      const id = String(row.record_id);
+      const when = typeof row.scheduled_for === "string" ? row.scheduled_for : null;
+      if (when && Date.parse(when) > now) scheduledFor.set(id, when);
+      else if (!sentTo.has(id)) sentTo.set(id, String(when ?? row.created_at));
+    }
+    const peopleIds = people.map((row) => String(row.id));
+    const sentTimes = peopleIds.flatMap((id) => (sentTo.has(id) ? [sentTo.get(id)!] : [])).sort();
+    const scheduledTimes = peopleIds
+      .flatMap((id) => (!sentTo.has(id) && scheduledFor.has(id) ? [scheduledFor.get(id)!] : []))
+      .sort();
+    return {
+      ...step,
+      sendAt: planSendTime(step.on),
+      total: people.length,
+      sent: sentTimes.length,
+      scheduled: scheduledTimes.length,
+      nextScheduled: scheduledTimes[0] ?? null,
+      lastSent: sentTimes.at(-1) ?? null,
+      remaining: people
+        .filter((row) => !sentTo.has(String(row.id)) && !scheduledFor.has(String(row.id)))
+        .map((row) => ({
+          id: String(row.id),
+          name: String(row.name ?? ""),
+          email: String(row.email ?? ""),
+          program: String(row.hackathon_name ?? hackathon.name),
+        })),
+    };
+  });
+  return { ok: true, steps };
 }
 
 export type EmailLogEntry = {

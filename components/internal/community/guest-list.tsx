@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition, type ChangeEvent } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as Dialog from "@radix-ui/react-dialog";
 import {
@@ -11,6 +12,7 @@ import {
   Users,
   X,
 } from "@phosphor-icons/react";
+import { changeEntries } from "@/app/internal/(dashboard)/actions";
 import {
   importGuestList,
   markRestNoShow,
@@ -23,6 +25,11 @@ import {
   guestsFromCsv,
 } from "@/lib/internal/community/csv";
 import {
+  doorRows,
+  type DoorRow,
+  type SiteRegistration,
+} from "@/lib/internal/community/door";
+import {
   GUEST_ROLES,
   labelOf,
   type Guest,
@@ -31,6 +38,7 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/components/internal/toast";
 import {
   EmptyState,
+  StatusBadge,
   buttonClass,
   inputClass,
   textareaClass,
@@ -41,40 +49,42 @@ import { AddButton } from "@/components/internal/community/lists";
 
 /**
  * An event's guest list: registrations, check-ins at the door, a CSV import
- * from Luma or Meetup, and "mark the rest as no-shows" once it's over.
+ * from Luma or Meetup, and "mark the rest as no-shows" once it's over. A
+ * hackathon event also lists its site registrations here (lib/internal/
+ * community/door.ts), so everyone is checked in from one list.
  */
 
 const VIEWS = [
   {
     key: "all",
     label: "All",
-    match: (guest: Guest) => guest.status !== "cancelled",
+    match: (guest: Pick<DoorRow, "status">) => guest.status !== "cancelled",
   },
   {
     key: "going",
     label: "Going",
-    match: (guest: Guest) =>
+    match: (guest: Pick<DoorRow, "status">) =>
       guest.status === "registered" || guest.status === "confirmed",
   },
   {
     key: "attended",
     label: "Attended",
-    match: (guest: Guest) => guest.status === "attended",
+    match: (guest: Pick<DoorRow, "status">) => guest.status === "attended",
   },
   {
     key: "waitlisted",
     label: "Waitlist",
-    match: (guest: Guest) => guest.status === "waitlisted",
+    match: (guest: Pick<DoorRow, "status">) => guest.status === "waitlisted",
   },
   {
     key: "no_show",
     label: "No-show",
-    match: (guest: Guest) => guest.status === "no_show",
+    match: (guest: Pick<DoorRow, "status">) => guest.status === "no_show",
   },
   {
     key: "cancelled",
     label: "Cancelled",
-    match: (guest: Guest) => guest.status === "cancelled",
+    match: (guest: Pick<DoorRow, "status">) => guest.status === "cancelled",
   },
 ] as const;
 
@@ -249,12 +259,15 @@ export function GuestList({
   eventId,
   eventName,
   guests,
+  registrations,
   canEdit,
   isOver,
 }: {
   eventId: string;
   eventName: string;
   guests: Guest[];
+  /** A hackathon event's registrations from the site form. */
+  registrations?: SiteRegistration[];
   canEdit: boolean;
   /** The event has happened: offer "mark the rest as no-shows". */
   isOver: boolean;
@@ -267,44 +280,53 @@ export function GuestList({
   const [editing, setEditing] = useState<Guest | null>(null);
   const [busy, startTransition] = useTransition();
   const [confirmNoShow, setConfirmNoShow] = useState(false);
+  const rows = useMemo(() => doorRows(guests, registrations ?? []), [guests, registrations]);
+  const fromSite = rows.filter((row) => row.source === "site").length;
 
   const counts = useMemo(
     () =>
       Object.fromEntries(
-        VIEWS.map((item) => [item.key, guests.filter(item.match).length]),
+        VIEWS.map((item) => [item.key, rows.filter(item.match).length]),
       ),
-    [guests],
+    [rows],
   );
   const shown = useMemo(() => {
     const match = VIEWS.find((item) => item.key === view)!.match;
     const words = query.trim().toLowerCase();
-    return guests.filter(
-      (guest) =>
-        match(guest) &&
+    return rows.filter(
+      (row) =>
+        match(row) &&
         (!words ||
-          `${guest.name} ${guest.email} ${guest.organisation}`
+          `${row.name} ${row.email} ${row.detail}`
             .toLowerCase()
             .includes(words)),
     );
-  }, [guests, view, query]);
+  }, [rows, view, query]);
   const going = counts.going ?? 0;
 
-  const checkIn = (guest: Guest, attended: boolean) =>
+  // A guest's status, or a site registration's review status (which needs
+  // hackathon access; community managers have it).
+  const checkIn = (row: DoorRow, attended: boolean) =>
     startTransition(async () => {
-      const result = await setQuickField(
-        "guest",
-        guest.id,
-        attended ? "attended" : "registered",
-      );
+      const result =
+        row.source === "site"
+          ? await changeEntries("hackathons", [row.id], {
+              status: attended ? "attended" : "confirmed",
+            })
+          : await setQuickField(
+              "guest",
+              row.id,
+              attended ? "attended" : "registered",
+            );
       if (result.ok) {
         toast(
           "success",
           attended
-            ? `${guest.name || guest.email} checked in`
+            ? `${row.name || row.email} checked in`
             : "Check-in undone",
         );
         router.refresh();
-      } else toast("error", result.message);
+      } else toast("error", result.message ?? "Couldn't save. Try again.");
     });
 
   const noShows = () => {
@@ -324,7 +346,7 @@ export function GuestList({
   };
 
   const copyEmails = async () => {
-    const emails = shown.map((guest) => guest.email).join(", ");
+    const emails = shown.map((row) => row.email).join(", ");
     try {
       await navigator.clipboard.writeText(emails);
       toast(
@@ -344,15 +366,17 @@ export function GuestList({
       "role",
       "status",
       "checked_in_at",
+      "source",
     ];
-    const lines = shown.map((guest) =>
+    const lines = shown.map((row) =>
       [
-        guest.name,
-        guest.email,
-        guest.organisation,
-        guest.role,
-        guest.status,
-        guest.checked_in_at ?? "",
+        row.name,
+        row.email,
+        row.detail,
+        row.role,
+        row.status,
+        row.checked_in_at ?? "",
+        row.source === "site" ? "site form" : "guest list",
       ]
         .map(csvCell)
         .join(","),
@@ -377,10 +401,15 @@ export function GuestList({
     <section className="rounded-xl border border-[var(--i-line)] bg-[var(--i-panel)] shadow-[var(--i-shadow-sm)]">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--i-line)] px-5 py-3">
         <h2 className="text-[13px] font-medium">
-          Guest list{" "}
+          {registrations ? "Door list" : "Guest list"}{" "}
           <span className="font-normal text-[var(--i-faint)]">
             {counts.all}
           </span>
+          {registrations ? (
+            <span className="ml-1.5 text-[12px] font-normal text-[var(--i-muted)]">
+              {fromSite.toLocaleString("en-IN")} from the site form
+            </span>
+          ) : null}
         </h2>
         <div className="flex flex-wrap gap-1.5">
           {canEdit && isOver && going > 0 ? (
@@ -407,7 +436,7 @@ export function GuestList({
         </div>
       </div>
 
-      {guests.length === 0 ? (
+      {rows.length === 0 ? (
         <EmptyState icon={<Users size={20} />} title="No guests yet">
           {canEdit
             ? "Import the CSV from Luma, Meetup or a Google Form, or add people one by one. Check them in at the door from here."
@@ -476,48 +505,71 @@ export function GuestList({
           </div>
 
           <ul className="divide-y divide-[var(--i-line)]">
-            {shown.slice(0, limit).map((guest) => (
-              <li key={guest.id} className="flex items-center gap-3 px-5 py-2">
-                <button
-                  type="button"
-                  onClick={() => setEditing(guest)}
-                  className="min-w-0 flex-1 text-left"
-                >
-                  <span className="block truncate text-[13px] font-medium hover:text-[var(--i-accent-text)]">
-                    {guest.name || guest.email}
-                    {guest.role !== "attendee" ? (
+            {shown.slice(0, limit).map((row) => (
+              <li key={row.key} className="flex items-center gap-3 px-5 py-2">
+                {row.source === "site" ? (
+                  <Link
+                    href={`/internal/hackathons/${row.id}`}
+                    className="min-w-0 flex-1 text-left"
+                  >
+                    <span className="block truncate text-[13px] font-medium hover:text-[var(--i-accent-text)]">
+                      {row.name || row.email}
                       <span className="ml-1.5 text-[11.5px] font-normal text-[var(--i-muted)]">
-                        {labelOf(GUEST_ROLES, guest.role)}
+                        Site form
                       </span>
-                    ) : null}
-                  </span>
-                  <span className="block truncate text-[12px] text-[var(--i-muted)]">
-                    {[guest.name ? guest.email : "", guest.organisation]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </span>
-                </button>
-                <QuickSelect
-                  entity="guest"
-                  id={guest.id}
-                  value={guest.status}
-                  canEdit={canEdit}
-                  label={`Status of ${guest.name || guest.email}`}
-                />
+                    </span>
+                    <span className="block truncate text-[12px] text-[var(--i-muted)]">
+                      {[row.name ? row.email : "", row.detail]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </span>
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setEditing(row.guest ?? null)}
+                    className="min-w-0 flex-1 text-left"
+                  >
+                    <span className="block truncate text-[13px] font-medium hover:text-[var(--i-accent-text)]">
+                      {row.name || row.email}
+                      {row.role !== "attendee" ? (
+                        <span className="ml-1.5 text-[11.5px] font-normal text-[var(--i-muted)]">
+                          {labelOf(GUEST_ROLES, row.role)}
+                        </span>
+                      ) : null}
+                    </span>
+                    <span className="block truncate text-[12px] text-[var(--i-muted)]">
+                      {[row.name ? row.email : "", row.detail]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </span>
+                  </button>
+                )}
+                {row.source === "site" ? (
+                  <StatusBadge status={row.reviewStatus} />
+                ) : (
+                  <QuickSelect
+                    entity="guest"
+                    id={row.id}
+                    value={row.status}
+                    canEdit={canEdit}
+                    label={`Status of ${row.name || row.email}`}
+                  />
+                )}
                 {canEdit ? (
-                  guest.status === "attended" ? (
+                  row.status === "attended" ? (
                     <button
                       type="button"
-                      onClick={() => checkIn(guest, false)}
+                      onClick={() => checkIn(row, false)}
                       disabled={busy}
                       className={cn(buttonClass("ghost", "sm"), "w-[5.5rem]")}
                     >
                       Undo
                     </button>
-                  ) : guest.status !== "cancelled" ? (
+                  ) : row.status !== "cancelled" ? (
                     <button
                       type="button"
-                      onClick={() => checkIn(guest, true)}
+                      onClick={() => checkIn(row, true)}
                       disabled={busy}
                       className={cn(
                         buttonClass("secondary", "sm"),

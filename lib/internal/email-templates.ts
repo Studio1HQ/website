@@ -207,6 +207,49 @@ export const EMAIL_TEMPLATES: Partial<Record<SectionKey, EmailTemplate[]>> = {
       body: `Hi {first_name},\n\n{program} starts soon. Before then, please have ready:\n\n- your GitHub account, for submitting your project\n- your team, if you're joining one\n- an idea of the track you'll build for\n\nIf you can no longer take part, reply so we can give your spot to someone on the waitlist.\n\n${SIGN_OFF}`,
       call: false,
     },
+    // The email plan (lib/internal/hackathon-plan.ts): one per step. Parts
+    // in [brackets] are for the sender to fill in; the dialogs won't send
+    // until they're gone.
+    {
+      key: "week-before",
+      label: "One week to go",
+      group: "Follow up",
+      subject: "One week to go: {program}",
+      body: `Hi {first_name},\n\n{program} starts in a week, and you're confirmed.\n\nTo be ready on day one:\n\n- read the brief and the rules on the event page\n- finish the pre-hack tasks listed there\n- sort out your team, or reply if you're still looking for one\n\nIf you can no longer take part, reply so we can give your spot to someone on the waitlist.\n\n${SIGN_OFF}`,
+      call: false,
+    },
+    {
+      key: "day-before",
+      label: "Starts tomorrow",
+      group: "Follow up",
+      subject: "{program} starts tomorrow",
+      body: `Hi {first_name},\n\n{program} starts tomorrow. Here's what you need:\n\n- Where: [venue address, or the link to join]\n- When: [start time]\n- Bring: [laptop, charger, ID]\n\nWe'll share the kickoff link and the brief at the start. See you there.\n\n${SIGN_OFF}`,
+      call: false,
+    },
+    {
+      key: "kickoff",
+      label: "Kickoff",
+      group: "Follow up",
+      subject: "{program} is live",
+      body: `Hi {first_name},\n\n{program} has started. Everything you need:\n\n- Kickoff and stream: [link]\n- Brief and tracks: [link]\n- Where to ask for help: [Discord or channel link]\n\nSubmissions close on [date and time]. Good luck, and have fun building.\n\n${SIGN_OFF}`,
+      call: false,
+    },
+    {
+      key: "deadline",
+      label: "Submissions close soon",
+      group: "Follow up",
+      subject: "Submissions for {program} close soon",
+      body: `Hi {first_name},\n\nA reminder that submissions for {program} close on [date and time].\n\nTo submit, you'll need:\n\n- your repository link\n- a short demo video\n- the track you're building for\n\nSubmit here: [submission link]. If you're stuck, reply to this email.\n\n${SIGN_OFF}`,
+      call: false,
+    },
+    {
+      key: "results",
+      label: "Results and thanks",
+      group: "Follow up",
+      subject: "{program}: the results",
+      body: `Hi {first_name},\n\nThank you for building at {program}. The judges have picked the winners: [winners, and the link to the announcement].\n\nWe'd love to hear how it went for you: [feedback form link]. It takes two minutes and shapes the next one.\n\nWe hope to see you at the next Studio1 hackathon.\n\n${SIGN_OFF}`,
+      call: false,
+    },
     {
       key: "waitlist",
       label: "Waitlisted",
@@ -319,6 +362,14 @@ export function composerTemplate(pipeline: unknown, key: unknown): { pipeline: E
   const wanted = key === undefined || key === null ? "custom" : key;
   const found = (EMAIL_TEMPLATES[pipeline] ?? []).find((template) => template.key === wanted);
   return found ? { pipeline, key: found.key } : null;
+}
+
+/**
+ * Parts of a message still waiting to be filled in: "[start time]", not a
+ * Markdown link's "[text](url)". The dialogs won't send while there are any.
+ */
+export function unfilledParts(text: string) {
+  return [...text.matchAll(/\[([^\]\n]{2,80})\](?!\()/g)].map((match) => match[1]);
 }
 
 /** The footer line saying why someone got the email. */

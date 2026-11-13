@@ -35,7 +35,7 @@ export default async function DashboardLayout({
   return (
     <ToastProvider>
       <div className="md:flex">
-        <aside className="border-b border-[var(--i-line)] bg-[var(--i-sidebar)] px-3 pb-2 pt-3 md:sticky md:top-0 md:flex md:h-screen md:w-[236px] md:shrink-0 md:flex-col md:border-b-0 md:border-r md:px-3 md:py-4">
+        <aside className="border-b border-[var(--i-line)] bg-[var(--i-sidebar)] px-3 pb-2 pt-3 print:hidden md:sticky md:top-0 md:flex md:h-screen md:w-[236px] md:shrink-0 md:flex-col md:border-b-0 md:border-r md:px-3 md:py-4">
           <div className="mb-3 flex items-center justify-between gap-3 px-1.5 md:mb-6">
             <Link href={home} className="flex items-center gap-2.5">
               <Logo className="size-7" />
@@ -99,7 +99,7 @@ export default async function DashboardLayout({
             </form>
           </div>
         </aside>
-        <main className="min-w-0 flex-1 px-4 pb-24 pt-6 sm:px-6 lg:px-10 lg:pt-9">
+        <main className="min-w-0 flex-1 px-4 pb-24 pt-6 sm:px-6 lg:px-10 lg:pt-9 print:p-0">
           <div className="mx-auto max-w-[1280px]">{children}</div>
         </main>
       </div>

@@ -14,12 +14,25 @@ import {
   fillTemplate,
   reasonFor,
   renderEmail,
+  unfilledParts,
 } from "@/lib/internal/email-templates";
 import { statusLabel, type SectionKey } from "@/lib/internal/sections";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/internal/toast";
-import { SendLaterField, defaultSendLater, formatSendLater, sendLaterIso } from "@/components/internal/email-delivery";
+import {
+  SendLaterField,
+  defaultSendLater,
+  formatSendLater,
+  sendLaterIso,
+  toLocalInput,
+} from "@/components/internal/email-delivery";
 import { Avatar, Notice, buttonClass, inputClass, textareaClass } from "@/components/internal/ui";
+
+/** The suggested send time as the picker's value, or null. */
+function initialPickerValue(iso: string | undefined) {
+  const at = iso ? new Date(iso) : null;
+  return at && !Number.isNaN(at.getTime()) && at.getTime() > Date.now() ? toLocalInput(at) : null;
+}
 
 /** A token for one send, for the server's idempotency key. */
 function newNonce() {
@@ -28,10 +41,17 @@ function newNonce() {
 
 export type Recipient = { id: string; name: string; email: string; program: string };
 
+/** The most one send takes; bigger lists go in batches of this size. */
+const BATCH = 100;
+
+/** Resend holds a scheduled email for up to 30 days. */
+const MAX_AHEAD_MS = 29 * 24 * 60 * 60 * 1000;
+
 /**
  * One template to everyone selected. The message keeps {first_name},
  * {program} and {sender}, filled in per person when it sends; the preview
- * shows any recipient's copy. Sending takes two clicks.
+ * shows any recipient's copy. Sending takes two clicks. More than BATCH
+ * people go in batches, one after another.
  */
 export function BulkEmailDialog({
   sectionKey,
@@ -39,6 +59,8 @@ export function BulkEmailDialog({
   sender,
   mailerReady,
   onSent,
+  initialTemplate,
+  initialSendAt,
   children,
 }: {
   sectionKey: SectionKey;
@@ -46,13 +68,19 @@ export function BulkEmailDialog({
   sender: string;
   mailerReady: boolean;
   onSent: () => void;
+  /** The template it opens on (the email plan's step). */
+  initialTemplate?: string;
+  /** Suggested send time (ISO): starts on "Send later" when it's ahead and within Resend's 30 days. */
+  initialSendAt?: string;
   children: React.ReactNode;
 }) {
   const templates = EMAIL_TEMPLATES[sectionKey] ?? [];
   const toast = useToast();
   const [open, setOpen] = useState(false);
   const [sending, startSending] = useTransition();
-  const [templateKey, setTemplateKey] = useState(templates[0]?.key ?? "custom");
+  const [templateKey, setTemplateKey] = useState(
+    templates.some((item) => item.key === initialTemplate) ? initialTemplate! : (templates[0]?.key ?? "custom"),
+  );
   const template = templates.find((item) => item.key === templateKey) ?? templates[0];
   const [subject, setSubject] = useState(template?.subject ?? "");
   const [body, setBody] = useState(template?.body ?? "");
@@ -61,13 +89,19 @@ export function BulkEmailDialog({
   const [move, setMove] = useState(Boolean(template?.status));
   const [previewId, setPreviewId] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
-  const [later, setLater] = useState(false);
-  const [sendAt, setSendAt] = useState(defaultSendLater);
+  const [later, setLater] = useState(() => {
+    const at = initialSendAt ? Date.parse(initialSendAt) : Number.NaN;
+    return at > Date.now() + 10 * 60 * 1000 && at < Date.now() + MAX_AHEAD_MS;
+  });
+  const [sendAt, setSendAt] = useState(() =>
+    initialPickerValue(initialSendAt) ?? defaultSendLater(),
+  );
   // One per send from this dialog: a retry of the same send goes out once,
   // and the next send gets a fresh token.
   const [nonce, setNonce] = useState(newNonce);
 
   const reachable = recipients.filter((person) => isEmailAddress(person.email));
+  const unfilled = unfilledParts(`${subject}\n${body}`);
   const unreachable = recipients.length - reachable.length;
   const previewPerson = reachable.find((person) => person.id === previewId) ?? reachable[0];
   const vars = useMemo(
@@ -103,39 +137,64 @@ export function BulkEmailDialog({
 
   const send = () =>
     startSending(async () => {
-      const result = await sendBulkEmail(
-        sectionKey,
-        reachable.map((person) => person.id),
-        {
-          template: templateKey,
-          subject,
-          body,
-          call,
-          callUrl,
-          status: move && moveTo ? moveTo : undefined,
-          sendAt: sendLaterIso(later, sendAt),
-          nonce,
-        },
-      );
+      const ids = reachable.map((person) => person.id);
+      const options = {
+        template: templateKey,
+        subject,
+        body,
+        call,
+        callUrl,
+        status: move && moveTo ? moveTo : undefined,
+        sendAt: sendLaterIso(later, sendAt),
+      };
+      let sent = 0;
+      let skipped = 0;
+      let blocked = 0;
+      let scheduledFor: string | undefined;
+      const warnings: string[] = [];
+      let failure: string | null = null;
+      for (let start = 0; start < ids.length; start += BATCH) {
+        const batch = ids.slice(start, start + BATCH);
+        // Each batch gets its own key: a retry of the same batch goes out once.
+        const result = await sendBulkEmail(sectionKey, batch, {
+          ...options,
+          nonce: ids.length > BATCH ? `${nonce}-${start / BATCH}` : nonce,
+        });
+        if (!result.ok) {
+          failure = result.message;
+          break;
+        }
+        sent += result.sent;
+        skipped += result.skipped ?? 0;
+        blocked += result.blocked ?? 0;
+        scheduledFor = result.scheduledFor ?? scheduledFor;
+        if (result.warning) warnings.push(result.warning);
+      }
       setConfirming(false);
-      if (result.ok) {
+      if (sent > 0 || !failure) {
         const skips = [
-          result.skipped ? `skipped ${result.skipped} without an address` : "",
-          result.blocked ? `skipped ${result.blocked} that bounced or complained before` : "",
+          skipped ? `skipped ${skipped} without an address` : "",
+          blocked ? `skipped ${blocked} that bounced or complained before` : "",
         ].filter(Boolean);
         toast(
           "success",
-          `${result.scheduledFor ? "Scheduled" : "Sent"} ${result.sent} ${result.sent === 1 ? "email" : "emails"}${
-            result.scheduledFor ? ` for ${formatSendLater(result.scheduledFor)}` : ""
+          `${scheduledFor ? "Scheduled" : "Sent"} ${sent} ${sent === 1 ? "email" : "emails"}${
+            scheduledFor ? ` for ${formatSendLater(scheduledFor)}` : ""
           }${skips.length ? `, ${skips.join(", ")}` : ""}`,
         );
-        if (result.warning) toast("error", result.warning);
-        setNonce(newNonce());
-        setOpen(false);
-        onSent();
-      } else {
-        toast("error", result.message);
+        for (const warning of warnings) toast("error", warning);
       }
+      if (failure) {
+        toast(
+          "error",
+          sent > 0
+            ? `Stopped after ${sent}: ${failure} Open it again to send the rest.`
+            : failure,
+        );
+      }
+      setNonce(newNonce());
+      if (!failure) setOpen(false);
+      if (sent > 0 || !failure) onSent();
     });
 
   const copyAddresses = () => {
@@ -289,6 +348,11 @@ export function BulkEmailDialog({
                   ))}
                 </div>
               </div>
+              {unfilled.length ? (
+                <Notice tone="warning">
+                  Fill in the parts in brackets before sending: {unfilled.map((part) => `[${part}]`).join(", ")}.
+                </Notice>
+              ) : null}
               {!mailerReady ? (
                 <Notice tone="warning">
                   Sending from the dashboard needs a Resend API key in Vercel (RESEND_API_KEY). Until then,
@@ -335,7 +399,7 @@ export function BulkEmailDialog({
                 <button
                   type="button"
                   onClick={() => setConfirming(true)}
-                  disabled={!subject.trim() || !body.trim() || reachable.length === 0}
+                  disabled={!subject.trim() || !body.trim() || reachable.length === 0 || unfilled.length > 0}
                   className={buttonClass("primary")}
                 >
                   <EnvelopeSimple size={15} /> Send to {reachable.length} {reachable.length === 1 ? "person" : "people"}

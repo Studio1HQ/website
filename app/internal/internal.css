@@ -359,3 +359,31 @@
   outline: 2px solid var(--i-ring);
   outline-offset: 1px;
 }
+
+/* Printing (the event report's "Save as PDF"): always the light theme,
+   bars and chips in their colours, and no sidebar. */
+@media print {
+  .dark .internal-ui,
+  .dark .internal-pop {
+    --i-bg: #ffffff;
+    --i-sidebar: #f2f0ec;
+    --i-panel: #ffffff;
+    --i-sunken: #faf9f7;
+    --i-ink: #1c1917;
+    --i-ink-2: #44403c;
+    --i-muted: #78716c;
+    --i-faint: #a8a29e;
+    --i-line: #e7e5e4;
+    --i-line-strong: #d6d3d1;
+    --i-accent: #ea580c;
+    --i-accent-text: #c2410c;
+    --i-track: #f0eeea;
+    color-scheme: light;
+  }
+  .internal-ui {
+    min-height: 0;
+    background: #ffffff;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
