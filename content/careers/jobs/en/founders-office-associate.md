@@ -13,9 +13,15 @@ openings: 1
 order: 3
 postedDate: 2026-08-21T00:00:00.000Z
 requisitionId: STU_FOUNDERS_OFFICE_003
+questions:
+  - id: first-week
+    label: "How you would approach your first week at Studio1"
+    type: link
+    required: true
+    hint: "One short doc: what you would organize, improve, track or start. Make sure anyone with the link can view it."
 ---
 
-Studio1 is looking for a high-agency Founder's Office Associate who can work closely with the founders across operations, team coordination, growth, marketing, sales, and internal execution. This [...]
+Studio1 is looking for a high-agency Founder's Office Associate who can work closely with the founders across operations, team coordination, growth, marketing, sales, and internal execution. This role is for someone who notices gaps, creates structure, follows through, and helps priorities move from discussion to execution.
 
 ## What you will do
 
@@ -46,17 +52,15 @@ You should be organized, proactive, comfortable taking ownership, and able to wo
 
 ## Why join
 
-You will work closely with the founders and see how a growing tech company actually operates. You will get hands-on ownership across operations, internal systems, team execution, sales, marketing,[...]
+You will work closely with the founders and see how a growing tech company actually operates. You will get hands-on ownership across operations, internal systems, team execution, sales, marketing, outreach, partnerships, and growth instead of being limited to one function.
 
 ## Role details
 
-This is a full-time remote role for India-based candidates. Best fit: early-career operators who have worked in startups, managed projects or teams, built internal systems, or taken ownership of e[...]
+This is a full-time remote role for India-based candidates. Best fit: early-career operators who have worked in startups, managed projects or teams, built internal systems, or taken ownership of execution across multiple people.
 
 ## How to apply
 
-Use the Apply button and keep the subject line as: `Application: Founder's Office Associate`.
-
-Include your resume, past work links if you have them, and one clean short doc showing how you would approach your first week at Studio1. Tell us what you would organize, improve, track, or start [...]
+Apply with the form on this page. Include your resume, past work links if you have them, and one clean short doc showing how you would approach your first week at Studio1. Tell us what you would organize, improve, track, or start doing across operations, outreach, sales, growth, marketing, or internal execution after understanding our company and work.
 
 We usually respond within 1 week if there is a fit.
 

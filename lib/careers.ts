@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
+import { parseQuestions, type FormQuestion } from "@/lib/form-questions";
 import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n";
 
 const jobsDirectory = path.join(process.cwd(), "content/careers/jobs");
@@ -24,6 +25,11 @@ export type JobOpening = {
 
 export type JobDetail = JobOpening & {
   content: string;
+  /**
+   * The role's own questions on the application form, in place of the
+   * generic plan link. From the brief's `questions` frontmatter.
+   */
+  questions: FormQuestion[];
 };
 
 type JobFrontmatter = {
@@ -40,6 +46,7 @@ type JobFrontmatter = {
   order?: number;
   postedDate?: string | Date | number;
   requisitionId?: string | number;
+  questions?: unknown;
 };
 
 function toFrontmatterString(value: unknown): string | undefined {
@@ -117,6 +124,10 @@ function readJobFile(fileName: string, locale: Locale): JobDetail | null {
   return {
     ...meta,
     content: content.trim(),
+    questions: parseQuestions(
+      (data as JobFrontmatter).questions,
+      `content/careers/jobs/${locale}/${fileName}`,
+    ),
   };
 }
 

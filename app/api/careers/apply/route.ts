@@ -2,6 +2,7 @@ import { randomUUID } from "crypto";
 import { NextResponse, after } from "next/server";
 import { getJobById, getJobIds } from "@/lib/careers";
 import { sendConfirmation } from "@/lib/confirmation-email";
+import { storedAnswers } from "@/lib/form-questions";
 import { alertNewEntry } from "@/lib/internal/slack";
 import { looksAutomated } from "@/lib/form-guard";
 import { readFormBody } from "@/lib/read-body";
@@ -27,9 +28,21 @@ import {
 
 const BUCKET = "job-applications";
 
+/** The role's answers, sent by the form as one JSON field. */
+function parseAnswers(value: string): unknown {
+  if (!value || value.length > 64 * 1024) return {};
+  try {
+    return JSON.parse(value);
+  } catch {
+    return {};
+  }
+}
+
 /**
  * Job applications: the résumé goes to a private Storage bucket, the rest to
- * the job_applications table. One application per email per role.
+ * the job_applications table. One application per email per role. A role
+ * with its own questions (in its brief) saves their answers instead of the
+ * generic plan link.
  */
 export async function POST(request: Request) {
   if (!isSupabaseConfigured()) {
@@ -90,19 +103,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true });
   }
 
-  const result = validateApplication({
-    name: field("name"),
-    email: field("email"),
-    location: field("location"),
-    linkedin: field("linkedin"),
-    portfolio: field("portfolio"),
-    workLinks: field("workLinks"),
-    planLink: field("planLink"),
-    why: field("why"),
-    start: field("start"),
-    contactConsent: field("contactConsent"),
-    emailUpdates: field("emailUpdates"),
-  });
+  const result = validateApplication(
+    {
+      name: field("name"),
+      email: field("email"),
+      location: field("location"),
+      linkedin: field("linkedin"),
+      portfolio: field("portfolio"),
+      workLinks: field("workLinks"),
+      planLink: field("planLink"),
+      answers: parseAnswers(field("answers")),
+      why: field("why"),
+      start: field("start"),
+      contactConsent: field("contactConsent"),
+      emailUpdates: field("emailUpdates"),
+    },
+    job.questions,
+  );
   const resume = form.get("resume");
   const file = resume instanceof File ? resume : null;
   let fileError = resumeError(file);
@@ -140,7 +157,8 @@ export async function POST(request: Request) {
   }
 
   const id = randomUUID();
-  const saved = await insertRow("job_applications", {
+  const answers = storedAnswers(job.questions, values.answers);
+  const row = {
     id,
     job_id: job.id,
     job_title: job.title,
@@ -151,13 +169,38 @@ export async function POST(request: Request) {
     linkedin: values.linkedin || null,
     portfolio: values.portfolio || null,
     work_links: links,
-    plan_link: values.planLink,
+    plan_link: values.planLink || null,
     why: values.why,
     start_availability: values.start,
     resume_path: path,
     contact_consent: values.contactConsent,
     email_updates: values.emailUpdates,
-  });
+  };
+  let saved = await insertRow(
+    "job_applications",
+    job.questions.length ? { ...row, answers } : row,
+  );
+  // Before 20261114160000_job_answers.sql runs there's no answers column and
+  // the plan link is required: keep the application, with the answers
+  // written under "why" so nothing the applicant sent is lost.
+  if (
+    !saved.ok &&
+    !saved.duplicate &&
+    job.questions.length &&
+    /answers|plan_link/.test(saved.message)
+  ) {
+    console.error(
+      `[careers] answers column missing; saving ${id} with its answers in "why". Run 20261114160000_job_answers.sql.`,
+    );
+    const written = answers
+      .map((item) => `${item.question}\n${item.answer}`)
+      .join("\n\n");
+    saved = await insertRow("job_applications", {
+      ...row,
+      plan_link: "",
+      why: written ? `${values.why}\n\n---\n\n${written}` : values.why,
+    });
+  }
 
   if (!saved.ok) {
     await removeFiles(BUCKET, [path]);
@@ -172,7 +215,12 @@ export async function POST(request: Request) {
   }
 
   after(() =>
-    sendConfirmation("jobs", { id, name: values.name, email: values.email, program: job.title }),
+    sendConfirmation("jobs", {
+      id,
+      name: values.name,
+      email: values.email,
+      program: job.title,
+    }),
   );
   after(() =>
     alertNewEntry({

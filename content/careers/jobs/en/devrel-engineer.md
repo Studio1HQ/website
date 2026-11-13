@@ -13,6 +13,20 @@ openings: 1
 order: 4
 postedDate: 2026-11-12T00:00:00.000Z
 requisitionId: STU_DEVREL_ENGINEER_004
+questions:
+  - id: agent-projects
+    label: "Two or three AI or agent projects you built"
+    type: long
+    required: true
+    hint: "For each: the link, what it does, how it's built, and a demo if there is one."
+  - id: talks
+    label: "Talks, workshops or events you have spoken at or organized"
+    type: long
+  - id: demo-plan
+    label: "An agent demo you would build for a developer tool of your choice, and how you would get it in front of developers"
+    type: link
+    required: true
+    hint: "One short doc. Make sure anyone with the link can view it."
 ---
 
 Studio1 is hiring a DevRel Engineer who builds with AI every day. You will build AI agents, agentic apps, and integrations around developer products, then turn that work into tutorials, videos, and launches that developers actually use.
@@ -63,7 +77,7 @@ This is a full-time remote role for India-based candidates. You will work closel
 
 Applications for this role will open soon.
 
-When applications open, keep the subject line as `Application: DevRel Engineer` and send:
+When applications open, apply with the form on this page. Have these ready:
 
 1. Your resume and GitHub profile.
 2. Links to two or three AI or agent projects you built: what each does, how it's built, and a demo if there is one.

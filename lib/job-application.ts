@@ -10,6 +10,13 @@ import {
   type ContactConsentValues,
 } from "@/lib/contact-consent";
 import { isEmailAddress, nameError, placeError } from "@/lib/form-checks";
+import {
+  answerErrors,
+  readAnswers,
+  withProtocol,
+  type AnswerField,
+  type FormQuestion,
+} from "@/lib/form-questions";
 
 export const START_OPTIONS = [
   "Immediately",
@@ -33,14 +40,17 @@ export type ApplicationValues = ContactConsentValues & {
   portfolio: string;
   /** One link per line. */
   workLinks: string;
+  /** The generic "plan" link, for roles without their own questions. */
   planLink: string;
+  /** Answers to the role's own questions, by question id. */
+  answers: Record<string, string>;
   why: string;
   start: string;
   /** Honeypot: hidden from people, filled in by bots. */
   website: string;
 };
 
-export type ApplicationField = keyof ApplicationValues | "resume";
+export type ApplicationField = keyof ApplicationValues | "resume" | AnswerField;
 export type ApplicationErrors = Partial<Record<ApplicationField, string>>;
 
 export const EMPTY_APPLICATION: ApplicationValues = {
@@ -51,6 +61,7 @@ export const EMPTY_APPLICATION: ApplicationValues = {
   portfolio: "",
   workLinks: "",
   planLink: "",
+  answers: {},
   why: "",
   start: "",
   ...EMPTY_CONSENT,
@@ -70,13 +81,6 @@ function isUrl(value: string) {
   }
 }
 
-/** Adds https:// when someone pastes "github.com/me". */
-function withProtocol(value: string) {
-  const trimmed = value.trim();
-  if (!trimmed) return "";
-  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
-}
-
 export function splitLinks(value: string) {
   return value
     .split(/[\s,]+/)
@@ -87,8 +91,13 @@ export function splitLinks(value: string) {
 const text = (value: unknown) =>
   typeof value === "string" ? value.trim() : "";
 
+/**
+ * Checks an application. A role with its own `questions` asks those instead
+ * of the generic plan link; answers to anything else are dropped.
+ */
 export function validateApplication(
   input: Partial<Record<keyof ApplicationValues, unknown>>,
+  questions: readonly FormQuestion[] = [],
 ):
   | { ok: true; values: ApplicationValues; links: string[] }
   | { ok: false; errors: ApplicationErrors } {
@@ -99,7 +108,8 @@ export function validateApplication(
     linkedin: withProtocol(text(input.linkedin)),
     portfolio: withProtocol(text(input.portfolio)),
     workLinks: text(input.workLinks),
-    planLink: withProtocol(text(input.planLink)),
+    planLink: questions.length ? "" : withProtocol(text(input.planLink)),
+    answers: readAnswers(questions, input.answers),
     why: text(input.why),
     start: text(input.start),
     ...readConsent(input),
@@ -124,7 +134,9 @@ export function validateApplication(
     errors.workLinks = `Pick your best ${APPLICATION_LIMITS.workLinks} links.`;
   else if (!links.every(isUrl))
     errors.workLinks = "One full link per line, like github.com/you/project.";
-  if (!isUrl(values.planLink))
+  if (questions.length)
+    Object.assign(errors, answerErrors(questions, values.answers));
+  else if (!isUrl(values.planLink))
     errors.planLink =
       "Add a link to your plan (Google Doc, Notion, or GitHub).";
   if (values.why.length < APPLICATION_LIMITS.why.min)

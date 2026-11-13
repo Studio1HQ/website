@@ -13,6 +13,21 @@ openings: 1
 order: 3.5
 postedDate: 2026-11-11T00:00:00.000Z
 requisitionId: STU_CONTENT_LEAD_012
+questions:
+  - id: results
+    label: "What did the content or channels in your links grow, and by how much?"
+    type: long
+    hint: "Numbers help. Rough is fine."
+  - id: studio1-rewrite
+    label: "Your rewrite of one recent Studio1 post from X or LinkedIn"
+    type: link
+    required: true
+    hint: "One doc with the original post, your rewrite, and what you changed and why. Make sure anyone with the link can view it."
+  - id: founder-posts
+    label: "Three first-draft posts for the founder of a developer tool of your choice"
+    type: link
+    required: true
+    hint: "One doc is fine. Make sure anyone with the link can view it."
 ---
 
 Studio1 does DevRel and developer marketing for devtool, AI, and open-source teams. We have worked with 35+ teams and driven 3M+ content views. We are hiring someone to own what we publish: Studio1's channels and the founders' personal profiles, every week, in a voice that sounds like real people with real opinions.
@@ -58,9 +73,7 @@ This is a full-time remote role for India-based candidates. You will work closel
 
 ## How to apply
 
-Use the Apply button and keep the subject line as: `Application: Content Lead`.
-
-Send:
+Apply with the form on this page. Have these ready:
 
 1. Links to content or channels you have owned or grown. Numbers help.
 2. A rewrite of one recent Studio1 post from X or LinkedIn, with what you changed and why.

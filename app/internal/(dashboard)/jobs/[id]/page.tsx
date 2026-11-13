@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { FilePdf } from "@phosphor-icons/react/dist/ssr";
+import { readStoredAnswers } from "@/lib/form-questions";
 import { Answers, RecordView, loadRecord } from "@/components/internal/section-views";
 import {
   ExternalLink,
@@ -8,6 +9,7 @@ import {
   LongText,
   buttonClass,
   relativeDate,
+  safeUrl,
   text,
 } from "@/components/internal/ui";
 
@@ -22,6 +24,8 @@ export default async function JobApplicationPage({ params, searchParams }: Props
   const data = await loadRecord("jobs", params, searchParams);
   const { record } = data;
   const workLinks = Array.isArray(record.work_links) ? record.work_links : [];
+  // The role's own questions (from its brief), in place of the plan link.
+  const answers = readStoredAnswers(record.answers);
   return (
     <RecordView
       sectionKey="jobs"
@@ -71,11 +75,31 @@ export default async function JobApplicationPage({ params, searchParams }: Props
               </ul>
             ) : null}
           </Field>
-          <Field label="Plan for the first 90 days" wide>
-            <ExternalLink href={record.plan_link} />
-          </Field>
+          {record.plan_link ? (
+            <Field label="Plan for the role" wide>
+              <ExternalLink href={record.plan_link} />
+            </Field>
+          ) : null}
         </Fields>
       </Answers>
+      {answers.length ? (
+        <Answers title={`Questions for ${text(record.job_title) || "this role"}`}>
+          <div className="space-y-5">
+            {answers.map((item) => (
+              <div key={item.id}>
+                <p className="text-[12.5px] font-medium text-[var(--i-muted)]">{item.question}</p>
+                <div className="mt-1 text-[13.5px]">
+                  {safeUrl(item.answer) && !/\s/.test(item.answer) ? (
+                    <ExternalLink href={item.answer} />
+                  ) : (
+                    <LongText value={item.answer} />
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Answers>
+      ) : null}
       <Answers title="Why Studio1">
         <LongText value={record.why} />
       </Answers>
