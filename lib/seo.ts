@@ -63,6 +63,9 @@ export function socialDescription(description: string) {
   const clauseEnd = Math.max(head.lastIndexOf(": "), head.lastIndexOf(" — "), head.lastIndexOf(" - "));
   if (clauseEnd >= 50) return `${text.slice(0, clauseEnd).trimEnd()}.`;
 
+  // No clean break: a full description that fits a search snippet reads
+  // better than one cut mid-phrase, and previews trim it themselves.
+  if (text.length <= 170) return text;
   const words = head.slice(0, head.lastIndexOf(" ")).replace(/[\s,;:–—-]+$/, "");
   return `${words}…`;
 }
