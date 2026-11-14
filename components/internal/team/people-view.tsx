@@ -284,7 +284,7 @@ function Attendance({
               <tr className="text-[var(--i-muted)]">
                 <th
                   scope="col"
-                  className="sticky left-0 z-10 min-w-[168px] border-b border-[var(--i-line)] bg-[var(--i-panel)] px-4 py-2 text-left font-normal"
+                  className="sticky left-0 z-10 min-w-[124px] border-b border-[var(--i-line)] bg-[var(--i-panel)] px-3 py-2 text-left font-normal sm:min-w-[168px] sm:px-4"
                 >
                   Person
                 </th>
@@ -327,9 +327,9 @@ function Attendance({
                   <tr key={person.email} className="group">
                     <th
                       scope="row"
-                      className="sticky left-0 z-10 border-b border-[var(--i-line)] bg-[var(--i-panel)] px-4 py-2 text-left font-normal group-last:border-b-0"
+                      className="sticky left-0 z-10 max-w-[124px] border-b border-[var(--i-line)] bg-[var(--i-panel)] px-3 py-2 text-left font-normal group-last:border-b-0 sm:max-w-none sm:px-4"
                     >
-                      <span className="flex items-center gap-2.5">
+                      <span className="flex items-center gap-2 sm:gap-2.5">
                         <Avatar name={name} email={person.email} size={24} src={photoUrl(person)} />
                         <span className="min-w-0">
                           <span className="block truncate text-[12.5px] font-medium text-[var(--i-ink)]">{name}</span>

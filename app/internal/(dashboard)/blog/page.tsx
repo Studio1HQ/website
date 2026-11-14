@@ -47,7 +47,7 @@ function PostRow({ post, me, search }: { post: BlogListItem; me: string; search?
     <li className="border-b border-[var(--i-line)] last:border-b-0">
       <Link
         href={`/internal/blog/${post.id}`}
-        className="flex flex-wrap items-center gap-x-4 gap-y-1.5 px-5 py-3.5 transition-colors hover:bg-[var(--i-hover)]"
+        className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-4 py-3.5 transition-colors hover:bg-[var(--i-hover)] sm:gap-x-4 sm:px-5"
       >
         <div className="min-w-0 flex-1 basis-[280px]">
           <p className="truncate text-[14px] font-medium">{post.title.trim() || "Untitled post"}</p>
@@ -58,16 +58,16 @@ function PostRow({ post, me, search }: { post: BlogListItem; me: string; search?
         </div>
         <BlogStatusBadge status={post.status} live={Boolean(post.source_path)} />
         {search !== undefined ? <SearchCell numbers={search} /> : null}
-        <div className="flex w-[150px] items-center gap-2 text-[12.5px] text-[var(--i-muted)]">
+        <div className="flex min-w-0 items-center gap-2 text-[12.5px] text-[var(--i-muted)] sm:w-[150px]">
           <Avatar name={nameFromEmail(post.created_by)} email={post.created_by} size={24} />
           <span className="truncate">{nameFromEmail(post.created_by)}</span>
         </div>
-        <div className="flex w-[64px] -space-x-1.5" title={post.reviewers.map(nameFromEmail).join(", ") || "No reviewers yet"}>
+        <div className="flex -space-x-1.5 empty:hidden sm:w-[64px] sm:empty:flex" title={post.reviewers.map(nameFromEmail).join(", ") || "No reviewers yet"}>
           {post.reviewers.slice(0, 3).map((email) => (
             <Avatar key={email} name={nameFromEmail(email)} email={email} size={24} className="ring-2 ring-[var(--i-panel)]" />
           ))}
         </div>
-        <span className="w-[90px] text-right text-[12px] text-[var(--i-faint)]" title={formatDate(post.updated_at)}>
+        <span className="ml-auto text-right text-[12px] text-[var(--i-faint)] sm:ml-0 sm:w-[90px]" title={formatDate(post.updated_at)}>
           {relativeDate(post.updated_at)}
         </span>
       </Link>
@@ -77,7 +77,7 @@ function PostRow({ post, me, search }: { post: BlogListItem; me: string; search?
 
 function SiteRow({ post, search }: { post: SitePost; search?: SearchNumbers | null }) {
   return (
-    <li className="flex flex-wrap items-center gap-x-4 gap-y-1.5 border-b border-[var(--i-line)] px-5 py-3 last:border-b-0">
+    <li className="flex flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-[var(--i-line)] px-4 py-3 last:border-b-0 sm:gap-x-4 sm:px-5">
       <div className="min-w-0 flex-1 basis-[280px]">
         <p className="truncate text-[14px]">{post.title}</p>
         <p className="truncate text-[12px] text-[var(--i-muted)]">

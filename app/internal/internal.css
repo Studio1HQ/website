@@ -63,6 +63,24 @@
   color-scheme: dark;
 }
 
+/* A grid with no column template sizes its one column to its widest child,
+   so a long name or URL pushes the page past a phone's edge. Default to a
+   column that can shrink; any grid-cols-* utility still wins (:where() has
+   no specificity). */
+:where(.internal-ui, .internal-pop) :where(.grid) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* iOS Safari zooms the page into any field under 16px when it's tapped, and
+   the dashboard's fields are 13px. On phones they're 16px instead; pinch
+   zoom stays available. */
+@media (max-width: 767.98px) {
+  :where(.internal-ui, .internal-pop)
+    :is(input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"]), textarea, select) {
+    font-size: 16px;
+  }
+}
+
 .internal-ui :focus-visible {
   outline: 2px solid var(--i-ring);
   outline-offset: 1px;
@@ -101,6 +119,42 @@
 
 .internal-pop.internal-dialog[data-state="open"] {
   animation: internal-dialog-in 160ms ease-out;
+}
+
+/* Phones: every dialog is a sheet from the bottom edge, full width, so forms
+   get the whole screen and the buttons sit under the thumb. Two classes
+   outrank the Tailwind position, width and translate utilities. */
+@keyframes internal-sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@media (max-width: 639.98px) {
+  .internal-pop.internal-dialog {
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    max-height: calc(100dvh - 2.5rem);
+    transform: none;
+    border-bottom-width: 0;
+    border-radius: 16px 16px 0 0;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .internal-pop.internal-dialog[data-state="open"] {
+    animation: internal-sheet-in 220ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+}
+
+@media (max-width: 639.98px) and (prefers-reduced-motion: reduce) {
+  .internal-pop.internal-dialog[data-state="open"] {
+    animation: none;
+  }
 }
 
 @keyframes internal-rise {
@@ -146,6 +200,28 @@
   font-size: 16px;
   line-height: 1.75;
   color: var(--i-ink);
+}
+/* Phones: the toolbar sticks under the dashboard's top bar (h-14), and the
+   writing area gives the text more of the width. */
+@media (max-width: 767.98px) {
+  .internal-ui .blog-editor [role="toolbar"] {
+    top: 56px;
+  }
+  /* The toolbar scrolls sideways under the pinned rich text / Markdown
+     switch; a fade before the switch shows there's more to swipe to. */
+  .internal-ui .blog-editor [class*="_diffSourceToggleWrapper_"] {
+    background: var(--i-sunken);
+    box-shadow: -18px 0 12px -4px var(--i-sunken);
+  }
+  /* The placeholder wraps instead of running off the edge. */
+  .internal-ui .blog-editor [class*="_placeholder_"] {
+    right: 0;
+    white-space: normal;
+  }
+  .internal-ui .blog-editor-content {
+    min-height: 420px;
+    padding: 18px 16px 40px;
+  }
 }
 .internal-ui .blog-editor-content img {
   max-width: 100%;

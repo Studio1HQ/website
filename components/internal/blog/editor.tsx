@@ -517,8 +517,8 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
 
   return (
     <div className="pb-10">
-      {/* Top bar */}
-      <div className="sticky top-0 z-30 -mx-4 mb-5 flex flex-wrap items-center gap-2 border-b border-[var(--i-line)] bg-[var(--i-bg)]/95 px-4 py-2.5 backdrop-blur sm:-mx-6 sm:px-6 lg:-mx-10 lg:px-10">
+      {/* Top bar: sticky from md; on phones the dashboard's own top bar is the sticky one. */}
+      <div className="-mx-4 -mt-5 mb-5 flex flex-wrap items-center gap-2 border-b border-[var(--i-line)] bg-[var(--i-bg)]/95 px-4 py-2.5 backdrop-blur sm:-mx-6 sm:-mt-0 sm:px-6 md:sticky md:top-0 md:z-30 lg:-mx-10 lg:px-10">
         <Link href="/internal/blog" className={buttonClass("ghost", "sm")}>
           <ArrowLeft size={14} /> Blog
         </Link>

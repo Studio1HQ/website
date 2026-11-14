@@ -3,6 +3,7 @@ import Link from "next/link";
 import { SignOut } from "@phosphor-icons/react/dist/ssr";
 import Logo from "@/components/ui/svgs/logo";
 import { InternalNav } from "@/components/internal/nav";
+import { MobileNavButton, MobileNavClose, MobileNavPanel, MobileNavProvider } from "@/components/internal/mobile-nav";
 import { NavProgress, RefreshButton } from "@/components/internal/nav-progress";
 import { ToastProvider } from "@/components/internal/toast";
 import { Avatar } from "@/components/internal/ui";
@@ -85,76 +86,83 @@ export default async function DashboardLayout({
       <Suspense fallback={null}>
         <NavProgress />
       </Suspense>
-      <div className="md:flex">
-        <aside className="border-b border-[var(--i-line)] bg-[var(--i-sidebar)] px-3 pb-2 pt-3 print:hidden md:sticky md:top-0 md:flex md:h-screen md:w-[236px] md:shrink-0 md:flex-col md:border-b-0 md:border-r md:px-3 md:py-4">
-          <div className="mb-3 flex items-center justify-between gap-3 px-1.5 md:mb-6">
-            <Link href={home} className="flex items-center gap-2.5">
-              <Logo className="size-7" />
-              <span className="leading-tight">
-                <span className="block text-[14px] font-medium">Studio1</span>
-                <span className="block text-[11.5px] text-[var(--i-muted)]">Internal dashboard</span>
-              </span>
-            </Link>
+      <MobileNavProvider>
+        {/* Phones: a top bar; the sidebar opens from its menu button. */}
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-1 border-b border-[var(--i-line)] bg-[var(--i-sidebar)] px-2 print:hidden md:hidden">
+          <MobileNavButton />
+          <Link href={home} className="flex min-w-0 items-center gap-2 rounded-lg px-1.5 py-1">
+            <Logo className="size-6 shrink-0" />
+            <span className="truncate text-[14px] font-medium">Studio1</span>
+          </Link>
+          <div className="ml-auto flex items-center">
+            <RefreshButton className="size-10 rounded-lg" />
             <Link
               href="/internal/profile"
               aria-label="Your profile"
-              className="ml-auto md:hidden"
+              className="flex size-10 items-center justify-center rounded-lg hover:bg-[var(--i-hover)]"
             >
               <Avatar name={name} email={staff.email} size={28} src={photoUrl(staff.person)} />
             </Link>
-            <RefreshButton className="size-8 md:hidden" />
-            <form action={signOut} className="md:hidden">
-              <button
-                type="submit"
-                aria-label="Sign out"
-                className="flex size-8 items-center justify-center rounded-lg text-[var(--i-muted)] hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)]"
-              >
-                <SignOut size={17} />
-              </button>
-            </form>
           </div>
-          {/* The links show at once; their counts arrive when they're read. */}
-          <Suspense fallback={<Sidebar staff={staff} counts={NO_COUNTS} />}>
-            <SidebarWithCounts staff={staff} />
-          </Suspense>
-          <div className="mt-auto hidden items-center gap-2.5 rounded-lg px-1.5 pt-4 md:flex">
-            <Link
-              href="/internal/profile"
-              title="Your profile"
-              className="-mx-1.5 -my-1 flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-1.5 py-1 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
-            >
-            <Avatar name={name} email={staff.email} size={28} src={photoUrl(staff.person)} />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-[12.5px] font-medium">{name}</p>
-              <p className="truncate text-[11.5px] text-[var(--i-muted)]">
-                {staff.localPreview
-                  ? "Local preview"
-                  : staff.roles.length
-                    ? rolesLabel(staff.roles)
-                    : staff.person
-                      ? PERSON_KINDS[staff.person.kind]
-                      : "Intern reviewer"}
-                {staff.status === "owner" ? " · Owner" : ""}
-              </p>
+        </header>
+        <div className="md:flex">
+          <MobileNavPanel className="px-3 pb-3 pt-2 md:py-4">
+            <div className="mb-4 flex items-center justify-between gap-3 px-1.5 md:mb-6">
+              <Link href={home} className="flex items-center gap-2.5 py-1">
+                <Logo className="size-7" />
+                <span className="leading-tight">
+                  <span className="block text-[14px] font-medium">Studio1</span>
+                  <span className="block text-[11.5px] text-[var(--i-muted)]">Internal dashboard</span>
+                </span>
+              </Link>
+              <MobileNavClose />
             </div>
-            </Link>
-            <RefreshButton />
-            <form action={signOut}>
-              <button
-                type="submit"
-                aria-label="Sign out"
-                title="Sign out"
-                className="flex size-7 items-center justify-center rounded-md text-[var(--i-muted)] hover:bg-black/[0.04] hover:text-[var(--i-ink)] dark:hover:bg-white/[0.06]"
+            {/* A long sidebar scrolls on its own; the profile stays at the foot. */}
+            <div className="-mx-3 min-h-0 flex-1 overflow-y-auto px-3 pb-2">
+              {/* The links show at once; their counts arrive when they're read. */}
+              <Suspense fallback={<Sidebar staff={staff} counts={NO_COUNTS} />}>
+                <SidebarWithCounts staff={staff} />
+              </Suspense>
+            </div>
+            <div className="flex items-center gap-2.5 border-t border-[var(--i-line)] px-1.5 pt-3 md:border-t-0 md:pt-4">
+              <Link
+                href="/internal/profile"
+                title="Your profile"
+                className="-mx-1.5 -my-1 flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-1.5 py-1 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
               >
-                <SignOut size={16} />
-              </button>
-            </form>
-          </div>
-        </aside>
-        <main className="min-w-0 flex-1 px-4 pb-24 pt-6 sm:px-6 lg:px-10 lg:pt-9 print:p-0">
-          <div className="mx-auto max-w-[1280px]">{children}</div>
-        </main>
-      </div>
+                <Avatar name={name} email={staff.email} size={28} src={photoUrl(staff.person)} />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[12.5px] font-medium">{name}</p>
+                  <p className="truncate text-[11.5px] text-[var(--i-muted)]">
+                    {staff.localPreview
+                      ? "Local preview"
+                      : staff.roles.length
+                        ? rolesLabel(staff.roles)
+                        : staff.person
+                          ? PERSON_KINDS[staff.person.kind]
+                          : "Intern reviewer"}
+                    {staff.status === "owner" ? " · Owner" : ""}
+                  </p>
+                </div>
+              </Link>
+              <RefreshButton className="hidden md:flex" />
+              <form action={signOut}>
+                <button
+                  type="submit"
+                  aria-label="Sign out"
+                  title="Sign out"
+                  className="flex size-10 items-center justify-center rounded-lg text-[var(--i-muted)] hover:bg-black/[0.04] hover:text-[var(--i-ink)] dark:hover:bg-white/[0.06] md:size-7 md:rounded-md"
+                >
+                  <SignOut size={16} />
+                </button>
+              </form>
+            </div>
+          </MobileNavPanel>
+          <main className="min-w-0 flex-1 px-4 pb-24 pt-5 sm:px-6 sm:pt-6 lg:px-10 lg:pt-9 print:p-0">
+            <div className="mx-auto max-w-[1280px]">{children}</div>
+          </main>
+        </div>
+      </MobileNavProvider>
     </ToastProvider>
   );
 }

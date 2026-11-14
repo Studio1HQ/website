@@ -64,7 +64,7 @@ function NavLink({
       href={href}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "group flex h-8 shrink-0 items-center gap-2.5 whitespace-nowrap rounded-lg px-2.5 text-[13.5px] transition-colors",
+        "group flex h-10 shrink-0 items-center gap-2.5 whitespace-nowrap rounded-lg px-2.5 text-[14px] transition-colors md:h-8 md:text-[13.5px]",
         active
           ? "bg-[var(--i-panel)] font-medium text-[var(--i-ink)] shadow-[var(--i-shadow)] ring-1 ring-[var(--i-line)]"
           : "text-[var(--i-ink-2)] hover:bg-black/[0.035] hover:text-[var(--i-ink)] dark:hover:bg-white/[0.05]",
@@ -96,11 +96,11 @@ function NavLink({
 
 function NavGroup({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="contents md:mt-5 md:block">
-      <p className="hidden px-2.5 pb-1.5 text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--i-faint)] md:block">
+    <div className="mt-5">
+      <p className="px-2.5 pb-1.5 text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--i-faint)]">
         {title}
       </p>
-      <div className="contents md:flex md:flex-col md:gap-0.5">{children}</div>
+      <div className="flex flex-col gap-0.5">{children}</div>
     </div>
   );
 }
@@ -173,20 +173,20 @@ export function InternalNav({
     return (
       <nav
         aria-label={section === "money" ? "Money" : "Community"}
-        className="flex gap-1 overflow-x-auto pb-1 md:flex-col md:gap-0 md:overflow-visible md:pb-0"
+        className="flex flex-col"
       >
         {back ? (
           <Link
             href={home}
-            className="flex h-8 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-2.5 text-[13px] text-[var(--i-muted)] hover:bg-black/[0.035] hover:text-[var(--i-ink)] dark:hover:bg-white/[0.05] md:mb-1"
+            className="mb-1 flex h-10 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-2.5 text-[13px] text-[var(--i-muted)] hover:bg-black/[0.035] hover:text-[var(--i-ink)] dark:hover:bg-white/[0.05] md:h-8"
           >
             <ArrowLeft size={14} aria-hidden /> Dashboard
           </Link>
         ) : null}
-        <p className="hidden items-center gap-2 px-2.5 pb-1.5 pt-3 text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--i-faint)] md:flex">
+        <p className="flex items-center gap-2 px-2.5 pb-1.5 pt-3 text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--i-faint)]">
           {section === "money" ? "Money" : "Community"}
         </p>
-        <div className="contents md:flex md:flex-col md:gap-0.5">
+        <div className="flex flex-col gap-0.5">
           {section === "money" ? (
             <>
               <NavLink href="/internal/money" label="Overview" icon={Bank} active={pathname === "/internal/money"} />
@@ -292,7 +292,7 @@ export function InternalNav({
   return (
     <nav
       aria-label="Dashboard"
-      className="flex gap-1 overflow-x-auto pb-1 md:flex-col md:gap-0 md:overflow-visible md:pb-0"
+      className="flex flex-col"
     >
       {overview ? (
         <NavLink
@@ -311,11 +311,11 @@ export function InternalNav({
           ),
         )
         .map((group) => (
-          <div key={group} className="contents md:mt-5 md:block">
-            <p className="hidden px-2.5 pb-1.5 text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--i-faint)] md:block">
+          <div key={group} className="mt-5">
+            <p className="px-2.5 pb-1.5 text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--i-faint)]">
               {group}
             </p>
-            <div className="contents md:flex md:flex-col md:gap-0.5">
+            <div className="flex flex-col gap-0.5">
               {SECTION_ORDER.filter(
                 (key) =>
                   SECTIONS[key].group === group &&
@@ -334,11 +334,11 @@ export function InternalNav({
           </div>
         ))}
       {blog ? (
-        <div className="contents md:mt-5 md:block">
-          <p className="hidden px-2.5 pb-1.5 text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--i-faint)] md:block">
+        <div className="mt-5">
+          <p className="px-2.5 pb-1.5 text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--i-faint)]">
             Content
           </p>
-          <div className="contents md:flex md:flex-col md:gap-0.5">
+          <div className="flex flex-col gap-0.5">
             <NavLink
               href="/internal/blog"
               label="Blog"
@@ -409,11 +409,11 @@ export function InternalNav({
         </NavGroup>
       ) : null}
       {role ? (
-        <div className="contents md:mt-5 md:block">
-          <p className="hidden px-2.5 pb-1.5 text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--i-faint)] md:block">
+        <div className="mt-5">
+          <p className="px-2.5 pb-1.5 text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--i-faint)]">
             Settings
           </p>
-          <div className="contents md:flex md:flex-col md:gap-0.5">
+          <div className="flex flex-col gap-0.5">
             <NavLink
               href="/internal/templates"
               label="Email templates"

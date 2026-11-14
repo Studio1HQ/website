@@ -198,7 +198,7 @@ export function Stat({
         {value}
       </p>
       {note ? (
-        <p className="mt-2 truncate text-[12.5px] text-[var(--i-faint)]">
+        <p className="mt-2 line-clamp-2 text-[12px] leading-snug text-[var(--i-faint)] sm:line-clamp-none sm:truncate sm:text-[12.5px]">
           {note}
         </p>
       ) : null}
@@ -312,7 +312,7 @@ export function SearchBox({
       action={action}
       method="get"
       role="search"
-      className="min-w-[200px] flex-1 sm:max-w-xs"
+      className="min-w-0 flex-1 basis-full sm:min-w-[200px] sm:basis-auto sm:max-w-xs"
     >
       {Object.entries(keep).map(([name, keepValue]) =>
         keepValue ? (
@@ -355,7 +355,10 @@ export function MigrationNotice({
   return <Notice tone="warning">{message}</Notice>;
 }
 
-/** A plain table shell; rows are <tr> children. */
+/**
+ * A plain table shell; rows are <tr> children. On phones it scrolls sideways
+ * with the first column (the name) pinned, so every row stays identifiable.
+ */
 export function Table({
   head,
   children,
@@ -369,11 +372,11 @@ export function Table({
     <div className={cn("overflow-x-auto", className)}>
       <table className="w-full min-w-[640px] border-collapse text-left text-[13px]">
         <thead>
-          <tr className="border-b border-[var(--i-line)] text-[12px] text-[var(--i-muted)] [&>th]:whitespace-nowrap [&>th]:px-4 [&>th]:py-2.5 [&>th]:font-normal first:[&>th]:pl-5 last:[&>th]:pr-5">
+          <tr className="border-b border-[var(--i-line)] text-[12px] text-[var(--i-muted)] [&>th]:whitespace-nowrap [&>th]:px-4 [&>th]:py-2.5 [&>th]:font-normal first:[&>th]:pl-5 last:[&>th]:pr-5 max-md:first:[&>th]:sticky max-md:first:[&>th]:left-0 max-md:first:[&>th]:z-[1] max-md:first:[&>th]:bg-[var(--i-panel)] max-md:first:[&>th]:pl-4">
             {head}
           </tr>
         </thead>
-        <tbody className="[&>tr]:border-b [&>tr]:border-[var(--i-line)] last:[&>tr]:border-0 [&>tr>td]:px-4 [&>tr>td]:py-2.5 first:[&>tr>td]:pl-5 last:[&>tr>td]:pr-5">
+        <tbody className="[&>tr]:border-b [&>tr]:border-[var(--i-line)] last:[&>tr]:border-0 [&>tr>td]:px-4 [&>tr>td]:py-2.5 first:[&>tr>td]:pl-5 last:[&>tr>td]:pr-5 max-md:first:[&>tr>td]:sticky max-md:first:[&>tr>td]:left-0 max-md:first:[&>tr>td]:z-[1] max-md:first:[&>tr>td]:max-w-[11rem] max-md:first:[&>tr>td]:bg-[var(--i-panel)] max-md:first:[&>tr>td]:pl-4 max-md:first:[&>tr>td]:shadow-[1px_0_0_var(--i-line)]">
           {children}
         </tbody>
       </table>

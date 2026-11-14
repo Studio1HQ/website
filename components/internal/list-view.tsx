@@ -310,6 +310,21 @@ export function ListView({
   /* ------------------------------------------------------------ columns */
 
   const columns = section.columns.filter((column) => column.kind !== "tags" || section.tags);
+  const personColumn = columns.find((column) => column.kind === "person");
+  const statusColumn = columns.find((column) => column.kind === "status");
+  const dateColumn = columns.find((column) => column.kind === "date");
+  /** A column as plain words, for the one-line summary on phone cards. */
+  const plainCell = (row: Row, column: ColumnSpec) => {
+    const value = row[column.key];
+    if (column.kind === "list") {
+      return Array.isArray(value) ? value.map((item) => column.labels?.[String(item)] ?? String(item)).join(", ") : "";
+    }
+    if (column.kind === "team") {
+      const team = text(value);
+      return team === "team" ? text(row.team_name) || "Team" : (column.labels?.[team] ?? team);
+    }
+    return text(value);
+  };
   const cell = (row: Row & { _id: string }, column: ColumnSpec) => {
     const value = row[column.key];
     switch (column.kind) {
@@ -413,7 +428,7 @@ export function ListView({
     }
   };
 
-  const onRowClick = (event: MouseEvent<HTMLTableRowElement>, href: string | null) => {
+  const onRowClick = (event: MouseEvent<HTMLElement>, href: string | null) => {
     if (!href) return;
     const target = event.target as HTMLElement;
     // Menus render in portals; their clicks still bubble here through React.
@@ -422,6 +437,50 @@ export function ListView({
     if (window.getSelection()?.toString()) return;
     if (event.metaKey || event.ctrlKey) window.open(href, "_blank");
     else router.push(href);
+  };
+
+  /** Shortlist, reject and the row menu: in table rows and phone cards. */
+  const quickActions = (row: Row & { _id: string }, size: "sm" | "md" = "sm") => {
+    const status = String(row.review_status ?? "");
+    const quick = section.quick;
+    if (!quick) return null;
+    const box = size === "md" ? "size-9" : "size-7";
+    return (
+      <>
+        <button
+          type="button"
+          title={statusLabel(quick.positive)}
+          aria-label={`${statusLabel(quick.positive)} ${text(row.name)}`}
+          disabled={status === quick.positive}
+          onClick={() => setStatus([row._id], quick.positive)}
+          className={cn(box, "flex items-center justify-center rounded-md text-[var(--i-muted)] hover:bg-violet-500/10 hover:text-violet-700 disabled:opacity-30 dark:hover:text-violet-300")}
+        >
+          <CheckCircle size={17} />
+        </button>
+        <button
+          type="button"
+          title={statusLabel(quick.negative)}
+          aria-label={`${statusLabel(quick.negative)} ${text(row.name)}`}
+          disabled={status === quick.negative}
+          onClick={() => setStatus([row._id], quick.negative)}
+          className={cn(box, "flex items-center justify-center rounded-md text-[var(--i-muted)] hover:bg-rose-500/10 hover:text-rose-700 disabled:opacity-30 dark:hover:text-rose-300")}
+        >
+          <XCircle size={17} />
+        </button>
+        <RowMenu
+          size={size}
+          row={row}
+          statuses={section.statuses ?? []}
+          tags={taggable ? tags : []}
+          onStatus={(value) => setStatus([row._id], value)}
+          onTag={(tag, add) => toggleTag([row._id], tag, add)}
+          onCopy={() => {
+            void navigator.clipboard.writeText(text(row.email));
+            toast("success", "Email copied");
+          }}
+        />
+      </>
+    );
   };
 
   const exportHref = (ids?: string[]) => {
@@ -511,7 +570,7 @@ export function ListView({
 
       <div className="rounded-xl border border-[var(--i-line)] bg-[var(--i-panel)] shadow-[var(--i-shadow-sm)]">
         <div className="flex flex-wrap items-center gap-2 border-b border-[var(--i-line)] p-3">
-          <div className="relative min-w-[200px] flex-1 sm:max-w-xs">
+          <div className="relative min-w-0 flex-1 basis-full sm:min-w-[200px] sm:basis-auto sm:max-w-xs">
             <MagnifyingGlass
               size={15}
               className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--i-faint)]"
@@ -625,122 +684,165 @@ export function ListView({
                 : "Entries from the site's form will show up here as they come in."}
             </EmptyState>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse text-left text-[13px]">
-                <thead>
-                  <tr className="border-b border-[var(--i-line)] text-[12px] text-[var(--i-muted)]">
-                    {reviewable ? (
-                      <th scope="col" className="w-10 py-2.5 pl-4 pr-1">
-                        <input
-                          type="checkbox"
-                          aria-label="Select all on this page"
-                          checked={allSelected}
-                          ref={(input) => {
-                            if (input) input.indeterminate = selectedIds.length > 0 && !allSelected;
-                          }}
-                          onChange={() => setSelected(allSelected ? new Set() : new Set(pageIds))}
-                          className="size-4 rounded border-[var(--i-line-strong)] accent-[var(--i-accent)]"
-                        />
-                      </th>
-                    ) : null}
-                    {columns.map((column, index) => (
-                      <th
-                        key={column.key}
-                        scope="col"
-                        className={cn(
-                          "whitespace-nowrap px-3 py-2.5 font-medium",
-                          index === 0 && !reviewable && "pl-4",
-                          column.wide && "hidden lg:table-cell",
-                        )}
-                      >
-                        {column.label}
-                      </th>
-                    ))}
-                    {reviewable ? <th scope="col" className="w-28 pr-3"><span className="sr-only">Actions</span></th> : null}
-                  </tr>
-                </thead>
-                <tbody>
-                  {view.map((row) => {
-                    const href = hrefFor(row);
-                    const isSelected = selected.has(row._id);
-                    const status = String(row.review_status ?? "");
-                    return (
-                      <tr
-                        key={row._id}
-                        onClick={(event) => onRowClick(event, href)}
-                        className={cn(
-                          "group border-b border-[var(--i-line)] align-middle transition-colors last:border-b-0",
-                          href && "cursor-pointer",
-                          isSelected ? "bg-[var(--i-selected)]" : "hover:bg-[var(--i-hover)]",
-                        )}
-                      >
-                        {reviewable ? (
-                          <td className="py-3 pl-4 pr-1">
-                            <input
-                              type="checkbox"
-                              aria-label={`Select ${text(row.name) || "entry"}`}
-                              checked={isSelected}
-                              onChange={() => toggleRow(row._id)}
-                              className="size-4 rounded border-[var(--i-line-strong)] accent-[var(--i-accent)]"
-                            />
-                          </td>
-                        ) : null}
-                        {columns.map((column, index) => (
-                          <td
-                            key={column.key}
-                            className={cn(
-                              "px-3 py-3",
-                              index === 0 && !reviewable && "pl-4",
-                              column.kind === "person" && "min-w-[220px] max-w-[300px]",
-                              column.wide && "hidden lg:table-cell",
-                            )}
-                          >
-                            {cell(row, column)}
-                          </td>
-                        ))}
-                        {reviewable && section.quick ? (
-                          <td className="py-2 pr-3">
-                            <div className="flex items-center justify-end gap-0.5 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100">
-                              <button
-                                type="button"
-                                title={statusLabel(section.quick.positive)}
-                                aria-label={`${statusLabel(section.quick.positive)} ${text(row.name)}`}
-                                disabled={status === section.quick.positive}
-                                onClick={() => setStatus([row._id], section.quick!.positive)}
-                                className="flex size-7 items-center justify-center rounded-md text-[var(--i-muted)] hover:bg-violet-500/10 hover:text-violet-700 disabled:opacity-30 dark:hover:text-violet-300"
-                              >
-                                <CheckCircle size={17} />
-                              </button>
-                              <button
-                                type="button"
-                                title={statusLabel(section.quick.negative)}
-                                aria-label={`${statusLabel(section.quick.negative)} ${text(row.name)}`}
-                                disabled={status === section.quick.negative}
-                                onClick={() => setStatus([row._id], section.quick!.negative)}
-                                className="flex size-7 items-center justify-center rounded-md text-[var(--i-muted)] hover:bg-rose-500/10 hover:text-rose-700 disabled:opacity-30 dark:hover:text-rose-300"
-                              >
-                                <XCircle size={17} />
-                              </button>
-                              <RowMenu
-                                row={row}
-                                statuses={section.statuses ?? []}
-                                tags={taggable ? tags : []}
-                                onStatus={(value) => setStatus([row._id], value)}
-                                onTag={(tag, add) => toggleTag([row._id], tag, add)}
-                                onCopy={() => {
-                                  void navigator.clipboard.writeText(text(row.email));
-                                  toast("success", "Email copied");
-                                }}
+            <>
+              {/* Phones and tablets: a card per entry. The table needs a laptop's width. */}
+              {reviewable ? (
+                <label className="flex items-center gap-3 border-b border-[var(--i-line)] px-4 py-2 text-[12.5px] text-[var(--i-muted)] lg:hidden">
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    ref={(input) => {
+                      if (input) input.indeterminate = selectedIds.length > 0 && !allSelected;
+                    }}
+                    onChange={() => setSelected(allSelected ? new Set() : new Set(pageIds))}
+                    className="size-4 rounded border-[var(--i-line-strong)] accent-[var(--i-accent)]"
+                  />
+                  Select all on this page
+                </label>
+              ) : null}
+              <ul className="divide-y divide-[var(--i-line)] lg:hidden">
+                {view.map((row) => {
+                  const href = hrefFor(row);
+                  const isSelected = selected.has(row._id);
+                  const details = columns
+                    .filter((column) => !column.wide && (column.kind === "text" || column.kind === "team" || column.kind === "list"))
+                    .map((column) => plainCell(row, column))
+                    .filter(Boolean);
+                  const tagList = section.tags ? rowTags(row) : [];
+                  const tagsColumn = columns.find((column) => column.kind === "tags");
+                  return (
+                    <li
+                      key={row._id}
+                      onClick={(event) => onRowClick(event, href)}
+                      className={cn(
+                        "flex gap-3 px-4 py-3 transition-colors",
+                        href && "cursor-pointer",
+                        isSelected ? "bg-[var(--i-selected)]" : "active:bg-[var(--i-hover)]",
+                      )}
+                    >
+                      {reviewable ? (
+                        // A bigger tap area than the box itself.
+                        <label className="-my-1 -ml-2 flex shrink-0 items-start px-2 pt-[15px]">
+                          <input
+                            type="checkbox"
+                            aria-label={`Select ${text(row.name) || "entry"}`}
+                            checked={isSelected}
+                            onChange={() => toggleRow(row._id)}
+                            className="size-4 rounded border-[var(--i-line-strong)] accent-[var(--i-accent)]"
+                          />
+                        </label>
+                      ) : null}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start gap-2">
+                          <div className="min-w-0 flex-1 text-[13.5px]">{personColumn ? cell(row, personColumn) : null}</div>
+                          {statusColumn ? <div className="shrink-0 pt-1">{cell(row, statusColumn)}</div> : null}
+                        </div>
+                        <div className={cn("mt-0.5 flex items-center gap-2 pl-11", reviewable && section.quick && "mt-1 min-h-7")}>
+                          <p className="min-w-0 flex-1 truncate text-[12.5px] text-[var(--i-muted)]">
+                            {details.join(" · ")}
+                            {details.length && dateColumn ? " · " : null}
+                            {dateColumn ? (
+                              <span title={formatDate(row[dateColumn.key])} suppressHydrationWarning>
+                                {relativeDate(row[dateColumn.key])}
+                              </span>
+                            ) : null}
+                          </p>
+                          {reviewable && section.quick ? (
+                            <div className="-my-1 -mr-2 flex shrink-0 items-center">{quickActions(row, "md")}</div>
+                          ) : null}
+                        </div>
+                        {tagList.length && tagsColumn ? <div className="mt-1.5 pl-11">{cell(row, tagsColumn)}</div> : null}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+              <div className="hidden overflow-x-auto lg:block">
+                <table className="w-full border-collapse text-left text-[13px]">
+                  <thead>
+                    <tr className="border-b border-[var(--i-line)] text-[12px] text-[var(--i-muted)]">
+                      {reviewable ? (
+                        <th scope="col" className="w-10 py-2.5 pl-4 pr-1">
+                          <input
+                            type="checkbox"
+                            aria-label="Select all on this page"
+                            checked={allSelected}
+                            ref={(input) => {
+                              if (input) input.indeterminate = selectedIds.length > 0 && !allSelected;
+                            }}
+                            onChange={() => setSelected(allSelected ? new Set() : new Set(pageIds))}
+                            className="size-4 rounded border-[var(--i-line-strong)] accent-[var(--i-accent)]"
+                          />
+                        </th>
+                      ) : null}
+                      {columns.map((column, index) => (
+                        <th
+                          key={column.key}
+                          scope="col"
+                          className={cn(
+                            "whitespace-nowrap px-3 py-2.5 font-medium",
+                            index === 0 && !reviewable && "pl-4",
+                            column.wide && "hidden lg:table-cell",
+                          )}
+                        >
+                          {column.label}
+                        </th>
+                      ))}
+                      {reviewable ? <th scope="col" className="w-28 pr-3"><span className="sr-only">Actions</span></th> : null}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {view.map((row) => {
+                      const href = hrefFor(row);
+                      const isSelected = selected.has(row._id);
+                      return (
+                        <tr
+                          key={row._id}
+                          onClick={(event) => onRowClick(event, href)}
+                          className={cn(
+                            "group border-b border-[var(--i-line)] align-middle transition-colors last:border-b-0",
+                            href && "cursor-pointer",
+                            isSelected ? "bg-[var(--i-selected)]" : "hover:bg-[var(--i-hover)]",
+                          )}
+                        >
+                          {reviewable ? (
+                            <td className="py-3 pl-4 pr-1">
+                              <input
+                                type="checkbox"
+                                aria-label={`Select ${text(row.name) || "entry"}`}
+                                checked={isSelected}
+                                onChange={() => toggleRow(row._id)}
+                                className="size-4 rounded border-[var(--i-line-strong)] accent-[var(--i-accent)]"
                               />
-                            </div>
-                          </td>
-                        ) : null}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                            </td>
+                          ) : null}
+                          {columns.map((column, index) => (
+                            <td
+                              key={column.key}
+                              className={cn(
+                                "px-3 py-3",
+                                index === 0 && !reviewable && "pl-4",
+                                column.kind === "person" && "min-w-[220px] max-w-[300px]",
+                                column.wide && "hidden lg:table-cell",
+                              )}
+                            >
+                              {cell(row, column)}
+                            </td>
+                          ))}
+                          {reviewable && section.quick ? (
+                            <td className="py-2 pr-3">
+                              <div className="flex items-center justify-end gap-0.5 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100">
+                                {quickActions(row)}
+                              </div>
+                            </td>
+                          ) : null}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </div>
 
@@ -847,7 +949,9 @@ function RowMenu({
   onStatus,
   onTag,
   onCopy,
+  size = "sm",
 }: {
+  size?: "sm" | "md";
   row: Row;
   statuses: readonly string[];
   tags: Option[];
@@ -863,7 +967,10 @@ function RowMenu({
         <button
           type="button"
           aria-label={`More actions for ${text(row.name) || "entry"}`}
-          className="flex size-7 items-center justify-center rounded-md text-[var(--i-muted)] hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)] data-[state=open]:bg-[var(--i-hover)]"
+          className={cn(
+            size === "md" ? "size-9" : "size-7",
+            "flex items-center justify-center rounded-md text-[var(--i-muted)] hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)] data-[state=open]:bg-[var(--i-hover)]",
+          )}
         >
           <DotsThree size={18} weight="bold" />
         </button>
