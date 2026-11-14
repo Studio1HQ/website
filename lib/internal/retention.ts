@@ -84,29 +84,40 @@ export async function purgeRejectedApplications(now = new Date()): Promise<Purge
     if (!kept.ok) return { ok: false, deleted, message: `couldn't keep the contacts, so nothing was deleted: ${kept.message}` };
 
     const ids = due.rows.map((row) => String(row.id));
+
+    // Someone who unsubscribed between the read above and the upsert: their
+    // unsubscribe found no kept contact to remove yet, so the one just kept
+    // carries a stale yes. Their entries are read again now that the contact
+    // exists (an unsubscribe from here on removes it itself), and it goes for
+    // anyone no longer opted in, whether or not their entry is deleted below.
+    const address = (row: { email?: string | null }) => String(row.email ?? "").trim().toLowerCase();
+    const saidYes = new Set(due.rows.filter((row) => row.email_updates === true).map(address));
+    if (saidYes.size) {
+      const fresh = await selectRows<Pick<Due, "email" | "email_updates">>(
+        TABLE,
+        new URLSearchParams({ select: "email,email_updates", id: inList(ids) }),
+      );
+      if (!fresh.ok) return { ok: false, deleted, message: `couldn't check who's still opted in, so nothing was deleted: ${fresh.message}` };
+      const seen = new Set(fresh.rows.map(address));
+      const stillYes = new Set(fresh.rows.filter((row) => row.email_updates === true).map(address));
+      const withdrew = [...saidYes].filter((email) => email && seen.has(email) && !stillYes.has(email));
+      if (withdrew.length) {
+        const undone = await deleteRows(KEPT_CONTACTS, new URLSearchParams({ email: inList(withdrew), email_updates: "eq.true" }), "email");
+        if (!undone.ok) return { ok: false, deleted, message: `couldn't drop contacts that unsubscribed, so nothing was deleted: ${undone.message}` };
+      }
+    }
+
     // The status and date are checked again in the delete itself, so an
     // entry someone moved out of Rejected a moment ago is left alone. The
     // delete hands back exactly the rows that went, as they were then: the
     // clean-up below works from those, with nothing to read again.
-    const gone = await deleteRows<Due>(
+    const gone = await deleteRows<Pick<Due, "id" | "resume_path">>(
       TABLE,
       new URLSearchParams({ id: inList(ids), review_status: "eq.rejected", updated_at: `lt.${cutoff}` }),
-      "id,resume_path,email,email_updates",
+      "id,resume_path",
     );
     if (!gone.ok) return { ok: false, deleted, message: gone.message };
     deleted += gone.count;
-
-    // Someone who unsubscribed between the read above and the delete: their
-    // entry said "yes" when read and "no" when it went. The contact kept a
-    // moment ago carries the stale yes, so it goes, as an unsubscribe does.
-    const address = (row: Due) => String(row.email ?? "").trim().toLowerCase();
-    const saidYes = new Set(due.rows.filter((row) => row.email_updates === true).map(address));
-    const stillYes = new Set(gone.rows.filter((row) => row.email_updates === true).map(address));
-    const withdrew = [...new Set(gone.rows.map(address))].filter((email) => email && saidYes.has(email) && !stillYes.has(email));
-    if (withdrew.length) {
-      const undone = await deleteRows(KEPT_CONTACTS, new URLSearchParams({ email: inList(withdrew), email_updates: "eq.true" }), "email");
-      if (!undone.ok) return { ok: false, deleted, message: `couldn't drop contacts that unsubscribed: ${undone.message}` };
-    }
 
     const paths = gone.rows.map((row) => row.resume_path).filter((path): path is string => typeof path === "string" && path !== "");
     if (await removeFiles(RESUME_BUCKET, paths)) files += paths.length;

@@ -149,7 +149,7 @@ export default async function SponsorPage({
         }
       />
 
-      <LoadNotice show={incomplete(contacts, deals, events, tasks, activity)} />
+      <LoadNotice show={incomplete(contacts, deals, events, tasks, activity, backed)} />
       <div
         className={cn(
           "mb-6 grid grid-cols-2 gap-3",

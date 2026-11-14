@@ -108,6 +108,8 @@ export function TimeField({
             onChange={(event) => type(event.target.value)}
             onBlur={commit}
             onKeyDown={(event) => {
+              // Enter that confirms an input method's composition isn't ours.
+              if (event.nativeEvent.isComposing) return;
               if (event.key === "Enter") {
                 event.preventDefault();
                 commit();

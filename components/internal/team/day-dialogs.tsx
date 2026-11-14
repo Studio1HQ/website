@@ -138,9 +138,13 @@ function DayDialogBody({
         options={KIND_OPTIONS}
         onChange={(next) => {
           setKind(next);
-          // The time boxes come and go with the kind, and start clean.
-          setStartBad(false);
-          setEndBad(false);
+          // The time boxes go with Leave and come back clean. Between Worked
+          // and Half day they stay, unreadable text and all, so their flags
+          // stay too and Save keeps waiting.
+          if (next === "leave") {
+            setStartBad(false);
+            setEndBad(false);
+          }
         }}
       />
       {kind !== "leave" ? (

@@ -83,4 +83,24 @@ describe("the rejected-applications clean-up", () => {
     }
     expect(db.rows("kept_contacts").map((row) => row.email)).toEqual(["quiet@example.com"]);
   });
+
+  it("drops it too when that entry is also moved out of Rejected, so it isn't deleted", async () => {
+    const fake = (await import("@/lib/internal/team/test-db")).fakeSupabase;
+    const keep = fake.upsertRows;
+    // Unsubscribed, and someone shortlisted the entry, while the job ran.
+    fake.upsertRows = async (table, rows, options) => {
+      const result = await keep(table, rows, options);
+      for (const row of db.rows("job_applications")) {
+        if (row.id === "old-rejected") Object.assign(row, { email_updates: false, review_status: "shortlisted" });
+      }
+      return result;
+    };
+    try {
+      await purgeRejectedApplications(NOW);
+    } finally {
+      fake.upsertRows = keep;
+    }
+    expect(db.rows("job_applications").some((row) => row.id === "old-rejected")).toBe(true);
+    expect(db.rows("kept_contacts").map((row) => row.email)).toEqual(["quiet@example.com"]);
+  });
 });
