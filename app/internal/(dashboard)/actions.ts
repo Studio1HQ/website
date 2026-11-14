@@ -5,7 +5,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { updateEntries, type EntryChange } from "@/lib/internal/data";
 import { cleanTag, sectionFor } from "@/lib/internal/sections";
-import { sessionCookieOptions } from "@/lib/internal/session";
+import { sectionsChanged } from "@/lib/internal/section-cache";
+import { requireMember, sessionCookieOptions } from "@/lib/internal/session";
 import { SESSION_COOKIE } from "@/lib/internal/token";
 
 export type ActionResult =
@@ -54,4 +55,15 @@ export async function changeEntries(
 export async function signOut() {
   (await cookies()).set(SESSION_COOKIE, "", sessionCookieOptions(0));
   redirect("/internal/login?signed-out");
+}
+
+/**
+ * The sidebar's Refresh button: drops the list reads the server keeps for a
+ * short while and every page the browser kept, so what shows next is read
+ * from the database now. Any signed-in member may ask.
+ */
+export async function refreshData(): Promise<void> {
+  await requireMember();
+  sectionsChanged();
+  revalidatePath("/internal", "layout");
 }

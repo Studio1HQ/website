@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { DateField } from "@/components/internal/pickers";
+import { TimeField } from "@/components/internal/team/time-field";
 import { cn } from "@/lib/utils";
 import { buttonClass, inputClass } from "@/components/internal/ui";
 import { Select } from "@/components/internal/select";
@@ -69,6 +71,10 @@ function DayDialogBody({
   const [leaveType, setLeaveType] = useState<LeaveType>(existing?.leave_type ?? "paid");
   const [start, setStart] = useState(existing?.start_time ?? "");
   const [end, setEnd] = useState(existing?.end_time ?? "");
+  // A time typed in a way that can't be read: Save waits until it's fixed.
+  const [startBad, setStartBad] = useState(false);
+  const [endBad, setEndBad] = useState(false);
+  const timesBad = kind !== "leave" && (startBad || endBad);
   const [active, setActive] = useState(hoursText(existing?.active_minutes ?? null));
   const [note, setNote] = useState(existing?.note ?? "");
 
@@ -109,7 +115,13 @@ function DayDialogBody({
           <button type="button" onClick={() => onOpenChange(false)} className={buttonClass("ghost")}>
             Cancel
           </button>
-          <button type="button" onClick={save} disabled={pending} className={buttonClass("primary")}>
+          <button
+            type="button"
+            onClick={save}
+            disabled={pending || timesBad}
+            title={timesBad ? "Fix the time marked in red first" : undefined}
+            className={buttonClass("primary")}
+          >
             {pending ? "Saving…" : "Save"}
           </button>
         </>
@@ -117,23 +129,31 @@ function DayDialogBody({
     >
       {pickDate ? (
         <Label label="Date">
-          <input
-            type="date"
-            value={day}
-            max={maxDate}
-            onChange={(event) => setDay(event.target.value)}
-            className={inputClass()}
-          />
+          <DateField value={day} max={maxDate} required onChange={setDay} />
         </Label>
       ) : null}
-      <Segmented label="Day" value={kind} options={KIND_OPTIONS} onChange={setKind} />
+      <Segmented
+        label="Day"
+        value={kind}
+        options={KIND_OPTIONS}
+        onChange={(next) => {
+          setKind(next);
+          // The time boxes go with Leave and come back clean. Between Worked
+          // and Half day they stay, unreadable text and all, so their flags
+          // stay too and Save keeps waiting.
+          if (next === "leave") {
+            setStartBad(false);
+            setEndBad(false);
+          }
+        }}
+      />
       {kind !== "leave" ? (
         <div className="grid grid-cols-3 gap-3">
           <Label label="Start">
-            <input type="time" value={start} onChange={(event) => setStart(event.target.value)} className={inputClass()} />
+            <TimeField value={start} onChange={setStart} around="09:00" onInvalidChange={setStartBad} />
           </Label>
           <Label label="End">
-            <input type="time" value={end} onChange={(event) => setEnd(event.target.value)} className={inputClass()} />
+            <TimeField value={end} onChange={setEnd} placeholder="6:00 pm" around="18:00" onInvalidChange={setEndBad} />
           </Label>
           <Label label="Active hours">
             <input
@@ -232,18 +252,17 @@ function LeaveDialogBody({ open, onOpenChange, today, who, people, onSave }: Lea
       ) : null}
       <div className="grid grid-cols-2 gap-3">
         <Label label="From">
-          <input
-            type="date"
+          <DateField
             value={from}
-            onChange={(event) => {
-              setFrom(event.target.value);
-              if (to < event.target.value) setTo(event.target.value);
+            required
+            onChange={(next) => {
+              setFrom(next);
+              if (to < next) setTo(next);
             }}
-            className={inputClass()}
           />
         </Label>
         <Label label="To">
-          <input type="date" value={to} min={from} onChange={(event) => setTo(event.target.value)} className={inputClass()} />
+          <DateField value={to} min={from} required onChange={setTo} />
         </Label>
       </div>
       <Label group label="Leave type">

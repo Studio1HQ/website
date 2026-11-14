@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Hourglass, Prohibit, WarningCircle } from "@phosphor-icons/react/dist/ssr";
 import Logo from "@/components/ui/svgs/logo";
@@ -7,6 +6,7 @@ import { buttonClass } from "@/components/internal/ui";
 import { requestAccess } from "@/lib/internal/members";
 import { getStaff, hasAccess, homeFor } from "@/lib/internal/session";
 import { signOut } from "../(dashboard)/actions";
+import { WaitingNameForm } from "./name-form";
 
 export const metadata: Metadata = { title: "Waiting for approval" };
 
@@ -41,11 +41,11 @@ export default async function PendingPage() {
         : {
             icon: <Hourglass size={20} />,
             title: "Waiting for approval",
-            body: "Your request to join the Studio1 dashboard is with Arindam and Amitesh. You'll get in as soon as one of them approves it.",
+            body: "Your request to join the Studio1 dashboard is with Arindam and Amitesh. One of them picks what you can open (there's no default access), and you'll get in as soon as they approve it.",
           };
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4 py-12">
+    <main className="flex min-h-dvh items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm">
         <div className="mb-8 flex items-center gap-3">
           <Logo className="size-9" />
@@ -61,10 +61,13 @@ export default async function PendingPage() {
           <h1 className="text-[18px] font-medium">{content.title}</h1>
           <p className="mt-1.5 text-[13.5px] leading-relaxed text-[var(--i-muted)]">{content.body}</p>
           <p className="mt-4 text-[12.5px] text-[var(--i-faint)]">Signed in as {staff.email}</p>
+          {staff.status === "pending" ? <WaitingNameForm saved={staff.name} /> : null}
           <div className="mt-5 flex gap-2">
-            <Link href="/internal" className={buttonClass("primary")}>
+            {/* A full page load: a cached "still waiting" answer is never reused. */}
+            {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+            <a href="/internal" className={buttonClass("primary")}>
               Check again
-            </Link>
+            </a>
             <form action={signOut}>
               <button type="submit" className={buttonClass("secondary")}>
                 Sign out

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, UsersFour } from "@phosphor-icons/react/dist/ssr";
+import { requireCommunity } from "@/lib/internal/session";
 import {
   incomplete,
   loadEvents,
@@ -20,20 +21,24 @@ import {
   sponsorFollowUpDue,
   sponsorshipsIn,
 } from "@/lib/internal/community/stats";
+import { seesMoney } from "@/lib/internal/community/visibility";
 import { Card } from "@/components/internal/ui";
 
 /**
  * Community at a glance for the main dashboard overview: events coming up,
  * follow-ups due, late tasks and this year's sponsorship. Loads its own
- * data; renders nothing until the community migration has run.
+ * data; renders nothing until the community migration has run. It checks
+ * the session itself: an intern gets their own late tasks and no money.
  */
 export async function CommunitySummaryCard() {
+  const staff = await requireCommunity();
+  const money = seesMoney(staff.community);
   const [events, tasks, sponsors, partners, deals] = await Promise.all([
-    loadEvents(),
-    loadTasks(),
-    loadSponsors(),
+    loadEvents(staff.community),
+    loadTasks(staff),
+    loadSponsors(staff.community),
     loadPartners(),
-    loadSponsorships(),
+    loadSponsorships(staff.community),
   ]);
   if (!events.ok) return null;
 
@@ -65,7 +70,9 @@ export async function CommunitySummaryCard() {
       ? `${followUps} ${followUps === 1 ? "follow-up" : "follow-ups"} due`
       : null,
     late ? `${late} ${late === 1 ? "task" : "tasks"} late` : null,
-    deals.ok ? `${formatTotals(sponsorship)} sponsorship in ${year}` : null,
+    money && deals.ok
+      ? `${formatTotals(sponsorship)} sponsorship in ${year}`
+      : null,
     // A read that failed counts as nothing above; don't let it pass as zero.
     partial ? "some numbers didn't load" : null,
   ].filter(Boolean);

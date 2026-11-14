@@ -10,6 +10,8 @@ import {
   type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
+import { DateField, SuggestInput } from "@/components/internal/pickers";
+import { TimeField } from "@/components/internal/team/time-field";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Trash, X } from "@phosphor-icons/react";
 import {
@@ -26,6 +28,7 @@ import {
   type FieldDef,
   type RefOptions,
 } from "@/lib/internal/community/schema";
+import { visibleFields } from "@/lib/internal/community/visibility";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/internal/toast";
 import {
@@ -94,7 +97,10 @@ export function RecordDialog({
   /** After adding, open this path with the new id on the end. */
   goTo?: string;
   canDelete?: boolean;
-  /** Viewers: the form shows but can't be saved. */
+  /**
+   * Interns (the viewer access): the form shows but can't be saved, and
+   * its money fields are left out.
+   */
   readOnly?: boolean;
   title?: string;
   onDeleted?: () => void;
@@ -113,7 +119,7 @@ export function RecordDialog({
       {trigger ? <Dialog.Trigger asChild>{trigger}</Dialog.Trigger> : null}
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px]" />
-        <Dialog.Content className="internal-pop internal-dialog fixed left-1/2 top-1/2 z-50 flex max-h-[92vh] w-[min(720px,calc(100vw-1.5rem))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border border-[var(--i-line)] bg-[var(--i-panel)] text-[var(--i-ink)] shadow-[var(--i-shadow-pop)]">
+        <Dialog.Content className="internal-pop internal-dialog fixed left-1/2 top-1/2 z-50 flex max-h-[92dvh] w-[min(720px,calc(100vw-1.5rem))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border border-[var(--i-line)] bg-[var(--i-panel)] text-[var(--i-ink)] shadow-[var(--i-shadow-pop)]">
           {/* Mounted only while open, so every opening starts from fresh values. */}
           <RecordForm
             key={record?.id ?? "new"}
@@ -167,6 +173,12 @@ function RecordForm({
   close: () => void;
 }) {
   const def = ENTITIES[entity];
+  // Read-only is how interns get this form: no money fields for them. (The
+  // server has already taken the values out of the record.)
+  const fields = useMemo(
+    () => visibleFields(entity, readOnly ? "viewer" : "manager"),
+    [entity, readOnly],
+  );
   const router = useRouter();
   const toast = useToast();
   const [saving, startSaving] = useTransition();
@@ -177,10 +189,10 @@ function RecordForm({
   const start = useMemo(() => {
     const source = { ...(defaults ?? {}), ...(record ?? {}) };
     const values: Values = {};
-    for (const field of def.fields)
+    for (const field of fields)
       values[field.key] = initialValue(field, source[field.key]);
     return values;
-  }, [def, defaults, record]);
+  }, [fields, defaults, record]);
   const [values, setValues] = useState<Values>(start);
 
   useEffect(
@@ -197,7 +209,7 @@ function RecordForm({
     event.preventDefault();
     if (readOnly) return;
     const payload: Record<string, unknown> = {};
-    for (const field of def.fields) {
+    for (const field of fields) {
       if (hidden.includes(field.key)) {
         // Fixed by the page: only sent when adding.
         if (!record && defaults && field.key in defaults)
@@ -254,7 +266,6 @@ function RecordForm({
   };
 
   const heading = title ?? (record ? `Edit ${def.noun}` : `New ${def.noun}`);
-  const listId = (key: string) => `community-${entity}-${key}-list`;
 
   return (
     <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
@@ -284,7 +295,7 @@ function RecordForm({
           disabled={readOnly || saving}
           className="m-0 grid min-w-0 gap-x-4 gap-y-3.5 border-0 p-0 sm:grid-cols-2"
         >
-          {def.fields
+          {fields
             .filter(
               (field) => !hidden.includes(field.key) && visible(field, values),
             )
@@ -395,17 +406,11 @@ function RecordForm({
                     </label>
                   );
                 case "date":
-                case "time":
                   return wrap(
-                    <input
-                      id={id}
-                      type={field.type}
-                      value={text}
-                      onChange={(event) => set(field.key, event.target.value)}
-                      required={field.required}
-                      className={inputClass()}
-                    />,
+                    <DateField id={id} value={text} onChange={(next) => set(field.key, next)} required={field.required} />,
                   );
+                case "time":
+                  return wrap(<TimeField id={id} value={text} onChange={(next) => set(field.key, next)} />);
                 case "owner":
                 case "channel":
                 case "text": {
@@ -426,29 +431,16 @@ function RecordForm({
                           }));
                   return wrap(
                     <>
-                      <input
+                      <SuggestInput
                         id={id}
                         type="text"
                         value={text}
-                        onChange={(event) => set(field.key, event.target.value)}
+                        onChange={(next) => set(field.key, next)}
+                        options={suggestions}
                         maxLength={field.max ?? 200}
                         required={field.required}
                         placeholder={field.placeholder}
-                        list={
-                          suggestions.length ? listId(field.key) : undefined
-                        }
-                        autoComplete="off"
-                        className={inputClass()}
                       />
-                      {suggestions.length ? (
-                        <datalist id={listId(field.key)}>
-                          {suggestions.map((item) => (
-                            <option key={item.value} value={item.value}>
-                              {item.label}
-                            </option>
-                          ))}
-                        </datalist>
-                      ) : null}
                     </>,
                   );
                 }

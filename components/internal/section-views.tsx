@@ -7,7 +7,7 @@ import {
   CaretRight,
   EnvelopeSimple,
 } from "@phosphor-icons/react/dist/ssr";
-import { ROW_LIMIT, entryExtras, listView, recordView } from "@/lib/internal/data";
+import { ROW_LIMIT, entryEmails, entryExtras, listView, recordView } from "@/lib/internal/data";
 import { AUTOMATIC_SENDER, senderName } from "@/lib/internal/email-templates";
 import { programOf } from "@/lib/internal/program";
 import { blockedReason } from "@/lib/email-delivery";
@@ -97,12 +97,15 @@ export async function loadRecord(
   const section = SECTIONS[sectionKey];
   const [{ id }, query] = await Promise.all([params, searchParams]);
   const filters = parseFilters(section, query);
+  // The email log is read alongside the record instead of after it.
+  const emails = entryEmails(section, id);
+  emails.catch(() => {});
   const [staff, view] = await Promise.all([
     requireSection(section),
     recordView(section, id, filters),
   ]);
   if (!view) notFound();
-  const extras = await entryExtras(section, view.record);
+  const extras = await entryExtras(section, view.record, emails);
   return {
     ...view,
     ...extras,
@@ -192,7 +195,7 @@ export function RecordView({
       </div>
 
       <Card className="mb-5">
-        <div className="flex flex-wrap items-start gap-4 p-5">
+        <div className="flex flex-wrap items-start gap-4 p-4 sm:p-5">
           <Avatar name={name} email={email} size={48} />
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2.5">
@@ -208,7 +211,8 @@ export function RecordView({
               ))}
             </div>
           </div>
-          <div className="flex flex-wrap gap-2">
+          {/* Phones: the buttons get their own row, so the name keeps the width. */}
+          <div className="flex flex-wrap gap-2 max-sm:basis-full">
             {email && data.canEdit && section.statuses ? (
               <EmailComposer
                 sectionKey={sectionKey}

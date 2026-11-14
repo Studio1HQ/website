@@ -3,13 +3,14 @@ import { cache } from "react";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { accessFor } from "@/lib/internal/members";
-import { teamAccessFor } from "@/lib/internal/team/people";
-import type { TeamPerson } from "@/lib/internal/team/shared";
+import { ensureOwnersOnTeam, teamAccessFor } from "@/lib/internal/team/people";
+import { displayName, type TeamPerson } from "@/lib/internal/team/shared";
 import {
   atLeast,
   blogAccess,
   communityAccess,
   hiringLevel,
+  isOwner,
   isStaffEmail,
   type BlogAccess,
   type CommunityAccess,
@@ -21,6 +22,8 @@ import { SESSION_COOKIE, devBypassEmail, readSession } from "@/lib/internal/toke
 
 export type Staff = {
   email: string;
+  /** Their own name from their member row, or "" (the team list's name wins; see staffName). */
+  name: string;
   /** Every role this person has; empty until an admin approves them. */
   roles: RoleKey[];
   /** Their level on the application pipelines, or null for none. */
@@ -42,7 +45,7 @@ export type Staff = {
 
 type BaseStaff = Omit<Staff, "person" | "interns">;
 
-function withRoles(base: { email: string; localPreview: boolean }, roles: RoleKey[], status: Staff["status"]): BaseStaff {
+function withRoles(base: { email: string; name: string; localPreview: boolean }, roles: RoleKey[], status: Staff["status"]): BaseStaff {
   return {
     ...base,
     roles,
@@ -53,16 +56,37 @@ function withRoles(base: { email: string; localPreview: boolean }, roles: RoleKe
   };
 }
 
-/** Adds the team list: skipped for people turned off or never invited. */
-async function withTeam(staff: BaseStaff): Promise<Staff> {
+type TeamAccess = Awaited<ReturnType<typeof teamAccessFor>>;
+
+/** Adds the team list: left out for people turned off or never invited. */
+async function withTeam(staff: BaseStaff, team: TeamAccess): Promise<Staff> {
   if (staff.status === "disabled" || staff.status === "uninvited" || staff.status === "unknown") {
     return { ...staff, person: null, interns: [] };
   }
-  return { ...staff, ...(await teamAccessFor(staff.email)) };
+  // The founders are always on the team list (People, Payroll, My day): a
+  // founder who isn't there yet is added now. Normally this never runs.
+  if (staff.status === "owner" && !team.person) {
+    await ensureOwnersOnTeam();
+    return { ...staff, ...(await teamAccessFor(staff.email)) };
+  }
+  return { ...staff, ...team };
+}
+
+/** The name to show for someone: the team list's, else their own, else from the address. */
+export function staffName(staff: Pick<Staff, "email" | "name" | "person">) {
+  return displayName({ email: staff.email, name: staff.person?.name || staff.name });
 }
 
 export function isAdmin(staff: Pick<Staff, "roles">) {
   return staff.roles.includes("admin");
+}
+
+/**
+ * The Money section (payroll, expense claims, payments) is the founders'
+ * only, whatever other roles someone has.
+ */
+export function canSeeMoney(staff: Pick<Staff, "email" | "status">) {
+  return staff.status === "owner" && isOwner(staff.email);
 }
 
 /** True when someone has any way in: a role, the team list or interns to log. */
@@ -85,21 +109,23 @@ export const getStaff = cache(async (): Promise<Staff | null> => {
   }
   if (!email) return null;
 
-  const access = await accessFor(email);
-  const base = { email, localPreview };
+  // Read together: one round trip to the database instead of two in a row.
+  const [access, team] = await Promise.all([accessFor(email), teamAccessFor(email)]);
+  const base = { email, name: access.kind === "member" ? access.member.name : "", localPreview };
   switch (access.kind) {
     case "owner":
-      return withTeam(withRoles(base, ["admin"], "owner"));
+      return withTeam(withRoles(base, ["admin"], "owner"), team);
     case "member":
       return withTeam(
         access.member.status === "active" && access.member.roles.length
           ? withRoles(base, access.member.roles, "active")
           : withRoles(base, [], access.member.status === "disabled" ? "disabled" : "pending"),
+        team,
       );
     case "none":
-      return withTeam(withRoles(base, [], isStaffEmail(email) ? "pending" : "uninvited"));
+      return withTeam(withRoles(base, [], isStaffEmail(email) ? "pending" : "uninvited"), team);
     default:
-      return withTeam(withRoles(base, [], "unknown"));
+      return withTeam(withRoles(base, [], "unknown"), team);
   }
 });
 
@@ -110,7 +136,7 @@ export function areasFor(staff: Staff) {
   if (staff.blog) areas.push("blog");
   if (staff.community) areas.push("community");
   if (staff.person || staff.interns.length || isAdmin(staff)) areas.push("team");
-  if (isAdmin(staff)) areas.push("money");
+  if (canSeeMoney(staff)) areas.push("money");
   return areas;
 }
 
@@ -157,6 +183,13 @@ export async function requireStaff(minimum: Role = "viewer"): Promise<Staff & { 
   if (!staff.role) redirect(homeFor(staff));
   if (!atLeast(staff.role, minimum)) redirect("/internal?denied=1");
   return staff as Staff & { role: Role };
+}
+
+/** Money pages, actions and files: the founders only. */
+export async function requireOwner(): Promise<Staff> {
+  const staff = await requireMember();
+  if (!canSeeMoney(staff)) redirect(isAdmin(staff) ? "/internal?denied=1" : homeFor(staff));
+  return staff;
 }
 
 /**

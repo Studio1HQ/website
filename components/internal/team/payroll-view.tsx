@@ -262,14 +262,16 @@ export function PayrollView({
 
         {rows.length === 0 ? (
           <EmptyState icon={<Receipt size={20} />} title="Nobody on the team list yet">
-            Add employees and interns on People. Their payslips show up here.
+            The two founders are added on their own, and employees and interns come from People. Reload in a moment
+            if this stays empty.
           </EmptyState>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[820px] text-left text-[13px]">
               <thead>
                 <tr className="border-b border-[var(--i-line)] text-[12px] text-[var(--i-muted)]">
-                  <th className="px-5 py-2.5 font-normal">Person</th>
+                  {/* Phones: the person stays pinned while the figures scroll. */}
+                  <th className="px-5 py-2.5 font-normal max-md:sticky max-md:left-0 max-md:z-[1] max-md:bg-[var(--i-panel)] max-md:px-4">Person</th>
                   <th className="px-3 py-2.5 text-right font-normal">Paid days</th>
                   <th className="px-3 py-2.5 text-right font-normal">LOP</th>
                   <th className="px-3 py-2.5 text-right font-normal">Gross</th>
@@ -289,7 +291,7 @@ export function PayrollView({
                       onClick={() => setEditing(row)}
                       className="cursor-pointer border-b border-[var(--i-line)] last:border-b-0 hover:bg-[var(--i-hover)]"
                     >
-                      <td className="px-5 py-2.5">
+                      <td className="px-5 py-2.5 max-md:sticky max-md:left-0 max-md:z-[1] max-md:max-w-[11rem] max-md:bg-[var(--i-panel)] max-md:px-4 max-md:shadow-[1px_0_0_var(--i-line)]">
                         <button
                           type="button"
                           onClick={(event) => {
@@ -552,7 +554,7 @@ function PayslipEditor({
     <Dialog.Root open onOpenChange={(open) => (!open ? onClose() : undefined)}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px]" />
-        <Dialog.Content className="internal-pop internal-dialog fixed left-1/2 top-1/2 z-50 flex max-h-[92vh] w-[min(760px,calc(100vw-1.5rem))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border border-[var(--i-line)] bg-[var(--i-panel)] text-[var(--i-ink)] shadow-[var(--i-shadow-pop)]">
+        <Dialog.Content className="internal-pop internal-dialog fixed left-1/2 top-1/2 z-50 flex max-h-[92dvh] w-[min(760px,calc(100vw-1.5rem))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border border-[var(--i-line)] bg-[var(--i-panel)] text-[var(--i-ink)] shadow-[var(--i-shadow-pop)]">
           <div className="flex items-center justify-between gap-3 border-b border-[var(--i-line)] px-5 py-3.5">
             <div className="flex min-w-0 items-center gap-3">
               <Avatar name={name} email={row.person.email} size={32} src={photoUrl(row.person)} />

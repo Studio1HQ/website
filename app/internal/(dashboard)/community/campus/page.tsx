@@ -49,7 +49,7 @@ export default async function CampusPage({
   const canEdit = staff.community === "manager";
   const [partners, events, refs, owners] = await Promise.all([
     loadPartners(),
-    loadEvents(),
+    loadEvents(staff.community),
     canEdit ? refOptions(["partner"]) : Promise.resolve({}),
     canEdit ? ownerChoices() : Promise.resolve([]),
   ]);

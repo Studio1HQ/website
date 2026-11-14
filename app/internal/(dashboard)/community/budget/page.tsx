@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { requireCommunity } from "@/lib/internal/session";
 import {
   incomplete,
@@ -32,6 +33,7 @@ import {
   subtractMoney,
   turnouts,
 } from "@/lib/internal/community/stats";
+import { seesMoney } from "@/lib/internal/community/visibility";
 import { Card, CardTitle, PageHeader } from "@/components/internal/ui";
 import {
   ExpenseList,
@@ -59,6 +61,8 @@ export default async function BudgetPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const [staff, params] = await Promise.all([requireCommunity(), searchParams]);
+  // The whole page is money: managers and admins only. Before any read.
+  if (!seesMoney(staff.community)) redirect("/internal/community");
   const canEdit = staff.community === "manager";
   const [
     events,
@@ -70,10 +74,10 @@ export default async function BudgetPage({
     refs,
     owners,
   ] = await Promise.all([
-    loadEvents(),
-    loadExpenses(),
-    loadSponsorships(),
-    loadSponsors(),
+    loadEvents(staff.community),
+    loadExpenses(staff.community),
+    loadSponsorships(staff.community),
+    loadSponsors(staff.community),
     loadGuestCounts(),
     loadHackathonCounts(),
     refOptions(["event", "sponsor"]),

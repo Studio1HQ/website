@@ -1,8 +1,11 @@
+import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { HACKATHONS, getHackathon } from "@/data/hackathons";
 import { selectRows, signedFileUrl, updateRows } from "@/lib/supabase-server";
 import { todayKey } from "@/lib/internal/community/schema";
 import { PLAN_TEMPLATES, emailPlan, planSendTime, type PlanStep } from "@/lib/internal/hackathon-plan";
 import { blockedAddresses, deliveriesFor, type Delivery } from "@/lib/email-delivery";
+import { SECTIONS_KEEP_SECONDS, SECTIONS_TAG, sectionsChanged } from "@/lib/internal/section-cache";
 import { isAdmin, requireMember, requireSection } from "@/lib/internal/session";
 import {
   facetOptions,
@@ -102,7 +105,7 @@ function fail(section: Section, message: string): Loaded {
  * Every row of a section. `tags` is read when the table has it; before the
  * dashboard migration runs, the list still loads without tags.
  */
-async function loadSection(section: Section, full = false): Promise<Loaded> {
+async function readSection(section: Section, full: boolean): Promise<Loaded> {
   const columns = new Set(section.listSelect);
   for (const facet of section.facets) {
     columns.add(facet.column);
@@ -119,6 +122,42 @@ async function loadSection(section: Section, full = false): Promise<Loaded> {
   if (!result.ok) return fail(section, result.message);
   const tagsReady = section.tags && full && result.rows.some((row) => "tags" in row);
   return { ...result, tagsReady };
+}
+
+/**
+ * A section's list read, kept for a short while across requests: filtering,
+ * paging, opening an entry and the Overview all work from the same rows, so
+ * they'd otherwise each read the whole table again. Anything that writes to
+ * a form table calls sectionsChanged(), which drops it at once; the time
+ * limit only covers changes made outside the site. A failed read throws, so
+ * it's never kept.
+ */
+const keptSection = unstable_cache(
+  async (key: SectionKey) => {
+    const loaded = await readSection(SECTIONS[key], false);
+    if (!loaded.ok) throw new Error(loaded.message);
+    return loaded;
+  },
+  ["internal-section"],
+  { tags: [SECTIONS_TAG], revalidate: SECTIONS_KEEP_SECONDS },
+);
+
+/**
+ * The same, read once per request however many parts of a page ask: the
+ * hackathons page's tabs and its list share one read instead of two. The
+ * full read (every column, for exports) is never kept.
+ */
+const loadSectionOnce = cache(async (key: SectionKey, full: boolean): Promise<Loaded> => {
+  if (full) return readSection(SECTIONS[key], true);
+  try {
+    return await keptSection(key);
+  } catch (error) {
+    return { ok: false, message: error instanceof Error ? error.message : String(error) };
+  }
+});
+
+function loadSection(section: Section, full = false): Promise<Loaded> {
+  return loadSectionOnce(section.key, full);
 }
 
 export type ListView =
@@ -264,10 +303,20 @@ export async function updateEntries(
   section: Section,
   ids: string[],
   change: EntryChange,
-): Promise<
+): Promise<EntriesResult> {
+  try {
+    return await applyToEntries(section, ids, change);
+  } finally {
+    // After the last write, however it ended: lists read fresh rows again.
+    sectionsChanged();
+  }
+}
+
+type EntriesResult =
   | { ok: true; tags?: Record<string, string[]> }
-  | { ok: false; message: string; /** Part of the change was saved. */ saved?: boolean }
-> {
+  | { ok: false; message: string; /** Part of the change was saved. */ saved?: boolean };
+
+async function applyToEntries(section: Section, ids: string[], change: EntryChange): Promise<EntriesResult> {
   const staff = await requireSection(section, "edit");
   const unique = [...new Set(ids)];
   if (
@@ -384,21 +433,32 @@ export async function resumeUrl(id: string): Promise<string | null> {
   return signed.url;
 }
 
-async function count(table: string, filters: Record<string, string> = {}) {
+async function count(table: string, filters: Record<string, string> = {}, column = "*") {
   const result = await selectRows(
     table,
-    new URLSearchParams({ select: "*", limit: "1", ...filters }),
+    new URLSearchParams({ select: column, limit: "1", ...filters }),
     { count: true },
   );
   return result.ok ? (result.total ?? 0) : null;
 }
+
+/** A pipeline's "New" count for the sidebar, kept like the lists are. */
+const keptNewCount = unstable_cache(
+  async (table: string) => {
+    const total = await count(table, { review_status: "eq.new" }, "id");
+    if (total === null) throw new Error(`counting ${table} failed`);
+    return total;
+  },
+  ["internal-new-count"],
+  { tags: [SECTIONS_TAG], revalidate: SECTIONS_KEEP_SECONDS },
+);
 
 /** "New" entries per pipeline this person can open, for the sidebar. */
 export async function awaitingCounts(): Promise<Partial<Record<SectionKey, number>>> {
   const staff = await requireMember();
   const counts = await Promise.all(
     readableSections(staff, PIPELINES).map(
-      async (key) => [key, await count(SECTIONS[key].table, { review_status: "eq.new" })] as const,
+      async (key) => [key, await keptNewCount(SECTIONS[key].table).catch(() => null)] as const,
     ),
   );
   return Object.fromEntries(counts.filter(([, value]) => value !== null));
@@ -439,9 +499,9 @@ export async function overview() {
     Promise.all(
       readable.map(async (key): Promise<PipelineStats> => {
         const section = SECTIONS[key];
-        const result = await loadAll(section.table, "review_status,created_at", "created_at.desc,id.desc");
+        // The same rows the section's list uses: no read of its own.
+        const result = await loadSection(section);
         if (!result.ok) {
-          console.error(`[internal] overview of ${section.table} failed: ${result.message}`);
           return { key, ok: false, total: 0, awaiting: 0, lastWeek: 0, overdue: 0, byStatus: [] };
         }
         const counts = new Map<string, number>();
@@ -454,7 +514,7 @@ export async function overview() {
           ok: true,
           total: result.rows.length,
           awaiting: counts.get("new") ?? 0,
-          lastWeek: result.rows.filter((row) => Date.parse(String(row.created_at)) >= weekAgo)
+          lastWeek: result.rows.filter((row) => Date.parse(String(row[section.dateColumn])) >= weekAgo)
             .length,
           overdue: result.rows.filter((row) => isOverdue(row, section)).length,
           byStatus: (section.statuses ?? []).map((status) => ({
@@ -524,15 +584,9 @@ export async function hackathonBreakdown(): Promise<
 > {
   await requireSection(SECTIONS.hackathons);
   const section = SECTIONS.hackathons;
-  const result = await loadAll(
-    section.table,
-    "hackathon_slug,hackathon_name,review_status,created_at",
-    "created_at.desc,id.desc",
-  );
-  if (!result.ok) {
-    console.error(`[internal] hackathon breakdown failed: ${result.message}`);
-    return { ok: false, message: "Couldn't load the hackathon registrations." };
-  }
+  // The list below the tabs reads the same rows: share that read.
+  const result = await loadSection(section);
+  if (!result.ok) return { ok: false, message: "Couldn't load the hackathon registrations." };
   const today = todayKey();
   const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
   const bySlug = new Map<string, HackathonStats>();
@@ -624,6 +678,7 @@ export async function markHackathonNoShows(
     console.error(`[internal] marking ${slug} no-shows failed: ${result.message}`);
     return { ok: false, message: "Couldn't mark the registrations as no-shows. Try again in a minute." };
   }
+  sectionsChanged();
   return { ok: true, count: result.count ?? 0 };
 }
 
@@ -734,28 +789,43 @@ export type OtherEntry = {
   createdAt: string;
 };
 
+/** Emails sent to one entry from the dashboard, newest first; none on a failed read. */
+export async function entryEmails(section: Section, id: string): Promise<EmailLogEntry[]> {
+  await requireSection(section);
+  if (!UUID_PATTERN.test(id)) return [];
+  const log = await selectRows(
+    "internal_email_log",
+    new URLSearchParams({
+      // "*": works before and after the delivery migration adds columns.
+      select: "*",
+      source_table: `eq.${section.table}`,
+      record_id: `eq.${id}`,
+      order: "created_at.desc",
+      limit: "50",
+    }),
+  );
+  return log.ok ? (log.rows as unknown as EmailLogEntry[]) : [];
+}
+
 /**
  * What an entry page shows besides the record: emails sent from the
  * dashboard and the same person's other entries on any form. Each part
  * fails quietly. The résumé isn't here: the page loads it through
  * /internal/jobs/[id]/resume, which checks the session on every fetch.
  */
-export async function entryExtras(section: Section, record: Row) {
+export async function entryExtras(section: Section, record: Row, emails?: ReturnType<typeof entryEmails>) {
   const staff = await requireSection(section);
   const id = String(record.id);
   const email = String(record.email ?? "").toLowerCase();
-  const [log, others] = await Promise.all([
-    selectRows(
-      "internal_email_log",
-      new URLSearchParams({
-        // "*": works before and after the delivery migration adds columns.
-        select: "*",
-        source_table: `eq.${section.table}`,
-        record_id: `eq.${id}`,
-        order: "created_at.desc",
-        limit: "50",
-      }),
-    ),
+  // The email log only needs the id, so a page can start it (entryEmails)
+  // while the record itself is still being read.
+  const emailLog = emails ?? entryEmails(section, id);
+  const sentWithDeliveries = emailLog.then(async (sent) => ({
+    sent,
+    deliveries: await deliveriesFor(sent.map((entry) => entry.resend_id ?? "").filter(Boolean)),
+  }));
+  const [{ sent, deliveries }, others, blocked] = await Promise.all([
+    sentWithDeliveries,
     email
       ? selectRows(
           "submissions",
@@ -767,10 +837,6 @@ export async function entryExtras(section: Section, record: Row) {
           }),
         )
       : Promise.resolve({ ok: true as const, rows: [] as Row[], total: 0 }),
-  ]);
-  const sent = log.ok ? (log.rows as unknown as EmailLogEntry[]) : [];
-  const [deliveries, blocked] = await Promise.all([
-    deliveriesFor(sent.map((entry) => entry.resend_id ?? "").filter(Boolean)),
     email ? blockedAddresses([email]) : Promise.resolve(new Map<string, Delivery>()),
   ]);
   return {

@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { insertRow, selectRows, updateRows } from "@/lib/supabase-server";
 import {
   OWNERS,
@@ -21,6 +22,8 @@ export type MemberStatus = "pending" | "active" | "disabled";
 
 export type Member = {
   email: string;
+  /** What they call themselves; "" until they say (or before the profiles migration). */
+  name: string;
   roles: RoleKey[];
   status: MemberStatus;
   requested_at: string;
@@ -53,6 +56,7 @@ function toMember(row: Record<string, unknown>): Member | null {
     : cleanRoles(row.email, [LEGACY[String(row.role)]]);
   return {
     email: row.email,
+    name: typeof row.name === "string" ? row.name.trim() : "",
     roles,
     status,
     requested_at: String(row.requested_at ?? ""),
@@ -103,6 +107,25 @@ export async function requestAccess(email: string) {
     : { ok: false as const, message: result.message };
 }
 
+/**
+ * Saves the name someone typed for themselves (already cleaned). `found` is
+ * false when they have no member row: owners and people who are only on the
+ * team list keep their name there.
+ */
+export async function setMemberName(email: string, name: string) {
+  const result = await updateRows(TABLE, new URLSearchParams({ email: `eq.${email}` }), { name }, "email");
+  if (!result.ok) {
+    console.error(`[internal] saving a name on ${TABLE} failed: ${result.message}`);
+    return {
+      ok: false as const,
+      message: result.message.includes("name")
+        ? "Names aren't set up yet: the profiles migration (20261115100000_member_profiles.sql) has to run in Supabase first."
+        : "Couldn't save your name. Try again in a minute.",
+    };
+  }
+  return { ok: true as const, found: result.count > 0 };
+}
+
 export async function touchMember(email: string) {
   if (isOwner(email)) return;
   await updateRows(
@@ -135,14 +158,14 @@ export async function membersWith(roles: readonly RoleKey[]): Promise<string[]> 
   return [...new Set([...owners, ...found])];
 }
 
-export async function pendingCount(): Promise<number> {
+export const pendingCount = cache(async (): Promise<number> => {
   const result = await selectRows(
     TABLE,
     new URLSearchParams({ select: "email", status: "eq.pending", limit: "1" }),
     { count: true },
   );
   return result.ok ? (result.total ?? 0) : 0;
-}
+});
 
 /** The legacy single-role column, kept in step for old code. */
 function legacyRole(roles: RoleKey[]) {

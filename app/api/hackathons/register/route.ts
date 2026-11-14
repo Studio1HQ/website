@@ -1,3 +1,4 @@
+import { sectionsChanged } from "@/lib/internal/section-cache";
 import { randomUUID } from "crypto";
 import { NextResponse, after } from "next/server";
 import { getHackathon } from "@/data/hackathons";
@@ -137,6 +138,8 @@ export async function POST(request: Request) {
       { status: 502 },
     );
   }
+  // The dashboard keeps its lists for a moment: show this one straight away.
+  sectionsChanged();
 
   after(() =>
     sendConfirmation("hackathons", { id, name: values.name, email: values.email, program: hackathon.name }),

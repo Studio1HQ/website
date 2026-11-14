@@ -9,6 +9,7 @@ import {
   loadActivity,
   loadContacts,
   loadEvents,
+  loadSponsorEventIds,
   loadSponsorships,
   loadTasks,
   ownerChoices,
@@ -21,6 +22,7 @@ import {
   todayKey,
   type Sponsor,
 } from "@/lib/internal/community/schema";
+import { seesMoney } from "@/lib/internal/community/visibility";
 import {
   Card,
   CardTitle,
@@ -45,6 +47,7 @@ import {
   Owner,
   Stat,
 } from "@/components/internal/community/ui";
+import { cn } from "@/lib/utils";
 
 export async function generateMetadata({
   params,
@@ -52,8 +55,8 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   // The title is data too: check the role before reading the record.
-  const [, { id }] = await Promise.all([requireCommunity(), params]);
-  const sponsor = await getRecord<Sponsor>("sponsor", id);
+  const [staff, { id }] = await Promise.all([requireCommunity(), params]);
+  const sponsor = await getRecord<Sponsor>("sponsor", id, staff.community);
   return { title: sponsor?.name ?? "Sponsor" };
 }
 
@@ -63,17 +66,20 @@ export default async function SponsorPage({
   params: Promise<{ id: string }>;
 }) {
   const [staff, { id }] = await Promise.all([requireCommunity(), params]);
-  const sponsor = await getRecord<Sponsor>("sponsor", id);
+  const sponsor = await getRecord<Sponsor>("sponsor", id, staff.community);
   if (!sponsor) notFound();
   const canEdit = staff.community === "manager";
+  // Interns: no ask, no sponsorships. The loaders already leave the money
+  // out for them; this hides the empty cards.
+  const showMoney = seesMoney(staff.community);
   const today = todayKey();
 
   const [contacts, deals, events, tasks, activity, refs, owners] =
     await Promise.all([
       loadContacts({ sponsor_id: sponsor.id }),
-      loadSponsorships({ sponsor_id: sponsor.id }),
-      loadEvents(),
-      loadTasks({ sponsor_id: sponsor.id }),
+      loadSponsorships(staff.community, { sponsor_id: sponsor.id }),
+      loadEvents(staff.community),
+      loadTasks(staff, { sponsor_id: sponsor.id }),
       loadActivity({ sponsor_id: sponsor.id }),
       refOptions(["event", "sponsor", "partner"]),
       ownerChoices(),
@@ -86,9 +92,15 @@ export default async function SponsorPage({
     (events.ok ? events.rows : []).map((event) => [event.id, event.name]),
   );
   // Events this sponsor backs: each has a report with their name on it.
-  const sponsoredEvents = [
-    ...new Set(live.map((deal) => deal.event_id).filter((eventId): eventId is string => Boolean(eventId))),
-  ].filter((eventId) => eventNames[eventId]);
+  // Interns get no sponsorship rows, so their links come from the ids alone.
+  const backed = showMoney ? null : await loadSponsorEventIds(sponsor.id);
+  const sponsoredEvents = (
+    backed
+      ? backed.ok
+        ? backed.rows
+        : []
+      : [...new Set(live.map((deal) => deal.event_id).filter((eventId): eventId is string => Boolean(eventId)))]
+  ).filter((eventId) => eventNames[eventId]);
 
   return (
     <>
@@ -137,34 +149,55 @@ export default async function SponsorPage({
         }
       />
 
-      <LoadNotice show={incomplete(contacts, deals, events, tasks, activity)} />
-      <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Stat
-          label="Asking for"
-          value={
-            sponsor.ask_amount !== null
-              ? formatTotals({ [sponsor.currency]: sponsor.ask_amount })
-              : "—"
-          }
-          note={
-            sponsor.proposal_sent_on
-              ? `Proposal sent ${formatDay(sponsor.proposal_sent_on, today)}`
-              : "No proposal sent yet"
-          }
-        />
-        <Stat
-          label="Committed"
-          value={formatTotals(sumMoney(live))}
-          note={`${live.length} ${live.length === 1 ? "sponsorship" : "sponsorships"}`}
-          accent={live.length > 0}
-        />
-        <Stat
-          label="Received"
-          value={formatTotals(
-            sumMoney(dealRows.filter((deal) => deal.status === "paid")),
-          )}
-          note={`${formatTotals(sumMoney(dealRows.filter((deal) => deal.status === "invoiced")))} invoiced, not paid`}
-        />
+      <LoadNotice show={incomplete(contacts, deals, events, tasks, activity, backed)} />
+      <div
+        className={cn(
+          "mb-6 grid grid-cols-2 gap-3",
+          showMoney && "lg:grid-cols-4",
+        )}
+      >
+        {showMoney ? (
+          <>
+            <Stat
+              label="Asking for"
+              value={
+                sponsor.ask_amount !== null
+                  ? formatTotals({ [sponsor.currency]: sponsor.ask_amount })
+                  : "—"
+              }
+              note={
+                sponsor.proposal_sent_on
+                  ? `Proposal sent ${formatDay(sponsor.proposal_sent_on, today)}`
+                  : "No proposal sent yet"
+              }
+            />
+            <Stat
+              label="Committed"
+              value={formatTotals(sumMoney(live))}
+              note={`${live.length} ${live.length === 1 ? "sponsorship" : "sponsorships"}`}
+              accent={live.length > 0}
+            />
+            <Stat
+              label="Received"
+              value={formatTotals(
+                sumMoney(dealRows.filter((deal) => deal.status === "paid")),
+              )}
+              note={`${formatTotals(sumMoney(dealRows.filter((deal) => deal.status === "invoiced")))} invoiced, not paid`}
+            />
+          </>
+        ) : (
+          <Stat
+            label="Proposal"
+            value={
+              sponsor.proposal_sent_on
+                ? formatDay(sponsor.proposal_sent_on, today)
+                : "—"
+            }
+            note={
+              sponsor.proposal_sent_on ? "Sent" : "No proposal sent yet"
+            }
+          />
+        )}
         <Stat
           label="Last contact"
           value={
@@ -192,19 +225,21 @@ export default async function SponsorPage({
               on: sponsor.follow_up_on,
             }}
           />
-          <SponsorshipList
-            sponsorships={dealRows}
-            sponsorNames={{ [sponsor.id]: sponsor.name }}
-            eventNames={eventNames}
-            canEdit={canEdit}
-            refs={refs}
-            defaults={{
-              sponsor_id: sponsor.id,
-              currency: sponsor.currency,
-              amount: sponsor.ask_amount ?? "",
-            }}
-            hidden={["sponsor_id"]}
-          />
+          {showMoney ? (
+            <SponsorshipList
+              sponsorships={dealRows}
+              sponsorNames={{ [sponsor.id]: sponsor.name }}
+              eventNames={eventNames}
+              canEdit={canEdit}
+              refs={refs}
+              defaults={{
+                sponsor_id: sponsor.id,
+                currency: sponsor.currency,
+                amount: sponsor.ask_amount ?? "",
+              }}
+              hidden={["sponsor_id"]}
+            />
+          ) : null}
           {sponsoredEvents.length ? (
             <Card>
               <CardTitle>Reports for {sponsor.name}</CardTitle>

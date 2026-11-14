@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { emailAddress } from "@/lib/internal/token";
-import { isAdmin, requireMember } from "@/lib/internal/session";
+import { canSeeMoney, requireMember } from "@/lib/internal/session";
 import { draftPayslip, getPayslip } from "@/lib/internal/team/payroll";
 import { payslipFileName, payslipPdf } from "@/lib/internal/team/payslip-pdf";
 import { isMonthKey, type Payslip } from "@/lib/internal/team/shared";
@@ -21,13 +21,13 @@ export async function GET(request: NextRequest, { params }: Props) {
   let slip: Payslip | null = null;
 
   if (id === "draft") {
-    if (!isAdmin(staff)) return notFound();
+    if (!canSeeMoney(staff)) return notFound();
     const email = emailAddress(request.nextUrl.searchParams.get("email"));
     const month = request.nextUrl.searchParams.get("month");
     if (email && isMonthKey(month)) slip = await draftPayslip(email, month);
   } else {
     slip = await getPayslip(id);
-    if (slip && !isAdmin(staff) && !(slip.email === staff.email && slip.status === "sent")) slip = null;
+    if (slip && !canSeeMoney(staff) && !(slip.email === staff.email && slip.status === "sent")) slip = null;
   }
   if (!slip) return notFound();
 

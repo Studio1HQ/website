@@ -264,7 +264,10 @@ export function PaymentsView({
         <div
           className={cn(
             "grid gap-2.5 sm:gap-4",
-            showFlagged ? "grid-cols-3" : "grid-cols-2",
+            // Phones: two across, and "Needs a look" takes its own row.
+            showFlagged
+              ? "grid-cols-2 sm:grid-cols-3 [&>*:nth-child(3)]:col-span-2 sm:[&>*:nth-child(3)]:col-span-1"
+              : "grid-cols-2",
           )}
         >
           <Summary

@@ -22,9 +22,10 @@ export default async function TasksPage() {
   const staff = await requireCommunity();
   const canEdit = staff.community === "manager";
   const [tasks, events, sponsors, partners, refs, owners] = await Promise.all([
-    loadTasks(),
-    loadEvents(),
-    loadSponsors(),
+    // Every task for managers; for an intern only their own, cut on the server.
+    loadTasks(staff),
+    loadEvents(staff.community),
+    loadSponsors(staff.community),
     loadPartners(),
     refOptions(["event", "sponsor", "partner"]),
     ownerChoices(),

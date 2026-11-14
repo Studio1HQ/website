@@ -38,6 +38,7 @@ import {
   phaseOf,
   turnouts,
 } from "@/lib/internal/community/stats";
+import { seesMoney } from "@/lib/internal/community/visibility";
 import { Card, CardTitle, PageHeader } from "@/components/internal/ui";
 import {
   BarList,
@@ -105,6 +106,9 @@ export default async function AnalyticsPage({
 }) {
   const [staff, params] = await Promise.all([requireCommunity(), searchParams]);
   const canEdit = staff.community === "manager";
+  // Interns: no costs, asks or sponsorship. The loaders already leave the
+  // money out for them; this hides the empty stat, notes and columns.
+  const showMoney = seesMoney(staff.community);
   const [
     events,
     guestCounts,
@@ -118,16 +122,16 @@ export default async function AnalyticsPage({
     expenses,
     partners,
   ] = await Promise.all([
-    loadEvents(),
+    loadEvents(staff.community),
     loadGuestCounts(),
     loadHackathonCounts(),
     loadMetrics(),
     peopleTotals(),
     peopleByMonth(),
     subscribersByMonth(),
-    loadSponsors(),
-    loadSponsorships(),
-    loadExpenses(),
+    loadSponsors(staff.community),
+    loadSponsorships(staff.community),
+    loadExpenses(staff.community),
     loadPartners(),
   ]);
 
@@ -141,7 +145,11 @@ export default async function AnalyticsPage({
     <PageHeader
       eyebrow="Community"
       title="Analytics"
-      description="How the community is growing, how events perform, and where the money and partners come from."
+      description={
+        showMoney
+          ? "How the community is growing, how events perform, and where the money and partners come from."
+          : "How the community is growing, how events perform, and where the partners come from."
+      }
       actions={
         canEdit && metrics.ok ? (
           <GrowthForm
@@ -393,7 +401,12 @@ export default async function AnalyticsPage({
         ))}
       </nav>
 
-      <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-5">
+      <div
+        className={cn(
+          "mb-6 grid grid-cols-2 gap-3",
+          showMoney ? "lg:grid-cols-5" : "lg:grid-cols-4",
+        )}
+      >
         <Stat
           label="People reached"
           value={people ? people.people.toLocaleString("en-IN") : "—"}
@@ -422,11 +435,13 @@ export default async function AnalyticsPage({
           value={percent(averageShowUp)}
           note={`${signedUp.toLocaleString("en-IN")} signed up`}
         />
-        <Stat
-          label="Cost per attendee"
-          value={perHead ? formatTotals({ INR: perHead }) : "—"}
-          note={`${formatTotals(spentInRange)} spent`}
-        />
+        {showMoney ? (
+          <Stat
+            label="Cost per attendee"
+            value={perHead ? formatTotals({ INR: perHead }) : "—"}
+            note={`${formatTotals(spentInRange)} spent`}
+          />
+        ) : null}
       </div>
 
       <div className="mb-5 grid gap-5 xl:grid-cols-2">
@@ -541,8 +556,9 @@ export default async function AnalyticsPage({
                 label: stage.label,
                 value: count,
                 figure: count,
-                note:
-                  stage.value === "won"
+                note: !showMoney
+                  ? undefined
+                  : stage.value === "won"
                     ? formatTotals(sumMoney(dealRows))
                     : formatTotals(ask, ""),
               }))}
@@ -598,9 +614,13 @@ export default async function AnalyticsPage({
                 <th className="text-right">Signed up</th>
                 <th className="text-right">Attended</th>
                 <th className="text-right">Show-up</th>
-                <th className="text-right">Spent</th>
-                <th className="text-right">Per attendee</th>
-                <th className="text-right">Sponsorship</th>
+                {showMoney ? (
+                  <>
+                    <th className="text-right">Spent</th>
+                    <th className="text-right">Per attendee</th>
+                    <th className="text-right">Sponsorship</th>
+                  </>
+                ) : null}
               </>
             }
           >
@@ -644,19 +664,23 @@ export default async function AnalyticsPage({
                   <td className="text-right tabular-nums">
                     {percent(numbers.showUp)}
                   </td>
-                  <td className="whitespace-nowrap text-right tabular-nums">
-                    {formatTotals(eventMoney?.spent ?? {}, "—")}
-                  </td>
-                  <td className="whitespace-nowrap text-right tabular-nums">
-                    {head ? (
-                      formatTotals({ [event.currency]: head })
-                    ) : (
-                      <Muted>—</Muted>
-                    )}
-                  </td>
-                  <td className="whitespace-nowrap text-right tabular-nums">
-                    {formatTotals(eventMoney?.income ?? {}, "—")}
-                  </td>
+                  {showMoney ? (
+                    <>
+                      <td className="whitespace-nowrap text-right tabular-nums">
+                        {formatTotals(eventMoney?.spent ?? {}, "—")}
+                      </td>
+                      <td className="whitespace-nowrap text-right tabular-nums">
+                        {head ? (
+                          formatTotals({ [event.currency]: head })
+                        ) : (
+                          <Muted>—</Muted>
+                        )}
+                      </td>
+                      <td className="whitespace-nowrap text-right tabular-nums">
+                        {formatTotals(eventMoney?.income ?? {}, "—")}
+                      </td>
+                    </>
+                  ) : null}
                 </tr>
               );
             })}
@@ -667,8 +691,9 @@ export default async function AnalyticsPage({
           </p>
         )}
       </Card>
-      {inCurrency(spentInRange) !==
-      Object.values(spentInRange).reduce((sum, value) => sum + value, 0) ? (
+      {showMoney &&
+      inCurrency(spentInRange) !==
+        Object.values(spentInRange).reduce((sum, value) => sum + value, 0) ? (
         <p className="mt-3 text-[12px] text-[var(--i-faint)]">
           Cost per attendee counts rupee spend only.
         </p>

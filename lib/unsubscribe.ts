@@ -1,5 +1,5 @@
 import { baseUrl } from "@/lib/site";
-import { selectRows, updateRows } from "@/lib/supabase-server";
+import { deleteRows, selectRows, updateRows } from "@/lib/supabase-server";
 
 /**
  * Unsubscribe links for Studio1's email updates. Each link carries the
@@ -121,5 +121,14 @@ export async function unsubscribe(email: string) {
     if (!result.ok) return { ok: false as const, message: result.message };
     changed += result.count;
   }
+  // Contacts kept after a rejected application was deleted
+  // (lib/internal/retention.ts) are only kept until this moment.
+  // (kept_contacts has no id column: its key is the email.)
+  const kept = await deleteRows("kept_contacts", new URLSearchParams({ email: `eq.${address}` }), "email");
+  if (kept.ok) changed += kept.count;
+  // Before its migration runs there's no such table, and nothing kept: only
+  // that error (PostgREST PGRST205, Postgres 42P01) is let through. Anything
+  // else, like a missing grant, means the contact may still be there.
+  else if (!/"code":\s*"(PGRST205|42P01)"/.test(kept.message)) return { ok: false as const, message: kept.message };
   return { ok: true as const, changed };
 }

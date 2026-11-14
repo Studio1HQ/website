@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowRight, Paperclip, Receipt, Wallet, WarningCircle } from "@phosphor-icons/react/dist/ssr";
 import { Avatar, Card, CardTitle, Notice, PageHeader } from "@/components/internal/ui";
 import { Chip } from "@/components/internal/team/chips";
-import { requireStaff } from "@/lib/internal/session";
+import { requireOwner } from "@/lib/internal/session";
 import { listPayments, paymentTotals } from "@/lib/internal/team/payments";
 import { payrollMonth } from "@/lib/internal/team/payroll";
 import { listReimbursements } from "@/lib/internal/team/reimbursements";
@@ -74,10 +74,10 @@ function PaymentRow({ payment }: { payment: Payment }) {
 
 /**
  * The Money section's front page: what's left to pay, sponsor money to come
- * in, this month's payroll and the expense claims waiting. Admins only.
+ * in, this month's payroll and the expense claims waiting. Founders only.
  */
 export default async function MoneyPage() {
-  await requireStaff("admin");
+  await requireOwner();
   const month = monthOf(istNow().date);
   const [totals, due, payroll, claims] = await Promise.all([
     paymentTotals(),

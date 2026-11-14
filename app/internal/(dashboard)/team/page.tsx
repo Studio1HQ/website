@@ -5,7 +5,7 @@ import { requireStaff } from "@/lib/internal/session";
 import { TeamView } from "@/components/internal/team-view";
 import { Notice, PageHeader } from "@/components/internal/ui";
 
-export const metadata: Metadata = { title: "Team" };
+export const metadata: Metadata = { title: "Team & roles" };
 
 export default async function TeamPage() {
   const admin = await requireStaff("admin");
@@ -14,8 +14,8 @@ export default async function TeamPage() {
     <>
       <PageHeader
         eyebrow="Settings"
-        title="Team"
-        description="Anyone who signs in with an @studio1hq.com address waits here until Arindam or Amitesh approves them and picks their roles. Only they can invite people, change roles or turn access off."
+        title="Team & roles"
+        description="Add people and pick what each one can open. Anyone who signs in with an @studio1hq.com address has no access by default: they wait here until Arindam or Amitesh approves them with roles. Only the two of them can invite people, change roles or turn access off."
       />
       {members ? (
         <TeamView members={members} me={admin.email} canManage={isOwner(admin.email)} />

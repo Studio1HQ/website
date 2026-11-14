@@ -5,6 +5,7 @@ import { motion, useReducedMotion } from "motion/react";
 import {
   ArrowUpRight,
   GlobeSimple,
+  InstagramLogo,
   LinkedinLogo,
   XLogo,
 } from "@phosphor-icons/react";
@@ -85,6 +86,17 @@ const socials = (links: TeamMember["links"]) => [
     Icon: GlobeSimple,
     weight: "bold" as const,
   },
+  // Only for people who have one, so most cards keep three icons
+  ...(links?.instagram
+    ? [
+        {
+          href: links.instagram,
+          label: "Instagram",
+          Icon: InstagramLogo,
+          weight: "bold" as const,
+        },
+      ]
+    : []),
 ];
 
 function PersonCard({ member }: { member: TeamMember }) {

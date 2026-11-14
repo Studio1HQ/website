@@ -29,7 +29,7 @@ export default async function HackathonsPage({ searchParams }: Props) {
   const slug = selected.length === 1 ? selected[0] : null;
   const [breakdown, events, plan] = await Promise.all([
     hackathonBreakdown(),
-    loadEvents(),
+    loadEvents(staff.community),
     slug ? hackathonEmailPlan(slug) : Promise.resolve(null),
   ]);
   // Community events that collect this hackathon's site registrations.

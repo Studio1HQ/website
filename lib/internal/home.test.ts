@@ -23,10 +23,18 @@ function staff(over: Partial<Staff>): Staff {
 }
 
 describe("where each person's dashboard starts", () => {
-  it("gives admins the overview with every area", () => {
+  it("gives the founders the overview with every area, Money included", () => {
+    const founder = staff({ email: "arindam@studio1hq.com", status: "owner", roles: ["admin"], role: "admin", blog: "reviewer", community: "manager" });
+    expect(homeFor(founder)).toBe("/internal");
+    expect(areasFor(founder)).toEqual(["hiring", "blog", "community", "team", "money"]);
+  });
+
+  it("keeps Money from an admin who isn't a founder", () => {
     const admin = staff({ roles: ["admin"], role: "admin", blog: "reviewer", community: "manager" });
     expect(homeFor(admin)).toBe("/internal");
-    expect(areasFor(admin)).toEqual(["hiring", "blog", "community", "team", "money"]);
+    expect(areasFor(admin)).toEqual(["hiring", "blog", "community", "team"]);
+    // The status alone isn't enough either: it has to be a founder's address.
+    expect(areasFor(staff({ status: "owner", roles: ["admin"], role: "admin" }))).not.toContain("money");
   });
 
   it("sends single-area people straight to their area", () => {

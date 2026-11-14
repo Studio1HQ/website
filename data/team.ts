@@ -10,7 +10,13 @@ export type TeamMember = {
   role: string;
   /** Dithered portrait, ink dots on a transparent ground. */
   portrait?: string;
-  links?: { x?: string; linkedin?: string; website?: string };
+  links?: {
+    x?: string;
+    linkedin?: string;
+    website?: string;
+    /** Shown as a fourth icon only for people who have one. */
+    instagram?: string;
+  };
   /** A seat that isn't filled yet. */
   open?: boolean;
 };
@@ -72,7 +78,9 @@ export const TEAM: TeamTier[] = [
         role: "Developer Advocate",
         portrait: "/assets/team/kathank-raithatha.webp?v=11",
         links: {
+          x: "https://x.com/Kathank25",
           linkedin: "https://www.linkedin.com/in/kathank/",
+          instagram: "https://www.instagram.com/kathank_raithatha/",
         },
       },
       {
@@ -88,6 +96,22 @@ export const TEAM: TeamTier[] = [
           x: "https://x.com/bysoura",
           linkedin: "https://www.linkedin.com/in/souradeep-pradhan/",
           website: "https://souradeep.me/",
+        },
+      },
+      {
+        name: "Shivam Katare",
+        role: "Developer Relations",
+        portrait: "/assets/team/shivam-katare.webp?v=1",
+        links: {
+          linkedin: "https://www.linkedin.com/in/shivam-katare/",
+        },
+      },
+      {
+        name: "Indrajit Ari",
+        role: "Community Manager",
+        portrait: "/assets/team/indrajit-ari.webp?v=1",
+        links: {
+          x: "https://x.com/IndrajitAri",
         },
       },
     ],

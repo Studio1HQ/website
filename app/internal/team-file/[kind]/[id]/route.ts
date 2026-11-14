@@ -3,7 +3,7 @@ import { selectRows, signedFileUrl } from "@/lib/supabase-server";
 import { TEAM_BUCKET, readTeamFile } from "@/lib/internal/team/files";
 import { getPerson } from "@/lib/internal/team/people";
 import { getReimbursement } from "@/lib/internal/team/reimbursements";
-import { isAdmin, requireMember } from "@/lib/internal/session";
+import { canSeeMoney, requireMember } from "@/lib/internal/session";
 import { isUuid } from "@/lib/internal/team/shared";
 import { emailAddress } from "@/lib/internal/token";
 
@@ -55,11 +55,11 @@ export async function GET(_: NextRequest, { params }: Props) {
 
   if (kind === "receipt") {
     const item = await getReimbursement(id);
-    if (!item?.receipt_path || (item.email !== staff.email && !isAdmin(staff))) return notFound();
+    if (!item?.receipt_path || (item.email !== staff.email && !canSeeMoney(staff))) return notFound();
     return redirectTo(item.receipt_path);
   }
 
-  if (kind === "invoice" && isAdmin(staff) && isUuid(id)) {
+  if (kind === "invoice" && canSeeMoney(staff) && isUuid(id)) {
     const result = await selectRows<{ invoice_path: string | null }>(
       "payments",
       new URLSearchParams({ select: "invoice_path", id: `eq.${id}`, limit: "1" }),

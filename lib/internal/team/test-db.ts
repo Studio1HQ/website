@@ -183,7 +183,7 @@ export const fakeSupabase = {
       table,
       all.filter((row) => !gone.includes(row)),
     );
-    return { ok: true as const, count: gone.length };
+    return { ok: true as const, count: gone.length, rows: gone };
   },
 
   async uploadFile() {
@@ -192,7 +192,9 @@ export const fakeSupabase = {
   async downloadFile() {
     return { ok: false as const, notFound: true, message: "404" };
   },
-  async removeFiles() {},
+  async removeFiles() {
+    return true;
+  },
   async signedFileUrl() {
     return { ok: false as const, message: "test-db has no files" };
   },

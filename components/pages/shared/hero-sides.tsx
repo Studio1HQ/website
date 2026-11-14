@@ -36,7 +36,6 @@ import {
 } from "@/components/paper/paper-hero";
 import { INK, NIGHT, PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
-import { ReplyCard } from "@/components/pages/shared/paper-endorsement";
 
 /*
  * The service hero's flanks, set like the home hero's design-file artefacts:
@@ -229,6 +228,42 @@ function SearchCard() {
             );
           })}
         </ol>
+      </div>
+    </Shell>
+  );
+}
+
+/**
+ * Philip Vollet's public reply on X recommending Studio1 (10 Jul 2026),
+ * set as a paper card. The avatar is cropped from the original reply.
+ */
+function ReplyCard() {
+  return (
+    <Shell title="Reply on X" tag="Reply" tagIcon={XLogo}>
+      <div className="px-1">
+        <div className="flex items-center gap-2">
+          <Logo src="/assets/endorsements/philip-vollet.webp" size={28} />
+          <div className="min-w-0">
+            <p className="flex items-center gap-1 text-[12px] font-medium leading-tight text-[#141414]">
+              Philip Vollet
+              <SealCheck weight="fill" className="size-3.5 shrink-0" style={{ color: PRINT }} />
+            </p>
+            <p className="text-[10.5px] leading-tight text-[#141414]/50">@philipvollet</p>
+          </div>
+        </div>
+        <p className="mt-2 text-[14px] font-medium leading-[1.25] tracking-[-0.02em]">
+          “You will be in good hands! Highly recommended.”
+        </p>
+      </div>
+      <div className="mt-2.5 flex items-center gap-1.5 border-t border-[#141414]/10 px-1 pt-2 text-[10.5px] leading-tight text-[#141414]/55">
+        <Image
+          src="/assets/logos/weaviate-mark.svg"
+          alt=""
+          width={20}
+          height={12}
+          className="h-3 w-auto shrink-0"
+        />
+        Former VP of DevRel at Weaviate
       </div>
     </Shell>
   );
@@ -1012,7 +1047,7 @@ export function HeroWorkRow({ sides }: { sides: HeroSides }) {
 
 export const CONTENT_SIDES: HeroSides = {
   cards: [
-    { label: "reply / x", card: <ReplyCard />, wide: true },
+    { label: "reply / x", card: <ReplyCard /> },
     { label: "serp · toon vs json", card: <SearchCard /> },
   ],
   stats: [

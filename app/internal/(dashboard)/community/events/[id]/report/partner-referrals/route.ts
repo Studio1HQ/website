@@ -29,7 +29,7 @@ const COLUMNS = [
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const staff = await requireCommunity("manager");
   await requireSection(SECTIONS.hackathons, "export");
-  const event = await getRecord<CommunityEvent>("event", (await params).id);
+  const event = await getRecord<CommunityEvent>("event", (await params).id, staff.community);
   if (!event?.hackathon_slug) return new Response("Not found", { status: 404 });
   const registrations = await hackathonRegistrationsFor(event.hackathon_slug);
   if (!registrations.ok) return new Response(registrations.message, { status: 502 });

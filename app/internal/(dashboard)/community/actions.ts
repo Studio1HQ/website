@@ -24,18 +24,22 @@ import {
   channelKey,
   isDateKey,
   isEntityKey,
-  isOwnedBy,
   quickField,
   todayKey,
   type ActionResult,
   type CommunityEvent,
   type Task,
 } from "@/lib/internal/community/schema";
+import {
+  canActOnTask,
+  writesMoney,
+} from "@/lib/internal/community/visibility";
 
 /**
  * Community area writes. Server actions are public endpoints, so each one
- * checks the session: managers (and admins) change anything; viewers can
- * only move their own tasks along.
+ * checks the session: managers (and admins) change anything; interns (the
+ * viewer access) can only move their own tasks along. Every other write,
+ * money included (budgets, asks, sponsorships, expenses), is manager-only.
  */
 
 const DENIED: ActionResult = {
@@ -112,9 +116,11 @@ export async function setQuickField(
   if (!quick) return { ok: false, message: "That can't be changed here." };
   const staff = await requireCommunity();
   if (staff.community !== "manager") {
-    if (entity !== "task") return DENIED;
-    const task = await getRecord<Task>("task", id);
-    if (!task || !isOwnedBy(task.owner, staff.email))
+    // An intern: nothing but their own tasks, and nothing that is money.
+    if (entity !== "task" || writesMoney(entity, { [quick.key]: value }))
+      return DENIED;
+    const task = await getRecord<Task>("task", id, staff.community);
+    if (!task || !canActOnTask(task, staff))
       return { ok: false, message: "You can only move your own tasks." };
   }
   const result = await updateRecord(
@@ -314,7 +320,7 @@ export async function markRestNoShow(eventId: unknown): Promise<ActionResult> {
   const result = await markNoShows(eventId, staff.email);
   if (!result.ok) return result;
   // A hackathon event's site registrations are on its door list too.
-  const event = await getRecord<CommunityEvent>("event", eventId);
+  const event = await getRecord<CommunityEvent>("event", eventId, staff.community);
   let fromSite = 0;
   if (event?.hackathon_slug) {
     const site = await markHackathonNoShows(event.hackathon_slug);

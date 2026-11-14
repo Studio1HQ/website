@@ -270,6 +270,11 @@ export type FieldDef = {
   suggestions?: readonly string[];
   /** A select's value for new records, when it isn't the first option. */
   initial?: string;
+  /**
+   * A monetary detail: managers only. Community interns never get its
+   * value (see visibility.ts).
+   */
+  money?: boolean;
 };
 
 export type EntityKey =
@@ -291,6 +296,11 @@ export type EntityDef = {
   /** "event", for "New event" and "Event saved". */
   noun: string;
   fields: readonly FieldDef[];
+  /**
+   * Every row is a money record (a sponsorship, an expense): managers
+   * only. Community interns get none of its rows (see visibility.ts).
+   */
+  money?: boolean;
 };
 
 const NOTES: FieldDef = {
@@ -381,8 +391,8 @@ export const ENTITIES: Record<EntityKey, EntityDef> = {
         help: "Only when the guest list isn't kept here.",
       },
       { key: "attended_count", label: "Attended (typed in)", type: "int" },
-      { key: "budget", label: "Budget", type: "money" },
-      { key: "currency", label: "Currency", type: "currency" },
+      { key: "budget", label: "Budget", type: "money", money: true },
+      { key: "currency", label: "Currency", type: "currency", money: true },
       OWNER,
       {
         key: "recap_url",
@@ -550,8 +560,8 @@ export const ENTITIES: Record<EntityKey, EntityDef> = {
         max: 80,
         placeholder: "Dev tools, AI infra, cloud…",
       },
-      { key: "ask_amount", label: "Asking for", type: "money" },
-      { key: "currency", label: "Currency", type: "currency" },
+      { key: "ask_amount", label: "Asking for", type: "money", money: true },
+      { key: "currency", label: "Currency", type: "currency", money: true },
       {
         key: "proposal_url",
         label: "Proposal",
@@ -599,6 +609,7 @@ export const ENTITIES: Record<EntityKey, EntityDef> = {
     key: "sponsorship",
     table: "community_sponsorships",
     noun: "sponsorship",
+    money: true,
     fields: [
       {
         key: "sponsor_id",
@@ -614,8 +625,8 @@ export const ENTITIES: Record<EntityKey, EntityDef> = {
         ref: "event",
         help: "Blank for a general sponsorship.",
       },
-      { key: "amount", label: "Amount", type: "money" },
-      { key: "currency", label: "Currency", type: "currency" },
+      { key: "amount", label: "Amount", type: "money", money: true },
+      { key: "currency", label: "Currency", type: "currency", money: true },
       {
         key: "status",
         label: "Status",
@@ -639,6 +650,7 @@ export const ENTITIES: Record<EntityKey, EntityDef> = {
     key: "expense",
     table: "community_expenses",
     noun: "expense",
+    money: true,
     fields: [
       {
         key: "description",
@@ -662,8 +674,8 @@ export const ENTITIES: Record<EntityKey, EntityDef> = {
         type: "select",
         options: EXPENSE_CATEGORIES,
       },
-      { key: "amount", label: "Amount", type: "money" },
-      { key: "currency", label: "Currency", type: "currency" },
+      { key: "amount", label: "Amount", type: "money", money: true },
+      { key: "currency", label: "Currency", type: "currency", money: true },
       {
         key: "status",
         label: "Status",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition, type FormEvent, type ReactNode } from "react";
+import { DateField, MonthField } from "@/components/internal/pickers";
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "@phosphor-icons/react";
 import {
@@ -48,7 +49,7 @@ export function Modal({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px]" />
-        <Dialog.Content className="internal-pop internal-dialog fixed left-1/2 top-1/2 z-50 flex max-h-[92vh] w-[min(520px,calc(100vw-1.5rem))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border border-[var(--i-line)] bg-[var(--i-panel)] text-[var(--i-ink)] shadow-[var(--i-shadow-pop)]">
+        <Dialog.Content className="internal-pop internal-dialog fixed left-1/2 top-1/2 z-50 flex max-h-[92dvh] w-[min(520px,calc(100vw-1.5rem))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border border-[var(--i-line)] bg-[var(--i-panel)] text-[var(--i-ink)] shadow-[var(--i-shadow-pop)]">
           <form onSubmit={onSubmit} className="flex min-h-0 flex-1 flex-col">
             <div className="flex items-start justify-between gap-3 border-b border-[var(--i-line)] px-5 py-3.5">
               <div className="min-w-0">
@@ -281,7 +282,7 @@ export function PaymentDialog({
       </div>
       <div className="grid gap-3 sm:grid-cols-[1fr_1fr_6.5rem]">
         <FormField label="Month it's for">
-          <input type="month" value={month} onChange={(event) => setMonth(event.target.value)} required className={inputClass()} />
+          <MonthField value={month} onChange={setMonth} required />
         </FormField>
         <FormField label="Amount">
           <input
@@ -398,7 +399,7 @@ export function MarkPaidDialog({
           />
         </FormField>
         <FormField label={incoming ? "Received on" : "Paid on"}>
-          <input type="date" value={paidOn} max={today} onChange={(event) => setPaidOn(event.target.value)} required className={inputClass()} />
+          <DateField value={paidOn} max={today} onChange={setPaidOn} required />
         </FormField>
       </div>
       <FormField label="Reference" hint="UTR or transaction ID, optional">

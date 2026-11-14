@@ -44,6 +44,7 @@ import {
   sponsorshipsIn,
   turnouts,
 } from "@/lib/internal/community/stats";
+import { seesMoney } from "@/lib/internal/community/visibility";
 import {
   Card,
   CardTitle,
@@ -51,6 +52,7 @@ import {
   Notice,
   PageHeader,
 } from "@/components/internal/ui";
+import { cn } from "@/lib/utils";
 import { TaskList } from "@/components/internal/community/lists";
 import { QuickSelect } from "@/components/internal/community/quick-select";
 import {
@@ -79,6 +81,9 @@ export default async function CommunityOverview({
 }) {
   const [staff, params] = await Promise.all([requireCommunity(), searchParams]);
   const canEdit = staff.community === "manager";
+  // Interns: no money on this page, and only their own tasks (the loaders
+  // below already leave both out for them).
+  const money = seesMoney(staff.community);
   const today = todayKey();
   const [
     events,
@@ -95,14 +100,14 @@ export default async function CommunityOverview({
     owners,
     registrations,
   ] = await Promise.all([
-    loadEvents(),
+    loadEvents(staff.community),
     loadGuestCounts(),
     loadHackathonCounts(),
-    loadTasks(),
-    loadSponsors(),
+    loadTasks(staff),
+    loadSponsors(staff.community),
     loadPartners(),
-    loadExpenses(),
-    loadSponsorships(),
+    loadExpenses(staff.community),
+    loadSponsorships(staff.community),
     peopleTotals(),
     loadRecentActivity(8),
     refOptions(["event", "sponsor", "partner"]),
@@ -226,7 +231,7 @@ export default async function CommunityOverview({
       });
     }
   }
-  for (const expense of expenses.ok ? expenses.rows : []) {
+  for (const expense of money && expenses.ok ? expenses.rows : []) {
     if (
       expense.status === "to_pay" &&
       expense.due_on &&
@@ -247,7 +252,7 @@ export default async function CommunityOverview({
       sponsor.name,
     ]),
   );
-  for (const deal of sponsorships.ok ? sponsorships.rows : []) {
+  for (const deal of money && sponsorships.ok ? sponsorships.rows : []) {
     if (
       (deal.status === "pledged" || deal.status === "invoiced") &&
       deal.due_on &&
@@ -323,7 +328,12 @@ export default async function CommunityOverview({
       ) : null}
       <LoadNotice show={partial} />
 
-      <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div
+        className={cn(
+          "mb-6 grid grid-cols-2 gap-3",
+          money ? "lg:grid-cols-4" : "lg:grid-cols-3",
+        )}
+      >
         <Stat
           label="Coming up"
           value={nextMonth.length}
@@ -340,14 +350,16 @@ export default async function CommunityOverview({
           }
           href="/internal/community/analytics"
         />
+        {money ? (
+          <Stat
+            label={`Sponsorship ${year}`}
+            value={formatTotals(sumMoney(thisYearDeals))}
+            note={`${formatTotals(sumMoney(thisYearDeals.filter((deal) => deal.status === "paid")))} received`}
+            href="/internal/community/budget"
+          />
+        ) : null}
         <Stat
-          label={`Sponsorship ${year}`}
-          value={formatTotals(sumMoney(thisYearDeals))}
-          note={`${formatTotals(sumMoney(thisYearDeals.filter((deal) => deal.status === "paid")))} received`}
-          href="/internal/community/budget"
-        />
-        <Stat
-          label="Open tasks"
+          label={canEdit ? "Open tasks" : "My open tasks"}
           value={openTasks.length}
           note={lateTasks.length ? `${lateTasks.length} late` : "None late"}
           accent={lateTasks.length > 0}

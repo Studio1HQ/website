@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireStaff } from "@/lib/internal/session";
+import { requireOwner } from "@/lib/internal/session";
 import {
   addPayee,
   addPayment,
@@ -17,7 +17,7 @@ import {
 import { isUuid, type TeamResult } from "@/lib/internal/team/shared";
 
 /*
- * The Payments page's changes. Admins only; server actions are public
+ * The Payments page's changes. Founders only; server actions are public
  * endpoints, so every input is checked again here. Each one refreshes the
  * whole dashboard so the sidebar's "to pay" count stays right.
  */
@@ -33,7 +33,7 @@ function done(result: TeamResult) {
 
 /** Adds a payee (id null) or changes one. */
 export async function savePayeeAction(id: unknown, input: unknown): Promise<TeamResult> {
-  await requireStaff("admin");
+  await requireOwner();
   const clean = cleanPayee(record(input));
   if (!clean.ok) return clean;
   if (id === null) return done(await addPayee(clean.payee));
@@ -43,7 +43,7 @@ export async function savePayeeAction(id: unknown, input: unknown): Promise<Team
 
 /** Adds a payment by hand (id null) or changes one. */
 export async function savePaymentAction(id: unknown, input: unknown): Promise<TeamResult> {
-  const staff = await requireStaff("admin");
+  const staff = await requireOwner();
   const fields = record(input);
   const payeeId = typeof fields.payee_id === "string" && fields.payee_id ? fields.payee_id : null;
   const payee = payeeId ? await getPayee(payeeId) : null;
@@ -55,7 +55,7 @@ export async function savePaymentAction(id: unknown, input: unknown): Promise<Te
 }
 
 export async function markPaidAction(id: unknown, input: unknown): Promise<TeamResult> {
-  const staff = await requireStaff("admin");
+  const staff = await requireOwner();
   if (!isUuid(id)) return { ok: false, message: "That payment isn't there any more." };
   const fields = record(input);
   return done(
@@ -69,7 +69,7 @@ export async function markPaidAction(id: unknown, input: unknown): Promise<TeamR
 
 /** Cancels a payment, or puts it back to due ("Undo"). */
 export async function setPaymentStatusAction(id: unknown, status: unknown): Promise<TeamResult> {
-  const staff = await requireStaff("admin");
+  const staff = await requireOwner();
   if (!isUuid(id) || (status !== "due" && status !== "cancelled")) {
     return { ok: false, message: "That change isn't valid." };
   }
@@ -82,7 +82,7 @@ export async function setPaymentStatusAction(id: unknown, status: unknown): Prom
  * deleted goes in the audit trail.
  */
 export async function deletePaymentAction(id: unknown): Promise<TeamResult> {
-  const staff = await requireStaff("admin");
+  const staff = await requireOwner();
   if (!isUuid(id)) return { ok: false, message: "That payment isn't there any more." };
   return done(await deletePayment(id, staff.email));
 }

@@ -32,8 +32,10 @@ import {
 } from "@/components/internal/community/ui";
 
 /**
- * The team's tasks as a board: To do, Doing, Blocked, Done. Filter to your
- * own, someone else's, or what's late; click a card to edit it.
+ * Tasks as a board: To do, Doing, Blocked, Done. Managers get the whole
+ * team's tasks and the board opens on their own, with the menu to switch to
+ * everyone's, someone else's or unowned ones. Interns are only ever sent
+ * their own tasks, so they get no menu. Click a card to edit it.
  */
 
 const PRIORITY_RANK: Record<string, number> = {
@@ -60,7 +62,7 @@ export function TaskBoard({
   names: Record<string, string>;
 }) {
   const today = todayKey();
-  const [who, setWho] = useState<string>(canEdit ? "all" : "me");
+  const [who, setWho] = useState<string>("me");
   const [lateOnly, setLateOnly] = useState(false);
   const [editing, setEditing] = useState<Task | null>(null);
 
@@ -118,25 +120,29 @@ export function TaskBoard({
   return (
     <>
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        <label className="sr-only" htmlFor="task-owner-filter">
-          Whose tasks
-        </label>
-        <Select
-          id="task-owner-filter"
-          size="sm"
-          className="w-auto min-w-[10rem]"
-          value={who}
-          onChange={setWho}
-          options={[
-            { value: "all", label: "Everyone's tasks" },
-            { value: "me", label: "My tasks" },
-            { value: "none", label: "No owner" },
-            ...people.map((owner) => ({
-              value: owner.toLowerCase(),
-              label: ownerName(owner),
-            })),
-          ]}
-        />
+        {canEdit ? (
+          <>
+            <label className="sr-only" htmlFor="task-owner-filter">
+              Whose tasks
+            </label>
+            <Select
+              id="task-owner-filter"
+              size="sm"
+              className="w-auto min-w-[10rem]"
+              value={who}
+              onChange={setWho}
+              options={[
+                { value: "me", label: "My tasks" },
+                { value: "all", label: "Everyone's tasks" },
+                { value: "none", label: "No owner" },
+                ...people.map((owner) => ({
+                  value: owner.toLowerCase(),
+                  label: ownerName(owner),
+                })),
+              ]}
+            />
+          </>
+        ) : null}
         <button
           type="button"
           onClick={() => setLateOnly((value) => !value)}

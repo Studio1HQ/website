@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { DateField } from "@/components/internal/pickers";
+import { TimeField } from "@/components/internal/team/time-field";
 import { useRouter } from "next/navigation";
 import { cancelScheduledEmail } from "@/app/internal/(dashboard)/email-actions";
 import type { DeliveryStatus } from "@/lib/email-delivery";
@@ -80,15 +82,24 @@ export function SendLaterField({
         Send later
       </label>
       {enabled ? (
-        <input
-          type="datetime-local"
-          value={value}
-          onChange={(event) => onValueChange(event.target.value)}
-          min={toLocalInput(new Date(now + 5 * 60 * 1000))}
-          max={toLocalInput(new Date(now + 29 * 24 * 60 * 60 * 1000))}
-          aria-label="Send at"
-          className={inputClassName}
-        />
+        <div className="grid grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] gap-2">
+          <DateField
+            value={value.slice(0, 10)}
+            min={toLocalInput(new Date(now + 5 * 60 * 1000)).slice(0, 10)}
+            max={toLocalInput(new Date(now + 29 * 24 * 60 * 60 * 1000)).slice(0, 10)}
+            required
+            aria-label="Send on"
+            onChange={(day) => onValueChange(`${day}T${value.slice(11, 16) || "10:00"}`)}
+            className={inputClassName}
+          />
+          <TimeField
+            value={value.slice(11, 16)}
+            aria-label="Send at"
+            placeholder="10:00 am"
+            around="10:00"
+            onChange={(time) => onValueChange(`${value.slice(0, 10)}T${time || "10:00"}`)}
+          />
+        </div>
       ) : null}
     </div>
   );

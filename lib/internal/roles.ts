@@ -16,8 +16,13 @@
  *   community_manager  run the community area: events, guest lists, sponsors,
  *                    campus partners, budget, tasks and growth numbers, and
  *                    hackathon registrations (review, email, export)
- *   community_viewer read the community area and hackathon registrations;
- *                    tick off their own tasks
+ *   community_viewer the community intern: read the community area and
+ *                    hackathon registrations with every money detail left
+ *                    out (sponsorship amounts, budgets, costs), and see and
+ *                    tick off only the tasks assigned to them
+ *
+ * Money (payroll, expense claims, payments) isn't a role: it's the owners'
+ * only (canSeeMoney in lib/internal/session.ts).
  *
  * The owners are always admins and can't be changed. Staff (@studio1hq.com)
  * ask for access when they first sign in; only an owner approves them with
@@ -47,7 +52,8 @@ export const ROLE_INFO: Record<
   admin: {
     label: "Admin",
     area: "All",
-    description: "Everything: the team and invites, exports, subscriber lists, every pipeline and the blog.",
+    description:
+      "Everything except Money: the team list, exports, subscriber lists, every pipeline, the blog and community. Payroll and payments stay with the founders.",
   },
   hiring_reviewer: {
     label: "Hiring reviewer",
@@ -73,12 +79,13 @@ export const ROLE_INFO: Record<
     label: "Community manager",
     area: "Community",
     description:
-      "Run the community area: events, hackathon registrations, guest lists, sponsors, campus partners, budget, tasks and analytics.",
+      "Run the community area: events, hackathon registrations, guest lists, sponsors (amounts included), campus partners, budget, tasks and analytics.",
   },
   community_viewer: {
-    label: "Community viewer",
+    label: "Community intern",
     area: "Community",
-    description: "Read the community area, hackathon registrations included, and tick off their own tasks. No other changes.",
+    description:
+      "Read the community area and hackathon registrations, without any money details (sponsorship amounts, budgets, costs), and tick off the tasks assigned to them. No other changes.",
   },
 };
 

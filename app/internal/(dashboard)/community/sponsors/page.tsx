@@ -21,6 +21,7 @@ import {
   one,
   sponsorFollowUpDue,
 } from "@/lib/internal/community/stats";
+import { seesMoney } from "@/lib/internal/community/visibility";
 import {
   Card,
   EmptyState,
@@ -80,10 +81,13 @@ export default async function SponsorsPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const [staff, params] = await Promise.all([requireCommunity(), searchParams]);
+  // Interns: no asks or committed amounts. The loaders already leave the
+  // money out for them; this hides the columns.
+  const showMoney = seesMoney(staff.community);
   const canEdit = staff.community === "manager";
   const [sponsors, deals, owners] = await Promise.all([
-    loadSponsors(),
-    loadSponsorships(),
+    loadSponsors(staff.community),
+    loadSponsorships(staff.community),
     canEdit ? ownerChoices() : Promise.resolve([]),
   ]);
   const today = todayKey();
@@ -94,7 +98,11 @@ export default async function SponsorsPage({
     <PageHeader
       eyebrow="Community"
       title="Sponsors"
-      description="Every company you're talking to about sponsoring: stage, the ask, contacts, outreach and follow-ups."
+      description={
+        showMoney
+          ? "Every company you're talking to about sponsoring: stage, the ask, contacts, outreach and follow-ups."
+          : "Every company the team is talking to about sponsoring: stage, contacts, outreach and follow-ups."
+      }
       actions={
         canEdit ? (
           <RecordDialog
@@ -201,13 +209,15 @@ export default async function SponsorsPage({
             <p className="mt-1.5 text-[20px] font-medium leading-none tabular-nums">
               {count}
             </p>
-            <p className="mt-1.5 truncate text-[12px] text-[var(--i-faint)]">
-              {stage.value === "won"
-                ? `${formatTotals(wonTotal)} committed`
-                : count
-                  ? `${formatTotals(ask, "—")} asked`
-                  : "—"}
-            </p>
+            {showMoney ? (
+              <p className="mt-1.5 truncate text-[12px] text-[var(--i-faint)]">
+                {stage.value === "won"
+                  ? `${formatTotals(wonTotal)} committed`
+                  : count
+                    ? `${formatTotals(ask, "—")} asked`
+                    : "—"}
+              </p>
+            ) : null}
           </Card>
         ))}
       </div>
@@ -238,8 +248,12 @@ export default async function SponsorsPage({
               <>
                 <th>Company</th>
                 <th>Stage</th>
-                <th>Asking for</th>
-                <th>Committed</th>
+                {showMoney ? (
+                  <>
+                    <th>Asking for</th>
+                    <th>Committed</th>
+                  </>
+                ) : null}
                 <th>Follow up</th>
                 <th>Last contact</th>
                 <th>Owner</th>
@@ -267,20 +281,26 @@ export default async function SponsorsPage({
                     label={`Stage of ${sponsor.name}`}
                   />
                 </td>
-                <td className="whitespace-nowrap tabular-nums">
-                  {sponsor.ask_amount !== null ? (
-                    formatTotals({ [sponsor.currency]: sponsor.ask_amount })
-                  ) : (
-                    <Muted>—</Muted>
-                  )}
-                </td>
-                <td className="whitespace-nowrap tabular-nums">
-                  {committed.has(sponsor.id) ? (
-                    formatTotals(committed.get(sponsor.id)!)
-                  ) : (
-                    <Muted>—</Muted>
-                  )}
-                </td>
+                {showMoney ? (
+                  <>
+                    <td className="whitespace-nowrap tabular-nums">
+                      {sponsor.ask_amount !== null ? (
+                        formatTotals({
+                          [sponsor.currency]: sponsor.ask_amount,
+                        })
+                      ) : (
+                        <Muted>—</Muted>
+                      )}
+                    </td>
+                    <td className="whitespace-nowrap tabular-nums">
+                      {committed.has(sponsor.id) ? (
+                        formatTotals(committed.get(sponsor.id)!)
+                      ) : (
+                        <Muted>—</Muted>
+                      )}
+                    </td>
+                  </>
+                ) : null}
                 <td>
                   <DueDate
                     day={sponsor.follow_up_on}

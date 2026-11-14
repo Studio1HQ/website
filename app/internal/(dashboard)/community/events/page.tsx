@@ -67,7 +67,7 @@ export default async function EventsPage({
   const canEdit = staff.community === "manager";
   const [events, guestCounts, hackathonCounts, partners, refs, owners] =
     await Promise.all([
-      loadEvents(),
+      loadEvents(staff.community),
       loadGuestCounts(),
       loadHackathonCounts(),
       loadPartners(),

@@ -79,13 +79,14 @@ export default async function TemplatesPage({ searchParams }: Props) {
       </nav>
 
       <div className="grid items-start gap-5 lg:grid-cols-[280px_minmax(0,1fr)]">
-        <Card className="p-2">
+        {/* Phones: one row of pills that scrolls sideways, so the preview stays near the top. */}
+        <Card className="p-2 max-lg:flex max-lg:gap-1 max-lg:overflow-x-auto max-lg:p-1.5">
           {groups.map((group) => {
             const list = items.filter((item) => item.group === group);
             if (!list.length) return null;
             return (
-              <div key={group} className="mb-1 last:mb-0">
-                <p className="px-2.5 pb-1 pt-2 text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--i-faint)]">
+              <div key={group} className="mb-1 last:mb-0 max-lg:contents">
+                <p className="px-2.5 pb-1 pt-2 text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--i-faint)] max-lg:hidden">
                   {group}
                 </p>
                 {list.map((item) => {
@@ -97,7 +98,7 @@ export default async function TemplatesPage({ searchParams }: Props) {
                       scroll={false}
                       aria-current={active ? "true" : undefined}
                       className={cn(
-                        "flex items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-[13px] transition-colors",
+                        "flex items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-[13px] transition-colors max-lg:shrink-0 max-lg:whitespace-nowrap",
                         active ? "bg-[var(--i-ink)] font-medium text-[var(--i-panel)]" : "hover:bg-[var(--i-hover)]",
                       )}
                     >
@@ -114,7 +115,7 @@ export default async function TemplatesPage({ searchParams }: Props) {
         </Card>
 
         <Card>
-          <div className="space-y-2 border-b border-[var(--i-line)] px-5 py-4">
+          <div className="space-y-2 border-b border-[var(--i-line)] px-4 py-4 sm:px-5">
             <p className="text-[12px] text-[var(--i-muted)]">Subject</p>
             <div className="flex flex-wrap items-start justify-between gap-3">
               <p className="text-[15px] font-medium">{fillTemplate(selected.subject || "(You write the subject.)", vars)}</p>
@@ -141,12 +142,12 @@ export default async function TemplatesPage({ searchParams }: Props) {
               {!selected.automatic && !selected.status && !selected.call ? <span>No status change</span> : null}
             </div>
           </div>
-          <div className="bg-[var(--i-sunken)] p-4 sm:p-5">
+          <div className="bg-[var(--i-sunken)] p-2 sm:p-5">
             <iframe
               title={`Preview: ${selected.label}`}
               srcDoc={html}
               sandbox=""
-              className="h-[900px] w-full rounded-xl border border-[var(--i-line)] bg-[#f4efe7]"
+              className="h-[720px] w-full rounded-xl border border-[var(--i-line)] bg-[#f4efe7] sm:h-[900px]"
             />
           </div>
           {selected.status ? (

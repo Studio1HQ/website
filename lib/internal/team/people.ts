@@ -1,6 +1,6 @@
 import { inList, insertRow, selectRows, updateRows } from "@/lib/supabase-server";
 import { accessFor } from "@/lib/internal/members";
-import { isOwner, isStaffEmail } from "@/lib/internal/roles";
+import { OWNERS, isOwner, isStaffEmail } from "@/lib/internal/roles";
 import { emailAddress } from "@/lib/internal/token";
 import { audit } from "@/lib/internal/team/audit";
 import { deleteTeamFiles, saveTeamFile } from "@/lib/internal/team/files";
@@ -9,6 +9,8 @@ import {
   MAX_UPLOAD_LABEL,
   TEAM_MIGRATION_HINT,
   cleanLines,
+  cleanOwnName,
+  displayName,
   isDateKey,
   isMissingTable,
   shortText,
@@ -81,6 +83,44 @@ export async function teamAccessFor(email: string): Promise<{ person: TeamPerson
       ? people.filter((person) => person.kind === "intern" && person.reviewer === email).map((person) => person.email)
       : [],
   };
+}
+
+/**
+ * The founders belong on the team list like everyone else, so People shows
+ * them and Payroll can make their payslips, without anyone adding them
+ * first. Adds whichever of them is missing; a founder already there (even
+ * marked as left) is never touched. Checked once per server instance, on a
+ * founder's request (lib/internal/session.ts).
+ */
+let ownersOnTeam: Promise<void> | null = null;
+
+export function ensureOwnersOnTeam() {
+  ownersOnTeam ??= addMissingOwners().then((done) => {
+    // Try again on the next request when the read or a write failed.
+    if (!done) ownersOnTeam = null;
+  });
+  return ownersOnTeam;
+}
+
+async function addMissingOwners(): Promise<boolean> {
+  const found = await selectRows(TABLE, new URLSearchParams({ select: "email", email: inList([...OWNERS]), limit: "10" }));
+  if (!found.ok) {
+    if (!isMissingTable(found.message)) console.error(`[team] checking the founders on ${TABLE} failed: ${found.message}`);
+    return false;
+  }
+  const have = new Set(found.rows.map((row) => row.email));
+  let done = true;
+  for (const email of OWNERS) {
+    if (have.has(email)) continue;
+    const row = { email, name: displayName({ email }), kind: "employee", designation: "Co-founder", updated_by: "system" };
+    const added = await insertRow(TABLE, row);
+    if (added.ok) await audit({ actor: "system", area: "people", action: "added", subject: email, detail: row });
+    else if (!added.duplicate) {
+      console.error(`[team] adding founder ${email} failed: ${added.message}`);
+      done = false;
+    }
+  }
+  return done;
 }
 
 export type PeopleResult = { ok: true; people: TeamPerson[] } | { ok: false; message: string; missing: boolean };
@@ -236,15 +276,29 @@ export async function updatePerson(person: PersonInput, by: string, before?: Tea
   return { ok: true };
 }
 
-/** Someone's own name, from My day. */
-export async function updateOwnName(email: string, name: unknown): Promise<TeamResult> {
-  const clean = shortText(name, 80);
-  if (clean.length < 2) return { ok: false, message: "Enter your name." };
-  if (/https?:|www\.|@|\d/.test(clean)) return { ok: false, message: "Use just your name: no links, emails or digits." };
+/** One person's employee ID and nothing else. */
+export async function setEmployeeCode(email: string, code: string | null, by: string): Promise<TeamResult> {
   const result = await updateRows(
     TABLE,
     new URLSearchParams({ email: `eq.${email}` }),
-    { name: clean, updated_by: email, updated_at: new Date().toISOString() },
+    { employee_code: code, updated_by: by, updated_at: new Date().toISOString() },
+    "email",
+  );
+  if (!result.ok) {
+    console.error(`[team] setting ${email}'s employee ID failed: ${result.message}`);
+    return saveError(result.message);
+  }
+  return result.count ? { ok: true } : { ok: false, message: "That person isn't on the team list." };
+}
+
+/** Someone's own name, from My day. */
+export async function updateOwnName(email: string, name: unknown): Promise<TeamResult> {
+  const clean = cleanOwnName(name);
+  if (!clean.ok) return clean;
+  const result = await updateRows(
+    TABLE,
+    new URLSearchParams({ email: `eq.${email}` }),
+    { name: clean.name, updated_by: email, updated_at: new Date().toISOString() },
     "email",
   );
   if (!result.ok) return saveError(result.message);

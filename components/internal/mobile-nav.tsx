@@ -1,0 +1,178 @@
+"use client";
+
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import { usePathname } from "next/navigation";
+import { List, X } from "@phosphor-icons/react";
+import { cn } from "@/lib/utils";
+
+/*
+ * On phones the sidebar is a drawer: a top bar with a menu button opens it
+ * from the left. From md up it's the usual sticky sidebar. One sidebar
+ * serves both, so its links and counts are rendered once.
+ */
+
+type DrawerState = { open: boolean; setOpen: (open: boolean) => void };
+
+const DrawerContext = createContext<DrawerState>({ open: false, setOpen: () => {} });
+
+const MOBILE = "(max-width: 767.98px)";
+
+export function MobileNavProvider({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  // The page the drawer was opened on: going to another page (a link, the
+  // back button) closes it without an effect.
+  const [openOn, setOpenOn] = useState<string | null>(null);
+  // Forget it once we've left, so coming back (forward button) doesn't reopen it.
+  if (openOn !== null && openOn !== pathname) setOpenOn(null);
+  const open = openOn === pathname;
+  const setOpen = useCallback((next: boolean) => setOpenOn(next ? pathname : null), [pathname]);
+
+  // Turning the phone sideways (or widening the window) past md closes it.
+  useEffect(() => {
+    if (!open) return;
+    const query = window.matchMedia(MOBILE);
+    const onChange = () => {
+      if (!query.matches) setOpen(false);
+    };
+    query.addEventListener("change", onChange);
+    return () => query.removeEventListener("change", onChange);
+  }, [open, setOpen]);
+
+  // The page behind stays put while the drawer is open.
+  useEffect(() => {
+    if (!open) return;
+    const root = document.documentElement;
+    const before = root.style.overflow;
+    root.style.overflow = "hidden";
+    return () => {
+      root.style.overflow = before;
+    };
+  }, [open]);
+
+  return <DrawerContext.Provider value={{ open, setOpen }}>{children}</DrawerContext.Provider>;
+}
+
+/** The hamburger in the phone top bar. */
+export function MobileNavButton({ className }: { className?: string }) {
+  const { open, setOpen } = useContext(DrawerContext);
+  return (
+    <button
+      type="button"
+      aria-label="Open menu"
+      aria-expanded={open}
+      aria-controls="internal-sidebar"
+      data-drawer-opener=""
+      onClick={() => setOpen(true)}
+      className={cn(
+        "flex size-10 items-center justify-center rounded-lg text-[var(--i-ink-2)] hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)]",
+        className,
+      )}
+    >
+      <List size={20} />
+    </button>
+  );
+}
+
+/** Closes the drawer; only shown on phones. */
+export function MobileNavClose() {
+  const { setOpen } = useContext(DrawerContext);
+  return (
+    <button
+      type="button"
+      aria-label="Close menu"
+      data-drawer-close=""
+      onClick={() => setOpen(false)}
+      className="-mr-1 flex size-10 items-center justify-center rounded-lg text-[var(--i-muted)] hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)] md:hidden"
+    >
+      <X size={18} />
+    </button>
+  );
+}
+
+/**
+ * The sidebar itself. On phones it slides in over the page with a scrim;
+ * while closed it's `invisible`, so its links leave the tab order and the
+ * accessibility tree. From md up it's a plain sticky column.
+ */
+export function MobileNavPanel({ children, className }: { children: ReactNode; className?: string }) {
+  const { open, setOpen } = useContext(DrawerContext);
+  const panel = useRef<HTMLElement>(null);
+  const wasOpen = useRef(false);
+
+  const close = useCallback(() => setOpen(false), [setOpen]);
+
+  useEffect(() => {
+    if (open) {
+      wasOpen.current = true;
+      panel.current?.querySelector<HTMLElement>("[data-drawer-close]")?.focus();
+      const onKey = (event: KeyboardEvent) => {
+        if (event.key === "Escape") close();
+        if (event.key !== "Tab" || !panel.current) return;
+        // Keep Tab inside the drawer while it covers the page.
+        const items = [
+          ...panel.current.querySelectorAll<HTMLElement>("a[href], button:not([disabled]), input, [tabindex]:not([tabindex='-1'])"),
+        ].filter((el) => el.offsetParent !== null);
+        if (!items.length) return;
+        const first = items[0];
+        const last = items[items.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      };
+      document.addEventListener("keydown", onKey);
+      return () => document.removeEventListener("keydown", onKey);
+    }
+    if (wasOpen.current) {
+      wasOpen.current = false;
+      // Back to the menu button, unless a link moved focus to a new page.
+      if (!document.activeElement || document.activeElement === document.body || panel.current?.contains(document.activeElement)) {
+        document.querySelector<HTMLElement>("[data-drawer-opener]")?.focus({ preventScroll: true });
+      }
+    }
+  }, [open, close]);
+
+  return (
+    <>
+      <div
+        aria-hidden
+        onClick={close}
+        className={cn(
+          "fixed inset-0 z-40 bg-black/35 backdrop-blur-[1px] transition-opacity duration-200 md:hidden print:hidden",
+          open ? "opacity-100" : "pointer-events-none opacity-0",
+        )}
+      />
+      <aside
+        id="internal-sidebar"
+        ref={panel}
+        aria-label="Sidebar"
+        data-open={open}
+        // A tap on a link to the page that's already open closes it too.
+        onClick={(event) => {
+          if (event.target instanceof Element && event.target.closest("a[href]")) close();
+        }}
+        {...(open ? { role: "dialog", "aria-modal": true } : {})}
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 flex w-[min(300px,86vw)] flex-col bg-[var(--i-sidebar)] shadow-[var(--i-shadow-pop)] transition-[transform,visibility] duration-200 ease-out motion-reduce:transition-none",
+          open ? "visible translate-x-0" : "invisible -translate-x-full",
+          "md:visible md:sticky md:top-0 md:z-auto md:h-screen md:w-[236px] md:shrink-0 md:translate-x-0 md:border-r md:border-[var(--i-line)] md:shadow-none md:transition-none",
+          "print:hidden",
+          className,
+        )}
+      >
+        {children}
+      </aside>
+    </>
+  );
+}

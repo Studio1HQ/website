@@ -1,9 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { DateField, SuggestInput } from "@/components/internal/pickers";
 import Link from "next/link";
 import { AirplaneTilt, IdentificationCard, UserPlus } from "@phosphor-icons/react";
 import { addLeaveFor, deleteDayFor, saveDayFor, savePerson } from "@/app/internal/(dashboard)/people/actions";
+import { HoverLink, LinkPending } from "@/components/internal/nav-progress";
 import { cn } from "@/lib/utils";
 import { Avatar, Card, EmptyState, Notice, PageHeader, buttonClass, formatDate, inputClass } from "@/components/internal/ui";
 import { Chip, IdChip, dayText, dayTone, type Tone } from "@/components/internal/team/chips";
@@ -109,7 +111,7 @@ export function PeopleView({
               ["directory", "Team list"],
             ] as const
           ).map(([value, label]) => (
-            <Link
+            <HoverLink
               key={value}
               href={tabHref(value)}
               aria-current={tab === value ? "page" : undefined}
@@ -124,7 +126,8 @@ export function PeopleView({
               <span className="ml-1.5 text-[12px] tabular-nums text-[var(--i-faint)]">
                 {value === "directory" ? people.length : active.length}
               </span>
-            </Link>
+              <LinkPending className="ml-1.5 align-[-1px]" />
+            </HoverLink>
           ))}
         </nav>
       ) : null}
@@ -281,7 +284,7 @@ function Attendance({
               <tr className="text-[var(--i-muted)]">
                 <th
                   scope="col"
-                  className="sticky left-0 z-10 min-w-[168px] border-b border-[var(--i-line)] bg-[var(--i-panel)] px-4 py-2 text-left font-normal"
+                  className="sticky left-0 z-10 min-w-[124px] border-b border-[var(--i-line)] bg-[var(--i-panel)] px-3 py-2 text-left font-normal sm:min-w-[168px] sm:px-4"
                 >
                   Person
                 </th>
@@ -324,9 +327,9 @@ function Attendance({
                   <tr key={person.email} className="group">
                     <th
                       scope="row"
-                      className="sticky left-0 z-10 border-b border-[var(--i-line)] bg-[var(--i-panel)] px-4 py-2 text-left font-normal group-last:border-b-0"
+                      className="sticky left-0 z-10 max-w-[124px] border-b border-[var(--i-line)] bg-[var(--i-panel)] px-3 py-2 text-left font-normal group-last:border-b-0 sm:max-w-none sm:px-4"
                     >
-                      <span className="flex items-center gap-2.5">
+                      <span className="flex items-center gap-2 sm:gap-2.5">
                         <Avatar name={name} email={person.email} size={24} src={photoUrl(person)} />
                         <span className="min-w-0">
                           <span className="block truncate text-[12.5px] font-medium text-[var(--i-ink)]">{name}</span>
@@ -425,9 +428,14 @@ function Directory({ people, reviewers, owner }: { people: TeamPerson[]; reviewe
             {owner ? "" : " Only Arindam and Amitesh can add people, bring someone back or set a reviewer."}
           </p>
           {owner ? (
-            <button type="button" onClick={() => setEditing("new")} className={buttonClass("primary", "sm")}>
-              <UserPlus size={14} /> Add person
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              <Link href="/internal/team" className={buttonClass("ghost", "sm")}>
+                Dashboard roles
+              </Link>
+              <button type="button" onClick={() => setEditing("new")} className={buttonClass("primary", "sm")}>
+                <UserPlus size={14} /> Add person
+              </button>
+            </div>
           ) : null}
         </div>
         {people.length === 0 ? (
@@ -603,21 +611,13 @@ function PersonDialog({
       </Label>
       {kind === "intern" ? (
         <Label label="Reviewer" hint={owner ? "logs their days" : "only Arindam or Amitesh can set this"}>
-          <input
-            list="team-reviewers"
+          <SuggestInput
             value={reviewer}
             disabled={!owner}
-            onChange={(event) => setReviewer(event.target.value)}
+            onChange={setReviewer}
+            options={reviewers.filter((address) => address !== email).map((address) => ({ value: address }))}
             placeholder="mentor@studio1hq.com"
-            className={inputClass()}
           />
-          <datalist id="team-reviewers">
-            {reviewers
-              .filter((address) => address !== email)
-              .map((address) => (
-                <option key={address} value={address} />
-              ))}
-          </datalist>
         </Label>
       ) : null}
       <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-3">
@@ -631,7 +631,7 @@ function PersonDialog({
           />
         </Label>
         <Label label="Joined on">
-          <input type="date" value={joined} onChange={(event) => setJoined(event.target.value)} className={inputClass()} />
+          <DateField value={joined} onChange={setJoined} />
         </Label>
       </div>
       {person ? (
