@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { isAdmin, requireMember } from "@/lib/internal/session";
 import { cantLog } from "@/lib/internal/team/access";
 import { changeProblem, cleanDay, deleteDay, listDays, saveDay, saveLeave } from "@/lib/internal/team/attendance";
-import { cleanPerson, removePhoto, setPhoto, updateOwnName, updatePerson } from "@/lib/internal/team/people";
+import { cleanPerson, removePhoto, setEmployeeCode, setPhoto, updateOwnName } from "@/lib/internal/team/people";
 import { addReimbursement, withdrawReimbursement } from "@/lib/internal/team/reimbursements";
 import {
   MAX_UPLOAD_BYTES,
@@ -134,9 +134,11 @@ export async function updateMyEmployeeId(code: unknown): Promise<TeamResult> {
   const self = await me();
   if (!self) return NOT_ON_LIST;
   if (!isAdmin(self.staff)) return { ok: false, message: "Employee IDs are set by an admin." };
+  // Only the ID is written, so a change someone else made to this person's
+  // other details a moment ago isn't put back.
   const clean = cleanPerson({ ...self.person, employee_code: code });
   if (!clean.ok) return clean;
-  const result = await updatePerson(clean.person, self.staff.email, self.person);
+  const result = await setEmployeeCode(self.person.email, clean.person.employee_code, self.staff.email);
   if (result.ok) revalidatePath("/internal", "layout");
   return result.ok ? { ok: true, message: "Employee ID saved" } : result;
 }

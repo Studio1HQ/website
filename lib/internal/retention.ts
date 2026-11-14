@@ -23,7 +23,7 @@ const TABLE = "job_applications";
 const RESUME_BUCKET = "job-applications";
 export const KEPT_CONTACTS = "kept_contacts";
 
-type Due = { id: string; resume_path: string | null; email: string | null; name: string | null; email_updates: boolean | null; created_at: string | null };
+type Due = { id: string; resume_path: string | null; email: string | null; name?: string | null; email_updates: boolean | null; created_at?: string | null };
 
 /** One kept contact per address: opted in if any of their entries was, earliest date first seen. */
 function contactsFrom(rows: Due[], keptAt: string) {
@@ -85,31 +85,42 @@ export async function purgeRejectedApplications(now = new Date()): Promise<Purge
 
     const ids = due.rows.map((row) => String(row.id));
     // The status and date are checked again in the delete itself, so an
-    // entry someone moved out of Rejected a moment ago is left alone.
-    const gone = await deleteRows(
+    // entry someone moved out of Rejected a moment ago is left alone. The
+    // delete hands back exactly the rows that went, as they were then: the
+    // clean-up below works from those, with nothing to read again.
+    const gone = await deleteRows<Due>(
       TABLE,
       new URLSearchParams({ id: inList(ids), review_status: "eq.rejected", updated_at: `lt.${cutoff}` }),
+      "id,resume_path,email,email_updates",
     );
     if (!gone.ok) return { ok: false, deleted, message: gone.message };
     deleted += gone.count;
 
-    // Only files whose row really went: re-read what's left of this batch.
-    const left = await selectRows<{ id: string }>(TABLE, new URLSearchParams({ select: "id", id: inList(ids), limit: String(BATCH) }));
-    if (left.ok) {
-      const still = new Set(left.rows.map((row) => String(row.id)));
-      const removed = due.rows.filter((row) => !still.has(String(row.id)));
-      const paths = removed.map((row) => row.resume_path).filter((path): path is string => typeof path === "string" && path !== "");
-      await removeFiles(RESUME_BUCKET, paths);
-      files += paths.length;
-      // Best effort: the emails sent to them (needs the delete grant from
-      // 20261115110000_retention.sql; without it the log rows just stay).
-      if (removed.length) {
-        const log = await deleteRows(
-          "internal_email_log",
-          new URLSearchParams({ source_table: `eq.${TABLE}`, record_id: inList(removed.map((row) => String(row.id))) }),
-        );
-        if (!log.ok) console.warn(`[retention] email log rows kept: ${log.message}`);
-      }
+    // Someone who unsubscribed between the read above and the delete: their
+    // entry said "yes" when read and "no" when it went. The contact kept a
+    // moment ago carries the stale yes, so it goes, as an unsubscribe does.
+    const address = (row: Due) => String(row.email ?? "").trim().toLowerCase();
+    const saidYes = new Set(due.rows.filter((row) => row.email_updates === true).map(address));
+    const stillYes = new Set(gone.rows.filter((row) => row.email_updates === true).map(address));
+    const withdrew = [...new Set(gone.rows.map(address))].filter((email) => email && saidYes.has(email) && !stillYes.has(email));
+    if (withdrew.length) {
+      const undone = await deleteRows(KEPT_CONTACTS, new URLSearchParams({ email: inList(withdrew), email_updates: "eq.true" }), "email");
+      if (!undone.ok) return { ok: false, deleted, message: `couldn't drop contacts that unsubscribed: ${undone.message}` };
+    }
+
+    const paths = gone.rows.map((row) => row.resume_path).filter((path): path is string => typeof path === "string" && path !== "");
+    if (await removeFiles(RESUME_BUCKET, paths)) files += paths.length;
+    // The rows are gone, so a later run can't find these again: name them.
+    else console.error(`[retention] résumé files left in ${RESUME_BUCKET}, remove by hand: ${paths.join(", ")}`);
+
+    // Best effort: the emails sent to them (needs the delete grant from
+    // 20261115110000_retention.sql; without it the log rows just stay).
+    if (gone.rows.length) {
+      const log = await deleteRows(
+        "internal_email_log",
+        new URLSearchParams({ source_table: `eq.${TABLE}`, record_id: inList(gone.rows.map((row) => String(row.id))) }),
+      );
+      if (!log.ok) console.warn(`[retention] email log rows kept: ${log.message}`);
     }
     if (gone.count === 0 || due.rows.length < BATCH) break;
   }

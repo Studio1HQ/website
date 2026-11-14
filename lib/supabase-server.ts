@@ -204,10 +204,14 @@ export async function downloadFile(
   }
 }
 
-/** Best-effort delete, used to clean up an upload when the insert fails. */
-export async function removeFiles(bucket: string, paths: string[]) {
+/**
+ * Best-effort delete, used to clean up an upload when the insert fails.
+ * Says whether the files went, for callers that want to report it.
+ */
+export async function removeFiles(bucket: string, paths: string[]): Promise<boolean> {
   const supabase = config();
-  if (!supabase || paths.length === 0) return;
+  if (paths.length === 0) return true;
+  if (!supabase) return false;
   try {
     const response = await fetch(
       `${supabase.url}/storage/v1/object/${encodeURIComponent(bucket)}`,
@@ -227,8 +231,10 @@ export async function removeFiles(bucket: string, paths: string[]) {
         `[supabase] removing ${paths.length} file(s) from ${bucket} failed: ${response.status}`,
       );
     }
+    return response.ok;
   } catch (error) {
     console.error(`[supabase] removing files from ${bucket} failed`, error);
+    return false;
   }
 }
 
@@ -318,17 +324,22 @@ export async function updateRows(
   }
 }
 
-/** Deletes the rows matching `query`; `count` is how many went. */
-export async function deleteRows(
+/**
+ * Deletes the rows matching `query`; `count` is how many went and `rows`
+ * holds the `returning` columns of each (a table without an `id` column
+ * needs another column named here).
+ */
+export async function deleteRows<T = Record<string, unknown>>(
   table: string,
   query: URLSearchParams,
-): Promise<{ ok: true; count: number } | Failure> {
+  returning = "id",
+): Promise<{ ok: true; count: number; rows: T[] } | Failure> {
   const supabase = config();
   if (!supabase) return { ok: false, message: "Supabase isn't configured" };
   // PostgREST refuses a DELETE without filters; never send one anyway.
   if ([...query.keys()].length === 0) return { ok: false, message: "No filter given" };
   const filters = new URLSearchParams(query);
-  filters.set("select", "id");
+  filters.set("select", returning);
   try {
     const response = await fetch(`${supabase.url}/rest/v1/${table}?${filters.toString()}`, {
       method: "DELETE",
@@ -340,7 +351,8 @@ export async function deleteRows(
       const detail = await response.text().catch(() => "");
       return { ok: false, message: `${response.status} ${detail.slice(0, 300)}` };
     }
-    return { ok: true, count: ((await response.json()) as unknown[]).length };
+    const rows = (await response.json()) as T[];
+    return { ok: true, count: rows.length, rows };
   } catch (error) {
     return { ok: false, message: String(error) };
   }

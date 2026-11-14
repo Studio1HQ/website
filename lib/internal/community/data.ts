@@ -227,6 +227,23 @@ export const loadExpenses = async (
  * nothing else: for the event report's "Run with" list, which interns see
  * too. No amounts are read.
  */
+/**
+ * The events a sponsor backs, ids only: enough to link each event's report
+ * (which shows no money) for someone who doesn't get the sponsorship rows.
+ */
+export async function loadSponsorEventIds(sponsorId: string): Promise<Loaded<string>> {
+  if (!isUuid(sponsorId)) return { ok: true, rows: [] };
+  const result = await selectAll<{ event_id: string | null }>("community_sponsorships", {
+    select: "event_id",
+    sponsor_id: `eq.${sponsorId}`,
+    status: "neq.cancelled",
+    order: "created_at.desc",
+  });
+  return result.ok
+    ? { ...result, rows: [...new Set(result.rows.map((row) => row.event_id).filter((id): id is string => Boolean(id)))] }
+    : result;
+}
+
 export async function loadEventSponsorIds(
   eventId: string,
 ): Promise<Loaded<string>> {

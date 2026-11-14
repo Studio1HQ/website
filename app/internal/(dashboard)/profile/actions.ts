@@ -26,8 +26,13 @@ export async function saveMyProfile(name: unknown): Promise<TeamResult> {
   // Owners have no member row; everyone else usually does.
   if (!isOwner(staff.email)) {
     const member = await setMemberName(staff.email, clean.name);
-    if (member.ok) saved = saved || member.found;
-    else if (!saved) return member;
+    if (!member.ok) {
+      // The team list has the new name; say the rest didn't save, so they
+      // try again rather than leave Team & roles showing the old one.
+      if (saved) revalidatePath("/internal", "layout");
+      return saved ? { ok: false, message: `Saved on the team list, but not everywhere. ${member.message}` } : member;
+    }
+    saved = saved || member.found;
   }
   if (!saved) return { ok: false, message: "Couldn't find your profile. Ask Arindam or Amitesh." };
   revalidatePath("/internal", "layout");

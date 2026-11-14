@@ -276,6 +276,21 @@ export async function updatePerson(person: PersonInput, by: string, before?: Tea
   return { ok: true };
 }
 
+/** One person's employee ID and nothing else. */
+export async function setEmployeeCode(email: string, code: string | null, by: string): Promise<TeamResult> {
+  const result = await updateRows(
+    TABLE,
+    new URLSearchParams({ email: `eq.${email}` }),
+    { employee_code: code, updated_by: by, updated_at: new Date().toISOString() },
+    "email",
+  );
+  if (!result.ok) {
+    console.error(`[team] setting ${email}'s employee ID failed: ${result.message}`);
+    return saveError(result.message);
+  }
+  return result.count ? { ok: true } : { ok: false, message: "That person isn't on the team list." };
+}
+
 /** Someone's own name, from My day. */
 export async function updateOwnName(email: string, name: unknown): Promise<TeamResult> {
   const clean = cleanOwnName(name);

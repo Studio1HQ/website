@@ -49,6 +49,7 @@ export function TimeField({
   placeholder = "9:30 am",
   /** Where the list opens when nothing is picked yet. */
   around = "09:00",
+  onInvalidChange,
   "aria-label": ariaLabel,
 }: {
   value: string;
@@ -56,6 +57,14 @@ export function TimeField({
   id?: string;
   placeholder?: string;
   around?: string;
+  /**
+   * Told when what's typed can't be read as a time (and when it can again),
+   * so the form can hold its Save button: the unreadable text then stays in
+   * the box, marked. Without this, an unreadable entry is dropped when the
+   * box is left and the last good time shows again, so what's on screen is
+   * always what gets saved.
+   */
+  onInvalidChange?: (invalid: boolean) => void;
   "aria-label"?: string;
 }) {
   const [open, setOpen] = useState(false);
@@ -63,13 +72,21 @@ export function TimeField({
   const [draft, setDraft] = useState<string | null>(null);
   const bad = draft !== null && parseTimeText(draft) === null;
 
+  const type = (text: string | null) => {
+    setDraft(text);
+    onInvalidChange?.(text !== null && parseTimeText(text) === null);
+  };
+
   const commit = () => {
     if (draft === null) return;
     const parsed = parseTimeText(draft);
-    // Something unreadable stays in the box, marked, until it's fixed.
-    if (parsed === null) return;
+    if (parsed === null) {
+      // With a form holding its Save, the text stays, marked, until fixed.
+      if (!onInvalidChange) type(null);
+      return;
+    }
     onChange(parsed);
-    setDraft(null);
+    type(null);
   };
 
   const focusSlot = value ? value.slice(0, 5) : around;
@@ -88,7 +105,7 @@ export function TimeField({
             autoComplete="off"
             placeholder={placeholder}
             value={draft ?? timeLabel(value)}
-            onChange={(event) => setDraft(event.target.value)}
+            onChange={(event) => type(event.target.value)}
             onBlur={commit}
             onKeyDown={(event) => {
               if (event.key === "Enter") {
@@ -132,7 +149,7 @@ export function TimeField({
                     ref={slot === nearest ? (node) => node?.scrollIntoView({ block: "center" }) : undefined}
                     onClick={() => {
                       onChange(slot);
-                      setDraft(null);
+                      type(null);
                       setOpen(false);
                     }}
                     className={cn(

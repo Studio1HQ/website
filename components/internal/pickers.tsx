@@ -398,6 +398,7 @@ export function SuggestInput({
           role="combobox"
           aria-expanded={visible}
           aria-controls={listId}
+          aria-activedescendant={visible && active >= 0 ? `${listId}-${active}` : undefined}
           aria-autocomplete="list"
           autoComplete="off"
           value={value}
@@ -412,6 +413,11 @@ export function SuggestInput({
           }}
           onClick={() => setOpen(true)}
           onKeyDown={(event) => {
+            // Mid-composition (an IME), these keys belong to the composer.
+            if (event.nativeEvent.isComposing) {
+              input.onKeyDown?.(event);
+              return;
+            }
             if (event.key === "ArrowDown" || event.key === "ArrowUp") {
               event.preventDefault();
               setOpen(true);
@@ -450,8 +456,11 @@ export function SuggestInput({
                   <button
                     type="button"
                     role="option"
+                    id={`${listId}-${index}`}
                     aria-selected={on}
                     tabIndex={-1}
+                    // Arrowing past the edge of the list brings the option into view.
+                    ref={index === active ? (node) => node?.scrollIntoView({ block: "nearest" }) : undefined}
                     // Keep the focus in the text box while clicking.
                     onMouseDown={(event) => event.preventDefault()}
                     onMouseEnter={() => setActive(index)}

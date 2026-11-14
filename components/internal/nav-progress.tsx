@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ArrowsClockwise } from "@phosphor-icons/react";
 import Link, { useLinkStatus } from "next/link";
 import type { ComponentProps } from "react";
+import { refreshData } from "@/app/internal/(dashboard)/actions";
 import { cn } from "@/lib/utils";
 
 /** Links that answer with a file or leave the dashboard shell: no page change to wait for. */
@@ -93,7 +94,13 @@ export function RefreshButton({ className }: { className?: string }) {
       aria-label="Refresh"
       title="Get the latest data"
       disabled={pending}
-      onClick={() => start(() => router.refresh())}
+      onClick={() =>
+        start(async () => {
+          // The server's own short-lived reads go first, then the page.
+          await refreshData().catch(() => {});
+          router.refresh();
+        })
+      }
       className={cn(
         "flex size-7 items-center justify-center rounded-md text-[var(--i-muted)] hover:bg-black/[0.04] hover:text-[var(--i-ink)] dark:hover:bg-white/[0.06]",
         className,

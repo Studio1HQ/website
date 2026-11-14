@@ -9,6 +9,7 @@ import {
   loadActivity,
   loadContacts,
   loadEvents,
+  loadSponsorEventIds,
   loadSponsorships,
   loadTasks,
   ownerChoices,
@@ -91,9 +92,15 @@ export default async function SponsorPage({
     (events.ok ? events.rows : []).map((event) => [event.id, event.name]),
   );
   // Events this sponsor backs: each has a report with their name on it.
-  const sponsoredEvents = [
-    ...new Set(live.map((deal) => deal.event_id).filter((eventId): eventId is string => Boolean(eventId))),
-  ].filter((eventId) => eventNames[eventId]);
+  // Interns get no sponsorship rows, so their links come from the ids alone.
+  const backed = showMoney ? null : await loadSponsorEventIds(sponsor.id);
+  const sponsoredEvents = (
+    backed
+      ? backed.ok
+        ? backed.rows
+        : []
+      : [...new Set(live.map((deal) => deal.event_id).filter((eventId): eventId is string => Boolean(eventId)))]
+  ).filter((eventId) => eventNames[eventId]);
 
   return (
     <>

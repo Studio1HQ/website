@@ -71,6 +71,8 @@ export function ProfileForm({
               ref={fileRef}
               type="file"
               accept="image/png,image/jpeg,image/webp"
+              aria-label="Profile photo"
+              tabIndex={-1}
               className="sr-only"
               onChange={(event) => {
                 void upload(event.target.files?.[0]);

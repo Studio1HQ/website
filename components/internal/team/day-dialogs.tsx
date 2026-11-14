@@ -71,6 +71,10 @@ function DayDialogBody({
   const [leaveType, setLeaveType] = useState<LeaveType>(existing?.leave_type ?? "paid");
   const [start, setStart] = useState(existing?.start_time ?? "");
   const [end, setEnd] = useState(existing?.end_time ?? "");
+  // A time typed in a way that can't be read: Save waits until it's fixed.
+  const [startBad, setStartBad] = useState(false);
+  const [endBad, setEndBad] = useState(false);
+  const timesBad = kind !== "leave" && (startBad || endBad);
   const [active, setActive] = useState(hoursText(existing?.active_minutes ?? null));
   const [note, setNote] = useState(existing?.note ?? "");
 
@@ -111,7 +115,13 @@ function DayDialogBody({
           <button type="button" onClick={() => onOpenChange(false)} className={buttonClass("ghost")}>
             Cancel
           </button>
-          <button type="button" onClick={save} disabled={pending} className={buttonClass("primary")}>
+          <button
+            type="button"
+            onClick={save}
+            disabled={pending || timesBad}
+            title={timesBad ? "Fix the time marked in red first" : undefined}
+            className={buttonClass("primary")}
+          >
             {pending ? "Saving…" : "Save"}
           </button>
         </>
@@ -122,14 +132,24 @@ function DayDialogBody({
           <DateField value={day} max={maxDate} required onChange={setDay} />
         </Label>
       ) : null}
-      <Segmented label="Day" value={kind} options={KIND_OPTIONS} onChange={setKind} />
+      <Segmented
+        label="Day"
+        value={kind}
+        options={KIND_OPTIONS}
+        onChange={(next) => {
+          setKind(next);
+          // The time boxes come and go with the kind, and start clean.
+          setStartBad(false);
+          setEndBad(false);
+        }}
+      />
       {kind !== "leave" ? (
         <div className="grid grid-cols-3 gap-3">
           <Label label="Start">
-            <TimeField value={start} onChange={setStart} around="09:00" />
+            <TimeField value={start} onChange={setStart} around="09:00" onInvalidChange={setStartBad} />
           </Label>
           <Label label="End">
-            <TimeField value={end} onChange={setEnd} placeholder="6:00 pm" around="18:00" />
+            <TimeField value={end} onChange={setEnd} placeholder="6:00 pm" around="18:00" onInvalidChange={setEndBad} />
           </Label>
           <Label label="Active hours">
             <input

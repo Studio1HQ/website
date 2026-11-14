@@ -66,4 +66,21 @@ describe("the rejected-applications clean-up", () => {
     expect(result.ok).toBe(false);
     expect(db.rows("job_applications")).toHaveLength(5);
   });
+
+  it("drops the kept contact of someone who unsubscribed while the job ran", async () => {
+    const fake = (await import("@/lib/internal/team/test-db")).fakeSupabase;
+    const keep = fake.upsertRows;
+    // The unsubscribe lands after the job has read the entry, before it deletes it.
+    fake.upsertRows = async (table, rows, options) => {
+      const result = await keep(table, rows, options);
+      for (const row of db.rows("job_applications")) if (row.id === "old-rejected") row.email_updates = false;
+      return result;
+    };
+    try {
+      await purgeRejectedApplications(NOW);
+    } finally {
+      fake.upsertRows = keep;
+    }
+    expect(db.rows("kept_contacts").map((row) => row.email)).toEqual(["quiet@example.com"]);
+  });
 });

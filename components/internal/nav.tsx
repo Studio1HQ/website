@@ -268,6 +268,16 @@ export function InternalNav({
                 icon={ChartLineUp}
                 active={isActive("/internal/community/analytics")}
               />
+              {/* Managers email hackathon registrants; without a hiring
+                  role they have no Settings group to find this under. */}
+              {community.access === "manager" ? (
+                <NavLink
+                  href="/internal/templates"
+                  label="Email templates"
+                  icon={EnvelopeOpen}
+                  active={isActive("/internal/templates")}
+                />
+              ) : null}
             </>
           ) : null}
         </div>
