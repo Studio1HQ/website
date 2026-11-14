@@ -46,10 +46,23 @@ import {
   type Sponsorship,
   type Task,
 } from "@/lib/internal/community/schema";
+import {
+  isMoneyEntity,
+  seesMoney,
+  visibleRows,
+  visibleTasks,
+  type Access,
+  type Viewer,
+} from "@/lib/internal/community/visibility";
 
 /**
  * Reads and writes for the community area. No session checks here; the
  * pages and actions do that. Server only: it uses the service-role key.
+ *
+ * Reads that can carry money (events, sponsors, sponsorships, expenses, a
+ * single record) take the reader's community access, and tasks take the
+ * reader: a community intern gets rows without money and only their own
+ * tasks (visibility.ts), so neither is ever sent to their browser.
  */
 
 export type Loaded<T> =
@@ -137,21 +150,40 @@ async function selectAll<T>(
 
 /* ----------------------------------------------------------------- lists */
 
+/** A read as this person may see it: money taken out for interns. */
+function seen<T extends object>(
+  entity: EntityKey,
+  result: Loaded<T>,
+  access: Access,
+): Loaded<T> {
+  return result.ok && !seesMoney(access)
+    ? { ...result, rows: visibleRows(entity, result.rows, access) }
+    : result;
+}
+
 // The whole-table lists are read once per page render (React's cache), so
 // a page and the pickers it builds (refOptions) share one read.
-export const loadEvents = cache(() =>
+const allEvents = cache(() =>
   selectAll<CommunityEvent>("community_events", {
     order: "starts_on.desc.nullsfirst,created_at.desc",
   }),
 );
 
+const allSponsors = cache(() =>
+  selectAll<Sponsor>("community_sponsors", { order: "name.asc" }),
+);
+
+/** Events; without budgets for interns. */
+export const loadEvents = async (access: Access) =>
+  seen("event", await allEvents(), access);
+
 export const loadPartners = cache(() =>
   selectAll<Partner>("community_partners", { order: "name.asc" }),
 );
 
-export const loadSponsors = cache(() =>
-  selectAll<Sponsor>("community_sponsors", { order: "name.asc" }),
-);
+/** Sponsors; without what they're asked for, for interns. */
+export const loadSponsors = async (access: Access) =>
+  seen("sponsor", await allSponsors(), access);
 
 type Filter = Partial<Record<"event_id" | "sponsor_id" | "partner_id", string>>;
 
@@ -163,23 +195,76 @@ function filterParams(filter: Filter) {
   return params;
 }
 
-export const loadSponsorships = (filter: Filter = {}) =>
-  selectAll<Sponsorship>("community_sponsorships", {
-    ...filterParams(filter),
-    order: "created_at.desc",
-  });
+/** Nothing, without a read: what an intern gets for a money record type. */
+const NONE = { ok: true as const, rows: [] };
 
-export const loadExpenses = (filter: Filter = {}) =>
-  selectAll<Expense>("community_expenses", {
-    ...filterParams(filter),
-    order: "created_at.desc",
-  });
+/** Sponsorships: managers only. Interns get none, and nothing is read. */
+export const loadSponsorships = async (
+  access: Access,
+  filter: Filter = {},
+): Promise<Loaded<Sponsorship>> =>
+  seesMoney(access)
+    ? selectAll<Sponsorship>("community_sponsorships", {
+        ...filterParams(filter),
+        order: "created_at.desc",
+      })
+    : NONE;
 
-export const loadTasks = (filter: Filter = {}) =>
-  selectAll<Task>("community_tasks", {
+/** Expenses: managers only. Interns get none, and nothing is read. */
+export const loadExpenses = async (
+  access: Access,
+  filter: Filter = {},
+): Promise<Loaded<Expense>> =>
+  seesMoney(access)
+    ? selectAll<Expense>("community_expenses", {
+        ...filterParams(filter),
+        order: "created_at.desc",
+      })
+    : NONE;
+
+/**
+ * The sponsors backing an event (sponsorships not cancelled), by id and
+ * nothing else: for the event report's "Run with" list, which interns see
+ * too. No amounts are read.
+ */
+export async function loadEventSponsorIds(
+  eventId: string,
+): Promise<Loaded<string>> {
+  if (!isUuid(eventId)) return { ok: true, rows: [] };
+  const result = await selectAll<{ sponsor_id: string }>(
+    "community_sponsorships",
+    {
+      select: "sponsor_id",
+      event_id: `eq.${eventId}`,
+      status: "neq.cancelled",
+      order: "created_at.desc",
+    },
+  );
+  return result.ok
+    ? { ...result, rows: [...new Set(result.rows.map((row) => row.sponsor_id))] }
+    : result;
+}
+
+/**
+ * Tasks: every one for managers (they assign the work); for an intern only
+ * the ones assigned to them. The owner filter is in the query, and checked
+ * again on the rows by the same rule the task actions use.
+ */
+export const loadTasks = async (
+  viewer: Viewer,
+  filter: Filter = {},
+): Promise<Loaded<Task>> => {
+  const mine = viewer.community !== "manager";
+  if (mine && !viewer.email) return NONE;
+  const result = await selectAll<Task>("community_tasks", {
     ...filterParams(filter),
+    ...(mine ? { owner: `ilike.${viewer.email.trim()}` } : {}),
     order: "due_on.asc.nullslast,created_at.desc",
   });
+  return result.ok && mine
+    ? { ...result, rows: visibleTasks(result.rows, viewer) }
+    : result;
+};
 
 export const loadContacts = (filter: Filter) =>
   selectAll<Contact>("community_contacts", {
@@ -237,17 +322,29 @@ export const loadHackathonCounts = cache((): Promise<Loaded<HackathonCounts>> =>
   ),
 );
 
-export async function getRecord<T>(
+/**
+ * One record, as this person may see it: without its money fields for an
+ * intern, and not at all when it's a sponsorship or an expense.
+ */
+export async function getRecord<T extends object>(
   entity: EntityKey,
   id: string,
+  access: Access,
 ): Promise<T | null> {
   if (!isUuid(id)) return null;
-  const result = await selectRows<T>(
-    ENTITIES[entity].table,
+  if (isMoneyEntity(entity) && !seesMoney(access)) return null;
+  const rows = (await recordRows(ENTITIES[entity].table, id)) as T[] | null;
+  return rows ? (visibleRows(entity, rows, access)[0] ?? null) : null;
+}
+
+/** One record's row, read once per request: a page and its title share it. */
+const recordRows = cache(async (table: string, id: string) => {
+  const result = await selectRows(
+    table,
     new URLSearchParams({ select: "*", id: `eq.${id}`, limit: "1" }),
   );
-  return result.ok ? (result.rows[0] ?? null) : null;
-}
+  return result.ok ? result.rows : null;
+});
 
 /**
  * Everyone reached (unique emails) and how many signed up for more than
@@ -321,8 +418,9 @@ export async function refOptions(
 ): Promise<RefOptions> {
   const today = todayKey();
   const [events, sponsors, partners, hackathons] = await Promise.all([
-    kinds.includes("event") ? loadEvents() : null,
-    kinds.includes("sponsor") ? loadSponsors() : null,
+    // Names and dates only, so the money on these rows doesn't matter here.
+    kinds.includes("event") ? allEvents() : null,
+    kinds.includes("sponsor") ? allSponsors() : null,
     kinds.includes("partner") ? loadPartners() : null,
     kinds.includes("hackathon") ? loadHackathonCounts() : null,
   ]);
@@ -631,9 +729,9 @@ export async function saveMetrics(
 /* ---------------------------------------------------------------- badges */
 
 /** Sidebar counts: my tasks due or late, and follow-ups due today or earlier. */
-export async function communityBadges(
+export const communityBadges = cache(async (
   email: string,
-): Promise<{ tasks: number; sponsors: number; partners: number }> {
+): Promise<{ tasks: number; sponsors: number; partners: number }> => {
   const today = todayKey();
   const count = async (table: string, params: Record<string, string>) => {
     const result = await selectRows(
@@ -659,7 +757,7 @@ export async function communityBadges(
     }),
   ]);
   return { tasks, sponsors, partners };
-}
+});
 
 /** After an event: everyone still registered or confirmed becomes a no-show. */
 export async function markNoShows(

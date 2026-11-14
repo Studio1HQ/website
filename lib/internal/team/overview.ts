@@ -7,10 +7,11 @@ import { isWeekend, istNow, monthOf, type TeamPerson } from "@/lib/internal/team
 
 /**
  * The admin overview's team and money numbers: who's in today, what's left
- * to pay, and where this month's payroll stands. `ready` is false until the
+ * to pay, and where this month's payroll stands (`money`, founders only,
+ * else null). `ready` is false until the
  * team migration has run, and the overview leaves the section out.
  */
-export async function teamOverview() {
+export async function teamOverview(options: { money: boolean }) {
   const now = istNow();
   const month = monthOf(now.date);
   const people = await listPeople({ activeOnly: true });
@@ -18,9 +19,10 @@ export async function teamOverview() {
 
   const [today, slips, claims, payments] = await Promise.all([
     listDays({ from: now.date, to: now.date, emails: people.people.map((person) => person.email) }),
-    payrollMonth(month),
-    listReimbursements({ status: ["submitted"] }),
-    paymentTotals(),
+    // Pay, claims and payments are read for the founders only.
+    options.money ? payrollMonth(month) : Promise.resolve(null),
+    options.money ? listReimbursements({ status: ["submitted"] }) : Promise.resolve(null),
+    options.money ? paymentTotals() : Promise.resolve(null),
   ]);
 
   const byEmail = new Map((today.ok ? today.days : []).map((day) => [day.email, day]));
@@ -32,7 +34,7 @@ export async function teamOverview() {
   const leave = group((person) => byEmail.get(person.email)?.kind === "leave");
   const notLogged = isWeekend(now.date) ? [] : group((person) => !byEmail.has(person.email));
   // The same rows as the Payroll page: anyone with a salary set or a saved slip.
-  const rows = slips.ok ? slips.rows.filter((row) => !row.noSalary) : [];
+  const rows = slips?.ok ? slips.rows.filter((row) => !row.noSalary) : [];
   const sent = rows.filter((row) => row.slip?.status === "sent").length;
   const salaried = rows.length;
 
@@ -43,7 +45,11 @@ export async function teamOverview() {
     working,
     leave,
     notLogged,
-    payroll: { sent, salaried, claimsWaiting: claims.ok ? claims.items.length : 0 },
-    payments: payments as PaymentTotals,
+    money: payments
+      ? {
+          payroll: { sent, salaried, claimsWaiting: claims?.ok ? claims.items.length : 0 },
+          payments: payments as PaymentTotals,
+        }
+      : null,
   };
 }

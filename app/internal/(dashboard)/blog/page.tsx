@@ -103,6 +103,8 @@ export default async function BlogPage({ searchParams }: Props) {
   const staff = await requireBlog("writer");
   const params = await searchParams;
   const reviewer = staff.blog === "reviewer";
+  // On the Live tab the Google Search numbers load alongside the posts.
+  const searching = params.tab === "live" && isSearchConsoleConfigured() ? searchStats() : null;
   const listed = await listPosts(staff);
   const posts = listed.ok ? listed.posts : [];
 
@@ -129,7 +131,7 @@ export default async function BlogPage({ searchParams }: Props) {
   const error = typeof params.error === "string" ? params.error.slice(0, 200) : null;
 
   // Google Search numbers on the Live tab (lib/internal/search-console.ts).
-  const search = tab === "live" && isSearchConsoleConfigured() ? await searchStats() : null;
+  const search = tab === "live" ? await searching : null;
   const numbers = search?.ok ? search.posts : null;
   const byClicks = tab === "live" && numbers !== null && params.sort === "clicks";
   const clicksOf = (slug: string) => numbers?.[slug]?.clicks ?? -1;

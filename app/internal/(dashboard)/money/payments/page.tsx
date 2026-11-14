@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { PaymentsView } from "@/components/internal/team/payments-view";
 import { Card, CardTitle, Notice, PageHeader, relativeDate } from "@/components/internal/ui";
-import { requireStaff } from "@/lib/internal/session";
+import { requireOwner } from "@/lib/internal/session";
 import { listAudit, type AuditRow } from "@/lib/internal/team/audit";
 import { listPayees, listPayments } from "@/lib/internal/team/payments";
 import { istNow, isMonthKey, monthOf } from "@/lib/internal/team/shared";
@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: "Payments" };
 /**
  * What Studio1 owes writers, hackathon partners and others, and what
  * sponsors owe Studio1. Invoices arrive by email or get added here; marking
- * one paid can email the payee. Admins only.
+ * one paid can email the payee. Founders only.
  */
 /**
  * Invoice and claim emails the intake turned away, newest first: a claim
@@ -50,7 +50,7 @@ export default async function PaymentsPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  await requireStaff("admin");
+  await requireOwner();
   const [payments, payees, params, turnedAway] = await Promise.all([
     listPayments(),
     listPayees(),

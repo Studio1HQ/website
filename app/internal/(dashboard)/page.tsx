@@ -318,18 +318,18 @@ export default async function OverviewPage({
           />
         ) : null}
 
-        {team?.ready ? (
+        {team?.ready && team.money ? (
           <AreaCard
             area="money"
             href="/internal/money"
-            value={team.payments.ok ? money(team.payments.toPayByCurrency) : "—"}
+            value={team.money.payments.ok ? money(team.money.payments.toPayByCurrency) : "—"}
             unit="to pay"
             rows={[
-              ["Payments to make", team.payments.ok ? team.payments.toPay : "—"],
-              [`Payslips sent · ${monthLabel(team.month, true)}`, `${team.payroll.sent} of ${team.payroll.salaried}`],
-              ["Expense claims waiting", team.payroll.claimsWaiting],
-              ...(team.payments.ok && team.payments.toReceive
-                ? ([["From sponsors, to receive", money(team.payments.toReceiveByCurrency)]] as [string, React.ReactNode][])
+              ["Payments to make", team.money.payments.ok ? team.money.payments.toPay : "—"],
+              [`Payslips sent · ${monthLabel(team.month, true)}`, `${team.money.payroll.sent} of ${team.money.payroll.salaried}`],
+              ["Expense claims waiting", team.money.payroll.claimsWaiting],
+              ...(team.money.payments.ok && team.money.payments.toReceive
+                ? ([["From sponsors, to receive", money(team.money.payments.toReceiveByCurrency)]] as [string, React.ReactNode][])
                 : []),
             ]}
           />

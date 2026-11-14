@@ -11,10 +11,10 @@ import { isUuid } from "@/lib/internal/community/clean";
 import {
   getRecord,
   loadEventPartners,
+  loadEventSponsorIds,
   loadGuests,
   loadPartners,
   loadSponsors,
-  loadSponsorships,
 } from "@/lib/internal/community/data";
 import { eventReport, type ReportRegistration } from "@/lib/internal/community/report";
 import {
@@ -42,8 +42,8 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // The title is data too: check the role before reading the record.
-  const [, { id }] = await Promise.all([requireCommunity(), params]);
-  const event = await getRecord<CommunityEvent>("event", id);
+  const [staff, { id }] = await Promise.all([requireCommunity(), params]);
+  const event = await getRecord<CommunityEvent>("event", id, staff.community);
   return { title: event ? `${event.name}: report` : "Event report" };
 }
 
@@ -56,7 +56,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  */
 export default async function EventReportPage({ params, searchParams }: Props) {
   const [staff, { id }, query] = await Promise.all([requireCommunity(), params, searchParams]);
-  const event = await getRecord<CommunityEvent>("event", id);
+  const event = await getRecord<CommunityEvent>("event", id, staff.community);
   if (!event) notFound();
   const today = todayKey();
   const sponsorId = typeof query.sponsor === "string" && isUuid(query.sponsor) ? query.sponsor : null;
@@ -66,9 +66,10 @@ export default async function EventReportPage({ params, searchParams }: Props) {
     event.hackathon_slug ? hackathonRegistrationsFor(event.hackathon_slug) : Promise.resolve(null),
     loadEventPartners({ event_id: event.id }),
     loadPartners(),
-    loadSponsorships({ event_id: event.id }),
-    loadSponsors(),
-    sponsorId ? getRecord<Sponsor>("sponsor", sponsorId) : Promise.resolve(null),
+    // Which sponsors back it, by id only: no amounts are read for a report.
+    loadEventSponsorIds(event.id),
+    loadSponsors(staff.community),
+    sponsorId ? getRecord<Sponsor>("sponsor", sponsorId, staff.community) : Promise.resolve(null),
   ]);
   if (!guests.ok) return <MigrationNotice message={guests.message} />;
 
@@ -100,8 +101,7 @@ export default async function EventReportPage({ params, searchParams }: Props) {
   const sponsoredBy = [
     ...new Set(
       (sponsorships.ok ? sponsorships.rows : [])
-        .filter((deal) => deal.status !== "cancelled")
-        .map((deal) => sponsorNames.get(deal.sponsor_id))
+        .map((sponsorId) => sponsorNames.get(sponsorId))
         .filter((name): name is string => Boolean(name)),
     ),
   ];

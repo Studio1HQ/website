@@ -1,3 +1,4 @@
+import { sectionsChanged } from "@/lib/internal/section-cache";
 import { randomUUID } from "crypto";
 import { NextResponse, after } from "next/server";
 import { COHORT } from "@/data/devrel-cohort";
@@ -105,6 +106,8 @@ export async function POST(request: Request) {
       { status: 502 },
     );
   }
+  // The dashboard keeps its lists for a moment: show this one straight away.
+  sectionsChanged();
 
   after(() =>
     sendConfirmation("cohort", {

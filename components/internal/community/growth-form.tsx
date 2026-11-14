@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition, type FormEvent } from "react";
+import { DateField, SuggestInput } from "@/components/internal/pickers";
 import { useRouter } from "next/navigation";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Plus, X } from "@phosphor-icons/react";
@@ -104,14 +105,7 @@ export function GrowthForm({
             <div className="space-y-2.5 overflow-y-auto px-5 py-4">
               <label className="block text-[12px] text-[var(--i-muted)]">
                 Date
-                <input
-                  type="date"
-                  value={day}
-                  max={todayKey()}
-                  onChange={(event) => setDay(event.target.value)}
-                  className={cn(inputClass(), "mt-1 w-[10rem]")}
-                  required
-                />
+                <DateField value={day} max={todayKey()} onChange={setDay} className="mt-1 w-[10rem]" required />
               </label>
               {rows.map((row, index) => {
                 const known =
@@ -124,20 +118,14 @@ export function GrowthForm({
                       </span>
                     ) : (
                       <>
-                        <input
+                        <SuggestInput
                           value={row.channel}
-                          onChange={(event) =>
-                            setRows((current) =>
-                              current.map((item, at) =>
-                                at === index
-                                  ? { ...item, channel: event.target.value }
-                                  : item,
-                              ),
-                            )
+                          onChange={(next) =>
+                            setRows((current) => current.map((item, at) => (at === index ? { ...item, channel: next } : item)))
                           }
+                          options={Object.values(CHANNELS).map((label) => ({ value: label }))}
                           placeholder="Channel"
                           aria-label="Channel name"
-                          list="growth-channels"
                           className={cn(inputClass(), "w-40 shrink-0")}
                         />
                       </>
@@ -165,11 +153,6 @@ export function GrowthForm({
                   </div>
                 );
               })}
-              <datalist id="growth-channels">
-                {Object.values(CHANNELS).map((label) => (
-                  <option key={label} value={label} />
-                ))}
-              </datalist>
               <button
                 type="button"
                 onClick={() =>

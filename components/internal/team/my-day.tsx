@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { DateField } from "@/components/internal/pickers";
 import {
   AirplaneTilt,
   ArrowSquareOut,
@@ -19,6 +20,7 @@ import {
   deleteMyDay,
   endDay,
   removeMyPhoto,
+  updateMyEmployeeId,
   saveMyDay,
   startDay,
   updateMyName,
@@ -80,8 +82,11 @@ export function MyDay({
   payslips,
   claims,
   inboundAddress,
+  admin,
 }: {
   person: TeamPerson;
+  /** Admins can set their own employee ID. */
+  admin: boolean;
   greeting: string;
   now: { date: string; time: string };
   month: string;
@@ -396,7 +401,7 @@ export function MyDay({
         </div>
       </div>
 
-      <ProfileDialog open={profileOpen} onOpenChange={setProfileOpen} person={person} />
+      <ProfileDialog open={profileOpen} onOpenChange={setProfileOpen} person={person} admin={admin} />
       <LeaveDialog open={leaveOpen} onOpenChange={setLeaveOpen} today={now.date} onSave={addMyLeave} />
       <ClaimDialog open={claimOpen} onOpenChange={setClaimOpen} today={now.date} />
       <DayDialog
@@ -441,18 +446,40 @@ function ProfileDialog({
   open,
   onOpenChange,
   person,
+  admin,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   person: TeamPerson;
+  admin: boolean;
 }) {
-  return open ? <ProfileDialogBody onOpenChange={onOpenChange} person={person} /> : null;
+  return open ? <ProfileDialogBody onOpenChange={onOpenChange} person={person} admin={admin} /> : null;
 }
 
-function ProfileDialogBody({ onOpenChange, person }: { onOpenChange: (open: boolean) => void; person: TeamPerson }) {
+function ProfileDialogBody({
+  onOpenChange,
+  person,
+  admin,
+}: {
+  onOpenChange: (open: boolean) => void;
+  person: TeamPerson;
+  /** Admins set employee IDs, their own included. */
+  admin: boolean;
+}) {
   const toast = useToast();
   const { pending, run } = useTeamAction();
   const [name, setName] = useState(person.name);
+  const [code, setCode] = useState(person.employee_code ?? "");
+  const nameChanged = name.trim() !== person.name;
+  const codeChanged = admin && code.trim() !== (person.employee_code ?? "");
+  const save = () =>
+    run(async () => {
+      if (nameChanged) {
+        const named = await updateMyName(name);
+        if (!named.ok || !codeChanged) return named;
+      }
+      return codeChanged ? updateMyEmployeeId(code) : { ok: true };
+    });
   const fileRef = useRef<HTMLInputElement>(null);
 
   const upload = async (file: File | undefined) => {
@@ -480,11 +507,11 @@ function ProfileDialogBody({ onOpenChange, person }: { onOpenChange: (open: bool
           </button>
           <button
             type="button"
-            disabled={pending || name.trim() === person.name}
-            onClick={() => run(() => updateMyName(name))}
+            disabled={pending || (!nameChanged && !codeChanged)}
+            onClick={save}
             className={buttonClass("primary")}
           >
-            Save name
+            {pending ? "Saving…" : "Save"}
           </button>
         </>
       }
@@ -521,9 +548,22 @@ function ProfileDialogBody({ onOpenChange, person }: { onOpenChange: (open: bool
         <input value={name} maxLength={80} onChange={(event) => setName(event.target.value)} className={inputClass()} />
       </Label>
       <div className="grid grid-cols-2 gap-3">
-        <Label label="Employee ID" hint="set by an admin">
-          <input value={person.employee_code ?? "Not set yet"} disabled className={inputClass()} />
-        </Label>
+        {admin ? (
+          <Label label="Employee ID">
+            <input
+              value={code}
+              maxLength={24}
+              placeholder="e.g. S1-001"
+              autoComplete="off"
+              onChange={(event) => setCode(event.target.value)}
+              className={inputClass()}
+            />
+          </Label>
+        ) : (
+          <Label label="Employee ID" hint="set by an admin">
+            <input value={person.employee_code ?? "Not set yet"} disabled className={inputClass()} />
+          </Label>
+        )}
         <Label label="Email">
           <input value={person.email} disabled className={inputClass()} />
         </Label>
@@ -614,13 +654,7 @@ function ClaimDialogBody({ onOpenChange, today }: { onOpenChange: (open: boolean
           />
         </Label>
         <Label label="Date">
-          <input
-            type="date"
-            value={spentOn}
-            max={today}
-            onChange={(event) => setSpentOn(event.target.value)}
-            className={inputClass()}
-          />
+          <DateField value={spentOn} max={today} onChange={setSpentOn} />
         </Label>
       </div>
       <Label label="Receipt" hint="PDF or photo, optional">

@@ -33,6 +33,7 @@ import {
   SECTION_ORDER,
   type SectionKey,
 } from "@/lib/internal/sections";
+import { HoverLink, LinkPending } from "@/components/internal/nav-progress";
 import { cn } from "@/lib/utils";
 
 const ICONS: Record<SectionKey, Icon> = {
@@ -59,7 +60,7 @@ function NavLink({
   active: boolean;
 }) {
   return (
-    <Link
+    <HoverLink
       href={href}
       aria-current={active ? "page" : undefined}
       className={cn(
@@ -80,6 +81,7 @@ function NavLink({
         aria-hidden
       />
       <span className="flex-1">{label}</span>
+      <LinkPending />
       {badge ? (
         <span
           className="ml-2 rounded-full bg-[var(--i-accent-soft)] px-1.5 text-[11px] font-medium leading-[18px] tabular-nums text-[var(--i-accent-text)]"
@@ -88,7 +90,7 @@ function NavLink({
           {badge}
         </span>
       ) : null}
-    </Link>
+    </HoverLink>
   );
 }
 
@@ -243,12 +245,15 @@ export function InternalNav({
                 badgeTitle={`${community.partners} ${community.partners === 1 ? "follow-up" : "follow-ups"} due`}
                 active={isActive("/internal/community/campus")}
               />
-              <NavLink
-                href="/internal/community/budget"
-                label="Budget"
-                icon={Coins}
-                active={isActive("/internal/community/budget")}
-              />
+              {/* Money stays with the manager: interns have no Budget page. */}
+              {community.access === "manager" ? (
+                <NavLink
+                  href="/internal/community/budget"
+                  label="Budget"
+                  icon={Coins}
+                  active={isActive("/internal/community/budget")}
+                />
+              ) : null}
               <NavLink
                 href="/internal/community/tasks"
                 label="Tasks"
@@ -393,7 +398,7 @@ export function InternalNav({
           ) : null}
         </NavGroup>
       ) : null}
-      {role || community ? (
+      {role ? (
         <div className="contents md:mt-5 md:block">
           <p className="hidden px-2.5 pb-1.5 text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--i-faint)] md:block">
             Settings
@@ -408,7 +413,7 @@ export function InternalNav({
             {admin ? (
               <NavLink
                 href="/internal/team"
-                label="Team access"
+                label="Team & roles"
                 icon={UserGear}
                 badge={requests}
                 active={isActive("/internal/team")}

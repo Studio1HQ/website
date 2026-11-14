@@ -451,6 +451,14 @@ export function shortText(value: unknown, max: number) {
   return typeof value === "string" ? value.replace(/\s+/g, " ").trim().slice(0, max) : "";
 }
 
+/** A name someone typed for themselves: tidied, or why it can't be used. */
+export function cleanOwnName(value: unknown): { ok: true; name: string } | { ok: false; message: string } {
+  const name = shortText(value, 80);
+  if (name.length < 2) return { ok: false, message: "Enter your name." };
+  if (/https?:|www\.|@|\d/.test(name)) return { ok: false, message: "Use just your name: no links, emails or digits." };
+  return { ok: true, name };
+}
+
 /**
  * The biggest photo or receipt the dashboard takes. Uploads go through a
  * server action, whose whole request is capped at 4 MB (next.config.ts), so

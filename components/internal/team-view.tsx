@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition, type FormEvent } from "react";
+import Link from "next/link";
 import { Crown, UserPlus } from "@phosphor-icons/react";
 import { invite, updateMember } from "@/app/internal/(dashboard)/team/actions";
 import type { Member } from "@/lib/internal/members";
@@ -27,8 +28,9 @@ import {
   relativeDate,
 } from "@/components/internal/ui";
 
-function nameOf(email: string) {
-  return email.split("@")[0].replace(/[._+-]+/g, " ");
+/** Their own name when they've given one, else worked out from the address. */
+function nameOf(email: string, name?: string) {
+  return name?.trim() || email.split("@")[0].replace(/[._+-]+/g, " ");
 }
 
 /** Role checkboxes. Outside addresses only ever see Blog writer. */
@@ -126,7 +128,7 @@ export function TeamView({ members, me, canManage }: { members: Member[]; me: st
     <div className="space-y-5">
       {canManage ? (
       <Card>
-        <CardTitle>Invite someone</CardTitle>
+        <CardTitle>Add someone</CardTitle>
         <form onSubmit={submitInvite} className="space-y-3 px-5 py-4">
           <div className="flex flex-wrap gap-2">
             <input
@@ -138,9 +140,17 @@ export function TeamView({ members, me, canManage }: { members: Member[]; me: st
               className={cn(inputClass("sm"), "w-auto min-w-[260px] flex-1")}
             />
             <button type="submit" disabled={busy === "invite"} className={buttonClass("accent")}>
-              <UserPlus size={15} /> Invite
+              <UserPlus size={15} /> Add
             </button>
           </div>
+          <p className="text-[12.5px] text-[var(--i-muted)]">
+            They can sign in straight away with the roles you pick, and get an email saying so. Employee IDs, attendance
+            and payslips are on{" "}
+            <Link href="/internal/people?tab=directory" className="text-[var(--i-ink-2)] underline underline-offset-2">
+              People
+            </Link>
+            .
+          </p>
           {inviteEmail.includes("@") && !inviteIsStaff ? (
             <p className="text-[12.5px] text-[var(--i-muted)]">
               Someone outside Studio1 can only be a <strong className="font-medium text-[var(--i-ink-2)]">Blog writer</strong>: they
@@ -169,7 +179,8 @@ export function TeamView({ members, me, canManage }: { members: Member[]; me: st
         </CardTitle>
         {pending.length === 0 ? (
           <EmptyState icon={<Crown size={20} />} title="No requests">
-            Teammates appear here after they sign in with their @studio1hq.com address.
+            Teammates appear here after they sign in with their @studio1hq.com address. They get no access until you
+            approve them with roles.
           </EmptyState>
         ) : (
           <ul>
@@ -180,11 +191,11 @@ export function TeamView({ members, me, canManage }: { members: Member[]; me: st
                   key={member.email}
                   className="flex flex-wrap items-center gap-3 border-b border-[var(--i-line)] px-5 py-3.5 last:border-b-0"
                 >
-                  <Avatar name={nameOf(member.email)} email={member.email} size={32} />
+                  <Avatar name={nameOf(member.email, member.name)} email={member.email} size={32} />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-[13.5px] font-medium">{member.email}</p>
+                    <p className="truncate text-[13.5px] font-medium">{member.name || member.email}</p>
                     <p className="text-[12px] text-[var(--i-muted)]" title={formatDate(member.requested_at)}>
-                      Asked {relativeDate(member.requested_at)}
+                      {member.name ? `${member.email} · ` : ""}Asked {relativeDate(member.requested_at)}
                     </p>
                   </div>
                   {canManage ? (
@@ -248,10 +259,10 @@ export function TeamView({ members, me, canManage }: { members: Member[]; me: st
                   off && "opacity-60",
                 )}
               >
-                <Avatar name={nameOf(member.email)} email={member.email} size={32} />
+                <Avatar name={nameOf(member.email, member.name)} email={member.email} size={32} />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[13.5px] font-medium capitalize">
-                    {nameOf(member.email)}
+                  <p className={cn("truncate text-[13.5px] font-medium", !member.name && "capitalize")}>
+                    {nameOf(member.email, member.name)}
                     {outside ? (
                       <span className="ml-2 rounded-full border border-[var(--i-line)] px-1.5 py-px text-[11px] font-normal normal-case text-[var(--i-muted)]">
                         Outside writer
@@ -312,7 +323,8 @@ export function TeamView({ members, me, canManage }: { members: Member[]; me: st
           ))}
         </dl>
         <p className="border-t border-[var(--i-line)] px-5 py-3 text-[12.5px] text-[var(--i-muted)]">
-          One person can have several roles, like Hiring reviewer and Blog writer. Admin includes everything.
+          One person can have several roles, like Hiring reviewer and Blog writer. Admin includes everything except
+          Money: payroll, expense claims and payments stay with the two founders.
         </p>
       </Card>
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition, type FormEvent } from "react";
+import { DateField } from "@/components/internal/pickers";
 import { useRouter } from "next/navigation";
 import {
   ChatText,
@@ -29,7 +30,6 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/components/internal/toast";
 import {
   buttonClass,
-  inputClass,
   textareaClass,
 } from "@/components/internal/ui";
 import { DueDate } from "@/components/internal/community/ui";
@@ -188,24 +188,12 @@ export function ActivityLog({
           <div className="flex flex-wrap items-end gap-2">
             <label className="text-[12px] text-[var(--i-muted)]">
               When
-              <input
-                type="date"
-                value={day}
-                max={today}
-                onChange={(event) => setDay(event.target.value)}
-                className={cn(inputClass(), "mt-1 w-[9.5rem]")}
-              />
+              <DateField value={day} max={today} required onChange={setDay} className="mt-1 w-[9.5rem]" />
             </label>
             {followUp ? (
               <label className="text-[12px] text-[var(--i-muted)]">
                 Next follow-up
-                <input
-                  type="date"
-                  value={next}
-                  min={today}
-                  onChange={(event) => setNext(event.target.value)}
-                  className={cn(inputClass(), "mt-1 w-[9.5rem]")}
-                />
+                <DateField value={next} min={today} onChange={setNext} className="mt-1 w-[9.5rem]" />
               </label>
             ) : null}
             {followUp ? (

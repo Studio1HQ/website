@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { HoverLink } from "@/components/internal/nav-progress";
 import { cn } from "@/lib/utils";
 import { Avatar, Card, Notice, inputClass } from "@/components/internal/ui";
 import {
@@ -265,7 +266,7 @@ export function LinkTabs({
       {items.map((item) => {
         const on = item.key === active;
         return (
-          <Link
+          <HoverLink
             key={item.key}
             href={item.href}
             aria-current={on ? "page" : undefined}
@@ -287,7 +288,7 @@ export function LinkTabs({
                 {item.count}
               </span>
             ) : null}
-          </Link>
+          </HoverLink>
         );
       })}
     </nav>

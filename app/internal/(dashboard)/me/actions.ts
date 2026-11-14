@@ -1,10 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireMember } from "@/lib/internal/session";
+import { isAdmin, requireMember } from "@/lib/internal/session";
 import { cantLog } from "@/lib/internal/team/access";
 import { changeProblem, cleanDay, deleteDay, listDays, saveDay, saveLeave } from "@/lib/internal/team/attendance";
-import { removePhoto, setPhoto, updateOwnName } from "@/lib/internal/team/people";
+import { cleanPerson, removePhoto, setPhoto, updateOwnName, updatePerson } from "@/lib/internal/team/people";
 import { addReimbursement, withdrawReimbursement } from "@/lib/internal/team/reimbursements";
 import {
   MAX_UPLOAD_BYTES,
@@ -124,6 +124,21 @@ export async function updateMyName(name: unknown): Promise<TeamResult> {
   const result = await updateOwnName(self.person.email, name);
   if (result.ok) revalidatePath("/internal", "layout");
   return result.ok ? { ok: true, message: "Name saved" } : result;
+}
+
+/**
+ * An admin's own employee ID. Everyone else's is set for them on People, so
+ * nobody picks their own unless they could already set anyone's.
+ */
+export async function updateMyEmployeeId(code: unknown): Promise<TeamResult> {
+  const self = await me();
+  if (!self) return NOT_ON_LIST;
+  if (!isAdmin(self.staff)) return { ok: false, message: "Employee IDs are set by an admin." };
+  const clean = cleanPerson({ ...self.person, employee_code: code });
+  if (!clean.ok) return clean;
+  const result = await updatePerson(clean.person, self.staff.email, self.person);
+  if (result.ok) revalidatePath("/internal", "layout");
+  return result.ok ? { ok: true, message: "Employee ID saved" } : result;
 }
 
 export async function uploadMyPhoto(form: FormData): Promise<TeamResult> {

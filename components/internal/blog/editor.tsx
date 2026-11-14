@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { DateField } from "@/components/internal/pickers";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -846,11 +847,11 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label hint="blank = publish day">Date</Label>
-                <input
-                  type="date"
+                <DateField
                   value={fields.publish_date ?? ""}
-                  onChange={(event) => update("publish_date", event.target.value || null)}
-                  className={inputClass()}
+                  onChange={(next) => update("publish_date", next || null)}
+                  placeholder="Publish day"
+                  aria-label="Date"
                 />
               </div>
               <label className="flex cursor-pointer items-end gap-2 pb-1.5 text-[12.5px] text-[var(--i-ink-2)]">

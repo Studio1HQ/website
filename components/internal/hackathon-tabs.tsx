@@ -4,6 +4,7 @@ import type { HackathonStats } from "@/lib/internal/data";
 import { formatDay, formatEventDate, todayKey } from "@/lib/internal/community/schema";
 import { SECTIONS, statusLabel } from "@/lib/internal/sections";
 import { cn } from "@/lib/utils";
+import { HoverLink, LinkPending } from "@/components/internal/nav-progress";
 import { Card, Notice, StatusDot, buttonClass } from "@/components/internal/ui";
 
 const PHASE: Record<HackathonStats["phase"], string> = {
@@ -136,7 +137,7 @@ function Tab({
   muted?: boolean;
 }) {
   return (
-    <Link
+    <HoverLink
       href={href}
       aria-current={active ? "page" : undefined}
       title={fresh ? `${fresh} new` : undefined}
@@ -153,6 +154,7 @@ function Tab({
       {label}
       <span className="tabular-nums text-[12px] text-[var(--i-faint)]">{count}</span>
       {fresh ? <span className="size-1.5 rounded-full bg-[var(--i-accent)]" aria-label={`${fresh} new`} /> : null}
-    </Link>
+      <LinkPending />
+    </HoverLink>
   );
 }

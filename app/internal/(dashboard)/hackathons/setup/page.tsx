@@ -31,8 +31,8 @@ const STANDARD_FIELDS = [
  * each is linked to a Community event.
  */
 export default async function HackathonSetupPage() {
-  await requireSection(SECTIONS.hackathons);
-  const events = await loadEvents();
+  const staff = await requireSection(SECTIONS.hackathons);
+  const events = await loadEvents(staff.community);
   const repo = process.env.GITHUB_REPO?.trim() || "Studio1HQ/website";
   const newIssue = `https://github.com/${repo}/issues/new?template=new-hackathon.yml`;
   const changeIssue = `https://github.com/${repo}/issues/new?template=hackathon-change.yml`;

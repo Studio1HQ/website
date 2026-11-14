@@ -1,14 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireStaff } from "@/lib/internal/session";
+import { requireOwner } from "@/lib/internal/session";
 import { emailAddress } from "@/lib/internal/token";
 import { getSlipFor, monthIsOpen, savePayslip, sendPayslip, type SendResult } from "@/lib/internal/team/payroll";
 import { decideReimbursement, getReimbursement } from "@/lib/internal/team/reimbursements";
 import { cleanLines, isMonthKey, isUuid, monthLabel, type TeamResult } from "@/lib/internal/team/shared";
 
 /*
- * Payroll actions, admins only. Server actions are public endpoints, so each
+ * Payroll actions, founders only. Server actions are public endpoints, so each
  * one checks the session and every input again.
  */
 
@@ -23,7 +23,7 @@ export async function saveSlip(input: {
   lopDays: unknown;
   saveDefaults: unknown;
 }): Promise<TeamResult> {
-  const admin = await requireStaff("admin");
+  const admin = await requireOwner();
   const email = emailAddress(input?.email);
   const month = input?.month;
   if (!email || !isMonthKey(month)) return { ok: false, message: "That payslip isn't valid." };
@@ -47,7 +47,7 @@ export async function saveSlip(input: {
 
 /** Emails one payslip; the page calls this once per person so it can show progress. */
 export async function emailSlip(email: unknown, month: unknown, resend: unknown): Promise<SendResult> {
-  const admin = await requireStaff("admin");
+  const admin = await requireOwner();
   const target = emailAddress(email);
   if (!target || !isMonthKey(month)) return { ok: false, message: "That payslip isn't valid." };
   if (!monthIsOpen(month)) return { ok: false, message: NOT_YET };
@@ -63,7 +63,7 @@ export async function decideClaim(
   month: unknown,
   amount: unknown,
 ): Promise<TeamResult> {
-  const admin = await requireStaff("admin");
+  const admin = await requireOwner();
   if (!isUuid(id)) return { ok: false, message: "That claim isn't valid." };
   if (decision !== "approved" && decision !== "rejected") return { ok: false, message: "That change isn't valid." };
   const claim = await getReimbursement(id);

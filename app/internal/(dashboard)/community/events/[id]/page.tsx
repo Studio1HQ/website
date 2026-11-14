@@ -50,6 +50,7 @@ import {
   phaseOf,
   subtractMoney,
 } from "@/lib/internal/community/stats";
+import { seesMoney } from "@/lib/internal/community/visibility";
 import {
   Card,
   CardTitle,
@@ -80,6 +81,7 @@ import {
   Owner,
   Stat,
 } from "@/components/internal/community/ui";
+import { cn } from "@/lib/utils";
 
 export async function generateMetadata({
   params,
@@ -87,8 +89,8 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   // The title is data too: check the role before reading the record.
-  const [, { id }] = await Promise.all([requireCommunity(), params]);
-  const event = await getRecord<CommunityEvent>("event", id);
+  const [staff, { id }] = await Promise.all([requireCommunity(), params]);
+  const event = await getRecord<CommunityEvent>("event", id, staff.community);
   return { title: event?.name ?? "Event" };
 }
 
@@ -98,9 +100,12 @@ export default async function EventPage({
   params: Promise<{ id: string }>;
 }) {
   const [staff, { id }] = await Promise.all([requireCommunity(), params]);
-  const event = await getRecord<CommunityEvent>("event", id);
+  const event = await getRecord<CommunityEvent>("event", id, staff.community);
   if (!event) notFound();
   const canEdit = staff.community === "manager";
+  // Interns: no budget, costs or sponsorship. The loaders below already
+  // leave the money out for them; this hides the empty cards and columns.
+  const showMoney = seesMoney(staff.community);
   const today = todayKey();
 
   const [
@@ -122,12 +127,12 @@ export default async function EventPage({
     loadGuests(event.id),
     event.hackathon_slug ? loadHackathonCounts() : Promise.resolve(null),
     event.partner_id
-      ? getRecord<Partner>("partner", event.partner_id)
+      ? getRecord<Partner>("partner", event.partner_id, staff.community)
       : Promise.resolve(null),
-    loadExpenses({ event_id: event.id }),
-    loadSponsorships({ event_id: event.id }),
-    loadSponsors(),
-    loadTasks({ event_id: event.id }),
+    loadExpenses(staff.community, { event_id: event.id }),
+    loadSponsorships(staff.community, { event_id: event.id }),
+    loadSponsors(staff.community),
+    loadTasks(staff, { event_id: event.id }),
     loadActivity({ event_id: event.id }),
     refOptions(["event", "partner", "sponsor", "hackathon"]),
     ownerChoices(),
@@ -282,7 +287,12 @@ export default async function EventPage({
           activity,
         )}
       />
-      <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div
+        className={cn(
+          "mb-6 grid grid-cols-2 gap-3",
+          showMoney && "lg:grid-cols-4",
+        )}
+      >
         <Stat
           label="Signed up"
           value={
@@ -319,30 +329,35 @@ export default async function EventPage({
           }
           accent={turnout.attended > 0}
         />
-        <Stat
-          label="Spent"
-          value={formatTotals(money.spent)}
-          note={
-            event.budget ? (
-              <span className="flex items-center gap-2">
-                <span className="w-16">
-                  <Meter value={projected} max={event.budget} />
-                </span>
-                {Math.round((projected / event.budget) * 100)}% of the{" "}
-                {formatTotals({ [currency]: event.budget })} budget with plans
-              </span>
-            ) : perHead ? (
-              `${formatTotals({ [currency]: perHead })} per attendee`
-            ) : (
-              "No budget set"
-            )
-          }
-        />
-        <Stat
-          label="Sponsorship"
-          value={formatTotals(money.income)}
-          note={`Net ${formatTotals(net)} · ${formatTotals(money.received)} received`}
-        />
+        {showMoney ? (
+          <>
+            <Stat
+              label="Spent"
+              value={formatTotals(money.spent)}
+              note={
+                event.budget ? (
+                  <span className="flex items-center gap-2">
+                    <span className="w-16">
+                      <Meter value={projected} max={event.budget} />
+                    </span>
+                    {Math.round((projected / event.budget) * 100)}% of the{" "}
+                    {formatTotals({ [currency]: event.budget })} budget with
+                    plans
+                  </span>
+                ) : perHead ? (
+                  `${formatTotals({ [currency]: perHead })} per attendee`
+                ) : (
+                  "No budget set"
+                )
+              }
+            />
+            <Stat
+              label="Sponsorship"
+              value={formatTotals(money.income)}
+              note={`Net ${formatTotals(net)} · ${formatTotals(money.received)} received`}
+            />
+          </>
+        ) : null}
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
@@ -405,32 +420,34 @@ export default async function EventPage({
             canEdit={canEdit}
             isOver={phase === "past"}
           />
-          <div className="grid gap-5 xl:grid-cols-2">
-            <ExpenseList
-              expenses={expenses.ok ? expenses.rows : []}
-              canEdit={canEdit}
-              refs={refs}
-              defaults={{ event_id: event.id, currency, status: "planned" }}
-              title={
-                <>
-                  Expenses{" "}
-                  {event.budget ? (
-                    <span className="font-normal text-[var(--i-muted)]">
-                      · {formatTotals({ [currency]: spent })} of{" "}
-                      {formatTotals({ [currency]: event.budget })}
-                    </span>
-                  ) : null}
-                </>
-              }
-            />
-            <SponsorshipList
-              sponsorships={sponsorships.ok ? sponsorships.rows : []}
-              sponsorNames={sponsorNames}
-              canEdit={canEdit}
-              refs={refs}
-              defaults={{ event_id: event.id, currency }}
-            />
-          </div>
+          {showMoney ? (
+            <div className="grid gap-5 xl:grid-cols-2">
+              <ExpenseList
+                expenses={expenses.ok ? expenses.rows : []}
+                canEdit={canEdit}
+                refs={refs}
+                defaults={{ event_id: event.id, currency, status: "planned" }}
+                title={
+                  <>
+                    Expenses{" "}
+                    {event.budget ? (
+                      <span className="font-normal text-[var(--i-muted)]">
+                        · {formatTotals({ [currency]: spent })} of{" "}
+                        {formatTotals({ [currency]: event.budget })}
+                      </span>
+                    ) : null}
+                  </>
+                }
+              />
+              <SponsorshipList
+                sponsorships={sponsorships.ok ? sponsorships.rows : []}
+                sponsorNames={sponsorNames}
+                canEdit={canEdit}
+                refs={refs}
+                defaults={{ event_id: event.id, currency }}
+              />
+            </div>
+          ) : null}
         </div>
 
         <div className="min-w-0 space-y-5">
@@ -465,14 +482,18 @@ export default async function EventPage({
                     {where}
                   </Field>
                 ) : null}
-                <Field label="Budget">
-                  {event.budget !== null
-                    ? formatTotals({ [currency]: event.budget })
-                    : null}
-                </Field>
-                <Field label="Cost per attendee">
-                  {perHead ? formatTotals({ [currency]: perHead }) : null}
-                </Field>
+                {showMoney ? (
+                  <>
+                    <Field label="Budget">
+                      {event.budget !== null
+                        ? formatTotals({ [currency]: event.budget })
+                        : null}
+                    </Field>
+                    <Field label="Cost per attendee">
+                      {perHead ? formatTotals({ [currency]: perHead }) : null}
+                    </Field>
+                  </>
+                ) : null}
                 {event.recap_url ? (
                   <Field label="Recap" wide>
                     <ExternalLink href={event.recap_url} />

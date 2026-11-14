@@ -262,7 +262,8 @@ export function PayrollView({
 
         {rows.length === 0 ? (
           <EmptyState icon={<Receipt size={20} />} title="Nobody on the team list yet">
-            Add employees and interns on People. Their payslips show up here.
+            The two founders are added on their own, and employees and interns come from People. Reload in a moment
+            if this stays empty.
           </EmptyState>
         ) : (
           <div className="overflow-x-auto">

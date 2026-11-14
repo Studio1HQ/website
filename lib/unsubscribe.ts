@@ -1,5 +1,5 @@
 import { baseUrl } from "@/lib/site";
-import { selectRows, updateRows } from "@/lib/supabase-server";
+import { deleteRows, selectRows, updateRows } from "@/lib/supabase-server";
 
 /**
  * Unsubscribe links for Studio1's email updates. Each link carries the
@@ -121,5 +121,11 @@ export async function unsubscribe(email: string) {
     if (!result.ok) return { ok: false as const, message: result.message };
     changed += result.count;
   }
+  // Contacts kept after a rejected application was deleted
+  // (lib/internal/retention.ts) are only kept until this moment.
+  const kept = await deleteRows("kept_contacts", new URLSearchParams({ email: `eq.${address}` }));
+  if (kept.ok) changed += kept.count;
+  // Before its migration runs there's no such table, and nothing kept.
+  else if (!/kept_contacts|PGRST205|42P01/.test(kept.message)) return { ok: false as const, message: kept.message };
   return { ok: true as const, changed };
 }

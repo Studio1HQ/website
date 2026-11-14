@@ -81,6 +81,7 @@ export default async function MyDayPage({
       ) : null}
       <MyDay
         person={person}
+        admin={isAdmin(staff)}
         greeting={`${greeting(now.time)}, ${displayName(person).split(" ")[0]}`}
         now={now}
         month={month}

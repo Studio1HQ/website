@@ -3,7 +3,7 @@ import { communityBadges } from "@/lib/internal/community/data";
 import { hackathonBreakdown, overview as hiringOverview } from "@/lib/internal/data";
 import { pendingCount } from "@/lib/internal/members";
 import { SECTIONS, sectionAccess } from "@/lib/internal/sections";
-import { isAdmin, type Staff } from "@/lib/internal/session";
+import { canSeeMoney, isAdmin, type Staff } from "@/lib/internal/session";
 import { listDays } from "@/lib/internal/team/attendance";
 import { teamOverview } from "@/lib/internal/team/overview";
 import {
@@ -81,7 +81,7 @@ export async function dashboardOverview(staff: Staff) {
     // Every pipeline this person can open: the hiring ones and, for
     // community staff and admins, hackathon registrations.
     staff.role || staff.community ? hiringOverview() : Promise.resolve(null),
-    admin ? teamOverview() : Promise.resolve(null),
+    admin ? teamOverview({ money: canSeeMoney(staff) }) : Promise.resolve(null),
     blogStaff ? blogSummary(blogStaff) : Promise.resolve(null),
     admin ? pendingCount() : Promise.resolve(0),
     staff.community ? communityBadges(staff.email) : Promise.resolve(null),
@@ -119,26 +119,27 @@ export async function dashboardOverview(staff: Staff) {
     todo.push({ area: "blog", label: `${plural(blog.feedback, "post")} of yours with feedback`, href: "/internal/blog" });
   }
 
-  if (team?.ready) {
-    if (team.payroll.claimsWaiting) {
+  if (team?.ready && team.money) {
+    const { payroll, payments } = team.money;
+    if (payroll.claimsWaiting) {
       todo.push({
         area: "money",
-        label: `${plural(team.payroll.claimsWaiting, "expense claim")} to approve`,
+        label: `${plural(payroll.claimsWaiting, "expense claim")} to approve`,
         href: "/internal/money/payroll",
       });
     }
-    if (team.payments.ok && team.payments.toPay) {
-      const amount = money(team.payments.toPayByCurrency);
+    if (payments.ok && payments.toPay) {
+      const amount = money(payments.toPayByCurrency);
       todo.push({
         area: "money",
-        label: `${plural(team.payments.toPay, "payment")} to make`,
-        detail: [amount || null, team.payments.flagged ? `${team.payments.flagged} need a look` : null].filter(Boolean).join(" · ") || undefined,
+        label: `${plural(payments.toPay, "payment")} to make`,
+        detail: [amount || null, payments.flagged ? `${payments.flagged} need a look` : null].filter(Boolean).join(" · ") || undefined,
         href: "/internal/money/payments",
-        urgent: team.payments.flagged > 0,
+        urgent: payments.flagged > 0,
       });
     }
     // Payslips: a nudge from the 25th, while some are still unsent.
-    const unsent = team.payroll.salaried - team.payroll.sent;
+    const unsent = payroll.salaried - payroll.sent;
     if (unsent > 0 && Number(now.date.slice(8)) >= Math.min(25, daysInMonth(month))) {
       todo.push({
         area: "money",
@@ -146,6 +147,8 @@ export async function dashboardOverview(staff: Staff) {
         href: "/internal/money/payroll",
       });
     }
+  }
+  if (team?.ready) {
     if (team.notLogged.length && Number(now.time.slice(0, 2)) >= 12) {
       todo.push({
         area: "team",

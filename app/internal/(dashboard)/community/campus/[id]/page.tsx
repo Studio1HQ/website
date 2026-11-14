@@ -61,8 +61,8 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   // The title is data too: check the role before reading the record.
-  const [, { id }] = await Promise.all([requireCommunity(), params]);
-  const partner = await getRecord<Partner>("partner", id);
+  const [staff, { id }] = await Promise.all([requireCommunity(), params]);
+  const partner = await getRecord<Partner>("partner", id, staff.community);
   return { title: partner?.name ?? "Partner" };
 }
 
@@ -72,7 +72,7 @@ export default async function PartnerPage({
   params: Promise<{ id: string }>;
 }) {
   const [staff, { id }] = await Promise.all([requireCommunity(), params]);
-  const partner = await getRecord<Partner>("partner", id);
+  const partner = await getRecord<Partner>("partner", id, staff.community);
   if (!partner) notFound();
   const canEdit = staff.community === "manager";
   const today = todayKey();
@@ -90,11 +90,11 @@ export default async function PartnerPage({
     links,
   ] = await Promise.all([
     loadContacts({ partner_id: partner.id }),
-    loadEvents(),
+    loadEvents(staff.community),
     loadGuestCounts(),
     loadHackathonCounts(),
     loadPartners(),
-    loadTasks({ partner_id: partner.id }),
+    loadTasks(staff, { partner_id: partner.id }),
     loadActivity({ partner_id: partner.id }),
     refOptions(["event", "sponsor", "partner"]),
     ownerChoices(),

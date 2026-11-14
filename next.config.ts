@@ -28,6 +28,12 @@ const nextConfig: NextConfig = {
     // The upload limits (MAX_UPLOAD_BYTES in lib/internal/team/shared.ts,
     // MAX_CSV_BYTES in lib/internal/community) are sized to fit under this.
     serverActions: { bodySizeLimit: "4mb" },
+// The dashboard's data isn't real-time, so the browser keeps each page
+    // it has opened (or fetched ahead on hover) for five minutes: going back
+    // to a tab shows it at once instead of loading its data again. Saving
+    // anything (a server action that revalidates), the sidebar's Refresh
+    // button or a reload still fetches fresh data.
+    staleTimes: { dynamic: 300, static: 300 },
   },
   images: {
     // Serve compact modern formats and reuse optimized derivatives on repeat visits.
