@@ -105,7 +105,7 @@ function MapNode({ node, delay }: { node: Node; delay: number }) {
           {NodeIcon ? (
             <NodeIcon weight="bold" className="size-3.5" />
           ) : (
-            <Logo className="size-3.5 brightness-0 invert" />
+            <Logo className="size-3.5 brightness-0 invert" knockout />
           )}
         </span>
         <span className="truncate text-[13px] font-medium">{node.name}</span>
@@ -299,7 +299,7 @@ export function StudioBento() {
                 className="p-3"
               >
                 <PrintBlock className="flex size-[200px] rotate-[-3deg] items-center justify-center rounded-[6px] shadow-[0_30px_60px_-30px_rgba(20,20,20,0.45)] sm:size-[260px]">
-                  <Logo className="relative size-[58%] brightness-0 invert" />
+                  <Logo className="relative size-[58%] brightness-0 invert" knockout />
                 </PrintBlock>
               </SelectionFrame>
 

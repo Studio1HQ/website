@@ -607,7 +607,7 @@ function AboutMark() {
         className="p-1.5"
       >
         <PrintBlock className="flex size-[120px] items-center justify-center lg:size-[140px]">
-          <Logo className="relative size-[62%] brightness-0 invert" />
+          <Logo className="relative size-[62%] brightness-0 invert" knockout />
         </PrintBlock>
       </SelectionFrame>
     </motion.div>
@@ -731,7 +731,7 @@ export function PaperCreation() {
           <div className="relative">
             <SelectionFrame label="studio1-mark" className="p-2">
               <PrintBlock className="flex size-[150px] items-center justify-center md:size-[180px]">
-                <Logo className="relative size-[56%] brightness-0 invert" />
+                <Logo className="relative size-[56%] brightness-0 invert" knockout />
               </PrintBlock>
             </SelectionFrame>
             <Cursor className="absolute -bottom-8 -right-6" />

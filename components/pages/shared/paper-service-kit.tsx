@@ -218,7 +218,7 @@ function CaseFrame({
           {study.company}
         </span>
         <span className="ml-auto flex items-center gap-1 rounded-full bg-[#f97316] py-0.5 pl-1 pr-2 text-[10.5px] font-medium text-white">
-          <Logo className="size-3.5 brightness-0 invert" />
+          <Logo className="size-3.5 brightness-0 invert" knockout />
           Studio1
         </span>
       </div>

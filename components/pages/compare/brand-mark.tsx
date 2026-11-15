@@ -33,7 +33,7 @@ export function BrandMark({
           className="flex items-center justify-center"
           style={{ width: size, height: size }}
         >
-          <Logo className="size-[58%] brightness-0 invert" />
+          <Logo className="size-[58%] brightness-0 invert" knockout />
         </span>
       </PrintBlock>
     );

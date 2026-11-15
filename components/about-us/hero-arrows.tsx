@@ -108,7 +108,7 @@ export function HeroArrows() {
           className="p-1.5"
         >
           <PrintBlock className="flex size-[104px] items-center justify-center rounded-[6px] xl:size-[120px]">
-            <Logo className="size-[62%] brightness-0 invert" />
+            <Logo className="size-[62%] brightness-0 invert" knockout />
           </PrintBlock>
         </SelectionFrame>
         <Cursor className="absolute -bottom-7 -right-5" />

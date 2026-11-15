@@ -291,7 +291,7 @@ function CohortBadge() {
         <span className="text-[22px] font-semibold uppercase leading-none tracking-[0.12em]">
           Participant
         </span>
-        <Logo className="size-9 shrink-0 brightness-0 invert" />
+        <Logo className="size-9 shrink-0 brightness-0 invert" knockout />
       </div>
     </div>
   );
@@ -740,7 +740,7 @@ function Outcomes() {
             />
             <div className="flex items-center justify-between text-[11px] font-medium uppercase tracking-[0.16em] text-white/80">
               <span>Interviews at Studio1</span>
-              <Logo className="size-8 brightness-0 invert" />
+              <Logo className="size-8 brightness-0 invert" knockout />
             </div>
             <div className="mt-12">
               <p className="text-[18px] font-medium text-white/85">Top</p>
