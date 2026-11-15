@@ -11,7 +11,7 @@ import {
   formatMoney,
   isWeekend,
   istNow,
-  minutesBetween,
+  minutesSoFar,
   monthLabel,
   monthOf,
   type AttendanceDay,
@@ -206,7 +206,7 @@ export async function dashboardOverview(staff: Staff) {
     mine: staff.person
       ? {
           day: myDay,
-          soFar: myDay?.start_time && !myDay.end_time ? minutesBetween(myDay.start_time, now.time) : null,
+          soFar: myDay ? minutesSoFar(myDay, now.time) : null,
         }
       : null,
     interns: staff.interns.length

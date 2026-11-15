@@ -21,6 +21,7 @@ import {
   leaveFor,
   lopFor,
   photoUrl,
+  slotsLabel,
   weekday,
   type AttendanceDay,
   type PersonKind,
@@ -56,7 +57,7 @@ function describe(day: AttendanceDay) {
   return [
     dayLabel(day.day),
     dayText(day),
-    day.start_time ? `${day.start_time}–${day.end_time ?? "…"}` : null,
+    day.slots.length ? slotsLabel(day.slots) : null,
     day.kind !== "leave" && day.active_minutes !== null ? `${formatMinutes(day.active_minutes)} active` : null,
     day.note || null,
   ]

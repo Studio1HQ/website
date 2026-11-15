@@ -7,11 +7,14 @@ import { changeProblem, cleanDay, deleteDay, listDays, saveDay, saveLeave } from
 import { cleanPerson, removePhoto, setEmployeeCode, setPhoto, updateOwnName } from "@/lib/internal/team/people";
 import { addReimbursement, withdrawReimbursement } from "@/lib/internal/team/reimbursements";
 import {
+  MAX_SLOTS,
   MAX_UPLOAD_BYTES,
   MAX_UPLOAD_LABEL,
   isDateKey,
   istNow,
   minutesBetween,
+  openSlot,
+  slotMinutes,
   type TeamResult,
 } from "@/lib/internal/team/shared";
 
@@ -35,7 +38,10 @@ function done(result: TeamResult, message?: string): TeamResult {
   return result.ok && message ? { ok: true, message } : result;
 }
 
-/** "Start my day": today's start time, now. */
+/**
+ * "Start my day", or "Start another slot" once the last one has ended: a
+ * new slot on today, starting now.
+ */
 export async function startDay(): Promise<TeamResult> {
   const self = await me();
   if (!self) return NOT_ON_LIST;
@@ -43,15 +49,33 @@ export async function startDay(): Promise<TeamResult> {
   const blocked = cantLog(self.staff, self.person, date, "work");
   if (blocked) return { ok: false, message: blocked };
   const existing = await listDays({ from: date, to: date, emails: [self.person.email] });
-  if (existing.ok && existing.days[0]?.start_time) return { ok: false, message: "Today already has a start time. Edit it instead." };
+  if (!existing.ok) return { ok: false, message: existing.message };
+  const today = existing.days[0] ?? null;
+  if (today?.kind === "leave") return { ok: false, message: "Today is logged as leave. Edit the day instead." };
+  const running = today ? openSlot(today.slots) : null;
+  if (running) return { ok: false, message: `You're already working, since ${running.start}. End that slot first.` };
+  if (today && today.slots.length >= MAX_SLOTS) {
+    return { ok: false, message: `A day takes ${MAX_SLOTS} slots at most. Edit the day instead.` };
+  }
   const locked = await changeProblem(self.staff, self.person.email, [date]);
   if (locked) return { ok: false, message: locked };
-  const clean = cleanDay(self.person.email, { day: date, kind: "work", start_time: time });
+  const clean = cleanDay(self.person.email, {
+    day: date,
+    kind: today?.kind ?? "work",
+    leave_type: today?.leave_type,
+    slots: [...(today?.slots ?? []), { start: time, end: null }],
+    // What the earlier slots came to, breaks taken off included.
+    active_hours: today && today.active_minutes !== null ? String(today.active_minutes / 60) : "",
+    note: today?.note,
+  });
   if (!clean.ok) return clean;
-  return done(await saveDay(clean.day, self.staff.email), `Started at ${time}`);
+  return done(await saveDay(clean.day, self.staff.email), today?.slots.length ? `Started again at ${time}` : `Started at ${time}`);
 }
 
-/** "End my day": today's end time, now, and active hours from start to end. */
+/**
+ * "End my day" (or the slot that's running): its end time, now, and active
+ * hours from the slots.
+ */
 export async function endDay(): Promise<TeamResult> {
   const self = await me();
   if (!self) return NOT_ON_LIST;
@@ -61,17 +85,24 @@ export async function endDay(): Promise<TeamResult> {
   const existing = await listDays({ from: date, to: date, emails: [self.person.email] });
   if (!existing.ok) return { ok: false, message: existing.message };
   const today = existing.days[0];
-  if (!today?.start_time) return { ok: false, message: "Start your day first." };
+  const running = today ? openSlot(today.slots) : null;
+  if (!today || !running) {
+    return { ok: false, message: today?.slots.length ? "Nothing's running. Start another slot first." : "Start your day first." };
+  }
+  const earlier = slotMinutes(today.slots);
+  const total = earlier + (minutesBetween(running.start, time) ?? 0);
   // Keep active hours someone already typed, unless they'd now be too long.
-  const span = minutesBetween(today.start_time, time);
-  const active = today.active_minutes !== null && span !== null && today.active_minutes <= span ? today.active_minutes : span;
+  // With earlier slots, a figure no longer than them is theirs alone (their
+  // breaks taken off), so this slot is added on top.
+  const typed = today.active_minutes;
+  const active =
+    typed === null ? total : today.slots.length > 1 && typed <= earlier ? typed + (total - earlier) : typed <= total ? typed : total;
   const clean = cleanDay(self.person.email, {
     day: date,
     kind: today.kind,
     leave_type: today.leave_type,
-    start_time: today.start_time,
-    end_time: time,
-    active_hours: active === null ? "" : String(active / 60),
+    slots: [...today.slots.slice(0, -1), { start: running.start, end: time }],
+    active_hours: String(active / 60),
     note: today.note,
   });
   if (!clean.ok) return clean;

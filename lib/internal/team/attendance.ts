@@ -3,24 +3,29 @@ import type { Staff } from "@/lib/internal/session";
 import { cantChange } from "@/lib/internal/team/access";
 import { audit } from "@/lib/internal/team/audit";
 import {
+  MAX_SLOTS,
   TEAM_MIGRATION_HINT,
   cleanTime,
   dateRange,
   isDateKey,
   isMissingTable,
   isWeekend,
-  minutesBetween,
   monthOf,
   monthStart,
   parseHours,
+  readSlots,
+  slotMinutes,
   type AttendanceDay,
   type AttendanceKind,
   type LeaveType,
   type TeamResult,
+  type WorkSlot,
 } from "@/lib/internal/team/shared";
 
 /**
- * Attendance (team_attendance): one row per person per day. No session
+ * Attendance (team_attendance): one row per person per day, worked in one
+ * or more slots (start_time and end_time hold the first start and the last
+ * end, so anything reading only those still sees the whole day). No session
  * checks here; lib/internal/team/access.ts decides who may log whose days.
  * Server only.
  */
@@ -31,14 +36,18 @@ function toDay(row: Record<string, unknown>): AttendanceDay | null {
   if (typeof row.id !== "string" || typeof row.email !== "string" || typeof row.day !== "string") return null;
   const kind: AttendanceKind = row.kind === "leave" || row.kind === "half_day" ? row.kind : "work";
   const leave = row.leave_type === "paid" || row.leave_type === "sick" || row.leave_type === "unpaid" ? row.leave_type : null;
+  const start = cleanTime(row.start_time);
+  const end = cleanTime(row.end_time);
   return {
     id: row.id,
     email: row.email,
     day: row.day,
     kind,
     leave_type: kind === "work" ? null : leave,
-    start_time: cleanTime(row.start_time),
-    end_time: cleanTime(row.end_time),
+    start_time: start,
+    end_time: end,
+    // A leave written over a worked day leaves that day's slots in the row.
+    slots: kind === "leave" ? [] : readSlots(row.slots, start, end),
     active_minutes: typeof row.active_minutes === "number" ? row.active_minutes : null,
     note: typeof row.note === "string" ? row.note : "",
     logged_by: String(row.logged_by ?? ""),
@@ -111,6 +120,7 @@ async function auditReplaced(email: string, dates: string[], by: string, action:
         leave_type: day.leave_type,
         start_time: day.start_time,
         end_time: day.end_time,
+        slots: day.slots,
         active_minutes: day.active_minutes,
         note: day.note,
         logged_by: day.logged_by,
@@ -126,13 +136,16 @@ export type DayInput = {
   leave_type: LeaveType | null;
   start_time: string | null;
   end_time: string | null;
+  slots: WorkSlot[];
   active_minutes: number | null;
   note: string;
 };
 
 /**
- * Checks a day someone typed. Worked days need a start time; active hours
- * default to end minus start. Leave needs a type, and a half day the type of
+ * Checks a day someone typed. Worked days need a start time, and can have
+ * several slots (`slots`, or one from `start_time` and `end_time`): each
+ * after the one before, and only the last still open. Active hours default
+ * to the time in the slots. Leave needs a type, and a half day the type of
  * its other half.
  */
 export function cleanDay(email: string, input: Record<string, unknown>): { ok: true; day: DayInput } | { ok: false; message: string } {
@@ -146,24 +159,53 @@ export function cleanDay(email: string, input: Record<string, unknown>): { ok: t
     if (!leaveType) return { ok: false, message: "Pick the kind of leave." };
     return {
       ok: true,
-      day: { email, day: input.day, kind, leave_type: leaveType, start_time: null, end_time: null, active_minutes: null, note },
+      day: { email, day: input.day, kind, leave_type: leaveType, start_time: null, end_time: null, slots: [], active_minutes: null, note },
     };
   }
 
-  const start = cleanTime(input.start_time);
-  const end = cleanTime(input.end_time);
-  if (input.start_time && !start) return { ok: false, message: "The start time isn't valid." };
-  if (input.end_time && !end) return { ok: false, message: "The end time isn't valid." };
-  if (kind === "work" && !start) return { ok: false, message: "Add the time you started." };
-  if (end && !start) return { ok: false, message: "Add the start time too." };
+  // Rows left blank in the form don't count.
+  const typedSlots = (
+    Array.isArray(input.slots)
+      ? input.slots.map((slot) => ({ start: (slot as { start?: unknown } | null)?.start, end: (slot as { end?: unknown } | null)?.end }))
+      : [{ start: input.start_time, end: input.end_time }]
+  ).filter((slot) => slot.start || slot.end);
+  if (typedSlots.length > MAX_SLOTS) return { ok: false, message: `A day takes ${MAX_SLOTS} slots at most.` };
+  const several = typedSlots.length > 1;
+  const slots: WorkSlot[] = [];
+  for (const [index, typed] of typedSlots.entries()) {
+    const where = several ? `Slot ${index + 1}: ` : "";
+    const sentence = (text: string) => (where ? `${where}${text.charAt(0).toLowerCase()}${text.slice(1)}` : text);
+    const start = cleanTime(typed.start);
+    const end = cleanTime(typed.end);
+    if (typed.start && !start) return { ok: false, message: sentence("The start time isn't valid.") };
+    if (typed.end && !end) return { ok: false, message: sentence("The end time isn't valid.") };
+    if (!start) return { ok: false, message: sentence("Add the start time too.") };
+    const last = index === typedSlots.length - 1;
+    if (!last && !end) return { ok: false, message: `Slot ${index + 1} needs an end time before the next one starts.` };
+    // Only a day's last slot can run past midnight.
+    if (!last && end && end < start) return { ok: false, message: `Slot ${index + 1} ends before it starts.` };
+    const before = slots[index - 1];
+    if (before?.end && start < before.end) {
+      return { ok: false, message: `Slot ${index + 1} starts before slot ${index} ends.` };
+    }
+    slots.push({ start, end });
+  }
+  if (kind === "work" && slots.length === 0) return { ok: false, message: "Add the time you started." };
   if (kind === "half_day" && !leaveType) return { ok: false, message: "Pick the leave type for the other half." };
 
   const typed = parseHours(input.active_hours);
   if (typed !== null && Number.isNaN(typed)) return { ok: false, message: "Active hours should look like 7.5 or 7:30." };
-  const span = minutesBetween(start, end);
-  const active = typed ?? span;
+  const ended = slots.filter((slot) => slot.end);
+  // The whole day's length, known once every slot has ended.
+  const span = slots.length && ended.length === slots.length ? slotMinutes(slots) : null;
+  const active = typed ?? (ended.length ? slotMinutes(slots) : null);
   if (active !== null && span !== null && active > span) {
-    return { ok: false, message: "Active hours can't be more than the time between start and end." };
+    return {
+      ok: false,
+      message: several
+        ? "Active hours can't be more than the time in your slots."
+        : "Active hours can't be more than the time between start and end.",
+    };
   }
   if (active !== null && active > 16 * 60) return { ok: false, message: "That's more than 16 active hours. Check the times." };
 
@@ -174,12 +216,18 @@ export function cleanDay(email: string, input: Record<string, unknown>): { ok: t
       day: input.day,
       kind,
       leave_type: kind === "half_day" ? leaveType : null,
-      start_time: start,
-      end_time: end,
+      start_time: slots[0]?.start ?? null,
+      end_time: slots[slots.length - 1]?.end ?? null,
+      slots,
       active_minutes: active,
       note,
     },
   };
+}
+
+/** The `slots` column isn't there yet (its migration hasn't run). */
+function isMissingSlots(message: string) {
+  return message.includes("PGRST204") && message.includes("slots");
 }
 
 function saveError(message: string): TeamResult {
@@ -192,11 +240,16 @@ function saveError(message: string): TeamResult {
 /** Saves a day, replacing whatever was logged for it. */
 export async function saveDay(day: DayInput, by: string): Promise<TeamResult> {
   await auditReplaced(day.email, [day.day], by, "overwritten");
-  const result = await upsertRows(
-    TABLE,
-    [{ ...day, logged_by: by, updated_at: new Date().toISOString() }],
-    { onConflict: "email,day" },
-  );
+  const row = { ...day, logged_by: by, updated_at: new Date().toISOString() };
+  let result = await upsertRows(TABLE, [row], { onConflict: "email,day" });
+  if (!result.ok && isMissingSlots(result.message)) {
+    // Before the slots migration: a one-slot day still fits the old columns.
+    if (day.slots.length > 1) {
+      return { ok: false, message: "More than one slot a day needs the latest database update. Ask an admin to run it." };
+    }
+    const { slots: _slots, ...plain } = row;
+    result = await upsertRows(TABLE, [plain], { onConflict: "email,day" });
+  }
   return result.ok ? { ok: true } : saveError(result.message);
 }
 

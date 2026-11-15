@@ -12,10 +12,14 @@ import {
   istNow,
   lopFor,
   minutesBetween,
+  minutesSoFar,
   monthLabel,
+  openSlot,
   parseAmount,
   parseHours,
+  readSlots,
   shiftMonth,
+  slotsLabel,
 } from "@/lib/internal/team/shared";
 
 describe("time helpers", () => {
@@ -114,6 +118,43 @@ describe("attendance", () => {
       cleanDay("a@studio1hq.com", { day: "2026-11-10", kind: "work", start_time: "09:00", end_time: "10:00", active_hours: "3" }).ok,
     ).toBe(false);
     expect(cleanDay("a@studio1hq.com", { day: "2026-11-10", kind: "leave" }).ok).toBe(false);
+  });
+
+  it("checks a day worked in several slots", () => {
+    const day = (input: Record<string, unknown>) => cleanDay("a@studio1hq.com", { day: "2026-11-10", kind: "work", ...input });
+    const two = day({ slots: [{ start: "09:30", end: "13:00" }, { start: "16:00", end: "20:00" }] });
+    expect(two.ok && two.day.slots).toEqual([{ start: "09:30", end: "13:00" }, { start: "16:00", end: "20:00" }]);
+    // The first start and the last end, and the time in the slots, not between them.
+    expect(two.ok && [two.day.start_time, two.day.end_time, two.day.active_minutes]).toEqual(["09:30", "20:00", 450]);
+    // Blank rows from the form are dropped.
+    const blank = day({ slots: [{ start: "09:30", end: "13:00" }, { start: "", end: "" }] });
+    expect(blank.ok && blank.day.slots.length).toBe(1);
+    // A last slot still going: the day has no end, and the earlier slots count so far.
+    const open = day({ slots: [{ start: "09:30", end: "13:00" }, { start: "16:00", end: null }] });
+    expect(open.ok && [open.day.end_time, open.day.active_minutes]).toEqual([null, 210]);
+    // Only the last slot can be open, they can't overlap, and breaks can't add time.
+    expect(day({ slots: [{ start: "09:30", end: "" }, { start: "16:00", end: "20:00" }] }).ok).toBe(false);
+    expect(day({ slots: [{ start: "09:30", end: "13:00" }, { start: "12:00", end: "20:00" }] }).ok).toBe(false);
+    expect(day({ slots: [{ start: "09:30", end: "08:00" }, { start: "16:00", end: "20:00" }] }).ok).toBe(false);
+    expect(day({ slots: [{ start: "", end: "13:00" }] }).ok).toBe(false);
+    expect(day({ slots: [{ start: "09:00", end: "10:00" }, { start: "11:00", end: "12:00" }], active_hours: "3" }).ok).toBe(false);
+    expect(day({ slots: Array.from({ length: 7 }, (_, hour) => ({ start: `0${hour + 1}:00`, end: `0${hour + 1}:30` })) }).ok).toBe(false);
+    // The last slot may run past midnight.
+    const late = day({ slots: [{ start: "10:00", end: "13:00" }, { start: "22:00", end: "01:00" }] });
+    expect(late.ok && late.day.active_minutes).toBe(360);
+  });
+
+  it("reads slots, and days saved before there were any", () => {
+    expect(readSlots(undefined, "09:30", "18:00")).toEqual([{ start: "09:30", end: "18:00" }]);
+    expect(readSlots([], null, null)).toEqual([]);
+    const slots = readSlots([{ start: "09:30:00", end: "13:00" }, { start: "16:00", end: null }, { start: "nope" }], "09:30", null);
+    expect(slots).toEqual([{ start: "09:30", end: "13:00" }, { start: "16:00", end: null }]);
+    expect(openSlot(slots)?.start).toBe("16:00");
+    expect(slotsLabel(slots)).toBe("09:30–13:00, 16:00–…");
+    // Earlier slots plus the running one; a typed figure for the earlier ones is kept.
+    expect(minutesSoFar({ slots, active_minutes: 210 }, "17:00")).toBe(270);
+    expect(minutesSoFar({ slots, active_minutes: 180 }, "17:00")).toBe(240);
+    expect(minutesSoFar({ slots: [{ start: "09:30", end: "18:00" }], active_minutes: 510 }, "19:00")).toBeNull();
   });
 
   it("names people without a name from their email", () => {
