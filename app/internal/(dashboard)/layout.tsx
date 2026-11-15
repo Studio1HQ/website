@@ -13,7 +13,7 @@ import { clientNeeds } from "@/lib/internal/clients/data";
 import { communityBadges } from "@/lib/internal/community/data";
 import { awaitingCounts } from "@/lib/internal/data";
 import { pendingCount } from "@/lib/internal/members";
-import { rolesLabel } from "@/lib/internal/roles";
+import { isStaffEmail, rolesLabel } from "@/lib/internal/roles";
 import { canSeeMoney, homeFor, isAdmin, requireMember, staffName, type Staff } from "@/lib/internal/session";
 import { teamBadges } from "@/lib/internal/team/badges";
 import { canSeeOthers } from "@/lib/internal/tasks/access";
@@ -110,9 +110,10 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   // Pages check their own access; the shell only needs someone with a role.
-  // The photo map is kept (lib/internal/team/photos.ts), so this is usually
-  // no extra read.
-  const [staff, photos] = await Promise.all([requireMember(), teamPhotos()]);
+  const staff = await requireMember();
+  // Team photos by email (kept, so usually no extra read). Only for
+  // @studio1hq.com: outside writers would otherwise get the team's addresses.
+  const photos = isStaffEmail(staff.email) ? await teamPhotos() : {};
   const name = staffName(staff);
   const home = homeFor(staff);
 
