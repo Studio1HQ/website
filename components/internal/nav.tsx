@@ -373,6 +373,74 @@ export function InternalNav({
           active={isActive("/internal")}
         />
       ) : null}
+      {clients || blog || community || team.money ? (
+        <NavGroup title="Workspaces">
+          {clients ? (
+            <NavLink
+              href="/internal/clients"
+              label="Clients"
+              icon={Folders}
+              badge={clientsBadge}
+              badgeTitle={[
+                clients.late ? `${clients.late} of your deliverables late` : null,
+                clients.toReview ? `${clients.toReview} waiting for your review` : null,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+              active={false}
+            />
+          ) : null}
+          {blog ? (
+            <NavLink
+              href="/internal/blog"
+              label="Blog"
+              icon={NotePencil}
+              badge={blogBadge}
+              badgeTitle={
+                blog === "reviewer"
+                  ? `${blogBadge} waiting for review`
+                  : `${blogBadge} with feedback`
+              }
+              active={isActive("/internal/blog")}
+            />
+          ) : null}
+          {community ? (
+            <NavLink
+              href="/internal/community"
+              label="Community"
+              icon={Compass}
+              badge={communityBadge}
+              badgeTitle={[
+                community.tasks ? `${community.tasks} of your tasks due or late` : null,
+                community.sponsors + community.partners
+                  ? `${community.sponsors + community.partners} follow-ups due`
+                  : null,
+                hackathonsNew
+                  ? `${hackathonsNew} new hackathon ${hackathonsNew === 1 ? "registration" : "registrations"}`
+                  : null,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+              active={false}
+            />
+          ) : null}
+          {team.money ? (
+            <NavLink
+              href="/internal/money"
+              label="Money"
+              icon={Bank}
+              badge={moneyBadge}
+              badgeTitle={[
+                team.payrollBadge ? `${team.payrollBadge} expense ${team.payrollBadge === 1 ? "claim" : "claims"} waiting` : null,
+                team.paymentsBadge ? `${team.paymentsBadge} to pay` : null,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+              active={false}
+            />
+          ) : null}
+        </NavGroup>
+      ) : null}
       {groups
         .filter((group) =>
           SECTION_ORDER.some(
@@ -404,27 +472,6 @@ export function InternalNav({
             </div>
           </div>
         ))}
-      {blog ? (
-        <div className="mt-5">
-          <p className="px-2.5 pb-1.5 text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--i-faint)]">
-            Content
-          </p>
-          <div className="flex flex-col gap-0.5">
-            <NavLink
-              href="/internal/blog"
-              label="Blog"
-              icon={NotePencil}
-              badge={blogBadge}
-              badgeTitle={
-                blog === "reviewer"
-                  ? `${blogBadge} waiting for review`
-                  : `${blogBadge} with feedback`
-              }
-              active={isActive("/internal/blog")}
-            />
-          </div>
-        </div>
-      ) : null}
       {team.me || team.people || team.tasks ? (
         <NavGroup title="Team">
           {team.me ? (
@@ -446,60 +493,6 @@ export function InternalNav({
               label="People"
               icon={IdentificationCard}
               active={isActive("/internal/people")}
-            />
-          ) : null}
-        </NavGroup>
-      ) : null}
-      {community || clients || team.money ? (
-        <NavGroup title="Areas">
-          {community ? (
-            <NavLink
-              href="/internal/community"
-              label="Community"
-              icon={Compass}
-              badge={communityBadge}
-              badgeTitle={[
-                community.tasks ? `${community.tasks} of your tasks due or late` : null,
-                community.sponsors + community.partners
-                  ? `${community.sponsors + community.partners} follow-ups due`
-                  : null,
-                hackathonsNew
-                  ? `${hackathonsNew} new hackathon ${hackathonsNew === 1 ? "registration" : "registrations"}`
-                  : null,
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-              active={false}
-            />
-          ) : null}
-          {clients ? (
-            <NavLink
-              href="/internal/clients"
-              label="Clients"
-              icon={Folders}
-              badge={clientsBadge}
-              badgeTitle={[
-                clients.late ? `${clients.late} of your deliverables late` : null,
-                clients.toReview ? `${clients.toReview} waiting for your review` : null,
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-              active={false}
-            />
-          ) : null}
-          {team.money ? (
-            <NavLink
-              href="/internal/money"
-              label="Money"
-              icon={Bank}
-              badge={moneyBadge}
-              badgeTitle={[
-                team.payrollBadge ? `${team.payrollBadge} expense ${team.payrollBadge === 1 ? "claim" : "claims"} waiting` : null,
-                team.paymentsBadge ? `${team.paymentsBadge} to pay` : null,
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-              active={false}
             />
           ) : null}
         </NavGroup>
