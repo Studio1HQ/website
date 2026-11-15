@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { sectionsChanged } from "@/lib/internal/section-cache";
 import {
   blockedAddresses,
   blockedReason,
@@ -171,6 +172,8 @@ export async function sendEntryEmail(
     const moved = await updateEntries(section, [id], { status });
     if (!moved.ok) problems.push(`the status didn't move to ${statusLabel(status)}`);
   }
+  // The lists mark who's been emailed.
+  sectionsChanged();
   revalidatePath("/internal", "layout");
   return {
     ok: true,
@@ -218,6 +221,8 @@ export async function cancelScheduledEmail(logId: unknown): Promise<SendResult> 
     return { ok: false, message: "Resend couldn't cancel it. It may already be on its way." };
   }
   const recorded = await recordDelivery({ resendId, to: String(row.to_email), status: "canceled" });
+  // The lists mark who's been emailed.
+  sectionsChanged();
   revalidatePath("/internal", "layout");
   if (!recorded.ok) {
     console.error(`[internal] marking the email canceled failed: ${recorded.message}`);

@@ -27,6 +27,7 @@ import {
 } from "@/lib/internal/email-templates";
 import { programOf } from "@/lib/internal/program";
 import { UUID_PATTERN, sectionFor, statusLabel } from "@/lib/internal/sections";
+import { sectionsChanged } from "@/lib/internal/section-cache";
 import { requireMember, requireSection } from "@/lib/internal/session";
 import { unsubscribeUrl } from "@/lib/unsubscribe";
 
@@ -36,6 +37,8 @@ export type BulkResult =
       sent: number;
       skipped: number;
       blocked: number;
+      /** Left out because they'd already been sent this template. */
+      already: number;
       scheduledFor?: string;
       /** The emails went, but something after them didn't (the log, the status). */
       warning?: string;
@@ -50,7 +53,8 @@ const MAX_RECIPIENTS = 100;
  * own first name and role, in one request to Resend, now or at a set time
  * (`sendAt`, up to 30 days ahead). Whoever can edit the section. Recipients
  * always come from the stored entries, never the browser. Addresses that
- * bounced or complained before are skipped. Each email is logged on its
+ * bounced or complained before are skipped, and so is anyone who was
+ * already sent this template, unless `again` asks for it. Each email is logged on its
  * entry, and the status can move with it (straight away, even if scheduled).
  *
  * A repeat of the same send (a double click, a retry after a timeout) goes
@@ -112,13 +116,46 @@ export async function sendBulkEmail(
     return { ok: false, message: "Couldn't load those entries. Try again in a minute." };
   }
 
+  // Who already got this template, from the log itself (the browser's
+  // list can be a moment old). Canceled scheduled sends don't count.
+  const alreadySent = new Set<string>();
+  if (fields.again !== true) {
+    const logged = await selectRows<{ record_id: string; resend_id: string | null }>(
+      "internal_email_log",
+      new URLSearchParams({
+        select: "record_id,resend_id",
+        source_table: `eq.${section.table}`,
+        template: `eq.${template.key}`,
+        record_id: `in.(${idList.join(",")})`,
+      }),
+    );
+    if (!logged.ok) {
+      console.error(`[internal] bulk email: reading the email log failed: ${logged.message}`);
+      return { ok: false, message: "Couldn't check who already got this email. Try again in a minute." };
+    }
+    const resendIds = logged.rows.map((row) => row.resend_id).filter((id): id is string => Boolean(id));
+    const canceled = resendIds.length
+      ? await selectRows<{ resend_id: string }>(
+          "email_delivery",
+          new URLSearchParams({ select: "resend_id", status: "eq.canceled", resend_id: `in.(${resendIds.join(",")})` }),
+        )
+      : null;
+    const dropped = new Set(canceled?.ok ? canceled.rows.map((row) => row.resend_id) : []);
+    for (const row of logged.rows) if (!(row.resend_id && dropped.has(row.resend_id))) alreadySent.add(String(row.record_id));
+  }
+
   const blocked = await blockedAddresses(found.rows.map((record) => String(record.email ?? "")));
   let blockedCount = 0;
   const sender = senderName(staff.email);
   const pipeline = template.pipeline;
   const messages: MailMessage[] = [];
   const sentRows: { id: string; email: string; subject: string }[] = [];
+  let alreadyCount = 0;
   for (const record of found.rows) {
+    if (alreadySent.has(String(record.id))) {
+      alreadyCount += 1;
+      continue;
+    }
     const to = typeof record.email === "string" ? record.email.trim() : "";
     if (!isEmailAddress(to)) continue;
     if (blocked.has(to.toLowerCase())) {
@@ -139,13 +176,16 @@ export async function sendBulkEmail(
     messages.push({ to, subject: personalSubject, html, text, replyTo: staff.email });
     sentRows.push({ id: String(record.id), email: to.toLowerCase(), subject: personalSubject });
   }
-  const skipped = idList.length - sentRows.length - blockedCount;
+  const skipped = idList.length - sentRows.length - blockedCount - alreadyCount;
   if (messages.length === 0) {
     return {
       ok: false,
-      message: blockedCount
-        ? "Everyone selected either has no email address or bounced or complained before."
-        : "None of those entries has an email address we can use.",
+      message:
+        alreadyCount === idList.length
+          ? "They've all been sent this email already."
+          : blockedCount
+            ? "Everyone selected either has no email address, bounced or complained before, or already got this email."
+            : "None of those entries has an email address we can use.",
     };
   }
 
@@ -201,12 +241,15 @@ export async function sendBulkEmail(
     const moved = await updateEntries(section, sentRows.map((row) => row.id), { status });
     if (!moved.ok) problems.push(`the status didn't move to ${statusLabel(status)}`);
   }
+  // The lists mark who's been emailed: show it straight away.
+  sectionsChanged();
   revalidatePath("/internal", "layout");
   return {
     ok: true,
     sent: sentRows.length,
     skipped,
     blocked: blockedCount,
+    already: alreadyCount,
     scheduledFor: sendAt.at,
     ...(problems.length
       ? { warning: `The emails ${sendAt.at ? "are scheduled" : "were sent"}, but ${problems.join(" and ")}. Don't send them again.` }

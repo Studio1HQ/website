@@ -61,13 +61,11 @@ export function SendLaterField({
   onEnabledChange,
   value,
   onValueChange,
-  inputClassName,
 }: {
   enabled: boolean;
   onEnabledChange: (enabled: boolean) => void;
   value: string;
   onValueChange: (value: string) => void;
-  inputClassName?: string;
 }) {
   const now = Date.now();
   return (
@@ -90,7 +88,6 @@ export function SendLaterField({
             required
             aria-label="Send on"
             onChange={(day) => onValueChange(`${day}T${value.slice(11, 16) || "10:00"}`)}
-            className={inputClassName}
           />
           <TimeField
             value={value.slice(11, 16)}

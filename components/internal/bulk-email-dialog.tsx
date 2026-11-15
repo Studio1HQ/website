@@ -39,7 +39,14 @@ function newNonce() {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
 }
 
-export type Recipient = { id: string; name: string; email: string; program: string };
+export type Recipient = {
+  id: string;
+  name: string;
+  email: string;
+  program: string;
+  /** Templates they've already been sent: the same one isn't sent twice unless asked. */
+  sent?: string[];
+};
 
 /** The most one send takes; bigger lists go in batches of this size. */
 const BATCH = 100;
@@ -100,9 +107,13 @@ export function BulkEmailDialog({
   // and the next send gets a fresh token.
   const [nonce, setNonce] = useState(newNonce);
 
-  const reachable = recipients.filter((person) => isEmailAddress(person.email));
+  // Whoever already got this template is left out, unless "again" is ticked.
+  const [again, setAgain] = useState(false);
+  const withAddress = recipients.filter((person) => isEmailAddress(person.email));
+  const already = withAddress.filter((person) => person.sent?.includes(templateKey));
+  const reachable = again ? withAddress : withAddress.filter((person) => !person.sent?.includes(templateKey));
   const unfilled = unfilledParts(`${subject}\n${body}`);
-  const unreachable = recipients.length - reachable.length;
+  const unreachable = recipients.length - withAddress.length;
   const previewPerson = reachable.find((person) => person.id === previewId) ?? reachable[0];
   const vars = useMemo(
     () => ({ first_name: firstName(previewPerson?.name ?? ""), program: previewPerson?.program ?? "", sender }),
@@ -118,6 +129,7 @@ export function BulkEmailDialog({
     setBody(next.body);
     setCall(next.call);
     setMove(Boolean(next.status));
+    setAgain(false);
     setConfirming(false);
   };
 
@@ -146,10 +158,12 @@ export function BulkEmailDialog({
         callUrl,
         status: move && moveTo ? moveTo : undefined,
         sendAt: sendLaterIso(later, sendAt),
+        again,
       };
       let sent = 0;
       let skipped = 0;
       let blocked = 0;
+      let had = 0;
       let scheduledFor: string | undefined;
       const warnings: string[] = [];
       let failure: string | null = null;
@@ -167,6 +181,7 @@ export function BulkEmailDialog({
         sent += result.sent;
         skipped += result.skipped ?? 0;
         blocked += result.blocked ?? 0;
+        had += result.already ?? 0;
         scheduledFor = result.scheduledFor ?? scheduledFor;
         if (result.warning) warnings.push(result.warning);
       }
@@ -175,6 +190,7 @@ export function BulkEmailDialog({
         const skips = [
           skipped ? `skipped ${skipped} without an address` : "",
           blocked ? `skipped ${blocked} that bounced or complained before` : "",
+          had ? `skipped ${had} who already had it` : "",
         ].filter(Boolean);
         toast(
           "success",
@@ -320,7 +336,6 @@ export function BulkEmailDialog({
                       setSendAt(next);
                       setConfirming(false);
                     }}
-                    inputClassName={cn(inputClass("sm"), "w-auto")}
                   />
                 ) : null}
               </div>
@@ -348,6 +363,27 @@ export function BulkEmailDialog({
                   ))}
                 </div>
               </div>
+              {already.length ? (
+                <div className="rounded-lg border border-[var(--i-line)] bg-[var(--i-sunken)] px-3 py-2.5 text-[12.5px] leading-relaxed">
+                  <p className="text-[var(--i-ink-2)]">
+                    {already.length === withAddress.length && !again
+                      ? `Everyone here already got “${template?.label ?? "this email"}”.`
+                      : `${already.length} ${already.length === 1 ? "person" : "people"} already got “${template?.label ?? "this email"}”${again ? "." : " and won't get it again."}`}
+                  </p>
+                  <label className="mt-1.5 flex items-center gap-2 text-[var(--i-muted)]">
+                    <input
+                      type="checkbox"
+                      checked={again}
+                      onChange={(event) => {
+                        setAgain(event.target.checked);
+                        setConfirming(false);
+                      }}
+                      className="size-4 rounded border-[var(--i-line-strong)] accent-[var(--i-accent)]"
+                    />
+                    Send it to them again
+                  </label>
+                </div>
+              ) : null}
               {unfilled.length ? (
                 <Notice tone="warning">
                   Fill in the parts in brackets before sending: {unfilled.map((part) => `[${part}]`).join(", ")}.
