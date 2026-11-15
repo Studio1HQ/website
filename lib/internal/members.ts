@@ -172,19 +172,31 @@ function legacyRole(roles: RoleKey[]) {
   return hiringLevel(roles) ?? "viewer";
 }
 
+/**
+ * Saves someone's status and roles. `unless` makes the write itself hold a
+ * check that was made on an earlier read: the row must still have that
+ * status and still not be an admin's, so a change made in between (an owner
+ * turning the person off, or making them an admin) isn't written over.
+ */
 export async function decideMember(
   email: string,
   change: { status: MemberStatus; roles: RoleKey[] },
   by: string,
+  unless?: { statusWas: MemberStatus },
 ) {
   if (isOwner(email)) return { ok: false as const, message: "Owners can't be changed." };
   const roles = cleanRoles(email, change.roles);
   if (change.status === "active" && roles.length === 0) {
     return { ok: false as const, message: "Pick at least one role, or turn their access off." };
   }
+  const which = new URLSearchParams({ email: `eq.${email}` });
+  if (unless) {
+    which.set("status", `eq.${unless.statusWas}`);
+    which.set("roles", "not.cs.{admin}");
+  }
   const result = await updateRows(
     TABLE,
-    new URLSearchParams({ email: `eq.${email}` }),
+    which,
     {
       status: change.status,
       roles,
@@ -203,9 +215,11 @@ export async function decideMember(
         : "Couldn't save. Try again in a minute.",
     };
   }
-  return result.count
-    ? { ok: true as const }
-    : { ok: false as const, message: "That person isn't on the list." };
+  if (result.count) return { ok: true as const };
+  return {
+    ok: false as const,
+    message: unless ? "Their access was just changed by someone else. Reload the page and try again." : "That person isn't on the list.",
+  };
 }
 
 /**

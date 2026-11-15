@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { renderEmail } from "@/lib/internal/email-templates";
-import { accessFor, decideMember, inviteMember } from "@/lib/internal/members";
+import { accessFor, decideMember, inviteMember, type MemberStatus } from "@/lib/internal/members";
 import { isOwner, isRoleKey, isStaffEmail, roleChangeProblem, rolesLabel, type RoleKey } from "@/lib/internal/roles";
 import { requireStaff } from "@/lib/internal/session";
 import { emailAddress } from "@/lib/internal/token";
@@ -44,6 +44,8 @@ export async function updateMember(
     return { ok: false, message: "You can't change your own access." };
   }
   const wanted = roleList(roles);
+  // What a non-owner's change was checked against; the write holds to it.
+  let checked: { statusWas: MemberStatus } | undefined;
   if (!isOwner(admin.email)) {
     const access = await accessFor(target);
     if (access.kind === "error") return { ok: false, message: "Couldn't check that person just now. Try again in a minute." };
@@ -52,12 +54,9 @@ export async function updateMember(
     }
     const problem = roleChangeProblem({ owner: false }, access.member, { status, roles: wanted });
     if (problem) return { ok: false, message: problem };
+    checked = { statusWas: access.member.status };
   }
-  const result = await decideMember(
-    target,
-    { status, roles: wanted },
-    admin.email,
-  );
+  const result = await decideMember(target, { status, roles: wanted }, admin.email, checked);
   if (result.ok) revalidatePath("/internal", "layout");
   return result;
 }
