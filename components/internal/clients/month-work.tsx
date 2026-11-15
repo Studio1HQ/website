@@ -1,0 +1,1543 @@
+"use client";
+
+import { useAfterSave } from "@/components/internal/clients/use-after-save";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useTransition,
+  type FormEvent,
+  type ReactNode,
+} from "react";
+import {
+  ListChecks,
+  PencilSimple,
+  Plus,
+  Prohibit,
+} from "@phosphor-icons/react";
+import { saveDeliverable } from "@/app/internal/(dashboard)/clients/actions";
+import {
+  canChangeDeliverable,
+  scopeLineProgress,
+  type ClientsAccess,
+} from "@/lib/internal/clients/rules";
+import {
+  CONTENT_TYPES,
+  DELIVERABLE_KINDS,
+  POST_KINDS,
+  WRITTEN_KINDS,
+  formatDay,
+  labelOf,
+  liveLinks,
+  personName,
+  platformOf,
+  publishedBy,
+  todayKey,
+  type Deliverable,
+  type DeliverableKind,
+  type ScopeLine,
+} from "@/lib/internal/clients/schema";
+import { cn } from "@/lib/utils";
+import { useToast } from "@/components/internal/toast";
+import { Select } from "@/components/internal/select";
+import { DateField } from "@/components/internal/pickers";
+import { KindIcon } from "@/components/internal/clients/kind-icon";
+import {
+  PlatformChip,
+  PlatformChips,
+} from "@/components/internal/clients/platform-chip";
+import {
+  Card,
+  ExternalLink,
+  buttonClass,
+  inputClass,
+} from "@/components/internal/ui";
+import { DueDate, Meter } from "@/components/internal/community/ui";
+import { DeliverableFlags, OwnerName } from "@/components/internal/clients/ui";
+import { BlockDialog } from "@/components/internal/clients/block-dialog";
+import { DeliverableDialog } from "@/components/internal/clients/deliverable-dialog";
+import { MoveStatusMenu } from "@/components/internal/clients/move-status-menu";
+import {
+  RemoveLineButton,
+  ScopeLineDialog,
+} from "@/components/internal/clients/scope-lines";
+
+/**
+ * A month's work for one engagement, as one list: a group per part of the
+ * plan ("Blogs: 1 of 4 published"), its pieces numbered in the order they
+ * were added, and an "Add blog 2 of 4" row that takes a title and an owner.
+ * Work outside the plan sits in its own group at the end. Clicking a piece
+ * opens every field; the status pill moves it along.
+ */
+
+type Viewer = { email: string; clients: ClientsAccess };
+
+type Shared = {
+  cycleId: string;
+  viewer: Viewer;
+  internal: boolean;
+  owners: readonly string[];
+  names: Readonly<Record<string, string>>;
+  scopeLines: readonly Pick<ScopeLine, "id" | "kind" | "label">[];
+  today: string;
+  /** The DevRel tracker migration has run: type, views, more links. */
+  devrel: boolean;
+};
+
+/** "Blog" → "blog", "Cookbook PR" → "cookbook PR"; names keep their capital. */
+function kindWord(kind: DeliverableKind) {
+  const label = labelOf(DELIVERABLE_KINDS, kind);
+  if (/^(Reddit|GitHub)\b/.test(label)) return label;
+  return label.charAt(0).toLowerCase() + label.slice(1);
+}
+
+/** The small "+ Add blog 3 of 4" button under a group. */
+const addButtonClass =
+  "inline-flex items-center gap-1.5 rounded-md px-1.5 py-1 text-[12.5px] text-[var(--i-muted)] transition-colors hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)]";
+
+const byAdded = (a: Deliverable, b: Deliverable) =>
+  a.created_at.localeCompare(b.created_at);
+
+export function MonthWork({
+  cycleId,
+  lines,
+  deliverables,
+  viewer,
+  internal,
+  owners,
+  names,
+  canEditPlan,
+  devrel = false,
+}: {
+  cycleId: string;
+  lines: readonly ScopeLine[];
+  deliverables: readonly Deliverable[];
+  viewer: Viewer;
+  internal: boolean;
+  owners: readonly string[];
+  names: Readonly<Record<string, string>>;
+  /** Client managers change the plan (the lines and their numbers). */
+  canEditPlan: boolean;
+  devrel?: boolean;
+}) {
+  const today = todayKey();
+  const ordered = [...lines].sort((a, b) => a.position - b.position);
+  const known = new Set(ordered.map((line) => line.id));
+  const outside = deliverables
+    .filter((item) => !item.scope_line_id || !known.has(item.scope_line_id))
+    .sort(byAdded);
+  const shared: Shared = {
+    cycleId,
+    viewer,
+    internal,
+    owners,
+    names,
+    scopeLines: ordered,
+    today,
+    devrel,
+  };
+  const nextPosition = ordered.length
+    ? Math.max(...ordered.map((line) => line.position)) + 1
+    : 0;
+  const empty = !ordered.length && !deliverables.length;
+  // One kind of work at a time, or all of it.
+  const [only, setOnly] = useState<string | null>(null);
+  const shows = (key: string) => only === null || only === key;
+  const chips = [
+    ...ordered.map((line) => {
+      const items = deliverables.filter(
+        (item) => item.scope_line_id === line.id,
+      );
+      return {
+        key: line.id,
+        label: line.label || labelOf(DELIVERABLE_KINDS, line.kind),
+        done: items.filter((item) => item.status === "published").length,
+        planned: line.planned,
+        count: items.length,
+      };
+    }),
+    ...(outside.length
+      ? [
+          {
+            key: "outside",
+            label: "Not in the plan",
+            done: outside.filter((item) => item.status === "published").length,
+            planned: 0,
+            count: outside.length,
+          },
+        ]
+      : []),
+  ].filter((chip) => chip.planned > 0 || chip.count > 0);
+
+  const groups = ordered
+    .map((line) => ({
+      line,
+      items: deliverables
+        .filter((item) => item.scope_line_id === line.id)
+        .sort(byAdded),
+    }))
+    .filter((group) => shows(group.line.id));
+  const filled = groups.filter((group) => group.items.length);
+  const quiet =
+    only === null ? groups.filter((group) => !group.items.length) : [];
+  // Written work gets the full width; posts and the rest sit side by side.
+  const wide = (kind: DeliverableKind) =>
+    only !== null || (WRITTEN_KINDS.has(kind) && kind !== "report");
+
+  const outsideWide =
+    only !== null ||
+    outside.some(
+      (item) => WRITTEN_KINDS.has(item.kind) && item.kind !== "report",
+    );
+  // Each card with its width and a rough height (rows + header), so the
+  // half-width ones can be stacked in two even columns.
+  const cards: {
+    key: string;
+    wide: boolean;
+    weight: number;
+    node: ReactNode;
+  }[] = [
+    ...filled.map(({ line, items }) => ({
+      key: line.id,
+      wide: wide(line.kind),
+      weight: items.length + 2,
+      node: (
+        <PlanGroup
+          key={line.id}
+          line={line}
+          items={items}
+          wide={wide(line.kind)}
+          canEditPlan={canEditPlan}
+          {...shared}
+        />
+      ),
+    })),
+    ...(outside.length && shows("outside")
+      ? [
+          {
+            key: "outside",
+            wide: outsideWide,
+            weight: outside.length + 2,
+            node: (
+              <Card key="outside" className="min-w-0">
+                <div className="flex items-center gap-3 border-b border-[var(--i-line)] px-5 py-3">
+                  <h3 className="text-[13.5px] font-medium">Not in the plan</h3>
+                  <span className="text-[12.5px] tabular-nums text-[var(--i-muted)]">
+                    {
+                      outside.filter((item) => item.status === "published")
+                        .length
+                    }{" "}
+                    live
+                  </span>
+                </div>
+                {outsideWide ? (
+                  <WorkTable
+                    items={outside}
+                    written={outside.every((item) =>
+                      WRITTEN_KINDS.has(item.kind),
+                    )}
+                    {...shared}
+                  />
+                ) : (
+                  <CompactList items={outside} {...shared} />
+                )}
+              </Card>
+            ),
+          },
+        ]
+      : []),
+    ...(quiet.length
+      ? [
+          {
+            key: "quiet",
+            wide: false,
+            weight: quiet.length * 0.6 + 1,
+            node: (
+              <Card key="quiet" className="min-w-0">
+                <div className="px-5 pb-1 pt-3.5">
+                  <h3 className="text-[13.5px] font-medium">Not started yet</h3>
+                </div>
+                <ul className="pb-1.5">
+                  {quiet.map(({ line }) => (
+                    <QuietLine
+                      key={line.id}
+                      line={line}
+                      canEditPlan={canEditPlan}
+                      {...shared}
+                    />
+                  ))}
+                </ul>
+              </Card>
+            ),
+          },
+        ]
+      : []),
+  ];
+  const left: ReactNode[] = [];
+  const right: ReactNode[] = [];
+  let leftWeight = 0;
+  let rightWeight = 0;
+  for (const card of cards) {
+    if (card.wide) continue;
+    if (leftWeight <= rightWeight) {
+      left.push(card.node);
+      leftWeight += card.weight;
+    } else {
+      right.push(card.node);
+      rightWeight += card.weight;
+    }
+  }
+
+  return (
+    <section aria-label="The month's work" className="space-y-4">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        {chips.length > 1 ? (
+          <div
+            role="tablist"
+            aria-label="Show"
+            className="flex min-w-0 flex-1 flex-wrap gap-1"
+          >
+            {[
+              {
+                key: null,
+                label: "All",
+                done: 0,
+                planned: 0,
+                count: deliverables.length,
+              },
+              ...chips,
+            ].map((chip) => (
+              <button
+                key={chip.key ?? "all"}
+                type="button"
+                role="tab"
+                aria-selected={only === chip.key}
+                onClick={() => setOnly(chip.key)}
+                className={cn(
+                  "shrink-0 rounded-md px-2 py-1 text-[12.5px] transition-colors",
+                  only === chip.key
+                    ? "bg-[var(--i-panel)] font-medium text-[var(--i-ink)] shadow-[var(--i-shadow-sm)] ring-1 ring-inset ring-[var(--i-line)]"
+                    : "text-[var(--i-muted)] hover:text-[var(--i-ink)]",
+                )}
+              >
+                {chip.label}{" "}
+                <span className="tabular-nums text-[var(--i-faint)]">
+                  {chip.key === null
+                    ? chip.count
+                    : chip.planned > 0
+                      ? `${chip.done}/${chip.planned}`
+                      : chip.count}
+                </span>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <span className="flex-1" />
+        )}
+        <span className="flex shrink-0 items-center gap-1">
+          {canEditPlan ? (
+            <ScopeLineDialog
+              cycleId={cycleId}
+              position={nextPosition}
+              trigger={
+                <button type="button" className={buttonClass("ghost", "sm")}>
+                  <Plus size={13} /> Add to the plan
+                </button>
+              }
+            />
+          ) : null}
+          <DeliverableDialog
+            cycleId={cycleId}
+            scopeLines={ordered}
+            owners={owners}
+            names={names}
+            access={viewer.clients}
+            me={viewer.email}
+            title="Add work"
+            devrel={devrel}
+            trigger={
+              <button type="button" className={buttonClass("secondary", "sm")}>
+                <Plus size={13} />
+                {ordered.length ? "Add something else" : "Add work"}
+              </button>
+            }
+          />
+        </span>
+      </div>
+
+      {empty ? (
+        <Card>
+          <div className="flex flex-col items-center px-6 py-10 text-center">
+            <ListChecks size={20} className="text-[var(--i-muted)]" />
+            <p className="mt-2 text-[13.5px] font-medium">
+              Nothing planned yet
+            </p>
+            <p className="mt-1 max-w-sm text-[13px] text-[var(--i-muted)]">
+              {canEditPlan
+                ? "Add what the contract covers this month, like 4 blogs. Then add each one here as it starts."
+                : "A client manager sets this month's plan."}
+            </p>
+          </div>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {cards.filter((card) => card.wide).map((card) => card.node)}
+          {left.length || right.length ? (
+            <div className="grid items-start gap-4 lg:grid-cols-2">
+              <div className="min-w-0 space-y-4">{left}</div>
+              <div className="min-w-0 space-y-4">{right}</div>
+            </div>
+          ) : null}
+        </div>
+      )}
+    </section>
+  );
+}
+
+/** Change or remove a part of the plan; shows on hover. */
+function PlanTools({
+  line,
+  name,
+  cycleId,
+}: {
+  line: ScopeLine;
+  name: string;
+  cycleId: string;
+}) {
+  return (
+    <span className="flex shrink-0 items-center opacity-0 transition-opacity focus-within:opacity-100 group-hover/plan:opacity-100 max-md:opacity-100">
+      <ScopeLineDialog
+        cycleId={cycleId}
+        line={line}
+        trigger={
+          <button
+            type="button"
+            aria-label={`Change ${name}`}
+            title="Change the number or name"
+            className={buttonClass("ghost", "sm")}
+          >
+            <PencilSimple size={13} />
+          </button>
+        }
+      />
+      <RemoveLineButton id={line.id} name={name} />
+    </span>
+  );
+}
+
+/** A part of the plan with nothing in it yet: one line in "Not started yet". */
+function QuietLine({
+  line,
+  canEditPlan,
+  ...shared
+}: Shared & { line: ScopeLine; canEditPlan: boolean }) {
+  const name = line.label || labelOf(DELIVERABLE_KINDS, line.kind);
+  const posts = POST_KINDS.has(line.kind);
+  return (
+    <li
+      aria-label={name}
+      className="group/plan flex flex-wrap items-center gap-x-3 gap-y-1.5 px-5 py-1.5"
+    >
+      <span className="flex min-w-0 items-center gap-2 truncate text-[13px] text-[var(--i-ink-2)]">
+        <KindIcon kind={line.kind} size={14} />
+        {name}
+      </span>
+      <span className="text-[12px] tabular-nums text-[var(--i-faint)]">
+        {line.planned > 0 ? `0 of ${line.planned}` : "none planned"}
+      </span>
+      <span className="flex-1" />
+      {posts ? (
+        <QuickPost line={line} added={0} compact {...shared} />
+      ) : (
+        <QuickAdd line={line} added={0} compact {...shared} />
+      )}
+      {canEditPlan ? (
+        <PlanTools line={line} name={name} cycleId={shared.cycleId} />
+      ) : null}
+    </li>
+  );
+}
+
+/**
+ * One part of the plan as its own card: a header (name, "2 of 4", a small
+ * bar, views), the pieces, and a small add button. Written work is a table
+ * across the page; posts and other small parts are compact two-line rows,
+ * half the width, side by side.
+ */
+function PlanGroup({
+  line,
+  items,
+  wide,
+  canEditPlan,
+  ...shared
+}: Shared & {
+  line: ScopeLine;
+  items: readonly Deliverable[];
+  wide: boolean;
+  canEditPlan: boolean;
+}) {
+  const progress = scopeLineProgress(line, items);
+  const name = line.label || labelOf(DELIVERABLE_KINDS, line.kind);
+  const posts = POST_KINDS.has(line.kind);
+  const views = shared.devrel ? viewsOf(items) : 0;
+  return (
+    <Card aria-label={name} className="group/plan min-w-0">
+      <section aria-label={name}>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-[var(--i-line)] px-5 py-3">
+          <h3 className="flex items-center gap-2 text-[13.5px] font-medium">
+            <KindIcon kind={line.kind} />
+            {name}
+          </h3>
+          <span className="text-[12.5px] tabular-nums text-[var(--i-muted)]">
+            {line.planned > 0
+              ? progress.done > line.planned
+                ? // More than planned reads as a mistake as "4 of 2".
+                  `${progress.done} live · ${line.planned} planned`
+                : `${progress.done} of ${line.planned}`
+              : `${progress.done} live`}
+          </span>
+          {line.planned > 0 ? (
+            <span className="w-16">
+              <Meter
+                value={Math.min(progress.done, line.planned)}
+                max={line.planned}
+                label={
+                  progress.done > line.planned
+                    ? `${progress.done} done, ${line.planned} planned`
+                    : `${progress.done} of ${line.planned} done`
+                }
+              />
+            </span>
+          ) : null}
+          {progress.approved ? (
+            <span className="text-[12px] text-[var(--i-faint)]">
+              +{progress.approved} approved
+            </span>
+          ) : null}
+          {views > 0 ? (
+            <span className="text-[12px] tabular-nums text-[var(--i-muted)]">
+              {counts.format(views)} views
+            </span>
+          ) : null}
+          <span className="flex-1" />
+          {canEditPlan ? (
+            <PlanTools line={line} name={name} cycleId={shared.cycleId} />
+          ) : null}
+        </div>
+        {line.notes ? (
+          <p className="px-5 pt-2 text-[12px] text-[var(--i-faint)]">
+            {line.notes}
+          </p>
+        ) : null}
+        {wide ? (
+          posts ? (
+            <PostTable items={items} {...shared} />
+          ) : (
+            <WorkTable
+              items={items}
+              written={WRITTEN_KINDS.has(line.kind)}
+              {...shared}
+            />
+          )
+        ) : (
+          <CompactList items={items} {...shared} />
+        )}
+        <div className="border-t border-[var(--i-line)] px-4 py-1.5">
+          {posts ? (
+            <QuickPost
+              line={line}
+              added={items.length}
+              lastOwner={items.at(-1)?.owner}
+              {...shared}
+            />
+          ) : (
+            <QuickAdd
+              line={line}
+              added={items.length}
+              lastOwner={items.at(-1)?.owner}
+              {...shared}
+            />
+          )}
+        </div>
+      </section>
+    </Card>
+  );
+}
+
+/** Pieces as two-line rows, for the half-width cards. */
+function CompactList({
+  items,
+  ...shared
+}: Shared & { items: readonly Deliverable[] }) {
+  return (
+    <ol className="divide-y divide-[var(--i-line)]">
+      {items.map((item, index) => (
+        <CompactRow
+          key={item.id}
+          number={index + 1}
+          deliverable={item}
+          {...shared}
+        />
+      ))}
+    </ol>
+  );
+}
+
+/**
+ * Title, and on the right the views (a live post) or the stage; under it
+ * who did it, where it went live (colored chips) and the day.
+ */
+function CompactRow({
+  number,
+  deliverable,
+  viewer,
+  internal,
+  owners,
+  names,
+  scopeLines,
+  today,
+  devrel,
+}: Shared & { number: number; deliverable: Deliverable }) {
+  const [editing, setEditing] = useState(false);
+  const canChange = canChangeDeliverable(viewer, deliverable);
+  const live = deliverable.status === "published";
+  const links = live ? liveLinks(deliverable) : [];
+  const day = live
+    ? deliverable.published_at
+      ? todayKey(new Date(deliverable.published_at))
+      : null
+    : deliverable.due_on;
+  const showViews = devrel && live && POST_KINDS.has(deliverable.kind);
+  const note = deliverable.notes.split("\n")[0]?.trim();
+  return (
+    <li className="group/row flex gap-3 px-5 py-2.5 transition-colors hover:bg-[var(--i-hover)]">
+      <span className="w-4 shrink-0 pt-px text-[12px] tabular-nums text-[var(--i-faint)]">
+        {number}
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-start justify-between gap-3">
+          <button
+            type="button"
+            onClick={() => setEditing(true)}
+            className="min-w-0 break-words text-left text-[13.5px] font-medium leading-snug text-[var(--i-ink)] hover:text-[var(--i-accent-text)]"
+          >
+            {deliverable.title}
+          </button>
+          <span className="shrink-0">
+            {showViews ? (
+              <span className="flex items-center gap-1 text-[12px] text-[var(--i-muted)]">
+                <ViewsCell
+                  deliverable={deliverable}
+                  canChange={canChange}
+                  placeholder="—"
+                />
+                views
+              </span>
+            ) : (
+              <MoveStatusMenu
+                deliverable={deliverable}
+                internal={internal}
+                canChange={canChange}
+                align="end"
+              />
+            )}
+          </span>
+        </div>
+        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-[var(--i-muted)]">
+          {deliverable.owner ? (
+            <OwnerName email={deliverable.owner} names={names} />
+          ) : null}
+          <PlatformChips urls={links} />
+          {day ? (
+            <span className="tabular-nums">
+              {live ? (
+                formatDay(day, today)
+              ) : (
+                <>
+                  Due <DueDate day={day} today={today} />
+                </>
+              )}
+            </span>
+          ) : null}
+          {!live ? (
+            <DeliverableFlags deliverable={deliverable} today={today} />
+          ) : null}
+        </div>
+        {note ? (
+          <p
+            className="mt-0.5 truncate text-[12px] text-[var(--i-faint)]"
+            title={deliverable.notes}
+          >
+            {note}
+          </p>
+        ) : null}
+      </div>
+      <DeliverableDialog
+        deliverable={deliverable}
+        access={viewer.clients}
+        canChange={canChange}
+        owners={owners}
+        names={names}
+        scopeLines={scopeLines}
+        devrel={devrel}
+        open={editing}
+        onOpenChange={setEditing}
+      />
+    </li>
+  );
+}
+
+/** Headings for a table that only screen readers need; they set the widths. */
+function QuietHead({
+  columns,
+}: {
+  columns: readonly (readonly [string, string])[];
+}) {
+  return (
+    <thead>
+      <tr className="h-0">
+        {columns.map(([label, width]) => (
+          <th key={label} className={cn("p-0 font-normal", width)}>
+            <span className="sr-only">{label}</span>
+          </th>
+        ))}
+      </tr>
+    </thead>
+  );
+}
+
+const rowClass = cn(
+  "group/row border-t border-[var(--i-line)] align-middle transition-colors hover:bg-[var(--i-hover)] md:[&>td]:py-2 md:[&>td]:pr-4",
+  "max-md:flex max-md:flex-wrap max-md:items-center max-md:gap-x-3 max-md:gap-y-1.5 max-md:px-5 max-md:py-2.5 max-md:[&>td]:p-0",
+);
+
+/**
+ * The pieces as a table (a stacked list on phones): number, title (with its
+ * type, doc and flags), owner, stage, due, and where it went live. Blank
+ * cells stay blank.
+ */
+function WorkTable({
+  items,
+  written,
+  ...shared
+}: Shared & { items: readonly Deliverable[]; written: boolean }) {
+  return (
+    <table className="w-full border-collapse text-left text-[13px] max-md:block">
+      <QuietHead
+        columns={[
+          ["Number", "w-10 md:pl-5"],
+          [written ? "Topic" : "Item", ""],
+          [written ? "Writer" : "Owner", "w-32"],
+          ["Stage", "w-40"],
+          ["Due", "w-24"],
+          ["Published", "w-40"],
+          ["Blocked", "w-10"],
+        ]}
+      />
+      <tbody className="max-md:block">
+        {items.map((item, index) => (
+          <WorkRow
+            key={item.id}
+            number={index + 1}
+            deliverable={item}
+            written={written}
+            {...shared}
+          />
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+/** One piece of work as a table row. */
+function WorkRow({
+  number,
+  deliverable,
+  written,
+  viewer,
+  internal,
+  owners,
+  names,
+  scopeLines,
+  today,
+  devrel,
+}: Shared & { number: number; deliverable: Deliverable; written: boolean }) {
+  const [editing, setEditing] = useState(false);
+  const [blocking, setBlocking] = useState(false);
+  const canChange = canChangeDeliverable(viewer, deliverable);
+  const live = deliverable.status === "published";
+  const found = live ? publishedBy(deliverable.published_url) : null;
+  // Written pieces: their site or our Medium/dev.to; anything else: the platform.
+  const where =
+    found && !written
+      ? {
+          ...found,
+          where: platformOf(deliverable.published_url) ?? found.where,
+        }
+      : found;
+  const links = [
+    [written ? "Doc" : "Draft", deliverable.draft_url],
+    ["Review copy", deliverable.review_url],
+    ["PR", deliverable.pr_url],
+  ].filter((entry): entry is [string, string] => Boolean(entry[1]));
+  const note = deliverable.notes.split("\n")[0]?.trim();
+  return (
+    <tr
+      className={cn(
+        rowClass,
+        deliverable.blocked && !live && "bg-rose-50/40 dark:bg-rose-500/5",
+      )}
+    >
+      <td className="text-[12px] tabular-nums text-[var(--i-faint)] md:pl-5">
+        {number}
+      </td>
+      <td className="min-w-0 max-md:flex-1 max-md:basis-[calc(100%-2rem)]">
+        <span className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-0.5">
+          <button
+            type="button"
+            onClick={() => setEditing(true)}
+            className="min-w-0 break-words text-left text-[13.5px] font-medium leading-snug text-[var(--i-ink)] hover:text-[var(--i-accent-text)]"
+          >
+            {deliverable.title}
+          </button>
+          {written && devrel && deliverable.content_type ? (
+            <span className="shrink-0 text-[11.5px] text-[var(--i-muted)]">
+              {labelOf(CONTENT_TYPES, deliverable.content_type)}
+            </span>
+          ) : null}
+        </span>
+        {links.length || (!live && hasFlags(deliverable, today)) ? (
+          <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[12px] text-[var(--i-muted)]">
+            {!live ? (
+              <DeliverableFlags deliverable={deliverable} today={today} />
+            ) : null}
+            {links.map(([label, href]) => (
+              <ExternalLink key={label} href={href}>
+                {label}
+              </ExternalLink>
+            ))}
+          </span>
+        ) : null}
+        {note ? (
+          <span
+            className="mt-0.5 block max-w-[36rem] truncate text-[12px] text-[var(--i-faint)]"
+            title={deliverable.notes}
+          >
+            {note}
+          </span>
+        ) : null}
+      </td>
+      <td className="max-w-[8rem] text-[12.5px] max-md:empty:hidden">
+        {deliverable.owner ? (
+          <OwnerName email={deliverable.owner} names={names} />
+        ) : null}
+      </td>
+      <td>
+        <MoveStatusMenu
+          deliverable={deliverable}
+          internal={internal}
+          canChange={canChange}
+          align="end"
+        />
+      </td>
+      <td className="whitespace-nowrap text-[12.5px] text-[var(--i-muted)] max-md:empty:hidden">
+        {deliverable.due_on && !live ? (
+          <>
+            Due <DueDate day={deliverable.due_on} today={today} />
+          </>
+        ) : null}
+      </td>
+      <td className="text-[12.5px] max-md:empty:hidden">
+        {live ? (
+          <span className="flex flex-col">
+            {deliverable.published_url ? (
+              <span>
+                <PlatformChip
+                  url={deliverable.published_url}
+                  label={where?.where}
+                />
+              </span>
+            ) : (
+              "Live"
+            )}
+            <span className="text-[11.5px] text-[var(--i-muted)]">
+              {where && written
+                ? where.by === "studio1"
+                  ? "By us"
+                  : "By the client"
+                : ""}
+              {where && written && deliverable.published_at ? " · " : ""}
+              {deliverable.published_at
+                ? formatDay(todayKey(new Date(deliverable.published_at)), today)
+                : ""}
+            </span>
+            {devrel ? (
+              <span className="mt-1">
+                <ViewsCell deliverable={deliverable} canChange={canChange} />
+              </span>
+            ) : null}
+          </span>
+        ) : deliverable.status === "approved" ? (
+          <span className="text-emerald-700 dark:text-emerald-300">
+            Ready to publish
+          </span>
+        ) : null}
+      </td>
+      <td className="md:!pr-4">
+        {canChange && !live ? (
+          <button
+            type="button"
+            onClick={() => setBlocking(true)}
+            aria-label={
+              deliverable.blocked
+                ? "Blocked: change or unblock"
+                : "Mark as blocked"
+            }
+            title={
+              deliverable.blocked
+                ? "Blocked: change or unblock"
+                : "Mark as blocked"
+            }
+            className={cn(
+              "flex size-7 items-center justify-center rounded-md transition-opacity hover:bg-[var(--i-hover)] focus-visible:opacity-100",
+              deliverable.blocked
+                ? "text-rose-600 dark:text-rose-300"
+                : "text-[var(--i-faint)] opacity-0 group-hover/row:opacity-100 max-md:hidden",
+            )}
+          >
+            <Prohibit size={14} />
+          </button>
+        ) : null}
+        <DeliverableDialog
+          deliverable={deliverable}
+          access={viewer.clients}
+          canChange={canChange}
+          owners={owners}
+          names={names}
+          scopeLines={scopeLines}
+          devrel={devrel}
+          open={editing}
+          onOpenChange={setEditing}
+        />
+        {canChange ? (
+          <BlockDialog
+            deliverable={deliverable}
+            open={blocking}
+            onOpenChange={setBlocking}
+          />
+        ) : null}
+      </td>
+    </tr>
+  );
+}
+
+function hasFlags(item: Deliverable, today: string) {
+  return (
+    item.blocked ||
+    Boolean(item.due_on && item.due_on < today) ||
+    Boolean(
+      item.status === "client_review" &&
+      item.client_due_on &&
+      item.client_due_on < today,
+    )
+  );
+}
+
+/**
+ * "Add blog 2 of 4": opens a title box and an owner pick in place. The
+ * owner starts as whoever did the last one in this part of the plan, else
+ * the viewer. Members always own what they add. "More fields" opens the
+ * full form with what's typed so far.
+ */
+function QuickAdd({
+  line,
+  added,
+  cycleId,
+  viewer,
+  owners,
+  names,
+  scopeLines,
+  compact = false,
+  lastOwner,
+  devrel,
+}: Shared & {
+  line: ScopeLine;
+  added: number;
+  compact?: boolean;
+  lastOwner?: string | null;
+}) {
+  const afterSave = useAfterSave();
+  const toast = useToast();
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const manager = viewer.clients === "manager";
+  const startOwner = lastOwner || viewer.email;
+  const [owner, setOwner] = useState(startOwner);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, start] = useTransition();
+  const [full, setFull] = useState(false);
+  const input = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (open) input.current?.focus();
+  }, [open]);
+
+  const word = kindWord(line.kind);
+  const next = added + 1;
+  const label =
+    line.planned > 0 && next <= line.planned
+      ? `Add ${word} ${next} of ${line.planned}`
+      : added
+        ? `Add another ${word}`
+        : `Add a ${word}`;
+
+  const ownerOptions = [
+    ...new Set([viewer.email, ...owners].map((email) => email.toLowerCase())),
+  ]
+    .map((email) => ({ value: email, label: personName(email, names) }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+
+  const close = () => {
+    setOpen(false);
+    setTitle("");
+    setError(null);
+    setOwner(startOwner);
+  };
+
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    if (!title.trim()) {
+      setError("Give it a title.");
+      return;
+    }
+    setError(null);
+    start(async () => {
+      const result = await saveDeliverable(null, {
+        cycle_id: cycleId,
+        scope_line_id: line.id,
+        kind: line.kind,
+        title: title.trim(),
+        owner: manager ? owner : viewer.email,
+      });
+      if (!result.ok) {
+        setError(result.message);
+        return;
+      }
+      toast(
+        "success",
+        `${labelOf(DELIVERABLE_KINDS, line.kind)} ${next} added`,
+      );
+      close();
+      afterSave();
+    });
+  };
+
+  const fullForm = (
+    <DeliverableDialog
+      cycleId={cycleId}
+      scopeLines={scopeLines}
+      owners={owners}
+      names={names}
+      access={viewer.clients}
+      me={viewer.email}
+      title={label}
+      devrel={devrel}
+      defaults={{
+        title: title.trim(),
+        kind: line.kind,
+        scope_line_id: line.id,
+        owner: manager ? owner : viewer.email,
+      }}
+      open={full}
+      onOpenChange={(value) => {
+        setFull(value);
+        if (!value) close();
+      }}
+    />
+  );
+
+  if (!open)
+    return (
+      <>
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label={compact ? label : undefined}
+          className={addButtonClass}
+        >
+          <Plus size={12} className="shrink-0" />
+          {compact ? "Add" : label}
+        </button>
+        {fullForm}
+      </>
+    );
+
+  // The full form sits outside this <form>: React events bubble through
+  // portals, so a dialog inside would submit this one too.
+  return (
+    <>
+      <form
+        onSubmit={submit}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") {
+            event.preventDefault();
+            close();
+          }
+        }}
+        className={cn(
+          "rounded-lg border border-[var(--i-line-strong)] bg-[var(--i-sunken)] p-2",
+          compact && "basis-full",
+        )}
+      >
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            ref={input}
+            type="text"
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            maxLength={200}
+            placeholder={`Title of ${word} ${next}`}
+            aria-label={`Title of ${word} ${next}`}
+            className={cn(inputClass("sm"), "min-w-0 flex-1 basis-56")}
+          />
+          {manager ? (
+            <Select
+              size="sm"
+              aria-label="Owner"
+              value={owner.toLowerCase()}
+              onChange={setOwner}
+              options={ownerOptions}
+              className="w-full sm:w-44"
+            />
+          ) : null}
+          <span className="flex items-center gap-1.5">
+            <button
+              type="submit"
+              disabled={busy}
+              className={buttonClass("accent", "sm")}
+            >
+              {busy ? "Adding…" : "Add"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setFull(true)}
+              className={buttonClass("ghost", "sm")}
+            >
+              More fields
+            </button>
+            <button
+              type="button"
+              onClick={close}
+              className={buttonClass("ghost", "sm")}
+            >
+              Cancel
+            </button>
+          </span>
+        </div>
+        {error ? (
+          <p
+            role="alert"
+            className="mt-1.5 text-[12.5px] text-rose-700 dark:text-rose-300"
+          >
+            {error}
+          </p>
+        ) : null}
+      </form>
+      {fullForm}
+    </>
+  );
+}
+
+/** Views across these posts (blank counts as 0). */
+export function viewsOf(items: readonly Pick<Deliverable, "views">[]) {
+  return items.reduce((sum, item) => sum + (item.views ?? 0), 0);
+}
+
+const counts = new Intl.NumberFormat("en-US");
+
+/**
+ * Posts as a table (the Notion "Social post tracker"): what it was, who
+ * posted it, where (a chip per link), views (typed in place) and the day.
+ */
+function PostTable({
+  items,
+  ...shared
+}: Shared & { items: readonly Deliverable[] }) {
+  return (
+    <table className="w-full border-collapse text-left text-[13px] max-md:block">
+      <QuietHead
+        columns={[
+          ["Number", "w-10 md:pl-5"],
+          ["Post", ""],
+          ["Posted by", "w-32"],
+          ["Where", "w-44"],
+          ...(shared.devrel ? [["Views", "w-32"] as const] : []),
+          ["Date", "w-20"],
+        ]}
+      />
+      <tbody className="max-md:block">
+        {items.map((item, index) => (
+          <PostRow
+            key={item.id}
+            number={index + 1}
+            deliverable={item}
+            {...shared}
+          />
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+function PostRow({
+  number,
+  deliverable,
+  viewer,
+  internal,
+  owners,
+  names,
+  scopeLines,
+  today,
+  devrel,
+}: Shared & { number: number; deliverable: Deliverable }) {
+  const [editing, setEditing] = useState(false);
+  const canChange = canChangeDeliverable(viewer, deliverable);
+  const live = deliverable.status === "published";
+  const links = liveLinks(deliverable);
+  const note = deliverable.notes.split("\n")[0]?.trim();
+  const day = live
+    ? deliverable.published_at
+      ? todayKey(new Date(deliverable.published_at))
+      : null
+    : deliverable.due_on;
+  return (
+    <tr className={rowClass}>
+      <td className="text-[12px] tabular-nums text-[var(--i-faint)] md:pl-5">
+        {number}
+      </td>
+      <td className="min-w-0 max-md:flex-1 max-md:basis-[calc(100%-2rem)]">
+        <button
+          type="button"
+          onClick={() => setEditing(true)}
+          className="block max-w-full break-words text-left text-[13.5px] font-medium leading-snug text-[var(--i-ink)] hover:text-[var(--i-accent-text)]"
+        >
+          {deliverable.title}
+        </button>
+        {note ? (
+          <span
+            className="mt-0.5 block max-w-[36rem] truncate text-[12px] text-[var(--i-faint)]"
+            title={deliverable.notes}
+          >
+            {note}
+          </span>
+        ) : null}
+        <DeliverableDialog
+          deliverable={deliverable}
+          access={viewer.clients}
+          canChange={canChange}
+          owners={owners}
+          names={names}
+          scopeLines={scopeLines}
+          devrel={devrel}
+          open={editing}
+          onOpenChange={setEditing}
+        />
+      </td>
+      <td className="max-w-[8rem] text-[12.5px] max-md:empty:hidden">
+        {deliverable.owner ? (
+          <OwnerName email={deliverable.owner} names={names} />
+        ) : null}
+      </td>
+      <td>
+        {links.length ? (
+          <span className="flex flex-wrap gap-1">
+            <PlatformChips urls={links} />
+          </span>
+        ) : (
+          <MoveStatusMenu
+            deliverable={deliverable}
+            internal={internal}
+            canChange={canChange}
+            align="end"
+          />
+        )}
+      </td>
+      {devrel ? (
+        <td className="whitespace-nowrap">
+          <ViewsCell deliverable={deliverable} canChange={canChange} />
+        </td>
+      ) : null}
+      <td className="whitespace-nowrap text-[12.5px] text-[var(--i-muted)] max-md:empty:hidden md:!pr-5">
+        {day ? formatDay(day, today) : null}
+      </td>
+    </tr>
+  );
+}
+
+/** Views, typed in place: saved when the box loses focus or on Enter. */
+function ViewsCell({
+  deliverable,
+  canChange,
+  placeholder = "Add views",
+}: {
+  deliverable: Deliverable;
+  canChange: boolean;
+  placeholder?: string;
+}) {
+  const afterSave = useAfterSave();
+  const toast = useToast();
+  const saved = deliverable.views ?? null;
+  const [value, setValue] = useState(
+    saved === null ? "" : counts.format(saved),
+  );
+  const [busy, start] = useTransition();
+  if (!canChange)
+    return (
+      <span className="text-[12.5px] tabular-nums">
+        {saved === null ? "—" : counts.format(saved)}
+      </span>
+    );
+  const save = () => {
+    const typed = value.trim();
+    const before = saved === null ? "" : counts.format(saved);
+    if (typed === before) return;
+    start(async () => {
+      const result = await saveDeliverable(deliverable.id, { views: typed });
+      if (!result.ok) {
+        toast("error", result.message);
+        setValue(before);
+        return;
+      }
+      afterSave();
+    });
+  };
+  return (
+    <input
+      type="text"
+      inputMode="numeric"
+      aria-label={`Views on ${deliverable.title}`}
+      value={value}
+      disabled={busy}
+      onChange={(event) => setValue(event.target.value)}
+      onBlur={save}
+      onKeyDown={(event) => {
+        if (event.key === "Enter") event.currentTarget.blur();
+      }}
+      placeholder={placeholder}
+      maxLength={20}
+      className={cn(
+        inputClass("xs"),
+        "w-24 border-transparent bg-transparent text-right tabular-nums shadow-none hover:border-[var(--i-line-strong)] focus:border-[var(--i-line-strong)] focus:bg-[var(--i-panel)] max-md:w-28 max-md:text-left",
+      )}
+    />
+  );
+}
+
+/**
+ * "Log post 3 of 4": what it was, its link(s), views and who posted it.
+ * With a link it's saved as published; without one it's planned.
+ */
+function QuickPost({
+  line,
+  added,
+  cycleId,
+  viewer,
+  owners,
+  names,
+  devrel,
+  lastOwner,
+  compact = false,
+}: Shared & {
+  line: ScopeLine;
+  added: number;
+  lastOwner?: string | null;
+  compact?: boolean;
+}) {
+  const afterSave = useAfterSave();
+  const toast = useToast();
+  const manager = viewer.clients === "manager";
+  const startOwner = lastOwner || viewer.email;
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const [links, setLinks] = useState("");
+  const [views, setViews] = useState("");
+  const [postedOn, setPostedOn] = useState(todayKey());
+  const [owner, setOwner] = useState(startOwner);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, start] = useTransition();
+  const input = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (open) input.current?.focus();
+  }, [open]);
+
+  const word = kindWord(line.kind);
+  const next = added + 1;
+  const label =
+    line.planned > 0 && next <= line.planned
+      ? `Log ${word} ${next} of ${line.planned}`
+      : `Log another ${word}`;
+  const ownerOptions = [
+    ...new Set([viewer.email, ...owners].map((email) => email.toLowerCase())),
+  ]
+    .map((email) => ({ value: email, label: personName(email, names) }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+
+  const close = () => {
+    setOpen(false);
+    setTitle("");
+    setLinks("");
+    setViews("");
+    setPostedOn(todayKey());
+    setError(null);
+    setOwner(startOwner);
+  };
+
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    if (!title.trim()) {
+      setError("Say what the post was.");
+      return;
+    }
+    const urls = links.split(/[\s,]+/).filter(Boolean);
+    if (urls.length > 1 && !devrel) {
+      setError(
+        "One link for now: more links come with the DevRel tracker update.",
+      );
+      return;
+    }
+    setError(null);
+    start(async () => {
+      const result = await saveDeliverable(null, {
+        cycle_id: cycleId,
+        scope_line_id: line.id,
+        kind: line.kind,
+        title: title.trim(),
+        owner: manager ? owner : viewer.email,
+        ...(urls.length
+          ? {
+              status: "published",
+              published_url: urls[0],
+              published_on: postedOn,
+              ...(devrel ? { extra_urls: urls.slice(1), views } : {}),
+            }
+          : {}),
+      });
+      if (!result.ok) {
+        setError(result.message);
+        return;
+      }
+      toast("success", urls.length ? "Post logged" : "Post added to the plan");
+      close();
+      afterSave();
+    });
+  };
+
+  if (!open)
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label={compact ? label : undefined}
+        className={addButtonClass}
+      >
+        <Plus size={12} className="shrink-0" />
+        {compact ? "Log" : label}
+      </button>
+    );
+
+  return (
+    <form
+      onSubmit={submit}
+      onKeyDown={(event) => {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          close();
+        }
+      }}
+      className={cn(
+        "rounded-lg border border-[var(--i-line-strong)] bg-[var(--i-sunken)] p-2",
+        compact && "basis-full",
+      )}
+    >
+      <div className="flex flex-wrap items-center gap-2">
+        <input
+          ref={input}
+          type="text"
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+          maxLength={200}
+          placeholder="What it was: launch thread, Reddit post in r/LLMDevs…"
+          aria-label="What the post was"
+          className={cn(inputClass("sm"), "min-w-0 flex-1 basis-64")}
+        />
+        <input
+          type="text"
+          inputMode="url"
+          value={links}
+          onChange={(event) => setLinks(event.target.value)}
+          placeholder={
+            devrel ? "Link(s), space between them" : "Link, once it's up"
+          }
+          aria-label="Links to the post"
+          className={cn(inputClass("sm"), "min-w-0 flex-1 basis-56")}
+        />
+      </div>
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <span className="w-36">
+          <DateField
+            value={postedOn}
+            onChange={setPostedOn}
+            max={todayKey()}
+            required
+            aria-label="Posted on"
+          />
+        </span>
+        {devrel ? (
+          <input
+            type="text"
+            inputMode="numeric"
+            value={views}
+            onChange={(event) => setViews(event.target.value)}
+            placeholder="Views (7k)"
+            aria-label="Views"
+            maxLength={20}
+            className={cn(inputClass("sm"), "w-28 tabular-nums")}
+          />
+        ) : null}
+        {manager ? (
+          <Select
+            size="sm"
+            aria-label="Posted by"
+            value={owner.toLowerCase()}
+            onChange={setOwner}
+            options={ownerOptions}
+            className="w-full sm:w-44"
+          />
+        ) : null}
+        <span className="flex items-center gap-1.5">
+          <button
+            type="submit"
+            disabled={busy}
+            className={buttonClass("accent", "sm")}
+          >
+            {busy ? "Saving…" : "Log it"}
+          </button>
+          <button
+            type="button"
+            onClick={close}
+            className={buttonClass("ghost", "sm")}
+          >
+            Cancel
+          </button>
+        </span>
+      </div>
+      {error ? (
+        <p
+          role="alert"
+          className="mt-1.5 text-[12.5px] text-rose-700 dark:text-rose-300"
+        >
+          {error}
+        </p>
+      ) : null}
+    </form>
+  );
+}

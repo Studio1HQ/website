@@ -3,6 +3,9 @@ import Link from "next/link";
 import { IdentificationCard } from "@phosphor-icons/react/dist/ssr";
 import { Card, EmptyState, Notice, buttonClass } from "@/components/internal/ui";
 import { MyDay } from "@/components/internal/team/my-day";
+import { TodayWork } from "@/components/internal/tasks/today-work";
+import { cardChoices, loadWeekCards } from "@/lib/internal/tasks/load";
+import { weekStart } from "@/lib/internal/clients/schema";
 import { isAdmin, requireMember } from "@/lib/internal/session";
 import { listDays } from "@/lib/internal/team/attendance";
 import { listPayslips } from "@/lib/internal/team/payroll";
@@ -14,6 +17,7 @@ import {
   istNow,
   minutesSoFar,
   monthOf,
+  openSlot,
 } from "@/lib/internal/team/shared";
 
 export const metadata: Metadata = { title: "My day" };
@@ -61,11 +65,14 @@ export default async function MyDayPage({
     );
   }
 
-  const [monthDays, todayDays, payslips, claims] = await Promise.all([
+  const [monthDays, todayDays, payslips, claims, work, options] = await Promise.all([
     listDays({ from: `${month}-01`, to: `${month}-${String(daysInMonth(month)).padStart(2, "0")}`, emails: [person.email] }),
     listDays({ from: now.date, to: now.date, emails: [person.email] }),
     listPayslips({ email: person.email, status: "sent" }),
     listReimbursements({ email: person.email }),
+    // Tasks: today's cards (hidden until the tasks migration has run).
+    loadWeekCards(person.email, weekStart(now.date), now.date),
+    cardChoices(staff),
   ]);
 
   const today = todayDays.ok ? (todayDays.days[0] ?? null) : null;
@@ -92,6 +99,16 @@ export default async function MyDayPage({
         payslips={payslips.ok ? payslips.slips : []}
         claims={claims.ok ? claims.items : []}
         inboundAddress={process.env.INBOUND_EMAIL_ADDRESS?.trim() || null}
+        work={
+          work.missing ? null : (
+            <TodayWork
+              cards={work.cards.filter((card) => card.day === now.date)}
+              today={now.date}
+              ended={Boolean(today && today.kind !== "leave" && today.slots.length && !openSlot(today.slots))}
+              options={options}
+            />
+          )
+        }
       />
     </>
   );

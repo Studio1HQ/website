@@ -248,6 +248,7 @@ export type TabItem = {
   label: string;
   count?: number;
   href: string;
+  icon?: ReactNode;
 };
 
 /** Link tabs with counts, like the pipelines' status tabs. */
@@ -261,7 +262,10 @@ export function LinkTabs({
   return (
     <nav
       aria-label="Views"
-      className="-mx-1 mb-4 flex gap-1 overflow-x-auto px-1 pb-1"
+      // Sideways scrolling clips everything outside the box, so the padding
+      // (offset by the negative margins) leaves room for the active tab's
+      // ring and shadow on every side.
+      className="-mx-1 -mt-1 mb-4 flex gap-1 overflow-x-auto px-1 pt-1 pb-1"
     >
       {items.map((item) => {
         const on = item.key === active;
@@ -277,6 +281,7 @@ export function LinkTabs({
                 : "text-[var(--i-muted)] hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)]",
             )}
           >
+            {item.icon}
             {item.label}
             {item.count !== undefined ? (
               <span

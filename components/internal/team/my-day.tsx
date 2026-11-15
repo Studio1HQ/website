@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { DateField } from "@/components/internal/pickers";
 import {
   AirplaneTilt,
@@ -87,7 +87,10 @@ export function MyDay({
   claims,
   inboundAddress,
   admin,
+  work,
 }: {
+  /** Tasks' "What you did today" list, shown under Today (left out before Tasks is set up). */
+  work?: ReactNode;
   person: TeamPerson;
   /** Admins can set their own employee ID. */
   admin: boolean;
@@ -273,6 +276,8 @@ export function MyDay({
               )}
             </div>
           </Card>
+
+          {work}
 
           {/* The month */}
           <Card>

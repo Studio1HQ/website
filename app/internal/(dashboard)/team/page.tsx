@@ -15,7 +15,7 @@ export default async function TeamPage() {
       <PageHeader
         eyebrow="Settings"
         title="Team & roles"
-        description="Add people and pick what each one can open. Anyone who signs in with an @studio1hq.com address has no access by default: they wait here until an admin approves them with roles. Admins give and take away roles; only Arindam and Amitesh can invite people, turn access off or decide who's an admin."
+        description="One row per person, one column per area: pick what each person can open in Hiring, Blog, Community and Clients, and who sees the team's tasks. Anyone who signs in with an @studio1hq.com address has no access by default: they wait here until an admin approves them. Admins change access; only Arindam and Amitesh can invite people, turn access off or decide who's an admin."
       />
       {members ? (
         <TeamView members={members} me={admin.email} canManage={isOwner(admin.email)} />

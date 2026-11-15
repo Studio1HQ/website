@@ -8,6 +8,7 @@ import {
   CheckCircle,
   Compass,
   EnvelopeSimple,
+  Folders,
   Handshake,
   IdentificationCard,
   NotePencil,
@@ -49,6 +50,7 @@ const AREAS: Record<AreaKey, { name: string; icon: Icon }> = {
   team: { name: "Team", icon: IdentificationCard },
   money: { name: "Money", icon: Bank },
   community: { name: "Community", icon: Compass },
+  clients: { name: "Clients", icon: Folders },
   access: { name: "Team access", icon: UserGear },
 };
 
@@ -336,6 +338,35 @@ export default async function OverviewPage({
         ) : null}
 
         {data.community ? <CommunitySummaryCard /> : null}
+
+        {data.clients?.ok ? (
+          <AreaCard
+            area="clients"
+            href="/internal/clients"
+            value={number(data.clients.active)}
+            unit={data.clients.active === 1 ? "active engagement" : "active engagements"}
+            extra={
+              <p className="mt-1.5 text-[12px] text-[var(--i-faint)]">
+                {number(data.clients.done)} of {number(data.clients.planned)} planned pieces live in{" "}
+                {monthLabel(now.date.slice(0, 7), true)}
+              </p>
+            }
+            rows={[
+              ["At risk", data.clients.red],
+              ["Needs a look", data.clients.amber],
+              ["With clients for review", data.clients.inClientReview],
+              ["Blocked", data.clients.blocked],
+            ]}
+          />
+        ) : data.clients ? (
+          <AreaCard
+            area="clients"
+            href="/internal/clients"
+            value="—"
+            unit={data.clients.missing ? "not set up yet" : "couldn't load"}
+            rows={[]}
+          />
+        ) : null}
 
         {data.hackathons && data.hackathons.length ? (
           <AreaCard

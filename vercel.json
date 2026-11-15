@@ -5,6 +5,10 @@
     {
       "path": "/api/cron/purge-rejected",
       "schedule": "30 21 * * *"
+    },
+    {
+      "path": "/api/cron/client-cycles",
+      "schedule": "35 18 * * *"
     }
   ]
 }
