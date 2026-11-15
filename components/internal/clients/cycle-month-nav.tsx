@@ -38,7 +38,8 @@ export function CycleMonthNav({
       >
         <CaretLeft size={14} />
       </Link>
-      <span className="min-w-[8.5rem] px-1 text-center text-[13px] font-medium tabular-nums">
+      {/* Grows when the nav is stretched, so the arrows sit at the ends. */}
+      <span className="min-w-[8.5rem] flex-1 px-1 text-center text-[13px] font-medium tabular-nums">
         {monthLabel(month)}
       </span>
       <Link

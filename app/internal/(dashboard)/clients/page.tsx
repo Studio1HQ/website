@@ -215,25 +215,33 @@ export default async function ClientsPage({
     <PageHeader
       title="Clients"
       description={`Every active engagement in ${monthLabel(month)}: how far along it is, what's with the client, what's stuck.`}
+      actionsClassName="max-sm:w-full"
       actions={
-        <>
+        // Phones: the month on a row of its own, the buttons sharing the
+        // next one. Wider: all on one line.
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
           <CycleMonthNav
             month={month}
             href={(target) => href({ month: target })}
+            className="w-full sm:w-auto"
           />
-          {showStartNext ? (
-            <CycleStartAllButton
-              month={next}
-              label={`Start ${monthLabel(next, true)}`}
-              variant={
-                missingNext > 0 && Number(today.slice(8)) >= 25
-                  ? "accent"
-                  : "secondary"
-              }
-            />
+          {showStartNext || addClient ? (
+            <div className="flex gap-2 *:flex-1 sm:*:flex-none">
+              {showStartNext ? (
+                <CycleStartAllButton
+                  month={next}
+                  label={`Start ${monthLabel(next, true)}`}
+                  variant={
+                    missingNext > 0 && Number(today.slice(8)) >= 25
+                      ? "accent"
+                      : "secondary"
+                  }
+                />
+              ) : null}
+              {addClient}
+            </div>
           ) : null}
-          {addClient}
-        </>
+        </div>
       }
     />
   );
