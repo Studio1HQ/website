@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowSquareOut, NotePencil, PencilSimple, Plus } from "@phosphor-icons/react/dist/ssr";
 import { BlogStatusBadge } from "@/components/internal/blog/status";
-import { Avatar, Card, EmptyState, Notice, PageHeader, buttonClass, formatDate, relativeDate } from "@/components/internal/ui";
+import { Card, EmptyState, Notice, PageHeader, buttonClass, formatDate, relativeDate } from "@/components/internal/ui";
+import { TeamAvatar } from "@/components/internal/team-photos";
 import { listPosts, sitePosts, type BlogListItem, type SitePost } from "@/lib/internal/blog/data";
 import { isGithubConfigured } from "@/lib/internal/blog/github";
 import { isSearchConsoleConfigured, searchStats, type SearchNumbers } from "@/lib/internal/search-console";
@@ -59,12 +60,12 @@ function PostRow({ post, me, search }: { post: BlogListItem; me: string; search?
         <BlogStatusBadge status={post.status} live={Boolean(post.source_path)} />
         {search !== undefined ? <SearchCell numbers={search} /> : null}
         <div className="flex min-w-0 items-center gap-2 text-[12.5px] text-[var(--i-muted)] sm:w-[150px]">
-          <Avatar name={nameFromEmail(post.created_by)} email={post.created_by} size={24} />
+          <TeamAvatar name={nameFromEmail(post.created_by)} email={post.created_by} size={24} />
           <span className="truncate">{nameFromEmail(post.created_by)}</span>
         </div>
         <div className="flex -space-x-1.5 empty:hidden sm:w-[64px] sm:empty:flex" title={post.reviewers.map(nameFromEmail).join(", ") || "No reviewers yet"}>
           {post.reviewers.slice(0, 3).map((email) => (
-            <Avatar key={email} name={nameFromEmail(email)} email={email} size={24} className="ring-2 ring-[var(--i-panel)]" />
+            <TeamAvatar key={email} name={nameFromEmail(email)} email={email} size={24} className="ring-2 ring-[var(--i-panel)]" />
           ))}
         </div>
         <span className="ml-auto text-right text-[12px] text-[var(--i-faint)] sm:ml-0 sm:w-[90px]" title={formatDate(post.updated_at)}>

@@ -4,7 +4,8 @@ import {
   labelOf,
   pointsLabel,
 } from "@/lib/internal/clients/schema";
-import { Avatar, Card, CardTitle, buttonClass } from "@/components/internal/ui";
+import { Card, CardTitle, buttonClass } from "@/components/internal/ui";
+import { TeamAvatar } from "@/components/internal/team-photos";
 import { Pill } from "@/components/internal/community/ui";
 import {
   CapacityDialog,
@@ -77,7 +78,7 @@ export function CapacityTable({ people }: { people: CapacityPerson[] }) {
                 key={person.email}
                 className="flex items-start gap-3 px-4 py-3 text-[13px]"
               >
-                <Avatar
+                <TeamAvatar
                   name={person.name || person.email}
                   email={person.email}
                   size={28}
@@ -127,7 +128,7 @@ export function CapacityTable({ people }: { people: CapacityPerson[] }) {
                   <tr key={person.email} className="align-middle">
                     <td className="min-w-0 max-w-[18rem]">
                       <span className="flex min-w-0 items-center gap-2.5">
-                        <Avatar
+                        <TeamAvatar
                           name={person.name || person.email}
                           email={person.email}
                           size={24}

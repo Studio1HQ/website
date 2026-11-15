@@ -33,7 +33,6 @@ import {
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/internal/toast";
 import {
-  Avatar,
   Card,
   CardTitle,
   EmptyState,
@@ -41,6 +40,7 @@ import {
   menuContentClass,
   menuItemClass,
 } from "@/components/internal/ui";
+import { TeamAvatar } from "@/components/internal/team-photos";
 import { Select } from "@/components/internal/select";
 import {
   DeletePaymentDialog,
@@ -404,7 +404,7 @@ export function PaymentsView({
                       payment.status === "cancelled" && "opacity-60",
                     )}
                   >
-                    <Avatar
+                    <TeamAvatar
                       name={payment.name}
                       email={payment.email ?? payment.name}
                       size={32}

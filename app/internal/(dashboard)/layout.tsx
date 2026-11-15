@@ -5,6 +5,7 @@ import Logo from "@/components/ui/svgs/logo";
 import { InternalNav } from "@/components/internal/nav";
 import { MobileNavButton, MobileNavClose, MobileNavPanel, MobileNavProvider } from "@/components/internal/mobile-nav";
 import { NavProgress, RefreshButton } from "@/components/internal/nav-progress";
+import { TeamPhotosProvider } from "@/components/internal/team-photos";
 import { ToastProvider } from "@/components/internal/toast";
 import { Avatar } from "@/components/internal/ui";
 import { blogBadge } from "@/lib/internal/blog/data";
@@ -17,6 +18,7 @@ import { canSeeMoney, homeFor, isAdmin, requireMember, staffName, type Staff } f
 import { teamBadges } from "@/lib/internal/team/badges";
 import { canSeeOthers } from "@/lib/internal/tasks/access";
 import { taskNeeds } from "@/lib/internal/tasks/needs";
+import { teamPhotos } from "@/lib/internal/team/photos";
 import { PERSON_KINDS, photoUrl } from "@/lib/internal/team/shared";
 import { signOut } from "./actions";
 
@@ -108,7 +110,9 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   // Pages check their own access; the shell only needs someone with a role.
-  const staff = await requireMember();
+  // The photo map is kept (lib/internal/team/photos.ts), so this is usually
+  // no extra read.
+  const [staff, photos] = await Promise.all([requireMember(), teamPhotos()]);
   const name = staffName(staff);
   const home = homeFor(staff);
 
@@ -190,7 +194,9 @@ export default async function DashboardLayout({
             </div>
           </MobileNavPanel>
           <main className="min-w-0 flex-1 px-4 pb-24 pt-5 sm:px-6 sm:pt-6 lg:px-10 lg:pt-9 print:p-0">
-            <div className="mx-auto max-w-[1280px]">{children}</div>
+            <div className="mx-auto max-w-[1280px]">
+              <TeamPhotosProvider photos={photos}>{children}</TeamPhotosProvider>
+            </div>
           </main>
         </div>
       </MobileNavProvider>

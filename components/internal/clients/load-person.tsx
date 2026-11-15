@@ -9,7 +9,8 @@ import {
   type Deliverable,
 } from "@/lib/internal/clients/schema";
 import { cn } from "@/lib/utils";
-import { Avatar, Card } from "@/components/internal/ui";
+import { Card } from "@/components/internal/ui";
+import { TeamAvatar } from "@/components/internal/team-photos";
 import { Meter, Pill } from "@/components/internal/community/ui";
 import {
   DeliverableFlags,
@@ -155,7 +156,7 @@ export function LoadPerson({
       className={cn("p-4", over && "border-rose-200 dark:border-rose-500/30")}
     >
       <div className="flex items-start gap-3">
-        <Avatar name={load.name} email={load.email} size={32} />
+        <TeamAvatar name={load.name} email={load.email} size={32} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <h3 className="truncate text-[14px] font-medium" title={load.email}>

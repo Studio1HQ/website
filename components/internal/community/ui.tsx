@@ -2,7 +2,8 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { HoverLink } from "@/components/internal/nav-progress";
 import { cn } from "@/lib/utils";
-import { Avatar, Card, Notice, inputClass } from "@/components/internal/ui";
+import { Card, Notice, inputClass } from "@/components/internal/ui";
+import { TeamAvatar } from "@/components/internal/team-photos";
 import {
   COMMUNITY_MIGRATION_HINT,
   daysBetween,
@@ -105,7 +106,7 @@ export function Owner({
   const name = ownerName(owner);
   return (
     <span className="inline-flex min-w-0 items-center gap-1.5" title={owner}>
-      <Avatar
+      <TeamAvatar
         name={name}
         email={owner.includes("@") ? owner : ""}
         size={size}

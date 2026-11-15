@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { Avatar, Notice } from "@/components/internal/ui";
+import { Notice } from "@/components/internal/ui";
+import { TeamAvatar } from "@/components/internal/team-photos";
 import { Meter, Pill } from "@/components/internal/community/ui";
 import {
   blockedDays,
@@ -307,7 +308,7 @@ export function OwnerName({
       className="inline-flex min-w-0 items-center gap-1.5"
       title={hideName ? `${name} (${email})` : email}
     >
-      <Avatar name={name} email={email} size={size} />
+      <TeamAvatar name={name} email={email} size={size} />
       {hideName ? (
         <span className="sr-only">{name}</span>
       ) : (
