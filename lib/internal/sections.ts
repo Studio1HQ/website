@@ -406,6 +406,15 @@ export const FORM_SECTION: Record<string, SectionKey> = {
 
 export const PAGE_SIZE = 50;
 
+/** One email sent to one entry, as the lists show it. */
+export type SentEmail = { template: string; at: string; scheduled: boolean };
+
+/** Who a list's email button reaches: everyone matching, with the templates they've been sent. */
+export type ListRecipient = { id: string; name: string; email: string; program: string; sent: string[] };
+
+/** The most people a list's email button takes at once; narrow the list for more. */
+export const EMAIL_ALL_LIMIT = 500;
+
 export const SORTS = {
   newest: "Newest first",
   oldest: "Oldest first",

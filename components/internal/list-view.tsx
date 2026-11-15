@@ -30,6 +30,7 @@ import {
 import { changeEntries } from "@/app/internal/(dashboard)/actions";
 import { daysWaiting, rowTags, type FacetOptions, type Option, type Row } from "@/lib/internal/query";
 import {
+  EMAIL_ALL_LIMIT,
   FORM_SECTION,
   OVERDUE_DAYS,
   PAGE_SIZE,
@@ -41,7 +42,9 @@ import {
   withQuery,
   type ColumnSpec,
   type Filters,
+  type ListRecipient,
   type SectionKey,
+  type SentEmail,
   type SinceKey,
   type SortKey,
 } from "@/lib/internal/sections";
@@ -89,7 +92,10 @@ export function ListView({
   sender,
   mailerReady,
   rowLimit,
+  everyone,
 }: {
+  /** Everyone matching the filters, for the email button; null when there are too many. */
+  everyone: ListRecipient[] | null;
   /** Change status, tags and notes, and send email. */
   canEdit: boolean;
   /** Download the list as CSV. */
@@ -313,6 +319,38 @@ export function ListView({
   const personColumn = columns.find((column) => column.kind === "person");
   const statusColumn = columns.find((column) => column.kind === "status");
   const dateColumn = columns.find((column) => column.kind === "date");
+  /* The last email an entry was sent, shown under its status, and the
+     list's email button: on a status tab it offers that status's email to
+     everyone who hasn't had it ("Send rejection" on Rejected). */
+  const listTemplates = EMAIL_TEMPLATES[section.key] ?? [];
+  const emailMark = (row: Row) => {
+    const latest = (Array.isArray(row._emails) ? (row._emails as SentEmail[]) : [])[0];
+    if (!latest) return null;
+    const template = listTemplates.find((item) => item.key === latest.template);
+    const done = latest.scheduled ? "scheduled" : "sent";
+    return (
+      <span
+        title={`${template?.label ?? "Email"}: ${done} ${formatDate(latest.at)}`}
+        suppressHydrationWarning
+        className="inline-flex items-center gap-1 whitespace-nowrap text-[11.5px] text-[var(--i-muted)]"
+      >
+        <EnvelopeSimple size={12} />
+        {template?.status === "rejected" ? "Rejection" : "Mail"} {done}
+      </span>
+    );
+  };
+  const statusTemplates = filters.status ? listTemplates.filter((item) => item.status === filters.status) : [];
+  const toEmail =
+    everyone && statusTemplates.length
+      ? everyone.filter((person) => !person.sent.some((key) => statusTemplates.some((item) => item.key === key)))
+      : everyone;
+  const emailLabel =
+    filters.status === "rejected"
+      ? "Send rejection"
+      : statusTemplates[0]
+        ? `Send “${statusTemplates[0].label}”`
+        : "Email all";
+
   /** A column as plain words, for the one-line summary on phone cards. */
   const plainCell = (row: Row, column: ColumnSpec) => {
     const value = row[column.key];
@@ -626,6 +664,48 @@ export function ListView({
               </Menu.Content>
             </Menu.Portal>
           </Menu.Root>
+          {reviewable && listTemplates.length ? (
+            toEmail?.length ? (
+              <BulkEmailDialog
+                sectionKey={section.key}
+                sender={sender}
+                mailerReady={mailerReady}
+                recipients={toEmail}
+                initialTemplate={statusTemplates[0]?.key}
+                onSent={() => {}}
+              >
+                <button
+                  type="button"
+                  className={buttonClass("secondary")}
+                  title={
+                    statusTemplates.length
+                      ? "Everyone here who hasn't been sent it yet"
+                      : `Everyone in this list${filtered ? " with these filters" : ""}`
+                  }
+                >
+                  <EnvelopeSimple size={15} />
+                  {emailLabel}
+                  <span className="tabular-nums text-[var(--i-muted)]">{toEmail.length}</span>
+                </button>
+              </BulkEmailDialog>
+            ) : (
+              <button
+                type="button"
+                disabled
+                className={buttonClass("secondary")}
+                title={
+                  !everyone
+                    ? `Over ${EMAIL_ALL_LIMIT} here: filter the list down first`
+                    : statusTemplates.length && everyone.length
+                      ? "Everyone here has been sent it already"
+                      : "No one here to email"
+                }
+              >
+                <EnvelopeSimple size={15} />
+                {emailLabel}
+              </button>
+            )
+          ) : null}
           {canExport ? (
             <a href={exportHref()} className={cn(buttonClass("ghost"), "ml-auto")}>
               <DownloadSimple size={15} />
@@ -735,7 +815,12 @@ export function ListView({
                       <div className="min-w-0 flex-1">
                         <div className="flex items-start gap-2">
                           <div className="min-w-0 flex-1 text-[13.5px]">{personColumn ? cell(row, personColumn) : null}</div>
-                          {statusColumn ? <div className="shrink-0 pt-1">{cell(row, statusColumn)}</div> : null}
+                          {statusColumn ? (
+                          <div className="flex shrink-0 flex-col items-end gap-1 pt-1">
+                            {cell(row, statusColumn)}
+                            {emailMark(row)}
+                          </div>
+                        ) : null}
                         </div>
                         <div className={cn("mt-0.5 flex items-center gap-2 pl-11", reviewable && section.quick && "mt-1 min-h-7")}>
                           <p className="min-w-0 flex-1 truncate text-[12.5px] text-[var(--i-muted)]">
@@ -826,7 +911,14 @@ export function ListView({
                                 column.wide && "hidden lg:table-cell",
                               )}
                             >
-                              {cell(row, column)}
+                              {column.kind === "status" ? (
+                                <div className="flex flex-col items-start gap-1">
+                                  {cell(row, column)}
+                                  {emailMark(row)}
+                                </div>
+                              ) : (
+                                cell(row, column)
+                              )}
                             </td>
                           ))}
                           {reviewable && section.quick ? (
@@ -904,6 +996,7 @@ export function ListView({
                   name: text(row.name),
                   email: text(row.email),
                   program: programOf(section, row),
+                  sent: (Array.isArray(row._emails) ? (row._emails as SentEmail[]) : []).map((email) => email.template),
                 }))}
             >
               <button type="button" className="inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 hover:bg-white/10">

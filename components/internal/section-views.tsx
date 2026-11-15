@@ -81,6 +81,8 @@ export async function SectionListPage({
           sender={senderName(staff.email)}
           mailerReady={isMailerConfigured()}
           rowLimit={data.truncated ? ROW_LIMIT : null}
+          // Only editors email, so only their page carries everyone's addresses.
+          everyone={staff.access === "edit" ? data.everyone : null}
         />
       ) : (
         <Notice tone="error">{data.message}</Notice>

@@ -217,7 +217,6 @@ export function EmailComposer({
                     onEnabledChange={setLater}
                     value={sendAt}
                     onValueChange={setSendAt}
-                    inputClassName={cn(inputClass("sm"), "w-auto")}
                   />
                 ) : null}
               </div>

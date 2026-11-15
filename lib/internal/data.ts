@@ -5,6 +5,7 @@ import { selectRows, signedFileUrl, updateRows } from "@/lib/supabase-server";
 import { todayKey } from "@/lib/internal/community/schema";
 import { PLAN_TEMPLATES, emailPlan, planSendTime, type PlanStep } from "@/lib/internal/hackathon-plan";
 import { blockedAddresses, deliveriesFor, type Delivery } from "@/lib/email-delivery";
+import { programOf } from "@/lib/internal/program";
 import { SECTIONS_KEEP_SECONDS, SECTIONS_TAG, sectionsChanged } from "@/lib/internal/section-cache";
 import { isAdmin, requireMember, requireSection } from "@/lib/internal/session";
 import {
@@ -32,6 +33,9 @@ import {
   type Filters,
   type Section,
   type SectionKey,
+  EMAIL_ALL_LIMIT,
+  type ListRecipient,
+  type SentEmail,
 } from "@/lib/internal/sections";
 
 /**
@@ -160,6 +164,63 @@ function loadSection(section: Section, full = false): Promise<Loaded> {
   return loadSectionOnce(section.key, full);
 }
 
+/**
+ * The emails sent to a table's entries from the dashboard (the automatic
+ * confirmation left out), newest first, kept like the section reads: the
+ * sends call sectionsChanged(), so a mark shows as soon as an email goes.
+ * Scheduled emails that were canceled don't count.
+ */
+const keptSentEmails = unstable_cache(
+  async (table: string) => {
+    const log = await loadAll(
+      "internal_email_log",
+      "record_id,template,created_at,resend_id,scheduled_for",
+      "created_at.desc,id.desc",
+      { source_table: `eq.${table}`, template: "neq.confirmation" },
+    );
+    if (!log.ok) throw new Error(log.message);
+    const canceled = await selectRows<{ resend_id: string }>(
+      "email_delivery",
+      new URLSearchParams({ select: "resend_id", status: "eq.canceled" }),
+    );
+    const dropped = new Set(canceled.ok ? canceled.rows.map((row) => row.resend_id) : []);
+    return log.rows
+      .filter((row) => !(typeof row.resend_id === "string" && dropped.has(row.resend_id)))
+      .map((row) => ({
+        id: String(row.record_id),
+        template: String(row.template),
+        at: String(row.created_at),
+        scheduledFor: typeof row.scheduled_for === "string" ? row.scheduled_for : null,
+      }));
+  },
+  ["internal-sent-emails"],
+  { tags: [SECTIONS_TAG], revalidate: SECTIONS_KEEP_SECONDS },
+);
+
+/**
+ * Each entry's sent emails, by entry id. Fails quietly to none: the marks
+ * and the "already got it" counts are a help, and bulk sends check the log
+ * again themselves.
+ */
+const sentEmailsOnce = cache(async (key: SectionKey): Promise<Map<string, SentEmail[]>> => {
+  const byEntry = new Map<string, SentEmail[]>();
+  let rows: Awaited<ReturnType<typeof keptSentEmails>>;
+  try {
+    rows = await keptSentEmails(SECTIONS[key].table);
+  } catch (error) {
+    console.error(`[internal] reading the email log for ${key} failed: ${error instanceof Error ? error.message : error}`);
+    return byEntry;
+  }
+  const now = Date.now();
+  for (const row of rows) {
+    const list = byEntry.get(row.id) ?? [];
+    list.push({ template: row.template, at: row.at, scheduled: row.scheduledFor !== null && Date.parse(row.scheduledFor) > now });
+    byEntry.set(row.id, list);
+  }
+  return byEntry;
+});
+
+
 export type ListView =
   | {
       ok: true;
@@ -171,6 +232,8 @@ export type ListView =
       tagsReady: boolean;
       /** Overdue entries under the other filters, for the Overdue chip. */
       overdue: number;
+      /** Everyone matching the filters, for the email button; null past EMAIL_ALL_LIMIT. */
+      everyone: ListRecipient[] | null;
       /** The table holds more rows than the dashboard reads (MAX_ROWS). */
       truncated: boolean;
     }
@@ -178,7 +241,7 @@ export type ListView =
 
 export async function listView(section: Section, filters: Filters): Promise<ListView> {
   await requireSection(section);
-  const loaded = await loadSection(section);
+  const [loaded, sent] = await Promise.all([loadSection(section), sentEmailsOnce(section.key)]);
   if (!loaded.ok) return loaded;
   const matching = sortRows(filterRows(loaded.rows, section, filters), section, filters.sort);
   const start = (filters.page - 1) * PAGE_SIZE;
@@ -186,12 +249,24 @@ export async function listView(section: Section, filters: Filters): Promise<List
   const now = Date.now();
   return {
     ok: true,
-    // Flags for the list: _overdue and _also (this person's other entries).
+    // Flags for the list: _overdue, _also (this person's other entries)
+    // and _emails (what they've been sent, newest first).
     rows: matching.slice(start, start + PAGE_SIZE).map((row) => ({
       ...row,
       _overdue: isOverdue(row, section, now),
       _also: others.get(String(row.id)) ?? [],
+      _emails: (sent.get(String(row.id)) ?? []).slice(0, 5),
     })),
+    everyone:
+      matching.length <= EMAIL_ALL_LIMIT
+        ? matching.map((row) => ({
+            id: String(row.id),
+            name: String(row.name ?? ""),
+            email: String(row.email ?? ""),
+            program: programOf(section, row),
+            sent: [...new Set((sent.get(String(row.id)) ?? []).map((email) => email.template))],
+          }))
+        : null,
     overdue: section.statuses
       ? filterRows(loaded.rows, section, { ...filters, status: undefined }, "overdue").filter(
           (row) => isOverdue(row, section, now),
