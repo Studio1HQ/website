@@ -31,7 +31,6 @@ import { cn } from "@/lib/utils";
 import { Select, type SelectOption } from "@/components/internal/select";
 import { useToast } from "@/components/internal/toast";
 import {
-  Avatar,
   Card,
   CardTitle,
   EmptyState,
@@ -43,6 +42,7 @@ import {
   relativeDate,
   inputClass,
 } from "@/components/internal/ui";
+import { TeamAvatar } from "@/components/internal/team-photos";
 
 /** Their own name when they've given one, else worked out from the address. */
 function nameOf(email: string, name?: string) {
@@ -219,7 +219,7 @@ function PresetMenu({ row }: { row: AccessRow }) {
 function PersonCell({ row, size }: { row: AccessRow; size: 24 | 28 }) {
   return (
     <span className="flex min-w-0 items-center gap-2.5">
-      <Avatar name={typeof row.name === "string" ? row.name : row.email} email={row.email} size={size} />
+      <TeamAvatar name={typeof row.name === "string" ? row.name : row.email} email={row.email} size={size} />
       <span className="min-w-0">
         <span className="block truncate font-medium">{row.name}</span>
         <span className="block truncate text-[12px] text-[var(--i-muted)]">{row.sub}</span>
@@ -334,49 +334,63 @@ function Legend() {
   return (
     <Card>
       <CardTitle>What each level means</CardTitle>
-      <div className="grid gap-5 p-5 sm:grid-cols-2 xl:grid-cols-4">
+      {/* One row per area, its levels side by side, lowest first. The notes
+          below share the 8rem first column so their terms line up with the
+          area names. */}
+      <dl className="divide-y divide-[var(--i-line)]">
         {AREA_LIST.map((area) => (
-          <div key={area.key}>
-            <h3 className="text-[13px] font-medium">{area.label}</h3>
-            <dl className="mt-1.5 space-y-2">
-              <div>
-                <dt className="text-[12.5px] text-[var(--i-ink-2)]">{NONE}</dt>
-                <dd className="text-[12.5px] leading-relaxed text-[var(--i-muted)]">They don&apos;t see this area.</dd>
-              </div>
-              {area.levels.map((info) => (
-                <div key={info.level}>
-                  <dt className="text-[12.5px] text-[var(--i-ink-2)]">{info.label}</dt>
-                  <dd className="text-[12.5px] leading-relaxed text-[var(--i-muted)]">{info.description}</dd>
-                </div>
-              ))}
-            </dl>
+          <div
+            key={area.key}
+            className="grid gap-x-8 gap-y-3 px-5 py-4 md:grid-cols-[8rem_minmax(0,1fr)_minmax(0,1fr)]"
+          >
+            {/* Nudged down to sit level with the level pills. */}
+            <dt className="text-[13px] font-medium md:pt-0.5">{area.label}</dt>
+            {area.levels.map((info) => (
+              <dd key={info.level} className="min-w-0">
+                <span className="inline-flex rounded-md bg-[var(--i-sunken)] px-1.5 py-0.5 text-[11.5px] font-medium text-[var(--i-ink-2)] ring-1 ring-[var(--i-line)] ring-inset">
+                  {info.label}
+                </span>
+                <p className="mt-1.5 text-[12.5px] leading-relaxed text-[var(--i-muted)]">{info.description}</p>
+              </dd>
+            ))}
+            {area.levels.length === 1 ? (
+              <dd className="hidden pt-0.5 text-[12.5px] text-[var(--i-faint)] md:block">Only one level.</dd>
+            ) : null}
           </div>
         ))}
-      </div>
-      <div className="space-y-2 border-t border-[var(--i-line)] px-5 py-3 text-[12.5px] leading-relaxed text-[var(--i-muted)]">
-        <p>
-          <strong className="font-medium text-[var(--i-ink-2)]">Admin</strong>: {ROLE_INFO.admin.description} With Admin
-          on, every area is at its top level (in Team tasks, admins see and give tasks to everyone but the founders and other
-          admins; the founder's associate sees everyone). Any admin can change the other cells; only the founders
-          switch Admin on or off.
-        </p>
-        <p>
-          <strong className="font-medium text-[var(--i-ink-2)]">Money</strong> (payroll, expense claims and payments)
-          isn&apos;t in the grid: it stays with Arindam and Amitesh.
-        </p>
-        <p>
-          <strong className="font-medium text-[var(--i-ink-2)]">The team list</strong> (My day: hours, leave, expenses
-          and payslips) isn&apos;t in the grid either: being on it is set on{" "}
+      </dl>
+      <dl className="grid gap-x-8 gap-y-2.5 rounded-b-xl border-t border-[var(--i-line)] bg-[var(--i-sunken)] px-5 py-4 text-[12.5px] leading-relaxed md:grid-cols-[8rem_minmax(0,1fr)]">
+        <LegendNote term={NONE}>They don&apos;t see that area.</LegendNote>
+        <LegendNote term="Admin">
+          {ROLE_INFO.admin.description} Every area is at its top level. In Team tasks, admins see and give tasks to
+          everyone except the founders and other admins; the founder&apos;s associate sees everyone. Any admin can change
+          the other cells; only the founders switch Admin on or off.
+        </LegendNote>
+        <LegendNote term="Money">
+          Payroll, expense claims and payments. Not in the grid: it stays with Arindam and Amitesh.
+        </LegendNote>
+        <LegendNote term="Team list">
+          My day: hours, leave, expenses and payslips. Not in the grid: being on it is set on{" "}
           <Link href="/internal/people?tab=directory" className="text-[var(--i-ink-2)] underline underline-offset-2">
             People
           </Link>
           , and it lets someone in without any area here.
-        </p>
-        <p>
+        </LegendNote>
+        <LegendNote term="Outside Studio1">
           People outside @studio1hq.com can only ever have Blog: Own work.
-        </p>
-      </div>
+        </LegendNote>
+      </dl>
     </Card>
+  );
+}
+
+/** One term in the legend's notes: the name in the first column, what it means beside it. */
+function LegendNote({ term, children }: { term: string; children: ReactNode }) {
+  return (
+    <div className="contents">
+      <dt className="font-medium text-[var(--i-ink-2)]">{term}</dt>
+      <dd className="-mt-2 text-[var(--i-muted)] md:mt-0">{children}</dd>
+    </div>
   );
 }
 
