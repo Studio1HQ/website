@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { JesseImg, JuliaImg, MarketaImg, SauravImg } from "@/constants/image";
@@ -12,7 +12,7 @@ import {
   PenNib,
   VideoCamera,
 } from "@phosphor-icons/react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Logo from "@/components/ui/svgs/logo";
 import { cn } from "@/lib/utils";
 import { Container, EASE } from "@/components/home/ui";
@@ -365,8 +365,22 @@ function StrategyCallButton({
   );
 }
 
+/**
+ * Each locale's widest title line, in em (measured at 390px). On phones the
+ * title is sized from the hero's width so it stays on two lines; from `sm` up
+ * the fixed sizes apply. A line that grows past this just wraps.
+ */
+const TITLE_FIT_EM: Record<string, number> = {
+  en: 13.4,
+  es: 13.2,
+  fr: 14.7,
+  hi: 10.7,
+  zh: 12.1,
+};
+
 export default function PaperHero() {
   const t = useTranslations("Hero");
+  const locale = useLocale();
   const nav = useTranslations("Nav");
   const domains = useTranslations("HomeDomains");
   const cards = domains.raw("cards") as Record<string, string[]>;
@@ -609,12 +623,12 @@ export default function PaperHero() {
 
       {/* ----- Copy ----- */}
       <Container className="relative flex min-h-[calc(100svh/var(--s1-zoom,1))] flex-col justify-end pb-10 pt-36">
-        <div className="mb-auto mt-auto flex flex-col items-center pt-6 text-center lg:pt-16">
+        <div className="mb-auto mt-auto flex flex-col items-center pt-6 text-center [container-type:inline-size] lg:pt-16">
           <motion.div
             {...enter(0.1)}
             role="group"
             aria-label={t("trustedAria")}
-            className="inline-flex items-center gap-3 bg-white py-1.5 pl-1.5 pr-4 shadow-[0_1px_0_rgba(27,23,20,0.06)]"
+            className="inline-flex items-center gap-2 bg-white py-1 pl-1 pr-3 shadow-[0_1px_0_rgba(27,23,20,0.06)] sm:gap-3 sm:py-1.5 sm:pl-1.5 sm:pr-4"
           >
             <span className="flex -space-x-2" aria-hidden>
               {TRUSTED_FACES.map((face, index) => (
@@ -624,18 +638,21 @@ export default function PaperHero() {
                   alt=""
                   width={64}
                   height={64}
-                  sizes="28px"
-                  className="relative size-7 rounded-full object-cover ring-2 ring-white"
+                  sizes="(min-width: 640px) 28px, 24px"
+                  className="relative size-6 rounded-full object-cover ring-2 ring-white sm:size-7"
                   style={{ zIndex: TRUSTED_FACES.length - index }}
                 />
               ))}
             </span>
-            <span className="text-[13px] font-medium tracking-[-0.01em] sm:text-[14px]">
+            <span className="text-[12px] font-medium tracking-[-0.01em] sm:text-[14px]">
               {t("trustedPrefix")} 35+ {t("trustedSuffix")}
             </span>
           </motion.div>
 
-          <h1 className="relative mt-8 text-[38px] font-medium leading-[1.12] tracking-[-0.045em] sm:text-[52px] lg:text-[60px] xl:text-[68px]">
+          <h1
+            className="relative mt-8 text-[length:min(38px,calc(100cqw/var(--title-fit)))] font-medium leading-[1.12] tracking-[-0.045em] sm:text-[52px] lg:text-[60px] xl:text-[68px]"
+            style={{ "--title-fit": TITLE_FIT_EM[locale] ?? TITLE_FIT_EM.en } as CSSProperties}
+          >
             {[
               <>
                 {t("titleLine1")} <span style={{ color: PRINT }}>DevRel</span>
@@ -666,7 +683,9 @@ export default function PaperHero() {
             {...enter(0.55)}
             className="mt-7 max-w-[560px] text-[16px] leading-[1.6] text-[#141414]/70 sm:text-[18px]"
           >
-            {t("description")}
+            {/* Phones get the short version, so it takes two or three lines. */}
+            <span className="sm:hidden">{t("descriptionShort")}</span>
+            <span className="hidden sm:inline">{t("description")}</span>
           </motion.p>
 
           {/* Side by side from phones up; wraps only if a locale's labels run long */}
