@@ -12,7 +12,7 @@ import {
   displayName,
   isMonthKey,
   istNow,
-  minutesBetween,
+  minutesSoFar,
   monthOf,
 } from "@/lib/internal/team/shared";
 
@@ -69,7 +69,7 @@ export default async function MyDayPage({
   ]);
 
   const today = todayDays.ok ? (todayDays.days[0] ?? null) : null;
-  const soFar = today?.start_time && !today.end_time ? minutesBetween(today.start_time, now.time) : null;
+  const soFar = today ? minutesSoFar(today, now.time) : null;
   const failed = [monthDays, payslips, claims].find((result) => !result.ok);
 
   return (

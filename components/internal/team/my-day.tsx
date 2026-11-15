@@ -36,6 +36,7 @@ import { DayDialog, LeaveDialog } from "@/components/internal/team/day-dialogs";
 import { Label, MonthSwitcher, TeamDialog, shrinkImage, useTeamAction } from "@/components/internal/team/kit";
 import {
   CURRENCIES,
+  MAX_SLOTS,
   MAX_UPLOAD_BYTES,
   MAX_UPLOAD_LABEL,
   PERSON_KINDS,
@@ -47,11 +48,14 @@ import {
   isWeekend,
   leaveFor,
   lopFor,
+  minutesBetween,
   monthLabel,
+  openSlot,
   photoUrl,
   payslipPdfUrl,
   receiptUrl,
   shiftMonth,
+  slotsLabel,
   type AttendanceDay,
   type Payslip,
   type Reimbursement,
@@ -107,6 +111,10 @@ export function MyDay({
   const intern = person.kind === "intern";
   const editableFrom = `${shiftMonth(current, -1)}-01`;
   const canEdit = (date: string) => !intern && date >= editableFrom && date <= now.date;
+
+  // Today's slots: one running (no end yet), or all ended and room for another.
+  const slots = today?.slots ?? [];
+  const running = openSlot(slots);
 
   const worked = days.filter((day) => day.kind !== "leave");
   const workedDays = worked.reduce((sum, day) => sum + (day.kind === "half_day" ? 0.5 : 1), 0);
@@ -214,21 +222,51 @@ export function MyDay({
                 <>
                   <div className="grid grid-cols-3 gap-4">
                     <Stat label="Started" value={today.start_time ?? "—"} />
-                    <Stat label="Ended" value={today.end_time ?? "—"} note={today.end_time ? undefined : "Still working"} />
+                    <Stat
+                      label="Ended"
+                      value={today.end_time ?? "—"}
+                      note={running ? "Still working" : slots.length > 1 ? `${slots.length} slots` : undefined}
+                    />
                     <Stat
                       label="Active"
-                      value={today.end_time ? formatMinutes(today.active_minutes) : formatMinutes(soFar)}
-                      note={today.end_time ? (today.kind === "half_day" ? "Half day" : undefined) : "So far"}
+                      value={running ? formatMinutes(soFar) : formatMinutes(today.active_minutes)}
+                      note={running ? "So far" : today.kind === "half_day" ? "Half day" : undefined}
                     />
                   </div>
-                  {!today.end_time && !intern ? (
+                  {slots.length > 1 ? (
+                    <ol aria-label="Today's slots" className="mt-4 flex flex-wrap gap-1.5">
+                      {slots.map((slot, index) => (
+                        <li
+                          key={`${index}-${slot.start}`}
+                          className="inline-flex items-center gap-1.5 rounded-full bg-[var(--i-sunken)] px-2.5 py-1 text-[12px] tabular-nums ring-1 ring-inset ring-[var(--i-line)]"
+                        >
+                          {slot.end ? null : <span aria-hidden className="size-1.5 rounded-full bg-emerald-500" />}
+                          {slot.start}–{slot.end ?? "now"}
+                          {slot.end ? (
+                            <span className="text-[var(--i-faint)]">{formatMinutes(minutesBetween(slot.start, slot.end))}</span>
+                          ) : null}
+                        </li>
+                      ))}
+                    </ol>
+                  ) : null}
+                  {intern ? null : running ? (
                     <button
                       type="button"
                       disabled={pending}
                       onClick={() => run(() => endDay())}
                       className={cn(buttonClass("primary"), "mt-5 h-9 px-4")}
                     >
-                      <Stop size={14} weight="fill" /> End my day
+                      <Stop size={14} weight="fill" /> {slots.length > 1 ? "End this slot" : "End my day"}
+                    </button>
+                  ) : slots.length < MAX_SLOTS ? (
+                    <button
+                      type="button"
+                      disabled={pending}
+                      onClick={() => run(() => startDay())}
+                      title={slots.length ? "Back at work? This adds a new slot from now." : undefined}
+                      className={cn(buttonClass("secondary"), "mt-5 h-9 px-4")}
+                    >
+                      <Play size={14} weight="fill" /> {slots.length ? "Start another slot" : "Start my day"}
                     </button>
                   ) : null}
                 </>
@@ -277,8 +315,14 @@ export function MyDay({
                       <span className="w-[7.5rem] shrink-0">
                         <DayChip day={day} />
                       </span>
-                      <span className="hidden w-[7rem] shrink-0 text-[12.5px] tabular-nums text-[var(--i-muted)] sm:block">
+                      <span
+                        title={day.slots.length > 1 ? slotsLabel(day.slots) : undefined}
+                        className="hidden w-[10rem] shrink-0 truncate text-[12.5px] tabular-nums text-[var(--i-muted)] sm:block"
+                      >
                         {day.start_time ? `${day.start_time}–${day.end_time ?? "…"}` : ""}
+                        {day.slots.length > 1 ? (
+                          <span className="text-[var(--i-faint)]"> · {day.slots.length} slots</span>
+                        ) : null}
                       </span>
                       <span className="w-[4.5rem] shrink-0 text-right text-[12.5px] tabular-nums">
                         {day.kind === "leave" ? "" : formatMinutes(day.active_minutes)}

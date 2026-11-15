@@ -79,15 +79,24 @@ export const LEAVE_TYPES: Record<LeaveType, string> = {
   unpaid: "Unpaid leave",
 };
 
+/** One stretch of work in a day, "09:30" to "13:00"; `end` is null while it's still going. */
+export type WorkSlot = { start: string; end: string | null };
+
+/** The most slots one day takes. */
+export const MAX_SLOTS = 6;
+
 export type AttendanceDay = {
   id: string;
   email: string;
   day: string;
   kind: AttendanceKind;
   leave_type: LeaveType | null;
-  /** "09:30", or null. */
+  /** "09:30", or null: when the first slot started. */
   start_time: string | null;
+  /** When the last slot ended; null while one is still going. */
   end_time: string | null;
+  /** The stretches worked, in order. Only the last can be open. */
+  slots: WorkSlot[];
   active_minutes: number | null;
   note: string;
   logged_by: string;
@@ -124,6 +133,49 @@ export function minutesBetween(start: string | null, end: string | null) {
   const toMinutes = (time: string) => Number(time.slice(0, 2)) * 60 + Number(time.slice(3));
   const diff = toMinutes(b) - toMinutes(a);
   return diff >= 0 ? diff : diff + 1440;
+}
+
+/**
+ * A day's slots as stored (a JSON list), or, for days saved before there
+ * were slots, the one stretch from its start and end times.
+ */
+export function readSlots(value: unknown, start: string | null, end: string | null): WorkSlot[] {
+  const slots: WorkSlot[] = [];
+  for (const item of Array.isArray(value) ? value : []) {
+    const from = cleanTime((item as { start?: unknown } | null)?.start);
+    if (from) slots.push({ start: from, end: cleanTime((item as { end?: unknown }).end) });
+  }
+  if (slots.length) return slots;
+  return start ? [{ start, end }] : [];
+}
+
+/** The slot still going (the last one, with no end), or null. */
+export function openSlot(slots: WorkSlot[]): WorkSlot | null {
+  const last = slots[slots.length - 1];
+  return last && !last.end ? last : null;
+}
+
+/** Minutes in the slots that have ended. */
+export function slotMinutes(slots: WorkSlot[]) {
+  return slots.reduce((sum, slot) => sum + (minutesBetween(slot.start, slot.end) ?? 0), 0);
+}
+
+/**
+ * Minutes worked so far on a day with a slot still going: the earlier slots
+ * (less any breaks already taken off them) plus the open one up to `now`.
+ * Null when nothing is running.
+ */
+export function minutesSoFar(day: Pick<AttendanceDay, "slots" | "active_minutes">, now: string) {
+  const open = openSlot(day.slots);
+  if (!open) return null;
+  const earlier = slotMinutes(day.slots);
+  const carried = day.active_minutes !== null && day.active_minutes < earlier ? day.active_minutes : earlier;
+  return carried + (minutesBetween(open.start, now) ?? 0);
+}
+
+/** "09:30–13:00, 15:00–…" */
+export function slotsLabel(slots: WorkSlot[]) {
+  return slots.map((slot) => `${slot.start}–${slot.end ?? "…"}`).join(", ");
 }
 
 /** 450 → "7h 30m", 480 → "8h", 25 → "25m". */

@@ -2,8 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { renderEmail } from "@/lib/internal/email-templates";
-import { decideMember, inviteMember, type MemberStatus } from "@/lib/internal/members";
-import { isOwner, isRoleKey, isStaffEmail, rolesLabel, type RoleKey } from "@/lib/internal/roles";
+import { accessFor, decideMember, inviteMember, type MemberStatus } from "@/lib/internal/members";
+import { isOwner, isRoleKey, isStaffEmail, roleChangeProblem, rolesLabel, type RoleKey } from "@/lib/internal/roles";
 import { requireStaff } from "@/lib/internal/session";
 import { emailAddress } from "@/lib/internal/token";
 import { isMailerConfigured, sendMail } from "@/lib/mailer";
@@ -11,33 +11,31 @@ import { baseUrl } from "@/lib/site";
 
 export type TeamResult = { ok: true; message?: string } | { ok: false; message: string };
 
-const OWNERS_ONLY = "Only Arindam and Amitesh can approve, invite, change or turn off access.";
+const OWNERS_ONLY = "Only Arindam and Amitesh can invite people.";
 
 function roleList(value: unknown): RoleKey[] {
   return Array.isArray(value) ? value.filter(isRoleKey) : [];
 }
 
-/**
- * Who gets in is the owners' call (OWNERS in lib/internal/roles.ts): other
- * admins can see the team but not change it, so no admin can let someone in,
- * or keep someone in, on their own.
- */
+/** Inviting skips the waitlist and reaches outside addresses: the owners' call (OWNERS in lib/internal/roles.ts). */
 async function requireOwner() {
   const admin = await requireStaff("admin");
   return isOwner(admin.email) ? admin : null;
 }
 
 /**
- * Approve, decline, change roles, or turn access off and on. Owners only;
- * server actions are public endpoints, so every input is checked here.
+ * Approve, decline, change roles, or turn access off and on. Any admin can
+ * give and take away roles (approving included); the Admin role, other
+ * admins, declining and turning access off or on are the owners' alone
+ * (roleChangeProblem). Server actions are public endpoints, so every input
+ * is checked here, against the person's row as it is now.
  */
 export async function updateMember(
   email: unknown,
   status: unknown,
   roles: unknown,
 ): Promise<TeamResult> {
-  const admin = await requireOwner();
-  if (!admin) return { ok: false, message: OWNERS_ONLY };
+  const admin = await requireStaff("admin");
   const target = emailAddress(email);
   if (!target || (status !== "active" && status !== "disabled")) {
     return { ok: false, message: "That change isn't valid." };
@@ -45,11 +43,20 @@ export async function updateMember(
   if (target === admin.email) {
     return { ok: false, message: "You can't change your own access." };
   }
-  const result = await decideMember(
-    target,
-    { status: status as MemberStatus, roles: roleList(roles) },
-    admin.email,
-  );
+  const wanted = roleList(roles);
+  // What a non-owner's change was checked against; the write holds to it.
+  let checked: { statusWas: MemberStatus } | undefined;
+  if (!isOwner(admin.email)) {
+    const access = await accessFor(target);
+    if (access.kind === "error") return { ok: false, message: "Couldn't check that person just now. Try again in a minute." };
+    if (access.kind !== "member") {
+      return { ok: false, message: access.kind === "owner" ? "Owners can't be changed." : "That person isn't on the list." };
+    }
+    const problem = roleChangeProblem({ owner: false }, access.member, { status, roles: wanted });
+    if (problem) return { ok: false, message: problem };
+    checked = { statusWas: access.member.status };
+  }
+  const result = await decideMember(target, { status, roles: wanted }, admin.email, checked);
   if (result.ok) revalidatePath("/internal", "layout");
   return result;
 }
