@@ -16,10 +16,15 @@ import {
   Megaphone,
   EnvelopeOpen,
   EnvelopeSimple,
+  FileText,
+  Folders,
+  Gauge,
   Handshake,
   IdentificationCard,
+  Kanban,
   NotePencil,
   Receipt,
+  SlidersHorizontal,
   SquaresFour,
   Trophy,
   UserGear,
@@ -105,9 +110,21 @@ function NavGroup({ title, children }: { title: string; children: React.ReactNod
   );
 }
 
+/** The client-work pages with a link of their own (the rest highlight Overview). */
+const CLIENT_PAGES = [
+  "/internal/clients/board",
+  "/internal/clients/load",
+  "/internal/clients/reports",
+  "/internal/clients/templates",
+];
+
 export type TeamNav = {
   /** On the team list: My day. */
   me: boolean;
+  /** On the team list, or sees others' tasks: Tasks. */
+  tasks: boolean;
+  /** Reports due (yours) or waiting to be read (founders). */
+  tasksBadge: number;
   /** Admins and intern reviewers: People. */
   people: boolean;
   /** Admins: the Money section (payroll and payments), with their counts. */
@@ -125,6 +142,14 @@ export type CommunityNav = {
   partners: number;
 };
 
+export type ClientsNav = {
+  access: "manager" | "member";
+  /** My deliverables past due. */
+  late: number;
+  /** Items in internal review waiting on me as the reviewer. */
+  toReview: number;
+};
+
 export function InternalNav({
   awaiting,
   role,
@@ -134,6 +159,7 @@ export function InternalNav({
   requests,
   team,
   community,
+  clients = null,
   home,
   overview,
 }: {
@@ -147,6 +173,8 @@ export function InternalNav({
   requests: number;
   team: TeamNav;
   community: CommunityNav | null;
+  /** Client work, with my late and to-review counts; null without access. */
+  clients?: ClientsNav | null;
   /** Where this person's dashboard starts; the sections link back to it. */
   home: string;
   /** Show the Overview link: everyone whose home is the Overview. */
@@ -159,20 +187,23 @@ export function InternalNav({
       : pathname === href || pathname.startsWith(`${href}/`);
   const groups = ["Pipelines", "Audiences"] as const;
 
-  // Community and Money are sections of their own: inside one, the sidebar
-  // shows only that section's pages, so the main sidebar stays short.
-  // Hackathon registrations belong to Community.
+  // Community, Clients and Money are sections of their own: inside one, the
+  // sidebar shows only that section's pages, so the main sidebar stays
+  // short. Hackathon registrations belong to Community.
   const section =
     (isActive("/internal/community") || isActive(SECTIONS.hackathons.path)) && community
       ? "community"
-      : isActive("/internal/money") && team.money
-        ? "money"
-        : null;
+      : isActive("/internal/clients") && clients
+        ? "clients"
+        : isActive("/internal/money") && team.money
+          ? "money"
+          : null;
+  const sectionName = section === "money" ? "Money" : section === "clients" ? "Clients" : "Community";
   if (section) {
     const back = !home.startsWith(`/internal/${section}`);
     return (
       <nav
-        aria-label={section === "money" ? "Money" : "Community"}
+        aria-label={sectionName}
         className="flex flex-col"
       >
         {back ? (
@@ -184,10 +215,49 @@ export function InternalNav({
           </Link>
         ) : null}
         <p className="flex items-center gap-2 px-2.5 pb-1.5 pt-3 text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--i-faint)]">
-          {section === "money" ? "Money" : "Community"}
+          {sectionName}
         </p>
         <div className="flex flex-col gap-0.5">
-          {section === "money" ? (
+          {section === "clients" && clients ? (
+            <>
+              <NavLink
+                href="/internal/clients"
+                label="Overview"
+                icon={Folders}
+                badge={clients.late}
+                badgeTitle={`${clients.late} of your deliverables late`}
+                active={pathname === "/internal/clients" || (isActive("/internal/clients") && !CLIENT_PAGES.some((page) => isActive(page)))}
+              />
+              <NavLink
+                href="/internal/clients/board"
+                label="This week"
+                icon={CalendarBlank}
+                active={isActive("/internal/clients/board")}
+              />
+              <NavLink
+                href="/internal/clients/load"
+                label="Owner load"
+                icon={Gauge}
+                badge={clients.toReview}
+                badgeTitle={`${clients.toReview} waiting for your review`}
+                active={isActive("/internal/clients/load")}
+              />
+              <NavLink
+                href="/internal/clients/reports"
+                label="Monthly report"
+                icon={FileText}
+                active={isActive("/internal/clients/reports")}
+              />
+              {clients.access === "manager" ? (
+                <NavLink
+                  href="/internal/clients/templates"
+                  label="Templates & capacity"
+                  icon={SlidersHorizontal}
+                  active={isActive("/internal/clients/templates")}
+                />
+              ) : null}
+            </>
+          ) : section === "money" ? (
             <>
               <NavLink href="/internal/money" label="Overview" icon={Bank} active={pathname === "/internal/money"} />
               <NavLink
@@ -286,6 +356,7 @@ export function InternalNav({
   }
 
   const moneyBadge = team.payrollBadge + team.paymentsBadge;
+  const clientsBadge = clients ? clients.late + clients.toReview : 0;
   const hackathonsNew = community ? (awaiting.hackathons ?? 0) : 0;
   const communityBadge = community ? community.tasks + community.sponsors + community.partners + hackathonsNew : 0;
 
@@ -302,43 +373,24 @@ export function InternalNav({
           active={isActive("/internal")}
         />
       ) : null}
-      {groups
-        .filter((group) =>
-          SECTION_ORDER.some(
-            (key) =>
-              SECTIONS[key].group === group &&
-              atLeast(role, SECTIONS[key].minRole),
-          ),
-        )
-        .map((group) => (
-          <div key={group} className="mt-5">
-            <p className="px-2.5 pb-1.5 text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--i-faint)]">
-              {group}
-            </p>
-            <div className="flex flex-col gap-0.5">
-              {SECTION_ORDER.filter(
-                (key) =>
-                  SECTIONS[key].group === group &&
-                  atLeast(role, SECTIONS[key].minRole),
-              ).map((key) => (
-                <NavLink
-                  key={key}
-                  href={SECTIONS[key].path}
-                  label={SECTIONS[key].nav}
-                  icon={ICONS[key]}
-                  badge={awaiting[key]}
-                  active={isActive(SECTIONS[key].path)}
-                />
-              ))}
-            </div>
-          </div>
-        ))}
-      {blog ? (
-        <div className="mt-5">
-          <p className="px-2.5 pb-1.5 text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--i-faint)]">
-            Content
-          </p>
-          <div className="flex flex-col gap-0.5">
+      {clients || blog || community || team.money ? (
+        <NavGroup title="Workspaces">
+          {clients ? (
+            <NavLink
+              href="/internal/clients"
+              label="Clients"
+              icon={Folders}
+              badge={clientsBadge}
+              badgeTitle={[
+                clients.late ? `${clients.late} of your deliverables late` : null,
+                clients.toReview ? `${clients.toReview} waiting for your review` : null,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+              active={false}
+            />
+          ) : null}
+          {blog ? (
             <NavLink
               href="/internal/blog"
               label="Blog"
@@ -351,26 +403,7 @@ export function InternalNav({
               }
               active={isActive("/internal/blog")}
             />
-          </div>
-        </div>
-      ) : null}
-      {team.me || team.people ? (
-        <NavGroup title="Team">
-          {team.me ? (
-            <NavLink href="/internal/me" label="My day" icon={CalendarCheck} active={isActive("/internal/me")} />
           ) : null}
-          {team.people ? (
-            <NavLink
-              href="/internal/people"
-              label="People"
-              icon={IdentificationCard}
-              active={isActive("/internal/people")}
-            />
-          ) : null}
-        </NavGroup>
-      ) : null}
-      {community || team.money ? (
-        <NavGroup title="Areas">
           {community ? (
             <NavLink
               href="/internal/community"
@@ -404,6 +437,62 @@ export function InternalNav({
                 .filter(Boolean)
                 .join(" · ")}
               active={false}
+            />
+          ) : null}
+        </NavGroup>
+      ) : null}
+      {groups
+        .filter((group) =>
+          SECTION_ORDER.some(
+            (key) =>
+              SECTIONS[key].group === group &&
+              atLeast(role, SECTIONS[key].minRole),
+          ),
+        )
+        .map((group) => (
+          <div key={group} className="mt-5">
+            <p className="px-2.5 pb-1.5 text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--i-faint)]">
+              {group}
+            </p>
+            <div className="flex flex-col gap-0.5">
+              {SECTION_ORDER.filter(
+                (key) =>
+                  SECTIONS[key].group === group &&
+                  atLeast(role, SECTIONS[key].minRole),
+              ).map((key) => (
+                <NavLink
+                  key={key}
+                  href={SECTIONS[key].path}
+                  label={SECTIONS[key].nav}
+                  icon={ICONS[key]}
+                  badge={awaiting[key]}
+                  active={isActive(SECTIONS[key].path)}
+                />
+              ))}
+            </div>
+          </div>
+        ))}
+      {team.me || team.people || team.tasks ? (
+        <NavGroup title="Team">
+          {team.me ? (
+            <NavLink href="/internal/me" label="My day" icon={CalendarCheck} active={isActive("/internal/me")} />
+          ) : null}
+          {team.tasks ? (
+            <NavLink
+              href="/internal/tasks"
+              label="Tasks"
+              icon={Kanban}
+              badge={team.tasksBadge}
+              badgeTitle={`${team.tasksBadge} report${team.tasksBadge === 1 ? "" : "s"} to see to`}
+              active={isActive("/internal/tasks")}
+            />
+          ) : null}
+          {team.people ? (
+            <NavLink
+              href="/internal/people"
+              label="People"
+              icon={IdentificationCard}
+              active={isActive("/internal/people")}
             />
           ) : null}
         </NavGroup>

@@ -4,7 +4,8 @@ import { useCallback, useEffect, useRef, useState, type RefObject } from "react"
 import { ArrowBendUpLeft, ChatCircle, CheckCircle, CircleNotch, Quotes, X } from "@phosphor-icons/react";
 import { cleanQuote, locateQuote, nameFromEmail, type CommentThread } from "@/lib/internal/blog/shared";
 import { cn } from "@/lib/utils";
-import { Avatar, Card, buttonClass, formatDate, relativeDate, textareaClass } from "@/components/internal/ui";
+import { Card, buttonClass, formatDate, relativeDate, textareaClass } from "@/components/internal/ui";
+import { TeamAvatar } from "@/components/internal/team-photos";
 
 /*
  * Comments on a post, Google Docs style: select text in the editor and press
@@ -175,7 +176,7 @@ export function SelectionCommentButton({
 function Message({ actor, at, body }: { actor: string; at: string; body: string }) {
   return (
     <div className="flex gap-2 text-[12.5px]">
-      <Avatar name={nameFromEmail(actor)} email={actor} size={24} />
+      <TeamAvatar name={nameFromEmail(actor)} email={actor} size={24} />
       <div className="min-w-0 flex-1">
         <p className="text-[var(--i-muted)]">
           <span className="font-medium text-[var(--i-ink-2)]">{nameFromEmail(actor)}</span> ·{" "}

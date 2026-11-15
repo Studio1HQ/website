@@ -1,0 +1,47 @@
+import Link from "next/link";
+import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
+import { Card, CardTitle } from "@/components/internal/ui";
+import { DayList } from "@/components/internal/tasks/week-calendar";
+import type { CalendarCard } from "@/lib/internal/tasks/calendar";
+import type { LinkOption } from "@/lib/internal/tasks/shared";
+
+/**
+ * My day's "Today's tasks": today's cards from the week calendar, and a box
+ * to add what you did. Once the day has ended with nothing there, it asks.
+ */
+export function TodayWork({
+  cards,
+  today,
+  ended,
+  options,
+}: {
+  cards: CalendarCard[];
+  today: string;
+  /** The day has been started and every slot has ended. */
+  ended: boolean;
+  options: LinkOption[];
+}) {
+  const done = cards.filter((card) => (card.kind === "task" ? card.status === "done" : card.done)).length;
+  return (
+    <Card>
+      <CardTitle
+        action={
+          <Link href="/internal/tasks" className="inline-flex items-center gap-1 text-[12.5px] text-[var(--i-muted)] hover:text-[var(--i-ink)]">
+            Your week <ArrowRight size={12} />
+          </Link>
+        }
+      >
+        Today&apos;s tasks
+        <span className="ml-2 font-normal tabular-nums text-[var(--i-muted)]">
+          {done} done{cards.length > done ? ` · ${cards.length - done} open` : ""}
+        </span>
+      </CardTitle>
+      {ended && !done ? (
+        <p className="border-b border-[var(--i-line)] bg-amber-50 px-5 py-2.5 text-[12.5px] text-amber-900 dark:bg-amber-500/10 dark:text-amber-200">
+          You&apos;ve ended your day. Add what you worked on, so it counts in your week and your report.
+        </p>
+      ) : null}
+      <DayList day={today} today={today} cards={cards} options={options} />
+    </Card>
+  );
+}

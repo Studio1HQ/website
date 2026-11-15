@@ -5,15 +5,20 @@ import Logo from "@/components/ui/svgs/logo";
 import { InternalNav } from "@/components/internal/nav";
 import { MobileNavButton, MobileNavClose, MobileNavPanel, MobileNavProvider } from "@/components/internal/mobile-nav";
 import { NavProgress, RefreshButton } from "@/components/internal/nav-progress";
+import { TeamPhotosProvider } from "@/components/internal/team-photos";
 import { ToastProvider } from "@/components/internal/toast";
 import { Avatar } from "@/components/internal/ui";
 import { blogBadge } from "@/lib/internal/blog/data";
+import { clientNeeds } from "@/lib/internal/clients/data";
 import { communityBadges } from "@/lib/internal/community/data";
 import { awaitingCounts } from "@/lib/internal/data";
 import { pendingCount } from "@/lib/internal/members";
-import { rolesLabel } from "@/lib/internal/roles";
+import { isStaffEmail, rolesLabel } from "@/lib/internal/roles";
 import { canSeeMoney, homeFor, isAdmin, requireMember, staffName, type Staff } from "@/lib/internal/session";
 import { teamBadges } from "@/lib/internal/team/badges";
+import { canSeeOthers } from "@/lib/internal/tasks/access";
+import { taskNeeds } from "@/lib/internal/tasks/needs";
+import { teamPhotos } from "@/lib/internal/team/photos";
 import { PERSON_KINDS, photoUrl } from "@/lib/internal/team/shared";
 import { signOut } from "./actions";
 
@@ -23,6 +28,9 @@ type Counts = {
   blog: number;
   money: { payroll: number; payments: number };
   community: { tasks: number; sponsors: number; partners: number };
+  clients: { late: number; toReview: number };
+  /** Reports due (yours) plus reports to read (founders). */
+  tasks: number;
 };
 
 const NO_COUNTS: Counts = {
@@ -31,7 +39,14 @@ const NO_COUNTS: Counts = {
   blog: 0,
   money: { payroll: 0, payments: 0 },
   community: { tasks: 0, sponsors: 0, partners: 0 },
+  clients: { late: 0, toReview: 0 },
+  tasks: 0,
 };
+
+/** Tasks is for everyone on the team list, and anyone who sees others' tasks. */
+function seesTasks(staff: Staff) {
+  return staff.person !== null || canSeeOthers({ email: staff.email, roles: staff.roles, status: staff.status, interns: staff.interns });
+}
 
 /** The sidebar's links for this person, with whatever counts are known. */
 function Sidebar({ staff, counts }: { staff: Staff; counts: Counts }) {
@@ -47,12 +62,15 @@ function Sidebar({ staff, counts }: { staff: Staff; counts: Counts }) {
       requests={counts.requests}
       team={{
         me: staff.person !== null,
+        tasks: seesTasks(staff),
+        tasksBadge: counts.tasks,
         people: admin || staff.interns.length > 0,
         money: canSeeMoney(staff),
         payrollBadge: counts.money.payroll,
         paymentsBadge: counts.money.payments,
       }}
       community={staff.community ? { access: staff.community, ...counts.community } : null}
+      clients={staff.clients ? { access: staff.clients, ...counts.clients } : null}
       home={home}
       overview={home === "/internal"}
     />
@@ -61,14 +79,29 @@ function Sidebar({ staff, counts }: { staff: Staff; counts: Counts }) {
 
 /** Reads the counts (only the ones this person's sidebar shows). */
 async function SidebarWithCounts({ staff }: { staff: Staff }) {
-  const [awaiting, requests, blog, money, community] = await Promise.all([
+  const [awaiting, requests, blog, money, community, clients, tasks] = await Promise.all([
     staff.role || staff.community ? awaitingCounts() : Promise.resolve(NO_COUNTS.awaiting),
     isAdmin(staff) ? pendingCount() : Promise.resolve(0),
     staff.blog ? blogBadge(staff) : Promise.resolve(0),
     canSeeMoney(staff) ? teamBadges() : Promise.resolve(NO_COUNTS.money),
     staff.community ? communityBadges(staff.email) : Promise.resolve(NO_COUNTS.community),
+    staff.clients ? clientNeeds(staff.email) : Promise.resolve(NO_COUNTS.clients),
+    seesTasks(staff) ? taskNeeds(staff) : Promise.resolve(null),
   ]);
-  return <Sidebar staff={staff} counts={{ awaiting, requests, blog, money, community }} />;
+  return (
+    <Sidebar
+      staff={staff}
+      counts={{
+        awaiting,
+        requests,
+        blog,
+        money,
+        community,
+        clients: { late: clients.late, toReview: clients.toReview },
+        tasks: tasks ? tasks.reportsDue.length + tasks.reportsToRead : 0,
+      }}
+    />
+  );
 }
 
 export default async function DashboardLayout({
@@ -78,6 +111,9 @@ export default async function DashboardLayout({
 }) {
   // Pages check their own access; the shell only needs someone with a role.
   const staff = await requireMember();
+  // Team photos by email (kept, so usually no extra read). Only for
+  // @studio1hq.com: outside writers would otherwise get the team's addresses.
+  const photos = isStaffEmail(staff.email) ? await teamPhotos() : {};
   const name = staffName(staff);
   const home = homeFor(staff);
 
@@ -159,7 +195,9 @@ export default async function DashboardLayout({
             </div>
           </MobileNavPanel>
           <main className="min-w-0 flex-1 px-4 pb-24 pt-5 sm:px-6 sm:pt-6 lg:px-10 lg:pt-9 print:p-0">
-            <div className="mx-auto max-w-[1280px]">{children}</div>
+            <div className="mx-auto max-w-[1280px]">
+              <TeamPhotosProvider photos={photos}>{children}</TeamPhotosProvider>
+            </div>
           </main>
         </div>
       </MobileNavProvider>

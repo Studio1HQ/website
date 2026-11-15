@@ -181,7 +181,7 @@ export function WorldReachMap({
                     className="flex size-8 items-center justify-center rounded-[6px] shadow-[0_6px_14px_-8px_rgba(20,20,20,0.45)] ring-2 ring-white"
                     style={{ background: PRINT }}
                   >
-                    <Logo className="size-[18px] brightness-0 invert" />
+                    <Logo className="size-[18px] brightness-0 invert" knockout />
                   </span>
                   <span
                     className="-mt-px h-0 w-0 border-x-[5px] border-t-[6px] border-x-transparent"
@@ -217,7 +217,7 @@ export function WorldReachMap({
                     className="flex size-5 items-center justify-center rounded-[5px]"
                     style={{ background: PRINT }}
                   >
-                    <Logo className="size-3 brightness-0 invert" />
+                    <Logo className="size-3 brightness-0 invert" knockout />
                   </span>
                   {/* Studio1 is based in India; other countries are where clients are. */}
                   {highlight === hq

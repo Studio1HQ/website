@@ -40,6 +40,14 @@ const legacyRedirects: Record<string, string> = {
  */
 const THEME_SCRIPT = "'sha256-a/T6WihUdllNvOaPlAwIT5TdeEcYmobkkshLrN/KCkc='";
 
+/**
+ * A client's logo (app/internal/(dashboard)/clients/[slug]/logo): another
+ * site's icon, so it gets a policy that runs and loads nothing, and keeps
+ * the route's own month-long Cache-Control instead of no-store.
+ */
+const LOGO_PATH = /^\/internal\/clients\/[a-z0-9-]+\/logo$/;
+const LOGO_POLICY = "default-src 'none'; style-src 'unsafe-inline'; sandbox";
+
 function dashboardPolicy(nonce: string) {
   const dev = process.env.NODE_ENV === "development";
   let files = "";
@@ -70,7 +78,8 @@ async function internalGate(request: NextRequest) {
   const open =
     pathname === "/internal/login" || pathname.startsWith("/internal/auth/");
   const nonce = btoa(crypto.randomUUID());
-  const policy = dashboardPolicy(nonce);
+  const logo = LOGO_PATH.test(pathname);
+  const policy = logo ? LOGO_POLICY : dashboardPolicy(nonce);
   let response: NextResponse;
   if (
     open ||
@@ -94,7 +103,7 @@ async function internalGate(request: NextRequest) {
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("X-Robots-Tag", "noindex, nofollow");
   response.headers.set("Referrer-Policy", "no-referrer");
-  response.headers.set("Cache-Control", "private, no-store");
+  if (!logo || response.status >= 300) response.headers.set("Cache-Control", "private, no-store");
   return response;
 }
 

@@ -2,15 +2,16 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ProfileForm } from "@/components/internal/profile-form";
 import { Card, CardTitle, PageHeader } from "@/components/internal/ui";
-import { ROLE_INFO, isOwner } from "@/lib/internal/roles";
-import { canSeeMoney, isAdmin, requireMember, staffName } from "@/lib/internal/session";
+import { AREAS, AREA_KEYS, ROLE_INFO, areaAccess, isOwner, levelInfo } from "@/lib/internal/roles";
+import { isAdmin, requireMember, staffName } from "@/lib/internal/session";
 import { PERSON_KINDS } from "@/lib/internal/team/shared";
 
 export const metadata: Metadata = { title: "Your profile" };
 
 /**
  * Everyone's own page: their name and photo, and what their roles let them
- * open. Roles themselves are changed by the founders on /internal/team.
+ * open, in the same words as the access grid on /internal/team (where an
+ * admin changes it).
  */
 export default async function ProfilePage() {
   const staff = await requireMember();
@@ -18,7 +19,14 @@ export default async function ProfilePage() {
 
   const access: { label: string; description: string }[] = owner
     ? [{ label: "Founder", description: "Everything, including Money (payroll, expense claims and payments) and who gets access." }]
-    : staff.roles.map((role) => ({ label: ROLE_INFO[role].label, description: ROLE_INFO[role].description }));
+    : [
+        ...(staff.roles.includes("admin") ? [{ label: ROLE_INFO.admin.label, description: ROLE_INFO.admin.description }] : []),
+        // One line per area they can open, at the level they hold (Admin: the top one).
+        ...AREA_KEYS.flatMap((key) => {
+          const info = levelInfo(key, areaAccess(staff.roles, key));
+          return info ? [{ label: `${AREAS[key].label}: ${info.label}`, description: info.description }] : [];
+        }),
+      ];
   if (staff.person && !owner) {
     access.push({
       label: `${PERSON_KINDS[staff.person.kind]} on the team list`,
@@ -39,7 +47,7 @@ export default async function ProfilePage() {
     <>
       <PageHeader
         title="Your profile"
-        description="Your name and photo show across the dashboard. What you can open is set by Arindam and Amitesh."
+        description="Your name and photo show across the dashboard. What you can open is set on Team & roles by an admin."
       />
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <Card>
@@ -57,7 +65,7 @@ export default async function ProfilePage() {
             ))}
           </dl>
           <p className="border-t border-[var(--i-line)] px-5 py-3 text-[12.5px] text-[var(--i-muted)]">
-            {canSeeMoney(staff) ? (
+            {isAdmin(staff) ? (
               <>
                 Add people and change their roles on{" "}
                 <Link href="/internal/team" className="text-[var(--i-ink-2)] underline underline-offset-2">
@@ -66,7 +74,7 @@ export default async function ProfilePage() {
                 .
               </>
             ) : (
-              "Need something else? Ask Arindam or Amitesh to change your roles."
+              "Need something else? Ask Arindam, Amitesh or an admin to change your access."
             )}
           </p>
         </Card>

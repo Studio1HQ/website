@@ -4,6 +4,7 @@ import { OWNERS, isOwner, isStaffEmail } from "@/lib/internal/roles";
 import { emailAddress } from "@/lib/internal/token";
 import { audit } from "@/lib/internal/team/audit";
 import { deleteTeamFiles, saveTeamFile } from "@/lib/internal/team/files";
+import { photosChanged } from "@/lib/internal/team/photos";
 import {
   MAX_UPLOAD_BYTES,
   MAX_UPLOAD_LABEL,
@@ -334,6 +335,7 @@ export async function setPhoto(email: string, file: File): Promise<TeamResult> {
     return saveError(result.message);
   }
   await deleteTeamFiles([before.photo_path]);
+  photosChanged();
   return { ok: true };
 }
 
@@ -343,6 +345,7 @@ export async function removePhoto(email: string): Promise<TeamResult> {
   const result = await updateRows(TABLE, new URLSearchParams({ email: `eq.${email}` }), { photo_path: null }, "email");
   if (!result.ok) return saveError(result.message);
   await deleteTeamFiles([before.photo_path]);
+  photosChanged();
   return { ok: true };
 }
 

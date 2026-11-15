@@ -15,6 +15,7 @@ function staff(over: Partial<Staff>): Staff {
     role: null,
     blog: null,
     community: null,
+    clients: null,
     status: "active",
     person: null,
     interns: [],
@@ -24,15 +25,15 @@ function staff(over: Partial<Staff>): Staff {
 
 describe("where each person's dashboard starts", () => {
   it("gives the founders the overview with every area, Money included", () => {
-    const founder = staff({ email: "arindam@studio1hq.com", status: "owner", roles: ["admin"], role: "admin", blog: "reviewer", community: "manager" });
+    const founder = staff({ email: "arindam@studio1hq.com", status: "owner", roles: ["admin"], role: "admin", blog: "reviewer", community: "manager", clients: "manager" });
     expect(homeFor(founder)).toBe("/internal");
-    expect(areasFor(founder)).toEqual(["hiring", "blog", "community", "team", "money"]);
+    expect(areasFor(founder)).toEqual(["hiring", "blog", "community", "clients", "team", "money"]);
   });
 
   it("keeps Money from an admin who isn't a founder", () => {
-    const admin = staff({ roles: ["admin"], role: "admin", blog: "reviewer", community: "manager" });
+    const admin = staff({ roles: ["admin"], role: "admin", blog: "reviewer", community: "manager", clients: "manager" });
     expect(homeFor(admin)).toBe("/internal");
-    expect(areasFor(admin)).toEqual(["hiring", "blog", "community", "team"]);
+    expect(areasFor(admin)).toEqual(["hiring", "blog", "community", "clients", "team"]);
     // The status alone isn't enough either: it has to be a founder's address.
     expect(areasFor(staff({ status: "owner", roles: ["admin"], role: "admin" }))).not.toContain("money");
   });
@@ -40,6 +41,8 @@ describe("where each person's dashboard starts", () => {
   it("sends single-area people straight to their area", () => {
     expect(homeFor(staff({ roles: ["community_manager"], community: "manager" }))).toBe("/internal/community");
     expect(homeFor(staff({ roles: ["blog_writer"], blog: "writer" }))).toBe("/internal/blog");
+    expect(homeFor(staff({ roles: ["client_manager"], clients: "manager" }))).toBe("/internal/clients");
+    expect(homeFor(staff({ roles: ["client_member"], clients: "member" }))).toBe("/internal/clients");
     expect(homeFor(staff({ person }))).toBe("/internal/me");
     expect(homeFor(staff({ interns: ["i@studio1hq.com"] }))).toBe("/internal/people");
   });
@@ -48,6 +51,11 @@ describe("where each person's dashboard starts", () => {
     expect(homeFor(staff({ roles: ["hiring_viewer"], role: "viewer" }))).toBe("/internal");
     expect(homeFor(staff({ roles: ["community_manager"], community: "manager", person }))).toBe("/internal");
     expect(areasFor(staff({ roles: ["blog_writer"], blog: "writer", person }))).toEqual(["blog", "team"]);
+    expect(homeFor(staff({ roles: ["client_member"], clients: "member", person }))).toBe("/internal");
+    expect(areasFor(staff({ roles: ["community_viewer", "client_member"], community: "viewer", clients: "member" }))).toEqual([
+      "community",
+      "clients",
+    ]);
   });
 
   it("keeps people with no way in on the pending page", () => {

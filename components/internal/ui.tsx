@@ -292,11 +292,14 @@ export function PageHeader({
   title,
   description,
   actions,
+  actionsClassName,
 }: {
   eyebrow?: ReactNode;
   title: ReactNode;
   description?: ReactNode;
   actions?: ReactNode;
+  /** e.g. `max-sm:w-full`, to let the actions stretch across a phone. */
+  actionsClassName?: string;
 }) {
   return (
     <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
@@ -311,7 +314,9 @@ export function PageHeader({
           </p>
         ) : null}
       </div>
-      {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
+      {actions ? (
+        <div className={cn("flex flex-wrap items-center gap-2", actionsClassName)}>{actions}</div>
+      ) : null}
     </header>
   );
 }

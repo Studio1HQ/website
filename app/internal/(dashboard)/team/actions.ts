@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { renderEmail } from "@/lib/internal/email-templates";
 import { accessFor, decideMember, inviteMember, type MemberStatus } from "@/lib/internal/members";
-import { isOwner, isRoleKey, isStaffEmail, roleChangeProblem, rolesLabel, type RoleKey } from "@/lib/internal/roles";
+import { cleanRoles, isOwner, isStaffEmail, roleChangeProblem, rolesLabel, type RoleKey } from "@/lib/internal/roles";
 import { requireStaff } from "@/lib/internal/session";
 import { emailAddress } from "@/lib/internal/token";
 import { isMailerConfigured, sendMail } from "@/lib/mailer";
@@ -12,10 +12,6 @@ import { baseUrl } from "@/lib/site";
 export type TeamResult = { ok: true; message?: string } | { ok: false; message: string };
 
 const OWNERS_ONLY = "Only Arindam and Amitesh can invite people.";
-
-function roleList(value: unknown): RoleKey[] {
-  return Array.isArray(value) ? value.filter(isRoleKey) : [];
-}
 
 /** Inviting skips the waitlist and reaches outside addresses: the owners' call (OWNERS in lib/internal/roles.ts). */
 async function requireOwner() {
@@ -43,7 +39,9 @@ export async function updateMember(
   if (target === admin.email) {
     return { ok: false, message: "You can't change your own access." };
   }
-  const wanted = roleList(roles);
+  // The team page sends the roles its access grid stands for (rolesFromGrid);
+  // they're cleaned here for this address, whatever the browser sent.
+  const wanted = cleanRoles(target, roles);
   // What a non-owner's change was checked against; the write holds to it.
   let checked: { statusWas: MemberStatus } | undefined;
   if (!isOwner(admin.email)) {
@@ -72,7 +70,7 @@ export async function invite(email: unknown, roles: unknown): Promise<TeamResult
   const target = emailAddress(email);
   if (!target) return { ok: false, message: "Enter a valid email address." };
   if (target === admin.email) return { ok: false, message: "You already have access." };
-  const wanted = isStaffEmail(target) ? roleList(roles) : (["blog_writer"] as RoleKey[]);
+  const wanted = isStaffEmail(target) ? cleanRoles(target, roles) : (["blog_writer"] as RoleKey[]);
   const result = await inviteMember(target, wanted, admin.email);
   if (!result.ok) return result;
   revalidatePath("/internal", "layout");
@@ -87,7 +85,7 @@ export async function invite(email: unknown, roles: unknown): Promise<TeamResult
   const writerOnly = wanted.length === 1 && wanted[0] === "blog_writer";
   const body = writerOnly
     ? `Hi,\n\n${inviter} invited you to write for the Studio1 blog.\n\nSign in with this address (${target}) and you'll land in the blog editor. Write your post there, and when it's ready, ask for a review. A Studio1 reviewer will take it from there.\n\nThe Studio1 team`
-    : `Hi,\n\n${inviter} gave you access to the Studio1 dashboard as ${rolesLabel(wanted)}.\n\nSign in with this address (${target}) using the button below.\n\nThe Studio1 team`;
+    : `Hi,\n\n${inviter} gave you access to the Studio1 dashboard (${rolesLabel(wanted)}).\n\nSign in with this address (${target}) using the button below.\n\nThe Studio1 team`;
   const { html, text } = renderEmail({
     body,
     call: { label: writerOnly ? "Open the blog editor" : "Open the dashboard", url: `${baseUrl}/internal/login?next=${writerOnly ? "/internal/blog" : "/internal"}` },

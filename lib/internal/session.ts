@@ -6,13 +6,18 @@ import { accessFor } from "@/lib/internal/members";
 import { ensureOwnersOnTeam, teamAccessFor } from "@/lib/internal/team/people";
 import { displayName, type TeamPerson } from "@/lib/internal/team/shared";
 import {
-  atLeast,
+  areaAccess,
   blogAccess,
+  can,
+  clientAccess,
   communityAccess,
   hiringLevel,
   isOwner,
   isStaffEmail,
+  type AreaKey,
+  type AreaLevels,
   type BlogAccess,
+  type ClientsAccess,
   type CommunityAccess,
   type Role,
   type RoleKey,
@@ -32,6 +37,8 @@ export type Staff = {
   blog: BlogAccess | null;
   /** What they can do in the community area, or null for nothing. */
   community: CommunityAccess | null;
+  /** What they can do in client work, or null for nothing. */
+  clients: ClientsAccess | null;
   status: "owner" | "active" | "pending" | "disabled" | "unknown" | "uninvited";
   /**
    * Their row on the team list (employees and interns), if active. Being on
@@ -52,6 +59,7 @@ function withRoles(base: { email: string; name: string; localPreview: boolean },
     role: hiringLevel(roles),
     blog: blogAccess(roles),
     community: communityAccess(roles),
+    clients: clientAccess(roles),
     status,
   };
 }
@@ -131,11 +139,12 @@ export const getStaff = cache(async (): Promise<Staff | null> => {
 
 /** The dashboard areas someone can open, in sidebar order. */
 export function areasFor(staff: Staff) {
-  const areas: ("hiring" | "blog" | "community" | "team" | "money")[] = [];
+  const areas: ("hiring" | "blog" | "community" | "clients" | "team" | "money")[] = [];
   if (staff.role) areas.push("hiring");
   if (staff.blog) areas.push("blog");
   if (staff.community) areas.push("community");
-  if (staff.person || staff.interns.length || isAdmin(staff)) areas.push("team");
+  if (staff.clients) areas.push("clients");
+  if (staff.person || staff.interns.length || isAdmin(staff) || can(staff.roles, "tasks", "view")) areas.push("team");
   if (canSeeMoney(staff)) areas.push("money");
   return areas;
 }
@@ -144,16 +153,18 @@ export function areasFor(staff: Staff) {
  * Where someone's dashboard starts. The Overview (/internal) gathers every
  * area they can open, so it's home for admins, hiring staff and anyone with
  * two or more areas. Everyone else goes straight to their one area's page:
- * a community manager to Community, a writer to the Blog, an employee to
- * My day.
+ * a community manager to Community, a client manager to Clients, a writer
+ * to the Blog, an employee to My day.
  */
 export function homeFor(staff: Staff) {
   const areas = areasFor(staff);
   if (isAdmin(staff) || staff.role || areas.length > 1) return "/internal";
   if (staff.blog) return "/internal/blog";
   if (staff.community) return "/internal/community";
+  if (staff.clients) return "/internal/clients";
   if (staff.person) return "/internal/me";
   if (staff.interns.length) return "/internal/people";
+  if (can(staff.roles, "tasks", "view")) return "/internal/tasks";
   return "/internal/pending";
 }
 
@@ -173,15 +184,38 @@ export async function requirePeople(): Promise<Staff & { admin: boolean }> {
   return { ...staff, admin };
 }
 
+/** Where someone goes when they can open an area but not at the level a page needs. */
+const DENIED: Record<AreaKey, string> = {
+  hiring: "/internal?denied=1",
+  blog: "/internal/blog?denied=1",
+  community: "/internal/community?denied=1",
+  clients: "/internal/clients?denied=1",
+  tasks: "/internal/tasks?denied=1",
+};
+
+/**
+ * The one access check for an area's pages, data reads and actions: the
+ * signed-in person must reach at least `minimum` in `area` (Admin counts as
+ * Manage everywhere; see the grid in lib/internal/roles.ts). No access to the
+ * area at all sends them home; too low a level, to the area with ?denied=1.
+ * proxy.ts already turns signed-out visitors away; this is the check that
+ * counts, since a proxy alone can be bypassed.
+ */
+export async function requireArea<A extends AreaKey>(area: A, minimum: AreaLevels[A]): Promise<Staff> {
+  const staff = await requireMember();
+  if (!areaAccess(staff.roles, area)) redirect(homeFor(staff));
+  if (!can(staff.roles, area, minimum)) redirect(DENIED[area]);
+  return staff;
+}
+
 /**
  * Every pipeline page, action and data read calls this with the least
- * pipeline level it needs. proxy.ts already turns signed-out visitors away;
- * this is the check that counts, since a proxy alone can be bypassed.
+ * pipeline level it needs: "viewer" (Hiring: view), "reviewer" (Hiring:
+ * manage) or "admin" (the Admin switch).
  */
 export async function requireStaff(minimum: Role = "viewer"): Promise<Staff & { role: Role }> {
-  const staff = await requireMember();
-  if (!staff.role) redirect(homeFor(staff));
-  if (!atLeast(staff.role, minimum)) redirect("/internal?denied=1");
+  const staff = await requireArea("hiring", minimum === "viewer" ? "view" : "manage");
+  if (minimum === "admin" && !isAdmin(staff)) redirect(DENIED.hiring);
   return staff as Staff & { role: Role };
 }
 
@@ -212,10 +246,7 @@ export async function requireSection(
 
 /** Blog pages and actions: "writer" for writing, "reviewer" for reviewing and publishing. */
 export async function requireBlog(minimum: BlogAccess = "writer"): Promise<Staff & { blog: BlogAccess }> {
-  const staff = await requireMember();
-  if (!staff.blog) redirect(homeFor(staff));
-  if (minimum === "reviewer" && staff.blog !== "reviewer") redirect("/internal/blog?denied=1");
-  return staff as Staff & { blog: BlogAccess };
+  return (await requireArea("blog", minimum === "reviewer" ? "manage" : "own")) as Staff & { blog: BlogAccess };
 }
 
 /**
@@ -225,10 +256,21 @@ export async function requireBlog(minimum: BlogAccess = "writer"): Promise<Staff
 export async function requireCommunity(
   minimum: CommunityAccess = "viewer",
 ): Promise<Staff & { community: CommunityAccess }> {
-  const staff = await requireMember();
-  if (!staff.community) redirect(homeFor(staff));
-  if (minimum === "manager" && staff.community !== "manager") redirect("/internal/community?denied=1");
-  return staff as Staff & { community: CommunityAccess };
+  return (await requireArea("community", minimum === "manager" ? "manage" : "own")) as Staff & {
+    community: CommunityAccess;
+  };
+}
+
+/**
+ * Client work pages, data reads and actions: "member" to read (and move
+ * their own deliverables), "manager" for everything else.
+ */
+export async function requireClients(
+  minimum: ClientsAccess = "member",
+): Promise<Staff & { clients: ClientsAccess }> {
+  return (await requireArea("clients", minimum === "manager" ? "manage" : "own")) as Staff & {
+    clients: ClientsAccess;
+  };
 }
 
 export function sessionCookieOptions(maxAge: number) {

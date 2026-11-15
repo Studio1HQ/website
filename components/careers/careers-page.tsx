@@ -242,7 +242,7 @@ function HiringFlyer({ jobs }: { jobs: JobOpening[] }) {
               <br />
               hiring.
             </p>
-            <Logo className="mb-2 size-14 shrink-0 brightness-0 invert sm:size-16" />
+            <Logo className="mb-2 size-14 shrink-0 brightness-0 invert sm:size-16" knockout />
           </div>
           <p className="mt-7 max-w-[310px] text-[15px] leading-[1.5] text-white/90">
             Builders, writers and advocates who make developer products easy to

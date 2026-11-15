@@ -55,7 +55,8 @@ import { cn } from "@/lib/utils";
 import { CommentsPanel, SelectionCommentButton, useQuoteHighlights } from "@/components/internal/blog/comments";
 import { BlogStatusBadge } from "@/components/internal/blog/status";
 import { useToast } from "@/components/internal/toast";
-import { Avatar, Card, buttonClass, formatDate, inputClass, relativeDate, textareaClass } from "@/components/internal/ui";
+import { Card, buttonClass, formatDate, inputClass, relativeDate, textareaClass } from "@/components/internal/ui";
+import { TeamAvatar } from "@/components/internal/team-photos";
 
 const MarkdownEditor = dynamic(() => import("@/components/internal/blog/markdown-editor"), {
   ssr: false,
@@ -662,7 +663,7 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
                       checked={on}
                       onChange={() => setPicked(on ? picked.filter((email) => email !== person.email) : [...picked, person.email])}
                     />
-                    <Avatar name={person.name} email={person.email} size={24} />
+                    <TeamAvatar name={person.name} email={person.email} size={24} />
                     {person.name}
                   </label>
                 );
@@ -986,7 +987,7 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
             <p className="mb-3 text-[13px] font-medium">Activity</p>
             <ol className="space-y-3">
               <li className="flex gap-2 text-[12.5px] text-[var(--i-muted)]">
-                <Avatar name={nameFromEmail(post.created_by)} email={post.created_by} size={24} />
+                <TeamAvatar name={nameFromEmail(post.created_by)} email={post.created_by} size={24} />
                 <span className="pt-0.5">
                   {nameFromEmail(post.created_by)} started this post ·{" "}
                   <span title={formatDate(post.created_at)} suppressHydrationWarning>
@@ -998,7 +999,7 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
                 const line = eventLine(event);
                 return (
                   <li key={event.id} className="flex gap-2 text-[12.5px]">
-                    <Avatar name={nameFromEmail(event.actor)} email={event.actor} size={24} />
+                    <TeamAvatar name={nameFromEmail(event.actor)} email={event.actor} size={24} />
                     <div className="min-w-0 flex-1 pt-0.5">
                       <p className="flex flex-wrap items-center gap-1 text-[var(--i-muted)]">
                         {line.icon}

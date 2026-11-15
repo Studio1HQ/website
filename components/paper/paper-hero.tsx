@@ -410,7 +410,7 @@ export default function PaperHero() {
             className="p-1.5"
           >
             <PrintBlock className="flex size-[120px] items-center justify-center xl:size-[140px]">
-              <Logo className="size-[62%] brightness-0 invert" />
+              <Logo className="size-[62%] brightness-0 invert" knockout />
             </PrintBlock>
           </SelectionFrame>
           <Cursor className="absolute -bottom-8 -right-6" />
