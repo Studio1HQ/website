@@ -25,9 +25,12 @@
  * only (canSeeMoney in lib/internal/session.ts).
  *
  * The owners are always admins and can't be changed. Staff (@studio1hq.com)
- * ask for access when they first sign in; only an owner approves them with
- * roles, changes them or turns access off (app/internal/(dashboard)/team).
- * Anyone else can only be invited by an owner, and only as a blog writer.
+ * ask for access when they first sign in. Any admin can give and take away
+ * roles: approve someone who's waiting, or change what a teammate has
+ * (app/internal/(dashboard)/team). What stays with the owners
+ * (roleChangeProblem): the Admin role itself, anything about another admin,
+ * declining, turning access off or back on, and invites. Anyone outside
+ * @studio1hq.com can only be invited by an owner, and only as a blog writer.
  */
 
 export const STAFF_DOMAIN = "studio1hq.com";
@@ -141,6 +144,30 @@ export function isStaffEmail(email: string) {
 
 export function isRoleKey(value: unknown): value is RoleKey {
   return typeof value === "string" && (ROLE_KEYS as readonly string[]).includes(value);
+}
+
+/**
+ * Why this admin can't make this change to someone's access, or null when
+ * they can. Owners can do anything. Other admins give and take away roles
+ * only: not the Admin role, not another admin's roles, and not who is in at
+ * all (declining, turning access off or back on).
+ */
+export function roleChangeProblem(
+  actor: { owner: boolean },
+  current: { status: "pending" | "active" | "disabled"; roles: readonly RoleKey[] },
+  next: { status: "active" | "disabled"; roles: readonly RoleKey[] },
+): string | null {
+  if (actor.owner) return null;
+  const founders = "Arindam or Amitesh";
+  if (next.status === "disabled") {
+    return current.status === "pending"
+      ? `Only ${founders} can decline a request.`
+      : `Only ${founders} can turn someone's access off.`;
+  }
+  if (current.status === "disabled") return `Only ${founders} can turn someone's access back on.`;
+  if (current.roles.includes("admin")) return `Only ${founders} can change an admin's roles.`;
+  if (next.roles.includes("admin")) return `Only ${founders} can make someone an admin.`;
+  return null;
 }
 
 /**

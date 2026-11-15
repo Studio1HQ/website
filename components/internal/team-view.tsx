@@ -33,17 +33,23 @@ function nameOf(email: string, name?: string) {
   return name?.trim() || email.split("@")[0].replace(/[._+-]+/g, " ");
 }
 
-/** Role checkboxes. Outside addresses only ever see Blog writer. */
+/**
+ * Role checkboxes: tick as many as the person needs. Outside addresses only
+ * ever see Blog writer. `lockAdmin` holds the Admin box still, for admins
+ * who aren't owners.
+ */
 function RolePicker({
   email,
   value,
   onChange,
   disabled,
+  lockAdmin = false,
 }: {
   email: string;
   value: RoleKey[];
   onChange: (roles: RoleKey[]) => void;
   disabled?: boolean;
+  lockAdmin?: boolean;
 }) {
   const options = isStaffEmail(email) || !email.includes("@") ? ROLE_KEYS : OUTSIDE_ROLES;
   const admin = value.includes("admin");
@@ -53,23 +59,24 @@ function RolePicker({
         const on = value.includes(key);
         // Admin covers everything, so the other boxes show as included.
         const implied = admin && key !== "admin";
+        const locked = lockAdmin && key === "admin";
         return (
           <label
             key={key}
-            title={ROLE_INFO[key].description}
+            title={locked ? "Only Arindam or Amitesh can make someone an admin" : ROLE_INFO[key].description}
             className={cn(
               "inline-flex h-7 cursor-pointer select-none items-center gap-1.5 rounded-full border px-2.5 text-[12.5px] transition-colors",
               on || implied
                 ? "border-[var(--i-accent)] bg-[var(--i-accent-soft)] text-[var(--i-accent-text)]"
                 : "border-[var(--i-line)] bg-[var(--i-panel)] text-[var(--i-ink-2)] hover:bg-[var(--i-hover)]",
-              (disabled || implied) && "cursor-default opacity-70",
+              (disabled || implied || locked) && "cursor-default opacity-70",
             )}
           >
             <input
               type="checkbox"
               className="sr-only"
               checked={on || implied}
-              disabled={disabled || implied}
+              disabled={disabled || implied || locked}
               onChange={() => onChange(on ? value.filter((role) => role !== key) : [...value, key])}
             />
             {ROLE_INFO[key].label}
@@ -81,8 +88,9 @@ function RolePicker({
 }
 
 /**
- * The team list. Only owners (`canManage`) approve, invite, change roles or
- * turn access off; other admins see it read-only. The server actions check
+ * The team list, for admins. Every admin gives and takes away roles
+ * (approving included). Owners (`canManage`) also invite, decline, turn
+ * access off and on, and decide who's an admin. The server actions check
  * this again, so hiding the controls is only for clarity.
  */
 export function TeamView({ members, me, canManage }: { members: Member[]; me: string; canManage: boolean }) {
@@ -163,8 +171,8 @@ export function TeamView({ members, me, canManage }: { members: Member[]; me: st
       </Card>
       ) : (
         <Notice tone="info">
-          Only Arindam and Amitesh can approve people, invite them, change roles or turn access off. You can see the
-          team here.
+          You can approve people and give or take away their roles here. Inviting people, turning access off and
+          deciding who&apos;s an admin stay with Arindam and Amitesh.
         </Notice>
       )}
 
@@ -198,11 +206,11 @@ export function TeamView({ members, me, canManage }: { members: Member[]; me: st
                       {member.name ? `${member.email} · ` : ""}Asked {relativeDate(member.requested_at)}
                     </p>
                   </div>
-                  {canManage ? (
-                    <>
+                  <>
                       <RolePicker
                         email={member.email}
                         value={roles}
+                        lockAdmin={!canManage}
                         onChange={(next) => setChosen((current) => ({ ...current, [member.email]: next }))}
                       />
                       <button
@@ -213,18 +221,17 @@ export function TeamView({ members, me, canManage }: { members: Member[]; me: st
                       >
                         Approve
                       </button>
-                      <button
-                        type="button"
-                        disabled={busy === member.email}
-                        onClick={() => run(member.email, "disabled", [], `Declined ${member.email}`)}
-                        className={buttonClass("ghost")}
-                      >
-                        Decline
-                      </button>
-                    </>
-                  ) : (
-                    <span className="text-[12.5px] text-[var(--i-muted)]">Waiting for Arindam or Amitesh</span>
-                  )}
+                      {canManage ? (
+                        <button
+                          type="button"
+                          disabled={busy === member.email}
+                          onClick={() => run(member.email, "disabled", [], `Declined ${member.email}`)}
+                          className={buttonClass("ghost")}
+                        >
+                          Decline
+                        </button>
+                      ) : null}
+                  </>
                 </li>
               );
             })}
@@ -279,7 +286,9 @@ export function TeamView({ members, me, canManage }: { members: Member[]; me: st
                 <RolePicker
                   email={member.email}
                   value={member.roles}
-                  disabled={!canManage || busy === member.email || self || off}
+                  // Another admin's roles are the owners' to change.
+                  disabled={busy === member.email || self || off || (!canManage && member.roles.includes("admin"))}
+                  lockAdmin={!canManage}
                   onChange={(roles) =>
                     roles.length
                       ? run(member.email, "active", roles, `${member.email} is now ${rolesLabel(roles)}`)
@@ -323,8 +332,10 @@ export function TeamView({ members, me, canManage }: { members: Member[]; me: st
           ))}
         </dl>
         <p className="border-t border-[var(--i-line)] px-5 py-3 text-[12.5px] text-[var(--i-muted)]">
-          One person can have several roles, like Hiring reviewer and Blog writer. Admin includes everything except
-          Money: payroll, expense claims and payments stay with the two founders.
+          One person can have several roles, like Hiring reviewer and Blog writer: tick each one they need. Admin
+          already includes everything except Money (payroll, expense claims and payments stay with the two founders),
+          so it stands on its own. Any admin can give and take away the other roles; only the founders make someone
+          an admin.
         </p>
       </Card>
     </div>
