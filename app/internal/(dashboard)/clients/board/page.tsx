@@ -27,6 +27,7 @@ import {
 import { cn } from "@/lib/utils";
 import {
   Card,
+  CardTitle,
   EmptyState,
   Notice,
   PageHeader,
@@ -65,7 +66,9 @@ function href(week: string, current: string) {
  * "This week": one card per active client with the week's counts (done, in
  * progress, up next, blocked or waiting) and the latest things done. Each
  * card opens that client's workspace for the same week, where the work and
- * the weekly update live. Nothing is moved from here.
+ * the weekly update live. Below the cards, one list across every client of
+ * the deliverables still open: late first, then by due day, with who has
+ * each one. Nothing is moved from here.
  */
 export default async function ClientsThisWeekPage({
   searchParams,
@@ -140,6 +143,22 @@ export default async function ClientsThisWeekPage({
       list.push(line);
       linesOf.set(clientId, list);
     }
+
+  // Every client's open deliverables in one list: what a manager chases.
+  const clientById = new Map(active.map((client) => [client.id, client]));
+  const stillOpen = (data.ok ? data.lines : [])
+    .filter((line) => line.source === "deliverable" && line.group !== "done")
+    .map((line) => ({
+      line,
+      client: clientById.get(clientOf.get(line.engagementId ?? "") ?? ""),
+    }))
+    .filter((item) => item.client)
+    .sort(
+      (a, b) =>
+        Number(b.line.late) - Number(a.line.late) ||
+        (a.line.day ?? "9999").localeCompare(b.line.day ?? "9999") ||
+        a.line.title.localeCompare(b.line.title),
+    );
 
   return (
     <>
@@ -242,7 +261,69 @@ export default async function ClientsThisWeekPage({
                 );
               })}
             </div>
-          ) : (
+          ) : null}
+          {stillOpen.length ? (
+            <Card className="mt-6">
+              <CardTitle>
+                Still open, across clients{" "}
+                <span className="font-normal text-[var(--i-faint)]">
+                  {stillOpen.length}
+                </span>
+              </CardTitle>
+              <ul className="divide-y divide-[var(--i-line)]">
+                {stillOpen.map(({ line, client }) => (
+                  <li key={line.key}>
+                    <Link
+                      href={`${clientPath(client!.slug)}?tab=week${week === current ? "" : `&week=${week}`}`}
+                      className="flex flex-col gap-1 px-4 py-2.5 text-[13px] hover:bg-[var(--i-hover)] sm:flex-row sm:items-center sm:gap-4 sm:px-5"
+                    >
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate font-medium">
+                          {line.title}
+                        </span>
+                        <span className="block truncate text-[12px] text-[var(--i-muted)]">
+                          {client!.name}
+                          {line.who
+                            ? ` · ${personName(line.who, data.ok ? data.names : {})}`
+                            : " · nobody on it yet"}
+                        </span>
+                      </span>
+                      <span className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1 text-[12.5px]">
+                        <span className="text-[var(--i-muted)]">
+                          {line.status}
+                        </span>
+                        {line.blocked ? (
+                          <span
+                            className="text-rose-700 dark:text-rose-300"
+                            title={line.reason || undefined}
+                          >
+                            Blocked
+                          </span>
+                        ) : line.waitingOnClient ? (
+                          <span className="text-[var(--i-muted)]">
+                            Waiting on the client
+                          </span>
+                        ) : null}
+                        <span
+                          className={cn(
+                            "tabular-nums sm:w-24 sm:text-right",
+                            line.late
+                              ? "font-medium text-amber-700 dark:text-amber-300"
+                              : "text-[var(--i-muted)]",
+                          )}
+                        >
+                          {line.day
+                            ? `${line.late ? "Late · " : ""}${shortDay(line.day)}`
+                            : "No due date"}
+                        </span>
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          ) : null}
+          {active.length ? null : (
             <Card>
               <EmptyState icon={<Buildings size={20} />} title="No active clients">
                 Clients with the status Active show here, one card each.

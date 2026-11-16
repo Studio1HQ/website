@@ -334,25 +334,13 @@ export function ReportView({ report }: { report: ClientReport }) {
         </Card>
       ) : null}
 
-      {report.scopeNote || report.retroNote ? (
-        <div className="mb-5 grid gap-5 md:grid-cols-2 print:grid-cols-2">
-          {report.scopeNote ? (
-            <Card className="break-inside-avoid">
-              <CardTitle>Agreed scope</CardTitle>
-              <p className="whitespace-pre-wrap px-5 py-4 text-[13px] leading-relaxed text-[var(--i-ink-2)]">
-                {report.scopeNote}
-              </p>
-            </Card>
-          ) : null}
-          {report.retroNote ? (
-            <Card className="break-inside-avoid">
-              <CardTitle>Looking back on the month</CardTitle>
-              <p className="whitespace-pre-wrap px-5 py-4 text-[13px] leading-relaxed text-[var(--i-ink-2)]">
-                {report.retroNote}
-              </p>
-            </Card>
-          ) : null}
-        </div>
+      {report.scopeNote ? (
+        <Card className="mb-5 break-inside-avoid">
+          <CardTitle>Agreed scope</CardTitle>
+          <p className="whitespace-pre-wrap px-5 py-4 text-[13px] leading-relaxed text-[var(--i-ink-2)]">
+            {report.scopeNote}
+          </p>
+        </Card>
       ) : null}
 
       <p className="text-[12px] leading-relaxed text-[var(--i-faint)]">

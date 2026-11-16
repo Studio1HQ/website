@@ -49,7 +49,8 @@ export type CalendarCard =
       kind: "deliverable";
       id: string;
       title: string;
-      day: string;
+      /** Null in the tray: no due date yet. */
+      day: string | null;
       status: string;
       tone: Tone;
       done: boolean;
@@ -106,6 +107,8 @@ export function placeCards(input: {
   person: string;
   tasks: readonly Task[];
   deliverables: readonly Deliverable[];
+  /** Other people's deliverables in internal review, waiting on this person. */
+  reviewing?: readonly Deliverable[];
   community: readonly CommunityCard[];
   engagements: ReadonlyMap<string, EngagementLabel>;
   /** IST day of a timestamp. */
@@ -146,12 +149,12 @@ export function placeCards(input: {
     else if (current && (due === null || due < week)) tray.push({ ...card, day: due });
   }
 
+  const owned = new Set(input.deliverables.map((row) => row.id));
   for (const row of input.deliverables) {
     const engagement = engagements.get(row.engagement_id);
     const done = row.status === "published";
     const day = done ? input.dayOf(row.published_at) : row.due_on;
-    if (!day || !inRange(day, week, end)) continue;
-    cards.push({
+    const card: CalendarCard = {
       kind: "deliverable",
       id: row.id,
       title: row.title,
@@ -162,7 +165,32 @@ export function placeCards(input: {
       tag: engagement ? (engagement.internal ? engagement.name : engagement.client) : "Client",
       client: !engagement?.internal,
       href: engagement?.clientSlug && input.clientPath ? input.clientPath(engagement.clientSlug) : null,
-    });
+    };
+    if (inRange(day, week, end)) cards.push(card);
+    // Like tasks: open work with no due date, or due before this week, stays
+    // in sight in the tray instead of dropping off the week.
+    else if (!done && current && (!day || day < week)) tray.push(card);
+  }
+
+  // Someone else's piece waiting on this person's review has no day of its
+  // own here, so it sits in the tray until they've reviewed it.
+  if (current) {
+    for (const row of input.reviewing ?? []) {
+      if (owned.has(row.id) || row.status !== "internal_review") continue;
+      const engagement = engagements.get(row.engagement_id);
+      tray.push({
+        kind: "deliverable",
+        id: row.id,
+        title: row.title,
+        day: row.due_on,
+        status: "Your review",
+        tone: "violet",
+        done: false,
+        tag: engagement ? (engagement.internal ? engagement.name : engagement.client) : "Client",
+        client: !engagement?.internal,
+        href: engagement?.clientSlug && input.clientPath ? input.clientPath(engagement.clientSlug) : null,
+      });
+    }
   }
 
   for (const row of input.community) {

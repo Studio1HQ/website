@@ -193,9 +193,10 @@ export { isFounder };
 export async function loadWeekCards(email: string, week: string, today: string, names?: Record<string, string>) {
   email = email.toLowerCase();
   const end = addDaysKey(week, 6);
-  const [tasks, deliverables, community, engagements] = await Promise.all([
+  const [tasks, deliverables, reviewing, community, engagements] = await Promise.all([
     listTasks({ emails: [email], from: week, to: end }),
     ownedDeliverables(email, week),
+    reviewingDeliverables(email),
     ownedCommunityTasks(email, week),
     engagementLabels(),
   ]);
@@ -206,6 +207,7 @@ export async function loadWeekCards(email: string, week: string, today: string, 
     person: email,
     tasks: tasks.ok ? tasks.rows : [],
     deliverables: deliverables.ok ? deliverables.rows : [],
+    reviewing: reviewing.ok ? reviewing.rows : [],
     community: community.ok ? community.rows : [],
     engagements,
     dayOf: istDay,

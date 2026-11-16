@@ -716,7 +716,7 @@ export default async function ClientWorkspacePage({
                     }
                   >
                     {manager
-                      ? `It starts with the ${labelOf(ENGAGEMENT_TYPES, engagement.type).toLowerCase()} plan: ${
+                      ? `It starts with last month's numbers. If there was no last month, it starts with the ${labelOf(ENGAGEMENT_TYPES, engagement.type).toLowerCase()} plan: ${
                           template?.lines
                             .filter((line) => line.quantity > 0)
                             .map(
@@ -724,7 +724,7 @@ export default async function ClientWorkspacePage({
                                 `${line.quantity} × ${line.label || labelOf(DELIVERABLE_KINDS, line.kind)}`,
                             )
                             .join(", ") || "nothing yet"
-                        }. Change the numbers to match the contract, then add each piece as it starts.`
+                        }. Change the numbers if the scope changed, then add each piece as it starts.`
                       : "A client manager starts each month. From the 25th, next month starts on its own for active engagements."}
                   </EmptyState>
                 </Card>

@@ -1,3 +1,5 @@
+import { NotificationBell } from "@/components/internal/notification-bell";
+import { bellFor } from "@/lib/internal/notifications/data";
 import { Suspense } from "react";
 import Link from "next/link";
 import { SignOut } from "@phosphor-icons/react/dist/ssr";
@@ -19,6 +21,7 @@ import { teamBadges } from "@/lib/internal/team/badges";
 import { canSeeOthers } from "@/lib/internal/tasks/access";
 import { canSeeCalls } from "@/lib/internal/calls/access";
 import { taskNeeds } from "@/lib/internal/tasks/needs";
+import { outreachDue } from "@/lib/internal/outreach/data";
 import { teamPhotos } from "@/lib/internal/team/photos";
 import { PERSON_KINDS, photoUrl } from "@/lib/internal/team/shared";
 import { signOut } from "./actions";
@@ -30,6 +33,8 @@ type Counts = {
   money: { payroll: number; payments: number };
   community: { tasks: number; sponsors: number; partners: number };
   clients: { late: number; toReview: number };
+  /** My outreach follow-ups due (admins). */
+  outreach: number;
   /** Reports due (yours) plus reports to read (founders). */
   tasks: number;
 };
@@ -41,6 +46,7 @@ const NO_COUNTS: Counts = {
   money: { payroll: 0, payments: 0 },
   community: { tasks: 0, sponsors: 0, partners: 0 },
   clients: { late: 0, toReview: 0 },
+  outreach: 0,
   tasks: 0,
 };
 
@@ -73,6 +79,7 @@ function Sidebar({ staff, counts }: { staff: Staff; counts: Counts }) {
       }}
       community={staff.community ? { access: staff.community, ...counts.community } : null}
       clients={staff.clients ? { access: staff.clients, ...counts.clients } : null}
+      outreach={admin ? { due: counts.outreach } : null}
       home={home}
       overview={home === "/internal"}
     />
@@ -81,7 +88,7 @@ function Sidebar({ staff, counts }: { staff: Staff; counts: Counts }) {
 
 /** Reads the counts (only the ones this person's sidebar shows). */
 async function SidebarWithCounts({ staff }: { staff: Staff }) {
-  const [awaiting, requests, blog, money, community, clients, tasks] = await Promise.all([
+  const [awaiting, requests, blog, money, community, clients, tasks, outreach] = await Promise.all([
     staff.role || staff.community ? awaitingCounts() : Promise.resolve(NO_COUNTS.awaiting),
     isAdmin(staff) ? pendingCount() : Promise.resolve(0),
     staff.blog ? blogBadge(staff) : Promise.resolve(0),
@@ -89,6 +96,7 @@ async function SidebarWithCounts({ staff }: { staff: Staff }) {
     staff.community ? communityBadges(staff.email) : Promise.resolve(NO_COUNTS.community),
     staff.clients ? clientNeeds(staff.email, staff.clientScope) : Promise.resolve(NO_COUNTS.clients),
     seesTasks(staff) ? taskNeeds(staff) : Promise.resolve(null),
+    isAdmin(staff) ? outreachDue(staff.email) : Promise.resolve(0),
   ]);
   return (
     <Sidebar
@@ -100,10 +108,22 @@ async function SidebarWithCounts({ staff }: { staff: Staff }) {
         money,
         community,
         clients: { late: clients.late, toReview: clients.toReview },
-        tasks: tasks ? tasks.reportsDue.length + tasks.reportsToRead : 0,
+        outreach,
+        // Late tasks badge; ones due today are an ordinary day and don't.
+        tasks: tasks ? tasks.reportsDue.length + tasks.reportsToRead + tasks.tasksLate : 0,
       }}
     />
   );
+}
+
+/**
+ * The bell with this person's notifications. Read once per request (the
+ * phone bar and the sidebar each show one), and streamed in so it never
+ * holds the page up.
+ */
+async function BellFor({ email, side, className }: { email: string; side: "bottom" | "right"; className?: string }) {
+  const bell = await bellFor(email);
+  return <NotificationBell items={bell.items} unread={bell.unread} side={side} className={className} />;
 }
 
 export default async function DashboardLayout({
@@ -133,6 +153,9 @@ export default async function DashboardLayout({
             <span className="truncate text-[14px] font-medium">Studio1</span>
           </Link>
           <div className="ml-auto flex items-center">
+            <Suspense fallback={null}>
+              <BellFor email={staff.email} side="bottom" className="size-10" />
+            </Suspense>
             <RefreshButton className="size-10 rounded-lg" />
             <Link
               href="/internal/profile"
@@ -153,6 +176,11 @@ export default async function DashboardLayout({
                   <span className="block text-[11.5px] text-[var(--i-muted)]">Internal dashboard</span>
                 </span>
               </Link>
+              <span className="hidden md:block">
+                <Suspense fallback={null}>
+                  <BellFor email={staff.email} side="right" />
+                </Suspense>
+              </span>
               <MobileNavClose />
             </div>
             {/* A long sidebar scrolls on its own; the profile stays at the foot.

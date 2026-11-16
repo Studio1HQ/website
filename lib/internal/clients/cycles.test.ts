@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   engagementsNeedingCycle,
+  linesFromLastMonth,
   linesFromTemplate,
   monthToPrepare,
 } from "@/lib/internal/clients/cycles";
@@ -49,6 +50,20 @@ describe("next month's cycles", () => {
         (item) => item.id,
       ),
     ).toEqual(["a", "f"]);
+  });
+
+  it("carries last month's agreed numbers into the new month, in order", () => {
+    const lines = linesFromLastMonth(
+      [
+        { kind: "video", label: "Videos", planned: 1, owner_role: null, due_rule: null, position: 2 },
+        { kind: "blog", label: "Blogs", planned: 6, owner_role: "writer", due_rule: "weekly", position: 0 },
+      ],
+      "cycle-2",
+    );
+    expect(lines).toEqual([
+      { cycle_id: "cycle-2", kind: "blog", label: "Blogs", planned: 6, owner_role: "writer", due_rule: "weekly", position: 0 },
+      { cycle_id: "cycle-2", kind: "video", label: "Videos", planned: 1, owner_role: null, due_rule: null, position: 1 },
+    ]);
   });
 
   it("seeds scope lines from a template, in order", () => {

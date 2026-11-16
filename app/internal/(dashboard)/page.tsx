@@ -8,6 +8,7 @@ import {
   CheckCircle,
   Compass,
   EnvelopeSimple,
+  Binoculars,
   Folders,
   Handshake,
   IdentificationCard,
@@ -51,6 +52,7 @@ const AREAS: Record<AreaKey, { name: string; icon: Icon }> = {
   money: { name: "Money", icon: Bank },
   community: { name: "Community", icon: Compass },
   clients: { name: "Clients", icon: Folders },
+  outreach: { name: "Outreach", icon: Binoculars },
   access: { name: "Team access", icon: UserGear },
 };
 
@@ -471,7 +473,7 @@ export default async function OverviewPage({
 
       {params.denied !== undefined ? (
         <p className="mt-5 text-[12.5px] text-[var(--i-muted)]">
-          That page needs a higher role. Ask Arindam or Amitesh if you need it.
+          That page needs a higher role. Ask Arindam, Amitesh or an admin if you need it.
         </p>
       ) : null}
     </>

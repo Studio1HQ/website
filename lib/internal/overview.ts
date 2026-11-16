@@ -4,6 +4,7 @@ import { clientNeeds, loadClientWork } from "@/lib/internal/clients/data";
 import { communityBadges } from "@/lib/internal/community/data";
 import { hackathonBreakdown, overview as hiringOverview } from "@/lib/internal/data";
 import { pendingCount } from "@/lib/internal/members";
+import { outreachDue } from "@/lib/internal/outreach/data";
 import { SECTIONS, sectionAccess } from "@/lib/internal/sections";
 import { canSeeMoney, isAdmin, type Staff } from "@/lib/internal/session";
 import { listDays } from "@/lib/internal/team/attendance";
@@ -28,7 +29,7 @@ import {
  * area someone can't see, so the page is also the access boundary.
  */
 
-export type AreaKey = "hiring" | "hackathons" | "blog" | "team" | "money" | "community" | "clients" | "access";
+export type AreaKey = "hiring" | "hackathons" | "blog" | "team" | "money" | "community" | "clients" | "outreach" | "access";
 
 export type Attention = {
   area: AreaKey;
@@ -102,7 +103,7 @@ export async function dashboardOverview(staff: Staff) {
   // People who log days but aren't admins see their own day and their interns'.
   const ownEmails = admin ? [] : [...(staff.person ? [staff.person.email] : []), ...staff.interns];
 
-  const [pipelines, team, blog, requests, community, ownDays, hackathons, clientsMine, clients, tasks] = await Promise.all([
+  const [pipelines, team, blog, requests, community, ownDays, hackathons, clientsMine, clients, tasks, outreach] = await Promise.all([
     // Every pipeline this person can open: the hiring ones and, for
     // community staff and admins, hackathon registrations.
     staff.role || staff.community ? hiringOverview() : Promise.resolve(null),
@@ -115,6 +116,7 @@ export async function dashboardOverview(staff: Staff) {
     staff.clients ? clientNeeds(staff.email, staff.clientScope) : Promise.resolve(null),
     staff.clients ? clientsSummary(staff.clientScope) : Promise.resolve(null),
     taskNeeds(staff),
+    admin ? outreachDue(staff.email) : Promise.resolve(0),
   ]);
 
   // The Hiring card: job and cohort pipelines only (hackathons have their own).
@@ -233,6 +235,23 @@ export async function dashboardOverview(staff: Staff) {
   }
   if (clients?.ok && staff.clients === "manager" && clients.red) {
     todo.push({ area: "clients", label: `${plural(clients.red, "client engagement")} at risk`, href: "/internal/clients", urgent: true });
+  }
+
+  // Outreach (admins): their own follow-ups due on organisations still in play.
+  if (outreach) {
+    todo.push({
+      area: "outreach",
+      label: `${plural(outreach, "outreach follow-up")} due`,
+      href: "/internal/outreach?view=due",
+    });
+  }
+
+  // Tasks: your own cards that are late or due today.
+  if (tasks.tasksLate) {
+    todo.push({ area: "team", label: `${plural(tasks.tasksLate, "task")} of yours late`, href: "/internal/tasks", urgent: true });
+  }
+  if (tasks.tasksToday) {
+    todo.push({ area: "team", label: `${plural(tasks.tasksToday, "task")} of yours due today`, href: "/internal/tasks" });
   }
 
   // Tasks: your weekly / monthly report, and the founders' reports to read.

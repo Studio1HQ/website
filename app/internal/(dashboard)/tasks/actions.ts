@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { baseUrl } from "@/lib/site";
 import { isMailerConfigured, sendMail } from "@/lib/mailer";
+import { notify } from "@/lib/internal/notifications/data";
 import { OWNERS } from "@/lib/internal/roles";
 import { requireMember, staffName } from "@/lib/internal/session";
 import { getPerson } from "@/lib/internal/team/people";
@@ -179,6 +180,18 @@ export async function saveTask(id: unknown, values: unknown): Promise<TaskResult
       ...where,
     });
     if (!result.ok) return result;
+    // A task from someone else is news: it shows on their bell.
+    if (email !== staff.email) {
+      const by = staffName(staff);
+      after(() =>
+        notify([email], staff.email, {
+          kind: "task",
+          title: `${by} gave you a task`,
+          body: due ? `${title} · due ${due}` : title,
+          href: "/internal/tasks",
+        }),
+      );
+    }
     refresh();
     return { ok: true, id: result.id, message: email === staff.email ? "Task added" : `Added to ${displayName(person)}'s board` };
   }
@@ -584,6 +597,14 @@ export async function reviewReport(id: unknown, decision: unknown, note: unknown
         { idempotencyKey: `report-returned-${report.id}-${Date.now()}` },
       ).catch(() => null);
     });
+    after(() =>
+      notify([report.email], staff.email, {
+        kind: "task",
+        title: `${name} sent your report back`,
+        body: periodLabel(report.period, report.starts_on),
+        href: `/internal/tasks/reports/${report.id}`,
+      }),
+    );
   }
   refresh();
   return { ok: true, message: decision === "seen" ? "Marked as seen" : "Sent back" };

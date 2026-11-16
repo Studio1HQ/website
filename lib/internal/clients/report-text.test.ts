@@ -95,7 +95,7 @@ const deliverables = [
 const report = buildClientReport({
   client: { name: "Acme" },
   engagement: { name: "Token Factory content", owner: "priya.k@studio1hq.com" },
-  cycle: { month: "2026-11", scope_note: "4 blogs, 1 video", retro_note: "" },
+  cycle: { month: "2026-11", scope_note: "4 blogs, 1 video" },
   lines: [
     scope(),
     scope({ id: "l2", kind: "video", label: "Videos", planned: 1 }),
@@ -142,7 +142,7 @@ describe("buildClientReport", () => {
     const later = buildClientReport({
       client: { name: "Acme" },
       engagement: { name: "Content", owner: null },
-      cycle: { month: "2026-11", scope_note: "", retro_note: "" },
+      cycle: { month: "2026-11", scope_note: "" },
       lines: [scope()],
       deliverables,
       today: "2026-12-02",
@@ -190,11 +190,13 @@ describe("reportText", () => {
   });
 
   it("says so when there's nothing to list", () => {
+    const withRetro = { month: "2026-11", scope_note: " ", retro_note: "Good month" };
     const empty = reportText(
       buildClientReport({
         client: null,
         engagement: { name: "", owner: null },
-        cycle: { month: "2026-11", scope_note: " ", retro_note: "Good month" },
+        // The page passes the whole cycle row, retro included.
+        cycle: withRetro,
         lines: [],
         deliverables: [],
         today: "2026-11-15",
@@ -206,7 +208,9 @@ describe("reportText", () => {
     expect(empty).toContain("• Everything planned is live.");
     expect(empty).not.toContain("Slipped");
     expect(empty).not.toContain("Agreed scope");
-    expect(empty).toContain("Looking back on the month\nGood month");
+    // The retro is the team's own note; it never goes to the client.
+    expect(empty).not.toContain("Good month");
+    expect(empty).not.toContain("Looking back");
   });
 
   it("keeps each bullet on one line", () => {
@@ -214,7 +218,7 @@ describe("reportText", () => {
       buildClientReport({
         client: { name: "Acme" },
         engagement: { name: "Content", owner: null },
-        cycle: { month: "2026-11", scope_note: "", retro_note: "" },
+        cycle: { month: "2026-11", scope_note: "" },
         lines: [],
         deliverables: [item({ title: "Two\nlines", status: "planned" })],
         today: "2026-11-15",
@@ -294,7 +298,7 @@ describe("the CSV export, end to end", () => {
   const exported = buildClientReport({
     client: { name: "Acme" },
     engagement: { name: "Content", owner: null },
-    cycle: { month: "2026-11", scope_note: "", retro_note: "" },
+    cycle: { month: "2026-11", scope_note: "" },
     lines: [scope()],
     deliverables: [
       ...titles.map((title, index) =>
@@ -340,7 +344,7 @@ describe("reach and milestones", () => {
   const withReach = buildClientReport({
     client: { name: "Acme" },
     engagement: { name: "DevRel", owner: null },
-    cycle: { month: "2026-11", scope_note: "", retro_note: "" },
+    cycle: { month: "2026-11", scope_note: "" },
     lines: [],
     deliverables: [
       item({

@@ -9,6 +9,10 @@
     {
       "path": "/api/cron/client-cycles",
       "schedule": "35 18 * * *"
+    },
+    {
+      "path": "/api/cron/monthly-report",
+      "schedule": "30 3 1 * *"
     }
   ]
 }

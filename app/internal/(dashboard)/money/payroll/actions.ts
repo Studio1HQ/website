@@ -1,7 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireOwner } from "@/lib/internal/session";
+import { after } from "next/server";
+import { notify } from "@/lib/internal/notifications/data";
+import { requireOwner, staffName } from "@/lib/internal/session";
 import { emailAddress } from "@/lib/internal/token";
 import { getSlipFor, monthIsOpen, savePayslip, sendPayslip, type SendResult } from "@/lib/internal/team/payroll";
 import { decideReimbursement, getReimbursement } from "@/lib/internal/team/reimbursements";
@@ -86,6 +88,19 @@ export async function decideClaim(
     decision === "approved" && isMonthKey(month) ? { status: "approved", month, amount } : { status: "rejected" },
     admin.email,
   );
-  if (result.ok) revalidatePath("/internal", "layout");
+  if (result.ok) {
+    const approved = decision === "approved" && isMonthKey(month);
+    const by = staffName(admin);
+    // No amount on the bell: My day has it.
+    after(() =>
+      notify([claim.email], admin.email, {
+        kind: "claim",
+        title: approved ? `${by} approved your expense claim` : `${by} didn't approve your expense claim`,
+        body: approved ? `Paid with your ${monthLabel(month)} payslip` : "",
+        href: "/internal/me",
+      }),
+    );
+    revalidatePath("/internal", "layout");
+  }
   return result;
 }
