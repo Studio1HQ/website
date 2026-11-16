@@ -114,6 +114,16 @@ export const TEAM: TeamTier[] = [
           x: "https://x.com/IndrajitAri",
         },
       },
+      {
+        name: "Piuli Biswas",
+        role: "Content Writer",
+        portrait: "/assets/team/piuli-biswas.webp?v=1",
+        links: {
+          x: "https://x.com/withlovepiuli",
+          linkedin: "https://www.linkedin.com/in/piuli-biswas",
+          website: "https://www.piuli.me/",
+        },
+      },
     ],
   },
 ];
