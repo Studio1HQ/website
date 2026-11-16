@@ -7,7 +7,7 @@ import { addTasks, editTask, removeTask } from "@/app/internal/(dashboard)/tasks
 import { cn } from "@/lib/utils";
 import { buttonClass, inputClass, textareaClass } from "@/components/internal/ui";
 import { DateField } from "@/components/internal/pickers";
-import { Pill, TONES } from "@/components/internal/community/ui";
+import { TONES } from "@/components/internal/community/ui";
 import { Select } from "@/components/internal/select";
 import { Label, Segmented, TeamDialog, useTeamAction } from "@/components/internal/team/kit";
 import { forSelectOptions } from "@/components/internal/tasks/for-options";
@@ -89,10 +89,10 @@ export function WeekCalendar({
         </section>
       ) : null}
 
-      {/* Sideways scrolling clips anything outside the box: the padding (offset
-          by the negative margins) keeps the columns' outlines whole. */}
-      <div className="-mx-1 -mt-1 overflow-x-auto px-1 pb-2 pt-1">
-        <div className="grid gap-2 md:min-w-[60rem] md:grid-cols-7">
+      {/* One panel for the week. Wide screens: seven columns. Narrower: a row
+          per day (the columns would be too thin to read), never sideways scrolling. */}
+      <div className="overflow-hidden rounded-xl bg-[var(--i-sunken)] ring-1 ring-[var(--i-line)]">
+        <div className="divide-y divide-[var(--i-line)] xl:grid xl:grid-cols-7 xl:divide-x xl:divide-y-0">
           {days.map((day) => {
             const list = cards.filter((card) => card.day === day);
             const isToday = day === today;
@@ -101,6 +101,7 @@ export function WeekCalendar({
               <section
                 key={day}
                 aria-label={fullFormat.format(at(day))}
+                aria-current={isToday ? "date" : undefined}
                 onDragOver={(event) => {
                   if (own && day >= earliest && event.dataTransfer.types.includes(DRAG)) {
                     event.preventDefault();
@@ -110,19 +111,16 @@ export function WeekCalendar({
                 onDragLeave={() => setOver((current) => (current === day ? null : current))}
                 onDrop={drop(day)}
                 className={cn(
-                  "flex min-w-0 flex-col rounded-xl p-1.5 ring-1 transition-shadow md:min-h-[14rem]",
-                  isToday
-                    ? "bg-orange-50/70 ring-orange-300 dark:bg-orange-500/[0.07] dark:ring-orange-400/50"
-                    : "bg-[var(--i-sunken)] ring-[var(--i-line)]",
-                  over === day && "ring-2 ring-[var(--i-accent)]",
+                  "flex min-w-0 flex-col gap-1.5 p-2 transition-colors sm:flex-row sm:gap-3 xl:min-h-[18rem] xl:flex-col xl:gap-1.5 xl:p-1.5",
+                  isToday && "bg-orange-50/60 dark:bg-orange-500/[0.05]",
+                  over === day && "bg-[var(--i-accent-soft)]",
                 )}
               >
-                <h3 className="flex items-center justify-between gap-2 px-1.5 pb-1.5 pt-1">
-                  <span className="text-[12px] text-[var(--i-muted)]">
+                <h3 className="flex items-center gap-2 px-1.5 pt-1 sm:w-20 sm:shrink-0 sm:self-start xl:w-auto xl:self-auto xl:justify-between">
+                  <span className={cn("text-[12px]", isToday ? "font-medium text-[var(--i-accent-text)]" : "text-[var(--i-muted)]")}>
                     {weekdayFormat.format(at(day))}
-                    {isToday ? <span className="ml-1.5 font-medium text-[var(--i-accent-text)]">Today</span> : null}
                   </span>
-                  {/* Every date sits in the same round slot, so all the columns line up. */}
+                  {/* Every date sits in the same round slot, so all the days line up. */}
                   <span
                     className={cn(
                       "flex size-6 items-center justify-center rounded-full text-[13px] font-medium tabular-nums",
@@ -132,15 +130,19 @@ export function WeekCalendar({
                     {dateFormat.format(at(day))}
                   </span>
                 </h3>
-                <ul className="space-y-1.5">
-                  {list.map((card) => (
-                    <li key={`${card.kind}:${card.id}`}>
-                      <Card card={card} own={own} options={options} today={today} />
-                    </li>
-                  ))}
-                </ul>
-                {canAdd ? <AddCard day={day} today={today} options={options} /> : null}
-                {!list.length && !canAdd ? <p className="px-1.5 py-2 text-[12px] text-[var(--i-faint)]">Nothing.</p> : null}
+                <div className="min-w-0 flex-1 space-y-1.5">
+                  {list.length ? (
+                    <ul className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-1">
+                      {list.map((card) => (
+                        <li key={`${card.kind}:${card.id}`}>
+                          <Card card={card} own={own} options={options} today={today} />
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  {canAdd ? <AddCard day={day} today={today} options={options} /> : null}
+                  {!list.length && !canAdd ? <p className="px-1.5 py-1 text-[12px] text-[var(--i-faint)]">Nothing.</p> : null}
+                </div>
               </section>
             );
           })}
@@ -233,7 +235,7 @@ export function AddCard({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="mt-1 flex w-full items-center gap-1.5 rounded-lg px-2 py-1.5 text-left text-[12.5px] text-[var(--i-faint)] hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)]"
+        className="flex w-full items-center gap-1.5 rounded-lg px-2 py-1.5 text-left text-[12.5px] text-[var(--i-faint)] hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)]"
       >
         <Plus size={13} /> New
       </button>
@@ -250,7 +252,7 @@ export function AddCard({
           if (!panel.current?.contains(document.activeElement)) setOpen(false);
         }, 150);
       }}
-      className="mt-1.5 space-y-1.5 rounded-lg bg-[var(--i-panel)] p-1.5 ring-1 ring-[var(--i-line)]"
+      className="space-y-1.5 rounded-lg bg-[var(--i-panel)] p-1.5 ring-1 ring-[var(--i-line)]"
     >
       {several ? (
         <div className="rounded-md bg-[var(--i-sunken)] px-2 py-1.5 text-[12px]">
@@ -371,6 +373,83 @@ export function AddCard({
   );
 }
 
+/** A status as a coloured dot and its name: quieter than a pill on a small card. */
+function StatusText({ tone, label }: { tone?: keyof typeof TONES; label: string }) {
+  return (
+    <span className="flex items-center gap-1.5">
+      <span aria-hidden className={cn("size-1.5 shrink-0 rounded-full", TONES[tone ?? "stone"].dot)} />
+      {label}
+    </span>
+  );
+}
+
+/**
+ * The line under a card's title. Done cards keep just the tick by the title;
+ * open ones show where they stand (yours: click to change). Only client tags
+ * show (what syncs to client pages); a Studio1 area shows when editing.
+ */
+function CardMeta({
+  card,
+  done,
+  editable,
+  onStatus,
+}: {
+  card: CalendarCard;
+  done: boolean;
+  editable: boolean;
+  onStatus: (status: TaskStatus) => void;
+}) {
+  const taskStatus = card.kind === "task" ? TASK_STATUSES.find((option) => option.value === card.status) : undefined;
+  const status = done ? null : card.kind === "task" && editable ? (
+    <Select
+      aria-label={`Status of ${card.title}`}
+      size="xs"
+      value={card.status}
+      onChange={onStatus}
+      options={TASK_STATUSES.map((option) => ({
+        value: option.value,
+        label: <StatusText tone={option.tone} label={option.label} />,
+        textValue: option.label,
+      }))}
+      className="-ml-1.5 h-6 w-auto gap-1 border-0 bg-transparent px-1.5 text-[11.5px] text-[var(--i-muted)] hover:bg-[var(--i-hover)] focus:bg-[var(--i-hover)]"
+    />
+  ) : (
+    <span className="text-[11.5px] text-[var(--i-muted)]">
+      {card.kind === "task" ? (
+        <StatusText tone={taskStatus?.tone} label={taskStatus?.label ?? card.status} />
+      ) : (
+        <StatusText tone={card.tone} label={card.status} />
+      )}
+    </span>
+  );
+  const tag =
+    card.tag && (card.kind !== "task" || card.client) ? (
+      <span
+        title={card.kind === "task" ? card.forLabel : card.tag}
+        className={cn(
+          "max-w-full truncate rounded px-1.5 py-0.5 text-[11px]",
+          card.client ? "bg-sky-50 text-sky-700 dark:bg-sky-500/10 dark:text-sky-300" : "bg-[var(--i-sunken)] text-[var(--i-muted)]",
+        )}
+      >
+        {card.tag}
+      </span>
+    ) : null;
+  const blocked =
+    card.kind === "task" && card.blocked ? (
+      <span title={card.reason} className="text-rose-600 dark:text-rose-300">
+        <Prohibit size={13} />
+      </span>
+    ) : null;
+  if (!status && !tag && !blocked) return null;
+  return (
+    <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1">
+      {status}
+      {tag}
+      {blocked}
+    </div>
+  );
+}
+
 function Card({
   card,
   own,
@@ -397,9 +476,9 @@ function Card({
         event.dataTransfer.effectAllowed = "move";
       }}
       className={cn(
-        "group rounded-lg border bg-[var(--i-panel)] p-2 shadow-[var(--i-shadow-sm)]",
+        "group rounded-lg border bg-[var(--i-panel)] px-2.5 py-2 shadow-[var(--i-shadow-sm)] transition-colors",
         card.kind === "task" && card.blocked ? "border-rose-200 dark:border-rose-500/30" : "border-[var(--i-line)]",
-        editable && "md:cursor-grab md:active:cursor-grabbing",
+        editable && "hover:border-[var(--i-line-strong)] md:cursor-grab md:active:cursor-grabbing",
         pending && "opacity-60",
       )}
     >
@@ -424,46 +503,7 @@ function Card({
         </p>
       )}
       {card.kind === "task" && card.notes ? <TaskNote text={card.notes} className="mt-1" /> : null}
-      <div className="mt-1.5 flex flex-wrap items-center gap-1">
-        {card.kind === "task" && editable ? (
-          <Select
-            aria-label={`Status of ${card.title}`}
-            size="xs"
-            value={card.status}
-            onChange={(status) => run(() => editTask(card.id, { status }))}
-            options={TASK_STATUSES.map((option) => ({ value: option.value, label: option.label }))}
-            className={cn(
-              "h-6 w-auto gap-1 rounded-full border-0 px-2 text-[11.5px] font-medium ring-1 ring-inset",
-              TONES[TASK_STATUSES.find((option) => option.value === card.status)?.tone ?? "stone"].badge,
-            )}
-          />
-        ) : card.kind === "task" ? (
-          <Pill tone={TASK_STATUSES.find((option) => option.value === card.status)?.tone}>
-            {TASK_STATUSES.find((option) => option.value === card.status)?.label}
-          </Pill>
-        ) : (
-          <Pill tone={card.tone}>{card.status}</Pill>
-        )}
-        {/* Only client tags on the card (what syncs to client pages); a Studio1 area shows when editing. */}
-        {card.tag && (card.kind !== "task" || card.client) ? (
-          <span
-            title={card.kind === "task" ? card.forLabel : card.tag}
-            className={cn(
-              "max-w-full truncate rounded-md px-1.5 py-0.5 text-[11px] ring-1 ring-inset",
-              card.client
-                ? "bg-sky-50 text-sky-800 ring-sky-200 dark:bg-sky-500/10 dark:text-sky-200 dark:ring-sky-500/25"
-                : "bg-[var(--i-sunken)] text-[var(--i-muted)] ring-[var(--i-line)]",
-            )}
-          >
-            {card.tag}
-          </span>
-        ) : null}
-        {card.kind === "task" && card.blocked ? (
-          <span title={card.reason} className="text-rose-600 dark:text-rose-300">
-            <Prohibit size={13} />
-          </span>
-        ) : null}
-      </div>
+      <CardMeta card={card} done={done} editable={editable} onStatus={(status) => run(() => editTask(card.id, { status }))} />
       {showDay && card.day ? <p className="mt-1 text-[11px] text-[var(--i-faint)]">Was for {card.day}</p> : null}
       {card.kind === "task" && card.from ? <p className="mt-1 text-[11px] text-[var(--i-faint)]">From {card.from}</p> : null}
       {editable && card.kind === "task" ? (
