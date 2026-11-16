@@ -5,12 +5,13 @@ import Link from "next/link";
 import { CheckCircle, Plus, Prohibit, Sparkle } from "@phosphor-icons/react";
 import { addTasks, editTask, removeTask } from "@/app/internal/(dashboard)/tasks/actions";
 import { cn } from "@/lib/utils";
-import { buttonClass, inputClass } from "@/components/internal/ui";
+import { buttonClass, inputClass, textareaClass } from "@/components/internal/ui";
 import { DateField } from "@/components/internal/pickers";
 import { Pill, TONES } from "@/components/internal/community/ui";
 import { Select } from "@/components/internal/select";
 import { Label, Segmented, TeamDialog, useTeamAction } from "@/components/internal/team/kit";
 import { forSelectOptions } from "@/components/internal/tasks/for-options";
+import { TaskNote } from "@/components/internal/tasks/task-note";
 import type { CalendarCard } from "@/lib/internal/tasks/calendar";
 import { STUDIO_LINK, TASK_STATUSES, suggestLink, type LinkOption, type TaskStatus } from "@/lib/internal/tasks/shared";
 
@@ -149,7 +150,11 @@ export function WeekCalendar({
   );
 }
 
-/** "+ New" at the bottom of a day: type, press Enter; paste a list for several. */
+/**
+ * "+ New" at the bottom of a day: the task, an optional note for whoever
+ * checks it, then Save. Enter in the task moves to the note; ⌘/Ctrl+Enter
+ * saves from either. Pasting a list lines up one task per line.
+ */
 export function AddCard({
   day,
   today,
@@ -165,25 +170,62 @@ export function AddCard({
   const { pending, run } = useTeamAction();
   const [open, setOpen] = useState(startOpen);
   const [text, setText] = useState("");
+  const [note, setNote] = useState("");
+  const [noting, setNoting] = useState(false);
+  /** A pasted list: one task per line, saved together. */
+  const [list, setList] = useState<string[]>([]);
   const [link, setLink] = useState(STUDIO_LINK);
   const [picked, setPicked] = useState(false);
+  const panel = useRef<HTMLDivElement>(null);
   const box = useRef<HTMLInputElement>(null);
+  const noteBox = useRef<HTMLTextAreaElement>(null);
   const choices = useMemo(() => forSelectOptions(options), [options]);
   const suggestion = !picked && text.trim().length > 3 ? suggestLink(text, options) : null;
   const ahead = day > today;
+  const several = list.length > 0;
+  const empty = !several && !text.trim() && !note.trim();
 
-  const add = (titles: string[]) => {
-    const items = titles.map((title) => ({ title, link })).filter((item) => item.title.trim());
-    if (!items.length) return;
+  const reset = () => {
+    setText("");
+    setNote("");
+    setNoting(false);
+    setList([]);
+    setLink(STUDIO_LINK);
+    setPicked(false);
+  };
+
+  const close = () => {
+    reset();
+    if (!startOpen) setOpen(false);
+  };
+
+  const save = () => {
+    const items = several ? list.map((title) => ({ title, link })) : [{ title: text.trim(), notes: note.trim(), link }];
+    if (!items.some((item) => item.title)) return;
     run(
       () => addTasks(day, items),
       () => {
-        setText("");
-        setLink(STUDIO_LINK);
-        setPicked(false);
+        reset();
         box.current?.focus();
       },
     );
+  };
+
+  const keys = (event: KeyboardEvent<HTMLElement>) => {
+    if (event.key === "Escape") {
+      if (!startOpen) close();
+      return;
+    }
+    if (event.key !== "Enter" || event.nativeEvent.isComposing) return;
+    if (event.metaKey || event.ctrlKey) {
+      event.preventDefault();
+      save();
+    } else if (event.currentTarget === box.current) {
+      event.preventDefault();
+      if (!text.trim()) return;
+      if (noteBox.current) noteBox.current.focus();
+      else setNoting(true);
+    }
   };
 
   if (!open) {
@@ -199,34 +241,86 @@ export function AddCard({
   }
 
   return (
-    <div className="mt-1.5 space-y-1.5 rounded-lg bg-[var(--i-panel)] p-1.5 ring-1 ring-[var(--i-line)]">
-      <input
-        ref={box}
-        autoFocus
-        value={text}
-        disabled={pending}
-        onChange={(event) => setText(event.target.value)}
-        onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
-          if (event.key === "Enter" && !event.nativeEvent.isComposing) {
-            event.preventDefault();
-            add([text]);
-          }
-          if (event.key === "Escape" && !startOpen) setOpen(false);
-        }}
-        onPaste={(event: ClipboardEvent<HTMLInputElement>) => {
-          const pasted = event.clipboardData.getData("text");
-          if (!/\r?\n/.test(pasted.trim())) return;
-          event.preventDefault();
-          add(cleanPasted(pasted));
-        }}
-        onBlur={() => {
-          if (!text.trim() && !startOpen) setTimeout(() => setOpen(false), 150);
-        }}
-        maxLength={200}
-        placeholder={ahead ? "What's planned?" : "What did you do?"}
-        aria-label={`New task on ${fullFormat.format(at(day))}`}
-        className={inputClass("sm")}
-      />
+    <div
+      ref={panel}
+      onBlur={() => {
+        // Clicking away from an empty box closes it; anything typed keeps it open.
+        if (startOpen || !empty) return;
+        setTimeout(() => {
+          if (!panel.current?.contains(document.activeElement)) setOpen(false);
+        }, 150);
+      }}
+      className="mt-1.5 space-y-1.5 rounded-lg bg-[var(--i-panel)] p-1.5 ring-1 ring-[var(--i-line)]"
+    >
+      {several ? (
+        <div className="rounded-md bg-[var(--i-sunken)] px-2 py-1.5 text-[12px]">
+          <p className="flex items-center justify-between gap-2 text-[var(--i-muted)]">
+            {list.length} tasks
+            <button
+              type="button"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => setList([])}
+              className="text-[var(--i-faint)] hover:text-[var(--i-ink)]"
+            >
+              Clear
+            </button>
+          </p>
+          <ul className="mt-1 max-h-32 space-y-0.5 overflow-y-auto">
+            {list.map((title, index) => (
+              <li key={index} className="truncate">
+                {title}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        <>
+          <input
+            ref={box}
+            autoFocus
+            value={text}
+            disabled={pending}
+            onChange={(event) => setText(event.target.value)}
+            onKeyDown={keys}
+            onPaste={(event: ClipboardEvent<HTMLInputElement>) => {
+              const pasted = event.clipboardData.getData("text");
+              if (!/\r?\n/.test(pasted.trim())) return;
+              event.preventDefault();
+              setList(cleanPasted(pasted).slice(0, 30));
+              setText("");
+            }}
+            maxLength={200}
+            placeholder={ahead ? "What's planned?" : "What did you do?"}
+            title="Paste a list to add several at once."
+            aria-label={`New task on ${fullFormat.format(at(day))}`}
+            className={inputClass("sm")}
+          />
+          {noting ? (
+            <textarea
+              ref={noteBox}
+              autoFocus
+              value={note}
+              disabled={pending}
+              onChange={(event) => setNote(event.target.value)}
+              onKeyDown={keys}
+              rows={3}
+              maxLength={4000}
+              placeholder="Context for whoever checks it"
+              aria-label="Note"
+              className={cn(textareaClass, "resize-none px-2 py-1.5 text-[12.5px] leading-snug")}
+            />
+          ) : (
+            <button
+              type="button"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => setNoting(true)}
+              className="flex items-center gap-1 px-0.5 text-[11.5px] text-[var(--i-faint)] hover:text-[var(--i-ink)]"
+            >
+              <Plus size={11} /> Add a note
+            </button>
+          )}
+        </>
+      )}
       <Select
         aria-label="For"
         size="xs"
@@ -252,11 +346,27 @@ export function AddCard({
           <Sparkle size={11} weight="fill" className="shrink-0" />
           <span className="truncate">For {suggestion.label}?</span>
         </button>
-      ) : (
-        <p className="truncate px-0.5 text-[11px] text-[var(--i-faint)]" title="Paste a list to add several at once.">
-          Enter to add · {ahead ? "Not started" : "Done"}
-        </p>
-      )}
+      ) : null}
+      <div className="flex items-center justify-end gap-1">
+        {!startOpen || !empty ? (
+          <button
+            type="button"
+            onClick={close}
+            className={cn(buttonClass("ghost", "sm"), !startOpen && "flex-1 px-1")}
+          >
+            {startOpen ? "Clear" : "Cancel"}
+          </button>
+        ) : null}
+        <button
+          type="button"
+          onClick={save}
+          disabled={pending || (!several && !text.trim())}
+          title={`Saves as ${ahead ? "Not started" : "Done"}`}
+          className={cn(buttonClass("primary", "sm"), !startOpen && "flex-1 px-1")}
+        >
+          {pending ? "Saving…" : several ? `Save ${list.length}` : "Save"}
+        </button>
+      </div>
     </div>
   );
 }
@@ -313,6 +423,7 @@ function Card({
           <span className="line-clamp-3 min-w-0 break-words">{card.title}</span>
         </p>
       )}
+      {card.kind === "task" && card.notes ? <TaskNote text={card.notes} className="mt-1" /> : null}
       <div className="mt-1.5 flex flex-wrap items-center gap-1">
         {card.kind === "task" && editable ? (
           <Select
@@ -376,7 +487,13 @@ function EditCard({
   today: string;
 }) {
   const { pending, run } = useTeamAction();
-  const start = () => ({ title: card.title, link: card.link, status: card.status as TaskStatus, day: card.day ?? "" });
+  const start = () => ({
+    title: card.title,
+    notes: card.notes,
+    link: card.link,
+    status: card.status as TaskStatus,
+    day: card.day ?? "",
+  });
   const [form, setForm] = useState(start);
   const [confirming, setConfirming] = useState(false);
   const choices = useMemo(() => forSelectOptions(options, { value: card.link, label: card.forLabel }), [options, card.link, card.forLabel]);
@@ -389,6 +506,7 @@ function EditCard({
   const save = () => {
     const patch: Record<string, unknown> = {};
     if (form.title.trim() !== card.title) patch.title = form.title;
+    if (form.notes.trim() !== card.notes) patch.notes = form.notes;
     if (form.link !== card.link) patch.link = form.link;
     if (form.status !== card.status) patch.status = form.status;
     if (form.day && form.day !== card.day) patch.day = form.day;
@@ -431,6 +549,16 @@ function EditCard({
           onChange={(event) => setForm({ ...form, title: event.target.value })}
           maxLength={200}
           className={inputClass()}
+        />
+      </Label>
+      <Label label="Notes" hint="optional">
+        <textarea
+          value={form.notes}
+          onChange={(event) => setForm({ ...form, notes: event.target.value })}
+          rows={3}
+          maxLength={4000}
+          placeholder="Context for whoever checks it"
+          className={textareaClass}
         />
       </Label>
       <Label label="For" group>

@@ -12,6 +12,7 @@ import { Label, TeamDialog, useTeamAction } from "@/components/internal/team/kit
 import { DeliverableCard } from "@/components/internal/clients/deliverable-card";
 import { StatusBadge } from "@/components/internal/clients/ui";
 import { TaskDialog } from "@/components/internal/tasks/task-dialog";
+import { TaskNote } from "@/components/internal/tasks/task-note";
 import { ForChip, type ForOption, type LogTarget } from "@/components/internal/tasks/kit";
 import { displayName } from "@/lib/internal/team/shared";
 import type { ClientsAccess } from "@/lib/internal/clients/rules";
@@ -284,6 +285,7 @@ function TaskCard({ item, props }: { item: BoardTask; props: BoardProps }) {
         ) : (
           <p className="text-[13.5px] font-medium leading-snug">{task.title}</p>
         )}
+        {task.notes ? <TaskNote text={task.notes} /> : null}
         {task.blocked ? (
           <p className="text-[12px] text-rose-700 dark:text-rose-300">
             <Prohibit size={12} className="mr-1 inline" />
