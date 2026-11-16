@@ -243,6 +243,13 @@ function TeammateDialog({
   const [admin, setAdmin] = useState(teammate?.roles.includes("admin") ?? false);
   // Client team only: the clients they may open, or null for every client.
   const [clientIds, setClientIds] = useState<string[] | null>(teammate?.clientIds ?? null);
+  // Access goes with a save only when it was changed here (or for someone
+  // new or waiting), so a dialog left open can't undo another admin's change.
+  const [accessTouched, setAccessTouched] = useState(false);
+  const touch = <T,>(set: (value: T) => void) => (value: T) => {
+    setAccessTouched(true);
+    set(value);
+  };
   const [confirmOff, setConfirmOff] = useState(false);
 
   const address = email.trim().toLowerCase();
@@ -274,7 +281,7 @@ function TeammateDialog({
       designation,
       joined_on: joined,
       reviewer: kind === "intern" ? reviewer : "",
-      ...(canEditAccess
+      ...(canEditAccess && (isNew || teammate.status === "pending" || accessTouched)
         ? { roles: rolesFromGrid(grid, admin), client_ids: grid.clients === "own" && !admin ? clientIds : null }
         : {}),
     };
@@ -289,7 +296,8 @@ function TeammateDialog({
     <TeamDialog
       open
       wide
-      onOpenChange={(next) => (next ? null : onClose())}
+      // Held open while a save runs: its finish closes this dialog, not another.
+      onOpenChange={(next) => (next || pending ? null : onClose())}
       title={title}
       description={
         isNew
@@ -319,7 +327,7 @@ function TeammateDialog({
               </button>
             )
           ) : null}
-          <button type="button" onClick={onClose} className={buttonClass("ghost")}>
+          <button type="button" disabled={pending} onClick={onClose} className={buttonClass("ghost")}>
             Cancel
           </button>
           <button
@@ -432,14 +440,17 @@ function TeammateDialog({
                   locked={
                     !owner && area.key === "tasks" ? `Only ${FOUNDERS} can change who sees the team's tasks.` : null
                   }
-                  onChange={(level) => setGrid((current) => ({ ...current, [area.key]: level }))}
+                  onChange={(level) => {
+                    setAccessTouched(true);
+                    setGrid((current) => ({ ...current, [area.key]: level }));
+                  }}
                 >
                   {area.key === "clients" && grid.clients === "own" && !admin && !founder ? (
                     <ClientPicker
                       clients={clients}
                       value={clientIds}
                       disabled={!canEditAccess}
-                      onChange={setClientIds}
+                      onChange={touch(setClientIds)}
                     />
                   ) : null}
                 </AreaRow>
@@ -448,7 +459,7 @@ function TeammateDialog({
                 on={admin || founder}
                 disabled={!canEditAccess || founder || !owner}
                 note={!owner && !founder ? `Only ${FOUNDERS} can make someone an admin.` : null}
-                onChange={setAdmin}
+                onChange={touch(setAdmin)}
               />
             </div>
           </>

@@ -88,8 +88,8 @@ export function PeopleView({
   current: string;
   today: string;
   people: TeamPerson[];
-  /** The one team list, for admins: everyone with their details and access. */
-  teammates: Teammate[];
+  /** The one team list, for admins: everyone with their details and access. Null when access couldn't be read. */
+  teammates: Teammate[] | null;
   /** Every client, to give a Client team member only some. */
   clients: ClientChoice[];
   days: AttendanceDay[];
@@ -131,7 +131,9 @@ export function PeopleView({
             >
               {label}
               <span className="ml-1.5 text-[12px] tabular-nums text-[var(--i-faint)]">
-                {value === "team" ? teammates.filter((teammate) => teammate.status !== "off").length : active.length}
+                {value === "team"
+                  ? (teammates ?? []).filter((teammate) => teammate.status !== "off").length
+                  : active.length}
               </span>
               <LinkPending className="ml-1.5 align-[-1px]" />
             </HoverLink>
@@ -139,7 +141,13 @@ export function PeopleView({
         </nav>
       ) : null}
       {tab === "team" ? (
-        <TeamList teammates={teammates} clients={clients} me={me} owner={owner} reviewers={reviewers} />
+        teammates ? (
+          <TeamList teammates={teammates} clients={clients} me={me} owner={owner} reviewers={reviewers} />
+        ) : (
+          <Notice tone="error">
+            Couldn&apos;t load who has access right now, so the team can&apos;t be changed. Reload the page in a minute.
+          </Notice>
+        )
       ) : (
         <Attendance
           admin={admin}

@@ -230,7 +230,16 @@ export async function cardChoices(staff: Staff): Promise<LinkOption[]> {
     loadBoard(staff.email, thisWeek()),
     staff.clients ? engagementChoices().then((list) => choicesFor(staff.clientScope, list)) : Promise.resolve([]),
   ]);
-  return linkOptions(board, choices).filter(
+  // Their own deliverables too: only on clients they may open (People).
+  const mayOpen = (item: Deliverable) => {
+    const label = board.engagements.get(item.engagement_id);
+    return label ? choicesFor(staff.clientScope, [label]).length > 0 : false;
+  };
+  const scoped =
+    staff.clientScope === null
+      ? board
+      : { ...board, deliverables: board.deliverables.filter(mayOpen), reviewing: board.reviewing.filter(mayOpen) };
+  return linkOptions(scoped, choices).filter(
     (option) => option.group === "studio" || option.group === "client" || option.group === "deliverable",
   );
 }

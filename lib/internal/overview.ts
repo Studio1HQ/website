@@ -112,7 +112,7 @@ export async function dashboardOverview(staff: Staff) {
     staff.community ? communityBadges(staff.email) : Promise.resolve(null),
     ownEmails.length ? listDays({ from: now.date, to: now.date, emails: ownEmails }) : Promise.resolve(null),
     staff.community ? hackathonBreakdown() : Promise.resolve(null),
-    staff.clients ? clientNeeds(staff.email) : Promise.resolve(null),
+    staff.clients ? clientNeeds(staff.email, staff.clientScope) : Promise.resolve(null),
     staff.clients ? clientsSummary(staff.clientScope) : Promise.resolve(null),
     taskNeeds(staff),
   ]);

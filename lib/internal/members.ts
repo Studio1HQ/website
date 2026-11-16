@@ -210,14 +210,17 @@ function legacyRole(roles: RoleKey[]) {
 /**
  * Saves someone's status and roles. `unless` makes the write itself hold a
  * check that was made on an earlier read: the row must still have that
- * status and still not be an admin's, so a change made in between (an owner
- * turning the person off, or making them an admin) isn't written over.
+ * status, still not be an admin's and, when given, still have (or not have)
+ * Team tasks, so a change made in between (an owner turning the person off,
+ * making them an admin, or taking Team tasks away) isn't written over.
  */
+export type MemberSnapshot = { statusWas: MemberStatus; tasksViewer?: boolean };
+
 export async function decideMember(
   email: string,
   change: MemberChange,
   by: string,
-  unless?: { statusWas: MemberStatus },
+  unless?: MemberSnapshot,
 ) {
   if (isOwner(email)) return { ok: false as const, message: "Owners can't be changed." };
   const roles = cleanRoles(email, change.roles);
@@ -226,7 +229,11 @@ export async function decideMember(
   const which = new URLSearchParams({ email: `eq.${email}` });
   if (unless) {
     which.set("status", `eq.${unless.statusWas}`);
-    which.set("roles", "not.cs.{admin}");
+    // Two filters on one column: PostgREST ANDs them.
+    which.append("roles", "not.cs.{admin}");
+    if (unless.tasksViewer !== undefined) {
+      which.append("roles", unless.tasksViewer ? "cs.{tasks_viewer}" : "not.cs.{tasks_viewer}");
+    }
   }
   const result = await updateRows(
     TABLE,
@@ -288,9 +295,17 @@ export async function addMember(email: string, change: MemberChange, by: string)
 /**
  * Adds someone straight away: staff an admin wants in before they ask (with
  * any roles, or none for just My day and Tasks), or an outside writer.
- * Re-inviting an existing person updates them.
+ * Re-inviting an existing person updates them. `expected` holds the write to
+ * what the caller saw: "none" (no row, so one turning up in between is
+ * refused) or the row's snapshot (see decideMember's `unless`).
  */
-export async function inviteMember(email: string, roles: RoleKey[], by: string, clientIds?: string[] | null) {
+export async function inviteMember(
+  email: string,
+  roles: RoleKey[],
+  by: string,
+  clientIds?: string[] | null,
+  expected?: MemberSnapshot | "none",
+) {
   if (isOwner(email)) return { ok: false as const, message: "Owners already have access." };
   const clean = cleanRoles(email, roles);
   if (clean.length === 0 && !isStaffEmail(email)) {
@@ -318,6 +333,9 @@ export async function inviteMember(email: string, roles: RoleKey[], by: string, 
         : "Couldn't save the invite. Try again in a minute.",
     };
   }
-  const updated = await decideMember(email, { status: "active", roles: clean, clientIds }, by);
+  if (expected === "none") {
+    return { ok: false as const, message: "Their access was just changed by someone else. Reload the page and try again." };
+  }
+  const updated = await decideMember(email, { status: "active", roles: clean, clientIds }, by, expected);
   return updated.ok ? { ok: true as const, existed: true } : updated;
 }

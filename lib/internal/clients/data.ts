@@ -1,4 +1,5 @@
 import "server-only";
+import { inScope, type ClientScope } from "@/lib/internal/clients/scope";
 import { cache } from "react";
 import {
   deleteRows,
@@ -545,19 +546,38 @@ const NO_NEEDS: ClientNeeds = { late: 0, due: 0, toReview: 0, blocked: 0 };
  * (the migration not run included).
  */
 export const clientNeeds = cache(
-  async (email: string): Promise<ClientNeeds> => {
+  async (email: string, scope: ClientScope = null): Promise<ClientNeeds> => {
     const me = email.trim().toLowerCase();
     if (!EMAIL.test(me)) return NO_NEEDS;
     const [mine, owned] = await Promise.all([
       loadDeliverables({ person: me, open: true }),
-      read<Pick<Engagement, "id">>(TABLES.engagements, {
-        select: "id",
+      read<Pick<Engagement, "id" | "client_id">>(TABLES.engagements, {
+        select: "id,client_id",
         owner: `eq.${me}`,
         status: "in.(active,planned,paused)",
       }),
     ]);
     if (!mine.ok || !owned.ok) return NO_NEEDS;
-    const ownedIds = owned.rows.map((row) => row.id);
+    // Someone given only some clients counts only theirs, like the pages.
+    let mineRows = mine.rows;
+    if (scope !== null) {
+      const clientOf = await readIn<Pick<Engagement, "id" | "client_id">>(
+        TABLES.engagements,
+        "id",
+        [...new Set(mine.rows.map((item) => item.engagement_id))],
+        { select: "id,client_id" },
+      );
+      if (!clientOf.ok) return NO_NEEDS;
+      const allowed = new Set(
+        clientOf.rows
+          .filter((row) => inScope(scope, row.client_id))
+          .map((row) => row.id),
+      );
+      mineRows = mine.rows.filter((item) => allowed.has(item.engagement_id));
+    }
+    const ownedIds = owned.rows
+      .filter((row) => inScope(scope, row.client_id))
+      .map((row) => row.id);
     const blocked = ownedIds.length
       ? await readIn<Deliverable>(
           TABLES.deliverables,
@@ -570,7 +590,7 @@ export const clientNeeds = cache(
         )
       : { ok: true as const, rows: [] as Deliverable[] };
     const rows = new Map<string, Deliverable>();
-    for (const item of [...mine.rows, ...(blocked.ok ? blocked.rows : [])])
+    for (const item of [...mineRows, ...(blocked.ok ? blocked.rows : [])])
       rows.set(item.id, item);
     return needsMe(me, [...rows.values()], new Set(ownedIds), todayKey());
   },
