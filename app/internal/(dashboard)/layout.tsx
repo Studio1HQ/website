@@ -17,6 +17,7 @@ import { isStaffEmail, rolesLabel } from "@/lib/internal/roles";
 import { canSeeMoney, homeFor, isAdmin, requireMember, staffName, type Staff } from "@/lib/internal/session";
 import { teamBadges } from "@/lib/internal/team/badges";
 import { canSeeOthers } from "@/lib/internal/tasks/access";
+import { canSeeCalls } from "@/lib/internal/calls/access";
 import { taskNeeds } from "@/lib/internal/tasks/needs";
 import { teamPhotos } from "@/lib/internal/team/photos";
 import { PERSON_KINDS, photoUrl } from "@/lib/internal/team/shared";
@@ -64,6 +65,7 @@ function Sidebar({ staff, counts }: { staff: Staff; counts: Counts }) {
         me: staff.person !== null,
         tasks: seesTasks(staff),
         tasksBadge: counts.tasks,
+        calls: canSeeCalls(staff),
         people: admin || staff.interns.length > 0,
         money: canSeeMoney(staff),
         payrollBadge: counts.money.payroll,
@@ -153,8 +155,10 @@ export default async function DashboardLayout({
               </Link>
               <MobileNavClose />
             </div>
-            {/* A long sidebar scrolls on its own; the profile stays at the foot. */}
-            <div className="-mx-3 min-h-0 flex-1 overflow-y-auto px-3 pb-2">
+            {/* A long sidebar scrolls on its own; the profile stays at the foot.
+                The 4px of top room (pulled back up) keeps the first link's
+                outline and shadow from being clipped by the scroll edge. */}
+            <div className="-mx-3 -mt-1 min-h-0 flex-1 overflow-y-auto px-3 pb-2 pt-1">
               {/* The links show at once; their counts arrive when they're read. */}
               <Suspense fallback={<Sidebar staff={staff} counts={NO_COUNTS} />}>
                 <SidebarWithCounts staff={staff} />
