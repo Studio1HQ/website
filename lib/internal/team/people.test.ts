@@ -61,3 +61,65 @@ describe("the founders on the team list", () => {
     expect(pay.ok && pay.people.some((person) => person.email === "arindam@studio1hq.com" && person.earnings.length === 0)).toBe(true);
   });
 });
+
+describe("keeping the roster and dashboard access in step", async () => {
+  const { addMissingMembers, addToTeam, ensureOnTeam } = await import("@/lib/internal/team/people");
+  const { addMember, decideMember, inviteMember } = await import("@/lib/internal/members");
+
+  it("puts someone approved on the team list once, and never brings back someone who left", async () => {
+    expect(await addToTeam("kat@studio1hq.com", "", "arindam@studio1hq.com")).toBe(true);
+    expect(await addToTeam("kat@studio1hq.com", "Kat", "arindam@studio1hq.com")).toBe(false);
+    expect(db.rows("team_people").find((row) => row.email === "kat@studio1hq.com")).toMatchObject({ name: "Kat", kind: "employee", active: true });
+    expect(await addToTeam("gone@studio1hq.com", "", "arindam@studio1hq.com")).toBe(false);
+    expect(db.rows("team_people").find((row) => row.email === "gone@studio1hq.com")?.active).toBe(false);
+    // And the person then has My day.
+    expect((await teamAccessFor("kat@studio1hq.com")).person?.email).toBe("kat@studio1hq.com");
+  });
+
+  it("adds a signed-in member missing from the list only once per server, retrying after a failure", async () => {
+    db.fail("team_people");
+    expect(await ensureOnTeam("new@studio1hq.com", "New Person")).toBe(false);
+    db.fail("team_people", false);
+    expect(await ensureOnTeam("new@studio1hq.com", "New Person")).toBe(true);
+    expect(await ensureOnTeam("new@studio1hq.com", "New Person")).toBe(false);
+    expect(db.rows("team_people").filter((row) => row.email === "new@studio1hq.com")).toHaveLength(1);
+  });
+
+  it("lets staff be approved or invited with no areas (My day and Tasks), but not outside writers", async () => {
+    db.add("internal_members", { email: "p@studio1hq.com", status: "pending", roles: [] });
+    expect((await decideMember("p@studio1hq.com", { status: "active", roles: [] }, "arindam@studio1hq.com")).ok).toBe(true);
+    expect((await inviteMember("q@studio1hq.com", [], "arindam@studio1hq.com")).ok).toBe(true);
+    expect((await inviteMember("writer@gmail.com", [], "arindam@studio1hq.com")).ok).toBe(false);
+    db.add("internal_members", { email: "w@gmail.com", status: "active", roles: ["blog_writer"] });
+    expect((await decideMember("w@gmail.com", { status: "active", roles: [] }, "arindam@studio1hq.com")).ok).toBe(false);
+  });
+
+  it("gives someone from People a member row on their first change, and won't write over one that turned up", async () => {
+    expect((await addMember("e@studio1hq.com", { status: "active", roles: ["client_member"] }, "arindam@studio1hq.com")).ok).toBe(true);
+    expect(db.rows("internal_members").find((row) => row.email === "e@studio1hq.com")).toMatchObject({ status: "active", roles: ["client_member"] });
+    const again = await addMember("e@studio1hq.com", { status: "disabled", roles: [] }, "arindam@studio1hq.com");
+    expect(again.ok).toBe(false);
+    expect(db.rows("internal_members").find((row) => row.email === "e@studio1hq.com")?.status).toBe("active");
+    expect((await addMember("arindam@studio1hq.com", { status: "active", roles: [] }, "amitesh@studio1hq.com")).ok).toBe(false);
+  });
+
+  it("fills People with every approved Studio1 member missing from it, and nobody else", async () => {
+    const members = [
+      { email: "kathank@studio1hq.com", name: "", status: "active" as const },
+      { email: "e@studio1hq.com", name: "Esha", status: "active" as const },
+      { email: "gone@studio1hq.com", name: "", status: "active" as const },
+      { email: "wait@studio1hq.com", name: "", status: "pending" as const },
+      { email: "off@studio1hq.com", name: "", status: "disabled" as const },
+      { email: "writer@gmail.com", name: "", status: "active" as const },
+    ];
+    const people = await listPeople();
+    expect(people.ok).toBe(true);
+    const added = await addMissingMembers(members, people.ok ? people.people : [], "arindam@studio1hq.com");
+    expect(added).toEqual(["kathank@studio1hq.com"]);
+    expect(db.rows("team_people").find((row) => row.email === "kathank@studio1hq.com")).toMatchObject({ name: "Kathank", active: true });
+    expect(db.rows("team_people").find((row) => row.email === "gone@studio1hq.com")?.active).toBe(false);
+    // In step now: a second run adds nobody.
+    const again = await listPeople();
+    expect(await addMissingMembers(members, again.ok ? again.people : [], "arindam@studio1hq.com")).toEqual([]);
+  });
+});

@@ -6,6 +6,7 @@ import {
   DownloadSimple,
   FileText,
 } from "@phosphor-icons/react/dist/ssr";
+import { scopeWork } from "@/lib/internal/clients/scope";
 import { requireClients } from "@/lib/internal/session";
 import {
   loadClientWork,
@@ -82,7 +83,8 @@ export default async function ClientsReportsPage({ searchParams }: Props) {
       ? query.engagement.toLowerCase()
       : null;
 
-  const work = await loadClientWork(month);
+  // Client team members an admin gave specific clients see only theirs.
+  const work = scopeWork(staff.clientScope, await loadClientWork(month));
   if (!work.ok) {
     return (
       <>

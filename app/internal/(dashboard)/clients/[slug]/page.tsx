@@ -19,6 +19,7 @@ import {
   Target,
   Trophy,
 } from "@phosphor-icons/react/dist/ssr";
+import { inScope } from "@/lib/internal/clients/scope";
 import { requireClients } from "@/lib/internal/session";
 import { clientsSlackReady } from "@/lib/internal/clients/slack";
 import { readLinks } from "@/lib/internal/clients/links";
@@ -143,9 +144,14 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   // The title is data too: check access before reading the client.
-  const [, { slug }] = await Promise.all([requireClients(), params]);
+  const [staff, { slug }] = await Promise.all([requireClients(), params]);
   const found = await loadClientBySlug(slug);
-  return { title: found.ok && found.client ? found.client.name : "Client" };
+  return {
+    title:
+      found.ok && found.client && inScope(staff.clientScope, found.client.id)
+        ? found.client.name
+        : "Client",
+  };
 }
 
 const backLink = (
@@ -202,7 +208,8 @@ export default async function ClientWorkspacePage({
     );
   }
   const client = found.client;
-  if (!client) notFound();
+  // Not there, or not one of the clients an admin gave this person.
+  if (!client || !inScope(staff.clientScope, client.id)) notFound();
   const links = readLinks(client.links);
 
   const today = todayKey();

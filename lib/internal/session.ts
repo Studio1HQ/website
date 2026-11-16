@@ -3,7 +3,7 @@ import { cache } from "react";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { accessFor } from "@/lib/internal/members";
-import { ensureOwnersOnTeam, teamAccessFor } from "@/lib/internal/team/people";
+import { ensureOnTeam, ensureOwnersOnTeam, teamAccessFor } from "@/lib/internal/team/people";
 import { displayName, type TeamPerson } from "@/lib/internal/team/shared";
 import {
   areaAccess,
@@ -39,6 +39,11 @@ export type Staff = {
   community: CommunityAccess | null;
   /** What they can do in client work, or null for nothing. */
   clients: ClientsAccess | null;
+  /**
+   * The clients they may open, by id, or null for every client. Only ever a
+   * list for Client team members an admin has given specific clients.
+   */
+  clientScope: string[] | null;
   status: "owner" | "active" | "pending" | "disabled" | "unknown" | "uninvited";
   /**
    * Their row on the team list (employees and interns), if active. Being on
@@ -52,14 +57,22 @@ export type Staff = {
 
 type BaseStaff = Omit<Staff, "person" | "interns">;
 
-function withRoles(base: { email: string; name: string; localPreview: boolean }, roles: RoleKey[], status: Staff["status"]): BaseStaff {
+function withRoles(
+  base: { email: string; name: string; localPreview: boolean },
+  roles: RoleKey[],
+  status: Staff["status"],
+  clientIds: string[] | null = null,
+): BaseStaff {
+  const clients = clientAccess(roles);
   return {
     ...base,
     roles,
     role: hiringLevel(roles),
     blog: blogAccess(roles),
     community: communityAccess(roles),
-    clients: clientAccess(roles),
+    clients,
+    // Managers (and Admin) run every client; only the team level is scoped.
+    clientScope: clients === "member" ? clientIds : null,
     status,
   };
 }
@@ -76,6 +89,20 @@ async function withTeam(staff: BaseStaff, team: TeamAccess): Promise<Staff> {
   if (staff.status === "owner" && !team.person) {
     await ensureOwnersOnTeam();
     return { ...staff, ...(await teamAccessFor(staff.email)) };
+  }
+  // So is everyone else signed in with an @studio1hq.com address, waiting
+  // for areas or not: that's what gives them My day, Tasks and Calls.
+  // Signing in, inviting and approving add them; this catches anyone from
+  // before that, the next time they open the dashboard. Someone turned off
+  // (above) or marked as left on People stays off it, and so does the local
+  // preview's address, so QA runs don't land on the live team list.
+  if (
+    (staff.status === "active" || staff.status === "pending") &&
+    !team.person &&
+    !staff.localPreview &&
+    isStaffEmail(staff.email)
+  ) {
+    if (await ensureOnTeam(staff.email, staff.name)) return { ...staff, ...(await teamAccessFor(staff.email)) };
   }
   return { ...staff, ...team };
 }
@@ -124,9 +151,10 @@ export const getStaff = cache(async (): Promise<Staff | null> => {
     case "owner":
       return withTeam(withRoles(base, ["admin"], "owner"), team);
     case "member":
+      // Approved with no areas is still approved: My day and Tasks (withTeam).
       return withTeam(
-        access.member.status === "active" && access.member.roles.length
-          ? withRoles(base, access.member.roles, "active")
+        access.member.status === "active"
+          ? withRoles(base, access.member.roles, "active", access.member.client_ids)
           : withRoles(base, [], access.member.status === "disabled" ? "disabled" : "pending"),
         team,
       );

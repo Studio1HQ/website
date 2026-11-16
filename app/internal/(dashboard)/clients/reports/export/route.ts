@@ -1,4 +1,5 @@
 import { toCsv } from "@/lib/internal/csv";
+import { scopeWork } from "@/lib/internal/clients/scope";
 import { requireClients } from "@/lib/internal/session";
 import { loadClientWork } from "@/lib/internal/clients/data";
 import { isUuid } from "@/lib/internal/clients/clean";
@@ -25,7 +26,7 @@ export async function GET(request: Request) {
   if (!isMonthKey(month) || !isUuid(engagementId))
     return new Response("Not found", { status: 404 });
 
-  const work = await loadClientWork(month);
+  const work = scopeWork(staff.clientScope, await loadClientWork(month));
   if (!work.ok)
     return new Response(work.message, { status: work.missing ? 503 : 502 });
   const engagement = work.engagements.find((item) => item.id === engagementId);

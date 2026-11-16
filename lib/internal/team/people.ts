@@ -1,5 +1,5 @@
 import { inList, insertRow, selectRows, updateRows } from "@/lib/supabase-server";
-import { accessFor } from "@/lib/internal/members";
+import { accessFor, type Member } from "@/lib/internal/members";
 import { OWNERS, isOwner, isStaffEmail } from "@/lib/internal/roles";
 import { emailAddress } from "@/lib/internal/token";
 import { audit } from "@/lib/internal/team/audit";
@@ -122,6 +122,70 @@ async function addMissingOwners(): Promise<boolean> {
     }
   }
   return done;
+}
+
+/**
+ * Puts someone on the team list when they have no row there at all:
+ * everyone at Studio1 with dashboard access is on it, which is what gives
+ * them My day and Tasks and shows them on People. Inviting and approving
+ * call this (lib/internal/team/teammates.ts, the login). A row that's already
+ * there, even one marked as left, is never touched. True when they were
+ * added, false when a row was there already, null when the write failed.
+ */
+export async function addToTeam(email: string, name: string, by: string): Promise<boolean | null> {
+  const row = { email, name: name.trim() || displayName({ email }), kind: "employee", updated_by: by };
+  const added = await insertRow(TABLE, row);
+  if (added.ok) {
+    await audit({ actor: by, area: "people", action: "added", subject: email, detail: row });
+    return true;
+  }
+  if (added.duplicate) return false;
+  if (!isMissingTable(added.message)) console.error(`[team] adding ${email} to ${TABLE} failed: ${added.message}`);
+  return null;
+}
+
+/**
+ * Puts every approved Studio1 member who isn't on the team list yet onto it
+ * (addToTeam), so nobody invited or approved before that was automatic is
+ * left out. People runs it when it opens, with the lists
+ * they've already read: `people` must be the whole list, left ones
+ * included, so nobody marked as left comes back. The addresses added.
+ */
+export async function addMissingMembers(
+  members: readonly Pick<Member, "email" | "name" | "status">[],
+  people: readonly Pick<TeamPerson, "email">[],
+  by: string,
+): Promise<string[]> {
+  const listed = new Set(people.map((person) => person.email.toLowerCase()));
+  const missing = members.filter(
+    (member) =>
+      member.status === "active" &&
+      isStaffEmail(member.email) &&
+      !isOwner(member.email) &&
+      !listed.has(member.email.toLowerCase()),
+  );
+  const added: string[] = [];
+  for (const member of missing) {
+    if (await addToTeam(member.email.toLowerCase(), member.name, by)) added.push(member.email);
+  }
+  return added;
+}
+
+/** Addresses addToTeam has already been tried for on this server instance. */
+const onTeamChecked = new Set<string>();
+
+/**
+ * addToTeam for the signed-in person, at most once per server instance (it's
+ * checked on every request; lib/internal/session.ts). For people approved
+ * before inviting and approving did it themselves. True when they were added.
+ */
+export async function ensureOnTeam(email: string, name: string): Promise<boolean> {
+  if (onTeamChecked.has(email)) return false;
+  onTeamChecked.add(email);
+  const added = await addToTeam(email, name, "system");
+  // Try again on a later request when the write failed.
+  if (added === null) onTeamChecked.delete(email);
+  return added === true;
 }
 
 export type PeopleResult = { ok: true; people: TeamPerson[] } | { ok: false; message: string; missing: boolean };

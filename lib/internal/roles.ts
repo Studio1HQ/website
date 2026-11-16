@@ -38,11 +38,11 @@
  * only (canSeeMoney in lib/internal/session.ts).
  *
  * The owners are always admins and can't be changed. Staff (@studio1hq.com)
- * ask for access when they first sign in. Any admin can give and take away
- * roles: approve someone who's waiting, or change what a teammate has
- * (app/internal/(dashboard)/team). What stays with the owners
+ * join the team list when they first sign in, with My day, Tasks and Calls.
+ * Any admin adds people and gives and takes away roles on People
+ * (lib/internal/team/teammates.ts). What stays with the owners
  * (roleChangeProblem): the Admin role itself, anything about another admin,
- * declining, turning access off or back on, and invites. Anyone outside
+ * Team tasks, declining, and turning access off or back on. Anyone outside
  * @studio1hq.com can only be invited by an owner, and only as a blog writer.
  */
 
@@ -116,7 +116,7 @@ export const ROLE_INFO: Record<
     label: "Client team",
     area: "Clients",
     description:
-      "See all client work. Add deliverables, and change status, links, dates and the blocked flag on the ones they own or review.",
+      "See client work: every client, or only the ones an admin picks. Add deliverables, and change status, links, dates and the blocked flag on the ones they own or review.",
   },
   tasks_viewer: {
     label: "Team tasks viewer",

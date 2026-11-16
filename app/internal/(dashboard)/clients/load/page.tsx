@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { inScope } from "@/lib/internal/clients/scope";
 import { requireClients } from "@/lib/internal/session";
 import {
   incomplete,
@@ -134,6 +135,8 @@ export default async function ClientsLoadPage({
     const engagement = engagementOf.get(deliverable.engagement_id);
     const client = engagement ? clientOf.get(engagement.client_id) : undefined;
     if (engagement?.status === "ended" || client?.archived_at) continue;
+    // Client team members an admin gave specific clients see only theirs.
+    if (!inScope(staff.clientScope, engagement?.client_id)) continue;
     items.push({
       deliverable,
       clientName: client?.name,

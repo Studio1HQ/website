@@ -275,7 +275,7 @@ export default async function OverviewPage({
         {team?.ready && team.people === 0 ? (
           <AreaCard
             area="team"
-            href="/internal/people?tab=directory"
+            href="/internal/people"
             value="No one yet"
             unit="on the team list"
             extra={

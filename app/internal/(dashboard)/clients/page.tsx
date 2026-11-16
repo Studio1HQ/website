@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { Briefcase, Kanban, Plus, Rows } from "@phosphor-icons/react/dist/ssr";
+import { scopeWork } from "@/lib/internal/clients/scope";
 import { requireClients } from "@/lib/internal/session";
 import { cleanMonth } from "@/lib/internal/clients/clean";
 import {
@@ -90,10 +91,12 @@ export default async function ClientsPage({
   const next = shiftMonth(current, 1);
   const today = todayKey();
 
-  const [work, nextCycles] = await Promise.all([
+  const [allWork, nextCycles] = await Promise.all([
     loadClientWork(month),
     manager ? loadCycles({ month: next }) : Promise.resolve(null),
   ]);
+  // Client team members an admin gave specific clients see only those.
+  const work = scopeWork(staff.clientScope, allWork);
 
   const href = (changes: {
     month?: string;

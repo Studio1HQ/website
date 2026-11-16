@@ -6,6 +6,7 @@ import { istNow, type TeamPerson } from "@/lib/internal/team/shared";
 import { clientPath, weekStart, type Deliverable } from "@/lib/internal/clients/schema";
 import { canSeeOthers, canSeeTasksOf, isFounder, type TaskViewer } from "@/lib/internal/tasks/access";
 import {
+  choicesFor,
   engagementChoices,
   engagementLabels,
   guardedEmails,
@@ -227,7 +228,7 @@ export async function loadWeekCards(email: string, week: string, today: string, 
 export async function cardChoices(staff: Staff): Promise<LinkOption[]> {
   const [board, choices] = await Promise.all([
     loadBoard(staff.email, thisWeek()),
-    staff.clients ? engagementChoices() : Promise.resolve([]),
+    staff.clients ? engagementChoices().then((list) => choicesFor(staff.clientScope, list)) : Promise.resolve([]),
   ]);
   return linkOptions(board, choices).filter(
     (option) => option.group === "studio" || option.group === "client" || option.group === "deliverable",
