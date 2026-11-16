@@ -26,7 +26,8 @@ import {
  * slipped (theirs, ours, or someone else's). Pure, so the page, the CSV and
  * the "Copy for the client" text all say the same thing.
  *
- * Client-ready on purpose: no invoice state, no internal notes, no draft,
+ * Client-ready on purpose: no invoice state, no internal notes (the retro
+ * included), no draft,
  * review or PR links, no sizes or capacity. Only live links leave here.
  */
 
@@ -70,13 +71,13 @@ export type ClientReport = {
   /** The engagement's wins this month, oldest first. */
   milestones: { id: string; day: string; title: string; url: string | null }[];
   scopeNote: string;
-  retroNote: string;
 };
 
 export function buildClientReport(input: {
   client: Pick<ClientAccount, "name"> | null;
   engagement: Pick<Engagement, "name" | "owner">;
-  cycle: Pick<Cycle, "month" | "scope_note" | "retro_note">;
+  /** The retro stays out on purpose: it is the team's candid note, not the client's. */
+  cycle: Pick<Cycle, "month" | "scope_note">;
   lines: readonly ScopeLine[];
   deliverables: readonly Deliverable[];
   names?: Readonly<Record<string, string>>;
@@ -155,7 +156,6 @@ export function buildClientReport(input: {
       }))
       .sort((a, b) => a.day.localeCompare(b.day)),
     scopeNote: input.cycle.scope_note.trim(),
-    retroNote: input.cycle.retro_note.trim(),
   };
 }
 
@@ -267,8 +267,6 @@ export function reportText(report: ClientReport): string {
   }
 
   if (report.scopeNote) out.push("", "Agreed scope", report.scopeNote);
-  if (report.retroNote)
-    out.push("", "Looking back on the month", report.retroNote);
   return `${out.join("\n").trim()}\n`;
 }
 

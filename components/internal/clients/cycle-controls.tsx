@@ -183,7 +183,7 @@ export function CycleNotes({
           </label>
           <label className="block">
             <span className="mb-1 block text-[12px] text-[var(--i-muted)]">
-              Retro
+              Retro (team only, never in the client&rsquo;s report)
             </span>
             <textarea
               rows={3}
@@ -239,7 +239,7 @@ export function CycleNotes({
   return (
     <div className="space-y-3">
       {note("Agreed scope", scopeNote, "Nothing written down yet.")}
-      {note("Retro", retroNote, "Written when the month closes.")}
+      {note("Retro (team only)", retroNote, "Written when the month closes.")}
       {canEdit ? (
         <button
           type="button"
