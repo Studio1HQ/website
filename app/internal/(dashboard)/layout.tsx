@@ -85,7 +85,7 @@ async function SidebarWithCounts({ staff }: { staff: Staff }) {
     staff.blog ? blogBadge(staff) : Promise.resolve(0),
     canSeeMoney(staff) ? teamBadges() : Promise.resolve(NO_COUNTS.money),
     staff.community ? communityBadges(staff.email) : Promise.resolve(NO_COUNTS.community),
-    staff.clients ? clientNeeds(staff.email) : Promise.resolve(NO_COUNTS.clients),
+    staff.clients ? clientNeeds(staff.email, staff.clientScope) : Promise.resolve(NO_COUNTS.clients),
     seesTasks(staff) ? taskNeeds(staff) : Promise.resolve(null),
   ]);
   return (

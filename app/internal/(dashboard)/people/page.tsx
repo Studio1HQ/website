@@ -75,7 +75,9 @@ export default async function PeoplePage({
       current={current}
       today={now.date}
       people={people.people}
-      teammates={staff.admin ? mergeTeam(people.people, members ?? []) : []}
+      // A failed read of who has access is never shown as "nobody has any":
+      // saving from that would take people's access away.
+      teammates={!staff.admin ? [] : members ? mergeTeam(people.people, members) : null}
       clients={clientList?.ok ? clientList.rows.map((client) => ({ id: client.id, name: client.name })) : []}
       days={days.ok ? days.days : []}
       daysError={days.ok ? null : days.message}

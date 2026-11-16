@@ -198,3 +198,43 @@ describe("giving a Client team member only some clients", () => {
   });
 });
 
+
+describe("writes that hold to what was read", async () => {
+  const { decideMember, inviteMember } = await import("@/lib/internal/members");
+  const measure = "11111111-1111-4111-8111-111111111111";
+
+  it("won't put back Team tasks a founder took away after the read", async () => {
+    db.add("internal_members", { email: "assoc@studio1hq.com", status: "active", roles: ["client_member"] });
+    // Read when they still had Team tasks; a founder removed it since.
+    const stale = await decideMember(
+      "assoc@studio1hq.com",
+      { status: "active", roles: ["client_member", "tasks_viewer"] },
+      admin.email,
+      { statusWas: "active", tasksViewer: true },
+    );
+    expect(stale.ok).toBe(false);
+    expect(member("assoc@studio1hq.com")?.roles).toEqual(["client_member"]);
+  });
+
+  it("won't let an invite write over a row that appeared after the check", async () => {
+    db.add("internal_members", { email: "late@studio1hq.com", status: "disabled", roles: [] });
+    expect((await inviteMember("late@studio1hq.com", ["client_member"], admin.email, undefined, "none")).ok).toBe(false);
+    expect(member("late@studio1hq.com")?.status).toBe("disabled");
+  });
+
+  it("clears an old client list when someone is added back with every client", async () => {
+    db.add("client_accounts", { id: measure, name: "Measure", slug: "measure", archived_at: null });
+    db.add("internal_members", { email: "back@studio1hq.com", status: "pending", roles: [], client_ids: [measure] });
+    expect((await addTeammate(founder, { email: "back@studio1hq.com", roles: ["client_member"] })).ok).toBe(true);
+    expect(member("back@studio1hq.com")).toMatchObject({ status: "active", client_ids: null });
+  });
+
+  it("says so when access comes back but the roster write fails", async () => {
+    db.add("internal_members", { email: "noroster@studio1hq.com", status: "disabled", roles: [] });
+    db.fail("team_people");
+    const result = await setTeammateOn(founder, "noroster@studio1hq.com", true);
+    db.fail("team_people", false);
+    expect(result.ok).toBe(false);
+    expect(member("noroster@studio1hq.com")?.status).toBe("active");
+  });
+});

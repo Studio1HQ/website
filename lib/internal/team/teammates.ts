@@ -8,6 +8,7 @@ import {
   setMemberName,
   type Member,
   type MemberChange,
+  type MemberSnapshot,
 } from "@/lib/internal/members";
 import { clientAccess, cleanRoles, isOwner, isStaffEmail, roleChangeProblem, type RoleKey } from "@/lib/internal/roles";
 import {
@@ -112,6 +113,11 @@ export function mergeTeam(people: readonly TeamPerson[], members: readonly Membe
   );
 }
 
+/** What a non-founder's write must still find: the status, and whether they had Team tasks. */
+function snapshotOf(member: Pick<Member, "status" | "roles">): MemberSnapshot {
+  return { statusWas: member.status, tasksViewer: member.roles.includes("tasks_viewer") };
+}
+
 /** A roster row as the fields updatePerson takes. */
 function personInput(person: TeamPerson): PersonInput {
   const { email, name, employee_code, kind, designation, joined_on, reviewer, active } = person;
@@ -199,7 +205,16 @@ export async function addTeammate(actor: Actor, input: Record<string, unknown>):
     if (!added.ok) return { ok: false, message: added.message };
   }
   // Written with the roles, so they never have every client for a moment.
-  const invited = await inviteMember(email, roles, actor.email, scope.ids ?? undefined);
+  // An earlier list is cleared explicitly when every client is picked.
+  const hadScope = access.kind === "member" && access.member.client_ids !== null;
+  const invited = await inviteMember(
+    email,
+    roles,
+    actor.email,
+    scope.ids ?? (hadScope ? null : undefined),
+    // Another admin's write holds to what was checked above.
+    actor.owner ? undefined : access.kind === "member" ? snapshotOf(access.member) : "none",
+  );
   if (!invited.ok) {
     return {
       ok: false,
@@ -273,7 +288,7 @@ export async function saveTeammate(actor: Actor, input: Record<string, unknown>)
             email,
             accessChange,
             actor.email,
-            actor.owner ? undefined : { statusWas: current.status },
+            actor.owner ? undefined : snapshotOf(current),
           );
     if (!saved.ok) return saved;
   }
@@ -311,7 +326,10 @@ export async function setTeammateOn(actor: Actor, email: string, on: boolean): P
     const saved = await updatePerson({ ...personInput(person), active: on }, actor.email, person);
     if (!saved.ok) return saved;
   } else if (!person && on && isStaffEmail(email)) {
-    await addToTeam(email, access.kind === "member" ? access.member.name : "", actor.email);
+    const added = await addToTeam(email, access.kind === "member" ? access.member.name : "", actor.email);
+    if (added === null) {
+      return { ok: false, message: "Their access is back on, but they couldn't be put back on the team list. Try again in a minute." };
+    }
   }
   return { ok: true, message: on ? "Turned back on" : "Turned off" };
 }
