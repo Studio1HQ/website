@@ -2,7 +2,7 @@
  * A small in-memory stand-in for lib/supabase-server.ts, for tests of the
  * team and money code that reads and writes several tables in a row (sending
  * a payslip, taking in an invoice email). It understands the PostgREST
- * filters that code uses: eq, neq, gt, gte, lt, lte, is.null, in.(…) and the
+ * filters that code uses: eq, neq, gt, gte, lt, lte, is.null, in.(…), (not.)cs.{…} and the
  * one `or=(a.eq."x",b.eq."x")` form. Not for production code.
  *
  *   vi.mock("@/lib/supabase-server", async () => (await import("@/lib/internal/team/test-db")).fakeSupabase);
@@ -69,6 +69,13 @@ function test(row: Row, column: string, filter: string): boolean {
   const cell = row[column];
   const text = cell === null || cell === undefined ? null : String(cell);
   if (filter === "is.null") return text === null;
+  // Array columns: cs.{a,b} holds all of them; not.cs.{…} doesn't.
+  const contains = /^(not\.)?cs\.\{(.*)\}$/.exec(filter);
+  if (contains) {
+    const list = Array.isArray(cell) ? cell.map(String) : [];
+    const all = contains[2].split(",").filter(Boolean).every((item) => list.includes(unquote(item)));
+    return contains[1] ? !all : all;
+  }
   const dot = filter.indexOf(".");
   const op = filter.slice(0, dot);
   const value = filter.slice(dot + 1);

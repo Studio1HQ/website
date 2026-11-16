@@ -1,7 +1,7 @@
 import { Notice } from "@/components/internal/ui";
 import { Board, type BoardDeliverable } from "@/components/internal/tasks/board";
 import { canChangeTask, canGiveTask } from "@/lib/internal/tasks/access";
-import { engagementChoices } from "@/lib/internal/tasks/data";
+import { choicesFor, engagementChoices } from "@/lib/internal/tasks/data";
 import { loadBoard, thisWeek } from "@/lib/internal/tasks/load";
 import { boardPieces } from "@/lib/internal/tasks/board-data";
 import type { ViewProps } from "./types";
@@ -16,7 +16,7 @@ export async function BoardView({ staff, viewer, person, own, people, today }: V
   const canAdd = canGiveTask(viewer, person.email, person.guarded);
   const [board, choices] = await Promise.all([
     loadBoard(person.email, week),
-    staff.clients && canAdd ? engagementChoices() : Promise.resolve([]),
+    staff.clients && canAdd ? engagementChoices().then((list) => choicesFor(staff.clientScope, list)) : Promise.resolve([]),
   ]);
 
   if (board.missing) {

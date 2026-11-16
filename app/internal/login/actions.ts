@@ -9,9 +9,10 @@ import {
   sendSignInCode,
   verifySignInCode,
 } from "@/lib/supabase-server";
-import { isInvited, requestAccess, touchMember } from "@/lib/internal/members";
+import { accessFor, isInvited, requestAccess, touchMember } from "@/lib/internal/members";
+import { isOwner, isStaffEmail } from "@/lib/internal/roles";
 import { SIGN_IN_CODE_LIMIT, strictlyWithinLimit } from "@/lib/rate-limit";
-import { teamAccessFor } from "@/lib/internal/team/people";
+import { addToTeam, teamAccessFor } from "@/lib/internal/team/people";
 import { loginCookieOptions, sessionCookieOptions } from "@/lib/internal/session";
 import {
   CODE_TTL_SECONDS,
@@ -160,10 +161,22 @@ export async function checkSignInCode(
     return { status: "error", message: NOT_ALLOWED };
   }
 
-  // First sign-in files an access request for an owner to approve; owners
-  // and approved members go straight in (lib/internal/session.ts decides).
-  // People on the team list (or who log interns' days) already have My day
-  // or People, so they don't need a request.
+  // Everyone who signs in with an @studio1hq.com address joins People
+  // straight away, with My day, Tasks and Calls and no approval needed (the
+  // owner, 16 Nov 2026). Areas on People still wait for an admin.
+  // Someone whose access is turned off, or who's marked as left on People,
+  // stays out (addToTeam never touches an existing row).
+  if (isStaffEmail(email) && !isOwner(email)) {
+    const access = await accessFor(email);
+    if (access.kind === "none" || (access.kind === "member" && access.member.status !== "disabled")) {
+      await addToTeam(email, access.kind === "member" ? access.member.name : "", email);
+    }
+  }
+
+  // Anyone else's first sign-in files an access request for an owner to
+  // approve; owners and approved members go straight in
+  // (lib/internal/session.ts decides). People on the team list (or who log
+  // interns' days) already have My day or People, so they don't need one.
   const team = await teamAccessFor(email);
   if (!team.person && team.interns.length === 0) {
     const requested = await requestAccess(email);

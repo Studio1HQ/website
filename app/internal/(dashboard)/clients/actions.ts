@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
+import { inScope, type ClientScope } from "@/lib/internal/clients/scope";
 import { requireClients, staffName } from "@/lib/internal/session";
 import {
   cleanBlock,
@@ -132,7 +133,23 @@ function idOf(value: unknown) {
     : null;
 }
 
-type Viewer = { email: string; clients: ClientsAccess };
+type Viewer = { email: string; clients: ClientsAccess; clientScope: ClientScope };
+
+/**
+ * Refuses work on a client this person wasn't given (Client team members
+ * an admin scoped on People), as if it weren't there.
+ */
+async function outOfScope(
+  staff: Pick<Viewer, "clientScope">,
+  engagementId: string,
+): Promise<ActionResult | null> {
+  if (staff.clientScope === null) return null;
+  const engagement = await getEngagement(engagementId);
+  if (engagement === "error") return TRY_AGAIN;
+  return engagement && inScope(staff.clientScope, engagement.client_id)
+    ? null
+    : UNKNOWN;
+}
 
 /** Loads a deliverable and checks this person may change it. */
 async function changeable(
@@ -148,6 +165,8 @@ async function changeable(
   if (!deliverable) return { ok: false, result: UNKNOWN };
   if (!canChangeDeliverable(staff, deliverable))
     return { ok: false, result: NOT_YOURS };
+  const outside = await outOfScope(staff, deliverable.engagement_id);
+  if (outside) return { ok: false, result: outside };
   return { ok: true, deliverable };
 }
 
@@ -483,6 +502,8 @@ export async function saveDeliverable(
     const cycle = await getCycle(String(row.cycle_id));
     if (cycle === "error") return TRY_AGAIN;
     if (!cycle) return UNKNOWN;
+    const outside = await outOfScope(staff, cycle.engagement_id);
+    if (outside) return outside;
     if (row.scope_line_id) {
       const line = await getScopeLine(String(row.scope_line_id));
       if (line === "error") return TRY_AGAIN;
@@ -890,13 +911,17 @@ function mayChange(
   return row.created_by?.toLowerCase() === me;
 }
 
-/** Checks the engagement exists before something is added to it. */
-async function engagementCheck(id: unknown): Promise<ActionResult | null> {
+/** Checks the engagement exists, and is this person's to add to, before something is added to it. */
+async function engagementCheck(
+  staff: Pick<Viewer, "clientScope">,
+  id: unknown,
+): Promise<ActionResult | null> {
   const key = idOf(id);
   if (!key) return { ok: false, message: "Pick an engagement." };
   const engagement = await getEngagement(key);
   if (engagement === "error") return TRY_AGAIN;
-  if (!engagement) return UNKNOWN;
+  if (!engagement || !inScope(staff.clientScope, engagement.client_id))
+    return UNKNOWN;
   return null;
 }
 
@@ -913,7 +938,7 @@ export async function saveMilestone(
   if (!id) {
     const clean = cleanMilestone(input, "create");
     if (!clean.ok) return clean;
-    const problem = await engagementCheck(clean.row.engagement_id);
+    const problem = await engagementCheck(staff, clean.row.engagement_id);
     if (problem) return problem;
     const result = await insertRecord(
       TABLES.milestones,
@@ -930,6 +955,8 @@ export async function saveMilestone(
   const found = await getMilestone(key);
   if (found === "error") return TRY_AGAIN;
   if (!found) return UNKNOWN;
+  const outside = await outOfScope(staff, found.engagement_id);
+  if (outside) return outside;
   if (!mayChange(staff, found))
     return { ok: false, message: "Ask a client manager to change this one." };
   const clean = cleanMilestone(input, "update");
@@ -953,6 +980,8 @@ export async function removeMilestone(id: unknown): Promise<ActionResult> {
   const found = await getMilestone(key);
   if (found === "error") return TRY_AGAIN;
   if (!found) return UNKNOWN;
+  const outside = await outOfScope(staff, found.engagement_id);
+  if (outside) return outside;
   if (!mayChange(staff, found))
     return { ok: false, message: "Ask a client manager to remove this one." };
   const result = await deleteRecord(TABLES.milestones, "milestone", key);
@@ -986,7 +1015,7 @@ export async function savePartner(
         message:
           "Add yourself as the one who runs it, or ask a client manager.",
       };
-    const problem = await engagementCheck(row.engagement_id);
+    const problem = await engagementCheck(staff, row.engagement_id);
     if (problem) return problem;
     const result = await insertRecord(
       TABLES.partners,
@@ -1003,6 +1032,8 @@ export async function savePartner(
   const found = await getPartner(key);
   if (found === "error") return TRY_AGAIN;
   if (!found) return UNKNOWN;
+  const outside = await outOfScope(staff, found.engagement_id);
+  if (outside) return outside;
   if (!mayChange(staff, found))
     return {
       ok: false,
@@ -1040,6 +1071,8 @@ export async function removePartner(id: unknown): Promise<ActionResult> {
   const found = await getPartner(key);
   if (found === "error") return TRY_AGAIN;
   if (!found) return UNKNOWN;
+  const outside = await outOfScope(staff, found.engagement_id);
+  if (outside) return outside;
   if (!mayChange(staff, found))
     return { ok: false, message: "Ask a client manager to remove this one." };
   const result = await deleteRecord(TABLES.partners, "partner", key);

@@ -27,7 +27,6 @@ import {
   SlidersHorizontal,
   SquaresFour,
   Trophy,
-  UserGear,
   UsersThree,
   Wallet,
   type Icon,
@@ -492,6 +491,8 @@ export function InternalNav({
               href="/internal/people"
               label="People"
               icon={IdentificationCard}
+              badge={admin ? requests : undefined}
+              badgeTitle={`${requests} waiting for access`}
               active={isActive("/internal/people")}
             />
           ) : null}
@@ -509,15 +510,6 @@ export function InternalNav({
               icon={EnvelopeOpen}
               active={isActive("/internal/templates")}
             />
-            {admin ? (
-              <NavLink
-                href="/internal/team"
-                label="Team & roles"
-                icon={UserGear}
-                badge={requests}
-                active={isActive("/internal/team")}
-              />
-            ) : null}
           </div>
         </div>
       ) : null}

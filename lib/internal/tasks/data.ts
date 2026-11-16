@@ -1,4 +1,5 @@
 import "server-only";
+import { inScope, type ClientScope } from "@/lib/internal/clients/scope";
 import { cache } from "react";
 import { deleteRows, inList, insertRow, selectRows, updateRows } from "@/lib/supabase-server";
 import { listMembers } from "@/lib/internal/members";
@@ -503,6 +504,7 @@ export const engagementLabels = cache(async (): Promise<Map<string, EngagementLa
       name: engagement.name,
       internal: engagement.type === "internal",
       clientSlug: client?.slug,
+      clientId: engagement.client_id,
     });
   }
   return map;
@@ -539,12 +541,24 @@ export const engagementChoices = cache(async (): Promise<EngagementChoice[]> => 
       id: engagement.id,
       client: byClient.get(engagement.client_id)?.name ?? "A client",
       clientSlug: byClient.get(engagement.client_id)?.slug ?? "",
+      clientId: engagement.client_id,
       name: engagement.name,
       internal: engagement.type === "internal",
       cycleId: cycleOf.get(engagement.id) ?? null,
     }))
     .sort((a, b) => Number(b.internal) - Number(a.internal) || a.client.localeCompare(b.client) || a.name.localeCompare(b.name));
 });
+
+/**
+ * The engagements this person may tag work with: their clients (all of
+ * them unless an admin picked some on People) and Studio1's own work.
+ */
+export function choicesFor<T extends Pick<EngagementLabel, "clientId" | "internal">>(
+  scope: ClientScope,
+  choices: readonly T[],
+): T[] {
+  return choices.filter((choice) => choice.internal || inScope(scope, choice.clientId));
+}
 
 /* ---------------------------------------------- community tasks, read only */
 
