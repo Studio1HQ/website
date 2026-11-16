@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Buildings, CheckCircle } from "@phosphor-icons/react/dist/ssr";
+import { scopeRows } from "@/lib/internal/clients/scope";
 import { requireClients } from "@/lib/internal/session";
 import {
   incomplete,
@@ -108,7 +109,8 @@ export default async function ClientsThisWeekPage({
   }
   if (!clients.ok || !engagements.ok) return null;
 
-  const active = clients.rows.filter(
+  // Client team members an admin gave specific clients see only those.
+  const active = scopeRows(staff.clientScope, clients.rows).filter(
     (client) => client.status === "active" && !client.archived_at,
   );
   const activeIds = new Set(active.map((client) => client.id));

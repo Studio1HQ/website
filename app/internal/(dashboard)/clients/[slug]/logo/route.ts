@@ -1,5 +1,6 @@
 import { requireClients } from "@/lib/internal/session";
 import { loadClientBySlug } from "@/lib/internal/clients/data";
+import { inScope } from "@/lib/internal/clients/scope";
 import { LOGO_KEEP_SECONDS, clientLogo } from "@/lib/internal/clients/logo";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -17,10 +18,11 @@ const missing = () =>
  * browser can keep each one for a month.
  */
 export async function GET(_: Request, { params }: Props) {
-  await requireClients();
+  const staff = await requireClients();
   const { slug } = await params;
   const found = await loadClientBySlug(slug);
-  const website = found.ok ? found.client?.website : null;
+  const client = found.ok ? found.client : null;
+  const website = client && inScope(staff.clientScope, client.id) ? client.website : null;
   if (!website) return missing();
   const logo = await clientLogo(website);
   if (!logo) return missing();

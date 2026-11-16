@@ -11,6 +11,7 @@ import { displayName, istNow, isDateKey } from "@/lib/internal/team/shared";
 import { isOwnedBy } from "@/lib/internal/clients/schema";
 import { moveDeliverable } from "@/app/internal/(dashboard)/clients/actions";
 import type { Deliverable } from "@/lib/internal/clients/schema";
+import type { ClientScope } from "@/lib/internal/clients/scope";
 import {
   canChangeTask,
   canGiveTask,
@@ -19,6 +20,7 @@ import {
   owesReports,
 } from "@/lib/internal/tasks/access";
 import {
+  choicesFor,
   deleteTask,
   engagementLabels,
   findReport,
@@ -104,7 +106,7 @@ async function viewer() {
  * Where a task counts: Studio1 (an area) or a client engagement, and maybe a
  * deliverable of it. Checks the engagement and deliverable exist and match.
  */
-async function cleanFor(staff: { clients: unknown }, values: Record<string, unknown>): Promise<
+async function cleanFor(staff: { clients: unknown; clientScope: ClientScope }, values: Record<string, unknown>): Promise<
   | { ok: true; area: TaskArea; engagement_id: string | null; deliverable_id: string | null }
   | { ok: false; message: string }
 > {
@@ -119,7 +121,9 @@ async function cleanFor(staff: { clients: unknown }, values: Record<string, unkn
   if (!staff.clients) return NO_CLIENTS;
   const engagements = await engagementLabels();
   const engagement = engagements.get(engagementId);
-  if (!engagement) return { ok: false, message: "That client work isn't there any more. Pick another." };
+  // A client this person wasn't given (People) answers as if it weren't there.
+  if (!engagement || choicesFor(staff.clientScope, [engagement]).length === 0)
+    return { ok: false, message: "That client work isn't there any more. Pick another." };
   if (deliverableId) {
     const deliverable = await getDeliverableRow(deliverableId);
     if (deliverable === "error") return { ok: false, message: "Couldn't check that just now. Try again in a minute." };
@@ -280,7 +284,8 @@ async function resolveFor(
   if (!staff.clients) return NO_CLIENTS;
   if (link.kind === "e") {
     const engagement = (await engagementLabels()).get(link.id);
-    if (!engagement) return { ok: false, message: "That client work isn't there any more. Pick another." };
+    if (!engagement || choicesFor(staff.clientScope, [engagement]).length === 0)
+      return { ok: false, message: "That client work isn't there any more. Pick another." };
     return {
       ok: true,
       fields: { area: engagement.internal ? "content" : "client", engagement_id: link.id, deliverable_id: null },
@@ -292,7 +297,10 @@ async function resolveFor(
   if (!deliverable) return { ok: false, message: "That deliverable isn't there any more." };
   if (!isOwnedBy(deliverable.owner, staff.email) && !isOwnedBy(deliverable.reviewer, staff.email))
     return { ok: false, message: "Pick client work you own or review." };
-  const internal = (await engagementLabels()).get(deliverable.engagement_id)?.internal ?? false;
+  const label = (await engagementLabels()).get(deliverable.engagement_id);
+  if (!label || choicesFor(staff.clientScope, [label]).length === 0)
+    return { ok: false, message: "That deliverable isn't there any more." };
+  const internal = label.internal;
   return {
     ok: true,
     fields: { area: internal ? "content" : "client", engagement_id: deliverable.engagement_id, deliverable_id: deliverable.id },

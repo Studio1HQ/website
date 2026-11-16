@@ -1,18 +1,18 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { DateField, SuggestInput } from "@/components/internal/pickers";
 import Link from "next/link";
-import { AirplaneTilt, IdentificationCard, UserPlus } from "@phosphor-icons/react";
-import { addLeaveFor, deleteDayFor, saveDayFor, savePerson } from "@/app/internal/(dashboard)/people/actions";
+import { AirplaneTilt, IdentificationCard } from "@phosphor-icons/react";
+import { addLeaveFor, deleteDayFor, saveDayFor } from "@/app/internal/(dashboard)/people/actions";
 import { HoverLink, LinkPending } from "@/components/internal/nav-progress";
 import { cn } from "@/lib/utils";
-import { Avatar, Card, EmptyState, Notice, PageHeader, buttonClass, formatDate, inputClass } from "@/components/internal/ui";
-import { Chip, IdChip, dayText, dayTone, type Tone } from "@/components/internal/team/chips";
+import { Avatar, Card, EmptyState, Notice, PageHeader, buttonClass } from "@/components/internal/ui";
+import { dayText, dayTone, type Tone } from "@/components/internal/team/chips";
 import { DayDialog, LeaveDialog } from "@/components/internal/team/day-dialogs";
-import { Label, MonthSwitcher, Segmented, TeamDialog, useTeamAction } from "@/components/internal/team/kit";
+import { MonthSwitcher } from "@/components/internal/team/kit";
+import { TeamList, type ClientChoice } from "@/components/internal/team/team-list";
+import type { Teammate } from "@/lib/internal/team/teammates";
 import {
-  PERSON_KINDS,
   datesOfMonth,
   dayLabel,
   displayName,
@@ -24,7 +24,6 @@ import {
   slotsLabel,
   weekday,
   type AttendanceDay,
-  type PersonKind,
   type TeamPerson,
 } from "@/lib/internal/team/shared";
 
@@ -74,25 +73,32 @@ export function PeopleView({
   current,
   today,
   people,
+  teammates,
+  clients,
   days,
   daysError,
   reviewers,
 }: {
   admin: boolean;
-  /** One of the two owners: only they add people, bring someone back or set a reviewer. */
+  /** Arindam or Amitesh: outside writers, the Admin switch, Team tasks and turning people off. */
   owner: boolean;
   me: string;
-  tab: "attendance" | "directory";
+  tab: "team" | "attendance";
   month: string;
   current: string;
   today: string;
   people: TeamPerson[];
+  /** The one team list, for admins: everyone with their details and access. Null when access couldn't be read. */
+  teammates: Teammate[] | null;
+  /** Every client, to give a Client team member only some. */
+  clients: ClientChoice[];
   days: AttendanceDay[];
   daysError: string | null;
   reviewers: string[];
 }) {
   const active = people.filter((person) => person.active);
-  const tabHref = (value: string) => `/internal/people?tab=${value}${month !== current ? `&month=${month}` : ""}`;
+  const tabHref = (value: string) =>
+    value === "team" ? "/internal/people" : `/internal/people?tab=${value}${month !== current ? `&month=${month}` : ""}`;
 
   return (
     <>
@@ -100,7 +106,7 @@ export function PeopleView({
         title="People"
         description={
           admin
-            ? "Who's in today, everyone's month, and the team list with employee IDs."
+            ? "Everyone on the team, what they can open, and who's in today."
             : "Log your interns' days and leave. They can see what you log on their My day."
         }
       />
@@ -108,8 +114,8 @@ export function PeopleView({
         <nav aria-label="People" className="mb-5 flex gap-1 border-b border-[var(--i-line)]">
           {(
             [
+              ["team", "Team"],
               ["attendance", "Attendance"],
-              ["directory", "Team list"],
             ] as const
           ).map(([value, label]) => (
             <HoverLink
@@ -125,15 +131,23 @@ export function PeopleView({
             >
               {label}
               <span className="ml-1.5 text-[12px] tabular-nums text-[var(--i-faint)]">
-                {value === "directory" ? people.length : active.length}
+                {value === "team"
+                  ? (teammates ?? []).filter((teammate) => teammate.status !== "off").length
+                  : active.length}
               </span>
               <LinkPending className="ml-1.5 align-[-1px]" />
             </HoverLink>
           ))}
         </nav>
       ) : null}
-      {tab === "directory" ? (
-        <Directory people={people} reviewers={reviewers} owner={owner} />
+      {tab === "team" ? (
+        teammates ? (
+          <TeamList teammates={teammates} clients={clients} me={me} owner={owner} reviewers={reviewers} />
+        ) : (
+          <Notice tone="error">
+            Couldn&apos;t load who has access right now, so the team can&apos;t be changed. Reload the page in a minute.
+          </Notice>
+        )
       ) : (
         <Attendance
           admin={admin}
@@ -186,14 +200,14 @@ function Attendance({
           title={admin ? "No one on the team list yet" : "No interns to log for"}
           action={
             admin ? (
-              <Link href="/internal/people?tab=directory" className={buttonClass("primary")}>
+              <Link href="/internal/people" className={buttonClass("primary")}>
                 Add people
               </Link>
             ) : undefined
           }
         >
           {admin
-            ? "Add employees and interns on the Team list. Employees then log their own days on My day."
+            ? "Add people on the Team tab. Employees then log their own days on My day."
             : "An admin sets who reviews each intern on the People page."}
         </EmptyState>
       </Card>
@@ -270,7 +284,7 @@ function Attendance({
             <MonthSwitcher
               month={month}
               current={current}
-              hrefFor={(value) => `/internal/people${value === current ? "" : `?month=${value}`}`}
+              hrefFor={(value) => `/internal/people?tab=attendance${value === current ? "" : `&month=${value}`}`}
             />
             {editable.length ? (
               <button type="button" onClick={() => setLeaveOpen(true)} className={buttonClass("secondary", "sm")}>
@@ -411,242 +425,5 @@ function Attendance({
         onSave={addLeaveFor}
       />
     </div>
-  );
-}
-
-/* ------------------------------------------------------------- directory */
-
-function Directory({ people, reviewers, owner }: { people: TeamPerson[]; reviewers: string[]; owner: boolean }) {
-  const [editing, setEditing] = useState<TeamPerson | "new" | null>(null);
-
-  return (
-    <>
-      <Card>
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--i-line)] px-5 py-3">
-          <p className="max-w-xl text-[12.5px] leading-relaxed text-[var(--i-muted)]">
-            Everyone here can sign in with their @studio1hq.com address and use My day: no other role needed. Interns&apos; days
-            are logged by their reviewer.
-            {owner ? "" : " Only Arindam and Amitesh can add people, bring someone back or set a reviewer."}
-          </p>
-          {owner ? (
-            <div className="flex flex-wrap items-center gap-2">
-              <Link href="/internal/team" className={buttonClass("ghost", "sm")}>
-                Dashboard roles
-              </Link>
-              <button type="button" onClick={() => setEditing("new")} className={buttonClass("primary", "sm")}>
-                <UserPlus size={14} /> Add person
-              </button>
-            </div>
-          ) : null}
-        </div>
-        {people.length === 0 ? (
-          <EmptyState icon={<IdentificationCard size={20} />} title="No one yet">
-            Add employees and interns with their email. Employee IDs can wait until you have them.
-          </EmptyState>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-[12.5px]">
-              <thead>
-                <tr className="border-b border-[var(--i-line)] text-left text-[var(--i-muted)]">
-                  <th scope="col" className="px-5 py-2 font-normal">Person</th>
-                  <th scope="col" className="px-3 py-2 font-normal">Employee ID</th>
-                  <th scope="col" className="px-3 py-2 font-normal">Type</th>
-                  <th scope="col" className="hidden px-3 py-2 font-normal md:table-cell">Designation</th>
-                  <th scope="col" className="hidden px-3 py-2 font-normal lg:table-cell">Joined</th>
-                  <th scope="col" className="hidden px-3 py-2 font-normal md:table-cell">Reviewer</th>
-                  <th scope="col" className="px-5 py-2 text-right font-normal">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {people.map((person) => (
-                  <tr
-                    key={person.email}
-                    onClick={() => setEditing(person)}
-                    className={cn(
-                      "cursor-pointer border-b border-[var(--i-line)] last:border-b-0 hover:bg-[var(--i-hover)]",
-                      !person.active && "opacity-60",
-                    )}
-                  >
-                    <td className="px-5 py-2.5">
-                      <button
-                        type="button"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          setEditing(person);
-                        }}
-                        className="flex items-center gap-2.5 text-left"
-                      >
-                        <Avatar name={displayName(person)} email={person.email} size={28} src={photoUrl(person)} />
-                        <span className="min-w-0">
-                          <span className="block truncate font-medium">{displayName(person)}</span>
-                          <span className="block truncate text-[11.5px] text-[var(--i-muted)]">{person.email}</span>
-                        </span>
-                      </button>
-                    </td>
-                    <td className="px-3 py-2.5">
-                      {person.employee_code ? <IdChip>{person.employee_code}</IdChip> : <span className="text-[var(--i-faint)]">Not set</span>}
-                    </td>
-                    <td className="px-3 py-2.5">{PERSON_KINDS[person.kind]}</td>
-                    <td className="hidden px-3 py-2.5 text-[var(--i-ink-2)] md:table-cell">{person.designation || "—"}</td>
-                    <td className="hidden px-3 py-2.5 tabular-nums text-[var(--i-ink-2)] lg:table-cell">
-                      {person.joined_on ? formatDate(`${person.joined_on}T12:00:00Z`).replace(/,.*$/, "") : "—"}
-                    </td>
-                    <td className="hidden max-w-[12rem] truncate px-3 py-2.5 text-[var(--i-ink-2)] md:table-cell">
-                      {person.kind === "intern" ? person.reviewer || <span className="text-amber-700 dark:text-amber-300">Not set</span> : "—"}
-                    </td>
-                    <td className="px-5 py-2.5 text-right">
-                      <Chip tone={person.active ? "emerald" : "stone"}>{person.active ? "Active" : "Left"}</Chip>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Card>
-      {editing ? (
-        <PersonDialog
-          person={editing === "new" ? null : editing}
-          reviewers={reviewers}
-          owner={owner}
-          onClose={() => setEditing(null)}
-        />
-      ) : null}
-    </>
-  );
-}
-
-function PersonDialog({
-  person,
-  reviewers,
-  owner,
-  onClose,
-}: {
-  person: TeamPerson | null;
-  reviewers: string[];
-  owner: boolean;
-  onClose: () => void;
-}) {
-  const { pending, run } = useTeamAction();
-  const [email, setEmail] = useState(person?.email ?? "");
-  const [name, setName] = useState(person?.name ?? "");
-  const [code, setCode] = useState(person?.employee_code ?? "");
-  const [kind, setKind] = useState<PersonKind>(person?.kind ?? "employee");
-  const [designation, setDesignation] = useState(person?.designation ?? "");
-  const [joined, setJoined] = useState(person?.joined_on ?? "");
-  const [reviewer, setReviewer] = useState(person?.reviewer ?? "");
-  const [active, setActive] = useState(person?.active ?? true);
-
-  const save = () =>
-    run(
-      () =>
-        savePerson(
-          {
-            email,
-            name,
-            employee_code: code,
-            kind,
-            designation,
-            joined_on: joined,
-            reviewer: kind === "intern" ? reviewer : "",
-            active,
-          },
-          person === null,
-        ),
-      onClose,
-    );
-
-  return (
-    <TeamDialog
-      open
-      onOpenChange={(open) => (open ? null : onClose())}
-      title={person ? displayName(person) : "Add a person"}
-      description={person ? person.email : "They can sign in with this email and use My day."}
-      footer={
-        <>
-          <button type="button" onClick={onClose} className={buttonClass("ghost")}>
-            Cancel
-          </button>
-          <button type="button" disabled={pending} onClick={save} className={buttonClass("primary")}>
-            {pending ? "Saving…" : person ? "Save" : "Add"}
-          </button>
-        </>
-      }
-    >
-      {!person ? (
-        <Label label="Email">
-          <input
-            type="email"
-            value={email}
-            autoFocus
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="name@studio1hq.com"
-            className={inputClass()}
-          />
-        </Label>
-      ) : null}
-      <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-3">
-        <Label label="Name" hint="they can change it">
-          <input value={name} maxLength={80} onChange={(event) => setName(event.target.value)} className={inputClass()} />
-        </Label>
-        <Label label="Employee ID">
-          <input
-            value={code}
-            maxLength={24}
-            onChange={(event) => setCode(event.target.value)}
-            placeholder="S1-001"
-            className={inputClass()}
-          />
-        </Label>
-      </div>
-      <Label group label="Type">
-        <Segmented
-          label="Type"
-          value={kind}
-          onChange={setKind}
-          options={[
-            { value: "employee", label: "Employee: logs own days" },
-            { value: "intern", label: "Intern: a reviewer logs" },
-          ]}
-        />
-      </Label>
-      {kind === "intern" ? (
-        <Label label="Reviewer" hint={owner ? "logs their days" : "only Arindam or Amitesh can set this"}>
-          <SuggestInput
-            value={reviewer}
-            disabled={!owner}
-            onChange={setReviewer}
-            options={reviewers.filter((address) => address !== email).map((address) => ({ value: address }))}
-            placeholder="mentor@studio1hq.com"
-          />
-        </Label>
-      ) : null}
-      <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-3">
-        <Label label="Designation">
-          <input
-            value={designation}
-            maxLength={80}
-            onChange={(event) => setDesignation(event.target.value)}
-            placeholder="DevRel Engineer"
-            className={inputClass()}
-          />
-        </Label>
-        <Label label="Joined on">
-          <DateField value={joined} onChange={setJoined} />
-        </Label>
-      </div>
-      {person ? (
-        <label className="flex cursor-pointer items-center gap-2.5 text-[13px]">
-          <input
-            type="checkbox"
-            checked={active}
-            disabled={!owner && !person.active}
-            onChange={(event) => setActive(event.target.checked)}
-            className="size-4 accent-[var(--i-accent)]"
-          />
-          Active. Turn off when someone leaves: they lose My day, and their days and payslips stay.
-        </label>
-      ) : null}
-    </TeamDialog>
   );
 }

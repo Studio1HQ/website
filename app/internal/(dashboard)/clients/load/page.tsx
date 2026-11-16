@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { inScope } from "@/lib/internal/clients/scope";
 import { requireClients } from "@/lib/internal/session";
 import {
   incomplete,
@@ -134,6 +135,8 @@ export default async function ClientsLoadPage({
     const engagement = engagementOf.get(deliverable.engagement_id);
     const client = engagement ? clientOf.get(engagement.client_id) : undefined;
     if (engagement?.status === "ended" || client?.archived_at) continue;
+    // Client team members an admin gave specific clients see only theirs.
+    if (!inScope(staff.clientScope, engagement?.client_id)) continue;
     items.push({
       deliverable,
       clientName: client?.name,
@@ -173,16 +176,23 @@ export default async function ClientsLoadPage({
     `${count} ${count === 1 ? "person" : "people"}`;
   const verb = (count: number) =>
     past ? (count === 1 ? "was" : "were") : count === 1 ? "is" : "are";
+  // Someone given only some clients sees only that slice of each person's
+  // work: someone over on it is over, but nobody can be called fine.
+  const partial = staff.clientScope !== null;
   const headline = over.length
     ? `${headcount(over.length)} ${verb(over.length)} over capacity ${words}.`
-    : `Nobody ${past ? "was" : "is"} over capacity ${words}.`;
+    : partial
+      ? `Showing only work on your clients ${words}.`
+      : `Nobody ${past ? "was" : "is"} over capacity ${words}.`;
   const advice = over.length
     ? past
       ? "Worth a look before planning the next one."
       : "Move work or share it out before the Monday plan goes to the client."
-    : week >= current
+    : week >= current && !partial
       ? "Fine to send the Monday plan as it stands."
-      : "";
+      : partial
+        ? "People may have more work on other clients."
+        : "";
 
   return (
     <>

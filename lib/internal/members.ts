@@ -31,6 +31,11 @@ export type Member = {
   decided_at: string | null;
   last_seen_at: string | null;
   invited_by: string | null;
+  /**
+   * The clients a Client team member may open, by id; null for every client
+   * (and before the client scope migration, 20261116150000_member_client_scope.sql).
+   */
+  client_ids: string[] | null;
 };
 
 const TABLE = "internal_members";
@@ -64,6 +69,9 @@ function toMember(row: Record<string, unknown>): Member | null {
     decided_at: typeof row.decided_at === "string" ? row.decided_at : null,
     last_seen_at: typeof row.last_seen_at === "string" ? row.last_seen_at : null,
     invited_by: typeof row.invited_by === "string" ? row.invited_by : null,
+    client_ids: Array.isArray(row.client_ids)
+      ? row.client_ids.filter((id): id is string => typeof id === "string")
+      : null,
   };
 }
 
@@ -167,6 +175,33 @@ export const pendingCount = cache(async (): Promise<number> => {
   return result.ok ? (result.total ?? 0) : 0;
 });
 
+/**
+ * Staff approved with no roles still get My day and Tasks (they're on the
+ * team list), so that's allowed. Someone outside Studio1 with no role would
+ * have nothing at all.
+ */
+function noRolesProblem(email: string, status: MemberStatus, roles: RoleKey[]) {
+  if (status !== "active" || roles.length > 0 || isStaffEmail(email)) return null;
+  return "Outside writers need Blog: own work, or turn their access off.";
+}
+
+/**
+ * A change to someone's access. `clientIds` is written only when given: a
+ * database without the column (before 20261116150000_member_client_scope.sql)
+ * still takes every other change.
+ */
+export type MemberChange = { status: MemberStatus; roles: RoleKey[]; clientIds?: string[] | null };
+
+function scopeColumn(change: { clientIds?: string[] | null }) {
+  return change.clientIds === undefined ? {} : { client_ids: change.clientIds };
+}
+
+/** Whether the client scope column is there yet (the migration has run). */
+export async function clientScopeReady() {
+  const result = await selectRows(TABLE, new URLSearchParams({ select: "client_ids", limit: "1" }));
+  return result.ok;
+}
+
 /** The legacy single-role column, kept in step for old code. */
 function legacyRole(roles: RoleKey[]) {
   return hiringLevel(roles) ?? "viewer";
@@ -175,24 +210,30 @@ function legacyRole(roles: RoleKey[]) {
 /**
  * Saves someone's status and roles. `unless` makes the write itself hold a
  * check that was made on an earlier read: the row must still have that
- * status and still not be an admin's, so a change made in between (an owner
- * turning the person off, or making them an admin) isn't written over.
+ * status, still not be an admin's and, when given, still have (or not have)
+ * Team tasks, so a change made in between (an owner turning the person off,
+ * making them an admin, or taking Team tasks away) isn't written over.
  */
+export type MemberSnapshot = { statusWas: MemberStatus; tasksViewer?: boolean };
+
 export async function decideMember(
   email: string,
-  change: { status: MemberStatus; roles: RoleKey[] },
+  change: MemberChange,
   by: string,
-  unless?: { statusWas: MemberStatus },
+  unless?: MemberSnapshot,
 ) {
   if (isOwner(email)) return { ok: false as const, message: "Owners can't be changed." };
   const roles = cleanRoles(email, change.roles);
-  if (change.status === "active" && roles.length === 0) {
-    return { ok: false as const, message: "Pick at least one role, or turn their access off." };
-  }
+  const problem = noRolesProblem(email, change.status, roles);
+  if (problem) return { ok: false as const, message: problem };
   const which = new URLSearchParams({ email: `eq.${email}` });
   if (unless) {
     which.set("status", `eq.${unless.statusWas}`);
-    which.set("roles", "not.cs.{admin}");
+    // Two filters on one column: PostgREST ANDs them.
+    which.append("roles", "not.cs.{admin}");
+    if (unless.tasksViewer !== undefined) {
+      which.append("roles", unless.tasksViewer ? "cs.{tasks_viewer}" : "not.cs.{tasks_viewer}");
+    }
   }
   const result = await updateRows(
     TABLE,
@@ -201,6 +242,7 @@ export async function decideMember(
       status: change.status,
       roles,
       role: legacyRole(roles),
+      ...scopeColumn(change),
       decided_by: by,
       decided_at: new Date().toISOString(),
     },
@@ -223,17 +265,51 @@ export async function decideMember(
 }
 
 /**
- * Adds someone with roles straight away: staff an admin wants in before they
- * ask, or an outside writer. Re-inviting an existing person updates them.
+ * A member row for someone who's only on the team list (added on People,
+ * never invited or approved here): they had My day and Tasks, and now get
+ * these roles, or have their access turned off. Refused when a row turned up
+ * in the meantime, so a change made in between isn't written over.
  */
-export async function inviteMember(email: string, roles: RoleKey[], by: string) {
+export async function addMember(email: string, change: MemberChange, by: string) {
+  if (isOwner(email)) return { ok: false as const, message: "Owners can't be changed." };
+  const roles = cleanRoles(email, change.roles);
+  const problem = noRolesProblem(email, change.status, roles);
+  if (problem) return { ok: false as const, message: problem };
+  const inserted = await insertRow(TABLE, {
+    email,
+    roles,
+    role: legacyRole(roles),
+    status: change.status,
+    ...scopeColumn(change),
+    decided_by: by,
+    decided_at: new Date().toISOString(),
+  });
+  if (inserted.ok) return { ok: true as const };
+  if (inserted.duplicate) {
+    return { ok: false as const, message: "Their access was just changed by someone else. Reload the page and try again." };
+  }
+  console.error(`[internal] adding ${email} to ${TABLE} failed: ${inserted.message}`);
+  return { ok: false as const, message: "Couldn't save. Try again in a minute." };
+}
+
+/**
+ * Adds someone straight away: staff an admin wants in before they ask (with
+ * any roles, or none for just My day and Tasks), or an outside writer.
+ * Re-inviting an existing person updates them. `expected` holds the write to
+ * what the caller saw: "none" (no row, so one turning up in between is
+ * refused) or the row's snapshot (see decideMember's `unless`).
+ */
+export async function inviteMember(
+  email: string,
+  roles: RoleKey[],
+  by: string,
+  clientIds?: string[] | null,
+  expected?: MemberSnapshot | "none",
+) {
   if (isOwner(email)) return { ok: false as const, message: "Owners already have access." };
   const clean = cleanRoles(email, roles);
-  if (clean.length === 0) {
-    return {
-      ok: false as const,
-      message: isStaffEmail(email) ? "Pick at least one role." : "Outside writers can only be Blog writers.",
-    };
+  if (clean.length === 0 && !isStaffEmail(email)) {
+    return { ok: false as const, message: "Outside writers can only be Blog writers." };
   }
   const now = new Date().toISOString();
   const row = {
@@ -241,6 +317,7 @@ export async function inviteMember(email: string, roles: RoleKey[], by: string) 
     roles: clean,
     role: legacyRole(clean),
     status: "active",
+    ...scopeColumn({ clientIds }),
     invited_by: by,
     decided_by: by,
     decided_at: now,
@@ -256,6 +333,9 @@ export async function inviteMember(email: string, roles: RoleKey[], by: string) 
         : "Couldn't save the invite. Try again in a minute.",
     };
   }
-  const updated = await decideMember(email, { status: "active", roles: clean }, by);
+  if (expected === "none") {
+    return { ok: false as const, message: "Their access was just changed by someone else. Reload the page and try again." };
+  }
+  const updated = await decideMember(email, { status: "active", roles: clean, clientIds }, by, expected);
   return updated.ok ? { ok: true as const, existed: true } : updated;
 }

@@ -10,8 +10,8 @@ export const metadata: Metadata = { title: "Your profile" };
 
 /**
  * Everyone's own page: their name and photo, and what their roles let them
- * open, in the same words as the access grid on /internal/team (where an
- * admin changes it).
+ * open, in the same words as the team list on People (where an admin
+ * changes it).
  */
 export default async function ProfilePage() {
   const staff = await requireMember();
@@ -47,7 +47,7 @@ export default async function ProfilePage() {
     <>
       <PageHeader
         title="Your profile"
-        description="Your name and photo show across the dashboard. What you can open is set on Team & roles by an admin."
+        description="Your name and photo show across the dashboard. What you can open is set on People by an admin."
       />
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <Card>
@@ -67,9 +67,9 @@ export default async function ProfilePage() {
           <p className="border-t border-[var(--i-line)] px-5 py-3 text-[12.5px] text-[var(--i-muted)]">
             {isAdmin(staff) ? (
               <>
-                Add people and change their roles on{" "}
-                <Link href="/internal/team" className="text-[var(--i-ink-2)] underline underline-offset-2">
-                  Team &amp; roles
+                Add people and change what they can open on{" "}
+                <Link href="/internal/people" className="text-[var(--i-ink-2)] underline underline-offset-2">
+                  People
                 </Link>
                 .
               </>

@@ -1,26 +1,23 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { isOwner } from "@/lib/internal/roles";
+import { renderEmail } from "@/lib/internal/email-templates";
+import { isOwner, isStaffEmail, rolesLabel, type RoleKey } from "@/lib/internal/roles";
 import { requirePeople } from "@/lib/internal/session";
 import { cantLog } from "@/lib/internal/team/access";
 import { changeProblem, cleanDay, deleteDay, saveDay, saveLeave } from "@/lib/internal/team/attendance";
-import { addPerson, cleanPerson, getPerson, reviewerProblem, updatePerson } from "@/lib/internal/team/people";
-import { isDateKey, type TeamResult } from "@/lib/internal/team/shared";
+import { getPerson } from "@/lib/internal/team/people";
+import { displayName, isDateKey, type TeamResult } from "@/lib/internal/team/shared";
+import { addTeammate, saveTeammate, setTeammateOn, type Actor } from "@/lib/internal/team/teammates";
 import { emailAddress } from "@/lib/internal/token";
+import { isMailerConfigured, sendMail } from "@/lib/mailer";
+import { baseUrl } from "@/lib/site";
 
 /**
- * The People page: admins log anyone's days and keep the team list;
- * reviewers log their interns' days. Every action checks both.
- *
- * Being on the team list, or being named an intern's reviewer, is a way into
- * the dashboard. So adding someone, bringing someone back, and naming a
- * reviewer are the owners' call, like every other way in
- * (app/internal/(dashboard)/team/actions.ts). Other admins can still fix
- * names, IDs, designations and dates, and mark someone as having left.
+ * The People page: admins keep the one team list (who's on it, their
+ * details and what they can open) and log anyone's days; reviewers log
+ * their interns' days. Every action checks both.
  */
-
-const OWNERS_ONLY = "Only Arindam and Amitesh can add people, bring someone back or set a reviewer: it lets them into the dashboard.";
 
 /** One answer for "not on the list" and "not yours", so the list can't be probed. */
 const NOT_YOURS = "You can't log days for that person.";
@@ -71,34 +68,82 @@ export async function addLeaveFor(input: Record<string, unknown>): Promise<TeamR
   return done(result, result.ok ? `Leave added for ${result.days} ${result.days === 1 ? "day" : "days"}` : "");
 }
 
-/**
- * Adds someone to the team list, or changes their details. Admins only; the
- * changes that let someone in (see the top of this file) need an owner.
- */
-export async function savePerson(input: Record<string, unknown>, isNew: unknown): Promise<TeamResult> {
+/* ------------------------------------------------------------- the team */
+
+async function requireAdmin(): Promise<Actor | null> {
   const staff = await requirePeople();
-  if (!staff.admin) return { ok: false, message: "Only admins can change the team list." };
-  const clean = cleanPerson(input ?? {});
-  if (!clean.ok) return clean;
-  const owner = isOwner(staff.email);
-  const before = await getPerson(clean.person.email);
+  return staff.admin ? { email: staff.email, owner: isOwner(staff.email) } : null;
+}
 
-  if (isNew === true) {
-    if (!owner) return { ok: false, message: OWNERS_ONLY };
-    if (before) return { ok: false, message: "That person is already on the team list." };
-  } else {
-    if (!before) return { ok: false, message: "That person isn't on the team list." };
-    const comingBack = clean.person.active && !before.active;
-    const newReviewer = clean.person.reviewer !== null && clean.person.reviewer !== before.reviewer;
-    if ((comingBack || newReviewer) && !owner) return { ok: false, message: OWNERS_ONLY };
-  }
-  // A reviewer that's being set or changed has to be someone at Studio1 who's still around.
-  if (clean.person.reviewer && clean.person.reviewer !== before?.reviewer) {
-    const problem = await reviewerProblem(clean.person.reviewer);
-    if (problem) return { ok: false, message: problem };
-  }
+const ADMINS_ONLY: TeamResult = { ok: false, message: "Only admins can change the team." };
 
-  const result = isNew === true ? await addPerson(clean.person, staff.email) : await updatePerson(clean.person, staff.email, before);
+function teamChanged(result: TeamResult): TeamResult {
   if (result.ok) revalidatePath("/internal", "layout");
-  return result.ok ? { ok: true, message: isNew === true ? "Added to the team" : "Saved" } : result;
+  return result;
+}
+
+/**
+ * Adds someone from the Add person dialog: their details and what they can
+ * open, then an email saying they're in. Admins only; outside writers, the
+ * Admin switch and Team tasks stay with the founders (lib/internal/team/teammates.ts).
+ */
+export async function addTeammateAction(input: Record<string, unknown>): Promise<TeamResult> {
+  const actor = await requireAdmin();
+  if (!actor) return ADMINS_ONLY;
+  const added = await addTeammate(actor, input);
+  if (!added.ok) return added;
+  revalidatePath("/internal", "layout");
+  return { ok: true, message: await sendInvite(added.email, added.roles, actor.email) };
+}
+
+/** Saves someone's details and access from their row's dialog. */
+export async function saveTeammateAction(input: Record<string, unknown>): Promise<TeamResult> {
+  const actor = await requireAdmin();
+  if (!actor) return ADMINS_ONLY;
+  return teamChanged(await saveTeammate(actor, input));
+}
+
+/** Turns someone's access off, or back on. The founders only. */
+export async function setTeammateAccess(email: unknown, on: unknown): Promise<TeamResult> {
+  const actor = await requireAdmin();
+  if (!actor) return ADMINS_ONLY;
+  const target = emailAddress(email);
+  if (!target || typeof on !== "boolean") return { ok: false, message: "That change isn't valid." };
+  return teamChanged(await setTeammateOn(actor, target, on));
+}
+
+/**
+ * Tells someone they're in. Never a sign-in link (codes only; see the login
+ * page): the button opens the login page, where they ask for a code.
+ */
+async function sendInvite(target: string, roles: RoleKey[], by: string): Promise<string> {
+  if (!isMailerConfigured()) {
+    return `Added ${target}. Email isn't set up, so send them ${baseUrl}/internal/login yourself.`;
+  }
+  const inviter = displayName({ email: by });
+  const writerOnly = roles.length === 1 && roles[0] === "blog_writer" && !isStaffEmail(target);
+  const body = writerOnly
+    ? `Hi,\n\n${inviter} invited you to write for the Studio1 blog.\n\nSign in with this address (${target}) and you'll land in the blog editor. Write your post there, and when it's ready, ask for a review. A Studio1 reviewer will take it from there.\n\nThe Studio1 team`
+    : `Hi,\n\n${inviter} added you to the Studio1 dashboard (My day, Tasks and Calls${roles.length ? `, plus ${rolesLabel(roles)}` : ""}).\n\nSign in with this address (${target}) using the button below.\n\nThe Studio1 team`;
+  const { html, text } = renderEmail({
+    body,
+    call: {
+      label: writerOnly ? "Open the blog editor" : "Open the dashboard",
+      url: `${baseUrl}/internal/login?next=${writerOnly ? "/internal/blog" : "/internal"}`,
+    },
+    reason: `You're getting this because a Studio1 admin invited ${target}.`,
+  });
+  try {
+    await sendMail({
+      to: target,
+      subject: writerOnly ? "You're invited to write for the Studio1 blog" : "You have access to the Studio1 dashboard",
+      html,
+      text,
+      replyTo: by,
+    });
+  } catch (error) {
+    console.error("[internal] invite email failed", error);
+    return `Added ${target}, but the invite email didn't send. Send them ${baseUrl}/internal/login.`;
+  }
+  return `Added ${target} and emailed them an invite.`;
 }

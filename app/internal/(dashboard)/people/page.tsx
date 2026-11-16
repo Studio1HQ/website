@@ -1,18 +1,21 @@
 import type { Metadata } from "next";
 import { Notice, PageHeader } from "@/components/internal/ui";
 import { PeopleView } from "@/components/internal/team/people-view";
+import { loadClients } from "@/lib/internal/clients/data";
 import { listMembers } from "@/lib/internal/members";
 import { OWNERS, isOwner } from "@/lib/internal/roles";
 import { requirePeople } from "@/lib/internal/session";
 import { listDays } from "@/lib/internal/team/attendance";
-import { listPeople } from "@/lib/internal/team/people";
+import { addMissingMembers, listPeople } from "@/lib/internal/team/people";
+import { mergeTeam } from "@/lib/internal/team/teammates";
 import { daysInMonth, isMonthKey, istNow, monthOf } from "@/lib/internal/team/shared";
 
 export const metadata: Metadata = { title: "People" };
 
 /**
- * Attendance for the whole team (admins) or a reviewer's interns, and the
- * team list itself: employee IDs, interns' reviewers, who's active.
+ * The one team list (admins): everyone on the roster and everyone with
+ * dashboard access as one row, with their details and what they can open.
+ * And attendance, for the whole team (admins) or a reviewer's interns.
  */
 export default async function PeoplePage({
   searchParams,
@@ -23,10 +26,23 @@ export default async function PeoplePage({
   const now = istNow();
   const current = monthOf(now.date);
   const month = isMonthKey(params.month) && params.month <= current ? params.month : current;
-  const tab = staff.admin && params.tab === "directory" ? "directory" : "attendance";
+  // Admins land on the team; ?tab=directory is the old name, from saved links.
+  const tab = staff.admin && params.tab !== "attendance" && !params.month ? "team" : "attendance";
 
   // No salary lines here, for anyone: listPeople never reads them.
-  const people = await listPeople(staff.admin ? {} : { emails: staff.interns });
+  const [listed, members, clientList] = await Promise.all([
+    listPeople(staff.admin ? {} : { emails: staff.interns }),
+    staff.admin ? listMembers() : Promise.resolve(null),
+    // To give a Client team member only some clients (the team list's dialog).
+    staff.admin ? loadClients() : Promise.resolve(null),
+  ]);
+  let people = listed;
+  // Everyone with dashboard access at Studio1 belongs on the roster too:
+  // anyone who isn't yet (approved before that was automatic) is added now,
+  // then the list re-read.
+  if (people.ok && members && (await addMissingMembers(members, people.people, staff.email)).length) {
+    people = await listPeople();
+  }
   if (!people.ok) {
     return (
       <>
@@ -38,11 +54,8 @@ export default async function PeoplePage({
 
   const active = people.people.filter((person) => person.active);
   const last = `${month}-${String(daysInMonth(month)).padStart(2, "0")}`;
-  const [days, members] = await Promise.all([
-    // The whole month: leave planned for later days shows too.
-    listDays({ from: `${month}-01`, to: last, emails: active.map((person) => person.email) }),
-    staff.admin && tab === "directory" ? listMembers() : Promise.resolve(null),
-  ]);
+  // The whole month: leave planned for later days shows too.
+  const days = await listDays({ from: `${month}-01`, to: last, emails: active.map((person) => person.email) });
   // Reviewers to suggest for interns: dashboard members and the employees.
   const reviewers = [
     ...new Set([
@@ -62,6 +75,10 @@ export default async function PeoplePage({
       current={current}
       today={now.date}
       people={people.people}
+      // A failed read of who has access is never shown as "nobody has any":
+      // saving from that would take people's access away.
+      teammates={!staff.admin ? [] : members ? mergeTeam(people.people, members) : null}
+      clients={clientList?.ok ? clientList.rows.map((client) => ({ id: client.id, name: client.name })) : []}
       days={days.ok ? days.days : []}
       daysError={days.ok ? null : days.message}
       reviewers={reviewers}

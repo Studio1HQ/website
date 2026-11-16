@@ -281,6 +281,8 @@ export type EngagementLabel = {
   internal: boolean;
   /** The client's slug, for links to its workspace. */
   clientSlug?: string;
+  /** The client's id, for people who may open only some clients. */
+  clientId?: string;
 };
 
 export function forLabel(key: string, engagements: ReadonlyMap<string, EngagementLabel>) {

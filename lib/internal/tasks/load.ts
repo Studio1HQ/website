@@ -6,6 +6,7 @@ import { istNow, type TeamPerson } from "@/lib/internal/team/shared";
 import { clientPath, weekStart, type Deliverable } from "@/lib/internal/clients/schema";
 import { canSeeOthers, canSeeTasksOf, isFounder, type TaskViewer } from "@/lib/internal/tasks/access";
 import {
+  choicesFor,
   engagementChoices,
   engagementLabels,
   guardedEmails,
@@ -227,9 +228,18 @@ export async function loadWeekCards(email: string, week: string, today: string, 
 export async function cardChoices(staff: Staff): Promise<LinkOption[]> {
   const [board, choices] = await Promise.all([
     loadBoard(staff.email, thisWeek()),
-    staff.clients ? engagementChoices() : Promise.resolve([]),
+    staff.clients ? engagementChoices().then((list) => choicesFor(staff.clientScope, list)) : Promise.resolve([]),
   ]);
-  return linkOptions(board, choices).filter(
+  // Their own deliverables too: only on clients they may open (People).
+  const mayOpen = (item: Deliverable) => {
+    const label = board.engagements.get(item.engagement_id);
+    return label ? choicesFor(staff.clientScope, [label]).length > 0 : false;
+  };
+  const scoped =
+    staff.clientScope === null
+      ? board
+      : { ...board, deliverables: board.deliverables.filter(mayOpen), reviewing: board.reviewing.filter(mayOpen) };
+  return linkOptions(scoped, choices).filter(
     (option) => option.group === "studio" || option.group === "client" || option.group === "deliverable",
   );
 }

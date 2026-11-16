@@ -1,3 +1,4 @@
+import { scopeWork, type ClientScope } from "@/lib/internal/clients/scope";
 import { listPosts } from "@/lib/internal/blog/data";
 import { clientNeeds, loadClientWork } from "@/lib/internal/clients/data";
 import { communityBadges } from "@/lib/internal/community/data";
@@ -52,8 +53,9 @@ function money(byCurrency: Record<string, number>) {
 }
 
 /** Client work this month, for the Clients card. Null when it can't be read. */
-async function clientsSummary() {
-  const work = await loadClientWork();
+async function clientsSummary(scope: ClientScope) {
+  // Client team members an admin gave specific clients count only theirs.
+  const work = scopeWork(scope, await loadClientWork());
   if (!work.ok) return { ok: false as const, missing: work.missing };
   // Archived clients are off the Clients page, so they are off this card too.
   const live = work.rows.filter((row) => row.engagement.status === "active" && row.client && !row.client.archived_at);
@@ -110,8 +112,8 @@ export async function dashboardOverview(staff: Staff) {
     staff.community ? communityBadges(staff.email) : Promise.resolve(null),
     ownEmails.length ? listDays({ from: now.date, to: now.date, emails: ownEmails }) : Promise.resolve(null),
     staff.community ? hackathonBreakdown() : Promise.resolve(null),
-    staff.clients ? clientNeeds(staff.email) : Promise.resolve(null),
-    staff.clients ? clientsSummary() : Promise.resolve(null),
+    staff.clients ? clientNeeds(staff.email, staff.clientScope) : Promise.resolve(null),
+    staff.clients ? clientsSummary(staff.clientScope) : Promise.resolve(null),
     taskNeeds(staff),
   ]);
 
@@ -192,7 +194,7 @@ export async function dashboardOverview(staff: Staff) {
     todo.push({
       area: "access",
       label: `${plural(requests, "person", "people")} asking for dashboard access`,
-      href: "/internal/team",
+      href: "/internal/people",
     });
   }
 
