@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
 import {
@@ -186,10 +187,16 @@ function JoinCard() {
           colors={["#fdba74", "#ffedd5"]}
           className="absolute inset-y-0 right-0 -z-10 h-full w-[60%] opacity-80 [mask-image:linear-gradient(to_left,black_30%,transparent)]"
         />
-        {/* Fills the card so the transform doesn't move the silhouette's
-            layout box; grows from the shoulders and brightens on hover */}
-        <div className="absolute inset-0 origin-bottom opacity-[0.85] transition-[transform,opacity] duration-700 ease-out group-hover:scale-[1.03] group-hover:opacity-100 motion-reduce:transition-none motion-reduce:group-hover:scale-100">
-          <DotSilhouette fill="#ffffff" opacity={0.7} />
+        {/* A portrait-sized silhouette in the team photos' dot print,
+            shoulders off the bottom edge; grows from them on hover */}
+        <div className="absolute inset-0 origin-bottom opacity-90 transition-[transform,opacity] duration-700 ease-out group-hover:scale-[1.03] group-hover:opacity-100 motion-reduce:transition-none motion-reduce:group-hover:scale-100">
+          <Image
+            src="/assets/team/join-silhouette.webp"
+            alt=""
+            fill
+            sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
+            className="object-cover object-bottom"
+          />
         </div>
         <span className="absolute left-4 top-4 text-[clamp(28px,4vw,44px)] font-medium leading-[0.95] tracking-[-0.05em] text-white md:left-5 md:top-5">
           And you?
