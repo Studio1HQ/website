@@ -28,6 +28,7 @@ import {
   SquaresFour,
   Trophy,
   UsersThree,
+  VideoCamera,
   Wallet,
   type Icon,
 } from "@phosphor-icons/react";
@@ -124,6 +125,8 @@ export type TeamNav = {
   tasks: boolean;
   /** Reports due (yours) or waiting to be read (founders). */
   tasksBadge: number;
+  /** Everyone at Studio1: the internal calls calendar. */
+  calls: boolean;
   /** Admins and intern reviewers: People. */
   people: boolean;
   /** Admins: the Money section (payroll and payments), with their counts. */
@@ -471,7 +474,7 @@ export function InternalNav({
             </div>
           </div>
         ))}
-      {team.me || team.people || team.tasks ? (
+      {team.me || team.people || team.tasks || team.calls ? (
         <NavGroup title="Team">
           {team.me ? (
             <NavLink href="/internal/me" label="My day" icon={CalendarCheck} active={isActive("/internal/me")} />
@@ -485,6 +488,9 @@ export function InternalNav({
               badgeTitle={`${team.tasksBadge} report${team.tasksBadge === 1 ? "" : "s"} to see to`}
               active={isActive("/internal/tasks")}
             />
+          ) : null}
+          {team.calls ? (
+            <NavLink href="/internal/calls" label="Calls" icon={VideoCamera} active={isActive("/internal/calls")} />
           ) : null}
           {team.people ? (
             <NavLink
