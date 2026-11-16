@@ -323,7 +323,7 @@ async function startDeliverable(staff: Staffish, deliverable: Deliverable | null
 
 /**
  * Adds cards on a day (the week calendar's "+ New", My day): one or several
- * (a pasted list). items: [{ title, link? }]; status: left out = Done on
+ * (a pasted list). items: [{ title, notes?, link? }]; status: left out = Done on
  * today or a past day, Not started on a day ahead.
  */
 export async function addTasks(day: unknown, items: unknown, status?: unknown): Promise<TaskResult> {
@@ -335,9 +335,11 @@ export async function addTasks(day: unknown, items: unknown, status?: unknown): 
   if (problem) return { ok: false, message: problem };
   const state: TaskStatus = isTaskStatus(status) ? status : date <= today ? "done" : "todo";
   const list = (Array.isArray(items) ? items : [items]).map(input).slice(0, 30);
-  const clean = list.map((item) => ({ title: line(item.title, 200), link: item.link })).filter((item) => item.title);
+  const clean = list
+    .map((item) => ({ title: line(item.title, 200), notes: block(item.notes, 4000), link: item.link }))
+    .filter((item) => item.title);
   if (!clean.length) return { ok: false, message: "Write what it is." };
-  if (clean.some((item) => looksLikeSecret(item.title))) return SECRET;
+  if (clean.some((item) => looksLikeSecret(item.title) || looksLikeSecret(item.notes))) return SECRET;
 
   let added = 0;
   let also: string | null = null;
@@ -347,7 +349,7 @@ export async function addTasks(day: unknown, items: unknown, status?: unknown): 
     const saved = await insertTask({
       email: staff.email,
       title: item.title,
-      notes: "",
+      notes: item.notes,
       status: state,
       due_on: date,
       done_on: state === "done" ? doneDay(date, today) : null,
@@ -365,7 +367,7 @@ export async function addTasks(day: unknown, items: unknown, status?: unknown): 
 }
 
 /**
- * Changes a card: { title?, link?, status?, day? }. Done stamps the card's
+ * Changes a card: { title?, notes?, link?, status?, day? }. Done stamps the card's
  * day (or today, for a day ahead); moving a done card moves its done day.
  */
 export async function editTask(id: unknown, values: unknown): Promise<TaskResult> {
@@ -385,6 +387,11 @@ export async function editTask(id: unknown, values: unknown): Promise<TaskResult
     if (!title) return { ok: false, message: "Give it a title." };
     if (looksLikeSecret(title)) return SECRET;
     patch.title = title;
+  }
+  if ("notes" in data) {
+    const notes = block(data.notes, 4000);
+    if (looksLikeSecret(notes)) return SECRET;
+    patch.notes = notes;
   }
   if ("link" in data) {
     const tied = await resolveFor(staff, data.link);

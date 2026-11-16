@@ -29,6 +29,8 @@ export type CalendarCard =
       kind: "task";
       id: string;
       title: string;
+      /** Context for whoever checks it; "" when there's none. */
+      notes: string;
       day: string | null;
       status: TaskStatus;
       /** "Nebius · DevRel retainer", "Studio1 · Hiring", "Studio1". */
@@ -123,6 +125,7 @@ export function placeCards(input: {
       kind: "task",
       id: task.id,
       title: task.title,
+      notes: task.notes ?? "",
       day: null,
       status: task.status,
       forLabel: forLabel(key, engagements),
