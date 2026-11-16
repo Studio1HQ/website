@@ -39,7 +39,7 @@ export const TEAM: TeamTier[] = [
         links: {
           x: "https://dub.sh/arindam-x",
           linkedin: "https://dub.sh/arindam-linkedin",
-          website: "https://www.arindammajumder.com",
+          website: "https://arindamm.dev",
         },
       },
       {
@@ -72,6 +72,10 @@ export const TEAM: TeamTier[] = [
         name: "Nancy Garg",
         role: "Founder's Associate",
         portrait: "/assets/team/nancy-garg.webp?v=13",
+        links: {
+          x: "https://x.com/nanseedotai",
+          linkedin: "https://www.linkedin.com/in/nancygarg0609/",
+        },
       },
       {
         name: "Kathank Raithatha",
@@ -103,6 +107,7 @@ export const TEAM: TeamTier[] = [
         role: "Developer Relations",
         portrait: "/assets/team/shivam-katare.webp?v=1",
         links: {
+          x: "https://x.com/Shivamkatare_27",
           linkedin: "https://www.linkedin.com/in/shivam-katare/",
         },
       },
@@ -112,6 +117,7 @@ export const TEAM: TeamTier[] = [
         portrait: "/assets/team/indrajit-ari.webp?v=1",
         links: {
           x: "https://x.com/IndrajitAri",
+          linkedin: "https://www.linkedin.com/in/indrajit-ari-b42867222/",
         },
       },
       {
