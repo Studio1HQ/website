@@ -41,7 +41,7 @@ export default async function PendingPage() {
         : {
             icon: <Hourglass size={20} />,
             title: "Waiting for approval",
-            body: "Your request to join the Studio1 dashboard is with Arindam and Amitesh. One of them picks what you can open (there's no default access), and you'll get in as soon as they approve it.",
+            body: "Your request to join the Studio1 dashboard is with the admins (Arindam, Amitesh and the team's other admins). One of them picks what you can open (there's no default access), and you'll get in as soon as they approve it.",
           };
 
   return (

@@ -9,8 +9,9 @@ import {
   sendSignInCode,
   verifySignInCode,
 } from "@/lib/supabase-server";
-import { accessFor, isInvited, requestAccess, touchMember } from "@/lib/internal/members";
-import { isOwner, isStaffEmail } from "@/lib/internal/roles";
+import { accessFor, isInvited, membersWith, requestAccess, touchMember } from "@/lib/internal/members";
+import { notify } from "@/lib/internal/notifications/data";
+import { OWNERS, isOwner, isStaffEmail } from "@/lib/internal/roles";
 import { SIGN_IN_CODE_LIMIT, strictlyWithinLimit } from "@/lib/rate-limit";
 import { addToTeam, teamAccessFor } from "@/lib/internal/team/people";
 import { loginCookieOptions, sessionCookieOptions } from "@/lib/internal/session";
@@ -181,6 +182,18 @@ export async function checkSignInCode(
   if (!team.person && team.interns.length === 0) {
     const requested = await requestAccess(email);
     if (!requested.ok) console.error(`[internal] filing access request failed: ${requested.message}`);
+    else if (requested.created) {
+      // So the request doesn't wait until an admin happens to open People.
+      after(async () => {
+        const admins = await membersWith(["admin"]).catch(() => [] as string[]);
+        await notify([...OWNERS, ...admins], email, {
+          kind: "access",
+          title: "Someone is asking for dashboard access",
+          body: email,
+          href: "/internal/people",
+        });
+      });
+    }
   }
   await touchMember(email);
 

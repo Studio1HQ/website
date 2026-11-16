@@ -1,7 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireMember } from "@/lib/internal/session";
+import { after } from "next/server";
+import { notify } from "@/lib/internal/notifications/data";
+import { requireMember, staffName } from "@/lib/internal/session";
+import { listPeople } from "@/lib/internal/team/people";
 import { addDays } from "@/lib/internal/clients/schema";
 import { istNow } from "@/lib/internal/team/shared";
 import { canPlanCalls } from "@/lib/internal/calls/access";
@@ -15,7 +18,17 @@ import {
   saveChange,
   updateCall,
 } from "@/lib/internal/calls/data";
-import { cleanCall, isTime, occursOn, type CallResult } from "@/lib/internal/calls/shared";
+import {
+  attendees,
+  cleanCall,
+  clock,
+  isTime,
+  occursOn,
+  repeatLabel,
+  shortDay,
+  type Call,
+  type CallResult,
+} from "@/lib/internal/calls/shared";
 
 /**
  * Calls writes. Server actions are public endpoints, so every one checks
@@ -40,6 +53,19 @@ function refresh() {
   revalidatePath("/internal/me");
 }
 
+/**
+ * Puts a call's news (added, moved, cancelled) on the bell of everyone in
+ * it, never the person who did it. Runs after the response; a whole-team
+ * call reads the active team list.
+ */
+function tellCall(call: Pick<Call, "host" | "people" | "whole_team">, by: string, title: string, body: string) {
+  after(async () => {
+    const team = call.whole_team ? await listPeople({ activeOnly: true }) : null;
+    const everyone = team?.ok ? team.people.map((person) => person.email) : [];
+    await notify(attendees(call, everyone), by, { kind: "call", title, body, href: "/internal/calls" });
+  });
+}
+
 async function planner() {
   const staff = await requireMember();
   return canPlanCalls(staff) ? staff : null;
@@ -56,6 +82,7 @@ export async function saveCall(id: string | null, values: unknown): Promise<Call
   if (!id) {
     const result = await insertCall({ ...call, id: crypto.randomUUID() }, staff.email);
     if (!result.ok) return result;
+    tellCall(call, staff.email, `${staffName(staff)} added you to a call`, `${call.title} · ${repeatLabel(call)}`);
     refresh();
     return { ok: true, message: "Call added." };
   }
@@ -111,6 +138,7 @@ export async function changeOne(
       staff.email,
     );
     if (!result.ok) return result;
+    tellCall(call, staff.email, `${staffName(staff)} cancelled a call on ${shortDay(onDay)}`, call.title);
     refresh();
     return { ok: true, message: "Cancelled for that day." };
   }
@@ -138,6 +166,12 @@ export async function changeOne(
     staff.email,
   );
   if (!result.ok) return result;
+  tellCall(
+    call,
+    staff.email,
+    `${staffName(staff)} moved a call`,
+    `${call.title} · now ${shortDay(day)} at ${clock(time)} (was ${shortDay(onDay)} at ${clock(call.start_time)})`,
+  );
   refresh();
   return { ok: true, message: "Moved for that day." };
 }

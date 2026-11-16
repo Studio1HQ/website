@@ -10,8 +10,9 @@ import {
   type ReactNode,
 } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { LockSimple, Trash, X } from "@phosphor-icons/react";
+import { ArrowRight, LockSimple, Trash, X } from "@phosphor-icons/react";
 import {
+  moveToNextMonth,
   removeDeliverable,
   saveDeliverable,
 } from "@/app/internal/(dashboard)/clients/actions";
@@ -346,6 +347,21 @@ function DeliverableForm({
     });
   };
 
+  // Slipped work: into next month, so this one can close.
+  const moveOn = () => {
+    if (!deliverable) return;
+    startSaving(async () => {
+      const result = await moveToNextMonth(deliverable.id);
+      if (!result.ok) {
+        setError(result.message);
+        return;
+      }
+      toast("success", result.message ?? "Moved to next month");
+      close();
+      afterSave();
+    });
+  };
+
   const field = (
     key: keyof Values,
     label: string,
@@ -669,17 +685,33 @@ function DeliverableForm({
               {error}
             </p>
           ) : editing && manager && !readOnly ? (
-            <button
-              type="button"
-              onClick={remove}
-              disabled={saving}
-              className={buttonClass(confirmDelete ? "danger" : "ghost", "sm")}
-            >
-              <Trash size={14} />{" "}
-              {confirmDelete
-                ? "Click again to delete, with its history"
-                : "Delete"}
-            </button>
+            <span className="flex flex-wrap items-center gap-1">
+              <button
+                type="button"
+                onClick={remove}
+                disabled={saving}
+                className={buttonClass(
+                  confirmDelete ? "danger" : "ghost",
+                  "sm",
+                )}
+              >
+                <Trash size={14} />{" "}
+                {confirmDelete
+                  ? "Click again to delete, with its history"
+                  : "Delete"}
+              </button>
+              {deliverable && deliverable.status !== "published" ? (
+                <button
+                  type="button"
+                  onClick={moveOn}
+                  disabled={saving}
+                  title="It slipped: take it out of this month and put it in the next one"
+                  className={buttonClass("ghost", "sm")}
+                >
+                  <ArrowRight size={14} /> Move to next month
+                </button>
+              ) : null}
+            </span>
           ) : null}
         </div>
         <div className="flex gap-2">

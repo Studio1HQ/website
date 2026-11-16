@@ -424,7 +424,9 @@ function inlineHtml(text: string) {
  * the orange arrow. Tables and inline styles, for email clients.
  *
  * Bodies are plain text: blank lines split paragraphs, a paragraph whose
- * lines all start with "- " is a list, and [label](https://…) is a link.
+ * lines all start with "- " is a list, a one-line paragraph starting with
+ * "## " is a small section heading (reports), and [label](https://…) is a
+ * link.
  */
 export function renderEmail({
   body,
@@ -462,6 +464,10 @@ export function renderEmail({
   const blocks = body.trim().split(/\n{2,}/);
   const html_blocks = blocks.map((block) => {
     const lines = block.split("\n");
+    if (lines.length === 1 && lines[0].startsWith("## ")) {
+      // The site's index-line style: small, medium weight, on a hairline.
+      return `<p style="margin:14px 0 14px;padding:0 0 8px;border-bottom:1px solid ${HAIRLINE};font:500 12px/20px ${FONT};letter-spacing:0.04em;text-transform:uppercase;color:${MUTED};">${escapeHtml(lines[0].slice(3))}</p>`;
+    }
     if (!lines.every((line) => line.startsWith("- "))) {
       return `<p style="margin:0 0 18px;font:15.5px/1.7 ${FONT};color:${BODY};">${lines.map(inlineHtml).join("<br>")}</p>`;
     }
@@ -523,7 +529,7 @@ ${content}
 </body></html>`;
 
   const text = [
-    body.trim().replace(LINK, "$1 ($2)"),
+    body.trim().replace(LINK, "$1 ($2)").replace(/^## (.+)$/gm, (_, heading: string) => heading.toUpperCase()),
     call ? `${call.label}: ${call.url}` : "",
     "--",
     reason,

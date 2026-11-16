@@ -107,11 +107,12 @@ export async function isInvited(email: string) {
  * addresses never get one: they only come in through an invite.
  */
 export async function requestAccess(email: string) {
-  if (isOwner(email) || !isStaffEmail(email)) return { ok: true as const };
+  if (isOwner(email) || !isStaffEmail(email)) return { ok: true as const, created: false };
   const result = await insertRow(TABLE, { email, role: "viewer", status: "pending" });
-  // A duplicate means the request (or membership) already exists.
+  // A duplicate means the request (or membership) already exists. `created`
+  // is true only the first time, which is when the admins' bells are told.
   return result.ok || result.duplicate
-    ? { ok: true as const }
+    ? { ok: true as const, created: result.ok }
     : { ok: false as const, message: result.message };
 }
 

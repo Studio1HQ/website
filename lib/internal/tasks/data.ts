@@ -135,6 +135,23 @@ function mapRows<T>(rows: Record<string, unknown>[], fn: (row: Record<string, un
 /* --------------------------------------------------------------- tasks */
 
 /**
+ * How many of this person's open tasks are due today and how many are
+ * late, for the sidebar badge, "Needs you" and the morning email. Null when
+ * it can't be read.
+ */
+export async function dueTaskCounts(email: string, today: string): Promise<{ today: number; late: number } | null> {
+  const [me] = emailsOk([email]);
+  if (!me) return { today: 0, late: 0 };
+  const result = await selectRows(
+    TABLES.tasks,
+    new URLSearchParams({ select: "due_on", email: `eq.${me}`, status: "neq.done", due_on: `lte.${today}`, limit: "500" }),
+  );
+  if (!result.ok) return null;
+  const late = result.rows.filter((row) => typeof row.due_on === "string" && row.due_on < today).length;
+  return { today: result.rows.length - late, late };
+}
+
+/**
  * These people's tasks: every open one, plus the ones done between `from`
  * and `to` (both days included; leave both out for every done one).
  */

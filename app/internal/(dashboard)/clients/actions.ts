@@ -25,6 +25,8 @@ import {
 } from "@/lib/internal/clients/clean";
 import {
   ensureNextCycles,
+  lastMonthLines,
+  linesFromLastMonth,
   linesFromTemplate,
 } from "@/lib/internal/clients/cycles";
 import {
@@ -40,6 +42,7 @@ import {
   devrelReady,
   getMilestone,
   getPartner,
+  loadCycles,
   loadScopeLines,
   loadTemplates,
   logStatusEvent,
@@ -50,6 +53,7 @@ import {
   updateRecord,
 } from "@/lib/internal/clients/data";
 import { clientLogo } from "@/lib/internal/clients/logo";
+import { notify } from "@/lib/internal/notifications/data";
 import {
   MEMBER_FIELDS,
   blockProblem,
@@ -67,6 +71,7 @@ import {
   isOption,
   labelOf,
   monthOf,
+  monthLabel,
   shiftMonth,
   templateFor,
   todayKey,
@@ -184,6 +189,34 @@ async function slackContext(
   };
 }
 
+/**
+ * Puts a deliverable's news on someone's bell (its new owner or reviewer,
+ * or whoever a move hands it to), after the response. Never the person who
+ * did it. The body is the piece and its client; it opens the client's page.
+ */
+function tellAbout(
+  deliverable: Pick<Deliverable, "engagement_id" | "title">,
+  to: readonly (string | null | undefined)[],
+  by: string,
+  title: string,
+) {
+  if (!to.some((email) => email && email.toLowerCase() !== by)) return;
+  after(async () => {
+    const engagement = await getEngagement(deliverable.engagement_id);
+    const client =
+      engagement && engagement !== "error"
+        ? await getClient(engagement.client_id)
+        : null;
+    const found = client && client !== "error" ? client : null;
+    await notify(to, by, {
+      kind: "deliverable",
+      title,
+      body: found ? `${deliverable.title} · ${found.name}` : deliverable.title,
+      href: found ? `/internal/clients/${found.slug}` : "/internal/tasks",
+    });
+  });
+}
+
 /* ---------------------------------------------------------------- clients */
 
 /** Adds a client (no id) or changes one. */
@@ -290,8 +323,9 @@ export async function saveEngagement(
 /* ----------------------------------------------------------------- cycles */
 
 /**
- * Starts a month for one engagement with the scope lines from its type's
- * template (or none with `fromTemplate: false`): Active when the month has
+ * Starts a month for one engagement with last month's scope lines, or its
+ * type's template when there was no last month (or none with
+ * `fromTemplate: false`): Active when the month has
  * begun, Planning when it's still ahead.
  */
 export async function createCycle(
@@ -322,13 +356,23 @@ export async function createCycle(
   if (!created.ok || !created.id) return created;
   let warning: string | undefined;
   if (fromTemplate !== false) {
-    const templates = await loadTemplates();
+    // Last month's numbers are this client's agreed scope; the type's
+    // template is only for a first month.
+    const [templates, carried] = await Promise.all([
+      loadTemplates(),
+      lastMonthLines([key], month),
+    ]);
     // A failed read must not quietly swap the saved plan for the built-in one.
-    const readable = templates.ok || Boolean(templates.missing);
-    const lines = linesFromTemplate(
-      templateFor(engagement.type, templates.ok ? templates.rows : []).lines,
-      created.id,
-    );
+    const readable =
+      carried !== null && (templates.ok || Boolean(templates.missing));
+    const before = carried?.get(key);
+    const lines = before?.length
+      ? linesFromLastMonth(before, created.id)
+      : linesFromTemplate(
+          templateFor(engagement.type, templates.ok ? templates.rows : [])
+            .lines,
+          created.id,
+        );
     const added = readable
       ? await insertMany(TABLES.lines, "scope line", lines, staff.email)
       : { ok: false as const };
@@ -550,6 +594,14 @@ export async function saveDeliverable(
         { state: "active" },
         staff.email,
       );
+    const created = {
+      engagement_id: cycle.engagement_id,
+      title: String(row.title ?? ""),
+    };
+    const who = staffName(staff);
+    tellAbout(created, [row.owner as string | null], staff.email, `${who} made you the owner of a deliverable`);
+    if (row.reviewer && row.reviewer !== row.owner)
+      tellAbout(created, [row.reviewer as string | null], staff.email, `${who} made you the reviewer of a deliverable`);
     refresh();
     return { ...result, message: "Deliverable added" };
   }
@@ -606,6 +658,13 @@ export async function saveDeliverable(
     staff.email,
   );
   if (!result.ok) return result;
+  if (typeof patch.owner === "string" && patch.owner !== deliverable.owner)
+    tellAbout(deliverable, [patch.owner], staff.email, `${staffName(staff)} made you the owner of a deliverable`);
+  if (
+    typeof patch.reviewer === "string" &&
+    patch.reviewer !== deliverable.reviewer
+  )
+    tellAbout(deliverable, [patch.reviewer], staff.email, `${staffName(staff)} made you the reviewer of a deliverable`);
   refresh();
   return { ...result, message: "Deliverable saved" };
 }
@@ -620,6 +679,72 @@ export async function removeDeliverable(id: unknown): Promise<ActionResult> {
   if (!result.ok) return result;
   refresh();
   return { ok: true, message: "Deliverable deleted" };
+}
+
+/**
+ * Moves an unfinished deliverable into the month after its own, so work that
+ * slipped stops counting against a month that's over. Managers only. The
+ * next month is started first if it isn't there (active engagements); the
+ * piece joins that month's scope line of the same kind, if there is one.
+ * Its due date and week are cleared: they belonged to the old month.
+ */
+export async function moveToNextMonth(id: unknown): Promise<ActionResult> {
+  const staff = await manager();
+  if (!staff) return DENIED;
+  const found = await changeable(staff, id);
+  if (!found.ok) return found.result;
+  const { deliverable } = found;
+  if (deliverable.status === "published")
+    return { ok: false, message: "It's published: it stays in its month." };
+  const cycle = await getCycle(deliverable.cycle_id);
+  if (cycle === "error") return TRY_AGAIN;
+  if (!cycle) return UNKNOWN;
+  const month = shiftMonth(cycle.month, 1);
+  const findNext = () =>
+    loadCycles({ engagementIds: [deliverable.engagement_id], month });
+  let next = await findNext();
+  if (!next.ok) return TRY_AGAIN;
+  if (!next.rows.length) {
+    const made = await ensureNextCycles({
+      month,
+      by: staff.email,
+      engagementIds: [deliverable.engagement_id],
+    });
+    if (!made.ok) return TRY_AGAIN;
+    next = await findNext();
+    if (!next.ok) return TRY_AGAIN;
+  }
+  const target = next.rows[0];
+  if (!target)
+    return {
+      ok: false,
+      message: `Start ${monthLabel(month)} for this engagement first.`,
+    };
+  const lines = await loadScopeLines([target.id]);
+  const line = lines.ok
+    ? lines.rows.find((item) => item.kind === deliverable.kind)
+    : undefined;
+  const result = await updateRecord(
+    TABLES.deliverables,
+    "deliverable",
+    deliverable.id,
+    {
+      cycle_id: target.id,
+      scope_line_id: line?.id ?? null,
+      due_on: null,
+      week: null,
+    },
+    staff.email,
+    // Only if it's still where we found it.
+    { cycle_id: `eq.${deliverable.cycle_id}` },
+  );
+  if (!result.ok) return result;
+  refresh();
+  return {
+    ok: true,
+    id: deliverable.id,
+    message: `Moved to ${monthLabel(month)}. Give it a new due date.`,
+  };
 }
 
 /**
@@ -700,6 +825,10 @@ export async function moveDeliverable(
       }),
     );
   });
+  if (move.to === "internal_review")
+    tellAbout(deliverable, [deliverable.reviewer], staff.email, `${by} sent you a deliverable to review`);
+  if (move.to === "changes_requested")
+    tellAbout(deliverable, [deliverable.owner], staff.email, `${by} asked for changes on your deliverable`);
   refresh();
   return {
     ok: true,

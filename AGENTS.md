@@ -8,23 +8,24 @@
 - `docs/`, `mdx-components.tsx`: Documentation and MDX bindings; keep MDX-specific components scoped here.
 
 ## Build, Test, and Development Commands
-- `pnpm dev` (or `npm run dev`): Start local Next.js dev server with Turbopack; updates reflect changes in `app/` and shared modules.
+- `pnpm dev`: Start the local Next.js dev server (webpack); updates reflect changes in `app/` and shared modules.
 - `pnpm build`: Production build; run before tagging a release or deploying.
 - `pnpm start`: Serve the production build locally for smoke-testing.
 - `pnpm lint`: ESLint via Next; catches TypeScript/React issues and basic accessibility concerns.
 - `pnpm format`: Prettier over the repo; run before opening PRs to avoid churn.
+- `pnpm test`: Vitest, once (`pnpm test:watch` to keep it running). `pnpm exec tsc --noEmit` checks types. CI (`.github/workflows/ci.yml`) runs lint, types and tests on every PR.
 
 ## Coding Style & Naming Conventions
 - TypeScript-first; use functional React components and hooks. Co-locate component-specific styles or utility functions with the component when reasonable.
-- Formatting: Prettier defaults (2-space indent, semicolons off by default); do not hand-tune spacing that conflicts with the formatter.
+- Formatting: Prettier defaults (2-space indent, semicolons, double quotes); do not hand-tune spacing that conflicts with the formatter.
 - Styling: TailwindCSS for layout/spacing; use `clsx`/`tailwind-merge` for conditional classes; keep utility class order logical (layout → spacing → color).
 - Naming: Components and exported hooks in `PascalCase`/`camelCase`; route segments and asset files in `kebab-case` to match existing folders.
 - Types: Prefer explicit prop types and narrow unions; avoid `any` unless necessary and documented.
 
 ## Testing Guidelines
-- No automated test runner is currently wired. For new features, add targeted coverage (e.g., component tests or integration smoke tests) and document the command you introduce (e.g., `pnpm test`).
-- Until a suite exists, rely on `pnpm lint`, manual QA in `pnpm dev`, and `pnpm start` against production builds for regressions.
-- Name test files alongside sources with `.test.ts(x)` if you add a runner; keep fixtures small and deterministic.
+- Vitest is wired (`pnpm test`). Rules and anything pure (`lib/internal/**/rules.ts`, cleaning, wording) have tests beside them; add one with every new rule.
+- Server actions and pages have no automated tests yet: check them by hand in `pnpm dev`, and remember every server action must check the session and role itself.
+- Name test files alongside sources with `.test.ts(x)`; keep fixtures small and deterministic.
 
 ## Commit & Pull Request Guidelines
 - Commit history favors short, tagged summaries like `update: docs` or concise imperatives; match that style (`<verb>: <scope>`), keep bodies focused on rationale and side effects.

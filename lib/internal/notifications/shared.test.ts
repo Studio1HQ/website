@@ -1,0 +1,40 @@
+import { describe, expect, it } from "vitest";
+import { badgeText, noticeRecipients, noticeRows } from "@/lib/internal/notifications/shared";
+
+describe("noticeRecipients", () => {
+  it("leaves out the person who acted, blanks, names and repeats", () => {
+    expect(
+      noticeRecipients(["Priya@studio1hq.com", "me@studio1hq.com", null, "", "priya@studio1hq.com", "a volunteer"], "ME@studio1hq.com"),
+    ).toEqual(["priya@studio1hq.com"]);
+  });
+});
+
+describe("noticeRows", () => {
+  const notice = { kind: "task" as const, title: "  Asha gave you\n a task ", body: "Write the launch post", href: "/internal/tasks" };
+
+  it("makes one tidy row per person", () => {
+    expect(noticeRows(["priya@studio1hq.com", "dev@studio1hq.com"], "asha@studio1hq.com", notice)).toEqual([
+      { email: "priya@studio1hq.com", actor: "asha@studio1hq.com", kind: "task", title: "Asha gave you a task", body: "Write the launch post", href: "/internal/tasks" },
+      { email: "dev@studio1hq.com", actor: "asha@studio1hq.com", kind: "task", title: "Asha gave you a task", body: "Write the launch post", href: "/internal/tasks" },
+    ]);
+  });
+
+  it("saves nothing for yourself, an empty title or a link out of the dashboard", () => {
+    expect(noticeRows(["asha@studio1hq.com"], "asha@studio1hq.com", notice)).toEqual([]);
+    expect(noticeRows(["priya@studio1hq.com"], "asha@studio1hq.com", { ...notice, title: " " })).toEqual([]);
+    expect(noticeRows(["priya@studio1hq.com"], "asha@studio1hq.com", { ...notice, href: "https://evil.example" })).toEqual([]);
+  });
+
+  it("cuts long text to what the table holds", () => {
+    const [row] = noticeRows(["priya@studio1hq.com"], "a@studio1hq.com", { ...notice, title: "x".repeat(500), body: "y".repeat(500) });
+    expect(row.title).toHaveLength(200);
+    expect(row.body).toHaveLength(300);
+  });
+});
+
+describe("badgeText", () => {
+  it("caps at 9+", () => {
+    expect(badgeText(3)).toBe("3");
+    expect(badgeText(12)).toBe("9+");
+  });
+});

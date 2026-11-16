@@ -6,6 +6,7 @@ import {
   insertRecord,
   loadCycles,
   loadEngagements,
+  loadScopeLines,
   loadTemplates,
 } from "@/lib/internal/clients/data";
 import {
@@ -17,14 +18,16 @@ import {
   todayKey,
   type Cycle,
   type Engagement,
+  type ScopeLine,
   type ScopeTemplate,
   type TemplateLine,
 } from "@/lib/internal/clients/schema";
 
 /**
  * Next month's cycles. On or after the 25th (IST) each active engagement
- * gets next month's cycle in Planning, with scope lines from its type's
- * template; the account owner then adjusts the numbers and moves it to
+ * gets next month's cycle in Planning. Its scope lines are last month's
+ * (the numbers agreed with this client), or its type's template when there
+ * was no last month; the account owner then adjusts them and moves it to
  * Active. The daily cron (app/api/cron/client-cycles) and the "Start next
  * month" button both call ensureNextCycles. Running it again changes
  * nothing: an engagement that has the month already is skipped.
@@ -81,6 +84,61 @@ export function linesFromTemplate(
   }));
 }
 
+/**
+ * Scope-line rows for a new cycle, carried over from the month before: the
+ * same kinds, labels and numbers, in the same order. Notes stay behind
+ * (they were about that month).
+ */
+export function linesFromLastMonth(
+  lines: readonly Pick<
+    ScopeLine,
+    "kind" | "label" | "planned" | "owner_role" | "due_rule" | "position"
+  >[],
+  cycleId: string,
+) {
+  return [...lines]
+    .sort((a, b) => a.position - b.position)
+    .map((line, position) => ({
+      cycle_id: cycleId,
+      kind: line.kind,
+      label: line.label,
+      planned: Math.max(0, Math.min(999, Math.round(line.planned))),
+      owner_role: line.owner_role,
+      due_rule: line.due_rule,
+      position,
+    }));
+}
+
+/**
+ * Each engagement's scope lines from the month before `month`, by
+ * engagement id (only those that had lines). Null when it can't be read:
+ * callers then stop, or fall back to the template and say so.
+ */
+export async function lastMonthLines(
+  engagementIds: readonly string[],
+  month: string,
+): Promise<Map<string, ScopeLine[]> | null> {
+  const found = new Map<string, ScopeLine[]>();
+  if (!engagementIds.length) return found;
+  const cycles = await loadCycles({
+    engagementIds,
+    month: shiftMonth(month, -1),
+  });
+  if (!cycles.ok) return null;
+  if (!cycles.rows.length) return found;
+  const lines = await loadScopeLines(cycles.rows.map((cycle) => cycle.id));
+  if (!lines.ok) return null;
+  const engagementOf = new Map(
+    cycles.rows.map((cycle) => [cycle.id, cycle.engagement_id]),
+  );
+  for (const line of lines.rows) {
+    const engagement = engagementOf.get(line.cycle_id);
+    if (!engagement) continue;
+    found.set(engagement, [...(found.get(engagement) ?? []), line]);
+  }
+  return found;
+}
+
 export type EnsureResult =
   | {
       ok: true;
@@ -92,8 +150,9 @@ export type EnsureResult =
   | { ok: false; message: string };
 
 /**
- * Creates the month's cycle (Planning) with template scope lines for every
- * active engagement that lacks one, or only for `engagementIds` when given.
+ * Creates the month's cycle (Planning) for every active engagement that
+ * lacks one, or only for `engagementIds` when given, with last month's
+ * scope lines (the template when there are none).
  * A cycle whose lines can't be added is taken back out, so the next run
  * tries again from scratch.
  */
@@ -121,15 +180,20 @@ export async function ensureNextCycles(options: {
     month: options.month,
   });
   if (!cycles.ok) return { ok: false, message: cycles.message };
+  const needing = engagementsNeedingCycle(pool, cycles.rows, options.month);
+  // As with templates: a failed read must not quietly swap a client's agreed
+  // numbers for the template's.
+  const carried = await lastMonthLines(
+    needing.map((engagement) => engagement.id),
+    options.month,
+  );
+  if (!carried)
+    return { ok: false, message: "Couldn't read last month's scope lines." };
 
   let created = 0;
   let failed = 0;
   const done: string[] = [];
-  for (const engagement of engagementsNeedingCycle(
-    pool,
-    cycles.rows,
-    options.month,
-  )) {
+  for (const engagement of needing) {
     const cycle = await insertRecord(
       TABLES.cycles,
       "month",
@@ -148,10 +212,10 @@ export async function ensureNextCycles(options: {
       failed++;
       continue;
     }
-    const lines = linesFromTemplate(
-      templateFor(engagement.type, saved).lines,
-      cycle.id,
-    );
+    const before = carried.get(engagement.id);
+    const lines = before?.length
+      ? linesFromLastMonth(before, cycle.id)
+      : linesFromTemplate(templateFor(engagement.type, saved).lines, cycle.id);
     if (lines.length) {
       const added = await insertMany(
         TABLES.lines,

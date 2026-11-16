@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   ArrowLeft,
   Bank,
+  Binoculars,
   Briefcase,
   Buildings,
   CalendarBlank,
@@ -123,7 +124,7 @@ export type TeamNav = {
   me: boolean;
   /** On the team list, or sees others' tasks: Tasks. */
   tasks: boolean;
-  /** Reports due (yours) or waiting to be read (founders). */
+  /** Your late tasks, reports due (yours) or waiting to be read (founders). */
   tasksBadge: number;
   /** Everyone at Studio1: the internal calls calendar. */
   calls: boolean;
@@ -162,6 +163,7 @@ export function InternalNav({
   team,
   community,
   clients = null,
+  outreach = null,
   home,
   overview,
 }: {
@@ -177,6 +179,8 @@ export function InternalNav({
   community: CommunityNav | null;
   /** Client work, with my late and to-review counts; null without access. */
   clients?: ClientsNav | null;
+  /** Outreach (admins), with my follow-ups due; null without access. */
+  outreach?: { due: number } | null;
   /** Where this person's dashboard starts; the sections link back to it. */
   home: string;
   /** Show the Overview link: everyone whose home is the Overview. */
@@ -375,7 +379,7 @@ export function InternalNav({
           active={isActive("/internal")}
         />
       ) : null}
-      {clients || blog || community || team.money ? (
+      {clients || blog || community || team.money || outreach ? (
         <NavGroup title="Workspaces">
           {clients ? (
             <NavLink
@@ -390,6 +394,16 @@ export function InternalNav({
                 .filter(Boolean)
                 .join(" · ")}
               active={false}
+            />
+          ) : null}
+          {outreach ? (
+            <NavLink
+              href="/internal/outreach"
+              label="Outreach"
+              icon={Binoculars}
+              badge={outreach.due}
+              badgeTitle={`${outreach.due} of your follow-ups due`}
+              active={isActive("/internal/outreach")}
             />
           ) : null}
           {blog ? (
@@ -485,7 +499,7 @@ export function InternalNav({
               label="Tasks"
               icon={Kanban}
               badge={team.tasksBadge}
-              badgeTitle={`${team.tasksBadge} report${team.tasksBadge === 1 ? "" : "s"} to see to`}
+              badgeTitle={`${team.tasksBadge} late task${team.tasksBadge === 1 ? "" : "s"} or report${team.tasksBadge === 1 ? "" : "s"} to see to`}
               active={isActive("/internal/tasks")}
             />
           ) : null}

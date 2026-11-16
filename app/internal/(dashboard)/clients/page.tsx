@@ -454,6 +454,7 @@ export default async function ClientsPage({
                       <th>Account owner</th>
                       <th>{monthLabel(month, true)}</th>
                       <th>Client review</th>
+                      <th>Late</th>
                       <th>Blocked</th>
                       <th>Last update</th>
                       <th>Health</th>
@@ -498,6 +499,15 @@ export default async function ClientsPage({
                         </td>
                         <td className="whitespace-nowrap">
                           <ReviewCell row={row} />
+                        </td>
+                        <td className="tabular-nums">
+                          {row.late ? (
+                            <span className="font-medium text-amber-700 dark:text-amber-300">
+                              {row.late}
+                            </span>
+                          ) : (
+                            <Muted>0</Muted>
+                          )}
                         </td>
                         <td className="tabular-nums">
                           {row.blocked ? (
@@ -559,6 +569,11 @@ export default async function ClientsPage({
                           <MonthCell row={row} />
                           <span className="flex flex-col gap-1">
                             <ReviewCell row={row} />
+                            {row.late ? (
+                              <span className="text-amber-700 dark:text-amber-300">
+                                {row.late} late
+                              </span>
+                            ) : null}
                             {row.blocked ? (
                               <span className="text-rose-700 dark:text-rose-300">
                                 {row.blocked} blocked
