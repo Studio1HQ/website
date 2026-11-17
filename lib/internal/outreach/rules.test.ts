@@ -1,12 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
   activityEffect,
+  byFollowUp,
   domainOf,
   followUpDue,
   isOpen,
   orgsFromCsv,
   stageProblem,
   stageStamps,
+  xHandleFrom,
 } from "@/lib/internal/outreach/rules";
 
 describe("domainOf", () => {
@@ -118,10 +120,60 @@ describe("orgsFromCsv", () => {
           source: "referral",
           owner: "arindam@studio1hq.com",
           notes: "Met at KubeCon",
-          contact: { name: "Priya K", email: "priya@acme.dev", title: "Head of DevRel" },
+          priority: "",
+          about: "",
+          funding: "",
+          why_fit: "",
+          warm_path: "",
+          signal_url: "",
+          conflict: "",
+          contact: { name: "Priya K", email: "priya@acme.dev", title: "Head of DevRel", linkedin: "", x_handle: "" },
         },
       ],
     });
+  });
+
+  it("reads a prospect research sheet", () => {
+    const result = orgsFromCsv(
+      [
+        '"Company","Website","Category","Stage / Funding","Why They Fit","Contact Name","Role","LinkedIn","X","Email","Warm Path","Source","Priority","Conflict","Outreach Status","Owner","Notes"',
+        '"Herdr","https://herdr.dev","Runtime for coding agents","Seed $6M (Bessemer), Sep 8, 2026","Raised $6M on Sep 8","Can Celik","Founder & CEO","","https://x.com/cancelik","","Arindam replied to the seed post","https://x.com/Arindam_1729/status/2097384300337607010","High","None","Not contacted","","Founder last posted Nov 9"',
+        '"Polylane","https://polylane.com","AI SRE","Early access","1 company post","Boris Tane","Founder & CEO","linkedin.com/in/boristane","@boristane","boris@coreplane.ai","Past interaction","https://polylane.com","Med","Possible: Measure","In talks","",""',
+      ].join("\n"),
+    );
+    expect(result.ok && result.orgs[0]).toEqual({
+      name: "Herdr",
+      website: "https://herdr.dev",
+      domain: "herdr.dev",
+      kind: "client",
+      stage: "lead",
+      source: "outbound",
+      owner: "",
+      notes: "Founder last posted Nov 9",
+      priority: "high",
+      about: "Runtime for coding agents",
+      funding: "Seed $6M (Bessemer), Sep 8, 2026",
+      why_fit: "Raised $6M on Sep 8",
+      warm_path: "Arindam replied to the seed post",
+      signal_url: "https://x.com/Arindam_1729/status/2097384300337607010",
+      conflict: "",
+      contact: { name: "Can Celik", email: "", title: "Founder & CEO", linkedin: "", x_handle: "@cancelik" },
+    });
+    expect(result.ok && result.orgs[1]).toMatchObject({
+      stage: "replied",
+      priority: "medium",
+      conflict: "Possible: Measure",
+      contact: {
+        email: "boris@coreplane.ai",
+        linkedin: "https://linkedin.com/in/boristane",
+        x_handle: "@boristane",
+      },
+    });
+  });
+
+  it("keeps a lead source that isn't a link, and an unknown priority blank", () => {
+    const result = orgsFromCsv("name,source,priority,conflict\nAcme,Referral,Urgent,-");
+    expect(result.ok && result.orgs[0]).toMatchObject({ source: "referral", signal_url: "", priority: "", conflict: "" });
   });
 
   it("falls back to a client lead we reached out to", () => {
@@ -154,5 +206,34 @@ describe("orgsFromCsv", () => {
     expect(orgsFromCsv("name")).toMatchObject({ ok: false });
     expect(orgsFromCsv("website\nacme.dev")).toMatchObject({ ok: false });
     expect(orgsFromCsv("name\nA\nB\nC", 2)).toMatchObject({ ok: false });
+  });
+});
+
+describe("xHandleFrom", () => {
+  it("takes a handle, an @handle or a profile link", () => {
+    expect(xHandleFrom("https://x.com/calcsam")).toBe("@calcsam");
+    expect(xHandleFrom("twitter.com/@guard_if/")).toBe("@guard_if");
+    expect(xHandleFrom("@kiwicopple")).toBe("@kiwicopple");
+    expect(xHandleFrom("apenwarr")).toBe("@apenwarr");
+  });
+
+  it("is blank for anything else", () => {
+    expect(xHandleFrom("")).toBe("");
+    expect(xHandleFrom("https://x.com/mastra/status/2118048496490307982")).toBe("");
+    expect(xHandleFrom("https://linkedin.com/in/someone")).toBe("");
+    expect(xHandleFrom("https://x.com/home")).toBe("");
+  });
+});
+
+describe("byFollowUp", () => {
+  it("puts follow-ups first, then high priority, then names", () => {
+    const rows = [
+      { name: "Cee", follow_up_on: null, priority: "low" },
+      { name: "Bee", follow_up_on: null, priority: "" },
+      { name: "Ay", follow_up_on: null, priority: "high" },
+      { name: "Dee", follow_up_on: "2026-11-20", priority: "low" },
+      { name: "Ee", follow_up_on: null, priority: "high" },
+    ];
+    expect(rows.sort(byFollowUp).map((row) => row.name)).toEqual(["Dee", "Ay", "Ee", "Cee", "Bee"]);
   });
 });

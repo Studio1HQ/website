@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
+import { clientLogo } from "@/lib/internal/clients/logo";
 import { saveClient } from "@/app/internal/(dashboard)/clients/actions";
 import { isUuid } from "@/lib/internal/community/clean";
 import { isDateKey, todayKey } from "@/lib/internal/community/schema";
@@ -63,6 +65,21 @@ function refresh() {
   revalidatePath("/internal", "layout");
 }
 
+/**
+ * Fetches the websites' logos after the response, a few at a time, so a
+ * new organisation shows its icon on first open (they're kept a month; see
+ * lib/internal/clients/logo.ts).
+ */
+function warmLogos(websites: readonly unknown[]) {
+  const list = [...new Set(websites.filter((site): site is string => typeof site === "string" && Boolean(site)))];
+  if (!list.length) return;
+  after(async () => {
+    for (let index = 0; index < list.length; index += 4) {
+      await Promise.all(list.slice(index, index + 4).map((site) => clientLogo(site)));
+    }
+  });
+}
+
 function asInput(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
 }
@@ -102,6 +119,7 @@ export async function saveOrg(id: unknown, values: unknown): Promise<OutreachRes
       staff.email,
     );
     if (!result.ok) return result;
+    warmLogos([row.website]);
     refresh();
     return { ...result, message: "Organisation added" };
   }
@@ -124,6 +142,7 @@ export async function saveOrg(id: unknown, values: unknown): Promise<OutreachRes
   }
   const result = await updateRecord(TABLES.orgs, "an organisation", key, row, staff.email);
   if (!result.ok) return result;
+  if (row.website !== before.website) warmLogos([row.website]);
   refresh();
   return { ...result, message: "Saved" };
 }
@@ -377,6 +396,13 @@ export async function importOrgs(csv: unknown): Promise<OutreachResult> {
       // An owner who can't open Outreach would never see the follow-up.
       owner: owners.includes(org.owner) ? org.owner : staff.email,
       notes: org.notes,
+      priority: org.priority,
+      about: org.about,
+      funding: org.funding,
+      why_fit: org.why_fit,
+      warm_path: org.warm_path,
+      signal_url: org.signal_url || null,
+      conflict: org.conflict,
       ...stageStamps(null, org.stage, today),
     });
     if (org.contact) {
@@ -386,6 +412,8 @@ export async function importOrgs(csv: unknown): Promise<OutreachResult> {
         name: org.contact.name,
         email: org.contact.email || null,
         title: org.contact.title,
+        linkedin: org.contact.linkedin || null,
+        x_handle: org.contact.x_handle,
         is_primary: true,
       });
     }
@@ -414,6 +442,7 @@ export async function importOrgs(csv: unknown): Promise<OutreachResult> {
     }
   }
   console.info(`[outreach] ${staff.email} imported ${orgRows.length} organisations (${skipped} skipped)`);
+  warmLogos(fresh.map((org) => org.website));
   refresh();
   return {
     ok: true,
