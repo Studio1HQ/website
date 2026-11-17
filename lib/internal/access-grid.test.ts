@@ -16,6 +16,9 @@ import {
   communityAccess,
   gridFromRoles,
   hiringLevel,
+  isGrantedOnly,
+  OWNER_ROLES,
+  GRANTED_ONLY,
   presetAllowed,
   presetGrid,
   rolesFromGrid,
@@ -105,7 +108,9 @@ describe("the access grid", () => {
     expect(areaAccess(["community_manager"], "community")).toBe("manage");
     expect(areaAccess(["client_member"], "clients")).toBe("own");
     expect(areaAccess(["client_manager"], "clients")).toBe("manage");
-    for (const area of AREA_KEYS) expect(areaAccess(["admin"], area)).toBe(AREAS[area].levels.at(-1)?.level);
+    for (const area of AREA_KEYS) {
+      expect(areaAccess(["admin"], area)).toBe(isGrantedOnly(area) ? null : AREAS[area].levels.at(-1)?.level);
+    }
     expect(areaAccess(["admin"], "clients")).toBe("manage");
     expect(areaAccess(["admin"], "tasks")).toBe("view");
     expect(areaAccess(["tasks_viewer"], "tasks")).toBe("view");
@@ -115,6 +120,31 @@ describe("the access grid", () => {
     expect(areaAccess(["hiring_reviewer"], "community")).toBeNull();
     // gridFromRoles shows what's stored, not what Admin implies.
     expect(gridFromRoles(["admin"])).toEqual(EMPTY_GRID);
+  });
+
+  it("opens Outreach, Influencers and Social growth only with their own role, Admin or not", () => {
+    expect([...GRANTED_ONLY]).toEqual(["outreach", "influencers", "socials"]);
+    for (const area of GRANTED_ONLY) {
+      const role = AREAS[area].levels[0].role;
+      expect(areaAccess(["admin"], area)).toBeNull();
+      expect(can(["admin", "client_manager", "community_manager"], area, "manage")).toBe(false);
+      expect(areaAccess([role], area)).toBe("manage");
+      expect(areaAccess(["admin", role], area)).toBe("manage");
+      // One doesn't open another.
+      for (const other of GRANTED_ONLY) if (other !== area) expect(areaAccess([role], other)).toBeNull();
+      // And none opens anything else.
+      for (const other of AREA_KEYS) if (!isGrantedOnly(other)) expect(areaAccess([role], other)).toBeNull();
+    }
+  });
+
+  it("gives the founders every area", () => {
+    for (const area of AREA_KEYS) expect(areaAccess(OWNER_ROLES, area)).toBe(AREAS[area].levels.at(-1)?.level);
+  });
+
+  it("names the given-one-by-one areas next to Admin", () => {
+    expect(rolesLabel(["admin"])).toBe("Admin");
+    expect(rolesLabel(["admin", "outreach_manager", "socials_manager"])).toBe("Admin · Outreach · Social growth");
+    expect(rolesLabel(["influencer_manager", "blog_writer"])).toBe("Blog: own work · Influencers: manage");
   });
 
   it("orders levels: no access, then View or Own work, then Manage", () => {
@@ -147,9 +177,20 @@ describe("the access grid", () => {
   it("holds outside addresses to Blog: own work", () => {
     const outside = "writer@example.com";
     expect(allowedLevels(outside, "blog")).toEqual(["own"]);
-    for (const area of ["hiring", "community", "clients"] as const) expect(allowedLevels(outside, area)).toEqual([]);
+    for (const area of ["hiring", "community", "clients", "outreach", "influencers", "socials"] as const) {
+      expect(allowedLevels(outside, area)).toEqual([]);
+    }
     expect(allowedLevels("someone@studio1hq.com", "hiring")).toEqual(["view", "manage"]);
-    const everything: AccessGrid = { hiring: "manage", blog: "own", community: "manage", clients: "manage", tasks: "view" };
+    const everything: AccessGrid = {
+      hiring: "manage",
+      blog: "own",
+      community: "manage",
+      clients: "manage",
+      tasks: "view",
+      outreach: "manage",
+      influencers: "manage",
+      socials: "manage",
+    };
     const clean = cleanRoles(outside, rolesFromGrid(everything, true));
     expect(clean).toEqual(["blog_writer"]);
     expect(gridFromRoles(clean)).toEqual({ ...EMPTY_GRID, blog: "own" });

@@ -122,6 +122,13 @@ describe("changing someone", () => {
     expect(person("arindam@studio1hq.com")?.name).toBe("Arindam M");
   });
 
+  it("leaves a founder's details to the founders", async () => {
+    const refused = await saveTeammate(admin, { email: "arindam@studio1hq.com", name: "Someone Else", designation: "Intern" });
+    expect(refused).toEqual({ ok: false, message: "Only Arindam or Amitesh can change a founder's details." });
+    expect(person("arindam@studio1hq.com")?.name).toBe("Arindam");
+    expect((await saveTeammate({ email: "amitesh@studio1hq.com", owner: true }, { email: "arindam@studio1hq.com", name: "Arindam M" })).ok).toBe(true);
+  });
+
   it("gives someone only on the roster a member row on their first change", async () => {
     db.add("team_people", { email: "solo@studio1hq.com", name: "Solo" });
     expect((await saveTeammate(admin, { email: "solo@studio1hq.com", name: "Solo", roles: ["hiring_viewer"] })).ok).toBe(true);
@@ -147,6 +154,27 @@ describe("turning someone off and back on", () => {
     db.add("team_people", { email: "solo@studio1hq.com", name: "Solo" });
     expect((await setTeammateOn(founder, "solo@studio1hq.com", false)).ok).toBe(true);
     expect(member("solo@studio1hq.com")?.status).toBe("disabled");
+  });
+
+  it("won't leave interns without a reviewer", async () => {
+    db.add(
+      "team_people",
+      { email: "ivy@studio1hq.com", name: "Ivy", kind: "intern", reviewer: "kat@studio1hq.com" },
+      { email: "ian@studio1hq.com", name: "", kind: "intern", reviewer: "kat@studio1hq.com" },
+      { email: "old@studio1hq.com", name: "Old", kind: "intern", reviewer: "kat@studio1hq.com", active: false },
+    );
+    expect(await setTeammateOn(founder, "kat@studio1hq.com", false)).toEqual({
+      ok: false,
+      message: "Kat reviews Ivy and Ian. Give those interns another reviewer first.",
+    });
+    expect(member("kat@studio1hq.com")?.status).toBe("active");
+    expect(person("kat@studio1hq.com")?.active).toBe(true);
+
+    // Once they have someone else, it goes ahead.
+    for (const email of ["ivy@studio1hq.com", "ian@studio1hq.com"]) {
+      expect((await saveTeammate(founder, { email, kind: "intern", reviewer: "ada@studio1hq.com" })).ok).toBe(true);
+    }
+    expect((await setTeammateOn(founder, "kat@studio1hq.com", false)).ok).toBe(true);
   });
 
   it("is the founders' call, never on themselves", async () => {

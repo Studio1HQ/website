@@ -17,9 +17,12 @@ import {
   saveDeliverable,
 } from "@/app/internal/(dashboard)/clients/actions";
 import {
+  FORM_FIELD_LABELS,
   MEMBER_FIELDS,
+  formValueOf,
   memberMayStartAt,
   type ClientsAccess,
+  type FormField,
 } from "@/lib/internal/clients/rules";
 import {
   CONTENT_TYPES,
@@ -264,6 +267,13 @@ function DeliverableForm({
   const [values, setValues] = useState<Values>(() =>
     startValues(deliverable, defaults, me),
   );
+  // What the form showed when it opened: a save sends only the fields
+  // changed since, with what they were, so it never writes over someone
+  // else's newer change (saveDeliverable checks).
+  const [opened] = useState(() => ({
+    values: startValues(deliverable, defaults, me),
+    deliverable,
+  }));
   const [error, setError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [saving, startSaving] = useTransition();
@@ -305,6 +315,7 @@ function DeliverableForm({
       return;
     }
     const payload: Record<string, unknown> = {};
+    const seen: Record<string, string> = {};
     for (const key of Object.keys(values) as (keyof Values)[]) {
       if (key === "published_on" && (editing || values.status !== "published"))
         continue;
@@ -312,12 +323,26 @@ function DeliverableForm({
       if (locked(key)) continue;
       // Hidden here means not ours to change: never blank them by accident.
       if (DEVREL_KEYS.includes(key) && !shows(key)) continue;
+      if (editing && opened.deliverable) {
+        // Unchanged here: leave it as it is now, whoever changed it since.
+        if (values[key] === opened.values[key]) continue;
+        if (key in FORM_FIELD_LABELS)
+          seen[key] = formValueOf(opened.deliverable, key as FormField);
+      }
       payload[key] = values[key];
     }
     if (!editing) payload.cycle_id = cycleId;
+    if (editing && !Object.keys(payload).length) {
+      close();
+      return;
+    }
     setError(null);
     startSaving(async () => {
-      const result = await saveDeliverable(deliverable?.id ?? null, payload);
+      const result = await saveDeliverable(
+        deliverable?.id ?? null,
+        payload,
+        editing ? seen : undefined,
+      );
       if (!result.ok) {
         setError(result.message);
         return;

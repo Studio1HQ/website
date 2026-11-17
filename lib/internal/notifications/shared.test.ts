@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { badgeText, noticeRecipients, noticeRows } from "@/lib/internal/notifications/shared";
+import { badgeText, noticeCutoffs, noticeRecipients, noticeRows } from "@/lib/internal/notifications/shared";
 
 describe("noticeRecipients", () => {
   it("leaves out the person who acted, blanks, names and repeats", () => {
@@ -36,5 +36,14 @@ describe("badgeText", () => {
   it("caps at 9+", () => {
     expect(badgeText(3)).toBe("3");
     expect(badgeText(12)).toBe("9+");
+  });
+});
+
+describe("noticeCutoffs", () => {
+  it("keeps read notifications 30 days and any notification 90", () => {
+    expect(noticeCutoffs(new Date("2026-11-18T10:00:00Z"))).toEqual({
+      read: "2026-10-19T10:00:00.000Z",
+      any: "2026-08-20T10:00:00.000Z",
+    });
   });
 });

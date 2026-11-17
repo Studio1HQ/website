@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { inScope, type ClientScope } from "@/lib/internal/clients/scope";
-import { requireClients, staffName } from "@/lib/internal/session";
+import { canSeeMoney, requireClients, staffName } from "@/lib/internal/session";
 import {
   cleanBlock,
   cleanClient,
@@ -59,6 +59,8 @@ import {
   MEMBER_FIELDS,
   blockProblem,
   canChangeDeliverable,
+  clashText,
+  editClashes,
   memberMayStartAt,
   isInternal,
   moveProblem,
@@ -293,6 +295,8 @@ export async function saveEngagement(
   const key = id ? idOf(id) : null;
   if (id && !key) return UNKNOWN;
   const input = asInput(values);
+  // The contract is money: only the founders see or set its link.
+  if (!canSeeMoney(staff)) delete input.contract_url;
   const clean = cleanEngagement(input, key ? "update" : "create");
   if (!clean.ok) return clean;
   if (key) {
@@ -442,13 +446,14 @@ export async function saveCycleNotes(
   return { ok: true, message: "Notes saved" };
 }
 
-/** The invoice flag (not sent, sent, paid) and its link. No amounts. */
+/** The invoice flag (not sent, sent, paid) and its link. No amounts. The founders only. */
 export async function setInvoice(
   cycleId: unknown,
   values: unknown,
 ): Promise<ActionResult> {
   const staff = await manager();
-  if (!staff) return DENIED;
+  if (!staff || !canSeeMoney(staff))
+    return { ok: false, message: "Only Arindam or Amitesh can change the invoice." };
   const key = idOf(cycleId);
   if (!key) return UNKNOWN;
   const clean = cleanInvoice(asInput(values));
@@ -511,10 +516,15 @@ export async function removeScopeLine(id: unknown): Promise<ActionResult> {
  * may add one they own or review, and change only dates, links and notes
  * on their own; managers change anything. The status changes through
  * moveDeliverable, the blocked flag through setBlocked/clearBlocked.
+ *
+ * `seen`, when changing one: what the dialog showed for each field it sends
+ * (formValueOf). A field someone else changed since then isn't written over:
+ * the save stops and says so (editClashes).
  */
 export async function saveDeliverable(
   id: unknown,
   values: unknown,
+  seen?: unknown,
 ): Promise<ActionResult> {
   const staff = await requireClients();
   const key = id ? idOf(id) : null;
@@ -627,6 +637,12 @@ export async function saveDeliverable(
   const found = await changeable(staff, key);
   if (!found.ok) return found.result;
   const { deliverable } = found;
+  const clashes = editClashes(deliverable, asInput(seen), input);
+  if (clashes.length)
+    return {
+      ok: false,
+      message: `Someone else changed ${clashText(clashes)} since you opened this. Close it and open it again to see their change, then make yours.`,
+    };
   const clean = cleanDeliverable(input, "update");
   if (!clean.ok) return clean;
   let patch = clean.row;

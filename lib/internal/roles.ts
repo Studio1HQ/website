@@ -21,13 +21,21 @@
  *                    out (sponsorship amounts, budgets, costs), and see and
  *                    tick off only the tasks assigned to them
  *   client_manager   run client work: clients, engagements, monthly scope,
- *                    every deliverable, templates, capacity, the invoice flag
+ *                    every deliverable, templates, capacity (the invoice flag
+ *                    and contract links are the founders' alone)
  *   client_member    read client work; add deliverables and move along (status,
  *                    links, dates, blocked) the ones they own or review
  *   tasks_viewer     the founder's associate: see everyone's tasks, work logs
  *                    and weeks (Tasks), the founders' included, and give
  *                    people tasks. Everyone on the team list sees their own
  *                    without a role.
+ *   outreach_manager    the outreach pipeline: organisations, deals, follow-ups
+ *   influencer_manager  the influencer roster, rates and results
+ *   socials_manager     Social growth: the accounts and their numbers
+ *
+ * Those last three are given one by one (GRANTED_ONLY): Admin doesn't open
+ * them. The founders always have them (OWNER_ROLES); anyone else, admins
+ * included, needs a founder to give them.
  *
  * The team page shows these as one access grid (AREAS below): every role
  * but Admin is one level in one area, so a person is a row with a level per
@@ -61,18 +69,25 @@ export const ROLE_KEYS = [
   "client_manager",
   "client_member",
   "tasks_viewer",
+  "outreach_manager",
+  "influencer_manager",
+  "socials_manager",
 ] as const;
 export type RoleKey = (typeof ROLE_KEYS)[number];
 
 export const ROLE_INFO: Record<
   RoleKey,
-  { label: string; area: "All" | "Hiring" | "Blog" | "Community" | "Clients" | "Team tasks"; description: string }
+  {
+    label: string;
+    area: "All" | "Hiring" | "Blog" | "Community" | "Clients" | "Team tasks" | "Outreach" | "Influencers" | "Social growth";
+    description: string;
+  }
 > = {
   admin: {
     label: "Admin",
     area: "All",
     description:
-      "Everything except Money: the team list, exports, subscriber lists, every pipeline, the blog, community and client work. Payroll and payments stay with the founders.",
+      "Everything except Money, Outreach, Influencers and Social growth: the team list, exports, subscriber lists, every pipeline, the blog, community and client work. Payroll and payments stay with the founders; the other three are given one by one.",
   },
   hiring_reviewer: {
     label: "Hiring reviewer",
@@ -110,7 +125,7 @@ export const ROLE_INFO: Record<
     label: "Client manager",
     area: "Clients",
     description:
-      "Run client work: clients, engagements, each month's scope, every deliverable, scope templates, people's capacity and the invoice flag.",
+      "Run client work: clients, engagements, each month's scope, every deliverable, scope templates and people's capacity.",
   },
   client_member: {
     label: "Client team",
@@ -124,7 +139,28 @@ export const ROLE_INFO: Record<
     description:
       "See everyone's tasks, work logs and weeks, the founders' included, and give people tasks. Reports stay with the founders.",
   },
+  outreach_manager: {
+    label: "Outreach",
+    area: "Outreach",
+    description: "Work the outreach pipeline: organisations, contacts, deal values, follow-ups and the export.",
+  },
+  influencer_manager: {
+    label: "Influencers",
+    area: "Influencers",
+    description: "Run the influencer roster: creators, channels, rate cards, what Studio1 paid and how posts did.",
+  },
+  socials_manager: {
+    label: "Social growth",
+    area: "Social growth",
+    description: "Track Studio1's social accounts: add accounts and log their numbers.",
+  },
 };
+
+/**
+ * The founders' roles: Admin, plus the areas Admin alone doesn't open. Any
+ * code that treats someone as a founder gives them these.
+ */
+export const OWNER_ROLES: readonly RoleKey[] = ["admin", "outreach_manager", "influencer_manager", "socials_manager"];
 
 /** The only role someone outside @studio1hq.com can have. */
 export const OUTSIDE_ROLES: readonly RoleKey[] = ["blog_writer"];
@@ -155,8 +191,12 @@ export function atLeast(role: Role | null | undefined, minimum: Role) {
  *   clients    Own work = client_member    Manage = client_manager
  *   tasks      View = tasks_viewer (one level: everyone sees their own
  *              tasks without it; the founders see everyone's)
+ *   outreach, influencers, socials
+ *              Manage = outreach_manager / influencer_manager /
+ *              socials_manager (one level each; GRANTED_ONLY: Admin
+ *              doesn't open them)
  */
-export const AREA_KEYS = ["hiring", "blog", "community", "clients", "tasks"] as const;
+export const AREA_KEYS = ["hiring", "blog", "community", "clients", "tasks", "outreach", "influencers", "socials"] as const;
 export type AreaKey = (typeof AREA_KEYS)[number];
 
 /** The levels each area really has, lowest first. */
@@ -166,6 +206,9 @@ export type AreaLevels = {
   community: "own" | "manage";
   clients: "own" | "manage";
   tasks: "view";
+  outreach: "manage";
+  influencers: "manage";
+  socials: "manage";
 };
 export type AreaLevel<A extends AreaKey = AreaKey> = AreaLevels[A];
 
@@ -222,12 +265,48 @@ export const AREAS: { [A in AreaKey]: AreaInfo<A> } = {
     label: "Team tasks",
     levels: [level<"tasks">("view", "tasks_viewer")],
   },
+  outreach: {
+    key: "outreach",
+    label: "Outreach",
+    levels: [level<"outreach">("manage", "outreach_manager")],
+  },
+  influencers: {
+    key: "influencers",
+    label: "Influencers",
+    levels: [level<"influencers">("manage", "influencer_manager")],
+  },
+  socials: {
+    key: "socials",
+    label: "Social growth",
+    levels: [level<"socials">("manage", "socials_manager")],
+  },
 };
+
+/**
+ * Areas Admin alone doesn't open: who Studio1 pitches and for how much,
+ * what creators charge, and the social numbers. The founders always have
+ * them (OWNER_ROLES); anyone else, admins included, is given each one, and
+ * only by a founder (roleChangeProblem).
+ */
+export const GRANTED_ONLY: readonly AreaKey[] = ["outreach", "influencers", "socials"];
+
+export function isGrantedOnly(area: AreaKey) {
+  return GRANTED_ONLY.includes(area);
+}
 
 /** The areas in column order. */
 export const AREA_LIST: readonly AreaInfo[] = AREA_KEYS.map((key) => AREAS[key] as AreaInfo);
 
-export const EMPTY_GRID: AccessGrid = { hiring: null, blog: null, community: null, clients: null, tasks: null };
+export const EMPTY_GRID: AccessGrid = {
+  hiring: null,
+  blog: null,
+  community: null,
+  clients: null,
+  tasks: null,
+  outreach: null,
+  influencers: null,
+  socials: null,
+};
 
 /** The highest level of this area whose role is in the list, ignoring Admin. */
 function heldLevel<A extends AreaKey>(roles: readonly RoleKey[], area: A): AreaLevels[A] | null {
@@ -250,6 +329,9 @@ export function gridFromRoles(roles: readonly RoleKey[]): AccessGrid {
     community: heldLevel(roles, "community"),
     clients: heldLevel(roles, "clients"),
     tasks: heldLevel(roles, "tasks"),
+    outreach: heldLevel(roles, "outreach"),
+    influencers: heldLevel(roles, "influencers"),
+    socials: heldLevel(roles, "socials"),
   };
 }
 
@@ -266,11 +348,11 @@ export function rolesFromGrid(grid: Partial<AccessGrid>, admin: boolean): RoleKe
 
 /**
  * What someone can do in an area: Admin counts as the area's top level
- * everywhere (Manage; View in Team tasks, which has only that). Null for
- * nothing.
+ * (Manage; View in Team tasks, which has only that), except in the
+ * GRANTED_ONLY areas, which need their own role. Null for nothing.
  */
 export function areaAccess<A extends AreaKey>(roles: readonly RoleKey[], area: A): AreaLevels[A] | null {
-  if (roles.includes("admin")) {
+  if (roles.includes("admin") && !isGrantedOnly(area)) {
     const levels = AREAS[area].levels as readonly LevelInfo<A>[];
     return levels[levels.length - 1].level;
   }
@@ -416,6 +498,14 @@ export function roleChangeProblem(
   // can't see themselves, so it isn't theirs to hand out or take away.
   if (current.roles.includes("tasks_viewer") !== next.roles.includes("tasks_viewer"))
     return `Only ${founders} can change who sees the team's tasks.`;
+  // The given-one-by-one areas: an admin may not have them, so they aren't
+  // theirs to hand out or take away either.
+  for (const area of GRANTED_ONLY) {
+    const role = AREAS[area].levels[0].role;
+    if (current.roles.includes(role) !== next.roles.includes(role)) {
+      return `Only ${founders} can change who opens ${AREAS[area].label}.`;
+    }
+  }
   return null;
 }
 
@@ -431,8 +521,11 @@ export function cleanRoles(email: string, roles: unknown): RoleKey[] {
 
 /** "Admin", or the grid row in words: "Blog: own work · Clients: manage". */
 export function rolesLabel(roles: readonly RoleKey[]) {
-  if (roles.includes("admin")) return ROLE_INFO.admin.label;
   const grid = gridFromRoles(roles);
+  if (roles.includes("admin")) {
+    // Admin, plus any of the areas Admin doesn't open on its own.
+    return [ROLE_INFO.admin.label, ...GRANTED_ONLY.filter((area) => grid[area]).map((area) => AREAS[area].label)].join(" · ");
+  }
   return (
     AREA_LIST.flatMap((area) => {
       const value = grid[area.key];

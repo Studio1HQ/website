@@ -36,6 +36,20 @@ export type Notice = {
 export const BELL_LIMIT = 30;
 export const NOTICE_PEOPLE_LIMIT = 60;
 
+/**
+ * How long the bell keeps things. The daily clean-up
+ * (app/api/cron/purge-rejected) deletes a notification once it has been
+ * read for this many days, and any notification, read or not, this old.
+ */
+export const KEEP_READ_DAYS = 30;
+export const KEEP_ANY_DAYS = 90;
+
+/** The instants before which read, and any, notifications go. */
+export function noticeCutoffs(now = new Date()) {
+  const daysAgo = (days: number) => new Date(now.getTime() - days * 24 * 60 * 60 * 1000).toISOString();
+  return { read: daysAgo(KEEP_READ_DAYS), any: daysAgo(KEEP_ANY_DAYS) };
+}
+
 /** Who a notice goes to: lowercased, once each, never the person who did it. */
 export function noticeRecipients(to: readonly (string | null | undefined)[], actor: string) {
   const me = actor.trim().toLowerCase();

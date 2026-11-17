@@ -31,11 +31,17 @@ import {
   bestChannel,
   bestValue,
   byValue,
+  engagementRate,
   engagements,
   formatCount,
+  formatPercent,
+  isSpiky,
+  opensPerIssue,
   per1k,
   rateLines,
+  reachRate,
   totalFollowers,
+  typicalViews,
 } from "@/lib/internal/influencers/rules";
 import {
   CHANNEL_FIELDS,
@@ -47,7 +53,9 @@ import {
   STATUSES,
   formatLabel,
   formatName,
+  nicheLabel,
   platformLabel,
+  type Channel,
 } from "@/lib/internal/influencers/schema";
 import {
   Card,
@@ -69,11 +77,13 @@ import {
   rowClass,
 } from "@/components/internal/community/ui";
 import {
+  NicheChips,
   PATH,
   Per1k,
   PlatformPill,
 } from "@/components/internal/influencers/ui";
 import { FieldDialog } from "@/components/internal/outreach/field-dialog";
+import { SiteLogo } from "@/components/internal/site-logo";
 
 export async function generateMetadata({
   params,
@@ -87,6 +97,34 @@ export async function generateMetadata({
     title:
       influencer && influencer !== "error" ? influencer.name : "Influencers",
   };
+}
+
+/**
+ * The numbers a channel card shows, as [label, figure, what it means]. A
+ * newsletter has subscribers, opens and clicks; other platforms have the
+ * typical, average and best post, and engagement.
+ */
+function channelFigures(channel: Channel): [string, string, string?][] {
+  const posts = channel.posts_per_month === null ? "—" : String(channel.posts_per_month);
+  if (channel.platform === "newsletter") {
+    return [
+      ["Subscribers", formatCount(channel.followers)],
+      ["Open rate", formatPercent(channel.open_rate), "Subscribers who open an issue"],
+      ["Click rate", formatPercent(channel.click_rate), "Subscribers who click a link in an issue"],
+      ["Opens an issue", formatCount(opensPerIssue(channel)), "Subscribers × open rate"],
+      ["Issues a month", posts],
+    ];
+  }
+  return [
+    ["Followers", formatCount(channel.followers)],
+    ["Typical views", formatCount(channel.median_views), "The median post: what a usual post gets"],
+    ["Average views", formatCount(channel.avg_views), "The mean: a few viral posts can lift it"],
+    ["Best lately", formatCount(channel.best_views), "Their biggest post of the last few months"],
+    ["Engagement", formatPercent(engagementRate(channel)), "Engagements for every 100 views"],
+    ["Reaches", formatPercent(reachRate(channel)), "A typical post's views over their followers"],
+    ["Engagements", formatCount(channel.avg_engagements), "Likes, comments, reposts and saves on a usual post"],
+    ["Posts a month", posts],
+  ];
 }
 
 const editClass =
@@ -126,6 +164,9 @@ export default async function InfluencerPage({
   );
   const posted = posts.ok ? posts.rows : [];
   const top = bestChannel(own);
+  const topViews = top ? typicalViews(top) : null;
+  // A newsletter on its own: subscribers, not followers across platforms.
+  const onlyNewsletter = own.length === 1 && own[0].platform === "newsletter";
   const value = bestValue(lines);
   const spent = sumMoney(
     posted.map((post) => ({ amount: post.cost, currency: post.currency })),
@@ -148,7 +189,10 @@ export default async function InfluencerPage({
           </Link>
         }
         title={influencer.name}
-        description={[influencer.topics, influencer.location]
+        description={[
+          influencer.niches.map(nicheLabel).join(", "),
+          influencer.location,
+        ]
           .filter(Boolean)
           .join(" · ")}
         actions={
@@ -192,21 +236,23 @@ export default async function InfluencerPage({
 
       <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat
-          label="Followers, added up"
+          label={onlyNewsletter ? "Subscribers" : "Followers, added up"}
           value={own.length ? formatCount(totalFollowers(own)) : "—"}
           note={
-            own.length
-              ? `Across ${own.length} ${own.length === 1 ? "platform" : "platforms"}; some follow on more than one`
-              : "Add a channel to start"
+            onlyNewsletter
+              ? `${formatPercent(own[0].open_rate)} open · ${formatPercent(own[0].click_rate)} click`
+              : own.length
+                ? `Across ${own.length} ${own.length === 1 ? "platform" : "platforms"}; some follow on more than one`
+                : "Add a channel to start"
           }
         />
         <Stat
           label="Strongest platform"
-          value={top?.avg_views ? platformLabel(top.platform) : "—"}
+          value={topViews !== null && top ? platformLabel(top.platform) : "—"}
           note={
-            top?.avg_views
-              ? `${formatCount(top.avg_views)} views on a usual post`
-              : "Needs the usual views a post"
+            topViews !== null && top
+              ? `${formatCount(topViews)} ${top.platform === "newsletter" ? "opens an issue" : "views on a typical post"}`
+              : "Needs what a typical post gets"
           }
         />
         <Stat
@@ -214,8 +260,8 @@ export default async function InfluencerPage({
           value={value ? formatMoney(value.per1k, value.currency) : "—"}
           note={
             value
-              ? `For 1k views: ${formatName(value.format)}`
-              : "Needs a price and the usual views"
+              ? `For 1k ${value.platform === "newsletter" ? "opens" : "views"}: ${formatName(value.format)}`
+              : "Needs a price and what a typical post gets"
           }
         />
         <Stat
@@ -254,7 +300,9 @@ export default async function InfluencerPage({
                   <>
                     <th>What for</th>
                     <th className="text-right">Price</th>
-                    <th className="text-right">Per 1k views</th>
+                    <th className="text-right" title="Views for a post, opens for a newsletter">
+                      Per 1k views
+                    </th>
                     <th>Quoted</th>
                     <th>Covers</th>
                     {/* A label, not hidden text: absolutely placed text would widen the page on phones. */}
@@ -470,6 +518,14 @@ export default async function InfluencerPage({
                   <li key={channel.id} className="px-5 py-3">
                     <div className="flex items-center justify-between gap-3">
                       <span className="flex min-w-0 items-center gap-2">
+                        {channel.platform === "newsletter" && channel.url ? (
+                          <SiteLogo
+                            path={`${PATH}/channels/${channel.id}/logo`}
+                            name={channel.handle || influencer.name}
+                            website={channel.url}
+                            size={22}
+                          />
+                        ) : null}
                         <PlatformPill platform={channel.platform} />
                         {channel.url ? (
                           <ExternalLink
@@ -505,24 +561,25 @@ export default async function InfluencerPage({
                         }
                       />
                     </div>
-                    <dl className="mt-2 grid grid-cols-3 gap-2 text-[12px]">
-                      {(
-                        [
-                          ["Followers", channel.followers],
-                          ["Views a post", channel.avg_views],
-                          ["Engagements", channel.avg_engagements],
-                        ] as const
-                      ).map(([label, count]) => (
-                        <div key={label} className="min-w-0">
+                    <dl className="mt-2.5 grid grid-cols-3 gap-x-2 gap-y-2.5 text-[12px]">
+                      {channelFigures(channel).map(([label, figure, hint]) => (
+                        <div key={label} className="min-w-0" title={hint}>
                           <dt className="truncate text-[var(--i-faint)]">
                             {label}
                           </dt>
                           <dd className="mt-0.5 text-[13.5px] font-medium tabular-nums">
-                            {formatCount(count)}
+                            {figure}
                           </dd>
                         </div>
                       ))}
                     </dl>
+                    {isSpiky(channel) ? (
+                      <p className="mt-2 text-[12px] text-amber-700 dark:text-amber-300">
+                        Spiky: the average is{" "}
+                        {Math.round(((channel.avg_views ?? 0) / (channel.median_views ?? 1)) * 10) / 10}× the typical
+                        post, so a few viral posts carry it. Plan on the typical figure.
+                      </p>
+                    ) : null}
                     {channel.checked_on || channel.notes ? (
                       <p className="mt-1.5 line-clamp-2 text-[12px] text-[var(--i-muted)]">
                         {[
@@ -567,9 +624,19 @@ export default async function InfluencerPage({
                 <Field label="Best way to reach them" wide>
                   {influencer.contact_via}
                 </Field>
+                <Field label="Niche" wide>
+                  {influencer.niches.length ? (
+                    <NicheChips niches={influencer.niches} />
+                  ) : null}
+                </Field>
                 <Field label="Posts about" wide>
                   {influencer.topics}
                 </Field>
+                <Field label="Who follows them" wide>
+                  {influencer.audience}
+                </Field>
+                <Field label="Posts in">{influencer.languages}</Field>
+                <Field label="Style">{influencer.content_style}</Field>
                 {influencer.tags.length ? (
                   <Field label="Tags" wide>
                     <span className="flex flex-wrap gap-1">

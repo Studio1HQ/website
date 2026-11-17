@@ -68,6 +68,7 @@ export function EngagementDialog({
   names = {},
   me = "",
   types = ENGAGEMENT_TYPES,
+  money = false,
   trigger,
 }: {
   /** The engagement to edit; leave out to add one. */
@@ -83,6 +84,8 @@ export function EngagementDialog({
   me?: string;
   /** Built-in types and the team's own (engagementTypes()). */
   types?: readonly { value: EngagementType; label: string }[];
+  /** The viewer is a founder: the contract link is theirs alone to see and set. */
+  money?: boolean;
   trigger: ReactNode;
 }) {
   const router = useRouter();
@@ -107,9 +110,12 @@ export function EngagementDialog({
   const submit = (event: FormEvent) => {
     event.preventDefault();
     setError(null);
+    // Without the contract field, its value never goes: a save here can't blank it.
+    const { contract_url, ...rest } = values;
     startSaving(async () => {
       const result = await saveEngagement(engagement?.id ?? null, {
-        ...values,
+        ...rest,
+        ...(money ? { contract_url } : {}),
         ...(engagement ? {} : { client_id: clientId }),
       });
       if (!result.ok) {
@@ -223,9 +229,11 @@ export function EngagementDialog({
       >
         {text("client_tracker_url", "https://", true)}
       </FormField>
-      <FormField id="engagement-contract_url" label="Contract">
-        {text("contract_url", "https://", true)}
-      </FormField>
+      {money ? (
+        <FormField id="engagement-contract_url" label="Contract">
+          {text("contract_url", "https://", true)}
+        </FormField>
+      ) : null}
       <FormField id="engagement-notes" label="Notes" wide>
         <textarea
           id="engagement-notes"

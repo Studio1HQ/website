@@ -55,8 +55,8 @@ export function MetricDialog({
 }: {
   /** The month to correct; leave out to log a new one. */
   metric?: SocialMetric;
-  /** Adding: start on this account and platform. */
-  defaults?: { account: string; platform: Platform };
+  /** Adding: start on this account and platform (and month). */
+  defaults?: { account: string; platform: Platform; month?: string };
   /** Accounts logged so far, as suggestions. */
   accounts: readonly string[];
   /** This month, "YYYY-MM": the latest that can be logged. */
@@ -68,7 +68,7 @@ export function MetricDialog({
   const start = (): Values => ({
     account: metric?.account ?? defaults?.account ?? STUDIO_ACCOUNT,
     platform: metric?.platform ?? defaults?.platform ?? "linkedin",
-    month: metric?.month ?? month,
+    month: metric?.month ?? defaults?.month ?? month,
     followers: metric ? String(metric.followers) : "",
     impressions:
       metric?.impressions === null || metric?.impressions === undefined

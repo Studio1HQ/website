@@ -1,8 +1,15 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
+import {
+  EnvelopeSimple,
+  Globe,
+  InstagramLogo,
+  LinkedinLogo,
+  XLogo,
+  YoutubeLogo,
+} from "@phosphor-icons/react/dist/ssr";
 import { formatMoney } from "@/lib/internal/community/schema";
 import {
-  PLATFORMS,
+  nicheLabel,
   platformLabel,
   type Platform,
 } from "@/lib/internal/influencers/schema";
@@ -15,6 +22,8 @@ import {
   Table,
   rowClass,
 } from "@/components/internal/community/ui";
+import { safeUrl } from "@/components/internal/ui";
+import type { FilterOption } from "@/components/internal/influencers/filter-dropdown";
 import { cn } from "@/lib/utils";
 
 /** The pieces the Influencers pages share. Server-safe: nothing here needs the browser. */
@@ -24,13 +33,14 @@ export const PATH = "/internal/influencers";
 export function InfluencerTabs({
   active,
 }: {
-  active: "roster" | "rates" | "results";
+  active: "roster" | "newsletters" | "rates" | "results";
 }) {
   return (
     <LinkTabs
       active={active}
       items={[
         { key: "roster", label: "Roster", href: PATH },
+        { key: "newsletters", label: "Newsletters", href: `${PATH}/newsletters` },
         { key: "rates", label: "Rate cards", href: `${PATH}/rates` },
         { key: "results", label: "What works", href: `${PATH}/results` },
       ]}
@@ -38,50 +48,131 @@ export function InfluencerTabs({
   );
 }
 
-export function PlatformPill({
+/** Each platform's mark in its brand colour, so a row of them reads at a glance. */
+const ICONS: Record<Platform, { icon: typeof XLogo; className: string }> = {
+  x: { icon: XLogo, className: "text-[var(--i-ink)]" },
+  linkedin: { icon: LinkedinLogo, className: "text-[#0A66C2] dark:text-[#4c9ee8]" },
+  youtube: { icon: YoutubeLogo, className: "text-[#FF0000] dark:text-[#ff4d4d]" },
+  instagram: { icon: InstagramLogo, className: "text-[#E1306C] dark:text-[#f0628f]" },
+  newsletter: { icon: EnvelopeSimple, className: "text-amber-600 dark:text-amber-400" },
+  other: { icon: Globe, className: "text-[var(--i-muted)]" },
+};
+
+export function PlatformIcon({
   platform,
-  children,
+  size = 14,
+  className,
 }: {
   platform: Platform;
-  children?: ReactNode;
+  size?: number;
+  className?: string;
 }) {
-  const option = PLATFORMS.find((item) => item.value === platform);
+  const { icon: Icon, className: colour } = ICONS[platform] ?? ICONS.other;
   return (
-    <Pill tone={option?.tone ?? "stone"}>
-      {children ?? platformLabel(platform)}
-    </Pill>
+    <Icon
+      size={size}
+      weight="fill"
+      aria-hidden
+      className={cn("shrink-0", colour, className)}
+    />
   );
 }
 
-/** A row of filter links; the one that's on is raised. */
-export function FilterLinks({
-  label,
-  items,
-  className,
+/**
+ * A platform's logo and name (or what's passed in, like a follower count).
+ * With `href`, it opens their profile in a new tab.
+ */
+export function PlatformPill({
+  platform,
+  children,
+  href,
 }: {
-  label: string;
-  items: { key: string; label: string; href: string; on: boolean }[];
-  className?: string;
+  platform: Platform;
+  children?: ReactNode;
+  href?: string | null;
 }) {
-  return (
-    <nav aria-label={label} className={cn("flex flex-wrap gap-1", className)}>
-      {items.map((item) => (
-        <Link
-          key={item.key}
-          href={item.href}
-          aria-current={item.on ? "true" : undefined}
-          className={cn(
-            "inline-flex h-8 items-center rounded-lg px-2.5 text-[12.5px]",
-            item.on
-              ? "bg-[var(--i-panel)] font-medium text-[var(--i-ink)] shadow-[var(--i-shadow-sm)] ring-1 ring-[var(--i-line)]"
-              : "text-[var(--i-muted)] hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)]",
-          )}
-        >
-          {item.label}
-        </Link>
-      ))}
-    </nav>
+  const className =
+    "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-[var(--i-panel)] px-2 py-0.5 text-[12px] font-medium text-[var(--i-ink)] ring-1 ring-inset ring-[var(--i-line)]";
+  const body = (
+    <>
+      <PlatformIcon platform={platform} size={13} />
+      {children ?? platformLabel(platform)}
+    </>
   );
+  const url = href ? safeUrl(href) : null;
+  if (!url) return <span className={className}>{body}</span>;
+  return (
+    <a
+      href={url.toString()}
+      target="_blank"
+      rel="noopener noreferrer nofollow"
+      title={`Open on ${platformLabel(platform)}`}
+      className={cn(className, "hover:ring-[var(--i-line-strong)]")}
+    >
+      {body}
+    </a>
+  );
+}
+
+/** A creator's niches, as quiet chips. */
+export function NicheChips({ niches, max }: { niches: readonly string[]; max?: number }) {
+  if (!niches.length) return null;
+  const shown = max ? niches.slice(0, max) : niches;
+  return (
+    <span className="flex flex-wrap gap-1">
+      {shown.map((niche) => (
+        <span
+          key={niche}
+          className="inline-flex items-center whitespace-nowrap rounded-md bg-[var(--i-sunken)] px-1.5 py-0.5 text-[11.5px] text-[var(--i-ink-2)]"
+        >
+          {nicheLabel(niche)}
+        </span>
+      ))}
+      {max && niches.length > max ? (
+        <span className="px-0.5 text-[11.5px] text-[var(--i-faint)]">+{niches.length - max}</span>
+      ) : null}
+    </span>
+  );
+}
+
+/**
+ * A filter's choices for FilterDropdown, "any" first: `anyLabel` is that
+ * first choice's name ("Any niche").
+ */
+export function filterItems<T extends string>(
+  anyLabel: string,
+  options: readonly { value: T; label: string; note?: string }[],
+  current: T | null,
+  href: (value: T | null) => string,
+): FilterOption[] {
+  return [
+    { key: "any", label: anyLabel, href: href(null), on: current === null },
+    ...options.map((option) => ({
+      key: option.value,
+      label: option.label,
+      note: option.note,
+      href: href(option.value),
+      on: option.value === current,
+    })),
+  ];
+}
+
+/** The platform filter's items, each with its logo. */
+export function platformFilterItems(
+  platforms: readonly { value: Platform; label: string }[],
+  current: Platform | null,
+  href: (platform: Platform | null) => string,
+): FilterOption[] {
+  return [
+    { key: "all", label: "Every platform", href: href(null), on: current === null },
+    ...platforms.map((option) => ({
+      key: option.value,
+      label: option.label,
+      href: href(option.value),
+      on: option.value === current,
+      icon: <PlatformIcon platform={option.value} size={14} />,
+    })),
+  ];
 }
 
 /** "$12.50", for a thousand views. */

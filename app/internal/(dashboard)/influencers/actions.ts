@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
+import { clientLogo } from "@/lib/internal/clients/logo";
 import { isUuid } from "@/lib/internal/community/clean";
 import type { FieldDef } from "@/lib/internal/community/schema";
 import {
@@ -16,26 +18,30 @@ import { changed, countsToNumbers } from "@/lib/internal/influencers/rules";
 import {
   CHANNEL_FIELDS,
   INFLUENCER_FIELDS,
+  NEWSLETTER_CHANNEL_KEYS,
+  NEWSLETTER_FIELDS,
   POST_FIELDS,
   RATE_FIELDS,
   formatInfo,
   formatName,
+  isNiche,
   platformLabel,
   type InfluencerResult,
 } from "@/lib/internal/influencers/schema";
 import { cleanFields } from "@/lib/internal/outreach/clean";
-import { isAdmin, requireMember, type Staff } from "@/lib/internal/session";
+import { canSeeInfluencers, requireMember, type Staff } from "@/lib/internal/session";
 import { audit } from "@/lib/internal/team/audit";
 
 /**
  * Influencer writes. Server actions are public endpoints, so every one
- * checks the session here: admins only (the founders are admins). Every
+ * checks the session here: people given Influencers (the founders always
+ * are; Admin alone isn't enough). Every
  * change leaves a row in the audit trail.
  */
 
 const DENIED: InfluencerResult = {
   ok: false,
-  message: "Only admins can change influencers.",
+  message: "You don't have access to Influencers.",
 };
 const UNKNOWN: InfluencerResult = {
   ok: false,
@@ -46,9 +52,10 @@ const TRY_AGAIN: InfluencerResult = {
   message: "Couldn't check that just now. Try again in a minute.",
 };
 
-async function admin() {
+/** The signed-in person, if they may use this area; null otherwise. */
+async function allowed() {
   const staff = await requireMember();
-  return isAdmin(staff) ? staff : null;
+  return canSeeInfluencers(staff) ? staff : null;
 }
 
 function refresh() {
@@ -87,13 +94,15 @@ export async function saveInfluencer(
   id: unknown,
   values: unknown,
 ): Promise<InfluencerResult> {
-  const staff = await admin();
+  const staff = await allowed();
   if (!staff) return DENIED;
   const key = uuid(id);
   if (id && !key) return UNKNOWN;
   const cleaned = clean(INFLUENCER_FIELDS, values, key ? "update" : "create");
   if (!cleaned.ok) return cleaned;
   const row = cleaned.row;
+  // Niches come from the list, so the roster's niche filter finds them.
+  if (Array.isArray(row.niches)) row.niches = row.niches.filter(isNiche);
 
   const before = key ? await getInfluencer(key) : null;
   if (before === "error") return TRY_AGAIN;
@@ -147,9 +156,58 @@ export async function saveInfluencer(
   return { ...result, message: "Saved" };
 }
 
+/**
+ * Adds a newsletter: the publication (an influencer row) and its newsletter
+ * channel in one go. If the channel can't be saved, the publication is
+ * taken out again, so there's never one without the other.
+ */
+export async function saveNewsletter(values: unknown): Promise<InfluencerResult> {
+  const staff = await allowed();
+  if (!staff) return DENIED;
+  const cleaned = clean(NEWSLETTER_FIELDS, values, "create");
+  if (!cleaned.ok) return cleaned;
+  const channelKeys: readonly string[] = NEWSLETTER_CHANNEL_KEYS;
+  const publication: Record<string, unknown> = {};
+  const channel: Record<string, unknown> = { platform: "newsletter", handle: cleaned.row.name };
+  for (const [key, value] of Object.entries(cleaned.row)) {
+    if (channelKeys.includes(key)) channel[key] = value;
+    else publication[key] = value;
+  }
+  if (Array.isArray(publication.niches)) publication.niches = publication.niches.filter(isNiche);
+  if (publication.owner) {
+    const owners = await ownerChoices();
+    if (typeof publication.owner !== "string" || !owners.includes(publication.owner)) {
+      return { ok: false, message: "Pick an owner from the list." };
+    }
+  }
+
+  const added = await insertRecord("influencers", "a newsletter", publication, staff.email);
+  if (!added.ok || !added.id) return added.ok ? TRY_AGAIN : added;
+  const linked = await insertRecord(
+    "channels",
+    "a newsletter",
+    { ...channel, influencer_id: added.id },
+    staff.email,
+  );
+  if (!linked.ok) {
+    await deleteRecord("influencers", "a newsletter", added.id);
+    return linked;
+  }
+  await audit({
+    actor: staff.email,
+    area: "influencers",
+    action: "added",
+    subject: `${String(publication.name)} (newsletter)`,
+    detail: { id: added.id, channel_id: linked.id, ...publication, channel },
+  });
+  warmNewsletterLogo("channel", channel);
+  refresh();
+  return { ok: true, id: added.id, message: "Newsletter added" };
+}
+
 /** Deletes a creator with their channels, rate card and posts. */
 export async function removeInfluencer(id: unknown): Promise<InfluencerResult> {
-  const staff = await admin();
+  const staff = await allowed();
   if (!staff) return DENIED;
   const key = uuid(id);
   if (!key) return UNKNOWN;
@@ -242,6 +300,7 @@ async function saveChild(
       subject,
       detail: { id: result.id, influencer_id: owner, ...row },
     });
+    warmNewsletterLogo(kind, row);
     refresh();
     return { ...result, message: "Added" };
   }
@@ -266,8 +325,16 @@ async function saveChild(
       detail: { id: key, influencer_id: owner, changed: diff },
     });
   }
+  if ("url" in diff || "platform" in diff) warmNewsletterLogo(kind, row);
   refresh();
   return { ...result, message: "Saved" };
+}
+
+/** A newsletter's icon is fetched after the save, so the Newsletters tab has it on first open. */
+function warmNewsletterLogo(kind: keyof typeof CHILDREN, row: Record<string, unknown>) {
+  const site = row.url;
+  if (kind !== "channel" || row.platform !== "newsletter" || typeof site !== "string" || !site) return;
+  after(() => clientLogo(site).then(() => undefined));
 }
 
 async function removeChild(
@@ -305,7 +372,7 @@ export async function saveChannel(
   id: unknown,
   values: unknown,
 ): Promise<InfluencerResult> {
-  const staff = await admin();
+  const staff = await allowed();
   if (!staff) return DENIED;
   return saveChild(staff, "channel", influencerId, id, values);
 }
@@ -314,7 +381,7 @@ export async function removeChannel(
   influencerId: unknown,
   id: unknown,
 ): Promise<InfluencerResult> {
-  const staff = await admin();
+  const staff = await allowed();
   if (!staff) return DENIED;
   return removeChild(staff, "channel", influencerId, id);
 }
@@ -325,7 +392,7 @@ export async function saveRate(
   id: unknown,
   values: unknown,
 ): Promise<InfluencerResult> {
-  const staff = await admin();
+  const staff = await allowed();
   if (!staff) return DENIED;
   return saveChild(staff, "rate", influencerId, id, values);
 }
@@ -334,7 +401,7 @@ export async function removeRate(
   influencerId: unknown,
   id: unknown,
 ): Promise<InfluencerResult> {
-  const staff = await admin();
+  const staff = await allowed();
   if (!staff) return DENIED;
   return removeChild(staff, "rate", influencerId, id);
 }
@@ -345,7 +412,7 @@ export async function savePost(
   id: unknown,
   values: unknown,
 ): Promise<InfluencerResult> {
-  const staff = await admin();
+  const staff = await allowed();
   if (!staff) return DENIED;
   return saveChild(staff, "post", influencerId, id, values);
 }
@@ -354,7 +421,7 @@ export async function removePost(
   influencerId: unknown,
   id: unknown,
 ): Promise<InfluencerResult> {
-  const staff = await admin();
+  const staff = await allowed();
   if (!staff) return DENIED;
   return removeChild(staff, "post", influencerId, id);
 }

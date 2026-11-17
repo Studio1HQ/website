@@ -1,7 +1,14 @@
 import "server-only";
 import { cache } from "react";
-import { insertRows, selectRows, updateRows } from "@/lib/supabase-server";
-import { BELL_LIMIT, NOTICE_KINDS, noticeRows, type Notice, type Notification } from "@/lib/internal/notifications/shared";
+import { deleteRows, insertRows, selectRows, updateRows } from "@/lib/supabase-server";
+import {
+  BELL_LIMIT,
+  NOTICE_KINDS,
+  noticeCutoffs,
+  noticeRows,
+  type Notice,
+  type Notification,
+} from "@/lib/internal/notifications/shared";
 
 /**
  * Reads and writes for the bell. Every function takes the person's email
@@ -57,6 +64,22 @@ export const bellFor = cache(async (email: string): Promise<{ items: Notificatio
   const items = latest.rows.map(toNotification).filter((item): item is Notification => item !== null);
   return { items, unread: unread.ok ? (unread.total ?? 0) : items.filter((item) => !item.read_at).length };
 });
+
+/**
+ * Deletes notifications read more than KEEP_READ_DAYS ago, and every one
+ * older than KEEP_ANY_DAYS. No session check: only the daily cron route
+ * calls this, after checking its secret.
+ */
+export async function pruneNotifications(now = new Date()): Promise<{ ok: true; deleted: number } | { ok: false; message: string }> {
+  const { read, any } = noticeCutoffs(now);
+  const [wasRead, old] = await Promise.all([
+    deleteRows(TABLE, new URLSearchParams({ read_at: `lt.${read}` })),
+    deleteRows(TABLE, new URLSearchParams({ created_at: `lt.${any}` })),
+  ]);
+  const failed = [wasRead, old].find((result) => !result.ok);
+  if (failed && !failed.ok) return { ok: false, message: failed.message };
+  return { ok: true, deleted: (wasRead.ok ? wasRead.count : 0) + (old.ok ? old.count : 0) };
+}
 
 /** Marks this person's unread notifications read: one by id, or all of them. */
 export async function markRead(email: string, id?: string) {

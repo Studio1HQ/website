@@ -165,12 +165,15 @@ export function AddCard({
   today,
   options,
   open: startOpen = false,
+  inline = false,
 }: {
   day: string;
   today: string;
   options: LinkOption[];
   /** Start with the box open, with a Day to pick at the top (My day). */
   open?: boolean;
+  /** With open: one row (what, for, day, save), for a wide card. */
+  inline?: boolean;
 }) {
   const { pending, run } = useTeamAction();
   const [open, setOpen] = useState(startOpen);
@@ -249,6 +252,180 @@ export function AddCard({
     );
   }
 
+  const dayPicker = (
+    <DateField
+      value={on}
+      onChange={(next) => setOn(next || day)}
+      min={earliestCardDay(today)}
+      required
+      aria-label="Day these tasks are for"
+      className={cn(
+        "w-auto px-2 text-[12.5px]",
+        inline ? "h-8" : "h-7",
+        moved && "border-[var(--i-accent)] text-[var(--i-accent-text)]",
+      )}
+    />
+  );
+
+  const movedNote = moved ? (
+    <>
+      <span>
+        {shortFormat.format(at(on))}, not {day === today ? "today" : shortFormat.format(at(day))}
+      </span>
+      <button type="button" onClick={() => setOn(day)} className="text-[var(--i-faint)] underline hover:text-[var(--i-ink)]">
+        Back to {day === today ? "today" : shortFormat.format(at(day))}
+      </button>
+    </>
+  ) : null;
+
+  const pastedList = (
+    <div className="rounded-md bg-[var(--i-sunken)] px-2 py-1.5 text-[12px]">
+      <p className="flex items-center justify-between gap-2 text-[var(--i-muted)]">
+        {list.length} tasks
+        <button
+          type="button"
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={() => setList([])}
+          className="text-[var(--i-faint)] hover:text-[var(--i-ink)]"
+        >
+          Clear
+        </button>
+      </p>
+      <ul className="mt-1 max-h-32 space-y-0.5 overflow-y-auto">
+        {list.map((title, index) => (
+          <li key={index} className="truncate">
+            {title}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+
+  const textBox = (
+    <input
+      ref={box}
+      autoFocus
+      value={text}
+      disabled={pending}
+      onChange={(event) => setText(event.target.value)}
+      onKeyDown={keys}
+      onPaste={(event: ClipboardEvent<HTMLInputElement>) => {
+        const pasted = event.clipboardData.getData("text");
+        if (!/\r?\n/.test(pasted.trim())) return;
+        event.preventDefault();
+        setList(cleanPasted(pasted).slice(0, 30));
+        setText("");
+      }}
+      maxLength={200}
+      placeholder={ahead ? "What's planned?" : "What did you do?"}
+      title="Paste a list to add several at once."
+      aria-label={`New task on ${fullFormat.format(at(on))}`}
+      className={cn(inputClass("sm"), inline && "min-w-[12rem] flex-1 basis-56")}
+    />
+  );
+
+  const noteField = noting ? (
+    <textarea
+      ref={noteBox}
+      autoFocus
+      value={note}
+      disabled={pending}
+      onChange={(event) => setNote(event.target.value)}
+      onKeyDown={keys}
+      rows={inline ? 2 : 3}
+      maxLength={4000}
+      placeholder="Context for whoever checks it"
+      aria-label="Note"
+      className={cn(textareaClass, "resize-none px-2 py-1.5 text-[12.5px] leading-snug")}
+    />
+  ) : (
+    <button
+      type="button"
+      onMouseDown={(event) => event.preventDefault()}
+      onClick={() => setNoting(true)}
+      className="flex items-center gap-1 px-0.5 text-[11.5px] text-[var(--i-faint)] hover:text-[var(--i-ink)]"
+    >
+      <Plus size={11} /> Add a note
+    </button>
+  );
+
+  const linkPicker = (
+    <Select
+      aria-label="For"
+      size={inline ? "sm" : "xs"}
+      value={link}
+      onChange={(value) => {
+        setLink(value);
+        setPicked(true);
+      }}
+      options={choices}
+      className={inline ? "w-full sm:w-48" : "w-full"}
+    />
+  );
+
+  const suggestionChip =
+    suggestion && suggestion.value !== link ? (
+      <button
+        type="button"
+        onMouseDown={(event) => event.preventDefault()}
+        onClick={() => {
+          setLink(suggestion.value);
+          setPicked(true);
+          box.current?.focus();
+        }}
+        className={cn(
+          "flex items-center gap-1 rounded-md bg-[var(--i-accent-soft)] px-2 py-1 text-left text-[11.5px] text-[var(--i-accent-text)]",
+          inline ? "max-w-full" : "w-full",
+        )}
+      >
+        <Sparkle size={11} weight="fill" className="shrink-0" />
+        <span className="truncate">For {suggestion.label}?</span>
+      </button>
+    ) : null;
+
+  const buttons = (
+    <>
+      {!startOpen || !empty || moved ? (
+        <button
+          type="button"
+          onClick={close}
+          className={cn(buttonClass("ghost", inline ? "md" : "sm"), !startOpen && "flex-1 px-1")}
+        >
+          {startOpen ? "Clear" : "Cancel"}
+        </button>
+      ) : null}
+      <button
+        type="button"
+        onClick={save}
+        disabled={pending || (!several && !text.trim())}
+        title={`Saves as ${ahead ? "Not started" : "Done"}`}
+        className={cn(buttonClass("primary", inline ? "md" : "sm"), !startOpen && "flex-1 px-1")}
+      >
+        {pending ? "Saving…" : several ? `Save ${list.length}` : "Save"}
+      </button>
+    </>
+  );
+
+  // My day: one row (what, for, day, save); the note and hints open under it.
+  if (inline) {
+    return (
+      <div ref={panel} className="space-y-1.5">
+        {several ? pastedList : null}
+        <div className="flex flex-wrap items-center gap-1.5">
+          {several ? <span className="flex-1" /> : textBox}
+          {linkPicker}
+          {dayPicker}
+          {buttons}
+        </div>
+        {movedNote ? (
+          <p className="flex flex-wrap items-center gap-x-2 px-0.5 text-[12px] text-[var(--i-muted)]">{movedNote}</p>
+        ) : null}
+        {!several && (noting || text.trim()) ? noteField : null}
+        {suggestionChip}
+      </div>
+    );
+  }
+
   return (
     <div
       ref={panel}
@@ -264,141 +441,21 @@ export function AddCard({
       {startOpen ? (
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-[var(--i-muted)]">
           <span>Day</span>
-          <DateField
-            value={on}
-            onChange={(next) => setOn(next || day)}
-            min={earliestCardDay(today)}
-            required
-            aria-label="Day these tasks are for"
-            className={cn("h-7 w-auto px-2 text-[12.5px]", moved && "border-[var(--i-accent)] text-[var(--i-accent-text)]")}
-          />
-          {moved ? (
-            <>
-              <span>
-                {shortFormat.format(at(on))}, not {day === today ? "today" : shortFormat.format(at(day))}
-              </span>
-              <button type="button" onClick={() => setOn(day)} className="text-[var(--i-faint)] underline hover:text-[var(--i-ink)]">
-                Back to {day === today ? "today" : shortFormat.format(at(day))}
-              </button>
-            </>
-          ) : null}
+          {dayPicker}
+          {movedNote}
         </div>
       ) : null}
       {several ? (
-        <div className="rounded-md bg-[var(--i-sunken)] px-2 py-1.5 text-[12px]">
-          <p className="flex items-center justify-between gap-2 text-[var(--i-muted)]">
-            {list.length} tasks
-            <button
-              type="button"
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() => setList([])}
-              className="text-[var(--i-faint)] hover:text-[var(--i-ink)]"
-            >
-              Clear
-            </button>
-          </p>
-          <ul className="mt-1 max-h-32 space-y-0.5 overflow-y-auto">
-            {list.map((title, index) => (
-              <li key={index} className="truncate">
-                {title}
-              </li>
-            ))}
-          </ul>
-        </div>
+        pastedList
       ) : (
         <>
-          <input
-            ref={box}
-            autoFocus
-            value={text}
-            disabled={pending}
-            onChange={(event) => setText(event.target.value)}
-            onKeyDown={keys}
-            onPaste={(event: ClipboardEvent<HTMLInputElement>) => {
-              const pasted = event.clipboardData.getData("text");
-              if (!/\r?\n/.test(pasted.trim())) return;
-              event.preventDefault();
-              setList(cleanPasted(pasted).slice(0, 30));
-              setText("");
-            }}
-            maxLength={200}
-            placeholder={ahead ? "What's planned?" : "What did you do?"}
-            title="Paste a list to add several at once."
-            aria-label={`New task on ${fullFormat.format(at(on))}`}
-            className={inputClass("sm")}
-          />
-          {noting ? (
-            <textarea
-              ref={noteBox}
-              autoFocus
-              value={note}
-              disabled={pending}
-              onChange={(event) => setNote(event.target.value)}
-              onKeyDown={keys}
-              rows={3}
-              maxLength={4000}
-              placeholder="Context for whoever checks it"
-              aria-label="Note"
-              className={cn(textareaClass, "resize-none px-2 py-1.5 text-[12.5px] leading-snug")}
-            />
-          ) : (
-            <button
-              type="button"
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() => setNoting(true)}
-              className="flex items-center gap-1 px-0.5 text-[11.5px] text-[var(--i-faint)] hover:text-[var(--i-ink)]"
-            >
-              <Plus size={11} /> Add a note
-            </button>
-          )}
+          {textBox}
+          {noteField}
         </>
       )}
-      <Select
-        aria-label="For"
-        size="xs"
-        value={link}
-        onChange={(value) => {
-          setLink(value);
-          setPicked(true);
-        }}
-        options={choices}
-        className="w-full"
-      />
-      {suggestion && suggestion.value !== link ? (
-        <button
-          type="button"
-          onMouseDown={(event) => event.preventDefault()}
-          onClick={() => {
-            setLink(suggestion.value);
-            setPicked(true);
-            box.current?.focus();
-          }}
-          className="flex w-full items-center gap-1 rounded-md bg-[var(--i-accent-soft)] px-2 py-1 text-left text-[11.5px] text-[var(--i-accent-text)]"
-        >
-          <Sparkle size={11} weight="fill" className="shrink-0" />
-          <span className="truncate">For {suggestion.label}?</span>
-        </button>
-      ) : null}
-      <div className="flex items-center justify-end gap-1">
-        {!startOpen || !empty || moved ? (
-          <button
-            type="button"
-            onClick={close}
-            className={cn(buttonClass("ghost", "sm"), !startOpen && "flex-1 px-1")}
-          >
-            {startOpen ? "Clear" : "Cancel"}
-          </button>
-        ) : null}
-        <button
-          type="button"
-          onClick={save}
-          disabled={pending || (!several && !text.trim())}
-          title={`Saves as ${ahead ? "Not started" : "Done"}`}
-          className={cn(buttonClass("primary", "sm"), !startOpen && "flex-1 px-1")}
-        >
-          {pending ? "Saving…" : several ? `Save ${list.length}` : "Save"}
-        </button>
-      </div>
+      {linkPicker}
+      {suggestionChip}
+      <div className="flex items-center justify-end gap-1">{buttons}</div>
     </div>
   );
 }
@@ -661,18 +718,26 @@ export function DayList({
   cards: CalendarCard[];
   options: LinkOption[];
 }) {
+  // The box on top, the cards under it; in a card with a set height (My day
+  // on a wide screen) the cards scroll on their own.
   return (
-    <div className="space-y-2 p-3">
-      {cards.length ? (
-        <ul className="grid gap-1.5 sm:grid-cols-2">
-          {cards.map((card) => (
-            <li key={`${card.kind}:${card.id}`}>
-              <Card card={card} own options={options} today={today} />
-            </li>
-          ))}
-        </ul>
-      ) : null}
-      <AddCard day={day} today={today} options={options} open />
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="shrink-0 border-b border-[var(--i-line)] p-3">
+        <AddCard day={day} today={today} options={options} open inline />
+      </div>
+      <div className="min-h-0 flex-1 overflow-y-auto p-3">
+        {cards.length ? (
+          <ul className="grid gap-1.5 sm:grid-cols-2">
+            {cards.map((card) => (
+              <li key={`${card.kind}:${card.id}`}>
+                <Card card={card} own options={options} today={today} />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="px-1 py-2 text-[12.5px] text-[var(--i-faint)]">Nothing here yet. Add what you work on as you go.</p>
+        )}
+      </div>
     </div>
   );
 }

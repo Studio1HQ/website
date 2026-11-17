@@ -20,7 +20,7 @@ import {
   Trophy,
 } from "@phosphor-icons/react/dist/ssr";
 import { inScope } from "@/lib/internal/clients/scope";
-import { requireClients } from "@/lib/internal/session";
+import { canSeeMoney, requireClients } from "@/lib/internal/session";
 import { clientsSlackReady } from "@/lib/internal/clients/slack";
 import { readLinks } from "@/lib/internal/clients/links";
 import {
@@ -194,6 +194,9 @@ export default async function ClientWorkspacePage({
     searchParams,
   ]);
   const manager = staff.clients === "manager";
+  // Invoices and the contract are money: the founders' alone. Notes are for
+  // client managers, not the Client team.
+  const money = canSeeMoney(staff);
   const found = await loadClientBySlug(slug);
   if (!found.ok) {
     return (
@@ -370,6 +373,7 @@ export default async function ClientWorkspacePage({
       names={names}
       me={staff.email}
       types={types}
+      money={money}
       trigger={
         <button
           type="button"
@@ -643,12 +647,14 @@ export default async function ClientWorkspacePage({
                         state={cycle.state}
                         canEdit={manager}
                       />
-                      <InvoiceControl
-                        cycleId={cycle.id}
-                        state={cycle.invoice_state}
-                        url={cycle.invoice_url}
-                        canEdit={manager}
-                      />
+                      {money ? (
+                        <InvoiceControl
+                          cycleId={cycle.id}
+                          state={cycle.invoice_state}
+                          url={cycle.invoice_url}
+                          canEdit={manager}
+                        />
+                      ) : null}
                       <Link
                         href={reportHref(month)}
                         className="inline-flex items-center gap-1 text-[12.5px] text-[var(--i-muted)] hover:text-[var(--i-ink)]"
@@ -677,6 +683,7 @@ export default async function ClientWorkspacePage({
                       href={(target) => link({ month: target })}
                       reportHref={reportHref}
                       current={current}
+                      money={money}
                     />
                     <Card>
                       <CardTitle>Notes for the month</CardTitle>
@@ -807,18 +814,25 @@ export default async function ClientWorkspacePage({
                 <EngagementCard
                   types={types}
                   engagement={engagement}
+                  money={money}
+                  manager={manager}
                   rhythm={template?.rhythm ?? ""}
                   names={names}
                   action={
                     <span className="flex items-center gap-1">
                       {manager ? (
                         <EngagementDialog
-                          engagement={engagement}
+                          engagement={
+                            money
+                              ? engagement
+                              : { ...engagement, contract_url: null }
+                          }
                           clientId={client.id}
                           workspacePath={base}
                           owners={owners}
                           names={names}
                           types={types}
+                          money={money}
                           trigger={
                             <button
                               type="button"
@@ -869,7 +883,7 @@ export default async function ClientWorkspacePage({
                       ? formatDay(client.started_on, today)
                       : null}
                   </Field>
-                  {client.notes ? (
+                  {manager && client.notes ? (
                     <Field label="Notes" wide>
                       <span className="whitespace-pre-wrap break-words">
                         {client.notes}
@@ -902,12 +916,18 @@ function EngagementCard({
   rhythm,
   names,
   action,
+  money,
+  manager,
 }: {
   engagement: Engagement;
   types: ReturnType<typeof engagementTypes>;
   rhythm: string;
   names: Readonly<Record<string, string>>;
   action: ReactNode;
+  /** A founder: sees the contract link. */
+  money: boolean;
+  /** A client manager: sees the notes. */
+  manager: boolean;
 }) {
   const today = todayKey();
   return (
@@ -944,14 +964,16 @@ function EngagementCard({
               </ExternalLink>
             ) : null}
           </Field>
-          <Field label="Contract">
-            {engagement.contract_url ? (
-              <ExternalLink href={engagement.contract_url}>
-                Open the contract
-              </ExternalLink>
-            ) : null}
-          </Field>
-          {engagement.notes ? (
+          {money ? (
+            <Field label="Contract">
+              {engagement.contract_url ? (
+                <ExternalLink href={engagement.contract_url}>
+                  Open the contract
+                </ExternalLink>
+              ) : null}
+            </Field>
+          ) : null}
+          {manager && engagement.notes ? (
             <Field label="Notes" wide>
               <span className="whitespace-pre-wrap break-words">
                 {engagement.notes}
@@ -1091,6 +1113,7 @@ function MonthByMonth({
   current,
   href,
   reportHref,
+  money,
 }: {
   cycles: readonly Cycle[];
   lines: readonly ScopeLine[];
@@ -1100,6 +1123,8 @@ function MonthByMonth({
   current: string;
   href: (month: string) => string;
   reportHref: (month: string) => string;
+  /** A founder: sees each month's invoice flag. */
+  money: boolean;
 }) {
   const ordered = [...cycles].sort((a, b) => b.month.localeCompare(a.month));
   return (
@@ -1159,10 +1184,12 @@ function MonthByMonth({
                   </div>
                   <span className="flex flex-wrap items-center gap-2">
                     <OptionBadge list={CYCLE_STATES} value={item.state} />
-                    <OptionBadge
-                      list={INVOICE_STATES}
-                      value={item.invoice_state}
-                    />
+                    {money ? (
+                      <OptionBadge
+                        list={INVOICE_STATES}
+                        value={item.invoice_state}
+                      />
+                    ) : null}
                     <Link
                       href={reportHref(item.month)}
                       className="text-[12.5px] text-[var(--i-muted)] underline decoration-[var(--i-line-strong)] underline-offset-[3px] hover:text-[var(--i-ink)]"

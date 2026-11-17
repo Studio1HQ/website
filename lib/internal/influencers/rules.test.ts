@@ -6,15 +6,22 @@ import {
   byResult,
   changed,
   countsToNumbers,
+  engagementRate,
   engagements,
   formatCount,
+  formatPercent,
   hasOwnViews,
+  isSpiky,
   lowestRate,
   mainCurrency,
+  opensPerIssue,
   per1k,
   rateLines,
+  reachRate,
   results,
+  sizeOf,
   totalFollowers,
+  typicalViews,
 } from "@/lib/internal/influencers/rules";
 import {
   FORMATS,
@@ -41,8 +48,13 @@ function channel(over: Partial<Channel>): Channel {
     handle: "",
     url: null,
     followers: null,
+    median_views: null,
     avg_views: null,
+    best_views: null,
     avg_engagements: null,
+    posts_per_month: null,
+    open_rate: null,
+    click_rate: null,
     checked_on: null,
     notes: "",
     ...over,
@@ -167,6 +179,23 @@ describe("countsToNumbers", () => {
       message: "Followers should be a number, like 4500, 45k or 1.2M.",
     });
   });
+
+  it("reads the median and best views, and percents with or without %", () => {
+    expect(
+      countsToNumbers({ median_views: "32k", best_views: "1.1M", open_rate: "42%", click_rate: " 4.5 " }),
+    ).toEqual({
+      ok: true,
+      values: { median_views: 32_000, best_views: 1_100_000, open_rate: 42, click_rate: 4.5 },
+    });
+  });
+
+  it("refuses a percent above 100 or that isn't one", () => {
+    expect(countsToNumbers({ open_rate: "140" }, { open_rate: "Open rate, %" })).toEqual({
+      ok: false,
+      message: "Open rate, % should be a percent from 0 to 100, like 42 or 4.5.",
+    });
+    expect(countsToNumbers({ click_rate: "high" })).toMatchObject({ ok: false });
+  });
 });
 
 describe("per1k", () => {
@@ -207,6 +236,66 @@ describe("channels", () => {
       ])?.platform,
     ).toBe("youtube");
   });
+
+  it("goes by the typical post, not an average a viral post lifted", () => {
+    expect(
+      bestChannel([
+        channel({ platform: "x", median_views: 8000, avg_views: 60_000 }),
+        channel({ platform: "linkedin", median_views: 20_000, avg_views: 22_000 }),
+      ])?.platform,
+    ).toBe("linkedin");
+  });
+});
+
+describe("channel numbers", () => {
+  it("takes the median as typical, else the mean, else a newsletter's opens", () => {
+    expect(typicalViews(channel({ median_views: 9000, avg_views: 30_000 }))).toBe(9000);
+    expect(typicalViews(channel({ avg_views: 30_000 }))).toBe(30_000);
+    expect(
+      typicalViews(channel({ platform: "newsletter", followers: 200_000, open_rate: 42 })),
+    ).toBe(84_000);
+    expect(typicalViews(channel({ followers: 200_000 }))).toBeNull();
+  });
+
+  it("works out a newsletter's opens an issue only for newsletters", () => {
+    expect(opensPerIssue(channel({ platform: "newsletter", followers: 50_000, open_rate: 38.5 }))).toBe(19_250);
+    expect(opensPerIssue(channel({ platform: "newsletter", followers: 50_000 }))).toBeNull();
+    expect(opensPerIssue(channel({ platform: "x", followers: 50_000, open_rate: 40 }))).toBeNull();
+  });
+
+  it("gives engagement per 100 views, and a newsletter's click rate", () => {
+    expect(engagementRate(channel({ avg_engagements: 900, avg_views: 30_000 }))).toBe(3);
+    expect(engagementRate(channel({ avg_engagements: 450, median_views: 9000 }))).toBe(5);
+    expect(engagementRate(channel({ avg_engagements: 900 }))).toBeNull();
+    expect(engagementRate(channel({ platform: "newsletter", click_rate: 4.5 }))).toBe(4.5);
+  });
+
+  it("says how much of the following a typical post reaches", () => {
+    expect(reachRate(channel({ followers: 40_000, median_views: 10_000 }))).toBe(25);
+    expect(reachRate(channel({ followers: 5000, median_views: 12_000 }))).toBe(240);
+    expect(reachRate(channel({ median_views: 10_000 }))).toBeNull();
+  });
+
+  it("flags a channel whose average is twice its typical post", () => {
+    expect(isSpiky(channel({ median_views: 10_000, avg_views: 20_000 }))).toBe(true);
+    expect(isSpiky(channel({ median_views: 10_000, avg_views: 19_000 }))).toBe(false);
+    expect(isSpiky(channel({ avg_views: 90_000 }))).toBe(false);
+  });
+
+  it("puts a following in its size band", () => {
+    expect(sizeOf(9999)).toBe("nano");
+    expect(sizeOf(10_000)).toBe("micro");
+    expect(sizeOf(250_000)).toBe("mid");
+    expect(sizeOf(999_999)).toBe("macro");
+    expect(sizeOf(3_000_000)).toBe("mega");
+    expect(sizeOf(null)).toBeNull();
+  });
+
+  it("formats a percent", () => {
+    expect(formatPercent(3)).toBe("3%");
+    expect(formatPercent(4.56)).toBe("4.6%");
+    expect(formatPercent(null)).toBe("—");
+  });
 });
 
 describe("rate cards", () => {
@@ -223,6 +312,24 @@ describe("rate cards", () => {
     );
     expect(line.expectedViews).toBe(40_000);
     expect(line.per1k).toBe(12.5);
+  });
+
+  it("prices against the typical post when the median is known", () => {
+    const [line] = rateLines(
+      [rate({ format: "x_post", price: 500 })],
+      [channel({ platform: "x", median_views: 10_000, avg_views: 40_000 })],
+    );
+    expect(line.expectedViews).toBe(10_000);
+    expect(line.per1k).toBe(50);
+  });
+
+  it("prices a newsletter slot per thousand opens", () => {
+    const [line] = rateLines(
+      [rate({ platform: "newsletter", format: "newsletter_primary", price: 2000 })],
+      [channel({ platform: "newsletter", followers: 100_000, open_rate: 40 })],
+    );
+    expect(line.expectedViews).toBe(40_000);
+    expect(line.per1k).toBe(50);
   });
 
   it("uses that creator's channel, not someone else's", () => {

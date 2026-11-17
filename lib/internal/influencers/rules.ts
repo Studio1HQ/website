@@ -1,10 +1,13 @@
 import { parseCount } from "@/lib/internal/clients/clean";
 import {
   COUNT_KEYS,
+  PERCENT_KEYS,
+  SIZES,
   formatInfo,
   type Channel,
   type Post,
   type Rate,
+  type Size,
 } from "@/lib/internal/influencers/schema";
 
 /**
@@ -50,7 +53,95 @@ export function countsToNumbers(
     }
     values[key] = Math.round(count);
   }
+  for (const key of PERCENT_KEYS) {
+    const value = values[key];
+    if (typeof value !== "string" || !value.trim()) continue;
+    const text = value.trim().replace(/\s*%$/, "");
+    const percent = /^\d+(\.\d+)?$/.test(text) ? Number(text) : Number.NaN;
+    if (!(percent >= 0 && percent <= 100)) {
+      return {
+        ok: false,
+        message: `${labels[key] ?? key} should be a percent from 0 to 100, like 42 or 4.5.`,
+      };
+    }
+    values[key] = Math.round(percent * 100) / 100;
+  }
   return { ok: true, values };
+}
+
+/* ------------------------------------------------------- channel numbers */
+
+/**
+ * A newsletter's opens an issue: subscribers × open rate. Null for other
+ * platforms, or without both numbers.
+ */
+export function opensPerIssue(
+  channel: Pick<Channel, "platform" | "followers" | "open_rate">,
+) {
+  if (channel.platform !== "newsletter") return null;
+  if (!channel.followers || channel.open_rate === null || channel.open_rate === undefined) return null;
+  return Math.round((channel.followers * channel.open_rate) / 100);
+}
+
+/**
+ * What a usual post (or issue) is seen by: the median when known, since a
+ * few viral posts can't lift it; else the mean; for a newsletter, its
+ * opens. Null when none of them is known.
+ */
+export function typicalViews(
+  channel: Pick<Channel, "platform" | "followers" | "median_views" | "avg_views" | "open_rate">,
+) {
+  return channel.median_views ?? channel.avg_views ?? opensPerIssue(channel);
+}
+
+/**
+ * Engagements for every 100 views on a usual post (mean over mean, so the
+ * two match); a newsletter's click rate. Null when not known.
+ */
+export function engagementRate(
+  channel: Pick<
+    Channel,
+    "platform" | "avg_engagements" | "avg_views" | "median_views" | "click_rate"
+  >,
+) {
+  if (channel.platform === "newsletter") return channel.click_rate ?? null;
+  const views = channel.avg_views ?? channel.median_views;
+  if (channel.avg_engagements === null || channel.avg_engagements === undefined || !views) return null;
+  return Math.round((channel.avg_engagements / views) * 1000) / 10;
+}
+
+/**
+ * How much of their following a usual post reaches, in percent: typical
+ * views over followers (a newsletter's open rate). Above 100 when posts
+ * travel beyond their followers.
+ */
+export function reachRate(
+  channel: Pick<Channel, "platform" | "followers" | "median_views" | "avg_views" | "open_rate">,
+) {
+  const views = typicalViews(channel);
+  if (views === null || !channel.followers) return null;
+  return Math.round((views / channel.followers) * 1000) / 10;
+}
+
+/**
+ * True when the mean is at least twice the median: a few viral posts carry
+ * the average, so plan on the median.
+ */
+export function isSpiky(channel: Pick<Channel, "median_views" | "avg_views">) {
+  return Boolean(
+    channel.median_views && channel.avg_views && channel.avg_views >= channel.median_views * 2,
+  );
+}
+
+/** The size band a following falls in: nano, micro, mid, macro or mega. */
+export function sizeOf(followers: number | null | undefined): Size | null {
+  if (followers === null || followers === undefined) return null;
+  return SIZES.find((size) => followers >= size.min && followers < size.max)?.value ?? null;
+}
+
+/** "12.5%"; "—" when not known. */
+export function formatPercent(value: number | null | undefined) {
+  return value === null || value === undefined ? "—" : `${Number(value.toFixed(1))}%`;
 }
 
 /** What a thousand views cost; null when there's no price or no views. */
@@ -68,12 +159,12 @@ export function totalFollowers(channels: readonly Channel[]) {
   return channels.reduce((sum, channel) => sum + (channel.followers ?? 0), 0);
 }
 
-/** The channel whose posts get the most views; followers settle it when views aren't known. */
+/** The channel whose usual post is seen most; followers settle it when views aren't known. */
 export function bestChannel(channels: readonly Channel[]): Channel | null {
   return (
     [...channels].sort(
       (a, b) =>
-        (b.avg_views ?? -1) - (a.avg_views ?? -1) ||
+        (typicalViews(b) ?? -1) - (typicalViews(a) ?? -1) ||
         (b.followers ?? -1) - (a.followers ?? -1),
     )[0] ?? null
   );
@@ -93,13 +184,16 @@ export function hasOwnViews(format: string) {
 }
 
 export type RateLine = Rate & {
-  /** Their usual views on that platform; null when not known or not their own post. */
+  /**
+   * What a usual post (or a newsletter issue's opens) gets on that
+   * platform; null when not known or not their own post.
+   */
   expectedViews: number | null;
-  /** The price for a thousand of those views. */
+  /** The price for a thousand of those views (or opens). */
   per1k: number | null;
 };
 
-/** Each price with what it should buy, going by the channel's usual views. */
+/** Each price with what it should buy, going by the channel's typical post. */
 export function rateLines(
   rates: readonly Rate[],
   channels: readonly Channel[],
@@ -107,7 +201,7 @@ export function rateLines(
   const views = new Map(
     channels.map((channel) => [
       `${channel.influencer_id}:${channel.platform}`,
-      channel.avg_views,
+      typicalViews(channel),
     ]),
   );
   return rates.map((rate) => {

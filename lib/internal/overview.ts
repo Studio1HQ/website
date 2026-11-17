@@ -10,7 +10,7 @@ import { loadOrgs, outreachDue } from "@/lib/internal/outreach/data";
 import { outreachSummary, todayCalls, todayTasks } from "@/lib/internal/overview-today";
 import { listTasks } from "@/lib/internal/tasks/data";
 import { SECTIONS, sectionAccess } from "@/lib/internal/sections";
-import { canSeeMoney, isAdmin, type Staff } from "@/lib/internal/session";
+import { canSeeMoney, canSeeOutreach, isAdmin, type Staff } from "@/lib/internal/session";
 import { listDays } from "@/lib/internal/team/attendance";
 import { teamOverview } from "@/lib/internal/team/overview";
 import { taskNeeds } from "@/lib/internal/tasks/needs";
@@ -127,13 +127,13 @@ export async function dashboardOverview(staff: Staff) {
     staff.clients ? clientNeeds(staff.email, staff.clientScope) : Promise.resolve(null),
     staff.clients ? clientsSummary(staff.clientScope) : Promise.resolve(null),
     taskNeeds(staff),
-    admin ? outreachDue(staff.email) : Promise.resolve(0),
+    canSeeOutreach(staff) ? outreachDue(staff.email) : Promise.resolve(0),
     // Today, for the person themselves: their own tasks and their own calls.
     staff.person ? listTasks({ emails: [staff.person.email], from: now.date, to: now.date }) : Promise.resolve(null),
     canSeeCalls(staff)
       ? Promise.all([listCalls({ from: now.date }), listChanges(now.date, now.date)])
       : Promise.resolve(null),
-    admin ? loadOrgs() : Promise.resolve(null),
+    canSeeOutreach(staff) ? loadOrgs() : Promise.resolve(null),
   ]);
 
   // The Hiring card: job and cohort pipelines only (hackathons have their own).
@@ -254,7 +254,7 @@ export async function dashboardOverview(staff: Staff) {
     todo.push({ area: "clients", label: `${plural(clients.red, "client engagement")} at risk`, href: "/internal/clients", urgent: true });
   }
 
-  // Outreach (admins): their own follow-ups due on organisations still in play.
+  // Outreach (people given it): their own follow-ups due on organisations still in play.
   if (outreach) {
     todo.push({
       area: "outreach",
@@ -325,7 +325,7 @@ export async function dashboardOverview(staff: Staff) {
         ? { ok: true as const, items: todayCalls(myCalls[0].rows, myCalls[1].ok ? myCalls[1].rows : [], staff.email, now.date, now.time) }
         : { ok: false as const }
       : null,
-    /** The Outreach card (admins): the pipeline in numbers; null when it can't be read. */
+    /** The Outreach card (people given it): the pipeline in numbers; null when it can't be read. */
     outreach: orgs?.ok ? { ...outreachSummary(orgs.rows, now.date), mineDue: outreach } : null,
     mine: staff.person
       ? {

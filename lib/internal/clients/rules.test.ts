@@ -25,6 +25,9 @@ import {
   stuckSince,
   waitsOnClient,
   memberMayStartAt,
+  clashText,
+  editClashes,
+  formValueOf,
 } from "@/lib/internal/clients/rules";
 import {
   isOwnedBy,
@@ -854,5 +857,48 @@ describe("where a member may start new work", () => {
     expect(memberMayStartAt("published", "social_post")).toBe(true);
     expect(memberMayStartAt("published", "reddit_post")).toBe(true);
     expect(memberMayStartAt("approved", "social_post")).toBe(false);
+  });
+});
+
+describe("two people editing one deliverable", () => {
+  const saved: Partial<Deliverable> = {
+    title: "Launch post",
+    owner: "priya@studio1hq.com",
+    due_on: "2026-11-20",
+    notes: "",
+    views: 1200,
+    extra_urls: ["https://x.com/a", "https://x.com/b"],
+    reviewer: null,
+  };
+
+  it("reads a saved field the way the dialog shows it", () => {
+    expect(formValueOf(saved, "views")).toBe("1200");
+    expect(formValueOf(saved, "extra_urls")).toBe("https://x.com/a\nhttps://x.com/b");
+    expect(formValueOf(saved, "reviewer")).toBe("");
+    expect(formValueOf({}, "content_type")).toBe("");
+  });
+
+  it("lets a save through when nobody else touched its fields", () => {
+    expect(editClashes(saved, { due_on: "2026-11-20" }, { due_on: "2026-11-22" })).toEqual([]);
+    // Someone else changed the title; this save only sends the due date.
+    expect(editClashes({ ...saved, title: "Renamed" }, { due_on: "2026-11-20" }, { due_on: "2026-11-22" })).toEqual([]);
+  });
+
+  it("stops a save that would undo someone else's change to the same field", () => {
+    const now = { ...saved, due_on: "2026-11-25", owner: "dev@studio1hq.com" };
+    expect(
+      editClashes(
+        now,
+        { due_on: "2026-11-20", owner: "priya@studio1hq.com", notes: "" },
+        { due_on: "2026-11-22", owner: "asha@studio1hq.com", notes: "Draft in review" },
+      ),
+    ).toEqual(["owner", "due_on"]);
+    expect(clashText(["owner", "due_on"])).toBe("the owner and the due date");
+  });
+
+  it("doesn't call it a clash when both set the same value, or nothing was seen", () => {
+    const now = { ...saved, due_on: "2026-11-22" };
+    expect(editClashes(now, { due_on: "2026-11-20" }, { due_on: "2026-11-22" })).toEqual([]);
+    expect(editClashes(now, {}, { due_on: "2026-11-24" })).toEqual([]);
   });
 });

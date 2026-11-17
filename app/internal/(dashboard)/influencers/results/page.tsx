@@ -33,12 +33,12 @@ import {
 } from "@/components/internal/ui";
 import { Stat } from "@/components/internal/community/ui";
 import {
-  FilterLinks,
   InfluencerTabs,
   PATH,
   PlatformPill,
   ResultsTable,
 } from "@/components/internal/influencers/ui";
+import { FilterDropdown } from "@/components/internal/influencers/filter-dropdown";
 
 export const metadata: Metadata = { title: "What works" };
 
@@ -175,10 +175,10 @@ export default async function InfluencerResultsPage({
       </div>
 
       {currencies.length > 1 ? (
-        <div className="mb-3 flex flex-wrap items-center gap-1 text-[12.5px] text-[var(--i-muted)]">
-          <span className="px-1">Money in</span>
-          <FilterLinks
-            label="Currency"
+        <div className="mb-3 flex">
+          <FilterDropdown
+            label="Money in"
+            always
             items={currencies.map((item) => ({
               key: item,
               label: item,

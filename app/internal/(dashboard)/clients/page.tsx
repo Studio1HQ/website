@@ -279,7 +279,7 @@ export default async function ClientsPage({
                 ],
                 [
                   "Add an engagement",
-                  "On the client's page: the type of work, the account owner, and links to the contract and their tracker.",
+                  "On the client's page: the type of work, the account owner, and a link to their tracker.",
                 ],
                 [
                   "Start the month",
@@ -655,7 +655,8 @@ export default async function ClientsPage({
                       <th>Status</th>
                       <th>Engagements</th>
                       <th>Primary contact</th>
-                      <th>Notes</th>
+                      {/* Notes are for client managers, not the Client team. */}
+                      {manager ? <th>Notes</th> : null}
                     </>
                   }
                 >
@@ -692,11 +693,13 @@ export default async function ClientsPage({
                       <td className="max-w-[10rem] truncate text-[12.5px]">
                         {client.contact_name || <Muted>—</Muted>}
                       </td>
-                      <td className="max-w-[20rem] text-[12.5px] text-[var(--i-muted)]">
-                        <span className="line-clamp-2">
-                          {client.notes || "—"}
-                        </span>
-                      </td>
+                      {manager ? (
+                        <td className="max-w-[20rem] text-[12.5px] text-[var(--i-muted)]">
+                          <span className="line-clamp-2">
+                            {client.notes || "—"}
+                          </span>
+                        </td>
+                      ) : null}
                     </tr>
                   ))}
                 </Table>
@@ -730,7 +733,7 @@ export default async function ClientsPage({
                             engagementsOf.get(client.id) ?? [],
                           )}
                         </p>
-                        {client.notes ? (
+                        {manager && client.notes ? (
                           <p className="mt-1 line-clamp-2 text-[12.5px] text-[var(--i-ink-2)]">
                             {client.notes}
                           </p>
