@@ -4,23 +4,25 @@ import { revalidatePath } from "next/cache";
 import { looksLikeSecret, parseCount } from "@/lib/internal/clients/clean";
 import { isMonthKey, thisMonth } from "@/lib/internal/clients/schema";
 import { isUuid } from "@/lib/internal/community/clean";
-import { isAdmin, requireMember } from "@/lib/internal/session";
+import { canSeeSocials, requireMember } from "@/lib/internal/session";
 import { deleteMetricRow, saveMetricRow } from "@/lib/internal/socials/data";
 import { isPlatform, type SocialResult } from "@/lib/internal/socials/schema";
 
 /**
  * Social growth writes. Server actions are public endpoints, so each one
- * checks the session here: admins only (the founders are admins).
+ * checks the session here: people given Social growth (the founders always
+ * are; Admin alone isn't enough).
  */
 
 const DENIED: SocialResult = {
   ok: false,
-  message: "Only admins can change these numbers.",
+  message: "You don't have access to Social growth.",
 };
 
-async function admin() {
+/** The signed-in person, if they may use this area; null otherwise. */
+async function allowed() {
   const staff = await requireMember();
-  return isAdmin(staff) ? staff : null;
+  return canSeeSocials(staff) ? staff : null;
 }
 
 const text = (value: unknown, max: number) =>
@@ -41,7 +43,7 @@ function count(value: unknown, top: number): number | null | "bad" {
  * values: { account, platform, month, followers, impressions?, posts?, notes? }.
  */
 export async function saveMetric(values: unknown): Promise<SocialResult> {
-  const staff = await admin();
+  const staff = await allowed();
   if (!staff) return DENIED;
   const input =
     values && typeof values === "object"
@@ -91,7 +93,7 @@ export async function saveMetric(values: unknown): Promise<SocialResult> {
 }
 
 export async function deleteMetric(id: unknown): Promise<SocialResult> {
-  const staff = await admin();
+  const staff = await allowed();
   if (!staff) return DENIED;
   if (!isUuid(id))
     return {

@@ -1016,8 +1016,12 @@ function WorkRow({
                 : ""}
             </span>
             {devrel ? (
-              <span className="mt-1">
-                <ViewsCell deliverable={deliverable} canChange={canChange} />
+              <span className="mt-0.5">
+                <ViewsCell
+                  deliverable={deliverable}
+                  canChange={canChange}
+                  align="start"
+                />
               </span>
             ) : null}
           </span>
@@ -1389,15 +1393,21 @@ function PostRow({
   );
 }
 
-/** Views, typed in place: saved when the box loses focus or on Enter. */
+/**
+ * Views, typed in place: saved when the box loses focus or on Enter.
+ * "end" right-aligns it for a Views column; "start" lines its text up with
+ * the lines above it when it sits under a chip.
+ */
 function ViewsCell({
   deliverable,
   canChange,
   placeholder = "Add views",
+  align = "end",
 }: {
   deliverable: Deliverable;
   canChange: boolean;
   placeholder?: string;
+  align?: "start" | "end";
 }) {
   const afterSave = useAfterSave();
   const toast = useToast();
@@ -1442,7 +1452,10 @@ function ViewsCell({
       maxLength={20}
       className={cn(
         inputClass("xs"),
-        "w-24 border-transparent bg-transparent text-right tabular-nums shadow-none hover:border-[var(--i-line-strong)] focus:border-[var(--i-line-strong)] focus:bg-[var(--i-panel)] max-md:w-28 max-md:text-left",
+        "w-24 border-transparent bg-transparent tabular-nums shadow-none hover:border-[var(--i-line-strong)] focus:border-[var(--i-line-strong)] focus:bg-[var(--i-panel)]",
+        align === "start"
+          ? "-ml-2 h-6 w-28 text-left text-[12px]"
+          : "text-right max-md:w-28 max-md:text-left",
       )}
     />
   );

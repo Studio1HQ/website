@@ -278,6 +278,55 @@ function FieldForm({
                     <DateField id={id} value={text} onChange={(next) => set(field.key, next)} required={field.required} />
                   );
                   break;
+                case "tags":
+                  if (!field.options?.length) {
+                    control = (
+                      <input
+                        id={id}
+                        type="text"
+                        value={text}
+                        onChange={(event) => set(field.key, event.target.value)}
+                        placeholder={field.placeholder}
+                        className={inputClass()}
+                      />
+                    );
+                    break;
+                  }
+                  {
+                    // A fixed list: chips to switch on and off, kept as "a, b".
+                    const picked = text.split(",").map((item) => item.trim()).filter(Boolean);
+                    control = (
+                      <div id={id} role="group" aria-label={field.label} className="flex flex-wrap gap-1.5">
+                        {field.options.map((option) => {
+                          const on = picked.includes(option.value);
+                          return (
+                            <button
+                              key={option.value}
+                              type="button"
+                              aria-pressed={on}
+                              onClick={() =>
+                                set(
+                                  field.key,
+                                  (on ? picked.filter((item) => item !== option.value) : [...picked, option.value]).join(
+                                    ", ",
+                                  ),
+                                )
+                              }
+                              className={cn(
+                                "inline-flex h-7 items-center rounded-full px-2.5 text-[12.5px] ring-1 ring-inset transition-colors",
+                                on
+                                  ? "bg-[var(--i-accent-soft)] font-medium text-[var(--i-accent-text)] ring-[var(--i-accent)]"
+                                  : "text-[var(--i-muted)] ring-[var(--i-line)] hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)]",
+                              )}
+                            >
+                              {option.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    );
+                  }
+                  break;
                 case "text":
                   control = (
                     <SuggestInput

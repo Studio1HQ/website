@@ -105,6 +105,22 @@ describe("emailed invoices", () => {
     expect(turnedAway()[0]).toMatchObject({ action: "skipped", actor: "stranger@evil.example" });
   });
 
+  it("lets a payee's invoice through a flood from made-up senders, and rings the founders' bell", async () => {
+    for (let index = 0; index < 40; index += 1) {
+      db.add("payments", { email: `fake${index}@evil.example`, source: "email", created_at: new Date().toISOString() });
+    }
+    const forged = await receive({ from: "fake41@evil.example", subject: "Invoice | Nov 2026 | one more" });
+    expect("skipped" in forged).toBe(true);
+    expect(turnedAway()[0]).toMatchObject({ action: "skipped", actor: "fake41@evil.example" });
+    const bell = db.rows("internal_notifications");
+    expect(bell.map((row) => row.email).sort()).toEqual(["amitesh@studio1hq.com", "arindam@studio1hq.com"]);
+    expect(bell[0]).toMatchObject({ href: "/internal/money/payments" });
+
+    const real = await receive({ from: "Priya <priya@example.com>", subject: "Invoice | Priya Sharma | WR-07 | Nov 2026" });
+    expect(real).toMatchObject({ ok: true, kind: "invoice" });
+    expect(db.rows("payments").filter((row) => row.email === "priya@example.com")).toHaveLength(1);
+  });
+
   it("saves a retried webhook once", async () => {
     mails.set("same", { from: "priya@example.com", subject: "Invoice | WR-07 | Nov 2026" });
     const data = { email_id: "same", from: "priya@example.com", subject: "Invoice | WR-07 | Nov 2026", attachments: [] };

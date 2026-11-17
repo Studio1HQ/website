@@ -149,9 +149,9 @@ export async function orgsByDomain(domains: readonly string[]): Promise<Map<stri
   return found;
 }
 
-/** People who can own outreach: the admins (the founders included). */
+/** People who can own outreach: whoever has Outreach (the founders included). */
 export async function ownerChoices(): Promise<string[]> {
-  return (await membersWith(["admin"])).sort();
+  return (await membersWith(["outreach_manager"])).sort();
 }
 
 /**

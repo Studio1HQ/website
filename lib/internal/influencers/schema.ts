@@ -30,6 +30,11 @@ export const PLATFORMS = options([
 ] as const);
 export type Platform = (typeof PLATFORMS)[number]["value"];
 
+/** Platforms whose posts have views. A newsletter has opens instead. */
+export const VIEW_PLATFORMS: readonly Platform[] = PLATFORMS.map((platform) => platform.value).filter(
+  (platform) => platform !== "newsletter",
+);
+
 export function isPlatform(value: unknown): value is Platform {
   return PLATFORMS.some((platform) => platform.value === value);
 }
@@ -60,9 +65,29 @@ export const FORMATS = [
   { value: "instagram_story", platform: "instagram", label: "Story" },
   { value: "instagram_collab", platform: "instagram", label: "Collab post" },
   {
+    value: "newsletter_primary",
+    platform: "newsletter",
+    label: "Primary sponsor (top slot)",
+  },
+  {
     value: "newsletter_feature",
     platform: "newsletter",
     label: "Sponsored feature",
+  },
+  {
+    value: "newsletter_secondary",
+    platform: "newsletter",
+    label: "Secondary slot",
+  },
+  {
+    value: "newsletter_classified",
+    platform: "newsletter",
+    label: "Classified ad",
+  },
+  {
+    value: "newsletter_dedicated",
+    platform: "newsletter",
+    label: "Dedicated send",
   },
   { value: "newsletter_mention", platform: "newsletter", label: "Mention" },
   { value: "other", platform: "other", label: "Something else" },
@@ -106,6 +131,50 @@ const FORMAT_OPTIONS: readonly Option[] = FORMATS.map((format) => ({
   label: formatName(format.value),
 }));
 
+/**
+ * The domains a creator covers, picked from this list so the roster can be
+ * filtered by them. What they actually post about goes in "Posts about".
+ */
+export const NICHES = options([
+  ["ai_ml", "AI & ML"],
+  ["ai_agents", "AI agents"],
+  ["devtools", "Dev tools"],
+  ["open_source", "Open source"],
+  ["cloud", "Cloud & infra"],
+  ["devops", "DevOps & SRE"],
+  ["web", "Web dev"],
+  ["mobile", "Mobile"],
+  ["data", "Data & databases"],
+  ["security", "Security"],
+  ["web3", "Web3"],
+  ["startups", "Startups & founders"],
+  ["careers", "Careers & learning"],
+  ["product", "Product & design"],
+] as const);
+export type Niche = (typeof NICHES)[number]["value"];
+
+export function isNiche(value: unknown): value is Niche {
+  return NICHES.some((niche) => niche.value === value);
+}
+
+export function nicheLabel(value: string) {
+  return NICHES.find((niche) => niche.value === value)?.label ?? value;
+}
+
+/** Audience size by followers on a platform, as agencies usually split it. */
+export const SIZES = [
+  { value: "nano", label: "Nano", note: "under 10k", min: 0, max: 10_000 },
+  { value: "micro", label: "Micro", note: "10k–100k", min: 10_000, max: 100_000 },
+  { value: "mid", label: "Mid", note: "100k–500k", min: 100_000, max: 500_000 },
+  { value: "macro", label: "Macro", note: "500k–1M", min: 500_000, max: 1_000_000 },
+  { value: "mega", label: "Mega", note: "1M and up", min: 1_000_000, max: Number.POSITIVE_INFINITY },
+] as const;
+export type Size = (typeof SIZES)[number]["value"];
+
+export function isSize(value: unknown): value is Size {
+  return SIZES.some((size) => size.value === value);
+}
+
 export const STATUSES = options([
   ["prospect", "To approach", "stone"],
   ["talking", "In talks", "sky"],
@@ -132,19 +201,52 @@ export const INFLUENCER_FIELDS: readonly FieldDef[] = [
   },
   { key: "status", label: "Status", type: "select", options: STATUSES },
   {
+    key: "niches",
+    label: "Niche",
+    type: "tags",
+    options: NICHES,
+    wide: true,
+    help: "Pick every domain they cover; the roster filters by these.",
+  },
+  {
     key: "topics",
     label: "Posts about",
     type: "text",
     max: 200,
-    placeholder: "AI agents, dev tools",
+    wide: true,
+    placeholder: "MCP servers, Cursor tips, building agents in TypeScript",
+    help: "The topics themselves, in their words.",
+  },
+  {
+    key: "audience",
+    label: "Who follows them",
+    type: "text",
+    max: 200,
+    wide: true,
+    placeholder: "Junior and mid-level devs, mostly India and the US",
+  },
+  {
+    key: "languages",
+    label: "Posts in",
+    type: "text",
+    max: 80,
+    placeholder: "English, Hindi",
+    suggestions: ["English", "English, Hindi", "Hindi", "Spanish", "Portuguese"],
+  },
+  {
+    key: "content_style",
+    label: "Style",
+    type: "text",
+    max: 140,
+    placeholder: "Tutorials and demos",
     suggestions: [
-      "AI agents",
-      "Dev tools",
-      "Open source",
-      "Cloud and infra",
-      "Web dev",
-      "Data and ML",
-      "Startups",
+      "Tutorials and demos",
+      "Deep dives",
+      "News and hot takes",
+      "Memes and humour",
+      "Tool reviews",
+      "Shorts and reels",
+      "Live streams",
     ],
   },
   {
@@ -190,41 +292,171 @@ export const CHANNEL_FIELDS: readonly FieldDef[] = [
   },
   {
     key: "handle",
-    label: "Handle",
+    label: "Handle or name",
     type: "text",
     max: 80,
-    placeholder: "@priyabuilds",
+    placeholder: "@priyabuilds, or the newsletter's name",
   },
   {
     key: "url",
     label: "Link",
     type: "url",
     placeholder: "https://x.com/priyabuilds",
+    help: "For a newsletter, its site: its icon shows on the Newsletters tab.",
   },
   {
     key: "followers",
-    label: "Followers",
+    label: "Followers or subscribers",
     type: "int",
     placeholder: "120k",
-    help: "Or subscribers. 120k and 1.2M work.",
+    help: "120k and 1.2M work.",
+  },
+  {
+    key: "posts_per_month",
+    label: "Posts or issues a month",
+    type: "int",
+    placeholder: "20",
+    help: "How often they post here.",
+  },
+  {
+    key: "median_views",
+    label: "Typical views (median)",
+    type: "int",
+    placeholder: "32k",
+    help: "The middle post of their last 10 or so: line them up, take the one in the middle.",
+    showIf: { key: "platform", values: VIEW_PLATFORMS },
   },
   {
     key: "avg_views",
-    label: "Average views a post",
+    label: "Average views (mean)",
     type: "int",
     placeholder: "45k",
-    help: "What a normal post gets, not their best one.",
+    help: "All views over those posts, divided by how many.",
+    showIf: { key: "platform", values: VIEW_PLATFORMS },
+  },
+  {
+    key: "best_views",
+    label: "Best recent post",
+    type: "int",
+    placeholder: "310k",
+    help: "Views on their biggest post of the last few months.",
+    showIf: { key: "platform", values: VIEW_PLATFORMS },
   },
   {
     key: "avg_engagements",
-    label: "Average engagements a post",
+    label: "Engagements a post",
     type: "int",
     placeholder: "900",
-    help: "Likes, comments, reposts and saves added up.",
+    help: "Likes, comments, reposts and saves added up, on a usual post.",
+    showIf: { key: "platform", values: VIEW_PLATFORMS },
+  },
+  {
+    key: "open_rate",
+    label: "Open rate, %",
+    type: "money",
+    placeholder: "42",
+    help: "From their media kit or sponsor page.",
+    showIf: { key: "platform", values: ["newsletter"] },
+  },
+  {
+    key: "click_rate",
+    label: "Click rate, %",
+    type: "money",
+    placeholder: "4.5",
+    help: "Subscribers who click a link in an issue.",
+    showIf: { key: "platform", values: ["newsletter"] },
   },
   { key: "checked_on", label: "Numbers checked on", type: "date" },
   { key: "notes", label: "Notes", type: "textarea", max: 1000, wide: true },
 ];
+
+/**
+ * "Add newsletter": the publication and its newsletter channel in one form.
+ * The keys are the two tables' own; NEWSLETTER_CHANNEL_KEYS go to the
+ * channel, the rest to the influencer row.
+ */
+export const NEWSLETTER_FIELDS: readonly FieldDef[] = [
+  {
+    key: "name",
+    label: "Newsletter",
+    type: "text",
+    required: true,
+    max: 140,
+    placeholder: "TLDR AI",
+  },
+  {
+    key: "url",
+    label: "Site",
+    type: "url",
+    placeholder: "https://tldr.tech/ai",
+    help: "Its icon shows on the Newsletters tab.",
+  },
+  {
+    key: "followers",
+    label: "Subscribers",
+    type: "int",
+    placeholder: "500k",
+    help: "120k and 1.2M work.",
+  },
+  { key: "posts_per_month", label: "Issues a month", type: "int", placeholder: "20" },
+  {
+    key: "open_rate",
+    label: "Open rate, %",
+    type: "money",
+    placeholder: "42",
+    help: "From their media kit or sponsor page.",
+  },
+  {
+    key: "click_rate",
+    label: "Click rate, %",
+    type: "money",
+    placeholder: "4.5",
+  },
+  {
+    key: "niches",
+    label: "Niche",
+    type: "tags",
+    options: NICHES,
+    wide: true,
+  },
+  {
+    key: "topics",
+    label: "Covers",
+    type: "text",
+    max: 200,
+    wide: true,
+    placeholder: "AI news, new models and tools, a weekly paper",
+  },
+  {
+    key: "audience",
+    label: "Who reads it",
+    type: "text",
+    max: 200,
+    wide: true,
+    placeholder: "Engineers and founders building with AI, mostly US",
+  },
+  { key: "status", label: "Status", type: "select", options: STATUSES },
+  { key: "owner", label: "Owner", type: "owner" },
+  {
+    key: "contact_via",
+    label: "Sponsorship contact",
+    type: "text",
+    max: 140,
+    placeholder: "Their advertise page, or sponsors@…",
+  },
+  { key: "email", label: "Email", type: "email" },
+  { key: "checked_on", label: "Numbers checked on", type: "date" },
+  { key: "notes", label: "Notes", type: "textarea", max: 5000, wide: true },
+];
+
+export const NEWSLETTER_CHANNEL_KEYS = [
+  "url",
+  "followers",
+  "posts_per_month",
+  "open_rate",
+  "click_rate",
+  "checked_on",
+] as const;
 
 export const RATE_FIELDS: readonly FieldDef[] = [
   {
@@ -292,7 +524,9 @@ export const POST_FIELDS: readonly FieldDef[] = [
 /** The number fields that take "120k" and "1.2M" as well as digits. */
 export const COUNT_KEYS = [
   "followers",
+  "median_views",
   "avg_views",
+  "best_views",
   "avg_engagements",
   "views",
   "likes",
@@ -301,6 +535,9 @@ export const COUNT_KEYS = [
   "saves",
   "clicks",
 ] as const;
+
+/** Percent fields: "42", "42.5" or "42%", from 0 to 100. */
+export const PERCENT_KEYS = ["open_rate", "click_rate"] as const;
 
 /* ----------------------------------------------------------------- types */
 
@@ -315,7 +552,12 @@ type Stamps = {
 export type Influencer = Stamps & {
   name: string;
   status: Status;
+  /** Values from NICHES. */
+  niches: string[];
   topics: string;
+  audience: string;
+  languages: string;
+  content_style: string;
   location: string;
   email: string | null;
   contact_via: string;
@@ -330,8 +572,16 @@ export type Channel = Stamps & {
   handle: string;
   url: string | null;
   followers: number | null;
+  /** The middle post's views: what a usual post gets. */
+  median_views: number | null;
+  /** The mean; a few viral posts can lift it well above the median. */
   avg_views: number | null;
+  best_views: number | null;
   avg_engagements: number | null;
+  posts_per_month: number | null;
+  /** Newsletters: percent of subscribers who open an issue, and who click. */
+  open_rate: number | null;
+  click_rate: number | null;
   checked_on: string | null;
   notes: string;
 };
@@ -366,6 +616,9 @@ export type Post = Stamps & {
 
 export type InfluencerResult =
   { ok: true; message?: string; id?: string } | { ok: false; message: string };
+
+export const INFLUENCER_DETAILS_HINT =
+  "Niches, audience and the median and best views need one more step: run supabase/migrations/20261118140000_influencer_details.sql in the Supabase SQL editor, then try again.";
 
 export const INFLUENCERS_MIGRATION_HINT =
   "Influencers needs its tables first: run supabase/migrations/20261118130000_influencers.sql in the Supabase SQL editor, then reload.";

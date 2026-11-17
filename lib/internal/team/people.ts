@@ -87,6 +87,29 @@ export async function teamAccessFor(email: string): Promise<{ person: TeamPerson
 }
 
 /**
+ * The active interns this person reviews (logs the days of), or null when
+ * the list can't be read.
+ */
+export async function internsOf(reviewer: string): Promise<TeamPerson[] | null> {
+  const result = await selectRows(
+    TABLE,
+    new URLSearchParams({
+      select: PUBLIC_COLUMNS,
+      reviewer: `eq.${reviewer}`,
+      kind: "eq.intern",
+      active: "eq.true",
+      limit: "200",
+    }),
+  );
+  if (!result.ok) {
+    if (isMissingTable(result.message)) return [];
+    console.error(`[team] reading ${TABLE} failed: ${result.message}`);
+    return null;
+  }
+  return result.rows.map(toPerson).filter((person): person is TeamPerson => person !== null);
+}
+
+/**
  * The founders belong on the team list like everyone else, so People shows
  * them and Payroll can make their payslips, without anyone adding them
  * first. Adds whichever of them is missing; a founder already there (even

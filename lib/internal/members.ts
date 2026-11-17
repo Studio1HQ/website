@@ -3,6 +3,7 @@ import { cache } from "react";
 import { insertRow, selectRows, updateRows } from "@/lib/supabase-server";
 import {
   OWNERS,
+  OWNER_ROLES,
   cleanRoles,
   hiringLevel,
   isOwner,
@@ -163,7 +164,8 @@ export async function membersWith(roles: readonly RoleKey[]): Promise<string[]> 
   const found = members
     .filter((member) => member.status === "active" && member.roles.some((role) => roles.includes(role)))
     .map((member) => member.email);
-  const owners: string[] = roles.includes("admin") ? [...OWNERS] : [];
+  // The founders hold every OWNER_ROLES role, whatever their row says.
+  const owners: string[] = roles.some((role) => OWNER_ROLES.includes(role)) ? [...OWNERS] : [];
   return [...new Set([...owners, ...found])];
 }
 

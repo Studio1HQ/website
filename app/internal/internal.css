@@ -172,6 +172,34 @@
   animation: internal-rise 160ms ease-out;
 }
 
+/* The folded sidebar: its icon tooltips slide out from the icon, and the
+   footer buttons fade into their stacked spots. */
+@keyframes internal-tip-in {
+  from {
+    opacity: 0;
+    transform: translate(-4px, -50%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, -50%);
+  }
+}
+
+@keyframes internal-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .internal-ui [class*="animate-[internal-"] {
+    animation: none !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .internal-pop[data-state="open"],
   .internal-pop.internal-dialog[data-state="open"],

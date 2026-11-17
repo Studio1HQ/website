@@ -14,6 +14,7 @@ import {
   hiringLevel,
   isOwner,
   isStaffEmail,
+  OWNER_ROLES,
   type AreaKey,
   type AreaLevels,
   type BlogAccess,
@@ -124,6 +125,28 @@ export function canSeeMoney(staff: Pick<Staff, "email" | "status">) {
   return staff.status === "owner" && isOwner(staff.email);
 }
 
+/*
+ * The areas given one by one (GRANTED_ONLY in lib/internal/roles.ts): Admin
+ * alone doesn't open them. The founders always have them; anyone else needs
+ * the area's own role. Pages use requireArea; actions, files and the sidebar
+ * use these.
+ */
+
+/** Outreach: the organisations Studio1 pitches, deal values, follow-ups. */
+export function canSeeOutreach(staff: Pick<Staff, "roles">) {
+  return can(staff.roles, "outreach", "manage");
+}
+
+/** Influencers: creators, their rates and what Studio1 paid. */
+export function canSeeInfluencers(staff: Pick<Staff, "roles">) {
+  return can(staff.roles, "influencers", "manage");
+}
+
+/** Social growth: Studio1's accounts and their numbers. */
+export function canSeeSocials(staff: Pick<Staff, "roles">) {
+  return can(staff.roles, "socials", "manage");
+}
+
 /** True when someone has any way in: a role, the team list or interns to log. */
 export function hasAccess(staff: Staff) {
   return staff.roles.length > 0 || staff.person !== null || staff.interns.length > 0;
@@ -149,7 +172,7 @@ export const getStaff = cache(async (): Promise<Staff | null> => {
   const base = { email, name: access.kind === "member" ? access.member.name : "", localPreview };
   switch (access.kind) {
     case "owner":
-      return withTeam(withRoles(base, ["admin"], "owner"), team);
+      return withTeam(withRoles(base, [...OWNER_ROLES], "owner"), team);
     case "member":
       // Approved with no areas is still approved: My day and Tasks (withTeam).
       return withTeam(
@@ -167,11 +190,15 @@ export const getStaff = cache(async (): Promise<Staff | null> => {
 
 /** The dashboard areas someone can open, in sidebar order. */
 export function areasFor(staff: Staff) {
-  const areas: ("hiring" | "blog" | "community" | "clients" | "team" | "money")[] = [];
+  const areas: ("hiring" | "blog" | "community" | "clients" | "outreach" | "influencers" | "socials" | "team" | "money")[] =
+    [];
   if (staff.role) areas.push("hiring");
   if (staff.blog) areas.push("blog");
   if (staff.community) areas.push("community");
   if (staff.clients) areas.push("clients");
+  if (canSeeOutreach(staff)) areas.push("outreach");
+  if (canSeeInfluencers(staff)) areas.push("influencers");
+  if (canSeeSocials(staff)) areas.push("socials");
   if (staff.person || staff.interns.length || isAdmin(staff) || can(staff.roles, "tasks", "view")) areas.push("team");
   if (canSeeMoney(staff)) areas.push("money");
   return areas;
@@ -190,6 +217,9 @@ export function homeFor(staff: Staff) {
   if (staff.blog) return "/internal/blog";
   if (staff.community) return "/internal/community";
   if (staff.clients) return "/internal/clients";
+  if (canSeeOutreach(staff)) return "/internal/outreach";
+  if (canSeeInfluencers(staff)) return "/internal/influencers";
+  if (canSeeSocials(staff)) return "/internal/socials";
   if (staff.person) return "/internal/me";
   if (staff.interns.length) return "/internal/people";
   if (can(staff.roles, "tasks", "view")) return "/internal/tasks";
@@ -219,12 +249,17 @@ const DENIED: Record<AreaKey, string> = {
   community: "/internal/community?denied=1",
   clients: "/internal/clients?denied=1",
   tasks: "/internal/tasks?denied=1",
+  // One level each: no access at all already sends them home.
+  outreach: "/internal?denied=1",
+  influencers: "/internal?denied=1",
+  socials: "/internal?denied=1",
 };
 
 /**
  * The one access check for an area's pages, data reads and actions: the
  * signed-in person must reach at least `minimum` in `area` (Admin counts as
- * Manage everywhere; see the grid in lib/internal/roles.ts). No access to the
+ * Manage everywhere but the areas given one by one; see the grid in
+ * lib/internal/roles.ts). No access to the
  * area at all sends them home; too low a level, to the area with ?denied=1.
  * proxy.ts already turns signed-out visitors away; this is the check that
  * counts, since a proxy alone can be bypassed.

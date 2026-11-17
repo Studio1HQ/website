@@ -41,12 +41,14 @@ const legacyRedirects: Record<string, string> = {
 const THEME_SCRIPT = "'sha256-a/T6WihUdllNvOaPlAwIT5TdeEcYmobkkshLrN/KCkc='";
 
 /**
- * A client's or an outreach organisation's logo (app/internal/(dashboard)/
- * clients/[slug]/logo, outreach/[id]/logo): another site's icon, so it gets
- * a policy that runs and loads nothing, and keeps the route's own
+ * A client's, an outreach organisation's or a newsletter's logo
+ * (app/internal/(dashboard)/clients/[slug]/logo, outreach/[id]/logo,
+ * influencers/channels/[id]/logo): another site's icon, so it gets a
+ * policy that runs and loads nothing, and keeps the route's own
  * month-long Cache-Control instead of no-store.
  */
-const LOGO_PATH = /^\/internal\/(?:clients\/[a-z0-9-]+|outreach\/[0-9a-f-]{36})\/logo$/;
+const LOGO_PATH =
+  /^\/internal\/(?:clients\/[a-z0-9-]+|outreach\/[0-9a-f-]{36}|influencers\/channels\/[0-9a-f-]{36})\/logo$/;
 const LOGO_POLICY = "default-src 'none'; style-src 'unsafe-inline'; sandbox";
 
 function dashboardPolicy(nonce: string) {

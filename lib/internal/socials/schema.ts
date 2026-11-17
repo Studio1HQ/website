@@ -4,15 +4,25 @@
  * reads and writes the rows.
  */
 
+/**
+ * `audience`: its number is people who follow along (followers,
+ * subscribers), so it counts towards the total audience. Stars and
+ * visitors don't.
+ */
 export const PLATFORMS = [
-  { value: "linkedin", label: "LinkedIn", unit: "followers" },
-  { value: "x", label: "X (Twitter)", unit: "followers" },
-  { value: "youtube", label: "YouTube", unit: "subscribers" },
-  { value: "instagram", label: "Instagram", unit: "followers" },
-  { value: "github", label: "GitHub", unit: "stars" },
-  { value: "newsletter", label: "Newsletter", unit: "subscribers" },
-  { value: "website", label: "Website", unit: "visitors" },
-  { value: "other", label: "Other", unit: "followers" },
+  { value: "linkedin", label: "LinkedIn", unit: "followers", audience: true },
+  { value: "x", label: "X (Twitter)", unit: "followers", audience: true },
+  { value: "youtube", label: "YouTube", unit: "subscribers", audience: true },
+  { value: "instagram", label: "Instagram", unit: "followers", audience: true },
+  { value: "github", label: "GitHub", unit: "stars", audience: false },
+  {
+    value: "newsletter",
+    label: "Newsletter",
+    unit: "subscribers",
+    audience: true,
+  },
+  { value: "website", label: "Website", unit: "visitors", audience: false },
+  { value: "other", label: "Other", unit: "followers", audience: true },
 ] as const;
 export type Platform = (typeof PLATFORMS)[number]["value"];
 
@@ -29,6 +39,14 @@ export function platformInfo(value: string) {
 
 /** Studio1's own accounts; anything else is a person's. */
 export const STUDIO_ACCOUNT = "Studio1";
+
+/** Where Studio1's own profiles live, so the page can link to them. */
+export const STUDIO_PROFILES: Partial<Record<Platform, string>> = {
+  linkedin: "https://www.linkedin.com/company/studio1hq/",
+  x: "https://x.com/Studio1HQ",
+  youtube: "https://www.youtube.com/@studio1hq",
+  instagram: "https://www.instagram.com/studio1_hq/",
+};
 
 export type SocialMetric = {
   id: string;
@@ -131,4 +149,169 @@ export function growthSeries(rows: readonly SocialMetric[]): AccountSeries[] {
 export function signed(value: number) {
   const text = new Intl.NumberFormat("en-US").format(Math.abs(value));
   return value > 0 ? `+${text}` : value < 0 ? `-${text}` : "0";
+}
+
+export type AudienceMonth = {
+  month: string;
+  /**
+   * The total at the end of the month. A platform not logged that month
+   * counts at its last number, so a skipped month isn't a drop.
+   */
+  total: number;
+  /**
+   * Gained that month on the platforms logged then and before. A platform
+   * logged for the first time doesn't count as growth. Null when there's
+   * nothing to compare.
+   */
+  gained: number | null;
+  /** That gain as a percent of where those platforms were; null when it can't be said. */
+  percent: number | null;
+};
+
+export type Audience = {
+  /** Followers and subscribers on the counted platforms, each at its newest month. */
+  total: number;
+  /** How many platforms count towards it. */
+  platforms: number;
+  /** The newest month logged on any counted platform. */
+  newest: string | null;
+  /** Month by month, oldest first. */
+  byMonth: AudienceMonth[];
+  /** The newest month's gain and percent (see AudienceMonth). */
+  gained: number | null;
+  percent: number | null;
+};
+
+/** One account's audience across its platforms (not stars or visitors). */
+export function audienceOf(platforms: readonly PlatformSeries[]): Audience {
+  const counted = platforms.filter(
+    (item) => platformInfo(item.platform).audience,
+  );
+  const months = [
+    ...new Set(
+      counted.flatMap((item) => item.months.map((entry) => entry.month)),
+    ),
+  ].sort();
+  const byMonth = months.map((month): AudienceMonth => {
+    let total = 0;
+    let gained: number | null = null;
+    let before = 0;
+    for (const item of counted) {
+      // Months are newest first, so the first at or before is the latest then.
+      const latest = item.months.find((entry) => entry.month <= month);
+      total += latest?.followers ?? 0;
+      if (latest?.month === month && latest.gained !== null) {
+        gained = (gained ?? 0) + latest.gained;
+        before += latest.followers - latest.gained;
+      }
+    }
+    return {
+      month,
+      total,
+      gained,
+      percent: gained === null ? null : percent(gained, before),
+    };
+  });
+  const last = byMonth[byMonth.length - 1];
+  return {
+    total: counted.reduce((sum, item) => sum + item.latest.followers, 0),
+    platforms: counted.length,
+    newest: last?.month ?? null,
+    byMonth,
+    gained: last?.gained ?? null,
+    percent: last?.percent ?? null,
+  };
+}
+
+/** A platform's slice of the audience as a whole percent; null when it doesn't count. */
+export function shareOf(item: PlatformSeries, audience: Audience) {
+  if (!platformInfo(item.platform).audience || audience.total <= 0) return null;
+  return Math.round((item.latest.followers / audience.total) * 100);
+}
+
+/** One month on the growth chart. */
+export type ChartPoint = {
+  /** "YYYY-MM". */
+  month: string;
+  value: number;
+  gained: number | null;
+  percent: number | null;
+};
+
+/** One stat in the strip over the chart, with the months the chart draws. */
+export type OverviewSeries = {
+  key: string;
+  /** Null for the total audience. */
+  platform: Platform | null;
+  label: string;
+  /** What the number counts: "followers", "subscribers", "audience". */
+  unit: string;
+  value: number;
+  gained: number | null;
+  percent: number | null;
+  /** The month the change is against, "YYYY-MM". */
+  since: string | null;
+  /** Share of the total audience, in whole percent. */
+  share: number | null;
+  /** The profile, to open it. */
+  href: string | null;
+  /** Oldest first, up to 12 months. */
+  points: ChartPoint[];
+};
+
+/**
+ * An account's stats strip: its total audience first (when there's more
+ * than one platform to add up), then each platform.
+ */
+export function overviewOf(
+  account: AccountSeries,
+  audience: Audience,
+): OverviewSeries[] {
+  const before = audience.byMonth[audience.byMonth.length - 2];
+  const total: OverviewSeries = {
+    key: "total",
+    platform: null,
+    label: "Total audience",
+    unit: "audience",
+    value: audience.total,
+    gained: audience.gained,
+    percent: audience.percent,
+    since: before?.month ?? null,
+    share: null,
+    href: null,
+    points: audience.byMonth.slice(-12).map((entry) => ({
+      month: entry.month,
+      value: entry.total,
+      gained: entry.gained,
+      percent: entry.percent,
+    })),
+  };
+  const platforms = account.platforms.map((item): OverviewSeries => {
+    const info = platformInfo(item.platform);
+    return {
+      key: item.platform,
+      platform: item.platform,
+      label: info.label,
+      unit: info.unit,
+      value: item.latest.followers,
+      gained: item.latest.gained,
+      percent: item.latest.percent,
+      since: item.months[1]?.month ?? null,
+      share: shareOf(item, audience),
+      href:
+        account.account === STUDIO_ACCOUNT
+          ? (STUDIO_PROFILES[item.platform] ?? null)
+          : null,
+      points: [...item.months]
+        .reverse()
+        .slice(-12)
+        .map((entry) => ({
+          month: entry.month,
+          value: entry.followers,
+          gained: entry.gained,
+          percent: entry.percent,
+        })),
+    };
+  });
+  return audience.platforms > 1 ? [total, ...platforms] : platforms;
 }

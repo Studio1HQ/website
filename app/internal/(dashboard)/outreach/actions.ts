@@ -44,20 +44,22 @@ import {
   type Direction,
   type OutreachResult,
 } from "@/lib/internal/outreach/schema";
-import { isAdmin, requireMember } from "@/lib/internal/session";
+import { canSeeOutreach, requireMember } from "@/lib/internal/session";
 
 /**
  * Outreach writes. Server actions are public endpoints, so every one checks
- * the session here: admins only (the founders are admins).
+ * the session here: people given Outreach (the founders always are; Admin
+ * alone isn't enough).
  */
 
-const DENIED: OutreachResult = { ok: false, message: "Only admins can change outreach." };
+const DENIED: OutreachResult = { ok: false, message: "You don't have access to Outreach." };
 const UNKNOWN: OutreachResult = { ok: false, message: "That isn't there any more. Reload the page." };
 const TRY_AGAIN: OutreachResult = { ok: false, message: "Couldn't check that just now. Try again in a minute." };
 
-async function admin() {
+/** The signed-in person, if they may use this area; null otherwise. */
+async function allowed() {
   const staff = await requireMember();
-  return isAdmin(staff) ? staff : null;
+  return canSeeOutreach(staff) ? staff : null;
 }
 
 function refresh() {
@@ -95,7 +97,7 @@ async function ownerProblem(owner: unknown) {
 
 /** Adds an organisation (no id) or changes one. */
 export async function saveOrg(id: unknown, values: unknown): Promise<OutreachResult> {
-  const staff = await admin();
+  const staff = await allowed();
   if (!staff) return DENIED;
   const key = typeof id === "string" && isUuid(id) ? id.toLowerCase() : null;
   if (id && !key) return UNKNOWN;
@@ -149,7 +151,7 @@ export async function saveOrg(id: unknown, values: unknown): Promise<OutreachRes
 
 /** Moves an organisation to another stage. Lost needs `reason`. */
 export async function setStage(id: unknown, to: unknown, reason?: unknown): Promise<OutreachResult> {
-  const staff = await admin();
+  const staff = await allowed();
   if (!staff) return DENIED;
   if (typeof id !== "string" || !isUuid(id) || !isOrgStage(to)) return UNKNOWN;
   const org = await getOrg(id);
@@ -181,7 +183,7 @@ export async function setStage(id: unknown, to: unknown, reason?: unknown): Prom
 
 /** Deletes an organisation with its contacts and log. */
 export async function removeOrg(id: unknown): Promise<OutreachResult> {
-  const staff = await admin();
+  const staff = await allowed();
   if (!staff) return DENIED;
   if (typeof id !== "string" || !isUuid(id)) return UNKNOWN;
   const result = await deleteRecord(TABLES.orgs, "an organisation", id);
@@ -193,7 +195,7 @@ export async function removeOrg(id: unknown): Promise<OutreachResult> {
 
 /** Takes the follow-up date off: nothing to chase for now. */
 export async function clearFollowUp(id: unknown): Promise<OutreachResult> {
-  const staff = await admin();
+  const staff = await allowed();
   if (!staff) return DENIED;
   if (typeof id !== "string" || !isUuid(id)) return UNKNOWN;
   const result = await updateRecord(TABLES.orgs, "an organisation", id, { follow_up_on: null }, staff.email);
@@ -206,7 +208,7 @@ export async function clearFollowUp(id: unknown): Promise<OutreachResult> {
 
 /** Adds a person to an organisation (no id) or changes one. */
 export async function saveContact(orgId: unknown, id: unknown, values: unknown): Promise<OutreachResult> {
-  const staff = await admin();
+  const staff = await allowed();
   if (!staff) return DENIED;
   if (typeof orgId !== "string" || !isUuid(orgId)) return UNKNOWN;
   const key = typeof id === "string" && isUuid(id) ? id.toLowerCase() : null;
@@ -233,7 +235,7 @@ export async function saveContact(orgId: unknown, id: unknown, values: unknown):
 }
 
 export async function removeContact(id: unknown): Promise<OutreachResult> {
-  const staff = await admin();
+  const staff = await allowed();
   if (!staff) return DENIED;
   if (typeof id !== "string" || !isUuid(id)) return UNKNOWN;
   const result = await deleteRecord(TABLES.contacts, "a contact", id);
@@ -251,7 +253,7 @@ export async function removeContact(id: unknown): Promise<OutreachResult> {
  * given, and moves a lead along (see activityEffect).
  */
 export async function logActivity(orgId: unknown, values: unknown): Promise<OutreachResult> {
-  const staff = await admin();
+  const staff = await allowed();
   if (!staff) return DENIED;
   if (typeof orgId !== "string" || !isUuid(orgId)) return UNKNOWN;
   const input = asInput(values);
@@ -305,7 +307,7 @@ export async function logActivity(orgId: unknown, values: unknown): Promise<Outr
 }
 
 export async function removeActivity(id: unknown): Promise<OutreachResult> {
-  const staff = await admin();
+  const staff = await allowed();
   if (!staff) return DENIED;
   if (typeof id !== "string" || !isUuid(id)) return UNKNOWN;
   const result = await deleteRecord(TABLES.activity, "the log entry", id);
@@ -323,7 +325,7 @@ export async function removeActivity(id: unknown): Promise<OutreachResult> {
  * done once.
  */
 export async function convertToClient(id: unknown): Promise<OutreachResult> {
-  const staff = await admin();
+  const staff = await allowed();
   if (!staff) return DENIED;
   if (typeof id !== "string" || !isUuid(id)) return UNKNOWN;
   const org = await getOrg(id);
@@ -365,7 +367,7 @@ const IMPORT_LIMIT = 2000;
  * for a website that's already here, or repeated in the file, are skipped.
  */
 export async function importOrgs(csv: unknown): Promise<OutreachResult> {
-  const staff = await admin();
+  const staff = await allowed();
   if (!staff) return DENIED;
   if (typeof csv !== "string" || !csv.trim()) return { ok: false, message: "Pick a CSV file first." };
   if (csv.length > 2_000_000) return { ok: false, message: "That file is too big. Split it and import the parts." };

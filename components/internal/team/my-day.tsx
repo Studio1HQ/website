@@ -33,7 +33,7 @@ import { cn } from "@/lib/utils";
 import { Select } from "@/components/internal/select";
 import { useToast } from "@/components/internal/toast";
 import { Avatar, Card, CardTitle, buttonClass, inputClass } from "@/components/internal/ui";
-import { ClaimChip, DayChip, IdChip, dayText } from "@/components/internal/team/chips";
+import { ClaimChip, IdChip, dayText, dayTone, type Tone } from "@/components/internal/team/chips";
 import { DayDialog, LeaveDialog } from "@/components/internal/team/day-dialogs";
 import { Label, MonthSwitcher, TeamDialog, shrinkImage, useTeamAction } from "@/components/internal/team/kit";
 import {
@@ -45,6 +45,7 @@ import {
   MAX_RECEIPT_PDF_BYTES,
   MAX_RECEIPT_PDF_LABEL,
   REIMBURSEMENT_SUBJECT_EXAMPLE,
+  datesOfMonth,
   dayLabel,
   displayName,
   formatMinutes,
@@ -60,6 +61,7 @@ import {
   receiptUrl,
   shiftMonth,
   slotsLabel,
+  weekday,
   type AttendanceDay,
   type Payslip,
   type Reimbursement,
@@ -68,38 +70,149 @@ import {
 
 const MAX_UPLOAD = MAX_UPLOAD_BYTES;
 
-/** One of the page's three parts: a heading, a line on what it holds, its actions. */
-function Section({
-  title,
-  hint,
-  action,
-  children,
-}: {
-  title: string;
-  hint: string;
-  action?: ReactNode;
-  children: ReactNode;
-}) {
-  return (
-    <section className="mt-9 first:mt-0">
-      <div className="mb-3 flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
-        <div className="min-w-0">
-          <h2 className="text-[16px] font-medium leading-tight tracking-[-0.01em]">{title}</h2>
-          <p className="mt-0.5 text-[12.5px] text-[var(--i-muted)]">{hint}</p>
-        </div>
-        {action ? <div className="flex flex-wrap items-center gap-2">{action}</div> : null}
-      </div>
-      {children}
-    </section>
-  );
+const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+/** A logged day's cell in the month: a soft fill in the day's colour. */
+const CELL_TONES: Record<Tone, string> = {
+  emerald: "bg-emerald-50 text-emerald-900 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-100 dark:ring-emerald-500/25",
+  amber: "bg-amber-50 text-amber-900 ring-amber-200 dark:bg-amber-500/10 dark:text-amber-100 dark:ring-amber-500/25",
+  sky: "bg-sky-50 text-sky-900 ring-sky-200 dark:bg-sky-500/10 dark:text-sky-100 dark:ring-sky-500/25",
+  violet: "bg-violet-50 text-violet-900 ring-violet-200 dark:bg-violet-500/10 dark:text-violet-100 dark:ring-violet-500/25",
+  rose: "bg-rose-50 text-rose-900 ring-rose-200 dark:bg-rose-500/10 dark:text-rose-100 dark:ring-rose-500/25",
+  stone: "bg-stone-100 text-stone-800 ring-stone-200 dark:bg-stone-500/10 dark:text-stone-200 dark:ring-stone-500/25",
+};
+
+const LEGEND: { label: string; dot: string }[] = [
+  { label: "Worked", dot: "bg-emerald-500" },
+  { label: "Half day", dot: "bg-amber-500" },
+  { label: "Leave", dot: "bg-sky-500" },
+  { label: "Sick", dot: "bg-violet-500" },
+  { label: "Unpaid", dot: "bg-rose-500" },
+];
+
+/** Under the date in a cell: the hours, or what kind of day off. */
+function cellText(day: AttendanceDay, minutes: number | null) {
+  if (day.kind === "leave") return day.leave_type === "sick" ? "Sick" : day.leave_type === "unpaid" ? "Unpaid" : "Leave";
+  if (minutes) return formatMinutes(minutes);
+  return day.kind === "half_day" ? "½ day" : "Worked";
+}
+
+/** A logged day in one line, for the cell's tooltip and screen readers. */
+function describeDay(day: AttendanceDay) {
+  return [
+    dayLabel(day.day),
+    dayText(day),
+    day.slots.length ? slotsLabel(day.slots) : null,
+    day.kind !== "leave" && day.active_minutes !== null ? `${formatMinutes(day.active_minutes)} active` : null,
+    day.note || null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 }
 
 function Stat({ label, value, note }: { label: string; value: string; note?: string }) {
   return (
     <div className="min-w-0">
-      <p className="truncate text-[12px] text-[var(--i-muted)]">{label}</p>
-      <p className="mt-1 text-[20px] font-medium leading-none tabular-nums tracking-[-0.01em]">{value}</p>
-      {note ? <p className="mt-1 truncate text-[11.5px] text-[var(--i-faint)]">{note}</p> : null}
+      <p className="truncate text-[11.5px] text-[var(--i-muted)]">{label}</p>
+      <p className="mt-0.5 truncate text-[15px] font-medium tabular-nums tracking-[-0.01em]">
+        {value}
+        {note ? <span className="ml-1 text-[11px] font-normal text-[var(--i-faint)]">{note}</span> : null}
+      </p>
+    </div>
+  );
+}
+
+/** A small heading inside the pay card. */
+function SubHead({ children }: { children: ReactNode }) {
+  return <p className="px-4 pb-1 pt-3 text-[11.5px] font-medium text-[var(--i-muted)]">{children}</p>;
+}
+
+/**
+ * The month as a calendar, Monday first: each logged day in its colour with
+ * its hours. A day you can change opens its times on click.
+ */
+function MonthGrid({
+  month,
+  today,
+  days,
+  liveMinutes,
+  canEdit,
+  onPick,
+}: {
+  month: string;
+  today: string;
+  days: AttendanceDay[];
+  /** Today's minutes so far while a slot is running, else null. */
+  liveMinutes: number | null;
+  canEdit: (date: string) => boolean;
+  onPick: (date: string, day: AttendanceDay | null) => void;
+}) {
+  const byDate = new Map(days.map((day) => [day.day, day]));
+  const dates = datesOfMonth(month);
+  const lead = (weekday(dates[0]) + 6) % 7;
+  return (
+    <div className="flex flex-1 flex-col px-3 pb-3 pt-2">
+      <div aria-hidden className="grid grid-cols-7 gap-1 pb-1 text-center text-[11px] text-[var(--i-faint)]">
+        {WEEKDAYS.map((name) => (
+          <span key={name}>{name}</span>
+        ))}
+      </div>
+      {/* Rows share whatever height the card has (wide screens), 40px at least. */}
+      <ol className="grid flex-1 auto-rows-fr grid-cols-7 gap-1">
+        {dates.map((date, index) => {
+          const day = byDate.get(date) ?? null;
+          const ahead = date > today;
+          const missing = !day && !ahead && date < today && !isWeekend(date);
+          const label = day
+            ? describeDay(day)
+            : `${dayLabel(date)} · ${ahead ? "Ahead" : missing ? "Not logged" : "Nothing logged"}`;
+          const editable = canEdit(date);
+          const body = (
+            <>
+              <span aria-hidden className={cn("text-[11.5px] leading-none tabular-nums", date === today && "font-semibold")}>
+                {Number(date.slice(8))}
+              </span>
+              {day ? (
+                <span aria-hidden className="truncate text-[10.5px] font-medium leading-none tabular-nums">
+                  {cellText(day, date === today && liveMinutes !== null ? liveMinutes : day.active_minutes)}
+                </span>
+              ) : missing ? (
+                <span aria-hidden className="size-1 rounded-full bg-[var(--i-line-strong)]" />
+              ) : null}
+            </>
+          );
+          const cell = cn(
+            "flex h-full min-h-10 w-full flex-col justify-between rounded-md p-1.5 text-left ring-1 ring-inset",
+            day
+              ? CELL_TONES[dayTone(day)]
+              : isWeekend(date)
+                ? "bg-[var(--i-sunken)] text-[var(--i-muted)] ring-transparent"
+                : "text-[var(--i-ink-2)] ring-[var(--i-line)]",
+            ahead && "opacity-40",
+            date === today && "ring-2 ring-[var(--i-accent)]",
+          );
+          return (
+            <li key={date} style={index === 0 && lead ? { gridColumnStart: lead + 1 } : undefined}>
+              {editable ? (
+                <button
+                  type="button"
+                  title={`${label} · click to change`}
+                  aria-label={label}
+                  onClick={() => onPick(date, day)}
+                  className={cn(cell, "transition-[filter,box-shadow] hover:shadow-[var(--i-shadow-sm)] hover:brightness-[0.97]")}
+                >
+                  {body}
+                </button>
+              ) : (
+                <div title={label} className={cell}>
+                  <span className="sr-only">{label}</span>
+                  {body}
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ol>
     </div>
   );
 }
@@ -120,9 +233,9 @@ export function MyDay({
   tasks,
   calls,
 }: {
-  /** Today's task cards, under the clock (left out before Tasks is set up). */
+  /** Today's tasks card, under the clock (left out before Tasks is set up). */
   tasks?: ReactNode;
-  /** Today's calls, beside the tasks (left out when the person has none). */
+  /** Today's calls card, under the tasks (left out when the person has none). */
   calls?: ReactNode;
   person: TeamPerson;
   /** Admins can set their own employee ID. */
@@ -154,12 +267,15 @@ export function MyDay({
 
   const worked = days.filter((day) => day.kind !== "leave");
   const workedDays = worked.reduce((sum, day) => sum + (day.kind === "half_day" ? 0.5 : 1), 0);
-  const activeMinutes = worked.reduce((sum, day) => sum + (day.active_minutes ?? 0), 0);
+  const activeMinutes = worked.reduce(
+    (sum, day) => sum + ((day.day === now.date && running ? soFar : day.active_minutes) ?? 0),
+    0,
+  );
   const leaveDays = days.reduce((sum, day) => sum + leaveFor(day), 0);
   const unpaid = days.reduce((sum, day) => sum + lopFor(day), 0);
   const name = displayName(person);
 
-  // The clock card: where the day stands, in one line, a figure and a detail.
+  // The clock: where the day stands, in a status line and a figure.
   const idle = "bg-[var(--i-line-strong)]";
   const clock = !today
     ? {
@@ -179,289 +295,186 @@ export function MyDay({
             dot: "bg-emerald-500",
             status: "Working now",
             headline: formatMinutes(soFar),
-            detail: `Active so far · started ${today.start_time ?? running.start}`,
+            detail: `active so far · started ${today.start_time ?? running.start}`,
           }
         : {
             dot: idle,
             status: today.kind === "half_day" ? "Half day logged" : "Day ended",
             headline: formatMinutes(today.active_minutes),
-            detail: today.start_time
-              ? `Active · ${today.start_time}–${today.end_time ?? "…"}`
-              : "No times logged for today.",
+            detail: today.start_time ? `active · ${today.start_time}–${today.end_time ?? "…"}` : "No times logged for today.",
           };
 
   return (
-    <>
-      <header className="mb-7 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex min-w-0 items-center gap-3.5">
+    // Wide screens: one screen, no page scroll. The board takes the height
+    // that's left (the main area's bottom padding is pulled back up), and
+    // long lists scroll inside their own cards. Phones stack it all.
+    <div className="xl:-mb-16">
+      <header className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
           <button
             type="button"
             onClick={() => setProfileOpen(true)}
             aria-label="Edit your profile"
             className="group relative shrink-0 rounded-full"
           >
-            <Avatar name={name} email={person.email} size={48} src={photoUrl(person)} />
-            <span className="absolute -bottom-0.5 -right-0.5 flex size-5 items-center justify-center rounded-full border border-[var(--i-line)] bg-[var(--i-panel)] text-[var(--i-muted)] shadow-[var(--i-shadow-sm)] group-hover:text-[var(--i-ink)]">
-              <Camera size={11} />
+            <Avatar name={name} email={person.email} size={40} src={photoUrl(person)} />
+            <span className="absolute -bottom-0.5 -right-0.5 flex size-[18px] items-center justify-center rounded-full border border-[var(--i-line)] bg-[var(--i-panel)] text-[var(--i-muted)] shadow-[var(--i-shadow-sm)] group-hover:text-[var(--i-ink)]">
+              <Camera size={10} />
             </span>
           </button>
           <div className="min-w-0">
-            <p className="text-[12.5px] text-[var(--i-muted)]">{dayLabel(now.date, true)}</p>
-            <h1 className="truncate text-[22px] font-medium leading-tight tracking-[-0.01em]">{greeting}</h1>
-            <p className="mt-1 flex flex-wrap items-center gap-1.5 text-[12.5px] text-[var(--i-muted)]">
-              {person.employee_code ? <IdChip>{person.employee_code}</IdChip> : <span>No employee ID yet ·</span>}
-              <span>
-                {[person.designation, PERSON_KINDS[person.kind]].filter(Boolean).join(" · ")}
-              </span>
+            <h1 className="truncate text-[20px] font-medium leading-tight tracking-[-0.01em]">{greeting}</h1>
+            <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[12.5px] text-[var(--i-muted)]">
+              <span>{dayLabel(now.date, true)}</span>
+              <span aria-hidden>·</span>
+              {person.employee_code ? <IdChip>{person.employee_code}</IdChip> : <span>No employee ID yet</span>}
+              <span>{[person.designation, PERSON_KINDS[person.kind]].filter(Boolean).join(" · ")}</span>
             </p>
           </div>
         </div>
-        <button type="button" onClick={() => setProfileOpen(true)} className={buttonClass("secondary")}>
-          Edit profile
+        <button type="button" onClick={() => setProfileOpen(true)} className={buttonClass("ghost", "sm")}>
+          <PencilSimple size={13} /> Edit profile
         </button>
       </header>
 
-      {/* 1. Today: the clock, then today's tasks and calls */}
-      <Section title="Today" hint="Your hours, tasks and calls for the day.">
-        <Card className="p-5">
-          <div className="flex flex-wrap items-center justify-between gap-x-8 gap-y-4">
-            <div className="min-w-0">
-              <p className="flex items-center gap-2 text-[12.5px] text-[var(--i-muted)]">
-                <span aria-hidden className={cn("size-2 shrink-0 rounded-full", clock.dot)} />
-                {clock.status}
-              </p>
-              <p className="mt-2 text-[26px] font-medium leading-none tabular-nums tracking-[-0.02em]">
-                {clock.headline}
-              </p>
-              <p className="mt-2 text-[12.5px] leading-relaxed text-[var(--i-muted)]">{clock.detail}</p>
-            </div>
-            {intern ? null : (
-              <div className="flex flex-wrap items-center gap-2">
-                {!today ? (
-                  <>
+      <div className="grid gap-3 xl:h-[clamp(34rem,calc(100dvh-8.5rem),50rem)] xl:grid-cols-[minmax(0,1fr)_27rem] 2xl:grid-cols-[minmax(0,1fr)_29rem]">
+        {/* Today: the clock, then today's tasks and calls */}
+        <div className="flex min-h-0 flex-col gap-3">
+          <Card className="shrink-0 px-5 py-3.5">
+            <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+              <div className="min-w-0">
+                <p className="flex flex-wrap items-center gap-x-2 text-[12.5px] text-[var(--i-muted)]">
+                  <span className="flex items-center gap-2 font-medium text-[var(--i-ink-2)]">
+                    <span aria-hidden className={cn("size-2 shrink-0 rounded-full", clock.dot)} />
+                    {clock.status}
+                  </span>
+                </p>
+                <p className="mt-1.5 flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
+                  <span className="text-[24px] font-medium leading-none tabular-nums tracking-[-0.02em]">{clock.headline}</span>
+                  <span className="text-[12.5px] text-[var(--i-muted)]">{clock.detail}</span>
+                </p>
+              </div>
+              {intern ? null : (
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {!today ? (
+                    <>
+                      <button
+                        type="button"
+                        disabled={pending}
+                        onClick={() => run(() => startDay())}
+                        className={cn(buttonClass("accent"), "px-4")}
+                      >
+                        <Play size={14} weight="fill" /> Start my day
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setEditing({ date: now.date, existing: null })}
+                        className={buttonClass("secondary")}
+                      >
+                        Add times by hand
+                      </button>
+                    </>
+                  ) : today.kind === "leave" ? null : running ? (
+                    <button
+                      type="button"
+                      disabled={pending}
+                      onClick={() => run(() => endDay())}
+                      className={cn(buttonClass("primary"), "px-4")}
+                    >
+                      <Stop size={14} weight="fill" /> {slots.length > 1 ? "End this slot" : "End my day"}
+                    </button>
+                  ) : slots.length < MAX_SLOTS ? (
                     <button
                       type="button"
                       disabled={pending}
                       onClick={() => run(() => startDay())}
-                      className={cn(buttonClass("accent"), "h-9 px-4")}
+                      title={slots.length ? "Back at work? This adds a new slot from now." : undefined}
+                      className={cn(buttonClass("secondary"), "px-4")}
                     >
-                      <Play size={14} weight="fill" /> Start my day
+                      <Play size={14} weight="fill" /> {slots.length ? "Start another slot" : "Start my day"}
                     </button>
+                  ) : null}
+                  {today && canEdit(now.date) ? (
                     <button
                       type="button"
-                      onClick={() => setEditing({ date: now.date, existing: null })}
-                      className={cn(buttonClass("secondary"), "h-9")}
+                      onClick={() => setEditing({ date: now.date, existing: today })}
+                      className={buttonClass("ghost")}
                     >
-                      Add times by hand
+                      <PencilSimple size={14} /> {today.kind === "leave" ? "Change" : "Edit times"}
                     </button>
-                  </>
-                ) : today.kind === "leave" ? null : running ? (
-                  <button
-                    type="button"
-                    disabled={pending}
-                    onClick={() => run(() => endDay())}
-                    className={cn(buttonClass("primary"), "h-9 px-4")}
-                  >
-                    <Stop size={14} weight="fill" /> {slots.length > 1 ? "End this slot" : "End my day"}
-                  </button>
-                ) : slots.length < MAX_SLOTS ? (
-                  <button
-                    type="button"
-                    disabled={pending}
-                    onClick={() => run(() => startDay())}
-                    title={slots.length ? "Back at work? This adds a new slot from now." : undefined}
-                    className={cn(buttonClass("secondary"), "h-9 px-4")}
-                  >
-                    <Play size={14} weight="fill" /> {slots.length ? "Start another slot" : "Start my day"}
-                  </button>
-                ) : null}
-                {today && canEdit(now.date) ? (
-                  <button
-                    type="button"
-                    onClick={() => setEditing({ date: now.date, existing: today })}
-                    className={cn(buttonClass("ghost"), "h-9")}
-                  >
-                    <PencilSimple size={14} /> {today.kind === "leave" ? "Change" : "Edit times"}
-                  </button>
-                ) : null}
-              </div>
-            )}
-          </div>
-          {slots.length > 1 ? (
-            <ol
-              aria-label="Today's slots"
-              className="mt-4 flex flex-wrap gap-1.5 border-t border-[var(--i-line)] pt-4"
-            >
-              {slots.map((slot, index) => (
-                <li
-                  key={`${index}-${slot.start}`}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-[var(--i-sunken)] px-2.5 py-1 text-[12px] tabular-nums ring-1 ring-inset ring-[var(--i-line)]"
-                >
-                  {slot.end ? null : <span aria-hidden className="size-1.5 rounded-full bg-emerald-500" />}
-                  {slot.start}–{slot.end ?? "now"}
-                  {slot.end ? (
-                    <span className="text-[var(--i-faint)]">{formatMinutes(minutesBetween(slot.start, slot.end))}</span>
                   ) : null}
-                </li>
-              ))}
-            </ol>
-          ) : null}
-        </Card>
-
-        {tasks || calls ? (
-          <div
-            className={cn(
-              "mt-4 grid items-start gap-4",
-              tasks && calls ? "lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]" : null,
-            )}
-          >
-            {tasks}
-            {calls}
-          </div>
-        ) : null}
-      </Section>
-
-      {/* 2. The month: totals, then every logged day */}
-      <Section
-        title={month === current ? "This month" : monthLabel(month)}
-        hint="The days you've logged, your leave and your hours."
-        action={
-          <>
-            <MonthSwitcher month={month} current={current} hrefFor={(value) => `/internal/me?month=${value}`} />
-            {!intern ? (
-              <>
-                <button
-                  type="button"
-                  onClick={() => setEditing({ date: month === current ? now.date : `${month}-01`, existing: null })}
-                  className={buttonClass("secondary")}
-                >
-                  <Plus size={14} /> Log a day
-                </button>
-                <button type="button" onClick={() => setLeaveOpen(true)} className={buttonClass("secondary")}>
-                  <AirplaneTilt size={15} /> Take leave
-                </button>
-              </>
-            ) : null}
-          </>
-        }
-      >
-        <Card>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-5 px-5 py-4 sm:grid-cols-4">
-            <Stat label="Days worked" value={String(workedDays)} />
-            <Stat label="Active hours" value={formatMinutes(activeMinutes)} />
-            <Stat label="Leave days" value={String(leaveDays)} />
-            <Stat label="Unpaid days" value={String(unpaid)} note={unpaid ? "Loss of pay" : undefined} />
-          </div>
-          {days.length === 0 ? (
-            <p className="border-t border-[var(--i-line)] px-5 py-8 text-center text-[13px] text-[var(--i-faint)]">
-              Nothing logged in {monthLabel(month)}.
-            </p>
-          ) : (
-            <>
-              <div
-                aria-hidden
-                className="hidden items-center gap-3 border-y border-[var(--i-line)] bg-[var(--i-sunken)] px-5 py-2 text-[11.5px] text-[var(--i-muted)] sm:flex"
-              >
-                <span className="w-[5.5rem] shrink-0">Day</span>
-                <span className="w-[7.5rem] shrink-0">Logged as</span>
-                <span className="w-[10rem] shrink-0">Times</span>
-                <span className="w-[4.5rem] shrink-0 text-right">Active</span>
-                <span className="min-w-0 flex-1 pl-3">Note</span>
-              </div>
-              <ul className="border-t border-[var(--i-line)] sm:border-t-0">
-                {[...days].reverse().map((day) => {
-                  const editable = canEdit(day.day);
-                  const row = (
-                    <>
-                      <span className="w-[5.5rem] shrink-0 text-[13px] tabular-nums">
-                        {dayLabel(day.day)}
-                      </span>
-                      <span className="w-[7.5rem] shrink-0">
-                        <DayChip day={day} />
-                      </span>
-                      <span
-                        title={day.slots.length > 1 ? slotsLabel(day.slots) : undefined}
-                        className="hidden w-[10rem] shrink-0 truncate text-[12.5px] tabular-nums text-[var(--i-muted)] sm:block"
-                      >
-                        {day.start_time ? `${day.start_time}–${day.end_time ?? "now"}` : ""}
-                        {day.slots.length > 1 ? (
-                          <span className="text-[var(--i-faint)]"> · {day.slots.length} slots</span>
-                        ) : null}
-                      </span>
-                      <span className="ml-auto w-[4.5rem] shrink-0 text-right text-[12.5px] tabular-nums sm:ml-0">
-                        {day.kind === "leave"
-                          ? ""
-                          : formatMinutes(day.day === now.date && running ? soFar : day.active_minutes)}
-                      </span>
-                      <span className="hidden min-w-0 flex-1 truncate pl-3 text-[12.5px] text-[var(--i-faint)] sm:block">
-                        {day.note}
-                      </span>
-                      {editable ? (
-                        <span className="flex shrink-0 items-center gap-1 text-[12px] text-[var(--i-muted)]">
-                          <PencilSimple size={13} /> <span className="hidden sm:inline">Edit</span>
-                        </span>
-                      ) : null}
-                    </>
-                  );
-                  return (
-                    <li
-                      key={day.id}
-                      className={cn(
-                        "border-b border-[var(--i-line)] last:border-b-0",
-                        day.day === now.date ? "bg-[var(--i-hover)]" : null,
-                      )}
-                    >
-                      {editable ? (
-                        <button
-                          type="button"
-                          onClick={() => setEditing({ date: day.day, existing: day })}
-                          className="flex w-full items-center gap-3 px-5 py-2.5 text-left hover:bg-[var(--i-hover)]"
-                        >
-                          {row}
-                        </button>
-                      ) : (
-                        <div className="flex items-center gap-3 px-5 py-2.5">{row}</div>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-            </>
-          )}
-        </Card>
-      </Section>
-
-      {/* 3. Money: payslips and expense claims */}
-      <Section title="Pay and expenses" hint="Your payslips, and money you spent on work.">
-        <div className="grid items-start gap-4 md:grid-cols-2">
-          <Card>
-            <CardTitle action={<span aria-hidden className="h-8" />}>Payslips</CardTitle>
-            {payslips.length === 0 ? (
-              <p className="px-5 py-5 text-[13px] leading-relaxed text-[var(--i-faint)]">
-                Your payslips show up here, and in your inbox, once they&apos;re sent.
-              </p>
-            ) : (
-              <ul>
-                {payslips.slice(0, 12).map((slip) => (
-                  <li key={slip.id} className="border-b border-[var(--i-line)] last:border-b-0">
-                    <a
-                      href={payslipPdfUrl(slip)}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex items-center gap-3 px-5 py-3 hover:bg-[var(--i-hover)]"
-                    >
-                      <FilePdf size={18} className="shrink-0 text-[var(--i-accent)]" />
-                      <span className="min-w-0 flex-1 text-[13px] font-medium">{monthLabel(slip.month)}</span>
-                      <span className="text-[13px] tabular-nums">{formatMoney(slip.net)}</span>
-                      <ArrowSquareOut size={14} className="text-[var(--i-faint)]" />
-                    </a>
+                </div>
+              )}
+            </div>
+            {slots.length > 1 ? (
+              <ol aria-label="Today's slots" className="mt-2.5 flex flex-wrap gap-1.5">
+                {slots.map((slot, index) => (
+                  <li
+                    key={`${index}-${slot.start}`}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-[var(--i-sunken)] px-2 py-0.5 text-[11.5px] tabular-nums ring-1 ring-inset ring-[var(--i-line)]"
+                  >
+                    {slot.end ? null : <span aria-hidden className="size-1.5 rounded-full bg-emerald-500" />}
+                    {slot.start}–{slot.end ?? "now"}
+                    {slot.end ? (
+                      <span className="text-[var(--i-faint)]">{formatMinutes(minutesBetween(slot.start, slot.end))}</span>
+                    ) : null}
                   </li>
                 ))}
-              </ul>
-            )}
+              </ol>
+            ) : null}
+          </Card>
+          {tasks}
+          {calls}
+        </div>
+
+        {/* The month and the money */}
+        <div className="flex min-h-0 flex-col gap-3">
+          <Card className="flex flex-col xl:flex-1">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--i-line)] px-4 py-2.5">
+              <MonthSwitcher month={month} current={current} hrefFor={(value) => `/internal/me?month=${value}`} />
+              {!intern ? (
+                <div className="flex items-center">
+                  <button
+                    type="button"
+                    onClick={() => setEditing({ date: month === current ? now.date : `${month}-01`, existing: null })}
+                    className={buttonClass("ghost", "sm")}
+                  >
+                    <Plus size={13} /> Log a day
+                  </button>
+                  <button type="button" onClick={() => setLeaveOpen(true)} className={buttonClass("ghost", "sm")}>
+                    <AirplaneTilt size={14} /> Leave
+                  </button>
+                </div>
+              ) : null}
+            </div>
+            <div className="grid grid-cols-4 gap-3 border-b border-[var(--i-line)] px-4 py-2.5">
+              <Stat label="Days worked" value={String(workedDays)} />
+              <Stat label="Active" value={formatMinutes(activeMinutes)} />
+              <Stat label="Leave" value={String(leaveDays)} />
+              <Stat label="Unpaid" value={String(unpaid)} note={unpaid ? "LOP" : undefined} />
+            </div>
+            <MonthGrid
+              month={month}
+              today={now.date}
+              days={days}
+              liveMinutes={running ? soFar : null}
+              canEdit={canEdit}
+              onPick={(date, existing) => setEditing({ date, existing })}
+            />
+            <ul
+              aria-label="Colours"
+              className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-[var(--i-line)] px-4 py-2 text-[11px] text-[var(--i-muted)]"
+            >
+              {LEGEND.map((item) => (
+                <li key={item.label} className="flex items-center gap-1.5">
+                  <span aria-hidden className={cn("size-2 rounded-full", item.dot)} />
+                  {item.label}
+                </li>
+              ))}
+            </ul>
           </Card>
 
-          <Card>
+          <Card className="flex min-h-0 shrink flex-col xl:max-h-[40%]">
             <CardTitle
               action={
                 <button type="button" onClick={() => setClaimOpen(true)} className={buttonClass("secondary", "sm")}>
@@ -469,68 +482,94 @@ export function MyDay({
                 </button>
               }
             >
-              Expenses
+              Pay and expenses
             </CardTitle>
-            {claims.length === 0 ? (
-              <p className="px-5 py-5 text-[13px] leading-relaxed text-[var(--i-faint)]">
-                Spent your own money on work? Claim it here; approved claims are paid with your next payslip.
-              </p>
-            ) : (
-              <ul>
-                {claims.slice(0, 20).map((claim) => (
-                  <li
-                    key={claim.id}
-                    className="flex items-center gap-3 border-b border-[var(--i-line)] px-5 py-3 last:border-b-0"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-[13px] font-medium">{claim.description || "Expense"}</p>
-                      <p className="truncate text-[12px] text-[var(--i-muted)]">
-                        {[
-                          claim.spent_on ? dayLabel(claim.spent_on) : null,
-                          claim.source === "email" ? "By email" : null,
-                          claim.month && claim.status !== "rejected" ? `Paid with ${monthLabel(claim.month, true)}` : null,
-                          claim.note || null,
-                        ]
-                          .filter(Boolean)
-                          .join(" · ")}
-                      </p>
-                    </div>
-                    {receiptUrl(claim) ? (
+            <div className="min-h-0 flex-1 overflow-y-auto pb-2">
+              <SubHead>Payslips</SubHead>
+              {payslips.length === 0 ? (
+                <p className="px-4 pb-1 text-[12.5px] text-[var(--i-faint)]">They show up here, and in your inbox, once sent.</p>
+              ) : (
+                <ul>
+                  {payslips.slice(0, 12).map((slip) => (
+                    <li key={slip.id}>
                       <a
-                        href={receiptUrl(claim)!}
+                        href={payslipPdfUrl(slip)}
                         target="_blank"
                         rel="noreferrer"
-                        aria-label="Receipt"
-                        title={claim.receipt_name ?? "Receipt"}
-                        className="text-[var(--i-faint)] hover:text-[var(--i-ink)]"
+                        className="flex items-center gap-2.5 px-4 py-1.5 hover:bg-[var(--i-hover)]"
                       >
-                        <Paperclip size={15} />
+                        <FilePdf size={16} className="shrink-0 text-[var(--i-accent)]" />
+                        <span className="min-w-0 flex-1 truncate text-[13px] font-medium">{monthLabel(slip.month)}</span>
+                        <span className="text-[13px] tabular-nums">{formatMoney(slip.net)}</span>
+                        <ArrowSquareOut size={13} className="shrink-0 text-[var(--i-faint)]" />
                       </a>
-                    ) : null}
-                    <span className="text-[13px] tabular-nums">{formatMoney(claim.amount, claim.currency)}</span>
-                    <ClaimChip status={claim.status} />
-                    {claim.status === "submitted" ? (
-                      <button
-                        type="button"
-                        disabled={pending}
-                        onClick={() => run(() => withdrawClaim(claim.id))}
-                        className={buttonClass("ghost", "sm")}
-                      >
-                        Withdraw
-                      </button>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
-            )}
-            {inboundAddress ? (
-              <div className="border-t border-[var(--i-line)]">
-                <EmailHint address={inboundAddress} />
-              </div>
-            ) : null}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <SubHead>Expenses</SubHead>
+              {claims.length === 0 ? (
+                <p className="px-4 pb-1 text-[12.5px] leading-relaxed text-[var(--i-faint)]">
+                  Spent your own money on work? Claim it; approved claims are paid with your next payslip.
+                </p>
+              ) : (
+                <ul>
+                  {claims.slice(0, 20).map((claim) => (
+                    <li key={claim.id} className="flex items-start gap-3 px-4 py-1.5">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-[13px] font-medium">{claim.description || "Expense"}</p>
+                        <p className="flex min-w-0 items-center gap-1.5 text-[11.5px] text-[var(--i-muted)]">
+                          <span className="truncate">
+                            {[
+                              claim.spent_on ? dayLabel(claim.spent_on) : null,
+                              claim.source === "email" ? "By email" : null,
+                              claim.month && claim.status !== "rejected" ? `Paid with ${monthLabel(claim.month, true)}` : null,
+                              claim.note || null,
+                            ]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          </span>
+                          {receiptUrl(claim) ? (
+                            <a
+                              href={receiptUrl(claim)!}
+                              target="_blank"
+                              rel="noreferrer"
+                              aria-label="Receipt"
+                              title={claim.receipt_name ?? "Receipt"}
+                              className="shrink-0 text-[var(--i-faint)] hover:text-[var(--i-ink)]"
+                            >
+                              <Paperclip size={13} />
+                            </a>
+                          ) : null}
+                          {claim.status === "submitted" ? (
+                            <button
+                              type="button"
+                              disabled={pending}
+                              onClick={() => run(() => withdrawClaim(claim.id))}
+                              className="shrink-0 underline decoration-[var(--i-line-strong)] underline-offset-2 hover:text-[var(--i-ink)]"
+                            >
+                              Withdraw
+                            </button>
+                          ) : null}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 flex-col items-end gap-1">
+                        <span className="text-[13px] tabular-nums">{formatMoney(claim.amount, claim.currency)}</span>
+                        <ClaimChip status={claim.status} />
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {inboundAddress ? (
+                <div className="mt-2 border-t border-[var(--i-line)]">
+                  <EmailHint address={inboundAddress} />
+                </div>
+              ) : null}
+            </div>
           </Card>
         </div>
-      </Section>
+      </div>
 
       <ProfileDialog open={profileOpen} onOpenChange={setProfileOpen} person={person} admin={admin} />
       <LeaveDialog open={leaveOpen} onOpenChange={setLeaveOpen} today={now.date} onSave={addMyLeave} />
@@ -546,7 +585,7 @@ export function MyDay({
         onSave={saveMyDay}
         onDelete={deleteMyDay}
       />
-    </>
+    </div>
   );
 }
 

@@ -1,6 +1,7 @@
 import { NotificationBell } from "@/components/internal/notification-bell";
 import { bellFor } from "@/lib/internal/notifications/data";
 import { Suspense } from "react";
+import { cookies } from "next/headers";
 import Link from "next/link";
 import { SignOut } from "@phosphor-icons/react/dist/ssr";
 import Logo from "@/components/ui/svgs/logo";
@@ -16,7 +17,19 @@ import { communityBadges } from "@/lib/internal/community/data";
 import { awaitingCounts } from "@/lib/internal/data";
 import { pendingCount } from "@/lib/internal/members";
 import { isStaffEmail, rolesLabel } from "@/lib/internal/roles";
-import { canSeeMoney, homeFor, isAdmin, requireMember, staffName, type Staff } from "@/lib/internal/session";
+import {
+  canSeeInfluencers,
+  canSeeMoney,
+  canSeeOutreach,
+  canSeeSocials,
+  homeFor,
+  isAdmin,
+  requireMember,
+  staffName,
+  type Staff,
+} from "@/lib/internal/session";
+import { isSidebarCollapsed, SIDEBAR_COOKIE, SIDEBAR_EASE, SIDEBAR_FADE } from "@/lib/internal/sidebar";
+import { cn } from "@/lib/utils";
 import { teamBadges } from "@/lib/internal/team/badges";
 import { canSeeOthers } from "@/lib/internal/tasks/access";
 import { canSeeCalls } from "@/lib/internal/calls/access";
@@ -33,7 +46,7 @@ type Counts = {
   money: { payroll: number; payments: number };
   community: { tasks: number; sponsors: number; partners: number };
   clients: { late: number; toReview: number };
-  /** My outreach follow-ups due (admins). */
+  /** My outreach follow-ups due (people given Outreach). */
   outreach: number;
   /** Reports due (yours) plus reports to read (founders). */
   tasks: number;
@@ -79,7 +92,9 @@ function Sidebar({ staff, counts }: { staff: Staff; counts: Counts }) {
       }}
       community={staff.community ? { access: staff.community, ...counts.community } : null}
       clients={staff.clients ? { access: staff.clients, ...counts.clients } : null}
-      outreach={admin ? { due: counts.outreach } : null}
+      outreach={canSeeOutreach(staff) ? { due: counts.outreach } : null}
+      influencers={canSeeInfluencers(staff)}
+      socials={canSeeSocials(staff)}
       home={home}
       overview={home === "/internal"}
     />
@@ -96,7 +111,7 @@ async function SidebarWithCounts({ staff }: { staff: Staff }) {
     staff.community ? communityBadges(staff.email) : Promise.resolve(NO_COUNTS.community),
     staff.clients ? clientNeeds(staff.email, staff.clientScope) : Promise.resolve(NO_COUNTS.clients),
     seesTasks(staff) ? taskNeeds(staff) : Promise.resolve(null),
-    isAdmin(staff) ? outreachDue(staff.email) : Promise.resolve(0),
+    canSeeOutreach(staff) ? outreachDue(staff.email) : Promise.resolve(0),
   ]);
   return (
     <Sidebar
@@ -138,13 +153,15 @@ export default async function DashboardLayout({
   const photos = isStaffEmail(staff.email) ? await teamPhotos() : {};
   const name = staffName(staff);
   const home = homeFor(staff);
+  // Desktop sidebar folded to its icons, as this person left it.
+  const collapsed = isSidebarCollapsed((await cookies()).get(SIDEBAR_COOKIE)?.value);
 
   return (
     <ToastProvider>
       <Suspense fallback={null}>
         <NavProgress />
       </Suspense>
-      <MobileNavProvider>
+      <MobileNavProvider collapsed={collapsed}>
         {/* Phones: a top bar; the sidebar opens from its menu button. */}
         <header className="sticky top-0 z-30 flex h-14 items-center gap-1 border-b border-[var(--i-line)] bg-[var(--i-sidebar)] px-2 print:hidden md:hidden">
           <MobileNavButton />
@@ -167,11 +184,15 @@ export default async function DashboardLayout({
           </div>
         </header>
         <div className="md:flex">
+          {/* Folded (desktop), the md:group-data-[collapsed=true]/sidebar:
+              classes leave just the icons: the logo on top, the avatar below.
+              The logo and avatar sit 16px in (px-1), centred on the 60px
+              folded sidebar, so they hold still while it narrows. */}
           <MobileNavPanel className="px-3 pb-3 pt-2 md:py-4">
-            <div className="mb-4 flex items-center justify-between gap-3 px-1.5 md:mb-6">
+            <div className="mb-4 flex items-center justify-between gap-3 px-1 md:mb-6">
               <Link href={home} className="flex items-center gap-2.5 py-1">
-                <Logo className="size-7" />
-                <span className="leading-tight">
+                <Logo className="size-7 shrink-0" />
+                <span className={cn("whitespace-nowrap leading-tight", SIDEBAR_FADE)}>
                   <span className="block text-[14px] font-medium">Studio1</span>
                   <span className="block text-[11.5px] text-[var(--i-muted)]">Internal dashboard</span>
                 </span>
@@ -181,20 +202,27 @@ export default async function DashboardLayout({
             {/* A long sidebar scrolls on its own; the profile stays at the foot.
                 The 4px of top room (pulled back up) keeps the first link's
                 outline and shadow from being clipped by the scroll edge. */}
-            <div className="-mx-3 -mt-1 min-h-0 flex-1 overflow-y-auto px-3 pb-2 pt-1">
+            <div className="-mx-3 -mt-1 min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-3 pb-2 pt-1">
               {/* The links show at once; their counts arrive when they're read. */}
               <Suspense fallback={<Sidebar staff={staff} counts={NO_COUNTS} />}>
                 <SidebarWithCounts staff={staff} />
               </Suspense>
             </div>
-            <div className="flex items-center gap-2.5 border-t border-[var(--i-line)] px-1.5 pt-3 md:border-t-0 md:pt-4">
+            {/* Folded, refresh and sign out stack above the avatar (which
+                stays put) and fade in. */}
+            <div className="flex items-center gap-2.5 border-t border-[var(--i-line)] px-1 pt-3 md:border-t-0 md:pt-4 md:group-data-[collapsed=true]/sidebar:flex-col-reverse md:group-data-[collapsed=true]/sidebar:items-start md:group-data-[collapsed=true]/sidebar:gap-1">
               <Link
                 href="/internal/profile"
                 title="Your profile"
-                className="-mx-1.5 -my-1 flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-1.5 py-1 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
+                className={cn(
+                  "-mx-1 -my-1 flex min-w-0 max-w-[220px] flex-1 items-center gap-2.5 overflow-hidden rounded-lg px-1 py-1 transition-[max-width,background-color] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]",
+                  SIDEBAR_EASE,
+                  // Folded: just the avatar; max-width (not width) so it narrows smoothly.
+                  "md:group-data-[collapsed=true]/sidebar:max-w-9 md:group-data-[collapsed=true]/sidebar:flex-none",
+                )}
               >
                 <Avatar name={name} email={staff.email} size={28} src={photoUrl(staff.person)} />
-                <div className="min-w-0 flex-1">
+                <div className={cn("min-w-0 flex-1", SIDEBAR_FADE)}>
                   <p className="truncate text-[12.5px] font-medium">{name}</p>
                   <p className="truncate text-[11.5px] text-[var(--i-muted)]">
                     {staff.localPreview
@@ -208,8 +236,8 @@ export default async function DashboardLayout({
                   </p>
                 </div>
               </Link>
-              <RefreshButton className="hidden md:flex" />
-              <form action={signOut}>
+              <RefreshButton className="hidden md:flex md:group-data-[collapsed=true]/sidebar:animate-[internal-fade-in_220ms_ease-out]" />
+              <form action={signOut} className="md:group-data-[collapsed=true]/sidebar:animate-[internal-fade-in_220ms_ease-out]">
                 <button
                   type="submit"
                   aria-label="Sign out"

@@ -1,6 +1,5 @@
 import "server-only";
 import { cache } from "react";
-import { redirect } from "next/navigation";
 import {
   deleteRows,
   insertRow,
@@ -11,6 +10,7 @@ import { isUuid } from "@/lib/internal/community/clean";
 import { isMissingTable } from "@/lib/internal/community/data";
 import {
   INFLUENCERS_MIGRATION_HINT,
+  INFLUENCER_DETAILS_HINT,
   type Channel,
   type Influencer,
   type InfluencerResult,
@@ -18,25 +18,19 @@ import {
   type Rate,
 } from "@/lib/internal/influencers/schema";
 import { membersWith } from "@/lib/internal/members";
-import {
-  homeFor,
-  isAdmin,
-  requireMember,
-  type Staff,
-} from "@/lib/internal/session";
+import { requireArea, type Staff } from "@/lib/internal/session";
 
 /**
- * Influencer reads and writes. Admins only for now (the founders are
- * admins): what creators charge, and what Studio1 paid them, isn't for the
- * whole team. Pages check with requireInfluencers; the actions check on
- * their own (app/internal/(dashboard)/influencers/actions.ts). Nothing
- * below that checks who's asking.
+ * Influencer reads and writes. People given Influencers on People (the
+ * founders always are; Admin alone isn't enough): what creators charge, and
+ * what Studio1 paid them, isn't for the whole team. Pages check with
+ * requireInfluencers; the actions check on their own
+ * (app/internal/(dashboard)/influencers/actions.ts). Nothing below that
+ * checks who's asking.
  */
 
 export async function requireInfluencers(): Promise<Staff> {
-  const staff = await requireMember();
-  if (!isAdmin(staff)) redirect(homeFor(staff));
-  return staff;
+  return requireArea("influencers", "manage");
 }
 
 export const TABLES = {
@@ -103,15 +97,25 @@ function mapped<T>(result: Loaded<T>, fix: (row: T) => T): Loaded<T> {
   return result.ok ? { ...result, rows: result.rows.map(fix) } : result;
 }
 
+// The details fields are blank until their migration has run.
 const toInfluencer = (row: Influencer): Influencer => ({
   ...row,
   tags: row.tags ?? [],
+  niches: row.niches ?? [],
+  audience: row.audience ?? "",
+  languages: row.languages ?? "",
+  content_style: row.content_style ?? "",
 });
 const toChannel = (row: Channel): Channel => ({
   ...row,
   followers: number(row.followers),
+  median_views: number(row.median_views),
   avg_views: number(row.avg_views),
+  best_views: number(row.best_views),
   avg_engagements: number(row.avg_engagements),
+  posts_per_month: number(row.posts_per_month),
+  open_rate: number(row.open_rate),
+  click_rate: number(row.click_rate),
 });
 const toRate = (row: Rate): Rate => ({ ...row, price: number(row.price) ?? 0 });
 const toPost = (row: Post): Post => ({
@@ -200,9 +204,9 @@ export async function getInfluencer(
   return row && row !== "error" ? toInfluencer(row) : row;
 }
 
-/** People who can own a creator: the admins (the founders included). */
+/** People who can own a creator: whoever has Influencers (the founders included). */
 export async function ownerChoices(): Promise<string[]> {
-  return (await membersWith(["admin"])).sort();
+  return (await membersWith(["influencer_manager"])).sort();
 }
 
 /* ---------------------------------------------------------------- writes */
@@ -213,7 +217,10 @@ const GONE: InfluencerResult = {
 };
 
 function writeError(what: string, message: string): InfluencerResult {
-  if (isMissingTable(message) || /PGRST204|42703/.test(message))
+  // A missing column with the tables there: the details migration hasn't run.
+  if (/PGRST204|42703/.test(message))
+    return { ok: false, message: INFLUENCER_DETAILS_HINT };
+  if (isMissingTable(message))
     return { ok: false, message: INFLUENCERS_MIGRATION_HINT };
   if (message.includes("23505")) {
     return {

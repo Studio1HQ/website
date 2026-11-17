@@ -178,6 +178,65 @@ export const MEMBER_FIELDS = [
   "extra_urls",
 ] as const satisfies readonly (keyof Deliverable)[];
 
+/* -------------------------------------------------------- two editors */
+
+/** The fields the deliverable dialog edits, with how a clash names them. */
+export const FORM_FIELD_LABELS = {
+  title: "title",
+  kind: "kind",
+  scope_line_id: "plan line",
+  owner: "owner",
+  reviewer: "reviewer",
+  size: "size",
+  week: "week",
+  due_on: "due date",
+  client_due_on: "client's reply date",
+  draft_url: "draft link",
+  review_url: "review link",
+  pr_url: "PR link",
+  published_url: "live link",
+  notes: "notes",
+  content_type: "type",
+  views: "views",
+  extra_urls: "other links",
+} as const satisfies Partial<Record<keyof Deliverable, string>>;
+
+export type FormField = keyof typeof FORM_FIELD_LABELS;
+
+/**
+ * A deliverable field as the dialog shows it: "" for nothing, one link per
+ * line, numbers as text. The dialog starts from these, and the server reads
+ * the saved row the same way, so the two compare exactly.
+ */
+export function formValueOf(item: Partial<Deliverable>, field: FormField): string {
+  const value = item[field];
+  if (value === null || value === undefined) return "";
+  return Array.isArray(value) ? value.join("\n") : String(value);
+}
+
+/**
+ * Fields this save changes that someone else changed after the dialog
+ * opened: `seen` is what the dialog showed for each field it sends, `sent`
+ * what it sends. A field they set to the very value sent isn't a clash.
+ */
+export function editClashes(
+  current: Partial<Deliverable>,
+  seen: Readonly<Record<string, unknown>>,
+  sent: Readonly<Record<string, unknown>>,
+): FormField[] {
+  return (Object.keys(FORM_FIELD_LABELS) as FormField[]).filter((field) => {
+    if (!(field in sent) || typeof seen[field] !== "string") return false;
+    const now = formValueOf(current, field);
+    return now !== seen[field] && now !== String(sent[field] ?? "");
+  });
+}
+
+/** "the due date", "the owner and the notes", for a clash message. */
+export function clashText(fields: readonly FormField[]) {
+  const names = fields.map((field) => `the ${FORM_FIELD_LABELS[field]}`);
+  return names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}` : (names[0] ?? "");
+}
+
 /**
  * Where a member may start new work (the owner's rule, 16 Nov 2026):
  * Planned, In progress or In review. Later stages (with the client,

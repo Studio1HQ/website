@@ -1,7 +1,7 @@
 import { toCsv } from "@/lib/internal/csv";
 import { todayKey } from "@/lib/internal/community/schema";
 import { loadMainContacts, loadOrgs } from "@/lib/internal/outreach/data";
-import { isAdmin, getStaff } from "@/lib/internal/session";
+import { canSeeOutreach, getStaff } from "@/lib/internal/session";
 
 const COLUMNS = [
   "name",
@@ -38,12 +38,12 @@ const COLUMNS = [
 
 /**
  * Every organisation as CSV, with its main contact, in the columns the
- * import reads back. Admins only, like the pages; each download is logged.
+ * import reads back. People given Outreach only, like the pages; each download is logged.
  */
 export async function GET() {
   const staff = await getStaff();
   // A file, so no redirect to the sign-in page: just not there.
-  if (!staff || !isAdmin(staff)) return new Response("Not found", { status: 404 });
+  if (!staff || !canSeeOutreach(staff)) return new Response("Not found", { status: 404 });
   const [orgs, contacts] = await Promise.all([loadOrgs(), loadMainContacts()]);
   if (!orgs.ok) return new Response(orgs.message, { status: orgs.missing ? 503 : 502 });
   if (!contacts.ok) return new Response(contacts.message, { status: 502 });

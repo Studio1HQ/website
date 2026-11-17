@@ -7,6 +7,8 @@ import { MAX_FILE_BYTES, deleteTeamFiles, saveTeamFile } from "@/lib/internal/te
 import { getPerson } from "@/lib/internal/team/people";
 import { hasInboundPayment, inboundCountSince, insertInboundPayment, listPayees } from "@/lib/internal/team/payments";
 import { addReimbursement } from "@/lib/internal/team/reimbursements";
+import { notify } from "@/lib/internal/notifications/data";
+import { OWNERS } from "@/lib/internal/roles";
 import {
   formatMoney,
   istNow,
@@ -434,12 +436,18 @@ export type IntakeResult =
 
 /* ---------------------------------------------------------- turned away */
 
-/** Emailed invoices one address may send in an hour, and everyone together. */
+/**
+ * Emailed invoices one address may send in an hour, and senders who aren't
+ * on file as payees together. Payees' own addresses only have their own
+ * limit, so a flood from made-up addresses can't push out real invoices.
+ */
 const SENDER_HOURLY_LIMIT = 5;
 const INTAKE_HOURLY_LIMIT = 40;
 
 /** One Slack post per sender per hour for mail that was turned away. */
 const lastSkipAlert = new Map<string, number>();
+/** One bell notice an hour while strangers' invoices are being turned away. */
+let lastFloodNotice = 0;
 
 /**
  * Records an invoice or claim that wasn't taken in, so an admin can see it
@@ -450,7 +458,7 @@ const lastSkipAlert = new Map<string, number>();
 async function turnAway(
   mail: { emailId: string; from: string | null; subject: string; kind: IntakeKind },
   reason: string,
-  options: { alert?: boolean } = {},
+  options: { alert?: boolean; flood?: boolean } = {},
 ): Promise<IntakeResult> {
   await audit({
     actor: mail.from ?? "unknown sender",
@@ -471,6 +479,17 @@ async function turnAway(
         path: mail.kind === "invoice" ? "/internal/money/payments" : "/internal/money/payroll",
       }),
     );
+  }
+  // A flood isn't one sender's problem: the founders hear of it in the bell
+  // (Money is theirs), once an hour, so it never happens silently.
+  if (options.flood && now - lastFloodNotice > 3_600_000) {
+    lastFloodNotice = now;
+    await notify([...OWNERS], "intake", {
+      kind: "other",
+      title: "Emailed invoices from unknown senders are being turned away",
+      body: `More than ${INTAKE_HOURLY_LIMIT} in the last hour. Payees on file still get through. See "Emails not taken in" on Payments.`,
+      href: "/internal/money/payments",
+    });
   }
   return { ok: true, skipped: `${reason} (${sender})` };
 }
@@ -517,20 +536,29 @@ export async function handleReceivedEmail(data: unknown): Promise<IntakeResult> 
   }
 
   // A flood of invoices is turned away before anything is fetched or stored:
-  // from one address, or (forged senders) from everyone together.
+  // from one address, or (forged senders) from everyone not on file together.
+  // A payee's own address skips the second cap, so made-up senders can't
+  // crowd out a real invoice; forging a payee's address only reaches that
+  // payee's own five an hour.
   const claimed = parseFrom(meta.from).address;
   const mail = { emailId, from: claimed, subject: subjectText, kind: parsed.kind };
   if (parsed.kind === "invoice") {
     const hourAgo = new Date(Date.now() - 3_600_000).toISOString();
-    const [fromSender, fromAnyone] = await Promise.all([
+    const [fromSender, fromAnyone, payees] = await Promise.all([
       claimed ? inboundCountSince(hourAgo, claimed) : Promise.resolve(0),
       inboundCountSince(hourAgo),
+      listPayees(),
     ]);
     if ((fromSender ?? 0) >= SENDER_HOURLY_LIMIT) {
       return turnAway(mail, `More than ${SENDER_HOURLY_LIMIT} invoices from this address in an hour`);
     }
-    if ((fromAnyone ?? 0) >= INTAKE_HOURLY_LIMIT) {
-      return turnAway(mail, `More than ${INTAKE_HOURLY_LIMIT} emailed invoices in an hour`);
+    const onFile = Boolean(
+      claimed && payees.ok && payees.payees.some((payee) => payee.email?.toLowerCase() === claimed),
+    );
+    if (!onFile && (fromAnyone ?? 0) >= INTAKE_HOURLY_LIMIT) {
+      return turnAway(mail, `More than ${INTAKE_HOURLY_LIMIT} emailed invoices in an hour from senders not on file`, {
+        flood: true,
+      });
     }
   }
 

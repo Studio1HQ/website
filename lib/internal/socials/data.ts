@@ -1,13 +1,7 @@
 import "server-only";
-import { redirect } from "next/navigation";
 import { deleteRows, selectRows, upsertRows } from "@/lib/supabase-server";
 import { isMissingTable } from "@/lib/internal/community/data";
-import {
-  homeFor,
-  isAdmin,
-  requireMember,
-  type Staff,
-} from "@/lib/internal/session";
+import { requireArea, type Staff } from "@/lib/internal/session";
 import {
   SOCIALS_MIGRATION_HINT,
   isPlatform,
@@ -16,16 +10,15 @@ import {
 } from "@/lib/internal/socials/schema";
 
 /**
- * Social growth reads and writes. Admins only (the founders are admins):
- * the page checks with requireSocials, the actions check on their own.
+ * Social growth reads and writes. People given Social growth on People (the
+ * founders always are; Admin alone isn't enough): the page checks with
+ * requireSocials, the actions check on their own.
  */
 
 const TABLE = "social_metrics";
 
 export async function requireSocials(): Promise<Staff> {
-  const staff = await requireMember();
-  if (!isAdmin(staff)) redirect(homeFor(staff));
-  return staff;
+  return requireArea("socials", "manage");
 }
 
 export type LoadedMetrics =

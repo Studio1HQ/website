@@ -33,12 +33,14 @@ import {
   rowClass,
 } from "@/components/internal/community/ui";
 import {
-  FilterLinks,
   InfluencerTabs,
   PATH,
   Per1k,
   PlatformPill,
+  filterItems,
+  platformFilterItems,
 } from "@/components/internal/influencers/ui";
+import { FilterDropdown } from "@/components/internal/influencers/filter-dropdown";
 
 export const metadata: Metadata = { title: "Rate cards" };
 
@@ -129,30 +131,22 @@ export default async function InfluencerRatesPage({
         </div>
       ) : null}
 
-      <div className="mb-3 space-y-2">
-        <FilterLinks
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <FilterDropdown
           label="Platform"
-          items={[{ value: null, label: "Every platform" }, ...PLATFORMS].map(
-            (option) => ({
-              key: option.value ?? "all",
-              label: option.label,
-              href: link({ platform: option.value }),
-              on: option.value === platform,
-            }),
+          items={platformFilterItems(PLATFORMS, platform, (value) =>
+            link({ platform: value }),
           )}
         />
         {platform && formatsFor(platform).length > 1 ? (
-          <FilterLinks
+          <FilterDropdown
             label="Format"
-            items={[
-              { value: null, label: "Every format" },
-              ...formatsFor(platform),
-            ].map((option) => ({
-              key: option.value ?? "all",
-              label: option.label,
-              href: link({ format: option.value }),
-              on: option.value === format,
-            }))}
+            items={filterItems(
+              "Every format",
+              formatsFor(platform),
+              format,
+              (value) => link({ format: value }),
+            )}
           />
         ) : null}
       </div>

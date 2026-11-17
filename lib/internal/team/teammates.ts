@@ -10,12 +10,21 @@ import {
   type MemberChange,
   type MemberSnapshot,
 } from "@/lib/internal/members";
-import { clientAccess, cleanRoles, isOwner, isStaffEmail, roleChangeProblem, type RoleKey } from "@/lib/internal/roles";
+import {
+  OWNER_ROLES,
+  clientAccess,
+  cleanRoles,
+  isOwner,
+  isStaffEmail,
+  roleChangeProblem,
+  type RoleKey,
+} from "@/lib/internal/roles";
 import {
   addPerson,
   addToTeam,
   cleanPerson,
   getPerson,
+  internsOf,
   reviewerProblem,
   updatePerson,
   type PersonInput,
@@ -76,7 +85,7 @@ export function mergeTeam(people: readonly TeamPerson[], members: readonly Membe
       email: person.email,
       name: displayName({ email: person.email, name: person.name || member?.name }),
       person,
-      roles: owner ? ["admin"] : (member?.roles ?? []),
+      roles: owner ? [...OWNER_ROLES] : (member?.roles ?? []),
       clientIds: owner ? null : (member?.client_ids ?? null),
       status: owner
         ? "owner"
@@ -157,6 +166,17 @@ async function cleanScope(
 
 const COULDNT_CHECK = { ok: false as const, message: "Couldn't check that person just now. Try again in a minute." };
 
+/**
+ * Why someone can't be turned off yet: they still review interns, who'd be
+ * left with nobody to log their days. Null when they review nobody.
+ */
+export function reviewerOffProblem(name: string, interns: readonly Pick<TeamPerson, "email" | "name">[]): string | null {
+  if (!interns.length) return null;
+  const names = interns.map((intern) => displayName(intern));
+  const list = names.length === 1 ? names[0] : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+  return `${name} reviews ${list}. Give ${interns.length === 1 ? "that intern" : "those interns"} another reviewer first.`;
+}
+
 export type Added =
   | { ok: true; email: string; roles: RoleKey[] }
   | { ok: false; message: string };
@@ -235,6 +255,8 @@ export async function saveTeammate(actor: Actor, input: Record<string, unknown>)
   const clean = cleanPerson(input ?? {});
   if (!clean.ok) return clean;
   const { email } = clean.person;
+  // Their name, designation and joining date are the founders' own to change.
+  if (isOwner(email) && !actor.owner) return { ok: false, message: `Only ${FOUNDERS} can change a founder's details.` };
   const staff = isStaffEmail(email);
   const [access, before] = await Promise.all([accessFor(email), getPerson(email)]);
   if (access.kind === "error") return COULDNT_CHECK;
@@ -304,9 +326,16 @@ export async function setTeammateOn(actor: Actor, email: string, on: boolean): P
   if (!actor.owner) return { ok: false, message: `Only ${FOUNDERS} can turn someone's access off or back on.` };
   if (email === actor.email) return { ok: false, message: "You can't turn yourself off." };
   if (isOwner(email)) return { ok: false, message: "The founders can't be turned off." };
-  const [access, person] = await Promise.all([accessFor(email), getPerson(email)]);
-  if (access.kind === "error") return COULDNT_CHECK;
+  const [access, person, interns] = await Promise.all([
+    accessFor(email),
+    getPerson(email),
+    on ? Promise.resolve([]) : internsOf(email),
+  ]);
+  if (access.kind === "error" || interns === null) return COULDNT_CHECK;
   if (!person && access.kind !== "member") return { ok: false, message: "That person isn't on the team." };
+  // Their interns would be left with nobody to log their days.
+  const orphaned = reviewerOffProblem(displayName({ email, name: person?.name }), interns);
+  if (orphaned) return { ok: false, message: orphaned };
 
   if (access.kind === "member") {
     if (on && access.member.roles.length === 0 && !isStaffEmail(email)) {

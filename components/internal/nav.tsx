@@ -41,6 +41,7 @@ import {
   type SectionKey,
 } from "@/lib/internal/sections";
 import { HoverLink, LinkPending } from "@/components/internal/nav-progress";
+import { SIDEBAR_EASE, SIDEBAR_FADE } from "@/lib/internal/sidebar";
 import { cn } from "@/lib/utils";
 
 const ICONS: Record<SectionKey, Icon> = {
@@ -50,6 +51,14 @@ const ICONS: Record<SectionKey, Icon> = {
   subscribers: EnvelopeSimple,
   "partner-pool": Handshake,
 };
+
+/*
+ * Desktop with the sidebar folded down to its icons (see MobileNavPanel).
+ * The icons never move: the sidebar narrows around them while names and
+ * counts fade (still read by screen readers; names show as tooltips via
+ * data-tip), a count turns into a dot and group titles fold into a rule.
+ */
+const FOLDED_SHOW = cn("opacity-0 transition-opacity", SIDEBAR_EASE, "md:group-data-[collapsed=true]/sidebar:opacity-100");
 
 function NavLink({
   href,
@@ -66,33 +75,50 @@ function NavLink({
   badgeTitle?: string;
   active: boolean;
 }) {
+  const count = badge ? (badgeTitle || `${badge} new`) : null;
   return (
     <HoverLink
       href={href}
       aria-current={active ? "page" : undefined}
+      data-tip={count ? `${label} · ${count}` : label}
       className={cn(
-        "group flex h-10 shrink-0 items-center gap-2.5 whitespace-nowrap rounded-lg px-2.5 text-[14px] transition-colors md:h-8 md:text-[13.5px]",
+        "group flex h-10 shrink-0 items-center gap-2.5 overflow-hidden whitespace-nowrap rounded-lg px-2.5 text-[14px] transition-colors md:h-8 md:text-[13.5px]",
         active
           ? "bg-[var(--i-panel)] font-medium text-[var(--i-ink)] shadow-[var(--i-shadow)] ring-1 ring-[var(--i-line)]"
           : "text-[var(--i-ink-2)] hover:bg-black/[0.035] hover:text-[var(--i-ink)] dark:hover:bg-white/[0.05]",
       )}
     >
-      <IconComponent
-        size={16}
-        weight={active ? "fill" : "regular"}
-        className={
-          active
-            ? "text-[var(--i-accent)]"
-            : "text-[var(--i-muted)] group-hover:text-[var(--i-ink-2)]"
-        }
-        aria-hidden
-      />
-      <span className="flex-1">{label}</span>
+      <span className="relative flex shrink-0">
+        <IconComponent
+          size={16}
+          weight={active ? "fill" : "regular"}
+          className={
+            active
+              ? "text-[var(--i-accent)]"
+              : "text-[var(--i-muted)] group-hover:text-[var(--i-ink-2)]"
+          }
+          aria-hidden
+        />
+        {badge ? (
+          <span
+            aria-hidden
+            className={cn(
+              "absolute -right-1 -top-1 size-2 rounded-full bg-[var(--i-accent)] ring-2",
+              active ? "ring-[var(--i-panel)]" : "ring-[var(--i-sidebar)]",
+              FOLDED_SHOW,
+            )}
+          />
+        ) : null}
+      </span>
+      <span className={cn("flex-1", SIDEBAR_FADE)}>{label}</span>
       <LinkPending />
       {badge ? (
         <span
-          className="ml-2 rounded-full bg-[var(--i-accent-soft)] px-1.5 text-[11px] font-medium leading-[18px] tabular-nums text-[var(--i-accent-text)]"
-          title={badgeTitle ?? `${badge} new`}
+          className={cn(
+            "ml-2 rounded-full bg-[var(--i-accent-soft)] px-1.5 text-[11px] font-medium leading-[18px] tabular-nums text-[var(--i-accent-text)]",
+            SIDEBAR_FADE,
+          )}
+          title={count ?? undefined}
         >
           {badge}
         </span>
@@ -101,12 +127,50 @@ function NavLink({
   );
 }
 
+/**
+ * A group title. Folded, it shrinks to nothing (rows 1fr → 0fr, so the
+ * links below glide up instead of jumping) while it fades.
+ */
+function GroupTitle({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div
+      className={cn(
+        "grid grid-rows-[1fr] transition-[grid-template-rows,opacity]",
+        SIDEBAR_EASE,
+        "md:group-data-[collapsed=true]/sidebar:grid-rows-[0fr] md:group-data-[collapsed=true]/sidebar:opacity-0",
+      )}
+    >
+      <div className="min-h-0 overflow-hidden">
+        <p
+          className={cn(
+            "whitespace-nowrap px-2.5 pb-1.5 text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--i-faint)]",
+            className,
+          )}
+        >
+          {children}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The short line between groups once their titles fold away: sits in the
+ * gap above whatever follows it (`className` sets how far up).
+ */
+function FoldedRule({ className }: { className: string }) {
+  return (
+    <span aria-hidden className="relative mx-2.5 block h-0">
+      <span className={cn("absolute inset-x-0 h-px bg-[var(--i-line)]", FOLDED_SHOW, className)} />
+    </span>
+  );
+}
+
 function NavGroup({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="mt-5">
-      <p className="px-2.5 pb-1.5 text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--i-faint)]">
-        {title}
-      </p>
+      <FoldedRule className="-top-2.5" />
+      <GroupTitle>{title}</GroupTitle>
       <div className="flex flex-col gap-0.5">{children}</div>
     </div>
   );
@@ -165,6 +229,8 @@ export function InternalNav({
   community,
   clients = null,
   outreach = null,
+  influencers = false,
+  socials = false,
   home,
   overview,
 }: {
@@ -180,8 +246,12 @@ export function InternalNav({
   community: CommunityNav | null;
   /** Client work, with my late and to-review counts; null without access. */
   clients?: ClientsNav | null;
-  /** Outreach (admins), with my follow-ups due; null without access. */
+  /** Outreach, with my follow-ups due; null without access (given one by one, Admin alone isn't enough). */
   outreach?: { due: number } | null;
+  /** Influencers: given one by one, like Outreach. */
+  influencers?: boolean;
+  /** Social growth: given one by one, like Outreach. */
+  socials?: boolean;
   /** Where this person's dashboard starts; the sections link back to it. */
   home: string;
   /** Show the Overview link: everyone whose home is the Overview. */
@@ -214,16 +284,20 @@ export function InternalNav({
         className="flex flex-col"
       >
         {back ? (
-          <Link
-            href={home}
-            className="mb-1 flex h-10 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-2.5 text-[13px] text-[var(--i-muted)] hover:bg-black/[0.035] hover:text-[var(--i-ink)] dark:hover:bg-white/[0.05] md:h-8"
-          >
-            <ArrowLeft size={14} aria-hidden /> Dashboard
-          </Link>
+          <>
+            <Link
+              href={home}
+              data-tip="Back to the dashboard"
+              className="mb-3 flex h-10 shrink-0 items-center gap-2 overflow-hidden whitespace-nowrap rounded-lg px-2.5 text-[13px] text-[var(--i-muted)] transition-colors hover:bg-black/[0.035] hover:text-[var(--i-ink)] dark:hover:bg-white/[0.05] md:h-8"
+            >
+              {/* 1px in, so the 14px arrow centres on the 16px icons below. */}
+              <ArrowLeft size={14} aria-hidden className="ml-px shrink-0" />
+              <span className={SIDEBAR_FADE}>Dashboard</span>
+            </Link>
+            <FoldedRule className="-top-1.5" />
+          </>
         ) : null}
-        <p className="flex items-center gap-2 px-2.5 pb-1.5 pt-3 text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--i-faint)]">
-          {sectionName}
-        </p>
+        <GroupTitle className={back ? "pt-1" : "pt-3"}>{sectionName}</GroupTitle>
         <div className="flex flex-col gap-0.5">
           {section === "clients" && clients ? (
             <>
@@ -380,7 +454,7 @@ export function InternalNav({
           active={isActive("/internal")}
         />
       ) : null}
-      {clients || blog || community || team.money || outreach ? (
+      {clients || blog || community || team.money || outreach || influencers || socials ? (
         <NavGroup title="Workspaces">
           {clients ? (
             <NavLink
@@ -407,8 +481,7 @@ export function InternalNav({
               active={isActive("/internal/outreach")}
             />
           ) : null}
-          {outreach ? (
-            // Admins, like Outreach.
+          {influencers ? (
             <NavLink
               href="/internal/influencers"
               label="Influencers"
@@ -416,8 +489,7 @@ export function InternalNav({
               active={isActive("/internal/influencers")}
             />
           ) : null}
-          {outreach ? (
-            // Admins, like Outreach.
+          {socials ? (
             <NavLink
               href="/internal/socials"
               label="Social growth"
@@ -485,27 +557,22 @@ export function InternalNav({
           ),
         )
         .map((group) => (
-          <div key={group} className="mt-5">
-            <p className="px-2.5 pb-1.5 text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--i-faint)]">
-              {group}
-            </p>
-            <div className="flex flex-col gap-0.5">
-              {SECTION_ORDER.filter(
-                (key) =>
-                  SECTIONS[key].group === group &&
-                  atLeast(role, SECTIONS[key].minRole),
-              ).map((key) => (
-                <NavLink
-                  key={key}
-                  href={SECTIONS[key].path}
-                  label={SECTIONS[key].nav}
-                  icon={ICONS[key]}
-                  badge={awaiting[key]}
-                  active={isActive(SECTIONS[key].path)}
-                />
-              ))}
-            </div>
-          </div>
+          <NavGroup key={group} title={group}>
+            {SECTION_ORDER.filter(
+              (key) =>
+                SECTIONS[key].group === group &&
+                atLeast(role, SECTIONS[key].minRole),
+            ).map((key) => (
+              <NavLink
+                key={key}
+                href={SECTIONS[key].path}
+                label={SECTIONS[key].nav}
+                icon={ICONS[key]}
+                badge={awaiting[key]}
+                active={isActive(SECTIONS[key].path)}
+              />
+            ))}
+          </NavGroup>
         ))}
       {team.me || team.people || team.tasks || team.calls ? (
         <NavGroup title="Team">
@@ -538,19 +605,14 @@ export function InternalNav({
         </NavGroup>
       ) : null}
       {role ? (
-        <div className="mt-5">
-          <p className="px-2.5 pb-1.5 text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--i-faint)]">
-            Settings
-          </p>
-          <div className="flex flex-col gap-0.5">
-            <NavLink
-              href="/internal/templates"
-              label="Email templates"
-              icon={EnvelopeOpen}
-              active={isActive("/internal/templates")}
-            />
-          </div>
-        </div>
+        <NavGroup title="Settings">
+          <NavLink
+            href="/internal/templates"
+            label="Email templates"
+            icon={EnvelopeOpen}
+            active={isActive("/internal/templates")}
+          />
+        </NavGroup>
       ) : null}
     </nav>
   );

@@ -117,7 +117,7 @@ export default async function MyDayPage({
   return (
     <>
       {failed && !failed.ok ? (
-        <div className="mb-5">
+        <div className="mb-3">
           <Notice tone={failed.missing ? "warning" : "error"}>{failed.message}</Notice>
         </div>
       ) : null}
@@ -137,7 +137,8 @@ export default async function MyDayPage({
         calls={
           calls ? (
             <CallsProvider value={calls.context}>
-              <TodayCalls items={calls.items} stacked={!work.missing} />
+              {/* With tasks above, the calls keep to under half the column. */}
+              <TodayCalls items={calls.items} className={work.missing ? "xl:flex-1" : "shrink-0 xl:max-h-[45%]"} />
             </CallsProvider>
           ) : null
         }
@@ -148,6 +149,7 @@ export default async function MyDayPage({
               today={now.date}
               ended={Boolean(today && today.kind !== "leave" && today.slots.length && !openSlot(today.slots))}
               options={options}
+              className="min-h-[14rem] xl:flex-1"
             />
           )
         }
