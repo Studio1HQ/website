@@ -28,5 +28,8 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
+      # next-env.d.ts (image imports, route types) is generated, not
+      # committed; without it tsc can't type `import x from "./a.webp"`.
+      - run: pnpm exec next typegen
       - run: pnpm exec tsc --noEmit
       - run: pnpm test
