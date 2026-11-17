@@ -134,22 +134,22 @@ export default async function MyDayPage({
         payslips={payslips.ok ? payslips.slips : []}
         claims={claims.ok ? claims.items : []}
         inboundAddress={process.env.INBOUND_EMAIL_ADDRESS?.trim() || null}
-        work={
-          <>
-            {calls ? (
-              <CallsProvider value={calls.context}>
-                <TodayCalls items={calls.items} />
-              </CallsProvider>
-            ) : null}
-            {work.missing ? null : (
-              <TodayWork
-                cards={work.cards.filter((card) => card.day === now.date)}
-                today={now.date}
-                ended={Boolean(today && today.kind !== "leave" && today.slots.length && !openSlot(today.slots))}
-                options={options}
-              />
-            )}
-          </>
+        calls={
+          calls ? (
+            <CallsProvider value={calls.context}>
+              <TodayCalls items={calls.items} stacked={!work.missing} />
+            </CallsProvider>
+          ) : null
+        }
+        tasks={
+          work.missing ? null : (
+            <TodayWork
+              cards={work.cards.filter((card) => card.day === now.date)}
+              today={now.date}
+              ended={Boolean(today && today.kind !== "leave" && today.slots.length && !openSlot(today.slots))}
+              options={options}
+            />
+          )
         }
       />
     </>

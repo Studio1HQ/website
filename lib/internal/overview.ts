@@ -4,12 +4,17 @@ import { clientNeeds, loadClientWork } from "@/lib/internal/clients/data";
 import { communityBadges } from "@/lib/internal/community/data";
 import { hackathonBreakdown, overview as hiringOverview } from "@/lib/internal/data";
 import { pendingCount } from "@/lib/internal/members";
-import { outreachDue } from "@/lib/internal/outreach/data";
+import { canSeeCalls } from "@/lib/internal/calls/access";
+import { listCalls, listChanges } from "@/lib/internal/calls/data";
+import { loadOrgs, outreachDue } from "@/lib/internal/outreach/data";
+import { outreachSummary, todayCalls, todayTasks } from "@/lib/internal/overview-today";
+import { listTasks } from "@/lib/internal/tasks/data";
 import { SECTIONS, sectionAccess } from "@/lib/internal/sections";
 import { canSeeMoney, isAdmin, type Staff } from "@/lib/internal/session";
 import { listDays } from "@/lib/internal/team/attendance";
 import { teamOverview } from "@/lib/internal/team/overview";
 import { taskNeeds } from "@/lib/internal/tasks/needs";
+import { monthCounts } from "@/lib/internal/trend";
 import { writeHref } from "@/lib/internal/tasks/report-status";
 import { periodLabel } from "@/lib/internal/tasks/shared";
 import {
@@ -88,6 +93,12 @@ async function blogSummary(staff: Staff & { blog: NonNullable<Staff["blog"]> }) 
     publishedThisMonth: result.posts.filter(
       (post) => post.status === "published" && typeof post.published_at === "string" && post.published_at.startsWith(month),
     ).length,
+    /** Posts published in each of the last six months, oldest first. */
+    publishedByMonth: monthCounts(
+      result.posts.filter((post) => post.status === "published").map((post) => post.published_at),
+      month,
+      6,
+    ),
     // Writers: their own posts with feedback to act on.
     feedback: result.posts.filter(
       (post) => post.created_by === staff.email && (post.status === "changes_requested" || post.status === "approved"),
@@ -103,7 +114,7 @@ export async function dashboardOverview(staff: Staff) {
   // People who log days but aren't admins see their own day and their interns'.
   const ownEmails = admin ? [] : [...(staff.person ? [staff.person.email] : []), ...staff.interns];
 
-  const [pipelines, team, blog, requests, community, ownDays, hackathons, clientsMine, clients, tasks, outreach] = await Promise.all([
+  const [pipelines, team, blog, requests, community, ownDays, hackathons, clientsMine, clients, tasks, outreach, myTasks, myCalls, orgs] = await Promise.all([
     // Every pipeline this person can open: the hiring ones and, for
     // community staff and admins, hackathon registrations.
     staff.role || staff.community ? hiringOverview() : Promise.resolve(null),
@@ -117,6 +128,12 @@ export async function dashboardOverview(staff: Staff) {
     staff.clients ? clientsSummary(staff.clientScope) : Promise.resolve(null),
     taskNeeds(staff),
     admin ? outreachDue(staff.email) : Promise.resolve(0),
+    // Today, for the person themselves: their own tasks and their own calls.
+    staff.person ? listTasks({ emails: [staff.person.email], from: now.date, to: now.date }) : Promise.resolve(null),
+    canSeeCalls(staff)
+      ? Promise.all([listCalls({ from: now.date }), listChanges(now.date, now.date)])
+      : Promise.resolve(null),
+    admin ? loadOrgs() : Promise.resolve(null),
   ]);
 
   // The Hiring card: job and cohort pipelines only (hackathons have their own).
@@ -300,6 +317,16 @@ export async function dashboardOverview(staff: Staff) {
     community: staff.community !== null,
     /** The Clients card: this month across active engagements; null without access. */
     clients,
+    /** Your own tasks due today or late; null off the team list, `ok: false` when unread. */
+    myTasks: myTasks ? (myTasks.ok ? { ok: true as const, ...todayTasks(myTasks.rows, now.date) } : { ok: false as const }) : null,
+    /** The calls you're in today; null without the Calls page. */
+    myCalls: myCalls
+      ? myCalls[0].ok
+        ? { ok: true as const, items: todayCalls(myCalls[0].rows, myCalls[1].ok ? myCalls[1].rows : [], staff.email, now.date, now.time) }
+        : { ok: false as const }
+      : null,
+    /** The Outreach card (admins): the pipeline in numbers; null when it can't be read. */
+    outreach: orgs?.ok ? { ...outreachSummary(orgs.rows, now.date), mineDue: outreach } : null,
     mine: staff.person
       ? {
           day: myDay,

@@ -1,6 +1,6 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
 import {
@@ -12,7 +12,14 @@ import {
 import { accessFor, isInvited, membersWith, requestAccess, touchMember } from "@/lib/internal/members";
 import { notify } from "@/lib/internal/notifications/data";
 import { OWNERS, isOwner, isStaffEmail } from "@/lib/internal/roles";
-import { SIGN_IN_CODE_LIMIT, strictlyWithinLimit } from "@/lib/rate-limit";
+import {
+  SIGN_IN_CODE_LIMIT,
+  SIGN_IN_NETWORK_REQUESTS,
+  SIGN_IN_NETWORK_TRIES,
+  clientIp,
+  strictlyWithinLimit,
+  type Limit,
+} from "@/lib/rate-limit";
 import { addToTeam, teamAccessFor } from "@/lib/internal/team/people";
 import { loginCookieOptions, sessionCookieOptions } from "@/lib/internal/session";
 import {
@@ -38,6 +45,21 @@ export type CheckCodeState = { status: "idle" } | { status: "error"; message: st
 
 const NOT_ALLOWED = `Use your @${STAFF_DOMAIN} address. Writers from outside Studio1 need an invite from an admin first.`;
 
+const TOO_MANY = "Too many sign-in tries from this network. Wait an hour and try again.";
+const UNAVAILABLE = "Sign-in is unavailable right now. Try again in a minute.";
+
+/**
+ * The limit for the caller's network, so one script can't send code emails
+ * to made-up addresses or burn through an address's tries. Without an IP
+ * header (local dev) there's nothing to count.
+ */
+async function networkProblem(kind: string, limit: Limit) {
+  const ip = clientIp(new Request("http://internal", { headers: await headers() }));
+  if (!ip) return null;
+  const allowed = await strictlyWithinLimit(kind, ip, limit);
+  return allowed === "limited" ? TOO_MANY : allowed === "unavailable" ? UNAVAILABLE : null;
+}
+
 /** Staff, or an outside writer an admin invited; anyone else gets null. */
 async function allowedEmail(input: unknown) {
   const address = emailAddress(input);
@@ -62,6 +84,8 @@ export async function requestSignInCode(
   if (!emailAddress(formData.get("email"))) {
     return { status: "error", message: "Enter a valid email address." };
   }
+  const blocked = await networkProblem("sign-in-request-ip", SIGN_IN_NETWORK_REQUESTS);
+  if (blocked) return { status: "error", message: blocked };
   const email = await allowedEmail(formData.get("email"));
   if (!email) return { status: "error", message: NOT_ALLOWED };
 
@@ -123,6 +147,11 @@ export async function checkSignInCode(
   if (code.length < 6 || code.length > 10) {
     return { status: "error", message: "Enter the code from the email." };
   }
+
+  // The network first, so one script can't work through address after
+  // address. (It can still use up one address's ten tries an hour.)
+  const blocked = await networkProblem("sign-in-code-ip", SIGN_IN_NETWORK_TRIES);
+  if (blocked) return { status: "error", message: blocked };
 
   // Every try counts against the address, so a script can't guess its way
   // in: Supabase's own limit is per IP, and every check comes from our server.

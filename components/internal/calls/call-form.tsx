@@ -53,7 +53,7 @@ function formOf(call: Call | null, today: string): Form {
         start_time: call.start_time,
         minutes: String(call.minutes),
         whole_team: call.whole_team,
-        people: call.host ? [call.host, ...call.people] : call.people,
+        people: call.host ? [call.host, ...call.people.filter((email) => email !== call.host)] : call.people,
         host: call.host ?? "",
         link: call.link,
         about: call.about,

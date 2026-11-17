@@ -1,6 +1,6 @@
 import { deleteRows, insertRow, selectRows, updateRows } from "@/lib/supabase-server";
 import { audit } from "@/lib/internal/team/audit";
-import { deleteTeamFiles, saveTeamFile } from "@/lib/internal/team/files";
+import { deleteTeamFiles, saveTeamFile, uploadedReceipt } from "@/lib/internal/team/files";
 import {
   TEAM_MIGRATION_HINT,
   isCurrency,
@@ -81,6 +81,11 @@ export type NewReimbursement = {
   spent_on?: unknown;
   /** The receipt: a PDF or an image. */
   receipt?: { body: Uint8Array | ArrayBuffer; name: string } | null;
+  /**
+   * Instead of `receipt`: a big PDF the browser already put in the bucket
+   * (startReceiptUpload in files.ts), under the claim id it was given.
+   */
+  uploaded?: { id: string; name: string } | null;
   source: "dashboard" | "email";
   /** Resend's id for the email it came in. */
   inbound_id?: string;
@@ -95,10 +100,16 @@ export async function addReimbursement(input: NewReimbursement): Promise<TeamRes
   if (amount !== null && Number.isNaN(amount)) return { ok: false, message: "The amount should be a number, like 1250 or 1,250.50." };
   if (input.source === "dashboard" && !amount) return { ok: false, message: "Add the amount." };
   const spentOn = isDateKey(input.spent_on) ? input.spent_on : null;
-  const id = crypto.randomUUID();
+  const id = input.uploaded?.id ?? crypto.randomUUID();
 
   let receipt: { path: string; name: string } | null = null;
-  if (input.receipt) {
+  if (input.uploaded) {
+    // Sent twice: the claim is already in, and its receipt has to stay.
+    if (!isUuid(id) || (await getReimbursement(id))) return { ok: false, message: "That claim was already sent." };
+    const saved = await uploadedReceipt(input.email, id, input.uploaded.name);
+    if (!saved.ok) return saved;
+    receipt = { path: saved.path, name: saved.name };
+  } else if (input.receipt) {
     const saved = await saveTeamFile("receipts", id, input.receipt.body, input.receipt.name);
     if (!saved.ok) return saved;
     receipt = { path: saved.path, name: saved.name };
@@ -128,6 +139,11 @@ export async function addReimbursement(input: NewReimbursement): Promise<TeamRes
   return { ok: true, id };
 }
 
+/** An admin's note on a claim: one line, 300 characters at most. */
+export function cleanDecisionNote(value: unknown) {
+  return typeof value === "string" ? value.replace(/\s+/g, " ").trim().slice(0, 300) : "";
+}
+
 /**
  * An admin's call on a claim that isn't paid yet: approve it onto a payslip
  * month (with the amount, which they can correct) or reject it. Payslips
@@ -135,7 +151,7 @@ export async function addReimbursement(input: NewReimbursement): Promise<TeamRes
  */
 export async function decideReimbursement(
   id: string,
-  change: { status: "approved"; month: string; amount?: unknown } | { status: "rejected" },
+  change: ({ status: "approved"; month: string; amount?: unknown } | { status: "rejected" }) & { note?: unknown },
   by: string,
 ): Promise<TeamResult> {
   const patch: Record<string, unknown> = {
@@ -144,6 +160,10 @@ export async function decideReimbursement(
     decided_at: new Date().toISOString(),
     month: null,
   };
+  // The admin's note for the person (why it was rejected, why the amount
+  // changed). Left as it was when they wrote nothing.
+  const note = cleanDecisionNote(change.note);
+  if (note) patch.note = note;
   if (change.status === "approved") {
     if (!isMonthKey(change.month)) return { ok: false, message: "Pick the payslip month it's paid with." };
     patch.month = monthStart(change.month);
@@ -165,7 +185,10 @@ export async function decideReimbursement(
     area: "claims",
     action: change.status,
     subject: id,
-    detail: change.status === "approved" ? { month: change.month, amount: patch.amount ?? null } : {},
+    detail: {
+      ...(change.status === "approved" ? { month: change.month, amount: patch.amount ?? null } : {}),
+      ...(note ? { note } : {}),
+    },
   });
   return { ok: true };
 }

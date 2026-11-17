@@ -3,7 +3,9 @@ import { selectRows } from "@/lib/supabase-server";
 import { loadClientWork } from "@/lib/internal/clients/data";
 import { firstDay, lastDay, monthLabel, shiftMonth } from "@/lib/internal/clients/schema";
 import type { MonthlyReport } from "@/lib/internal/monthly-report";
-import { istMidnight, listTasks } from "@/lib/internal/tasks/data";
+import { istMidnight, listLogs, listTasks } from "@/lib/internal/tasks/data";
+import { teamRows } from "@/lib/internal/tasks/team-report";
+import { listDays } from "@/lib/internal/team/attendance";
 import { listPeople } from "@/lib/internal/team/people";
 import { displayName } from "@/lib/internal/team/shared";
 
@@ -60,6 +62,24 @@ export async function loadMonthlyReport(month: string): Promise<MonthlyReport> {
       for (const task of tasks.rows) {
         if (task.status === "done") done.set(task.email.toLowerCase(), (done.get(task.email.toLowerCase()) ?? 0) + 1);
       }
+      // Hours: clocked on My day, or logged on tasks when nothing was clocked.
+      const [days, logs] = await Promise.all([
+        listDays({ from, to, emails: team.people.map((person) => person.email) }),
+        listLogs({ emails: team.people.map((person) => person.email), from, to }),
+      ]);
+      const hours = new Map(
+        teamRows({
+          people: team.people.map((person) => ({ email: person.email, name: displayName(person) })),
+          from,
+          to,
+          today: to,
+          days: days.ok ? days.days : null,
+          logs: logs.ok ? logs.rows : [],
+          tasks: [],
+          pieces: [],
+          engagements: new Map(),
+        }).map((row) => [row.email, row]),
+      );
       const published = new Map<string, number>();
       for (const item of work.ok ? work.deliverables : []) {
         if (item.status !== "published" || !item.owner) continue;
@@ -71,6 +91,8 @@ export async function loadMonthlyReport(month: string): Promise<MonthlyReport> {
           name: displayName(person),
           tasksDone: done.get(person.email.toLowerCase()) ?? 0,
           published: published.get(person.email.toLowerCase()) ?? 0,
+          minutes: hours.get(person.email.toLowerCase())?.clocked || hours.get(person.email.toLowerCase())?.logged || 0,
+          perDay: hours.get(person.email.toLowerCase())?.perDay ?? null,
         }))
         .filter((person) => person.tasksDone || person.published)
         .sort((a, b) => b.tasksDone + b.published - (a.tasksDone + a.published) || a.name.localeCompare(b.name));

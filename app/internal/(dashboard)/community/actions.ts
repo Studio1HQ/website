@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireCommunity } from "@/lib/internal/session";
 import { markHackathonNoShows } from "@/lib/internal/data";
 import { cleanField, isUuid } from "@/lib/internal/community/clean";
+import { phaseOf } from "@/lib/internal/community/stats";
 import {
   MAX_CSV_BYTES,
   byteLength,
@@ -317,10 +318,15 @@ export async function markRestNoShow(eventId: unknown): Promise<ActionResult> {
   if (!staff) return DENIED;
   if (typeof eventId !== "string")
     return { ok: false, message: "Unknown event." };
+  // Only once it's over (the page only offers it then): this can't be
+  // undone, and before the event it would mark everyone who registered.
+  const event = await getRecord<CommunityEvent>("event", eventId, staff.community);
+  if (!event) return { ok: false, message: "Unknown event." };
+  if (phaseOf(event) !== "past")
+    return { ok: false, message: "You can mark no-shows once the event is over." };
   const result = await markNoShows(eventId, staff.email);
   if (!result.ok) return result;
   // A hackathon event's site registrations are on its door list too.
-  const event = await getRecord<CommunityEvent>("event", eventId, staff.community);
   let fromSite = 0;
   if (event?.hackathon_slug) {
     const site = await markHackathonNoShows(event.hackathon_slug);

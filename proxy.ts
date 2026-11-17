@@ -64,7 +64,8 @@ function dashboardPolicy(nonce: string) {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https:",
     "font-src 'self' data:",
-    `connect-src 'self'${dev ? " ws: wss:" : ""}`,
+    // Big PDF receipts go from the browser straight to Storage.
+    `connect-src 'self'${files ? ` ${files}` : ""}${dev ? " ws: wss:" : ""}`,
     `frame-src 'self' blob: data: ${files} https://www.youtube.com https://www.youtube-nocookie.com`.replace(/\s+/g, " "),
     "media-src 'self' blob: data: https:",
     "object-src 'none'",

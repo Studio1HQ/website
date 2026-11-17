@@ -26,7 +26,16 @@ export type MonthlyReport = {
       }[]
     | null;
   /** Null when it couldn't be read. Only people with something to show. */
-  people: { name: string; tasksDone: number; published: number }[] | null;
+  people:
+    | {
+        name: string;
+        tasksDone: number;
+        published: number;
+        /** Minutes worked in the month, and on an average working day. */
+        minutes?: number;
+        perDay?: number | null;
+      }[]
+    | null;
   /** Posts published on the Studio1 blog; null when unread. */
   blogPublished: number | null;
   applications: { jobs: number | null; cohort: number | null; hackathons: number | null };
@@ -36,6 +45,13 @@ export type MonthlyReport = {
 
 function plural(count: number, one: string, many = `${one}s`) {
   return `${count} ${count === 1 ? one : many}`;
+}
+
+/** "96h" / "6h 10m". */
+function hours(minutes: number) {
+  const whole = Math.floor(minutes / 60);
+  const rest = Math.round(minutes % 60);
+  return whole ? (rest ? `${whole}h ${rest}m` : `${whole}h`) : `${rest}m`;
 }
 
 /** Bullets never carry link markup: a name can't become a link in the email. */
@@ -78,6 +94,7 @@ export function monthlyBody(report: MonthlyReport, firstName: string) {
   }
 
   blocks.push("## The team");
+  // The week-by-week detail is on the Team report page.
   if (report.people === null) blocks.push("Tasks couldn't be read this time.");
   else if (!report.people.length) blocks.push("Nothing was marked done on Tasks.");
   else
@@ -85,7 +102,9 @@ export function monthlyBody(report: MonthlyReport, firstName: string) {
       report.people
         .map(
           (person) =>
-            `- ${plain(person.name)}: ${plural(person.tasksDone, "task")} done${person.published ? `, ${plural(person.published, "client piece")} published` : ""}`,
+            `- ${plain(person.name)}: ${plural(person.tasksDone, "task")} done${person.published ? `, ${plural(person.published, "client piece")} published` : ""}${
+              person.minutes ? `, ${hours(person.minutes)} worked${person.perDay ? ` (${hours(person.perDay)} a day)` : ""}` : ""
+            }`,
         )
         .join("\n"),
     );

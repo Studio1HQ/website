@@ -36,6 +36,7 @@ import {
 } from "@/lib/internal/tasks/data";
 import { liveSnapshot, taskViewer } from "@/lib/internal/tasks/load";
 import { reportEmailHtml, reportText } from "@/lib/internal/tasks/report";
+import { reportsSince } from "@/lib/internal/tasks/report-status";
 import {
   STUDIO_LINK,
   isPeriodStart,
@@ -427,7 +428,9 @@ export async function editTask(id: unknown, values: unknown): Promise<TaskResult
     patch.status = status;
     if (status === "done") Object.assign(patch, { blocked: false, block_reason: "" });
   }
-  patch.done_on = status === "done" ? doneDay(day, today) : null;
+  // Only when the status or the day changes: fixing a typo in a finished
+  // task mustn't move the day it was finished on.
+  if (status !== task.status || "day" in data) patch.done_on = status === "done" ? doneDay(day, today) : null;
   if (!deliverable && task.deliverable_id && status !== task.status) {
     const row = await getDeliverableRow(task.deliverable_id);
     deliverable = row === "error" ? null : row;
@@ -452,10 +455,18 @@ function cleanWords(values: unknown) {
 }
 
 /** A week or month that has started (no reports for ones still ahead). */
-function cleanPeriod(period: unknown, start: unknown): { period: ReportPeriod; start: string } | null {
+function cleanPeriod(
+  period: unknown,
+  start: unknown,
+  joinedOn?: string | null,
+): { period: ReportPeriod; start: string } | null {
   if (period !== "week" && period !== "month") return null;
   if (!isPeriodStart(period, start)) return null;
   if (start > periodStart(period, istNow().date)) return null;
+  // Nor for ones that ended before Tasks began or before they joined:
+  // otherwise one person could file (and email) a report for every week
+  // there has ever been.
+  if (periodEnd(period, start) < reportsSince(joinedOn)) return null;
   return { period, start };
 }
 
@@ -465,7 +476,7 @@ function cleanPeriod(period: unknown, start: unknown): { period: ReportPeriod; s
 export async function saveReportDraft(period: unknown, start: unknown, values: unknown): Promise<TaskResult> {
   const { staff } = await viewer();
   if (!staff.person) return NOT_ON_LIST;
-  const which = cleanPeriod(period, start);
+  const which = cleanPeriod(period, start, staff.person.joined_on);
   if (!which) return UNKNOWN;
   const words = cleanWords(values);
   if (Object.values(words).some(looksLikeSecret)) return SECRET;
@@ -496,7 +507,7 @@ export async function submitReport(period: unknown, start: unknown, values: unkn
   const { staff } = await viewer();
   if (!staff.person) return NOT_ON_LIST;
   if (!owesReports(staff.email)) return { ok: false, message: "Founders don't send reports to themselves." };
-  const which = cleanPeriod(period, start);
+  const which = cleanPeriod(period, start, staff.person.joined_on);
   if (!which) return UNKNOWN;
   const today = istNow().date;
   if (today < readyOn(which.period, which.start))
@@ -529,6 +540,14 @@ export async function submitReport(period: unknown, start: unknown, values: unkn
   if (!result.ok) return result;
   const id = result.id ?? existing?.id ?? "";
   const name = staffName(staff);
+  after(() =>
+    notify(OWNERS, staff.email, {
+      kind: "task",
+      title: `${name} sent their report`,
+      body: periodLabel(which.period, which.start),
+      href: `/internal/tasks/reports/${id}`,
+    }),
+  );
   after(async () => {
     if (!isMailerConfigured()) return;
     const link = `${baseUrl}/internal/tasks/reports/${id}`;

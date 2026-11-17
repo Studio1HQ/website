@@ -312,6 +312,28 @@ export async function addPerson(person: PersonInput, by: string): Promise<TeamRe
   return saveError(result.message);
 }
 
+const TRACKED = ["name", "employee_code", "kind", "designation", "joined_on", "reviewer", "active"] as const;
+
+/** The details that differ, as before and after, for the audit trail; null when nothing changed. */
+export function personChanges(
+  before: Partial<PersonInput>,
+  after: Partial<PersonInput>,
+): { before: Record<string, unknown>; after: Record<string, unknown> } | null {
+  const was: Record<string, unknown> = {};
+  const now: Record<string, unknown> = {};
+  for (const key of TRACKED) {
+    if (!(key in after) || (before[key] ?? null) === (after[key] ?? null)) continue;
+    was[key] = before[key] ?? null;
+    now[key] = after[key] ?? null;
+  }
+  return Object.keys(now).length ? { before: was, after: now } : null;
+}
+
+async function auditChanges(email: string, by: string, before: Partial<PersonInput>, after: Partial<PersonInput>) {
+  const detail = personChanges(before, after);
+  if (detail) await audit({ actor: by, area: "people", action: "changed", subject: email, detail });
+}
+
 /** Changes someone's details; the email stays the same. `before` goes in the audit trail. */
 export async function updatePerson(person: PersonInput, by: string, before?: TeamPerson | null): Promise<TeamResult> {
   const { email, ...rest } = person;
@@ -326,23 +348,12 @@ export async function updatePerson(person: PersonInput, by: string, before?: Tea
     return saveError(result.message);
   }
   if (!result.count) return { ok: false, message: "That person isn't on the team list." };
-  if (before && (before.active !== person.active || before.reviewer !== person.reviewer || before.kind !== person.kind)) {
-    await audit({
-      actor: by,
-      area: "people",
-      action: "changed",
-      subject: email,
-      detail: {
-        before: { active: before.active, reviewer: before.reviewer, kind: before.kind },
-        after: { active: person.active, reviewer: person.reviewer, kind: person.kind },
-      },
-    });
-  }
+  if (before) await auditChanges(email, by, before, person);
   return { ok: true };
 }
 
-/** One person's employee ID and nothing else. */
-export async function setEmployeeCode(email: string, code: string | null, by: string): Promise<TeamResult> {
+/** One person's employee ID and nothing else. `before` goes in the audit trail. */
+export async function setEmployeeCode(email: string, code: string | null, by: string, before?: TeamPerson | null): Promise<TeamResult> {
   const result = await updateRows(
     TABLE,
     new URLSearchParams({ email: `eq.${email}` }),
@@ -353,7 +364,9 @@ export async function setEmployeeCode(email: string, code: string | null, by: st
     console.error(`[team] setting ${email}'s employee ID failed: ${result.message}`);
     return saveError(result.message);
   }
-  return result.count ? { ok: true } : { ok: false, message: "That person isn't on the team list." };
+  if (!result.count) return { ok: false, message: "That person isn't on the team list." };
+  if (before) await auditChanges(email, by, before, { employee_code: code });
+  return { ok: true };
 }
 
 /** Someone's own name, from My day. */

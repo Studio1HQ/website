@@ -118,7 +118,7 @@ async function SidebarWithCounts({ staff }: { staff: Staff }) {
 
 /**
  * The bell with this person's notifications. Read once per request (the
- * phone bar and the sidebar each show one), and streamed in so it never
+ * phone bar and the desktop page corner each show one), and streamed in so it never
  * holds the page up.
  */
 async function BellFor({ email, side, className }: { email: string; side: "bottom" | "right"; className?: string }) {
@@ -176,11 +176,6 @@ export default async function DashboardLayout({
                   <span className="block text-[11.5px] text-[var(--i-muted)]">Internal dashboard</span>
                 </span>
               </Link>
-              <span className="hidden md:block">
-                <Suspense fallback={null}>
-                  <BellFor email={staff.email} side="right" />
-                </Suspense>
-              </span>
               <MobileNavClose />
             </div>
             {/* A long sidebar scrolls on its own; the profile stays at the foot.
@@ -226,7 +221,19 @@ export default async function DashboardLayout({
               </form>
             </div>
           </MobileNavPanel>
-          <main className="min-w-0 flex-1 px-4 pb-24 pt-5 sm:px-6 sm:pt-6 lg:px-10 lg:pt-9 print:p-0">
+          {/* Desktop: the bell floats in the page's top-right corner, in the
+              gutter main keeps free for it (md:pr-12), so it never sits on a
+              page's own buttons. Phones have it in the top bar. */}
+          <div className="fixed right-2 top-2 z-30 hidden md:block print:hidden">
+            <Suspense fallback={null}>
+              <BellFor
+                email={staff.email}
+                side="bottom"
+                className="size-9 rounded-full bg-[var(--i-panel)] shadow-[var(--i-shadow)] ring-1 ring-[var(--i-line)] hover:bg-[var(--i-panel)]"
+              />
+            </Suspense>
+          </div>
+          <main className="min-w-0 flex-1 px-4 pb-24 pt-5 sm:px-6 sm:pt-6 md:pr-12 lg:pl-10 lg:pt-9 print:p-0">
             <div className="mx-auto max-w-[1280px]">
               <TeamPhotosProvider photos={photos}>{children}</TeamPhotosProvider>
             </div>

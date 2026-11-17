@@ -110,6 +110,13 @@ export async function withinLimit(kind: string, value: string, { limit, windowSe
 
 /** Tries at a dashboard sign-in code, per address (app/internal/login). */
 export const SIGN_IN_CODE_LIMIT: Limit = { limit: 10, windowSeconds: HOUR };
+/**
+ * Sign-in from one network: codes asked for, and codes tried. A whole
+ * office shares an address, so these are well above what a team needs and
+ * well below what a script wants.
+ */
+export const SIGN_IN_NETWORK_REQUESTS: Limit = { limit: 20, windowSeconds: HOUR };
+export const SIGN_IN_NETWORK_TRIES: Limit = { limit: 40, windowSeconds: HOUR };
 
 /**
  * The strict count, for sign-in: the attempt is saved first and counted

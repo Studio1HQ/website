@@ -67,6 +67,7 @@ export function EngagementDialog({
   owners = [],
   names = {},
   me = "",
+  types = ENGAGEMENT_TYPES,
   trigger,
 }: {
   /** The engagement to edit; leave out to add one. */
@@ -80,6 +81,8 @@ export function EngagementDialog({
   names?: Readonly<Record<string, string>>;
   /** The viewer's email: a new engagement's owner unless changed. */
   me?: string;
+  /** Built-in types and the team's own (engagementTypes()). */
+  types?: readonly { value: EngagementType; label: string }[];
   trigger: ReactNode;
 }) {
   const router = useRouter();
@@ -158,13 +161,13 @@ export function EngagementDialog({
         id="engagement-type"
         label="Type"
         required
-        help="Sets the monthly scope a new month starts with."
+        help="Sets the monthly scope a new month starts with. Make your own under Templates."
       >
         <Select
           id="engagement-type"
           value={values.type}
           onChange={(next) => set("type", next)}
-          options={ENGAGEMENT_TYPES}
+          options={types}
         />
       </FormField>
       <FormField id="engagement-status" label="Status">

@@ -10,7 +10,7 @@ const report: MonthlyReport = {
     { name: "Jozu [x](https://evil.example)", engagement: "", planned: 4, done: 2, late: 1 },
   ],
   people: [
-    { name: "Priya", tasksDone: 14, published: 5 },
+    { name: "Priya", tasksDone: 14, published: 5, minutes: 5790, perDay: 370 },
     { name: "Dev", tasksDone: 1, published: 0 },
   ],
   blogPublished: 3,
@@ -33,7 +33,7 @@ describe("monthly report", () => {
     expect(body).toContain("Hi Arindam,");
     expect(body).toContain("8 of 10 planned pieces went live (80%) across 2 engagements. 1 piece still open and late.");
     expect(body).toContain("- Nebius, DevRel retainer: 6 of 6");
-    expect(body).toContain("- Priya: 14 tasks done, 5 client pieces published");
+    expect(body).toContain("- Priya: 14 tasks done, 5 client pieces published, 96h 30m worked (6h 10m a day)");
     expect(body).toContain("- Dev: 1 task done\n");
     expect(body).toContain("- Hiring: 23 job applications");
     expect(body).toContain("- Hackathons: 1 registration");

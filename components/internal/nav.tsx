@@ -406,6 +406,15 @@ export function InternalNav({
               active={isActive("/internal/outreach")}
             />
           ) : null}
+          {outreach ? (
+            // Admins, like Outreach.
+            <NavLink
+              href="/internal/socials"
+              label="Social growth"
+              icon={ChartLineUp}
+              active={isActive("/internal/socials")}
+            />
+          ) : null}
           {blog ? (
             <NavLink
               href="/internal/blog"

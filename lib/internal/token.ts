@@ -74,10 +74,14 @@ export function emailAddress(input: unknown): string | null {
   return local.test(name) && !name.includes("..") && host.test(domain) ? email : null;
 }
 
-/** Lowercased address on the staff domain, or null for anything else. */
+/**
+ * Lowercased address on the staff domain, or null for anything else.
+ * "name+tag@" is refused: it lands in name@'s inbox, so it would let one
+ * person sign in as a second, new member (even after being turned off).
+ */
 export function staffEmail(input: unknown): string | null {
   const email = emailAddress(input);
-  return email && email.endsWith(`@${STAFF_DOMAIN}`) ? email : null;
+  return email && email.endsWith(`@${STAFF_DOMAIN}`) && !email.includes("+") ? email : null;
 }
 
 /** Where to go after signing in: a dashboard path, never another site. */

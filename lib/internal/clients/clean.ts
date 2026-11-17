@@ -8,6 +8,7 @@ import {
   DUE_RULES,
   ENGAGEMENT_STATUSES,
   ENGAGEMENT_TYPES,
+  isCustomType,
   INVOICE_STATES,
   PARTNER_STATUSES,
   PARTNER_TYPES,
@@ -177,6 +178,8 @@ type Spec = {
   required?: boolean;
   max?: number;
   options?: readonly Option[];
+  /** A select that also takes values outside `options` (team-made types). */
+  allow?: (value: string) => boolean;
   /** A select whose blank means "none" (saved as null). */
   nullable?: boolean;
   min?: number;
@@ -221,7 +224,8 @@ function cleanField(spec: Spec, value: unknown): FieldResult {
       // Blank: null for the columns that can be empty, else left as it is
       // (the table's default on a new row).
       if (!text) return { ok: true, value: spec.nullable ? null : undefined };
-      return spec.options?.some((option) => option.value === text)
+      return spec.options?.some((option) => option.value === text) ||
+        spec.allow?.(text)
         ? { ok: true, value: text }
         : bad(`Pick a valid ${spec.label.toLowerCase()}.`);
     }
@@ -418,6 +422,7 @@ const ENGAGEMENT_SPECS: Spec[] = [
     label: "Type",
     type: "select",
     options: ENGAGEMENT_TYPES,
+    allow: isCustomType,
     required: true,
   },
   {

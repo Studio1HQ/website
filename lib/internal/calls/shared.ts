@@ -476,7 +476,10 @@ export function cleanCall(raw: unknown): { ok: true; call: CallInput } | { ok: f
       about,
       link: link.link,
       host,
-      people: host ? people.filter((email) => email !== host) : people,
+      // The host is kept apart from the rest, unless they're the only one
+      // in it: the table needs someone on the list for a call that isn't
+      // the whole team's.
+      people: host && (wholeTeam || people.some((email) => email !== host)) ? people.filter((email) => email !== host) : host ? [host] : people,
       whole_team: wholeTeam,
       repeat,
       days,
