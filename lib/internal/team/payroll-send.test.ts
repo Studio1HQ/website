@@ -173,6 +173,36 @@ describe("emailing a payslip", () => {
     expect(await sendPayslip(EMAIL, MONTH, ADMIN)).toEqual({ ok: true, status: "sent" });
   });
 
+  it("makes a payslip for an earlier month, also for someone who has since left", async () => {
+    const earlier = shiftMonth(MONTH, -1);
+    db.rows("team_people")[0].active = false;
+
+    // Gone from this month's list, still there for the month before.
+    const now = await payrollMonth(MONTH);
+    expect(now.ok && now.rows).toHaveLength(0);
+    const before = await payrollMonth(earlier);
+    expect(before.ok && before.rows[0]).toMatchObject({ person: { email: EMAIL }, check: expect.stringContaining("left") });
+
+    // Never emailed on its own; saved by an admin first, it goes out.
+    expect((await sendPayslip(EMAIL, earlier, ADMIN)).ok).toBe(false);
+    expect(sendMail).not.toHaveBeenCalled();
+    await savePayslip(
+      EMAIL,
+      earlier,
+      { earnings: [{ label: "Basic", amount: 50000 }], deductions: [], lopDays: 0, saveDefaults: false },
+      ADMIN,
+    );
+    expect(await sendPayslip(EMAIL, earlier, ADMIN)).toEqual({ ok: true, status: "sent" });
+    expect(slip()).toMatchObject({ month: monthStart(earlier), status: "sent", net: 50000 });
+  });
+
+  it("leaves out someone who left and only joined after that month", async () => {
+    db.rows("team_people")[0].active = false;
+    db.rows("team_people")[0].joined_on = `${MONTH}-01`;
+    const before = await payrollMonth(shiftMonth(MONTH, -1));
+    expect(before.ok && before.rows).toHaveLength(0);
+  });
+
   it("never runs ahead of this month", async () => {
     const next = shiftMonth(MONTH, 1);
     expect((await sendPayslip(EMAIL, next, ADMIN)).ok).toBe(false);

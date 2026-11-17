@@ -519,6 +519,14 @@ export function cleanOwnName(value: unknown): { ok: true; name: string } | { ok:
 export const MAX_UPLOAD_BYTES = 3.5 * 1024 * 1024;
 export const MAX_UPLOAD_LABEL = "3.5 MB";
 
+/**
+ * A PDF receipt can't be shrunk like a photo, so a bigger one skips the
+ * server action and goes from the browser straight to the bucket, which
+ * takes 10 MB (startReceiptUpload in lib/internal/team/files.ts).
+ */
+export const MAX_RECEIPT_PDF_BYTES = 10 * 1024 * 1024;
+export const MAX_RECEIPT_PDF_LABEL = "10 MB";
+
 export type TeamResult = { ok: true; message?: string } | { ok: false; message: string };
 
 /** The message to show when a table from the team migration isn't there yet. */

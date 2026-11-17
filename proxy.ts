@@ -41,11 +41,12 @@ const legacyRedirects: Record<string, string> = {
 const THEME_SCRIPT = "'sha256-a/T6WihUdllNvOaPlAwIT5TdeEcYmobkkshLrN/KCkc='";
 
 /**
- * A client's logo (app/internal/(dashboard)/clients/[slug]/logo): another
- * site's icon, so it gets a policy that runs and loads nothing, and keeps
- * the route's own month-long Cache-Control instead of no-store.
+ * A client's or an outreach organisation's logo (app/internal/(dashboard)/
+ * clients/[slug]/logo, outreach/[id]/logo): another site's icon, so it gets
+ * a policy that runs and loads nothing, and keeps the route's own
+ * month-long Cache-Control instead of no-store.
  */
-const LOGO_PATH = /^\/internal\/clients\/[a-z0-9-]+\/logo$/;
+const LOGO_PATH = /^\/internal\/(?:clients\/[a-z0-9-]+|outreach\/[0-9a-f-]{36})\/logo$/;
 const LOGO_POLICY = "default-src 'none'; style-src 'unsafe-inline'; sandbox";
 
 function dashboardPolicy(nonce: string) {
@@ -63,7 +64,8 @@ function dashboardPolicy(nonce: string) {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https:",
     "font-src 'self' data:",
-    `connect-src 'self'${dev ? " ws: wss:" : ""}`,
+    // Big PDF receipts go from the browser straight to Storage.
+    `connect-src 'self'${files ? ` ${files}` : ""}${dev ? " ws: wss:" : ""}`,
     `frame-src 'self' blob: data: ${files} https://www.youtube.com https://www.youtube-nocookie.com`.replace(/\s+/g, " "),
     "media-src 'self' blob: data: https:",
     "object-src 'none'",

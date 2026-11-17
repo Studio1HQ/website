@@ -512,7 +512,14 @@ function CallRow({ call, next }: { call: Call; next: Occurrence | null }) {
 }
 
 /** My day's "Your calls today": today's calls you're in, with Join. */
-export function TodayCalls({ items }: { items: Occurrence[] }) {
+export function TodayCalls({
+  items,
+  stacked = false,
+}: {
+  items: Occurrence[];
+  /** One call per row, for a narrow column (My day, beside the tasks). */
+  stacked?: boolean;
+}) {
   const { calls, now: serverNow } = useCalls();
   const now = useNow(serverNow);
   const left = items.filter((item) => !item.cancelled && callState(item, now) !== "past").length;
@@ -539,7 +546,7 @@ export function TodayCalls({ items }: { items: Occurrence[] }) {
               <span className="font-medium text-[var(--i-ink)]">{calls[next.call_id].title}</span> at {timeRange(next.start, next.minutes)}
             </p>
           ) : null}
-          <ul className="grid gap-1.5 sm:grid-cols-2">
+          <ul className={cn("grid gap-1.5", stacked ? "sm:grid-cols-2 lg:grid-cols-1" : "sm:grid-cols-2")}>
             {items.map((item) => (
               <li key={item.key}>
                 <CallCard item={item} now={now} />

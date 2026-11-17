@@ -2,18 +2,20 @@
 
 import { useAfterSave } from "@/components/internal/clients/use-after-save";
 import {
-  useEffect,
-  useRef,
   useState,
   useTransition,
+  type ComponentProps,
   type FormEvent,
   type ReactNode,
 } from "react";
+import * as Dialog from "@radix-ui/react-dialog";
 import {
+  DotsThree,
   ListChecks,
   PencilSimple,
   Plus,
   Prohibit,
+  X,
 } from "@phosphor-icons/react";
 import { saveDeliverable } from "@/app/internal/(dashboard)/clients/actions";
 import {
@@ -54,6 +56,11 @@ import {
 } from "@/components/internal/ui";
 import { DueDate, Meter } from "@/components/internal/community/ui";
 import { DeliverableFlags, OwnerName } from "@/components/internal/clients/ui";
+import {
+  FormDialog,
+  FormField,
+  useDialogOpen,
+} from "@/components/internal/clients/client-dialog-shell";
 import { BlockDialog } from "@/components/internal/clients/block-dialog";
 import { DeliverableDialog } from "@/components/internal/clients/deliverable-dialog";
 import { MoveStatusMenu } from "@/components/internal/clients/move-status-menu";
@@ -65,7 +72,7 @@ import {
 /**
  * A month's work for one engagement, as one list: a group per part of the
  * plan ("Blogs: 1 of 4 published"), its pieces numbered in the order they
- * were added, and an "Add blog 2 of 4" row that takes a title and an owner.
+ * were added, and an Add button on its header that opens a small dialog.
  * Work outside the plan sits in its own group at the end. Clicking a piece
  * opens every field; the status pill moves it along.
  */
@@ -91,9 +98,31 @@ function kindWord(kind: DeliverableKind) {
   return label.charAt(0).toLowerCase() + label.slice(1);
 }
 
-/** The small "+ Add blog 3 of 4" button under a group. */
+/** The quiet "+ Add" button on a not-started line. */
 const addButtonClass =
   "inline-flex items-center gap-1.5 rounded-md px-1.5 py-1 text-[12.5px] text-[var(--i-muted)] transition-colors hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)]";
+
+const columnClass = "flex min-w-0 flex-col gap-4 lg:[&>*:last-child]:flex-1";
+
+/**
+ * A half-width card's rough height, in title rows: its header, up to five
+ * pieces (taller with an owner line or a note), and the "Show all" row.
+ * Only used to share the cards between the two columns evenly.
+ */
+function cardWeight(items: readonly Deliverable[]) {
+  const rows = items.map(
+    (item) =>
+      1 +
+      (item.owner || item.published_url || item.due_on ? 0.65 : 0) +
+      (item.notes.trim() ? 0.45 : 0),
+  );
+  const average = rows.reduce((sum, row) => sum + row, 0) / (rows.length || 1);
+  return (
+    1.3 +
+    average * Math.min(rows.length, SHORT_LIST) +
+    (rows.length > SHORT_LIST ? 0.9 : 0)
+  );
+}
 
 const byAdded = (a: Deliverable, b: Deliverable) =>
   a.created_at.localeCompare(b.created_at);
@@ -200,13 +229,14 @@ export function MonthWork({
     ...filled.map(({ line, items }) => ({
       key: line.id,
       wide: wide(line.kind),
-      weight: items.length + 2,
+      weight: cardWeight(items),
       node: (
         <PlanGroup
           key={line.id}
           line={line}
           items={items}
           wide={wide(line.kind)}
+          all={only !== null}
           canEditPlan={canEditPlan}
           {...shared}
         />
@@ -217,7 +247,7 @@ export function MonthWork({
           {
             key: "outside",
             wide: outsideWide,
-            weight: outside.length + 2,
+            weight: cardWeight(outside),
             node: (
               <Card key="outside" className="min-w-0">
                 <div className="flex items-center gap-3 border-b border-[var(--i-line)] px-5 py-3">
@@ -230,17 +260,17 @@ export function MonthWork({
                     live
                   </span>
                 </div>
-                {outsideWide ? (
-                  <WorkTable
-                    items={outside}
-                    written={outside.every((item) =>
-                      WRITTEN_KINDS.has(item.kind),
-                    )}
-                    {...shared}
-                  />
-                ) : (
-                  <CompactList items={outside} {...shared} />
-                )}
+                <Pieces
+                  name="Not in the plan"
+                  items={outside}
+                  layout={outsideWide ? "work" : "compact"}
+                  posts={false}
+                  written={outside.every((item) =>
+                    WRITTEN_KINDS.has(item.kind),
+                  )}
+                  all={only !== null}
+                  {...shared}
+                />
               </Card>
             ),
           },
@@ -251,7 +281,7 @@ export function MonthWork({
           {
             key: "quiet",
             wide: false,
-            weight: quiet.length * 0.6 + 1,
+            weight: quiet.length * 0.75 + 1.2,
             node: (
               <Card key="quiet" className="min-w-0">
                 <div className="px-5 pb-1 pt-3.5">
@@ -382,12 +412,17 @@ export function MonthWork({
       ) : (
         <div className="space-y-4">
           {cards.filter((card) => card.wide).map((card) => card.node)}
-          {left.length || right.length ? (
-            <div className="grid items-start gap-4 lg:grid-cols-2">
-              <div className="min-w-0 space-y-4">{left}</div>
-              <div className="min-w-0 space-y-4">{right}</div>
+          {right.length ? (
+            // Two columns of the same height: the last card in the shorter
+            // one grows to the bottom, so no hole is left under it.
+            <div className="grid gap-4 lg:grid-cols-2">
+              <div className={columnClass}>{left}</div>
+              <div className={columnClass}>{right}</div>
             </div>
-          ) : null}
+          ) : (
+            // One half-width card alone takes the whole row.
+            left
+          )}
         </div>
       )}
     </section>
@@ -460,7 +495,7 @@ function QuietLine({
 
 /**
  * One part of the plan as its own card: a header (name, "2 of 4", a small
- * bar, views), the pieces, and a small add button. Written work is a table
+ * bar, views, the add button) and the pieces. Written work is a table
  * across the page; posts and other small parts are compact two-line rows,
  * half the width, side by side.
  */
@@ -468,12 +503,15 @@ function PlanGroup({
   line,
   items,
   wide,
+  all,
   canEditPlan,
   ...shared
 }: Shared & {
   line: ScopeLine;
   items: readonly Deliverable[];
   wide: boolean;
+  /** Every piece on the card (one kind is picked), not the short list. */
+  all: boolean;
   canEditPlan: boolean;
 }) {
   const progress = scopeLineProgress(line, items);
@@ -523,26 +561,6 @@ function PlanGroup({
           {canEditPlan ? (
             <PlanTools line={line} name={name} cycleId={shared.cycleId} />
           ) : null}
-        </div>
-        {line.notes ? (
-          <p className="px-5 pt-2 text-[12px] text-[var(--i-faint)]">
-            {line.notes}
-          </p>
-        ) : null}
-        {wide ? (
-          posts ? (
-            <PostTable items={items} {...shared} />
-          ) : (
-            <WorkTable
-              items={items}
-              written={WRITTEN_KINDS.has(line.kind)}
-              {...shared}
-            />
-          )
-        ) : (
-          <CompactList items={items} {...shared} />
-        )}
-        <div className="border-t border-[var(--i-line)] px-4 py-1.5">
           {posts ? (
             <QuickPost
               line={line}
@@ -559,22 +577,143 @@ function PlanGroup({
             />
           )}
         </div>
+        {line.notes ? (
+          <p className="px-5 pt-2 text-[12px] text-[var(--i-faint)]">
+            {line.notes}
+          </p>
+        ) : null}
+        <Pieces
+          name={name}
+          items={items}
+          layout={!wide ? "compact" : posts ? "posts" : "work"}
+          posts={posts}
+          written={WRITTEN_KINDS.has(line.kind)}
+          all={all}
+          {...shared}
+        />
       </section>
     </Card>
+  );
+}
+
+/** How many pieces a card shows before "Show all". */
+const SHORT_LIST = 5;
+
+/** A piece's number in its part of the plan, by id. */
+type Numbers = ReadonlyMap<string, number>;
+
+/**
+ * A card's pieces. Up to five show on the card: the posts with the most
+ * views, or the newest of anything else, each with its own number. "Show
+ * all" opens the whole list in a large dialog. With one kind picked at the
+ * top, the card shows every piece.
+ */
+function Pieces({
+  name,
+  items,
+  layout,
+  posts,
+  written,
+  all,
+  ...shared
+}: Shared & {
+  name: string;
+  items: readonly Deliverable[];
+  layout: "compact" | "posts" | "work";
+  posts: boolean;
+  written: boolean;
+  all: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const numbers: Numbers = new Map(
+    items.map((item, index) => [item.id, index + 1]),
+  );
+  const list = (
+    shown: readonly Deliverable[],
+    as: "compact" | "posts" | "work",
+  ) =>
+    as === "compact" ? (
+      <CompactList items={shown} numbers={numbers} {...shared} />
+    ) : as === "posts" ? (
+      <PostTable items={shown} numbers={numbers} {...shared} />
+    ) : (
+      <WorkTable
+        items={shown}
+        written={written}
+        numbers={numbers}
+        {...shared}
+      />
+    );
+  if (all || items.length <= SHORT_LIST) return list(items, layout);
+
+  const short = posts
+    ? [...items]
+        .sort((a, b) => (b.views ?? 0) - (a.views ?? 0))
+        .slice(0, SHORT_LIST)
+    : items.slice(-SHORT_LIST);
+  const views = shared.devrel && posts ? viewsOf(items) : 0;
+  return (
+    <>
+      {list(short, layout)}
+      <Dialog.Root open={open} onOpenChange={setOpen}>
+        <div className="border-t border-[var(--i-line)] px-4 py-1.5">
+          <Dialog.Trigger asChild>
+            <button type="button" className={addButtonClass}>
+              <DotsThree size={14} weight="bold" className="shrink-0" />
+              Show all {items.length}
+              <span className="text-[var(--i-faint)]">
+                {posts ? "· top 5 by views here" : "· newest 5 here"}
+              </span>
+            </button>
+          </Dialog.Trigger>
+        </div>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px]" />
+          <Dialog.Content
+            className="internal-pop internal-dialog fixed left-1/2 top-1/2 z-50 flex max-h-[92dvh] w-[min(1100px,calc(100vw-1.5rem))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border border-[var(--i-line)] bg-[var(--i-panel)] text-[var(--i-ink)] shadow-[var(--i-shadow-pop)]"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-center gap-3 border-b border-[var(--i-line)] px-5 py-3.5">
+              <Dialog.Title className="min-w-0 truncate text-[15px] font-medium">
+                {name}
+              </Dialog.Title>
+              <Dialog.Description className="text-[12.5px] tabular-nums text-[var(--i-muted)]">
+                {items.length} in all
+                {views > 0 ? ` · ${counts.format(views)} views` : ""}
+              </Dialog.Description>
+              <span className="flex-1" />
+              <Dialog.Close asChild>
+                <button
+                  type="button"
+                  aria-label="Close"
+                  className="flex size-8 items-center justify-center rounded-lg text-[var(--i-muted)] hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)]"
+                >
+                  <X size={16} />
+                </button>
+              </Dialog.Close>
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              {list(items, posts ? "posts" : "work")}
+            </div>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+    </>
   );
 }
 
 /** Pieces as two-line rows, for the half-width cards. */
 function CompactList({
   items,
+  numbers,
   ...shared
-}: Shared & { items: readonly Deliverable[] }) {
+}: Shared & { items: readonly Deliverable[]; numbers?: Numbers }) {
   return (
     <ol className="divide-y divide-[var(--i-line)]">
       {items.map((item, index) => (
         <CompactRow
           key={item.id}
-          number={index + 1}
+          number={numbers?.get(item.id) ?? index + 1}
           deliverable={item}
           {...shared}
         />
@@ -719,8 +858,13 @@ const rowClass = cn(
 function WorkTable({
   items,
   written,
+  numbers,
   ...shared
-}: Shared & { items: readonly Deliverable[]; written: boolean }) {
+}: Shared & {
+  items: readonly Deliverable[];
+  written: boolean;
+  numbers?: Numbers;
+}) {
   return (
     <table className="w-full border-collapse text-left text-[13px] max-md:block">
       <QuietHead
@@ -738,7 +882,7 @@ function WorkTable({
         {items.map((item, index) => (
           <WorkRow
             key={item.id}
-            number={index + 1}
+            number={numbers?.get(item.id) ?? index + 1}
             deliverable={item}
             written={written}
             {...shared}
@@ -943,11 +1087,32 @@ function hasFlags(item: Deliverable, today: string) {
   );
 }
 
+/** The "+ Add" button: on a card's header, or quieter on a not-started line. */
+function AddTrigger({
+  label,
+  compact,
+  ...props
+}: { label: string; compact: boolean } & ComponentProps<"button">) {
+  // The dialog passes its click handler and ref through `props`.
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={label}
+      {...props}
+      className={compact ? addButtonClass : buttonClass("secondary", "sm")}
+    >
+      <Plus size={compact ? 12 : 13} className="shrink-0" />
+      Add
+    </button>
+  );
+}
+
 /**
- * "Add blog 2 of 4": opens a title box and an owner pick in place. The
- * owner starts as whoever did the last one in this part of the plan, else
- * the viewer. Members always own what they add. "More fields" opens the
- * full form with what's typed so far.
+ * "Add blog 2 of 4": a small dialog with a title and an owner. The owner
+ * starts as whoever did the last one in this part of the plan, else the
+ * viewer. Members always own what they add. "More fields" opens the full
+ * form with what's typed so far.
  */
 function QuickAdd({
   line,
@@ -968,7 +1133,6 @@ function QuickAdd({
 }) {
   const afterSave = useAfterSave();
   const toast = useToast();
-  const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const manager = viewer.clients === "manager";
   const startOwner = lastOwner || viewer.email;
@@ -976,10 +1140,11 @@ function QuickAdd({
   const [error, setError] = useState<string | null>(null);
   const [busy, start] = useTransition();
   const [full, setFull] = useState(false);
-  const input = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    if (open) input.current?.focus();
-  }, [open]);
+  const [open, setOpen] = useDialogOpen(() => {
+    setTitle("");
+    setError(null);
+    setOwner(startOwner);
+  });
 
   const word = kindWord(line.kind);
   const next = added + 1;
@@ -995,13 +1160,6 @@ function QuickAdd({
   ]
     .map((email) => ({ value: email, label: personName(email, names) }))
     .sort((a, b) => a.label.localeCompare(b.label));
-
-  const close = () => {
-    setOpen(false);
-    setTitle("");
-    setError(null);
-    setOwner(startOwner);
-  };
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
@@ -1026,123 +1184,80 @@ function QuickAdd({
         "success",
         `${labelOf(DELIVERABLE_KINDS, line.kind)} ${next} added`,
       );
-      close();
+      setOpen(false);
       afterSave();
     });
   };
 
-  const fullForm = (
-    <DeliverableDialog
-      cycleId={cycleId}
-      scopeLines={scopeLines}
-      owners={owners}
-      names={names}
-      access={viewer.clients}
-      me={viewer.email}
-      title={label}
-      devrel={devrel}
-      defaults={{
-        title: title.trim(),
-        kind: line.kind,
-        scope_line_id: line.id,
-        owner: manager ? owner : viewer.email,
-      }}
-      open={full}
-      onOpenChange={(value) => {
-        setFull(value);
-        if (!value) close();
-      }}
-    />
-  );
-
-  if (!open)
-    return (
-      <>
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          aria-label={compact ? label : undefined}
-          className={addButtonClass}
-        >
-          <Plus size={12} className="shrink-0" />
-          {compact ? "Add" : label}
-        </button>
-        {fullForm}
-      </>
-    );
-
-  // The full form sits outside this <form>: React events bubble through
-  // portals, so a dialog inside would submit this one too.
+  // The full form sits outside the small one: React events bubble through
+  // portals, so a dialog inside would submit this form too.
   return (
     <>
-      <form
+      <FormDialog
+        open={open}
+        onOpenChange={setOpen}
+        trigger={<AddTrigger label={label} compact={compact} />}
+        title={label}
+        description="A title and an owner. More fields opens the full form."
+        width="sm"
         onSubmit={submit}
-        onKeyDown={(event) => {
-          if (event.key === "Escape") {
-            event.preventDefault();
-            close();
-          }
-        }}
-        className={cn(
-          "rounded-lg border border-[var(--i-line-strong)] bg-[var(--i-sunken)] p-2",
-          compact && "basis-full",
-        )}
+        busy={busy}
+        error={error}
+        submitLabel="Add"
+        footerStart={
+          <button
+            type="button"
+            onClick={() => {
+              setOpen(false);
+              setFull(true);
+            }}
+            className={buttonClass("ghost")}
+          >
+            More fields
+          </button>
+        }
       >
-        <div className="flex flex-wrap items-center gap-2">
+        <FormField id={`add-title-${line.id}`} label="Title" required>
           <input
-            ref={input}
+            id={`add-title-${line.id}`}
             type="text"
             value={title}
             onChange={(event) => setTitle(event.target.value)}
             maxLength={200}
             placeholder={`Title of ${word} ${next}`}
-            aria-label={`Title of ${word} ${next}`}
-            className={cn(inputClass("sm"), "min-w-0 flex-1 basis-56")}
+            className={inputClass()}
+            autoFocus
           />
-          {manager ? (
+        </FormField>
+        {manager ? (
+          <FormField id={`add-owner-${line.id}`} label="Owner">
             <Select
-              size="sm"
-              aria-label="Owner"
+              id={`add-owner-${line.id}`}
               value={owner.toLowerCase()}
               onChange={setOwner}
               options={ownerOptions}
-              className="w-full sm:w-44"
             />
-          ) : null}
-          <span className="flex items-center gap-1.5">
-            <button
-              type="submit"
-              disabled={busy}
-              className={buttonClass("accent", "sm")}
-            >
-              {busy ? "Adding…" : "Add"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setFull(true)}
-              className={buttonClass("ghost", "sm")}
-            >
-              More fields
-            </button>
-            <button
-              type="button"
-              onClick={close}
-              className={buttonClass("ghost", "sm")}
-            >
-              Cancel
-            </button>
-          </span>
-        </div>
-        {error ? (
-          <p
-            role="alert"
-            className="mt-1.5 text-[12.5px] text-rose-700 dark:text-rose-300"
-          >
-            {error}
-          </p>
+          </FormField>
         ) : null}
-      </form>
-      {fullForm}
+      </FormDialog>
+      <DeliverableDialog
+        cycleId={cycleId}
+        scopeLines={scopeLines}
+        owners={owners}
+        names={names}
+        access={viewer.clients}
+        me={viewer.email}
+        title={label}
+        devrel={devrel}
+        defaults={{
+          title: title.trim(),
+          kind: line.kind,
+          scope_line_id: line.id,
+          owner: manager ? owner : viewer.email,
+        }}
+        open={full}
+        onOpenChange={setFull}
+      />
     </>
   );
 }
@@ -1160,8 +1275,9 @@ const counts = new Intl.NumberFormat("en-US");
  */
 function PostTable({
   items,
+  numbers,
   ...shared
-}: Shared & { items: readonly Deliverable[] }) {
+}: Shared & { items: readonly Deliverable[]; numbers?: Numbers }) {
   return (
     <table className="w-full border-collapse text-left text-[13px] max-md:block">
       <QuietHead
@@ -1178,7 +1294,7 @@ function PostTable({
         {items.map((item, index) => (
           <PostRow
             key={item.id}
-            number={index + 1}
+            number={numbers?.get(item.id) ?? index + 1}
             deliverable={item}
             {...shared}
           />
@@ -1333,8 +1449,8 @@ function ViewsCell({
 }
 
 /**
- * "Log post 3 of 4": what it was, its link(s), views and who posted it.
- * With a link it's saved as published; without one it's planned.
+ * "Log post 3 of 4", in a dialog: what it was, its link(s), views and who
+ * posted it. With a link it's saved as published; without one it's planned.
  */
 function QuickPost({
   line,
@@ -1356,7 +1472,6 @@ function QuickPost({
   const toast = useToast();
   const manager = viewer.clients === "manager";
   const startOwner = lastOwner || viewer.email;
-  const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [links, setLinks] = useState("");
   const [views, setViews] = useState("");
@@ -1364,10 +1479,14 @@ function QuickPost({
   const [owner, setOwner] = useState(startOwner);
   const [error, setError] = useState<string | null>(null);
   const [busy, start] = useTransition();
-  const input = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    if (open) input.current?.focus();
-  }, [open]);
+  const [open, setOpen] = useDialogOpen(() => {
+    setTitle("");
+    setLinks("");
+    setViews("");
+    setPostedOn(todayKey());
+    setError(null);
+    setOwner(startOwner);
+  });
 
   const word = kindWord(line.kind);
   const next = added + 1;
@@ -1380,16 +1499,6 @@ function QuickPost({
   ]
     .map((email) => ({ value: email, label: personName(email, names) }))
     .sort((a, b) => a.label.localeCompare(b.label));
-
-  const close = () => {
-    setOpen(false);
-    setTitle("");
-    setLinks("");
-    setViews("");
-    setPostedOn(todayKey());
-    setError(null);
-    setOwner(startOwner);
-  };
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
@@ -1426,118 +1535,90 @@ function QuickPost({
         return;
       }
       toast("success", urls.length ? "Post logged" : "Post added to the plan");
-      close();
+      setOpen(false);
       afterSave();
     });
   };
 
-  if (!open)
-    return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        aria-label={compact ? label : undefined}
-        className={addButtonClass}
-      >
-        <Plus size={12} className="shrink-0" />
-        {compact ? "Log" : label}
-      </button>
-    );
-
+  const id = (field: string) => `post-${field}-${line.id}`;
   return (
-    <form
+    <FormDialog
+      open={open}
+      onOpenChange={setOpen}
+      trigger={<AddTrigger label={label} compact={compact} />}
+      title={label}
+      description="What the post was, its links, when it went up, its views and who posted it."
       onSubmit={submit}
-      onKeyDown={(event) => {
-        if (event.key === "Escape") {
-          event.preventDefault();
-          close();
-        }
-      }}
-      className={cn(
-        "rounded-lg border border-[var(--i-line-strong)] bg-[var(--i-sunken)] p-2",
-        compact && "basis-full",
-      )}
+      busy={busy}
+      error={error}
+      submitLabel="Log it"
     >
-      <div className="flex flex-wrap items-center gap-2">
+      <FormField id={id("title")} label="What it was" required wide>
         <input
-          ref={input}
+          id={id("title")}
           type="text"
           value={title}
           onChange={(event) => setTitle(event.target.value)}
           maxLength={200}
-          placeholder="What it was: launch thread, Reddit post in r/LLMDevs…"
-          aria-label="What the post was"
-          className={cn(inputClass("sm"), "min-w-0 flex-1 basis-64")}
+          placeholder="Launch thread, Reddit post in r/LLMDevs…"
+          className={inputClass()}
+          autoFocus
         />
+      </FormField>
+      <FormField
+        id={id("links")}
+        label={devrel ? "Link(s)" : "Link"}
+        wide
+        help={
+          devrel
+            ? "A space between links. Leave empty if it isn't up yet: it's saved as planned."
+            : "Leave empty if it isn't up yet: it's saved as planned."
+        }
+      >
         <input
+          id={id("links")}
           type="text"
           inputMode="url"
           value={links}
           onChange={(event) => setLinks(event.target.value)}
-          placeholder={
-            devrel ? "Link(s), space between them" : "Link, once it's up"
-          }
-          aria-label="Links to the post"
-          className={cn(inputClass("sm"), "min-w-0 flex-1 basis-56")}
+          placeholder="https://x.com/…"
+          className={inputClass()}
         />
-      </div>
-      <div className="mt-2 flex flex-wrap items-center gap-2">
-        <span className="w-36">
-          <DateField
-            value={postedOn}
-            onChange={setPostedOn}
-            max={todayKey()}
-            required
-            aria-label="Posted on"
-          />
-        </span>
-        {devrel ? (
+      </FormField>
+      <FormField id={id("date")} label="Posted on">
+        <DateField
+          id={id("date")}
+          value={postedOn}
+          onChange={setPostedOn}
+          max={todayKey()}
+          required
+          aria-label="Posted on"
+        />
+      </FormField>
+      {devrel ? (
+        <FormField id={id("views")} label="Views">
           <input
+            id={id("views")}
             type="text"
             inputMode="numeric"
             value={views}
             onChange={(event) => setViews(event.target.value)}
-            placeholder="Views (7k)"
-            aria-label="Views"
+            placeholder="7k"
             maxLength={20}
-            className={cn(inputClass("sm"), "w-28 tabular-nums")}
+            className={cn(inputClass(), "tabular-nums")}
           />
-        ) : null}
-        {manager ? (
+        </FormField>
+      ) : null}
+      {manager ? (
+        <FormField id={id("owner")} label="Posted by">
           <Select
-            size="sm"
-            aria-label="Posted by"
+            id={id("owner")}
             value={owner.toLowerCase()}
             onChange={setOwner}
             options={ownerOptions}
-            className="w-full sm:w-44"
           />
-        ) : null}
-        <span className="flex items-center gap-1.5">
-          <button
-            type="submit"
-            disabled={busy}
-            className={buttonClass("accent", "sm")}
-          >
-            {busy ? "Saving…" : "Log it"}
-          </button>
-          <button
-            type="button"
-            onClick={close}
-            className={buttonClass("ghost", "sm")}
-          >
-            Cancel
-          </button>
-        </span>
-      </div>
-      {error ? (
-        <p
-          role="alert"
-          className="mt-1.5 text-[12.5px] text-rose-700 dark:text-rose-300"
-        >
-          {error}
-        </p>
+        </FormField>
       ) : null}
-    </form>
+    </FormDialog>
   );
 }

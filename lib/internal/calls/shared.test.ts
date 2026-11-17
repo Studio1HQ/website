@@ -251,6 +251,13 @@ describe("checking a call as typed", () => {
     about: "",
   };
 
+  it("keeps a host who's the only one in it on the list, so the call can be saved", () => {
+    const alone = cleanCall({ ...typed, people: ["nancy@studio1hq.com"] });
+    expect(alone).toMatchObject({ ok: true, call: { host: "nancy@studio1hq.com", people: ["nancy@studio1hq.com"] } });
+    const whole = cleanCall({ ...typed, people: [], whole_team: true });
+    expect(whole).toMatchObject({ ok: true, call: { host: "nancy@studio1hq.com", people: [] } });
+  });
+
   it("cleans names, days, people and the link", () => {
     const result = cleanCall(typed);
     expect(result.ok).toBe(true);

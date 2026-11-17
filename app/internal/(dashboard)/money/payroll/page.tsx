@@ -20,10 +20,10 @@ export default async function PayrollPage({
   const current = monthOf(istNow().date);
   // Payroll never runs ahead of this month.
   const month = isMonthKey(params.month) && params.month <= current ? params.month : current;
-  const [data, waiting] = await Promise.all([
-    payrollMonth(month),
-    listReimbursements({ status: ["submitted"] }),
-  ]);
+  // Every claim, for the breakdown of who claimed what; the ones still
+  // waiting are picked out of it.
+  const [data, claims] = await Promise.all([payrollMonth(month), listReimbursements()]);
+  const all = claims.ok ? claims.items : [];
 
   if (!data.ok) {
     return (
@@ -39,7 +39,8 @@ export default async function PayrollPage({
       month={month}
       current={current}
       rows={data.rows}
-      waiting={waiting.ok ? waiting.items : []}
+      waiting={all.filter((claim) => claim.status === "submitted")}
+      claims={all}
       people={data.people}
       mailer={isMailerConfigured()}
     />

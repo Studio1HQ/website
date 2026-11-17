@@ -28,6 +28,7 @@ import {
   SlidersHorizontal,
   SquaresFour,
   Trophy,
+  UserSound,
   UsersThree,
   VideoCamera,
   Wallet,
@@ -404,6 +405,24 @@ export function InternalNav({
               badge={outreach.due}
               badgeTitle={`${outreach.due} of your follow-ups due`}
               active={isActive("/internal/outreach")}
+            />
+          ) : null}
+          {outreach ? (
+            // Admins, like Outreach.
+            <NavLink
+              href="/internal/influencers"
+              label="Influencers"
+              icon={UserSound}
+              active={isActive("/internal/influencers")}
+            />
+          ) : null}
+          {outreach ? (
+            // Admins, like Outreach.
+            <NavLink
+              href="/internal/socials"
+              label="Social growth"
+              icon={ChartLineUp}
+              active={isActive("/internal/socials")}
             />
           ) : null}
           {blog ? (

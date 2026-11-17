@@ -44,6 +44,7 @@ import {
   getPartner,
   loadCycles,
   loadScopeLines,
+  loadEngagements,
   loadTemplates,
   logStatusEvent,
   resetTemplateRow,
@@ -74,6 +75,9 @@ import {
   monthLabel,
   shiftMonth,
   templateFor,
+  customTypeKey,
+  engagementTypes,
+  isCustomType,
   todayKey,
   type ActionResult,
   type Deliverable,
@@ -138,7 +142,11 @@ function idOf(value: unknown) {
     : null;
 }
 
-type Viewer = { email: string; clients: ClientsAccess; clientScope: ClientScope };
+type Viewer = {
+  email: string;
+  clients: ClientsAccess;
+  clientScope: ClientScope;
+};
 
 /**
  * Refuses work on a client this person wasn't given (Client team members
@@ -599,9 +607,19 @@ export async function saveDeliverable(
       title: String(row.title ?? ""),
     };
     const who = staffName(staff);
-    tellAbout(created, [row.owner as string | null], staff.email, `${who} made you the owner of a deliverable`);
+    tellAbout(
+      created,
+      [row.owner as string | null],
+      staff.email,
+      `${who} made you the owner of a deliverable`,
+    );
     if (row.reviewer && row.reviewer !== row.owner)
-      tellAbout(created, [row.reviewer as string | null], staff.email, `${who} made you the reviewer of a deliverable`);
+      tellAbout(
+        created,
+        [row.reviewer as string | null],
+        staff.email,
+        `${who} made you the reviewer of a deliverable`,
+      );
     refresh();
     return { ...result, message: "Deliverable added" };
   }
@@ -659,12 +677,22 @@ export async function saveDeliverable(
   );
   if (!result.ok) return result;
   if (typeof patch.owner === "string" && patch.owner !== deliverable.owner)
-    tellAbout(deliverable, [patch.owner], staff.email, `${staffName(staff)} made you the owner of a deliverable`);
+    tellAbout(
+      deliverable,
+      [patch.owner],
+      staff.email,
+      `${staffName(staff)} made you the owner of a deliverable`,
+    );
   if (
     typeof patch.reviewer === "string" &&
     patch.reviewer !== deliverable.reviewer
   )
-    tellAbout(deliverable, [patch.reviewer], staff.email, `${staffName(staff)} made you the reviewer of a deliverable`);
+    tellAbout(
+      deliverable,
+      [patch.reviewer],
+      staff.email,
+      `${staffName(staff)} made you the reviewer of a deliverable`,
+    );
   refresh();
   return { ...result, message: "Deliverable saved" };
 }
@@ -826,9 +854,19 @@ export async function moveDeliverable(
     );
   });
   if (move.to === "internal_review")
-    tellAbout(deliverable, [deliverable.reviewer], staff.email, `${by} sent you a deliverable to review`);
+    tellAbout(
+      deliverable,
+      [deliverable.reviewer],
+      staff.email,
+      `${by} sent you a deliverable to review`,
+    );
   if (move.to === "changes_requested")
-    tellAbout(deliverable, [deliverable.owner], staff.email, `${by} asked for changes on your deliverable`);
+    tellAbout(
+      deliverable,
+      [deliverable.owner],
+      staff.email,
+      `${by} asked for changes on your deliverable`,
+    );
   refresh();
   return {
     ok: true,
@@ -947,7 +985,7 @@ export async function saveTemplate(
 ): Promise<ActionResult> {
   const staff = await manager();
   if (!staff) return DENIED;
-  if (!isOption(ENGAGEMENT_TYPES, type))
+  if (!isOption(ENGAGEMENT_TYPES, type) && !isCustomType(type))
     return { ok: false, message: "Unknown engagement type." };
   const input = asInput(values);
   const lines = cleanTemplateLines(input.lines);
@@ -974,16 +1012,77 @@ export async function saveTemplate(
   };
 }
 
-/** Goes back to the built-in template for a type. */
+/**
+ * Makes a new template (a team-made engagement type) with a name, starting
+ * empty or as a copy of another. values: { name, from? }.
+ */
+export async function createTemplate(values: unknown): Promise<ActionResult> {
+  const staff = await manager();
+  if (!staff) return DENIED;
+  const input = asInput(values);
+  const name =
+    typeof input.name === "string"
+      ? input.name.replace(/\s+/g, " ").trim().slice(0, 60)
+      : "";
+  if (name.length < 2)
+    return { ok: false, message: "Give the template a name." };
+  if (looksLikeSecret(name))
+    return {
+      ok: false,
+      message: "That looks like a password or a key. Pick another name.",
+    };
+  const key = customTypeKey(name);
+  if (!key)
+    return { ok: false, message: "Use letters or numbers in the name." };
+  const saved = await loadTemplates();
+  if (!saved.ok) return { ok: false, message: saved.message };
+  const taken = engagementTypes(saved.rows).some(
+    (type) =>
+      type.value === key || type.label.toLowerCase() === name.toLowerCase(),
+  );
+  if (taken)
+    return { ok: false, message: "A template with that name already exists." };
+  const from = input.from;
+  const start =
+    isOption(ENGAGEMENT_TYPES, from) || isCustomType(from)
+      ? templateFor(from, saved.rows)
+      : { lines: [], rhythm: "" };
+  const result = await saveTemplateRow(
+    { engagement_type: key, name, lines: start.lines, rhythm: start.rhythm },
+    staff.email,
+  );
+  if (!result.ok) return result;
+  refresh();
+  return { ok: true, message: `${name} added. Edit it to set its lines.` };
+}
+
+/**
+ * Goes back to the built-in template for a type. A team-made type is
+ * removed instead, unless an engagement still uses it.
+ */
 export async function resetTemplate(type: unknown): Promise<ActionResult> {
   const staff = await manager();
   if (!staff) return DENIED;
-  if (!isOption(ENGAGEMENT_TYPES, type))
+  const own = isCustomType(type);
+  if (!isOption(ENGAGEMENT_TYPES, type) && !own)
     return { ok: false, message: "Unknown engagement type." };
+  if (own) {
+    const engagements = await loadEngagements();
+    if (!engagements.ok) return { ok: false, message: engagements.message };
+    const using = engagements.rows.filter((row) => row.type === type).length;
+    if (using)
+      return {
+        ok: false,
+        message: `${using === 1 ? "1 engagement uses" : `${using} engagements use`} this template. Change ${using === 1 ? "its" : "their"} type first.`,
+      };
+  }
   const result = await resetTemplateRow(type);
   if (!result.ok) return result;
   refresh();
-  return { ok: true, message: "Back to the built-in template" };
+  return {
+    ok: true,
+    message: own ? "Template removed" : "Back to the built-in template",
+  };
 }
 
 /** Saves a person's capacity row. values: { email, name?, role, weekly_capacity, slack_user_id?, active? }. */

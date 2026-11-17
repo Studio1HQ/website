@@ -126,6 +126,13 @@ export default async function ReportsPage() {
             ? "Everyone's weekly and monthly reports. Weekly ones are due Monday at 12:00, monthly ones on the 2nd."
             : "Your weekly and monthly reports to Arindam and Amitesh. The numbers fill themselves in from your tasks, client work and days; you add a few lines."
         }
+        actions={
+          founder ? (
+            <Link href="/internal/tasks/reports/team" className={buttonClass("secondary")}>
+              Team report
+            </Link>
+          ) : undefined
+        }
       />
 
       {failed && !failed.ok ? (

@@ -23,6 +23,8 @@ import {
 } from "@/lib/internal/clients/rules";
 import {
   CLIENTS_MIGRATION_HINT,
+  TEMPLATES_MIGRATION_HINT,
+  engagementTypes,
   namesFrom,
   thisMonth,
   todayKey,
@@ -429,6 +431,12 @@ export const loadTemplates = () =>
     { tieBreak: null },
   );
 
+/** The engagement types to pick from and to name: built-in, then the team's own. */
+export const loadTypeOptions = cache(async () => {
+  const saved = await loadTemplates();
+  return engagementTypes(saved.ok ? saved.rows : []);
+});
+
 /** People who can own or review client work: admins and the client roles, by email. */
 export async function ownerChoices(): Promise<string[]> {
   // Dashboard members in client work, plus everyone active on the capacity
@@ -601,6 +609,13 @@ export const clientNeeds = cache(
 function writeError(noun: string, message: string): ActionResult {
   if (isMissingTable(message))
     return { ok: false, message: CLIENTS_MIGRATION_HINT };
+  // A team-made template before its migration: no name column (PGRST204),
+  // or the old list of allowed types (23514).
+  if (
+    noun === "template" &&
+    (message.includes("PGRST204") || message.includes("23514"))
+  )
+    return { ok: false, message: TEMPLATES_MIGRATION_HINT };
   if (message.includes("23505")) {
     return {
       ok: false,
@@ -733,7 +748,9 @@ export async function insertMany(
 
 /** Saves a type's template (replacing the saved one). */
 export async function saveTemplateRow(
-  row: Pick<ScopeTemplate, "engagement_type" | "lines" | "rhythm">,
+  row: Pick<ScopeTemplate, "engagement_type" | "lines" | "rhythm"> & {
+    name?: string;
+  },
   by: string,
 ): Promise<ActionResult> {
   const result = await upsertRows(
@@ -751,7 +768,7 @@ export async function saveTemplateRow(
   return result.ok ? { ok: true } : writeError("template", result.message);
 }
 
-/** Deletes a type's saved template, so the built-in one applies again. */
+/** Deletes a type's saved template: the built-in one applies again, or a team-made type is gone. */
 export async function resetTemplateRow(type: string): Promise<ActionResult> {
   const result = await deleteRows(
     TABLES.templates,
@@ -780,4 +797,3 @@ export async function savePersonRow(
   );
   return result.ok ? { ok: true } : writeError("person", result.message);
 }
-

@@ -6,7 +6,7 @@ import { notify } from "@/lib/internal/notifications/data";
 import { requireOwner, staffName } from "@/lib/internal/session";
 import { emailAddress } from "@/lib/internal/token";
 import { getSlipFor, monthIsOpen, savePayslip, sendPayslip, type SendResult } from "@/lib/internal/team/payroll";
-import { decideReimbursement, getReimbursement } from "@/lib/internal/team/reimbursements";
+import { cleanDecisionNote, decideReimbursement, getReimbursement } from "@/lib/internal/team/reimbursements";
 import { cleanLines, isMonthKey, isUuid, monthLabel, type TeamResult } from "@/lib/internal/team/shared";
 
 /*
@@ -58,12 +58,16 @@ export async function emailSlip(email: unknown, month: unknown, resend: unknown)
   return result;
 }
 
-/** Approves an expense claim onto a payslip month (amount can be corrected), or rejects it. */
+/**
+ * Approves an expense claim onto a payslip month (amount can be corrected),
+ * or rejects it. The note is for the person: they see it on My day.
+ */
 export async function decideClaim(
   id: unknown,
   decision: unknown,
   month: unknown,
   amount: unknown,
+  note?: unknown,
 ): Promise<TeamResult> {
   const admin = await requireOwner();
   if (!isUuid(id)) return { ok: false, message: "That claim isn't valid." };
@@ -85,18 +89,19 @@ export async function decideClaim(
   }
   const result = await decideReimbursement(
     id,
-    decision === "approved" && isMonthKey(month) ? { status: "approved", month, amount } : { status: "rejected" },
+    decision === "approved" && isMonthKey(month) ? { status: "approved", month, amount, note } : { status: "rejected", note },
     admin.email,
   );
   if (result.ok) {
     const approved = decision === "approved" && isMonthKey(month);
     const by = staffName(admin);
+    const said = cleanDecisionNote(note);
     // No amount on the bell: My day has it.
     after(() =>
       notify([claim.email], admin.email, {
         kind: "claim",
         title: approved ? `${by} approved your expense claim` : `${by} didn't approve your expense claim`,
-        body: approved ? `Paid with your ${monthLabel(month)} payslip` : "",
+        body: [approved ? `Paid with your ${monthLabel(month)} payslip` : "", said].filter(Boolean).join(" · "),
         href: "/internal/me",
       }),
     );

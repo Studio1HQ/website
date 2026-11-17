@@ -18,6 +18,7 @@ import {
 import {
   addMyLeave,
   claimExpense,
+  startReceipt,
   deleteMyDay,
   endDay,
   removeMyPhoto,
@@ -32,7 +33,7 @@ import { cn } from "@/lib/utils";
 import { Select } from "@/components/internal/select";
 import { useToast } from "@/components/internal/toast";
 import { Avatar, Card, CardTitle, buttonClass, inputClass } from "@/components/internal/ui";
-import { ClaimChip, DayChip, IdChip } from "@/components/internal/team/chips";
+import { ClaimChip, DayChip, IdChip, dayText } from "@/components/internal/team/chips";
 import { DayDialog, LeaveDialog } from "@/components/internal/team/day-dialogs";
 import { Label, MonthSwitcher, TeamDialog, shrinkImage, useTeamAction } from "@/components/internal/team/kit";
 import {
@@ -41,6 +42,8 @@ import {
   MAX_UPLOAD_BYTES,
   MAX_UPLOAD_LABEL,
   PERSON_KINDS,
+  MAX_RECEIPT_PDF_BYTES,
+  MAX_RECEIPT_PDF_LABEL,
   REIMBURSEMENT_SUBJECT_EXAMPLE,
   dayLabel,
   displayName,
@@ -65,6 +68,32 @@ import {
 
 const MAX_UPLOAD = MAX_UPLOAD_BYTES;
 
+/** One of the page's three parts: a heading, a line on what it holds, its actions. */
+function Section({
+  title,
+  hint,
+  action,
+  children,
+}: {
+  title: string;
+  hint: string;
+  action?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <section className="mt-9 first:mt-0">
+      <div className="mb-3 flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
+        <div className="min-w-0">
+          <h2 className="text-[16px] font-medium leading-tight tracking-[-0.01em]">{title}</h2>
+          <p className="mt-0.5 text-[12.5px] text-[var(--i-muted)]">{hint}</p>
+        </div>
+        {action ? <div className="flex flex-wrap items-center gap-2">{action}</div> : null}
+      </div>
+      {children}
+    </section>
+  );
+}
+
 function Stat({ label, value, note }: { label: string; value: string; note?: string }) {
   return (
     <div className="min-w-0">
@@ -88,10 +117,13 @@ export function MyDay({
   claims,
   inboundAddress,
   admin,
-  work,
+  tasks,
+  calls,
 }: {
-  /** Tasks' "What you did today" list, shown under Today (left out before Tasks is set up). */
-  work?: ReactNode;
+  /** Today's task cards, under the clock (left out before Tasks is set up). */
+  tasks?: ReactNode;
+  /** Today's calls, beside the tasks (left out when the person has none). */
+  calls?: ReactNode;
   person: TeamPerson;
   /** Admins can set their own employee ID. */
   admin: boolean;
@@ -127,9 +159,40 @@ export function MyDay({
   const unpaid = days.reduce((sum, day) => sum + lopFor(day), 0);
   const name = displayName(person);
 
+  // The clock card: where the day stands, in one line, a figure and a detail.
+  const idle = "bg-[var(--i-line-strong)]";
+  const clock = !today
+    ? {
+        dot: idle,
+        status: "Not started",
+        headline: intern ? "Nothing logged today" : "You haven't started yet",
+        detail: intern
+          ? `Your reviewer${person.reviewer ? ` (${person.reviewer})` : ""} logs your days.`
+          : isWeekend(now.date)
+            ? "It's the weekend. Log it only if you worked."
+            : "Start your day when you sit down to work.",
+      }
+    : today.kind === "leave"
+      ? { dot: "bg-sky-500", status: "On leave today", headline: dayText(today), detail: today.note || "Enjoy the day off." }
+      : running
+        ? {
+            dot: "bg-emerald-500",
+            status: "Working now",
+            headline: formatMinutes(soFar),
+            detail: `Active so far · started ${today.start_time ?? running.start}`,
+          }
+        : {
+            dot: idle,
+            status: today.kind === "half_day" ? "Half day logged" : "Day ended",
+            headline: formatMinutes(today.active_minutes),
+            detail: today.start_time
+              ? `Active · ${today.start_time}–${today.end_time ?? "…"}`
+              : "No times logged for today.",
+          };
+
   return (
     <>
-      <header className="mb-6 flex flex-wrap items-center justify-between gap-4">
+      <header className="mb-7 flex flex-wrap items-center justify-between gap-4">
         <div className="flex min-w-0 items-center gap-3.5">
           <button
             type="button"
@@ -153,51 +216,29 @@ export function MyDay({
             </p>
           </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={() => setProfileOpen(true)} className={buttonClass("secondary")}>
-            Edit profile
-          </button>
-          {!intern ? (
-            <button type="button" onClick={() => setLeaveOpen(true)} className={buttonClass("secondary")}>
-              <AirplaneTilt size={15} /> Take leave
-            </button>
-          ) : null}
-        </div>
+        <button type="button" onClick={() => setProfileOpen(true)} className={buttonClass("secondary")}>
+          Edit profile
+        </button>
       </header>
 
-      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
-        <div className="space-y-4">
-          {/* Today */}
-          <Card>
-            <CardTitle
-              action={
-                today && canEdit(now.date) ? (
-                  <button
-                    type="button"
-                    onClick={() => setEditing({ date: now.date, existing: today })}
-                    className={buttonClass("ghost", "sm")}
-                  >
-                    Edit
-                  </button>
-                ) : null
-              }
-            >
-              Today
-            </CardTitle>
-            <div className="p-5">
-              {intern && !today ? (
-                <p className="text-[13.5px] leading-relaxed text-[var(--i-muted)]">
-                  Your reviewer{person.reviewer ? ` (${person.reviewer})` : ""} logs your days. Nothing&apos;s logged for
-                  today yet.
-                </p>
-              ) : !today ? (
-                <>
-                  <p className="text-[13.5px] text-[var(--i-muted)]">
-                    {isWeekend(now.date)
-                      ? "It's the weekend. Log it only if you worked."
-                      : "You haven't started your day yet."}
-                  </p>
-                  <div className="mt-4 flex flex-wrap gap-2">
+      {/* 1. Today: the clock, then today's tasks and calls */}
+      <Section title="Today" hint="Your hours, tasks and calls for the day.">
+        <Card className="p-5">
+          <div className="flex flex-wrap items-center justify-between gap-x-8 gap-y-4">
+            <div className="min-w-0">
+              <p className="flex items-center gap-2 text-[12.5px] text-[var(--i-muted)]">
+                <span aria-hidden className={cn("size-2 shrink-0 rounded-full", clock.dot)} />
+                {clock.status}
+              </p>
+              <p className="mt-2 text-[26px] font-medium leading-none tabular-nums tracking-[-0.02em]">
+                {clock.headline}
+              </p>
+              <p className="mt-2 text-[12.5px] leading-relaxed text-[var(--i-muted)]">{clock.detail}</p>
+            </div>
+            {intern ? null : (
+              <div className="flex flex-wrap items-center gap-2">
+                {!today ? (
+                  <>
                     <button
                       type="button"
                       disabled={pending}
@@ -213,111 +254,128 @@ export function MyDay({
                     >
                       Add times by hand
                     </button>
-                  </div>
-                </>
-              ) : today.kind === "leave" ? (
-                <div className="flex items-center gap-3">
-                  <DayChip day={today} />
-                  <p className="text-[13.5px] text-[var(--i-muted)]">
-                    You&apos;re on leave today{today.note ? `: ${today.note}` : "."}
-                  </p>
-                </div>
-              ) : (
-                <>
-                  <div className="grid grid-cols-3 gap-4">
-                    <Stat label="Started" value={today.start_time ?? "—"} />
-                    <Stat
-                      label="Ended"
-                      value={today.end_time ?? "—"}
-                      note={running ? "Still working" : slots.length > 1 ? `${slots.length} slots` : undefined}
-                    />
-                    <Stat
-                      label="Active"
-                      value={running ? formatMinutes(soFar) : formatMinutes(today.active_minutes)}
-                      note={running ? "So far" : today.kind === "half_day" ? "Half day" : undefined}
-                    />
-                  </div>
-                  {slots.length > 1 ? (
-                    <ol aria-label="Today's slots" className="mt-4 flex flex-wrap gap-1.5">
-                      {slots.map((slot, index) => (
-                        <li
-                          key={`${index}-${slot.start}`}
-                          className="inline-flex items-center gap-1.5 rounded-full bg-[var(--i-sunken)] px-2.5 py-1 text-[12px] tabular-nums ring-1 ring-inset ring-[var(--i-line)]"
-                        >
-                          {slot.end ? null : <span aria-hidden className="size-1.5 rounded-full bg-emerald-500" />}
-                          {slot.start}–{slot.end ?? "now"}
-                          {slot.end ? (
-                            <span className="text-[var(--i-faint)]">{formatMinutes(minutesBetween(slot.start, slot.end))}</span>
-                          ) : null}
-                        </li>
-                      ))}
-                    </ol>
-                  ) : null}
-                  {intern ? null : running ? (
-                    <button
-                      type="button"
-                      disabled={pending}
-                      onClick={() => run(() => endDay())}
-                      className={cn(buttonClass("primary"), "mt-5 h-9 px-4")}
-                    >
-                      <Stop size={14} weight="fill" /> {slots.length > 1 ? "End this slot" : "End my day"}
-                    </button>
-                  ) : slots.length < MAX_SLOTS ? (
-                    <button
-                      type="button"
-                      disabled={pending}
-                      onClick={() => run(() => startDay())}
-                      title={slots.length ? "Back at work? This adds a new slot from now." : undefined}
-                      className={cn(buttonClass("secondary"), "mt-5 h-9 px-4")}
-                    >
-                      <Play size={14} weight="fill" /> {slots.length ? "Start another slot" : "Start my day"}
-                    </button>
-                  ) : null}
-                </>
-              )}
-            </div>
-          </Card>
-
-          {work}
-
-          {/* The month */}
-          <Card>
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--i-line)] px-5 py-3">
-              <h2 className="text-[13px] font-medium">Your days</h2>
-              <div className="flex items-center gap-2">
-                <MonthSwitcher month={month} current={current} hrefFor={(value) => `/internal/me?month=${value}`} />
-                {!intern ? (
+                  </>
+                ) : today.kind === "leave" ? null : running ? (
                   <button
                     type="button"
-                    aria-label="Log a day"
-                    title="Log a day"
-                    onClick={() =>
-                      setEditing({ date: month === current ? now.date : `${month}-01`, existing: null })
-                    }
-                    className={cn(buttonClass("secondary", "sm"), "h-8 w-8 px-0")}
+                    disabled={pending}
+                    onClick={() => run(() => endDay())}
+                    className={cn(buttonClass("primary"), "h-9 px-4")}
                   >
-                    <Plus size={14} />
+                    <Stop size={14} weight="fill" /> {slots.length > 1 ? "End this slot" : "End my day"}
+                  </button>
+                ) : slots.length < MAX_SLOTS ? (
+                  <button
+                    type="button"
+                    disabled={pending}
+                    onClick={() => run(() => startDay())}
+                    title={slots.length ? "Back at work? This adds a new slot from now." : undefined}
+                    className={cn(buttonClass("secondary"), "h-9 px-4")}
+                  >
+                    <Play size={14} weight="fill" /> {slots.length ? "Start another slot" : "Start my day"}
+                  </button>
+                ) : null}
+                {today && canEdit(now.date) ? (
+                  <button
+                    type="button"
+                    onClick={() => setEditing({ date: now.date, existing: today })}
+                    className={cn(buttonClass("ghost"), "h-9")}
+                  >
+                    <PencilSimple size={14} /> {today.kind === "leave" ? "Change" : "Edit times"}
                   </button>
                 ) : null}
               </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4 border-b border-[var(--i-line)] px-5 py-4 sm:grid-cols-4">
-              <Stat label="Days worked" value={String(workedDays)} />
-              <Stat label="Active hours" value={formatMinutes(activeMinutes)} />
-              <Stat label="Leave" value={String(leaveDays)} note={leaveDays === 1 ? "day" : "days"} />
-              <Stat label="Unpaid" value={String(unpaid)} note="Loss of pay days" />
-            </div>
-            {days.length === 0 ? (
-              <p className="px-5 py-8 text-center text-[13px] text-[var(--i-faint)]">
-                Nothing logged in {monthLabel(month)}.
-              </p>
-            ) : (
-              <ul>
+            )}
+          </div>
+          {slots.length > 1 ? (
+            <ol
+              aria-label="Today's slots"
+              className="mt-4 flex flex-wrap gap-1.5 border-t border-[var(--i-line)] pt-4"
+            >
+              {slots.map((slot, index) => (
+                <li
+                  key={`${index}-${slot.start}`}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-[var(--i-sunken)] px-2.5 py-1 text-[12px] tabular-nums ring-1 ring-inset ring-[var(--i-line)]"
+                >
+                  {slot.end ? null : <span aria-hidden className="size-1.5 rounded-full bg-emerald-500" />}
+                  {slot.start}–{slot.end ?? "now"}
+                  {slot.end ? (
+                    <span className="text-[var(--i-faint)]">{formatMinutes(minutesBetween(slot.start, slot.end))}</span>
+                  ) : null}
+                </li>
+              ))}
+            </ol>
+          ) : null}
+        </Card>
+
+        {tasks || calls ? (
+          <div
+            className={cn(
+              "mt-4 grid items-start gap-4",
+              tasks && calls ? "lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]" : null,
+            )}
+          >
+            {tasks}
+            {calls}
+          </div>
+        ) : null}
+      </Section>
+
+      {/* 2. The month: totals, then every logged day */}
+      <Section
+        title={month === current ? "This month" : monthLabel(month)}
+        hint="The days you've logged, your leave and your hours."
+        action={
+          <>
+            <MonthSwitcher month={month} current={current} hrefFor={(value) => `/internal/me?month=${value}`} />
+            {!intern ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setEditing({ date: month === current ? now.date : `${month}-01`, existing: null })}
+                  className={buttonClass("secondary")}
+                >
+                  <Plus size={14} /> Log a day
+                </button>
+                <button type="button" onClick={() => setLeaveOpen(true)} className={buttonClass("secondary")}>
+                  <AirplaneTilt size={15} /> Take leave
+                </button>
+              </>
+            ) : null}
+          </>
+        }
+      >
+        <Card>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-5 px-5 py-4 sm:grid-cols-4">
+            <Stat label="Days worked" value={String(workedDays)} />
+            <Stat label="Active hours" value={formatMinutes(activeMinutes)} />
+            <Stat label="Leave days" value={String(leaveDays)} />
+            <Stat label="Unpaid days" value={String(unpaid)} note={unpaid ? "Loss of pay" : undefined} />
+          </div>
+          {days.length === 0 ? (
+            <p className="border-t border-[var(--i-line)] px-5 py-8 text-center text-[13px] text-[var(--i-faint)]">
+              Nothing logged in {monthLabel(month)}.
+            </p>
+          ) : (
+            <>
+              <div
+                aria-hidden
+                className="hidden items-center gap-3 border-y border-[var(--i-line)] bg-[var(--i-sunken)] px-5 py-2 text-[11.5px] text-[var(--i-muted)] sm:flex"
+              >
+                <span className="w-[5.5rem] shrink-0">Day</span>
+                <span className="w-[7.5rem] shrink-0">Logged as</span>
+                <span className="w-[10rem] shrink-0">Times</span>
+                <span className="w-[4.5rem] shrink-0 text-right">Active</span>
+                <span className="min-w-0 flex-1 pl-3">Note</span>
+              </div>
+              <ul className="border-t border-[var(--i-line)] sm:border-t-0">
                 {[...days].reverse().map((day) => {
                   const editable = canEdit(day.day);
                   const row = (
                     <>
-                      <span className="w-[5.5rem] shrink-0 text-[13px] tabular-nums">{dayLabel(day.day)}</span>
+                      <span className="w-[5.5rem] shrink-0 text-[13px] tabular-nums">
+                        {dayLabel(day.day)}
+                      </span>
                       <span className="w-[7.5rem] shrink-0">
                         <DayChip day={day} />
                       </span>
@@ -325,15 +383,19 @@ export function MyDay({
                         title={day.slots.length > 1 ? slotsLabel(day.slots) : undefined}
                         className="hidden w-[10rem] shrink-0 truncate text-[12.5px] tabular-nums text-[var(--i-muted)] sm:block"
                       >
-                        {day.start_time ? `${day.start_time}–${day.end_time ?? "…"}` : ""}
+                        {day.start_time ? `${day.start_time}–${day.end_time ?? "now"}` : ""}
                         {day.slots.length > 1 ? (
                           <span className="text-[var(--i-faint)]"> · {day.slots.length} slots</span>
                         ) : null}
                       </span>
-                      <span className="w-[4.5rem] shrink-0 text-right text-[12.5px] tabular-nums">
-                        {day.kind === "leave" ? "" : formatMinutes(day.active_minutes)}
+                      <span className="ml-auto w-[4.5rem] shrink-0 text-right text-[12.5px] tabular-nums sm:ml-0">
+                        {day.kind === "leave"
+                          ? ""
+                          : formatMinutes(day.day === now.date && running ? soFar : day.active_minutes)}
                       </span>
-                      <span className="min-w-0 flex-1 truncate text-[12.5px] text-[var(--i-faint)]">{day.note}</span>
+                      <span className="hidden min-w-0 flex-1 truncate pl-3 text-[12.5px] text-[var(--i-faint)] sm:block">
+                        {day.note}
+                      </span>
                       {editable ? (
                         <span className="flex shrink-0 items-center gap-1 text-[12px] text-[var(--i-muted)]">
                           <PencilSimple size={13} /> <span className="hidden sm:inline">Edit</span>
@@ -342,7 +404,13 @@ export function MyDay({
                     </>
                   );
                   return (
-                    <li key={day.id} className="border-b border-[var(--i-line)] last:border-b-0">
+                    <li
+                      key={day.id}
+                      className={cn(
+                        "border-b border-[var(--i-line)] last:border-b-0",
+                        day.day === now.date ? "bg-[var(--i-hover)]" : null,
+                      )}
+                    >
                       {editable ? (
                         <button
                           type="button"
@@ -358,16 +426,18 @@ export function MyDay({
                   );
                 })}
               </ul>
-            )}
-          </Card>
-        </div>
+            </>
+          )}
+        </Card>
+      </Section>
 
-        <div className="space-y-4">
-          {/* Payslips */}
+      {/* 3. Money: payslips and expense claims */}
+      <Section title="Pay and expenses" hint="Your payslips, and money you spent on work.">
+        <div className="grid items-start gap-4 md:grid-cols-2">
           <Card>
-            <CardTitle>Payslips</CardTitle>
+            <CardTitle action={<span aria-hidden className="h-8" />}>Payslips</CardTitle>
             {payslips.length === 0 ? (
-              <p className="px-5 py-6 text-[13px] text-[var(--i-faint)]">
+              <p className="px-5 py-5 text-[13px] leading-relaxed text-[var(--i-faint)]">
                 Your payslips show up here, and in your inbox, once they&apos;re sent.
               </p>
             ) : (
@@ -391,7 +461,6 @@ export function MyDay({
             )}
           </Card>
 
-          {/* Expenses */}
           <Card>
             <CardTitle
               action={
@@ -403,13 +472,16 @@ export function MyDay({
               Expenses
             </CardTitle>
             {claims.length === 0 ? (
-              <p className="px-5 pt-5 text-[13px] text-[var(--i-faint)]">
+              <p className="px-5 py-5 text-[13px] leading-relaxed text-[var(--i-faint)]">
                 Spent your own money on work? Claim it here; approved claims are paid with your next payslip.
               </p>
             ) : (
               <ul>
                 {claims.slice(0, 20).map((claim) => (
-                  <li key={claim.id} className="flex items-center gap-3 border-b border-[var(--i-line)] px-5 py-3">
+                  <li
+                    key={claim.id}
+                    className="flex items-center gap-3 border-b border-[var(--i-line)] px-5 py-3 last:border-b-0"
+                  >
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-[13px] font-medium">{claim.description || "Expense"}</p>
                       <p className="truncate text-[12px] text-[var(--i-muted)]">
@@ -451,10 +523,14 @@ export function MyDay({
                 ))}
               </ul>
             )}
-            {inboundAddress ? <EmailHint address={inboundAddress} /> : claims.length === 0 ? <div className="h-5" /> : null}
+            {inboundAddress ? (
+              <div className="border-t border-[var(--i-line)]">
+                <EmailHint address={inboundAddress} />
+              </div>
+            ) : null}
           </Card>
         </div>
-      </div>
+      </Section>
 
       <ProfileDialog open={profileOpen} onOpenChange={setProfileOpen} person={person} admin={admin} />
       <LeaveDialog open={leaveOpen} onOpenChange={setLeaveOpen} today={now.date} onSave={addMyLeave} />
@@ -477,7 +553,7 @@ export function MyDay({
 function EmailHint({ address }: { address: string }) {
   const toast = useToast();
   return (
-    <div className="m-5 mt-4 rounded-lg border border-dashed border-[var(--i-line-strong)] px-3.5 py-3 text-[12.5px] leading-relaxed text-[var(--i-muted)]">
+    <div className="px-5 py-4 text-[12.5px] leading-relaxed text-[var(--i-muted)]">
       Or email <span className="font-medium text-[var(--i-ink)]">{address}</span> with the receipt attached and the
       subject:
       <button
@@ -651,6 +727,8 @@ function ClaimDialogBody({ onOpenChange, today }: { onOpenChange: (open: boolean
   const [spentOn, setSpentOn] = useState(today);
   const [receipt, setReceipt] = useState<File | null>(null);
 
+  const [uploading, setUploading] = useState(false);
+
   const submit = async () => {
     const form = new FormData();
     form.set("description", description);
@@ -658,12 +736,50 @@ function ClaimDialogBody({ onOpenChange, today }: { onOpenChange: (open: boolean
     form.set("currency", currency);
     form.set("spent_on", spentOn);
     if (receipt) {
-      const body = receipt.type === "application/pdf" ? receipt : await shrinkImage(receipt, 2000);
-      if (body.size > MAX_UPLOAD) {
-        toast("error", `The receipt is too big. Keep it under ${MAX_UPLOAD_LABEL}.`);
+      // Some phones and mail apps hand over a PDF with no type at all.
+      const pdf = receipt.type === "application/pdf" || /\.pdf$/i.test(receipt.name);
+      const body = pdf ? receipt : await shrinkImage(receipt, 2000);
+      if (body.size <= MAX_UPLOAD) {
+        form.set("receipt", new File([body], receipt.name, { type: pdf ? "application/pdf" : body.type || receipt.type }));
+      } else if (pdf && body.size <= MAX_RECEIPT_PDF_BYTES) {
+        // Too big to send with the form: it goes straight to storage first.
+        if (description.trim().length < 3 || !amount.trim()) {
+          toast("error", description.trim().length < 3 ? "Say what the expense was for." : "Add the amount.");
+          return;
+        }
+        setUploading(true);
+        try {
+          const start = await startReceipt();
+          if (!start.ok) {
+            toast("error", start.message);
+            return;
+          }
+          const sent = await fetch(start.url, {
+            method: "PUT",
+            headers: { "content-type": "application/pdf" },
+            body,
+          });
+          if (!sent.ok) {
+            toast("error", "The receipt didn't upload. Try again.");
+            return;
+          }
+          form.set("receipt_id", start.id);
+          form.set("receipt_name", receipt.name);
+        } catch {
+          toast("error", "The receipt didn't upload. Check your connection and try again.");
+          return;
+        } finally {
+          setUploading(false);
+        }
+      } else {
+        toast(
+          "error",
+          pdf
+            ? `The receipt is too big. Keep PDFs under ${MAX_RECEIPT_PDF_LABEL}.`
+            : `The receipt is too big. Keep it under ${MAX_UPLOAD_LABEL}.`,
+        );
         return;
       }
-      form.set("receipt", new File([body], receipt.name, { type: body.type || receipt.type }));
     }
     run(() => claimExpense(form), () => onOpenChange(false));
   };
@@ -679,8 +795,8 @@ function ClaimDialogBody({ onOpenChange, today }: { onOpenChange: (open: boolean
           <button type="button" onClick={() => onOpenChange(false)} className={buttonClass("ghost")}>
             Cancel
           </button>
-          <button type="button" disabled={pending} onClick={() => void submit()} className={buttonClass("primary")}>
-            {pending ? "Sending…" : "Send for approval"}
+          <button type="button" disabled={pending || uploading} onClick={() => void submit()} className={buttonClass("primary")}>
+            {uploading ? "Uploading the receipt…" : pending ? "Sending…" : "Send for approval"}
           </button>
         </>
       }
@@ -715,10 +831,10 @@ function ClaimDialogBody({ onOpenChange, today }: { onOpenChange: (open: boolean
           <DateField value={spentOn} max={today} onChange={setSpentOn} />
         </Label>
       </div>
-      <Label label="Receipt" hint="PDF or photo, optional">
+      <Label label="Receipt" hint={`PDF (up to ${MAX_RECEIPT_PDF_LABEL}) or photo, optional`}>
         <input
           type="file"
-          accept="application/pdf,image/png,image/jpeg,image/webp"
+          accept="application/pdf,.pdf,image/png,image/jpeg,image/webp"
           onChange={(event) => setReceipt(event.target.files?.[0] ?? null)}
           className="block w-full text-[12.5px] text-[var(--i-muted)] file:mr-3 file:h-8 file:rounded-lg file:border file:border-[var(--i-line)] file:bg-[var(--i-panel)] file:px-3 file:text-[12.5px] file:font-medium file:text-[var(--i-ink)] hover:file:bg-[var(--i-hover)]"
         />

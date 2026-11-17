@@ -10,13 +10,16 @@ import {
   asClientsView,
   type ClientsView,
 } from "@/lib/internal/clients/overview-view";
-import { loadClientWork, loadCycles } from "@/lib/internal/clients/data";
+import {
+  loadClientWork,
+  loadCycles,
+  loadTypeOptions,
+} from "@/lib/internal/clients/data";
 import type { EngagementRow } from "@/lib/internal/clients/rules";
 import {
   CLIENT_STATUSES,
   CYCLE_STATES,
   ENGAGEMENT_STATUSES,
-  ENGAGEMENT_TYPES,
   clientPath,
   labelOf,
   monthLabel,
@@ -91,9 +94,10 @@ export default async function ClientsPage({
   const next = shiftMonth(current, 1);
   const today = todayKey();
 
-  const [allWork, nextCycles] = await Promise.all([
+  const [allWork, nextCycles, types] = await Promise.all([
     loadClientWork(month),
     manager ? loadCycles({ month: next }) : Promise.resolve(null),
+    loadTypeOptions(),
   ]);
   // Client team members an admin gave specific clients see only those.
   const work = scopeWork(staff.clientScope, allWork);
@@ -484,7 +488,7 @@ export default async function ClientsPage({
                         </td>
                         <td>
                           <OptionBadge
-                            list={ENGAGEMENT_TYPES}
+                            list={types}
                             value={row.engagement.type}
                           />
                         </td>
@@ -553,7 +557,7 @@ export default async function ClientsPage({
                               </p>
                               <p className="truncate text-[12px] text-[var(--i-muted)]">
                                 {row.engagement.name} ·{" "}
-                                {labelOf(ENGAGEMENT_TYPES, row.engagement.type)}
+                                {labelOf(types, row.engagement.type)}
                               </p>
                             </div>
                           </div>

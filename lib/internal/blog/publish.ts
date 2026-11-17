@@ -153,19 +153,23 @@ export async function publishPost(
     commitUrl = commit.url;
   }
 
-  const recorded = await markPublished(
-    post.id,
-    {
-      body,
-      banner_image: bannerImage,
-      publish_date: date,
-      source_path: filePath,
-      source_sha: ours,
-      published_by: staff.email,
-      published_commit: commitSha ?? post.published_commit,
-    },
-    post.updated_at,
-  );
+  // The commit is made, so this has to land: once the site redeploys with
+  // the new file, pressing Publish again can't recover it (the slug then
+  // reads as another post's). A failed write is tried twice more.
+  const published = {
+    body,
+    banner_image: bannerImage,
+    publish_date: date,
+    source_path: filePath,
+    source_sha: ours,
+    published_by: staff.email,
+    published_commit: commitSha ?? post.published_commit,
+  };
+  let recorded = await markPublished(post.id, published, post.updated_at);
+  for (let attempt = 0; recorded === "failed" && attempt < 2; attempt += 1) {
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    recorded = await markPublished(post.id, published, post.updated_at);
+  }
   if (recorded === "failed") {
     // The draft keeps its images and its links to them, so nothing breaks.
     return {

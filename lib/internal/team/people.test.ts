@@ -3,7 +3,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/supabase-server", async () => (await import("@/lib/internal/team/test-db")).fakeSupabase);
 
 const { db } = await import("@/lib/internal/team/test-db");
-const { ensureOwnersOnTeam, getPerson, listPeople, listPeoplePay, reviewerProblem, teamAccessFor } = await import("@/lib/internal/team/people");
+const { ensureOwnersOnTeam, getPerson, listPeople, listPeoplePay, personChanges, reviewerProblem, setEmployeeCode, teamAccessFor } = await import(
+  "@/lib/internal/team/people"
+);
 
 beforeEach(() => {
   db.reset();
@@ -121,5 +123,34 @@ describe("keeping the roster and dashboard access in step", async () => {
     // In step now: a second run adds nobody.
     const again = await listPeople();
     expect(await addMissingMembers(members, again.ok ? again.people : [], "arindam@studio1hq.com")).toEqual([]);
+  });
+});
+
+describe("the audit trail for someone's details", () => {
+  it("keeps only what changed, before and after", () => {
+    const before = { name: "Esha", employee_code: "S1-001", designation: "Writer", joined_on: null };
+    expect(personChanges(before, { ...before, employee_code: "EMP/7", joined_on: null })).toEqual({
+      before: { employee_code: "S1-001" },
+      after: { employee_code: "EMP/7" },
+    });
+    expect(personChanges(before, { ...before })).toBeNull();
+    expect(personChanges({ employee_code: null }, { employee_code: "S1-002" })).toEqual({
+      before: { employee_code: null },
+      after: { employee_code: "S1-002" },
+    });
+  });
+
+  it("writes a row when an employee ID changes", async () => {
+    const before = await getPerson("e@studio1hq.com");
+    expect((await setEmployeeCode("e@studio1hq.com", "S1-009", "admin@studio1hq.com", before)).ok).toBe(true);
+    expect(db.rows("team_audit")).toEqual([
+      expect.objectContaining({
+        actor: "admin@studio1hq.com",
+        area: "people",
+        action: "changed",
+        subject: "e@studio1hq.com",
+        detail: { before: { employee_code: null }, after: { employee_code: "S1-009" } },
+      }),
+    ]);
   });
 });

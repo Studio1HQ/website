@@ -5,6 +5,7 @@ import { isAdmin, requireMember } from "@/lib/internal/session";
 import { cantLog } from "@/lib/internal/team/access";
 import { changeProblem, cleanDay, deleteDay, listDays, saveDay, saveLeave } from "@/lib/internal/team/attendance";
 import { cleanPerson, removePhoto, setEmployeeCode, setPhoto, updateOwnName } from "@/lib/internal/team/people";
+import { startReceiptUpload } from "@/lib/internal/team/files";
 import { addReimbursement, withdrawReimbursement } from "@/lib/internal/team/reimbursements";
 import {
   MAX_SLOTS,
@@ -12,6 +13,7 @@ import {
   MAX_UPLOAD_LABEL,
   dayLabel,
   isDateKey,
+  isUuid,
   istNow,
   minutesBetween,
   openSlot,
@@ -191,7 +193,7 @@ export async function updateMyEmployeeId(code: unknown): Promise<TeamResult> {
   // other details a moment ago isn't put back.
   const clean = cleanPerson({ ...self.person, employee_code: code });
   if (!clean.ok) return clean;
-  const result = await setEmployeeCode(self.person.email, clean.person.employee_code, self.staff.email);
+  const result = await setEmployeeCode(self.person.email, clean.person.employee_code, self.staff.email, self.person);
   if (result.ok) revalidatePath("/internal", "layout");
   return result.ok ? { ok: true, message: "Employee ID saved" } : result;
 }
@@ -215,11 +217,24 @@ export async function removeMyPhoto(): Promise<TeamResult> {
   return result.ok ? { ok: true, message: "Photo removed" } : result;
 }
 
+/**
+ * A PDF receipt too big for a server action (over MAX_UPLOAD_BYTES): the
+ * browser gets a one-off link, puts the file in the bucket itself, then
+ * sends the claim with the id from here as `receipt_id`.
+ */
+export async function startReceipt(): Promise<{ ok: true; id: string; url: string } | { ok: false; message: string }> {
+  const self = await me();
+  if (!self) return { ok: false, message: "You're not on the team list yet. Ask an admin to add you." };
+  return startReceiptUpload(self.person.email);
+}
+
 /** An expense claim from the dashboard, with an optional receipt. */
 export async function claimExpense(form: FormData): Promise<TeamResult> {
   const self = await me();
   if (!self) return NOT_ON_LIST;
   const file = form.get("receipt");
+  const uploadedId = form.get("receipt_id");
+  const uploadedName = form.get("receipt_name");
   if (file instanceof File && file.size > MAX_UPLOAD_BYTES) {
     return { ok: false, message: `Receipts can be ${MAX_UPLOAD_LABEL} at most.` };
   }
@@ -232,6 +247,10 @@ export async function claimExpense(form: FormData): Promise<TeamResult> {
     currency: form.get("currency"),
     spent_on: form.get("spent_on"),
     receipt,
+    uploaded:
+      !receipt && isUuid(uploadedId)
+        ? { id: uploadedId, name: typeof uploadedName === "string" && uploadedName ? uploadedName : "Receipt.pdf" }
+        : null,
     source: "dashboard",
   });
   if (result.ok) revalidatePath("/internal", "layout");

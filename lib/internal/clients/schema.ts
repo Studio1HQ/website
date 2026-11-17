@@ -62,7 +62,45 @@ export const ENGAGEMENT_TYPES = options([
   ["campaign", "Campaign", "rose"],
   ["internal", "Internal (Studio1)", "stone"],
 ] as const);
-export type EngagementType = (typeof ENGAGEMENT_TYPES)[number]["value"];
+export type BuiltInType = (typeof ENGAGEMENT_TYPES)[number]["value"];
+/**
+ * A built-in type, or one the team made on the Templates page
+ * ("custom_launch_support"): a saved template under its own key.
+ */
+export type EngagementType = BuiltInType | `custom_${string}`;
+
+export function isCustomType(value: unknown): value is `custom_${string}` {
+  return typeof value === "string" && /^custom_[a-z0-9_]{1,40}$/.test(value);
+}
+
+/** "Launch support" → "custom_launch_support"; null when nothing is left. */
+export function customTypeKey(name: string): `custom_${string}` | null {
+  const slug = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+/, "")
+    .slice(0, 40)
+    .replace(/_+$/, "");
+  return slug ? `custom_${slug}` : null;
+}
+
+/** The built-in types, then the team's own by name. */
+export function engagementTypes(
+  saved: readonly { engagement_type: string; name?: string | null }[] = [],
+): readonly Labelled<EngagementType>[] {
+  const own = saved
+    .filter((row) => isCustomType(row.engagement_type))
+    .map((row) => {
+      const words = row.engagement_type.slice(7).replace(/_/g, " ");
+      return {
+        value: row.engagement_type as EngagementType,
+        label: row.name || words.charAt(0).toUpperCase() + words.slice(1),
+        tone: "stone" as Tone,
+      };
+    })
+    .sort((a, b) => a.label.localeCompare(b.label));
+  return [...ENGAGEMENT_TYPES, ...own];
+}
 
 export const ENGAGEMENT_STATUSES = options([
   ["planned", "Not started", "sky"],
@@ -416,6 +454,8 @@ export type TemplateLine = {
 
 export type ScopeTemplate = {
   engagement_type: EngagementType;
+  /** A team-made type's name; built-in types have none. */
+  name?: string | null;
   created_at: string;
   updated_at: string;
   created_by: string | null;
@@ -554,6 +594,9 @@ export type ActionResult =
     }
   | { ok: false; message: string };
 
+export const TEMPLATES_MIGRATION_HINT =
+  "Run the custom templates migration (supabase/migrations/20261118100000_custom_templates.sql) in Supabase first.";
+
 export const CLIENTS_MIGRATION_HINT =
   "Run the client work migration (supabase/migrations/20261115130000_client_work.sql) in Supabase first.";
 
@@ -575,7 +618,7 @@ function line(
  * month's cycle. A type with a saved row (client_scope_templates) uses that.
  */
 export const DEFAULT_TEMPLATES: Record<
-  EngagementType,
+  BuiltInType,
   { lines: TemplateLine[]; rhythm: string }
 > = {
   blogs_only: {
@@ -655,7 +698,12 @@ export function templateFor(
   const row = saved.find((item) => item.engagement_type === type);
   if (row && Array.isArray(row.lines))
     return { lines: row.lines, rhythm: row.rhythm, custom: true };
-  return { ...DEFAULT_TEMPLATES[type], custom: false };
+  // A team-made type whose row is gone starts empty.
+  const builtIn = DEFAULT_TEMPLATES[type as BuiltInType] ?? {
+    lines: [],
+    rhythm: "",
+  };
+  return { ...builtIn, custom: false };
 }
 
 /* ----------------------------------------------------------------- dates */

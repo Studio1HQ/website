@@ -392,6 +392,43 @@ export async function signedFileUrl(
   }
 }
 
+/**
+ * A one-off link the browser can PUT one file to (valid for two hours),
+ * for files too big to pass through a server action. It never overwrites:
+ * a path that's taken is refused. The bucket's size and type rules apply.
+ */
+export async function signedUploadUrl(
+  bucket: string,
+  path: string,
+): Promise<{ ok: true; url: string } | Failure> {
+  const supabase = config();
+  if (!supabase) return { ok: false, message: "Supabase isn't configured" };
+  try {
+    const response = await fetch(
+      `${supabase.url}/storage/v1/object/upload/sign/${encodeURIComponent(bucket)}/${encodePath(path)}`,
+      {
+        method: "POST",
+        headers: {
+          ...authHeaders(supabase.key),
+          "content-type": "application/json",
+        },
+        body: "{}",
+        cache: "no-store",
+        signal: AbortSignal.timeout(10_000),
+      },
+    );
+    if (!response.ok) {
+      const detail = await response.text().catch(() => "");
+      return { ok: false, message: `${response.status} ${detail.slice(0, 300)}` };
+    }
+    const { url } = (await response.json()) as { url?: string };
+    if (!url) return { ok: false, message: "No upload URL returned" };
+    return { ok: true, url: `${supabase.url}/storage/v1${url}` };
+  } catch (error) {
+    return { ok: false, message: String(error) };
+  }
+}
+
 // ---------------------------------------------------------------------
 // Auth: emailed-code sign-in for the internal dashboard (app/internal).
 // ---------------------------------------------------------------------

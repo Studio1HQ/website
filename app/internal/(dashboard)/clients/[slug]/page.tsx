@@ -59,7 +59,6 @@ import {
   CYCLE_STATES,
   DELIVERABLE_KINDS,
   ENGAGEMENT_STATUSES,
-  ENGAGEMENT_TYPES,
   INVOICE_STATES,
   addDays,
   clientPath,
@@ -71,6 +70,7 @@ import {
   plural,
   shiftWeek,
   templateFor,
+  engagementTypes,
   thisMonth,
   statusLabel,
   todayKey,
@@ -358,6 +358,7 @@ export default async function ClientWorkspacePage({
   const template = engagement
     ? templateFor(engagement.type, templates.ok ? templates.rows : [])
     : null;
+  const types = engagementTypes(templates.ok ? templates.rows : []);
   const internal = engagement ? isInternal(engagement.type) : false;
   const viewer = { email: staff.email, clients: staff.clients };
 
@@ -368,6 +369,7 @@ export default async function ClientWorkspacePage({
       owners={owners}
       names={names}
       me={staff.email}
+      types={types}
       trigger={
         <button
           type="button"
@@ -676,7 +678,7 @@ export default async function ClientWorkspacePage({
                       reportHref={reportHref}
                       current={current}
                     />
-                    <Card className="h-fit">
+                    <Card>
                       <CardTitle>Notes for the month</CardTitle>
                       <div className="px-5 py-4">
                         <CycleNotes
@@ -716,7 +718,7 @@ export default async function ClientWorkspacePage({
                     }
                   >
                     {manager
-                      ? `It starts with last month's numbers. If there was no last month, it starts with the ${labelOf(ENGAGEMENT_TYPES, engagement.type).toLowerCase()} plan: ${
+                      ? `It starts with last month's numbers. If there was no last month, it starts with the ${labelOf(types, engagement.type).toLowerCase()} plan: ${
                           template?.lines
                             .filter((line) => line.quantity > 0)
                             .map(
@@ -803,6 +805,7 @@ export default async function ClientWorkspacePage({
             <div className="min-w-0">
               {engagement ? (
                 <EngagementCard
+                  types={types}
                   engagement={engagement}
                   rhythm={template?.rhythm ?? ""}
                   names={names}
@@ -815,6 +818,7 @@ export default async function ClientWorkspacePage({
                           workspacePath={base}
                           owners={owners}
                           names={names}
+                          types={types}
                           trigger={
                             <button
                               type="button"
@@ -894,11 +898,13 @@ export default async function ClientWorkspacePage({
 
 function EngagementCard({
   engagement,
+  types,
   rhythm,
   names,
   action,
 }: {
   engagement: Engagement;
+  types: ReturnType<typeof engagementTypes>;
   rhythm: string;
   names: Readonly<Record<string, string>>;
   action: ReactNode;
@@ -910,7 +916,7 @@ function EngagementCard({
       <div className="px-5 py-4">
         <Fields>
           <Field label="Type">
-            <OptionBadge list={ENGAGEMENT_TYPES} value={engagement.type} />
+            <OptionBadge list={types} value={engagement.type} />
           </Field>
           <Field label="Status">
             <OptionBadge list={ENGAGEMENT_STATUSES} value={engagement.status} />
@@ -1097,7 +1103,7 @@ function MonthByMonth({
 }) {
   const ordered = [...cycles].sort((a, b) => b.month.localeCompare(a.month));
   return (
-    <Card className="h-fit">
+    <Card>
       <CardTitle>
         Month by month{" "}
         <span className="font-normal text-[var(--i-faint)]">

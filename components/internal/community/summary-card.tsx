@@ -79,25 +79,23 @@ export async function CommunitySummaryCard() {
 
   return (
     <Link href="/internal/community" className="group block">
-      <Card className="flex h-full flex-col px-5 py-4 transition-colors group-hover:bg-[var(--i-hover)]">
-        <div className="flex items-center gap-2.5">
-          <span className="flex size-7 items-center justify-center rounded-lg bg-[var(--i-sunken)] text-[var(--i-ink-2)] ring-1 ring-inset ring-[var(--i-line)]">
-            <UsersFour size={15} />
-          </span>
-          <h2 className="flex-1 text-[13px] font-medium">Community</h2>
+      <Card className="flex h-full flex-col px-4 py-3.5 transition-colors group-hover:bg-[var(--i-hover)]">
+        <div className="flex items-center gap-2">
+          <UsersFour size={15} className="text-[var(--i-muted)]" />
+          <h2 className="flex-1 text-[12.5px] font-medium text-[var(--i-ink-2)]">Community</h2>
           <ArrowRight
-            size={13}
+            size={12}
             className="text-[var(--i-faint)] group-hover:text-[var(--i-ink)]"
           />
         </div>
-        <p className="mt-3 text-[22px] font-medium leading-none tabular-nums tracking-[-0.015em]">
+        <p className="mt-2.5 text-[22px] font-medium leading-none tracking-[-0.015em]">
           {soon.length}
-          <span className="text-[14px] font-normal text-[var(--i-muted)]">
+          <span className="text-[12.5px] font-normal text-[var(--i-muted)]">
             {" "}
             {soon.length === 1 ? "event" : "events"} in 30 days
           </span>
         </p>
-        <div className="mt-2 text-[12.5px] leading-relaxed text-[var(--i-muted)]">
+        <div className="mt-2.5 text-[12px] leading-snug text-[var(--i-muted)]">
           {notes.join(" · ")}
         </div>
       </Card>
