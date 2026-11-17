@@ -44,8 +44,9 @@ type DayDialogProps = {
   existing: AttendanceDay | null;
   /** Whose day it is, when it isn't your own. */
   who?: string;
-  /** Show a date field (for logging a past day). */
+  /** Show a date field: to log a past day, or move a logged one to the right date. */
   pickDate?: boolean;
+  minDate?: string;
   maxDate?: string;
   onSave: (input: Record<string, unknown>) => Promise<TeamResult>;
   onDelete?: (date: string) => Promise<TeamResult>;
@@ -63,6 +64,7 @@ function DayDialogBody({
   existing,
   who,
   pickDate = false,
+  minDate,
   maxDate,
   onSave,
   onDelete,
@@ -102,6 +104,8 @@ function DayDialogBody({
       () =>
         onSave({
           day,
+          // The date it was on, so a changed date moves the day instead of copying it.
+          from: existing?.day,
           kind,
           leave_type: kind === "work" ? null : leaveType,
           slots: kind === "leave" ? [] : slots.map((slot) => ({ start: slot.start, end: slot.end })),
@@ -146,7 +150,10 @@ function DayDialogBody({
     >
       {pickDate ? (
         <Label label="Date">
-          <DateField value={day} max={maxDate} required onChange={setDay} />
+          <DateField value={day} min={minDate} max={maxDate} required onChange={(next) => setDay(next || date)} />
+          {existing && day !== existing.day ? (
+            <span className="mt-1 block text-[12px] text-[var(--i-muted)]">Moves this day from {dayLabel(existing.day)}.</span>
+          ) : null}
         </Label>
       ) : null}
       <Segmented

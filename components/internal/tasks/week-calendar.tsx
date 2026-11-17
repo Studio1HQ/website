@@ -24,6 +24,7 @@ const DRAG = "application/x-studio1-card";
 const weekdayFormat = new Intl.DateTimeFormat("en-GB", { weekday: "short", timeZone: "UTC" });
 const dateFormat = new Intl.DateTimeFormat("en-GB", { day: "numeric", timeZone: "UTC" });
 const fullFormat = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" });
+const shortFormat = new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
 
 function at(day: string) {
   return new Date(`${day}T00:00:00Z`);
@@ -155,7 +156,9 @@ export function WeekCalendar({
 /**
  * "+ New" at the bottom of a day: the task, an optional note for whoever
  * checks it, then Save. Enter in the task moves to the note; ⌘/Ctrl+Enter
- * saves from either. Pasting a list lines up one task per line.
+ * saves from either. Pasting a list lines up one task per line. On My day
+ * the box has a Day at the top, for work that belongs to another day (last
+ * night's, entered after midnight).
  */
 export function AddCard({
   day,
@@ -166,7 +169,7 @@ export function AddCard({
   day: string;
   today: string;
   options: LinkOption[];
-  /** Start with the box open (My day). */
+  /** Start with the box open, with a Day to pick at the top (My day). */
   open?: boolean;
 }) {
   const { pending, run } = useTeamAction();
@@ -178,12 +181,15 @@ export function AddCard({
   const [list, setList] = useState<string[]>([]);
   const [link, setLink] = useState(STUDIO_LINK);
   const [picked, setPicked] = useState(false);
+  /** The day the tasks go on: the box's own, unless another is picked. */
+  const [on, setOn] = useState(day);
+  const moved = on !== day;
   const panel = useRef<HTMLDivElement>(null);
   const box = useRef<HTMLInputElement>(null);
   const noteBox = useRef<HTMLTextAreaElement>(null);
   const choices = useMemo(() => forSelectOptions(options), [options]);
   const suggestion = !picked && text.trim().length > 3 ? suggestLink(text, options) : null;
-  const ahead = day > today;
+  const ahead = on > today;
   const several = list.length > 0;
   const empty = !several && !text.trim() && !note.trim();
 
@@ -198,6 +204,7 @@ export function AddCard({
 
   const close = () => {
     reset();
+    setOn(day);
     if (!startOpen) setOpen(false);
   };
 
@@ -205,7 +212,7 @@ export function AddCard({
     const items = several ? list.map((title) => ({ title, link })) : [{ title: text.trim(), notes: note.trim(), link }];
     if (!items.some((item) => item.title)) return;
     run(
-      () => addTasks(day, items),
+      () => addTasks(on, items),
       () => {
         reset();
         box.current?.focus();
@@ -254,6 +261,29 @@ export function AddCard({
       }}
       className="space-y-1.5 rounded-lg bg-[var(--i-panel)] p-1.5 ring-1 ring-[var(--i-line)]"
     >
+      {startOpen ? (
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-[var(--i-muted)]">
+          <span>Day</span>
+          <DateField
+            value={on}
+            onChange={(next) => setOn(next || day)}
+            min={earliestCardDay(today)}
+            required
+            aria-label="Day these tasks are for"
+            className={cn("h-7 w-auto px-2 text-[12.5px]", moved && "border-[var(--i-accent)] text-[var(--i-accent-text)]")}
+          />
+          {moved ? (
+            <>
+              <span>
+                {shortFormat.format(at(on))}, not {day === today ? "today" : shortFormat.format(at(day))}
+              </span>
+              <button type="button" onClick={() => setOn(day)} className="text-[var(--i-faint)] underline hover:text-[var(--i-ink)]">
+                Back to {day === today ? "today" : shortFormat.format(at(day))}
+              </button>
+            </>
+          ) : null}
+        </div>
+      ) : null}
       {several ? (
         <div className="rounded-md bg-[var(--i-sunken)] px-2 py-1.5 text-[12px]">
           <p className="flex items-center justify-between gap-2 text-[var(--i-muted)]">
@@ -294,7 +324,7 @@ export function AddCard({
             maxLength={200}
             placeholder={ahead ? "What's planned?" : "What did you do?"}
             title="Paste a list to add several at once."
-            aria-label={`New task on ${fullFormat.format(at(day))}`}
+            aria-label={`New task on ${fullFormat.format(at(on))}`}
             className={inputClass("sm")}
           />
           {noting ? (
@@ -350,7 +380,7 @@ export function AddCard({
         </button>
       ) : null}
       <div className="flex items-center justify-end gap-1">
-        {!startOpen || !empty ? (
+        {!startOpen || !empty || moved ? (
           <button
             type="button"
             onClick={close}
@@ -583,6 +613,9 @@ function EditCard({
         </>
       }
     >
+      <Label label="Day" group>
+        <DateField value={form.day} onChange={(day) => setForm({ ...form, day })} min={earliestCardDay(today)} aria-label="Day" />
+      </Label>
       <Label label="Task">
         <input
           value={form.title}
@@ -611,9 +644,6 @@ function EditCard({
           onChange={(status) => setForm({ ...form, status })}
           options={TASK_STATUSES.map((option) => ({ value: option.value, label: option.label }))}
         />
-      </Label>
-      <Label label="Day" group>
-        <DateField value={form.day} onChange={(day) => setForm({ ...form, day })} min={earliestCardDay(today)} aria-label="Day" />
       </Label>
     </TeamDialog>
   );

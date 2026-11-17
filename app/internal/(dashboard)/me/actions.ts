@@ -10,6 +10,7 @@ import {
   MAX_SLOTS,
   MAX_UPLOAD_BYTES,
   MAX_UPLOAD_LABEL,
+  dayLabel,
   isDateKey,
   istNow,
   minutesBetween,
@@ -109,17 +110,38 @@ export async function endDay(): Promise<TeamResult> {
   return done(await saveDay(clean.day, self.staff.email), `Ended at ${time}`);
 }
 
-/** Saves one of my days from the day form. */
+/**
+ * Saves one of my days from the day form. `from` is the date the entry was on
+ * when the form opened: a different date moves it there (logged on the wrong
+ * day, like after midnight), as long as nothing's on that date already.
+ */
 export async function saveMyDay(input: Record<string, unknown>): Promise<TeamResult> {
   const self = await me();
   if (!self) return NOT_ON_LIST;
   const clean = cleanDay(self.person.email, input ?? {});
   if (!clean.ok) return clean;
+  const to = clean.day.day;
+  const from = isDateKey(input?.from) && input.from !== to ? input.from : null;
   const blocked =
-    cantLog(self.staff, self.person, clean.day.day, clean.day.kind === "leave" ? "leave" : "work") ??
-    (await changeProblem(self.staff, self.person.email, [clean.day.day]));
+    cantLog(self.staff, self.person, to, clean.day.kind === "leave" ? "leave" : "work") ??
+    (from ? cantLog(self.staff, self.person, from, "leave") : null) ??
+    (await changeProblem(self.staff, self.person.email, from ? [to, from] : [to]));
   if (blocked) return { ok: false, message: blocked };
-  return done(await saveDay(clean.day, self.staff.email), "Saved");
+  if (!from) return done(await saveDay(clean.day, self.staff.email), "Saved");
+
+  const taken = await listDays({ from: to, to, emails: [self.person.email] });
+  if (!taken.ok) return { ok: false, message: taken.message };
+  if (taken.days.length) {
+    return { ok: false, message: `${dayLabel(to)} already has a day logged. Edit that one, or remove it first.` };
+  }
+  const saved = await saveDay(clean.day, self.staff.email);
+  if (!saved.ok) return saved;
+  const removed = await deleteDay(self.person.email, from, self.staff.email);
+  if (!removed.ok) {
+    revalidatePath("/internal/me");
+    return { ok: false, message: `Saved on ${dayLabel(to)}, but ${dayLabel(from)} is still there. Remove it by hand.` };
+  }
+  return done(saved, `Moved to ${dayLabel(to)}`);
 }
 
 export async function deleteMyDay(day: unknown): Promise<TeamResult> {

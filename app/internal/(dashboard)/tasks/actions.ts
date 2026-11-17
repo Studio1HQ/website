@@ -8,7 +8,7 @@ import { notify } from "@/lib/internal/notifications/data";
 import { OWNERS } from "@/lib/internal/roles";
 import { requireMember, staffName } from "@/lib/internal/session";
 import { getPerson } from "@/lib/internal/team/people";
-import { displayName, istNow, isDateKey } from "@/lib/internal/team/shared";
+import { dayLabel, displayName, istNow, isDateKey } from "@/lib/internal/team/shared";
 import { isOwnedBy } from "@/lib/internal/clients/schema";
 import { moveDeliverable } from "@/app/internal/(dashboard)/clients/actions";
 import type { Deliverable } from "@/lib/internal/clients/schema";
@@ -375,7 +375,9 @@ export async function addTasks(day: unknown, items: unknown, status?: unknown): 
     also = (await startDeliverable(staff, tied.deliverable, state)) ?? also;
   }
   refresh();
-  const what = added === 1 ? "Added" : `Added ${added}`;
+  // Say the day when it isn't today, so a task put on another day isn't "lost".
+  const where = date === today ? "" : ` on ${dayLabel(date)}`;
+  const what = `${added === 1 ? "Added" : `Added ${added}`}${where}`;
   return { ok: true, message: also ? `${what}, and ${also}` : what };
 }
 
