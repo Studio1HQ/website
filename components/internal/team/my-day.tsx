@@ -9,6 +9,7 @@ import {
   Copy,
   FilePdf,
   Paperclip,
+  PencilSimple,
   Play,
   Plus,
   Receipt,
@@ -109,7 +110,7 @@ export function MyDay({
   const [profileOpen, setProfileOpen] = useState(false);
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [claimOpen, setClaimOpen] = useState(false);
-  const [editing, setEditing] = useState<{ date: string; existing: AttendanceDay | null; pick?: boolean } | null>(null);
+  const [editing, setEditing] = useState<{ date: string; existing: AttendanceDay | null } | null>(null);
 
   const intern = person.kind === "intern";
   const editableFrom = `${shiftMonth(current, -1)}-01`;
@@ -291,7 +292,7 @@ export function MyDay({
                     aria-label="Log a day"
                     title="Log a day"
                     onClick={() =>
-                      setEditing({ date: month === current ? now.date : `${month}-01`, existing: null, pick: true })
+                      setEditing({ date: month === current ? now.date : `${month}-01`, existing: null })
                     }
                     className={cn(buttonClass("secondary", "sm"), "h-8 w-8 px-0")}
                   >
@@ -333,6 +334,11 @@ export function MyDay({
                         {day.kind === "leave" ? "" : formatMinutes(day.active_minutes)}
                       </span>
                       <span className="min-w-0 flex-1 truncate text-[12.5px] text-[var(--i-faint)]">{day.note}</span>
+                      {editable ? (
+                        <span className="flex shrink-0 items-center gap-1 text-[12px] text-[var(--i-muted)]">
+                          <PencilSimple size={13} /> <span className="hidden sm:inline">Edit</span>
+                        </span>
+                      ) : null}
                     </>
                   );
                   return (
@@ -458,7 +464,8 @@ export function MyDay({
         onOpenChange={(open) => (open ? null : setEditing(null))}
         date={editing?.date ?? now.date}
         existing={editing?.existing ?? null}
-        pickDate={editing?.pick}
+        pickDate
+        minDate={editableFrom}
         maxDate={now.date}
         onSave={saveMyDay}
         onDelete={deleteMyDay}
