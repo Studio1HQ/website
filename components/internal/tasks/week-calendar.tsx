@@ -17,7 +17,9 @@ import { STUDIO_LINK, TASK_STATUSES, suggestLink, type LinkOption, type TaskStat
 
 /* The week calendar: a column per day, a card per task, the way the old
    tracker looked. Your own cards: "+ New" on a day, click the pill to
-   change the status, click the card to edit, drag it to another day. */
+   change the status, click the card to edit, drag it to another day. On
+   someone else's week, the same for whoever may give them tasks and
+   change their cards (lib/internal/tasks/access.ts). */
 
 const DRAG = "application/x-studio1-card";
 
@@ -51,6 +53,8 @@ export function WeekCalendar({
   tray,
   options,
   own,
+  canAdd: mayAdd = own,
+  person,
 }: {
   days: string[];
   today: string;
@@ -59,17 +63,22 @@ export function WeekCalendar({
   options: LinkOption[];
   /** The viewer's own week: they can add, edit and move cards. */
   own: boolean;
+  /** May add cards to this week (own, or giving the person tasks). */
+  canAdd?: boolean;
+  /** Whose week it is, when it isn't the viewer's: new cards go to them. */
+  person?: { email: string; name: string };
 }) {
   const { run } = useTeamAction();
   const [over, setOver] = useState<string | null>(null);
   const earliest = earliestCardDay(today);
+  const movable = [...cards, ...tray].some((card) => canEdit(card, own));
 
   const drop = (day: string) => (event: DragEvent) => {
     event.preventDefault();
     setOver(null);
     const id = event.dataTransfer.getData(DRAG);
     const card = [...cards, ...tray].find((item) => item.kind === "task" && item.id === id);
-    if (card && card.day !== day) run(() => editTask(id, { day }));
+    if (card && canEdit(card, own) && card.day !== day) run(() => editTask(id, { day }));
   };
 
   return (
@@ -78,7 +87,7 @@ export function WeekCalendar({
         <section aria-label="No day yet" className="rounded-xl bg-[var(--i-sunken)] p-2 ring-1 ring-[var(--i-line)]">
           <h2 className="px-1.5 pb-2 text-[12.5px] font-medium text-[var(--i-ink-2)]">
             No day yet, or from earlier <span className="font-normal tabular-nums text-[var(--i-faint)]">{tray.length}</span>
-            {own ? <span className="font-normal text-[var(--i-faint)]"> · drag one onto a day</span> : null}
+            {movable ? <span className="font-normal text-[var(--i-faint)]"> · drag one onto a day</span> : null}
           </h2>
           <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
             {tray.map((card) => (
@@ -97,14 +106,14 @@ export function WeekCalendar({
           {days.map((day) => {
             const list = cards.filter((card) => card.day === day);
             const isToday = day === today;
-            const canAdd = own && day >= earliest;
+            const canAdd = mayAdd && day >= earliest;
             return (
               <section
                 key={day}
                 aria-label={fullFormat.format(at(day))}
                 aria-current={isToday ? "date" : undefined}
                 onDragOver={(event) => {
-                  if (own && day >= earliest && event.dataTransfer.types.includes(DRAG)) {
+                  if (movable && day >= earliest && event.dataTransfer.types.includes(DRAG)) {
                     event.preventDefault();
                     setOver(day);
                   }
@@ -141,7 +150,7 @@ export function WeekCalendar({
                       ))}
                     </ul>
                   ) : null}
-                  {canAdd ? <AddCard day={day} today={today} options={options} /> : null}
+                  {canAdd ? <AddCard day={day} today={today} options={options} person={person} /> : null}
                   {!list.length && !canAdd ? <p className="px-1.5 py-1 text-[12px] text-[var(--i-faint)]">Nothing.</p> : null}
                 </div>
               </section>
@@ -166,6 +175,7 @@ export function AddCard({
   options,
   open: startOpen = false,
   inline = false,
+  person,
 }: {
   day: string;
   today: string;
@@ -174,6 +184,8 @@ export function AddCard({
   open?: boolean;
   /** With open: one row (what, for, day, save), for a wide card. */
   inline?: boolean;
+  /** Giving someone else tasks: they go on this person's week, Not started. */
+  person?: { email: string; name: string };
 }) {
   const { pending, run } = useTeamAction();
   const [open, setOpen] = useState(startOpen);
@@ -193,6 +205,7 @@ export function AddCard({
   const choices = useMemo(() => forSelectOptions(options), [options]);
   const suggestion = !picked && text.trim().length > 3 ? suggestLink(text, options) : null;
   const ahead = on > today;
+  const firstName = person ? person.name.split(/[\s@]/)[0] : "";
   const several = list.length > 0;
   const empty = !several && !text.trim() && !note.trim();
 
@@ -215,7 +228,7 @@ export function AddCard({
     const items = several ? list.map((title) => ({ title, link })) : [{ title: text.trim(), notes: note.trim(), link }];
     if (!items.some((item) => item.title)) return;
     run(
-      () => addTasks(on, items),
+      () => addTasks(on, items, person ? { email: person.email } : undefined),
       () => {
         reset();
         box.current?.focus();
@@ -317,7 +330,7 @@ export function AddCard({
         setText("");
       }}
       maxLength={200}
-      placeholder={ahead ? "What's planned?" : "What did you do?"}
+      placeholder={person ? `A task for ${firstName}` : ahead ? "What's planned?" : "What did you do?"}
       title="Paste a list to add several at once."
       aria-label={`New task on ${fullFormat.format(at(on))}`}
       className={cn(inputClass("sm"), inline && "min-w-[12rem] flex-1 basis-56")}
@@ -398,7 +411,7 @@ export function AddCard({
         type="button"
         onClick={save}
         disabled={pending || (!several && !text.trim())}
-        title={`Saves as ${ahead ? "Not started" : "Done"}`}
+        title={`Saves as ${person || ahead ? "Not started" : "Done"}`}
         className={cn(buttonClass("primary", inline ? "md" : "sm"), !startOpen && "flex-1 px-1")}
       >
         {pending ? "Saving…" : several ? `Save ${list.length}` : "Save"}
@@ -458,6 +471,11 @@ export function AddCard({
       <div className="flex items-center justify-end gap-1">{buttons}</div>
     </div>
   );
+}
+
+/** Whether the viewer may edit, move or delete a card: the page says, else your own week's tasks. */
+function canEdit(card: CalendarCard, own: boolean) {
+  return card.kind === "task" && (card.editable ?? own);
 }
 
 /** A status as a coloured dot and its name: quieter than a pill on a small card. */
@@ -552,7 +570,7 @@ function Card({
 }) {
   const { pending, run } = useTeamAction();
   const [editing, setEditing] = useState(false);
-  const editable = own && card.kind === "task";
+  const editable = canEdit(card, own);
   const done = card.kind === "task" ? card.status === "done" : card.done;
 
   return (

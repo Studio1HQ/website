@@ -44,6 +44,8 @@ export type CalendarCard =
       reason: string;
       /** Who added it, when it wasn't the person. */
       from: string | null;
+      /** Whether the viewer may edit, move or delete it (set by the page). */
+      editable?: boolean;
     }
   | {
       kind: "deliverable";

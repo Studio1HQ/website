@@ -3,7 +3,7 @@ import Link from "next/link";
 import { CheckSquare } from "@phosphor-icons/react/dist/ssr";
 import { requireMember } from "@/lib/internal/session";
 import { istNow } from "@/lib/internal/team/shared";
-import { canSeeOthers } from "@/lib/internal/tasks/access";
+import { canGiveTask, canSeeOthers } from "@/lib/internal/tasks/access";
 import { taskViewer, visiblePeople } from "@/lib/internal/tasks/load";
 import { tasksHref } from "@/lib/internal/tasks/shared";
 import { Card, EmptyState, Notice, PageHeader, buttonClass } from "@/components/internal/ui";
@@ -85,7 +85,9 @@ export default async function TasksPage({
             ? "Everyone's week: time logged, what got done, and whose report is in."
             : own
               ? "Your week, day by day: add what you did or plan to, and tag the client it's for. Your reports build from it."
-              : `What ${person.name || person.email} worked on.`
+              : canGiveTask(viewer, person.email, person.guarded)
+                ? `What ${person.name || person.email} is working on. Add a task on a day to give it to them; it shows on their bell.`
+                : `What ${person.name || person.email} worked on.`
         }
         actions={
           <>
