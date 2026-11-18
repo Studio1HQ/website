@@ -121,7 +121,7 @@ function MenuLink({
         isPaper
           ? "items-center gap-3 rounded-[6px] py-2 text-[14px] text-[#141414] hover:bg-[#f4efe7]/60"
           : "text-muted-foreground hover:text-foreground",
-        rowHeight && "h-[54px] py-0",
+        rowHeight && "min-h-[56px] py-2",
         current && (isPaper ? "bg-[#f4efe7]/60" : "text-foreground"),
       )}
     >
@@ -141,13 +141,13 @@ function MenuLink({
         />
       )}
       <span className="flex min-w-0 flex-col gap-0.5">
-        <span className="whitespace-nowrap text-sm font-medium">
+        <span className="text-sm font-medium leading-tight">
           {translatedNavTitle(child.title, t)}
         </span>
         {child.description ? (
           <span
             className={cn(
-              "whitespace-nowrap text-xs leading-snug",
+              "text-xs leading-snug",
               isPaper ? "text-[#141414]/55" : "text-muted-foreground/80",
             )}
           >
@@ -206,7 +206,7 @@ function GroupedNavItem({
       <div className={cn(dropdownClass, "left-1/2 -translate-x-1/2")}>
         <div
           className={cn(
-            "grid w-[43rem] grid-cols-[18.5rem_minmax(0,1fr)] overflow-hidden",
+            "grid w-[min(43rem,calc(100vw-2rem))] grid-cols-[minmax(0,18.5rem)_minmax(0,1fr)] overflow-hidden",
             isPaper
               ? paperCard
               : "rounded-[6px] border bg-background shadow-lg",
@@ -244,7 +244,7 @@ function GroupedNavItem({
                     onFocus={() => setHovered(index)}
                     onClick={() => setHovered(index)}
                     className={cn(
-                      "flex h-[54px] items-center gap-3 rounded-[6px] px-2.5 text-left transition-colors duration-200",
+                      "flex min-h-[56px] items-center gap-3 rounded-[6px] px-2.5 py-2 text-left transition-colors duration-200",
                       selected
                         ? isPaper
                           ? "bg-white shadow-[0_1px_0_rgba(20,20,20,0.06)] ring-1 ring-[#141414]/[0.08]"
@@ -272,7 +272,7 @@ function GroupedNavItem({
                       </span>
                       <span
                         className={cn(
-                          "whitespace-nowrap text-[12px] leading-snug",
+                          "text-[12px] leading-snug",
                           isPaper
                             ? "text-[#141414]/55"
                             : "text-muted-foreground/80",
