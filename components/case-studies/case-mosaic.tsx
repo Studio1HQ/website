@@ -1,7 +1,6 @@
 "use client";
 
 import Image, { type StaticImageData } from "next/image";
-import { servedAsIs } from "@/lib/image-as-is";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
@@ -136,7 +135,6 @@ export function CaseMosaic({
                     alt=""
                     fill
                     sizes="140px"
-                    unoptimized={servedAsIs(item.logo)}
                     className="object-contain"
                   />
                 </span>
@@ -249,7 +247,6 @@ export function CaseMosaic({
                 alt=""
                 fill
                 sizes="64px"
-                unoptimized={servedAsIs(item.logo)}
                 className="object-cover"
               />
             </Link>

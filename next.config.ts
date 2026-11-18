@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 import nextMDX from "@next/mdx";
 import createNextIntlPlugin from "next-intl/plugin";
 import { AI_AGENT_HEADER_PATTERN } from "./lib/ai-agents";
+import { IMAGE_CDN, IMAGE_WIDTHS } from "./lib/image-config.mjs";
 
 const withMDX = nextMDX();
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
@@ -22,13 +23,20 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: process.cwd(),
   },
+  env: {
+    // Production pages load image sizes from cdn.studio1hq.com
+    // (lib/image-loader.ts). Previews and local builds keep them on their own
+    // host: the CDN serves the production deployment, which won't have a
+    // preview's new images yet.
+    IMAGE_ORIGIN: process.env.VERCEL_ENV === "production" ? IMAGE_CDN : "",
+  },
   experimental: {
     // Dashboard uploads (profile photos, expense receipts) go through server
     // actions; Next's default is 1 MB. Vercel caps request bodies at 4.5 MB.
     // The upload limits (MAX_UPLOAD_BYTES in lib/internal/team/shared.ts,
     // MAX_CSV_BYTES in lib/internal/community) are sized to fit under this.
     serverActions: { bodySizeLimit: "4mb" },
-// The dashboard's data isn't real-time, so the browser keeps each page
+    // The dashboard's data isn't real-time, so the browser keeps each page
     // it has opened (or fetched ahead on hover) for five minutes: going back
     // to a tab shows it at once instead of loading its data again. Saving
     // anything (a server action that revalidates), the sidebar's Refresh
@@ -36,12 +44,16 @@ const nextConfig: NextConfig = {
     staleTimes: { dynamic: 300, static: 300 },
   },
   images: {
-    // Serve compact modern formats and reuse optimized derivatives on repeat visits.
-    formats: ["image/avif", "image/webp"],
+    // Images are sized before the build (scripts/image-variants.mjs) and
+    // served as plain files that Cloudflare caches, instead of Vercel's Image
+    // Optimization, which caps new images per month (lib/image-loader.ts).
+    loader: "custom",
+    loaderFile: "./lib/image-loader.ts",
     qualities: [50, 75, 95],
-    minimumCacheTTL: 60 * 60 * 24 * 30,
-    deviceSizes: [360, 640, 768, 1024, 1280, 1536, 1920],
-    imageSizes: [32, 48, 64, 96, 128, 256, 384],
+    // The srcset offers exactly the widths that are made, so each candidate's
+    // "w" is the real width of its file (and there are no duplicate URLs).
+    deviceSizes: IMAGE_WIDTHS.filter((width) => width >= 640),
+    imageSizes: IMAGE_WIDTHS.filter((width) => width < 640),
     remotePatterns: [
       {
         protocol: "https" as const,
@@ -59,7 +71,11 @@ const nextConfig: NextConfig = {
     // AI agents (lib/ai-agents.ts, never search engines) get the markdown
     // version of English pages from app/ai-md. People get the normal page.
     const aiAgent = [
-      { type: "header" as const, key: "user-agent", value: AI_AGENT_HEADER_PATTERN },
+      {
+        type: "header" as const,
+        key: "user-agent",
+        value: AI_AGENT_HEADER_PATTERN,
+      },
     ];
     return {
       beforeFiles: [
@@ -94,6 +110,30 @@ const nextConfig: NextConfig = {
           { key: "X-Robots-Tag", value: "noindex, nofollow" },
         ],
       })),
+      {
+        // Build-time image sizes keep their URL when an image is replaced
+        // under the same name, so Cloudflare checks back daily.
+        source: "/_img/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value:
+              "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800",
+          },
+        ],
+      },
+      {
+        // WebP blog covers change URL (?v=) when they change: Cloudflare keeps
+        // them for 30 days, browsers a day.
+        source: "/blog-cover/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value:
+              "public, max-age=86400, s-maxage=2592000, stale-while-revalidate=604800",
+          },
+        ],
+      },
       {
         source: "/assets/:path*",
         headers: [
