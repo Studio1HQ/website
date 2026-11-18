@@ -69,7 +69,9 @@ export async function WeekView({ staff, viewer, person, own, people, params, tod
               <Notice tone="warning">{data.failed} Some cards may be missing.</Notice>
             </div>
           ) : null}
+          {/* Keyed by whose week and which: an open "+ New" draft never carries over to another person or week. */}
           <WeekCalendar
+            key={`${person.email}:${week}`}
             days={weekDays(week)}
             today={today}
             cards={data.cards}

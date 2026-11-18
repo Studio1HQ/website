@@ -12,7 +12,7 @@ import { Select } from "@/components/internal/select";
 import { Label, Segmented, TeamDialog, useTeamAction } from "@/components/internal/team/kit";
 import { forSelectOptions } from "@/components/internal/tasks/for-options";
 import { TaskNote } from "@/components/internal/tasks/task-note";
-import type { CalendarCard } from "@/lib/internal/tasks/calendar";
+import { earliestCardDay, type CalendarCard } from "@/lib/internal/tasks/calendar";
 import { STUDIO_LINK, TASK_STATUSES, suggestLink, type LinkOption, type TaskStatus } from "@/lib/internal/tasks/shared";
 
 /* The week calendar: a column per day, a card per task, the way the old
@@ -22,6 +22,8 @@ import { STUDIO_LINK, TASK_STATUSES, suggestLink, type LinkOption, type TaskStat
    change their cards (lib/internal/tasks/access.ts). */
 
 const DRAG = "application/x-studio1-card";
+/** Also set when the dragged card is done: a done card can't go on a day that hasn't come yet. */
+const DRAG_DONE = "application/x-studio1-done";
 
 const weekdayFormat = new Intl.DateTimeFormat("en-GB", { weekday: "short", timeZone: "UTC" });
 const dateFormat = new Intl.DateTimeFormat("en-GB", { day: "numeric", timeZone: "UTC" });
@@ -32,11 +34,6 @@ function at(day: string) {
   return new Date(`${day}T00:00:00Z`);
 }
 
-/** The 1st of last month: the earliest day a card can go on. */
-export function earliestCardDay(today: string) {
-  const [year, month] = today.split("-").map(Number);
-  return new Date(Date.UTC(year, month - 2, 1)).toISOString().slice(0, 10);
-}
 
 /** "- item", "• item", "1. item", "[x] item" → "item". */
 function cleanPasted(text: string) {
@@ -78,7 +75,9 @@ export function WeekCalendar({
     setOver(null);
     const id = event.dataTransfer.getData(DRAG);
     const card = [...cards, ...tray].find((item) => item.kind === "task" && item.id === id);
-    if (card && canEdit(card, own) && card.day !== day) run(() => editTask(id, { day }));
+    if (!card || !canEdit(card, own) || card.day === day) return;
+    if (card.kind === "task" && card.status === "done" && day > today) return;
+    run(() => editTask(id, { day }));
   };
 
   return (
@@ -113,7 +112,8 @@ export function WeekCalendar({
                 aria-label={fullFormat.format(at(day))}
                 aria-current={isToday ? "date" : undefined}
                 onDragOver={(event) => {
-                  if (movable && day >= earliest && event.dataTransfer.types.includes(DRAG)) {
+                  const types = event.dataTransfer.types;
+                  if (movable && day >= earliest && types.includes(DRAG) && !(day > today && types.includes(DRAG_DONE))) {
                     event.preventDefault();
                     setOver(day);
                   }
@@ -570,6 +570,8 @@ function Card({
 }) {
   const { pending, run } = useTeamAction();
   const [editing, setEditing] = useState(false);
+  /** Bumped on each open: the editor starts again from the card, not a cancelled draft. */
+  const [opened, setOpened] = useState(0);
   const editable = canEdit(card, own);
   const done = card.kind === "task" ? card.status === "done" : card.done;
 
@@ -578,6 +580,7 @@ function Card({
       draggable={editable}
       onDragStart={(event) => {
         event.dataTransfer.setData(DRAG, card.id);
+        if (done) event.dataTransfer.setData(DRAG_DONE, "1");
         event.dataTransfer.effectAllowed = "move";
       }}
       className={cn(
@@ -590,7 +593,10 @@ function Card({
       {editable ? (
         <button
           type="button"
-          onClick={() => setEditing(true)}
+          onClick={() => {
+            setOpened((count) => count + 1);
+            setEditing(true);
+          }}
           className="flex w-full items-start gap-1.5 text-left text-[13px] font-medium leading-snug hover:text-[var(--i-accent-text)]"
         >
           {done ? <CheckCircle size={14} weight="fill" className="mt-px shrink-0 text-emerald-600 dark:text-emerald-400" /> : null}
@@ -612,7 +618,7 @@ function Card({
       {showDay && card.day ? <p className="mt-1 text-[11px] text-[var(--i-faint)]">Was for {card.day}</p> : null}
       {card.kind === "task" && card.from ? <p className="mt-1 text-[11px] text-[var(--i-faint)]">From {card.from}</p> : null}
       {editable && card.kind === "task" ? (
-        <EditCard open={editing} onOpenChange={setEditing} card={card} options={options} today={today} />
+        <EditCard key={opened} open={editing} onOpenChange={setEditing} card={card} options={options} today={today} />
       ) : null}
     </article>
   );

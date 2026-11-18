@@ -248,6 +248,12 @@ export async function getPerson(email: string): Promise<TeamPerson | null> {
   return result.ok && result.rows[0] ? toPerson(result.rows[0]) : null;
 }
 
+/** Like getPerson, but a failed read says so instead of answering "not there". */
+export async function findPerson(email: string): Promise<{ ok: true; person: TeamPerson | null } | { ok: false }> {
+  const result = await selectRows(TABLE, new URLSearchParams({ select: PUBLIC_COLUMNS, email: `eq.${email}`, limit: "1" }));
+  return result.ok ? { ok: true, person: result.rows[0] ? toPerson(result.rows[0]) : null } : { ok: false };
+}
+
 /** One person with their salary lines, for payroll. Admin pages only. */
 export async function getPersonPay(email: string): Promise<TeamPersonPay | null> {
   const result = await selectRows(TABLE, new URLSearchParams({ select: "*", email: `eq.${email}`, limit: "1" }));

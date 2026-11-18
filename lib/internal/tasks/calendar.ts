@@ -101,6 +101,12 @@ function inRange(day: string | null | undefined, from: string, to: string): bool
   return Boolean(day && day >= from && day <= to);
 }
 
+/** The 1st of last month: the earliest day a card can go on. */
+export function earliestCardDay(today: string) {
+  const [year, month] = today.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 2, 1)).toISOString().slice(0, 10);
+}
+
 export function placeCards(input: {
   week: string;
   end: string;
