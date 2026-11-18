@@ -3,6 +3,7 @@ import nextMDX from "@next/mdx";
 import createNextIntlPlugin from "next-intl/plugin";
 import { AI_AGENT_HEADER_PATTERN } from "./lib/ai-agents";
 import { IMAGE_CDN, IMAGE_WIDTHS } from "./lib/image-config.mjs";
+import { GA_MEASUREMENT_ID } from "./lib/analytics";
 
 const withMDX = nextMDX();
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
@@ -29,6 +30,10 @@ const nextConfig: NextConfig = {
     // host: the CDN serves the production deployment, which won't have a
     // preview's new images yet.
     IMAGE_ORIGIN: process.env.VERCEL_ENV === "production" ? IMAGE_CDN : "",
+    // Google Analytics (components/analytics) runs on production only, so
+    // previews, local builds and `next dev` never send it test traffic.
+    GA_MEASUREMENT_ID:
+      process.env.VERCEL_ENV === "production" ? GA_MEASUREMENT_ID : "",
   },
   experimental: {
     // Dashboard uploads (profile photos, expense receipts) go through server
