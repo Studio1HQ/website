@@ -459,7 +459,15 @@
     },
     "legal": {
       "terms": "条款与条件",
-      "privacy": "隐私政策"
+      "privacy": "隐私政策",
+      "cookies": "Cookie 设置"
     }
+  },
+  "CookieBanner": {
+    "label": "Cookie 同意",
+    "text": "我们使用 Google Analytics Cookie 来了解哪些页面有用。您同意吗？",
+    "accept": "接受",
+    "decline": "拒绝",
+    "privacy": "隐私政策"
   }
 }

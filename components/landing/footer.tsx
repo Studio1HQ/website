@@ -1,6 +1,7 @@
 "use client";
 
 import { MachineToggle } from "@/components/paper/machine-view";
+import { CookieSettingsButton } from "@/components/analytics/analytics";
 import Link from "next/link";
 import { ArrowUpRight } from "@phosphor-icons/react";
 import {
@@ -292,6 +293,7 @@ export default function Footer() {
               >
                 {t("legal.privacy")}
               </Link>
+              <CookieSettingsButton className="cursor-pointer text-[13px] text-white/45 transition-colors hover:text-white" />
             </nav>
           </motion.div>
         </div>

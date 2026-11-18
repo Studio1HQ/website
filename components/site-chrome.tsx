@@ -10,6 +10,7 @@ import { ForcePaperContext } from "@/components/paper/paper-chrome-context";
 import Navbar from "@/components/landing/navbar";
 import { Preloader } from "@/components/preloader";
 import { LocalizedLinkRuntime } from "@/components/localization/localized-link-runtime";
+import { Analytics } from "@/components/analytics/analytics";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import { DEFAULT_LOCALE, localeMeta, type Locale } from "@/lib/i18n";
 import { isPaperPath } from "@/lib/paper";
@@ -49,6 +50,7 @@ export function SiteChrome({
       {shouldShowGlobalCta ? <CTA /> : null}
       {isPaper ? <PaperFooter /> : <Footer />}
       <LocalizedLinkRuntime />
+      <Analytics />
     </ForcePaperContext.Provider>
   );
 }

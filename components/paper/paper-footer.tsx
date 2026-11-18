@@ -1,6 +1,7 @@
 "use client";
 
 import { MachineToggle } from "@/components/paper/machine-view";
+import { CookieSettingsButton } from "@/components/analytics/analytics";
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -490,6 +491,7 @@ export default function PaperFooter() {
             <Link href="/privacy" className="text-[13px] text-[#141414]/55 hover:text-[#141414]">
               {t("legal.privacy")}
             </Link>
+            <CookieSettingsButton className="cursor-pointer text-[13px] text-[#141414]/55 hover:text-[#141414]" />
           </div>
         </div>
       </Container>
