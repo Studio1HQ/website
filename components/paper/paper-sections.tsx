@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import Image from "next/image";
+import { servedAsIs } from "@/lib/image-as-is";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -2244,6 +2245,7 @@ export function PaperReasons() {
                   alt=""
                   fill
                   sizes="560px"
+                  unoptimized={servedAsIs(src)}
                   className="object-cover object-top"
                 />
               </span>
@@ -2343,6 +2345,7 @@ export function PaperTestimonials() {
                             alt=""
                             fill
                             sizes="28px"
+                            unoptimized={servedAsIs(mark)}
                             className="object-cover"
                           />
                         ) : (
