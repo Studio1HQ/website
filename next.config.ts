@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 import nextMDX from "@next/mdx";
 import createNextIntlPlugin from "next-intl/plugin";
 import { AI_AGENT_HEADER_PATTERN } from "./lib/ai-agents";
+import { IMAGE_CDN } from "./lib/image-config.mjs";
 
 const withMDX = nextMDX();
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
@@ -21,6 +22,13 @@ const nextConfig: NextConfig = {
   },
   turbopack: {
     root: process.cwd(),
+  },
+  env: {
+    // Production pages load image sizes from cdn.studio1hq.com
+    // (lib/image-loader.ts). Previews and local builds keep them on their own
+    // host: the CDN serves the production deployment, which won't have a
+    // preview's new images yet.
+    IMAGE_ORIGIN: process.env.VERCEL_ENV === "production" ? IMAGE_CDN : "",
   },
   experimental: {
     // Dashboard uploads (profile photos, expense receipts) go through server

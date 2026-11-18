@@ -58,6 +58,29 @@ describe("imageLoader", () => {
     );
   });
 
+  it("loads sizes and covers from the CDN when IMAGE_ORIGIN is set", () => {
+    vi.stubEnv("IMAGE_ORIGIN", "https://cdn.studio1hq.com");
+    expect(imageLoader({ src: "/assets/logos/litellm.webp", width: 48 })).toBe(
+      "https://cdn.studio1hq.com/_img/96/assets/logos/litellm.webp.webp",
+    );
+    expect(
+      imageLoader({
+        src: "/_next/static/media/jozu.41e3bd9b.webp",
+        width: 256,
+      }),
+    ).toBe("https://cdn.studio1hq.com/_img/256/_media/jozu.webp.webp");
+    expect(imageLoader({ src: "/blog-cover/aeo-guide?v=5", width: 640 })).toBe(
+      "https://cdn.studio1hq.com/blog-cover/aeo-guide/cover.webp?v=5",
+    );
+    // Other sites' images and other folders still stay as they are.
+    expect(imageLoader({ src: "/brand/logo.png", width: 640 })).toBe(
+      "/brand/logo.png",
+    );
+    expect(imageLoader({ src: "https://example.com/a.png", width: 640 })).toBe(
+      "https://example.com/a.png",
+    );
+  });
+
   it("serves originals in next dev, where the sizes don't exist", () => {
     vi.stubEnv("NODE_ENV", "development");
     expect(imageLoader({ src: "/assets/logos/litellm.webp", width: 48 })).toBe(
