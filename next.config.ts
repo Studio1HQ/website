@@ -28,7 +28,7 @@ const nextConfig: NextConfig = {
     // The upload limits (MAX_UPLOAD_BYTES in lib/internal/team/shared.ts,
     // MAX_CSV_BYTES in lib/internal/community) are sized to fit under this.
     serverActions: { bodySizeLimit: "4mb" },
-// The dashboard's data isn't real-time, so the browser keeps each page
+    // The dashboard's data isn't real-time, so the browser keeps each page
     // it has opened (or fetched ahead on hover) for five minutes: going back
     // to a tab shows it at once instead of loading its data again. Saving
     // anything (a server action that revalidates), the sidebar's Refresh
@@ -36,10 +36,12 @@ const nextConfig: NextConfig = {
     staleTimes: { dynamic: 300, static: 300 },
   },
   images: {
-    // Serve compact modern formats and reuse optimized derivatives on repeat visits.
-    formats: ["image/avif", "image/webp"],
+    // Images are sized at build time (scripts/image-variants.mjs) and served
+    // as plain files that Cloudflare caches, instead of Vercel's Image
+    // Optimization, which caps new images per month (lib/image-loader.ts).
+    loader: "custom",
+    loaderFile: "./lib/image-loader.ts",
     qualities: [50, 75, 95],
-    minimumCacheTTL: 60 * 60 * 24 * 30,
     deviceSizes: [360, 640, 768, 1024, 1280, 1536, 1920],
     imageSizes: [32, 48, 64, 96, 128, 256, 384],
     remotePatterns: [
@@ -59,7 +61,11 @@ const nextConfig: NextConfig = {
     // AI agents (lib/ai-agents.ts, never search engines) get the markdown
     // version of English pages from app/ai-md. People get the normal page.
     const aiAgent = [
-      { type: "header" as const, key: "user-agent", value: AI_AGENT_HEADER_PATTERN },
+      {
+        type: "header" as const,
+        key: "user-agent",
+        value: AI_AGENT_HEADER_PATTERN,
+      },
     ];
     return {
       beforeFiles: [
@@ -78,7 +84,14 @@ const nextConfig: NextConfig = {
         // build in public/brand, refreshed with scripts/sync-brand.mjs.
         { source: "/brand", destination: "/brand/index.html" },
       ],
-      fallback: [],
+      fallback: [
+        // A size scripts/image-variants.mjs didn't make (the image is
+        // narrower, or `next dev` never ran it): the original file.
+        {
+          source: "/_img/:width(\\d+)/:file(.+)\\.webp",
+          destination: "/:file",
+        },
+      ],
     };
   },
   async headers() {
@@ -94,6 +107,17 @@ const nextConfig: NextConfig = {
           { key: "X-Robots-Tag", value: "noindex, nofollow" },
         ],
       })),
+      {
+        // Build-time image sizes: Cloudflare keeps them for 30 days, browsers a day.
+        source: "/_img/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value:
+              "public, max-age=86400, s-maxage=2592000, stale-while-revalidate=604800",
+          },
+        ],
+      },
       {
         source: "/assets/:path*",
         headers: [

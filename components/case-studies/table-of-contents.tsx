@@ -1,7 +1,6 @@
 "use client";
 
 import Image, { type StaticImageData } from "next/image";
-import { servedAsIs } from "@/lib/image-as-is";
 import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, CalendarDots } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
@@ -147,7 +146,6 @@ export function TableOfContents({
                       alt=""
                       fill
                       sizes="40px"
-                      unoptimized={servedAsIs(client.logo)}
                       className="object-cover"
                     />
                   </span>

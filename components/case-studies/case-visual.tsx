@@ -1,7 +1,6 @@
 "use client";
 
 import Image, { type StaticImageData } from "next/image";
-import { servedAsIs } from "@/lib/image-as-is";
 import { motion, useReducedMotion } from "motion/react";
 import { GRAIN } from "@/lib/paper";
 
@@ -96,7 +95,6 @@ export function CaseVisual({
                 alt={`${client} logo`}
                 fill
                 sizes="92px"
-                unoptimized={servedAsIs(logo)}
                 className="object-cover"
               />
             ) : null}

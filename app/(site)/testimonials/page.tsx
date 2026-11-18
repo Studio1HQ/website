@@ -1,7 +1,6 @@
 import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import Image from "next/image";
-import { servedAsIs } from "@/lib/image-as-is";
 import Link from "next/link";
 import {
   ArrowUpRight,
@@ -213,7 +212,6 @@ function CompanyMark({ company, size }: { company: string; size: number }) {
           alt=""
           fill
           sizes={`${size}px`}
-          unoptimized={servedAsIs(mark)}
           className="object-cover"
         />
       ) : (
