@@ -45,6 +45,7 @@ const TILE: Record<string, { bg: string; scale?: number }> = {
   brightdata: { bg: "#3c7ffc" },
   copilotkit: { bg: "#fbf9f5" },
   "entelligence-ai": { bg: "#000000" },
+  insforge: { bg: "#000000" },
   ittybit: { bg: "#170a31" },
   jozu: { bg: "#fbf9f5", scale: 0.62 },
   litellm: { bg: "#9dcbd7", scale: 0.96 },
