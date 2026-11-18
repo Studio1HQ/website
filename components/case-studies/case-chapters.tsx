@@ -1,6 +1,7 @@
 "use client";
 
 import Image, { type StaticImageData } from "next/image";
+import { servedAsIs } from "@/lib/image-as-is";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -96,6 +97,7 @@ function Chapter({
                   alt=""
                   fill
                   sizes="44px"
+                  unoptimized={servedAsIs(study.logo)}
                   className="object-cover"
                 />
               </span>
@@ -206,6 +208,7 @@ function Chapter({
                       alt={study.quote.author}
                       fill
                       sizes="40px"
+                      unoptimized={servedAsIs(study.quote.avatar)}
                       className="object-cover"
                     />
                   </span>
@@ -263,6 +266,7 @@ function Chapter({
                 alt=""
                 fill
                 sizes="112px"
+                unoptimized={servedAsIs(study.logo)}
                 className="object-cover"
               />
             </span>

@@ -1,4 +1,5 @@
 import Image, { type StaticImageData } from "next/image";
+import { servedAsIs } from "@/lib/image-as-is";
 import Link from "next/link";
 import { ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
 import { NumericText } from "@/components/ui/num";
@@ -40,6 +41,7 @@ function Portrait({
           alt=""
           fill
           sizes="80px"
+          unoptimized={servedAsIs(logo)}
           className="object-contain p-1"
         />
       </span>
@@ -54,6 +56,7 @@ function Portrait({
         alt={quote.author}
         fill
         sizes="160px"
+        unoptimized={servedAsIs(quote.avatar)}
         className="object-cover"
       />
     </span>
@@ -112,6 +115,7 @@ export function CaseTestimonials({
                     alt=""
                     fill
                     sizes="20px"
+                    unoptimized={servedAsIs(logo)}
                     className="object-cover"
                   />
                 </span>
