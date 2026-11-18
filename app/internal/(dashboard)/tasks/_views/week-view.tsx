@@ -1,5 +1,6 @@
 import { isDateKey, shiftWeek, weekDays, weekEnd, weekLabel, weekStart } from "@/lib/internal/clients/schema";
-import { cardChoices, loadWeekCards } from "@/lib/internal/tasks/load";
+import { canChangeTask, canGiveTask } from "@/lib/internal/tasks/access";
+import { cardChoices, giveChoices, loadWeekCards } from "@/lib/internal/tasks/load";
 import { weekTally } from "@/lib/internal/tasks/calendar";
 import { tasksHref } from "@/lib/internal/tasks/shared";
 import { Notice } from "@/components/internal/ui";
@@ -24,17 +25,20 @@ function weekFrom(value: string | undefined, today: string) {
  * The week, as a calendar: a column per day with that day's cards, the
  * way the old tracker looked. The person's own tasks, the client
  * deliverables they own and their community tasks, each on its day;
- * "+ New" on a day adds to it.
+ * "+ New" on a day adds to it. On someone else's week, "+ New" gives them
+ * a task (founders, the founder's associate, admins: canGiveTask) and the
+ * cards the viewer may change (canChangeTask) open for editing.
  */
-export async function WeekView({ staff, person, own, people, params, today }: ViewProps) {
+export async function WeekView({ staff, viewer, person, own, people, params, today }: ViewProps) {
   const current = weekStart(today);
   const week = weekFrom(params.week, today);
   const href = (target: string) => tasksHref({ week: target === current ? null : target, person: own ? null : person.email });
   const names = Object.fromEntries(people.map((item) => [item.email.toLowerCase(), item.name || item.email]));
+  const canAdd = own || canGiveTask(viewer, person.email, person.guarded);
 
   const [data, options] = await Promise.all([
-    loadWeekCards(person.email, week, today, names),
-    own ? cardChoices(staff) : Promise.resolve([]),
+    loadWeekCards(person.email, week, today, names, (task) => canChangeTask(viewer, task)),
+    own ? cardChoices(staff) : canAdd ? giveChoices(staff) : Promise.resolve([]),
   ]);
   const tally = weekTally(data.cards);
 
@@ -65,7 +69,18 @@ export async function WeekView({ staff, person, own, people, params, today }: Vi
               <Notice tone="warning">{data.failed} Some cards may be missing.</Notice>
             </div>
           ) : null}
-          <WeekCalendar days={weekDays(week)} today={today} cards={data.cards} tray={data.tray} options={options} own={own} />
+          {/* Keyed by whose week and which: an open "+ New" draft never carries over to another person or week. */}
+          <WeekCalendar
+            key={`${person.email}:${week}`}
+            days={weekDays(week)}
+            today={today}
+            cards={data.cards}
+            tray={data.tray}
+            options={options}
+            own={own}
+            canAdd={canAdd}
+            person={own ? undefined : { email: person.email, name: person.name || person.email }}
+          />
         </>
       )}
       {own && weekEnd(week) >= today ? (

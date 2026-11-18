@@ -86,7 +86,7 @@ const KEY_LINES: Record<string, string> = {
   "Sakshi Sen":
     "A few Reddit posts even went viral, bringing in solid traffic.",
   "Tanmay Sinha": "captured the core values of our product in the write up",
-  "Nathan Telbert":
+  "Nathan Tarbert":
     "Their ability to create engaging content for developers has been a valuable addition to our educational content efforts.",
   "Saurav Jain":
     "write deeply technical articles that reaches to the right developer audiences",

@@ -10,6 +10,7 @@ tldrBullets:
   - "Being mentioned across trusted websites, communities, GitHub, Reddit, and developer publications can strengthen your product's discoverability."
   - "The goal isn't to game AI search. It's to make your tool genuinely useful, easy to understand, and easy for AI systems to discover and cite."
 date: 2026-10-03
+updatedDate: 2026-11-18
 draft: false
 authors:
   - "Studio1 Team"
@@ -52,6 +53,8 @@ Two patterns show up across the studies.
 **Community sites carry a lot of weight.** Peec AI's analysis found Reddit was the most cited domain across ChatGPT, Google AI Mode, Gemini, Perplexity, and AI Overviews. YouTube, LinkedIn, Wikipedia, and Forbes also made the top five. Review sites like G2 and Yelp appeared often when people asked for recommendations.
 
 **Most of what ChatGPT cites is not yours to edit.** In the Ahrefs look at ChatGPT's top 1,000 cited pages, Wikipedia made up 29.7%, homepages and landing pages 23.8%, and how-to and explainer pages 19.4%. Ahrefs counted only 32.3% as pages a company could realistically get into: explainers, reviews, news, and blog posts. Ahrefs says its sorting of page types is a rough guide, so treat the exact split loosely. The useful part is the homepage number. You cannot pitch your way onto someone else's homepage, but your own is a page you fully control.
+
+**Specific beats generic.** On November 18, 2026, we ran 22 developer questions from our clients' categories through ChatGPT, with web search on and memory off. Generic how-to questions were answered from official docs. The tutorial it recommended was a build on a named stack: CopilotKit's [multi-agent telecom support system with LangGraph JS](https://dev.to/copilotkit/build-a-multi-agent-telecom-support-system-with-copilotkit-langgraph-js-52oc), which Studio1 wrote, listed among its "useful tutorials and resources" for that build. See the [CopilotKit case study](/case-studies/copilotkit).
 
 ![Bar chart of ChatGPT's 1,000 most-cited pages: Wikipedia 29.7%, homepages and landing pages 23.8%, how-to and explainer pages 19.4%](/blog/uploads/how-to-get-your-tool-recommended-by-chatgpt-perplexity-google/chatgpt-cited-page-types.webp "Your homepage is a page ChatGPT cites that you fully control. Source: Ahrefs, Sept 2025.")
 
@@ -103,6 +106,8 @@ Write these pages yourself, and write them fairly. Put pricing in a table. Name 
 
 [Google's guide to generative AI search](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide) describes the content that holds up best as non-commodity: material built on first-hand experience that goes beyond what anyone could copy from other pages. Your own tests and your own numbers are exactly that.
 
+Comparisons built this way get picked up. Tensorlake's [Gemini 3 vs GPT-5.2 coding comparison](https://tensorlake.ai/blog/gemini3-vs-gpt5-coding), which Studio1 wrote, shows the prompts and names a winner per benchmark. It ranks #1 on Google for "gemini 3 vs gpt 5.2 coding", and Google's AI Overview cites it for its opening answer. See the [Tensorlake case study](/case-studies/tensorlake).
+
 ### 4. Make your docs the best answer on the web
 
 For developer tools, docs do the job that blog posts do for other products. Developers ask "how do I add X to Next.js" or paste an error message straight into a chat. Cover those questions:
@@ -112,6 +117,8 @@ For developer tools, docs do the job that blog posts do for other products. Deve
 - Migration guides from the tools people are leaving for yours.
 - Pricing, limits, and supported languages written out as text, not tucked into an image or a pricing widget.
 - Everything public. Docs behind a login cannot be read by a crawler.
+
+When the docs do this, assistants send people to them. Asked whether to start with the LiteLLM SDK or the Proxy, ChatGPT linked the SDK Quickstart that Studio1 wrote for LiteLLM's new Learn section as the official guide. See the [LiteLLM case study](/case-studies/litellm).
 
 ### 5. Get talked about where AI tools already look
 

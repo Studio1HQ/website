@@ -179,15 +179,31 @@ const contentCaseStudyProofs: CaseStudyResultData[] = [
     company: "Tensorlake",
     category: "Search-Led Technical Content",
     href: "/case-studies/tensorlake",
-    heroValue: "SEO",
-    heroLabel: "technical content for AI workflow topics",
+    heroValue: "#1",
+    heroLabel: "on Google for a Gemini 3 vs GPT-5.2 comparison",
     proof:
-      "Search-led technical writing and visual tutorials that made complex AI infrastructure ideas easier to understand.",
+      "Search-led comparisons and explainers. Google's AI Overview cites Tensorlake as the first source for the Gemini comparison, and points readers to its TOON vs JSON guide.",
     stats: [
-      { value: "SEO", label: "topic planning" },
-      { value: "AI", label: "workflow explainers" },
-      { value: "Visuals", label: "technical tutorials" },
+      { value: "AI Overview", label: "first source" },
+      { value: "2", label: "AI Overviews cite Tensorlake" },
+      { value: "#3", label: 'for "toon vs json"' },
     ],
+    art: "/case-studies/tensorlake/google-aio-gemini-3-vs-gpt-5-2.webp",
+  },
+  {
+    company: "CopilotKit",
+    category: "Developer Tutorials",
+    href: "/case-studies/copilotkit",
+    heroValue: "4",
+    heroLabel: "tutorials ranking #1 on Google",
+    proof:
+      "Build-along tutorials on CopilotKit's DEV publication. Two are the first source in Google's AI Overview, and ChatGPT lists the telecom support tutorial among its \"useful tutorials and resources\".",
+    stats: [
+      { value: "2", label: "AI Overviews, first source" },
+      { value: "ChatGPT", label: "recommends a tutorial" },
+      { value: "140", label: "visits from AI assistants" },
+    ],
+    art: "/case-studies/copilotkit/google-nextjs-ai-scheduling-app.webp",
   },
 ];
 

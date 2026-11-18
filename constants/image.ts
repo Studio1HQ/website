@@ -1,6 +1,6 @@
 import Permit from "@/public/assets/logos/permit.webp";
 import Tolgee from "@/public/assets/logos/tolgee.webp";
-import Copilotkit from "@/public/assets/logos/copilotkit.webp";
+import Copilotkit from "@/public/assets/logos/copilotkit-mark.webp";
 import Nebius from "@/public/assets/logos/nebius.webp";
 import Latitude from "@/public/assets/logos/latitude.webp";
 import Webcrumbs from "@/public/assets/logos/webcrumbs.webp";

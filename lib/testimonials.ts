@@ -11,7 +11,7 @@ export const COMPANY_MARKS: Record<string, string> = {
   Ittybit: "/assets/logos/ittybit.webp",
   "Entelligence.AI": "/assets/logos/enteligence.webp",
   "Readyset.io": "/assets/logos/readyset.webp",
-  CopilotKit: "/assets/logos/copilotkit.webp",
+  CopilotKit: "/assets/logos/copilotkit-mark.webp",
   Crawlee: "/assets/logos/crawlee.webp",
   Opire: "/assets/logos/opire.webp",
   "Permit.io": "/assets/logos/permit.webp",

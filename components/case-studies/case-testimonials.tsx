@@ -17,8 +17,34 @@ const initials = (name: string) =>
     .slice(0, 2)
     .toUpperCase();
 
-/** The person, as a face: their photo, or their initials on ink. */
-function Portrait({ quote, size }: { quote: Quote; size: string }) {
+/**
+ * The person, as a face: their photo; without one, the client's logo when
+ * given (a team or community voice), else their initials on ink.
+ */
+function Portrait({
+  quote,
+  size,
+  logo,
+}: {
+  quote: Quote;
+  size: string;
+  logo?: StaticImageData;
+}) {
+  if (!quote.avatar && logo) {
+    return (
+      <span
+        className={`relative block shrink-0 overflow-hidden rounded-[6px] bg-white ring-1 ring-inset ring-[#141414]/[0.08] ${size}`}
+      >
+        <Image
+          src={logo}
+          alt=""
+          fill
+          sizes="80px"
+          className="object-contain p-1"
+        />
+      </span>
+    );
+  }
   return quote.avatar ? (
     <span
       className={`relative block shrink-0 overflow-hidden rounded-[6px] ${size}`}
@@ -123,16 +149,19 @@ export function CaseTestimonials({
         </div>
       </figure>
 
-      {/* More voices */}
+      {/* More voices; a lone (or odd last) one takes the full row */}
       {rest.length ? (
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
           {rest.map((quote) => (
-            <figure key={quote.text} className={`flex flex-col p-5 ${GLASS}`}>
+            <figure
+              key={quote.text}
+              className={`flex flex-col p-5 sm:last:odd:col-span-2 md:p-6 ${GLASS}`}
+            >
               <blockquote className="text-[15.5px] leading-[1.6] text-[#141414]/80">
                 &ldquo;<NumericText>{quote.text}</NumericText>&rdquo;
               </blockquote>
               <figcaption className="mt-auto flex items-center gap-3 pt-4">
-                <Portrait quote={quote} size="size-9 text-[12px]" />
+                <Portrait quote={quote} size="size-9 text-[12px]" logo={logo} />
                 <span className="min-w-0 text-[13px] leading-snug">
                   <span className="block font-semibold text-[#141414]">
                     {quote.author}

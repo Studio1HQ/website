@@ -7,7 +7,7 @@ import { isMailerConfigured, sendMail } from "@/lib/mailer";
 import { notify } from "@/lib/internal/notifications/data";
 import { OWNERS } from "@/lib/internal/roles";
 import { requireMember, staffName } from "@/lib/internal/session";
-import { getPerson } from "@/lib/internal/team/people";
+import { findPerson, getPerson } from "@/lib/internal/team/people";
 import { dayLabel, displayName, istNow, isDateKey } from "@/lib/internal/team/shared";
 import { isOwnedBy } from "@/lib/internal/clients/schema";
 import { moveDeliverable } from "@/app/internal/(dashboard)/clients/actions";
@@ -31,6 +31,7 @@ import {
   guardedEmails,
   insertReport,
   insertTask,
+  insertTasks,
   updateReport,
   updateTask,
 } from "@/lib/internal/tasks/data";
@@ -48,6 +49,7 @@ import {
   periodLabel,
   periodStart,
   readyOn,
+  tasksHref,
   type ReportPeriod,
   type TaskArea,
   type TaskResult,
@@ -280,12 +282,14 @@ function doneDay(day: string | null, today: string) {
 
 /**
  * What a card is for (the "For" picker, lib/internal/tasks/shared.ts
- * parseLink): Studio1 and an area, a client, or one of your client
- * deliverables. Checks it's there and, for a deliverable, that it's yours.
+ * parseLink): Studio1 and an area, a client, or one of the client
+ * deliverables of whoever's week it's on (`person`, you by default).
+ * Checks it's there and, for a deliverable, that it's theirs.
  */
 async function resolveFor(
   staff: Staffish,
   value: unknown,
+  person: string = staff.email,
 ): Promise<
   | { ok: true; fields: { area: TaskArea; engagement_id: string | null; deliverable_id: string | null }; deliverable: Deliverable | null }
   | { ok: false; message: string }
@@ -309,8 +313,8 @@ async function resolveFor(
   const deliverable = await getDeliverableRow(link.id);
   if (deliverable === "error") return { ok: false, message: "Couldn't check that just now. Try again in a minute." };
   if (!deliverable) return { ok: false, message: "That deliverable isn't there any more." };
-  if (!isOwnedBy(deliverable.owner, staff.email) && !isOwnedBy(deliverable.reviewer, staff.email))
-    return { ok: false, message: "Pick client work you own or review." };
+  if (!isOwnedBy(deliverable.owner, person) && !isOwnedBy(deliverable.reviewer, person))
+    return { ok: false, message: person === staff.email ? "Pick client work you own or review." : "Pick client work they own or review." };
   const label = (await engagementLabels()).get(deliverable.engagement_id);
   if (!label || choicesFor(staff.clientScope, [label]).length === 0)
     return { ok: false, message: "That deliverable isn't there any more." };
@@ -337,17 +341,33 @@ async function startDeliverable(staff: Staffish, deliverable: Deliverable | null
 
 /**
  * Adds cards on a day (the week calendar's "+ New", My day): one or several
- * (a pasted list). items: [{ title, notes?, link? }]; status: left out = Done on
- * today or a past day, Not started on a day ahead.
+ * (a pasted list). items: [{ title, notes?, link? }]; extra: { email?, status? }.
+ * email: whose week (left out = your own); giving someone else a task goes
+ * through canGiveTask, like the board. status: left out = Done on today or
+ * a past day for your own, Not started on a day ahead or for someone else.
  */
-export async function addTasks(day: unknown, items: unknown, status?: unknown): Promise<TaskResult> {
-  const { staff } = await viewer();
-  if (!staff.person) return NOT_ON_LIST;
+export async function addTasks(day: unknown, items: unknown, extra?: unknown): Promise<TaskResult> {
+  const { staff, viewer: me } = await viewer();
+  const options = input(extra);
+  const email = (typeof options.email === "string" && options.email.trim() ? options.email : staff.email).trim().toLowerCase();
+  const other = email !== staff.email.toLowerCase();
+  let name = "";
+  if (!other) {
+    if (!staff.person) return NOT_ON_LIST;
+  } else {
+    // If who's an admin can't be read, treat them as guarded (fails closed).
+    const guarded = (await guardedEmails().catch(() => null))?.has(email) ?? true;
+    if (!canGiveTask(me, email, guarded)) return { ok: false, message: "You can't add tasks to that person's week." };
+    const found = await findPerson(email);
+    if (!found.ok) return TRY_AGAIN;
+    if (!found.person || !found.person.active) return { ok: false, message: "They're not on the active team list." };
+    name = displayName(found.person);
+  }
   const today = istNow().date;
   const date = typeof day === "string" && isDateKey(day) ? day : today;
   const problem = dayProblem(date, today);
   if (problem) return { ok: false, message: problem };
-  const state: TaskStatus = isTaskStatus(status) ? status : date <= today ? "done" : "todo";
+  const state: TaskStatus = isTaskStatus(options.status) ? options.status : other || date > today ? "todo" : "done";
   const list = (Array.isArray(items) ? items : [items]).map(input).slice(0, 30);
   const clean = list
     .map((item) => ({ title: line(item.title, 200), notes: block(item.notes, 4000), link: item.link }))
@@ -355,13 +375,15 @@ export async function addTasks(day: unknown, items: unknown, status?: unknown): 
   if (!clean.length) return { ok: false, message: "Write what it is." };
   if (clean.some((item) => looksLikeSecret(item.title) || looksLikeSecret(item.notes))) return SECRET;
 
-  let added = 0;
-  let also: string | null = null;
+  // Check every line first, then save them in one write: all or none, so a
+  // failed save can be retried without adding the first ones twice.
+  const rows: Record<string, unknown>[] = [];
+  const deliverables = new Map<string, Deliverable>();
   for (const item of clean) {
-    const tied = await resolveFor(staff, item.link);
-    if (!tied.ok) return added ? { ok: false, message: `Added ${added}, then: ${tied.message}` } : tied;
-    const saved = await insertTask({
-      email: staff.email,
+    const tied = await resolveFor(staff, item.link, email);
+    if (!tied.ok) return tied;
+    rows.push({
+      email,
       title: item.title,
       notes: item.notes,
       status: state,
@@ -371,14 +393,32 @@ export async function addTasks(day: unknown, items: unknown, status?: unknown): 
       updated_by: staff.email,
       ...tied.fields,
     });
-    if (!saved.ok) return added ? { ok: false, message: `Added ${added}, then: ${saved.message}` } : saved;
-    added += 1;
-    also = (await startDeliverable(staff, tied.deliverable, state)) ?? also;
+    if (tied.deliverable) deliverables.set(tied.deliverable.id, tied.deliverable);
+  }
+  const saved = await insertTasks(rows);
+  if (!saved.ok) return saved;
+  const added = rows.length;
+  let also: string | null = null;
+  // Someone else's deliverable isn't started for them: they start it when they pick it up.
+  if (!other) for (const deliverable of deliverables.values()) also = (await startDeliverable(staff, deliverable, state)) ?? also;
+  // A task from someone else is news: it shows on their bell (never an email),
+  // and opens the week it's on.
+  if (other) {
+    const by = staffName(staff);
+    const titles = clean.map((item) => item.title);
+    after(() =>
+      notify([email], staff.email, {
+        kind: "task",
+        title: added === 1 ? `${by} gave you a task` : `${by} gave you ${added} tasks`,
+        body: `${titles.slice(0, 3).join(" · ")}${titles.length > 3 ? " …" : ""} · ${dayLabel(date)}`,
+        href: tasksHref({ week: date }),
+      }),
+    );
   }
   refresh();
   // Say the day when it isn't today, so a task put on another day isn't "lost".
   const where = date === today ? "" : ` on ${dayLabel(date)}`;
-  const what = `${added === 1 ? "Added" : `Added ${added}`}${where}`;
+  const what = `${added === 1 ? "Added" : `Added ${added}`}${other ? ` to ${name}'s week` : ""}${where}`;
   return { ok: true, message: also ? `${what}, and ${also}` : what };
 }
 
@@ -410,7 +450,7 @@ export async function editTask(id: unknown, values: unknown): Promise<TaskResult
     patch.notes = notes;
   }
   if ("link" in data) {
-    const tied = await resolveFor(staff, data.link);
+    const tied = await resolveFor(staff, data.link, task.email);
     if (!tied.ok) return tied;
     Object.assign(patch, tied.fields);
     deliverable = tied.deliverable;
@@ -431,7 +471,8 @@ export async function editTask(id: unknown, values: unknown): Promise<TaskResult
   // Only when the status or the day changes: fixing a typo in a finished
   // task mustn't move the day it was finished on.
   if (status !== task.status || "day" in data) patch.done_on = status === "done" ? doneDay(day, today) : null;
-  if (!deliverable && task.deliverable_id && status !== task.status) {
+  // A new "For" replaces the old deliverable: only a status change alone reloads it.
+  if (!deliverable && !("link" in data) && task.deliverable_id && status !== task.status) {
     const row = await getDeliverableRow(task.deliverable_id);
     deliverable = row === "error" ? null : row;
   }

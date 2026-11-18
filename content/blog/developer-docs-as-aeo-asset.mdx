@@ -18,6 +18,7 @@ tldrBullets:
   - Authority from outside your site still decides who wins, so earn links and
     real mentions.
 date: 2026-10-10
+updatedDate: 2026-11-18
 draft: false
 authors:
   - Studio1 Team
@@ -70,6 +71,12 @@ The data on what gets cited is useful. SE Ranking studied more than 2 million pa
 [Ahrefs adds](https://ahrefs.com/blog/answer-engine-optimization/) that 44.2% of citations came from the first 30% of a page.
 
 Google says the same thing in plain terms. Its [guide to AI features in Search](https://developers.google.com/search/docs/appearance/ai-features) says there are no extra requirements to appear in AI Overviews or AI Mode, and no new machine readable files or special markup are needed. A page just has to be indexed and eligible to show with a snippet.
+
+**What this looks like on real docs.** Studio1 rebuilt [LiteLLM's docs](/case-studies/litellm) around a new Learn section with separate SDK and Gateway quickstarts. On November 18, 2026, we asked ChatGPT, with web search on, whether to start with the LiteLLM Python SDK or the Proxy. Its step-by-step answer ended with "Official guide" and a link to the [SDK Quickstart](https://docs.litellm.ai/docs/learn/python_sdk_quickstart).
+
+![ChatGPT answer ending with Official guide: LiteLLM Python SDK documentation and SDK Quickstart, with the link preview showing docs.litellm.ai/docs/learn](/blog/uploads/developer-docs-as-aeo-asset/chatgpt-litellm-sdk-quickstart.webp "ChatGPT links LiteLLM's SDK Quickstart as the official guide (November 18, 2026).")
+
+The same test showed why docs matter so much. Across 22 developer questions, generic how-to questions were answered from each platform's official docs, not from vendor blogs that rank on Google. If your docs answer the task clearly, they are the page that gets cited.
 
 ## How to structure developer docs so AI assistants cite them: an 8 step playbook
 
@@ -220,7 +227,7 @@ If a page would read the same with one word swapped, search engines and assistan
 Normal analytics miss most of this. Mintlify notes that coding agents [rarely show up in Google Analytics](https://www.mintlify.com/library/how-to-track-ai-traffic-to-your-documentation) because they fetch pages without running the tracking script. Use three checks instead.
 
 * **Read your server logs.** Filter by user agent: GPTBot, OAI-SearchBot, ChatGPT-User, ClaudeBot, PerplexityBot, Googlebot. You will see which pages they fetch and which they miss.
-* **Run a fixed prompt test.** Write 20 real questions your users ask. Ask each in ChatGPT, Gemini, Perplexity, Claude, and one coding assistant. Record whether your docs are cited, whether a competitor is, and whether the answer is correct. Repeat monthly with the same list.
+* **Run a fixed prompt test.** Write 20 real questions your users ask. Ask each in ChatGPT, Gemini, Perplexity, Claude, and one coding assistant. Record whether your docs are cited, whether a competitor is, and whether the answer is correct. Use a temporary chat with memory off, so your own history doesn't steer the answer. Repeat monthly with the same list.
 * **Watch search and referrals.** Search Console includes AI features in its reports. Track AI referral visits as their own group. SE Ranking found these visitors [spent 68% more time on site](https://visible.seranking.com/blog/answer-engine-optimization/) than organic search visitors.
 
 Read the answers, not only the links. Being cited is not the same as being recommended.

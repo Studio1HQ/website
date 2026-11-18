@@ -165,8 +165,9 @@ const litellmProof = {
   heroValue: "SDK + Gateway",
   heroLabel: "onboarding clarified",
   proof:
-    "Studio1 revamped LiteLLM's docs across SDK and Gateway paths, added focused quickstarts, improved information architecture, and turned community questions into a DX feedback loop.",
+    "Studio1 revamped LiteLLM's docs across SDK and Gateway paths, added focused quickstarts, improved information architecture, and turned community questions into a DX feedback loop. ChatGPT now links the SDK Quickstart as the official guide for getting started.",
   stats: [
+    { value: "ChatGPT", label: "links the SDK Quickstart" },
     { value: "SDK", label: "quickstart path" },
     { value: "Gateway", label: "quickstart path" },
     { value: "CEO", label: "public endorsement" },
