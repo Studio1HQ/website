@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 import nextMDX from "@next/mdx";
 import createNextIntlPlugin from "next-intl/plugin";
 import { AI_AGENT_HEADER_PATTERN } from "./lib/ai-agents";
-import { IMAGE_CDN } from "./lib/image-config.mjs";
+import { IMAGE_CDN, IMAGE_WIDTHS } from "./lib/image-config.mjs";
 
 const withMDX = nextMDX();
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
@@ -50,8 +50,10 @@ const nextConfig: NextConfig = {
     loader: "custom",
     loaderFile: "./lib/image-loader.ts",
     qualities: [50, 75, 95],
-    deviceSizes: [360, 640, 768, 1024, 1280, 1536, 1920],
-    imageSizes: [32, 48, 64, 96, 128, 256, 384],
+    // The srcset offers exactly the widths that are made, so each candidate's
+    // "w" is the real width of its file (and there are no duplicate URLs).
+    deviceSizes: IMAGE_WIDTHS.filter((width) => width >= 640),
+    imageSizes: IMAGE_WIDTHS.filter((width) => width < 640),
     remotePatterns: [
       {
         protocol: "https" as const,
@@ -109,9 +111,21 @@ const nextConfig: NextConfig = {
         ],
       })),
       {
-        // Build-time image sizes and WebP blog covers: Cloudflare keeps them
-        // for 30 days, browsers a day. Covers change URL (?v=) when they change.
-        source: "/:dir(_img|blog-cover)/:path*",
+        // Build-time image sizes keep their URL when an image is replaced
+        // under the same name, so Cloudflare checks back daily.
+        source: "/_img/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value:
+              "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800",
+          },
+        ],
+      },
+      {
+        // WebP blog covers change URL (?v=) when they change: Cloudflare keeps
+        // them for 30 days, browsers a day.
+        source: "/blog-cover/:path*",
         headers: [
           {
             key: "Cache-Control",

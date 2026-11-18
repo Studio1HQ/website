@@ -5,9 +5,12 @@
  * Optimization caps new images per month; past it they 402). The sizes are
  * plain files under public/_img, which Cloudflare caches in front of the site.
  *
- *   public images         public/_img/<width>/<path in public>.webp
- *   images imported       public/_img/<width>/_media/<file name>.webp
+ *   public images         public/_img/<width>/<path in public, as .webp>
+ *   images imported       public/_img/<width>/_media/<name>.webp
  *   in code (from public/)
+ *
+ * The extension is swapped, not added (logos/x.png → logos/x.webp), so two
+ * images that differ only by extension would clash; the script stops if so.
  *
  * Runs before `next build` (package.json "build"): on Vercel, Next packages
  * the deploy inside `next build`, so files written after it are left out.
@@ -20,13 +23,14 @@
  * Usage: node scripts/image-variants.mjs
  */
 
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import {
   access,
   copyFile,
   mkdir,
   readFile,
   readdir,
+  rename,
   rm,
   writeFile,
 } from "node:fs/promises";
@@ -38,9 +42,12 @@ import {
   IMAGE_FOLDERS,
   IMAGE_WIDTHS,
   MEDIA_DIR,
+  webpName,
 } from "../lib/image-config.mjs";
 
 const QUALITY = 75;
+/** Part of every cache file name: bump it to drop sizes an older version made. */
+const CACHE_VERSION = "v2";
 const IMAGE = /\.(?:webp|png|jpe?g)$/i;
 /** Where code may import images from public/. */
 const CODE_DIRS = ["app", "components", "constants", "data", "lib", "content"];
@@ -88,7 +95,7 @@ export async function publicImages(base = root) {
 /**
  * Images imported in code from public/. Next serves those as
  * /_next/static/media/<name>.<hash>.<ext>; the loader points them at
- * /_img/<width>/_media/<name>.<ext>.webp, so file names must be unique.
+ * /_img/<width>/_media/<name>.webp, so names (without extension) must be unique.
  */
 export async function importedImages(base = root) {
   const byName = new Map();
@@ -99,12 +106,12 @@ export async function importedImages(base = root) {
       for (const match of text.matchAll(PUBLIC_IMPORT)) {
         const rel = match[1];
         const name = path.posix.basename(rel);
-        const seen = byName.get(name);
+        const seen = byName.get(webpName(name));
         if (seen && seen.rel !== rel)
           throw new Error(
-            `two imported images are both named ${name}: ${seen.rel} and ${rel}`,
+            `two imported images would both be _media/${webpName(name)}: ${seen.rel} and ${rel}`,
           );
-        byName.set(name, {
+        byName.set(webpName(name), {
           rel,
           file: path.join(base, "public", ...rel.split("/")),
           name: `${MEDIA_DIR}/${name}`,
@@ -113,6 +120,24 @@ export async function importedImages(base = root) {
     }
   }
   return [...byName.values()].map(({ file, name }) => ({ file, name }));
+}
+
+/**
+ * The sized file each image becomes. Stops the build if two images would
+ * become the same file (x.png and x.webp in one folder).
+ */
+export function sizedFiles(sources) {
+  const byTarget = new Map();
+  for (const { file, name } of sources) {
+    const target = webpName(name);
+    const seen = byTarget.get(target);
+    if (seen && seen !== file)
+      throw new Error(
+        `${toUrl(root, seen)} and ${toUrl(root, file)} would both be /_img/<width>/${target}; rename one`,
+      );
+    byTarget.set(target, file);
+  }
+  return [...byTarget].map(([target, file]) => ({ file, target }));
 }
 
 /** For each width: resize below the image's own width, the image at its own size from there up. */
@@ -129,10 +154,10 @@ async function exists(file) {
   }
 }
 
-async function makeOne({ file, name }, stats) {
+async function makeOne({ file, target: name }, stats) {
   const input = await readFile(file);
   const targets = IMAGE_WIDTHS.map((width) =>
-    path.join(out, String(width), `${name}.webp`),
+    path.join(out, String(width), name),
   );
   await Promise.all(
     targets.map((target) => mkdir(path.dirname(target), { recursive: true })),
@@ -148,12 +173,21 @@ async function makeOne({ file, name }, stats) {
     );
     return;
   }
+  if ((meta.pages ?? 1) > 1) {
+    // Animated: resizing would keep only the first frame, so the original
+    // stands in for every size.
+    await Promise.all(targets.map((target) => writeFile(target, input)));
+    stats.animated.push(name);
+    return;
+  }
   const hash = createHash("sha1").update(input).digest("hex").slice(0, 20);
-  for (const [index, { width, resize }] of plan(meta.width ?? 0).entries()) {
+  // The width as shown (a photo's EXIF orientation can swap width and height).
+  const shownWidth = meta.autoOrient?.width ?? meta.width ?? 0;
+  for (const [index, { width, resize }] of plan(shownWidth).entries()) {
     const target = targets[index];
     const cached = path.join(
       cacheDir,
-      `${hash}-${resize ? width : "full"}-q${QUALITY}.webp`,
+      `${CACHE_VERSION}-${hash}-${resize ? width : "full"}-q${QUALITY}.webp`,
     );
     if (await exists(cached)) {
       await copyFile(cached, target);
@@ -163,13 +197,24 @@ async function makeOne({ file, name }, stats) {
     const buffer = resize
       ? await sharp(input)
           .rotate()
-          .resize({ width })
+          .resize({ width, withoutEnlargement: true })
           .webp({ quality: QUALITY })
           .toBuffer()
       : meta.format === "webp"
         ? input
         : await sharp(input).rotate().webp({ quality: QUALITY }).toBuffer();
-    await writeFile(cached, buffer);
+    // Into the cache via a temporary file, so a build stopped midway can't
+    // leave a half-written size there for the next build to reuse. Its name is
+    // unique: one file can be both a public and an imported image, so two
+    // workers may make the same size at once.
+    const temporary = `${cached}.${randomUUID()}.tmp`;
+    try {
+      await writeFile(temporary, buffer);
+      await rename(temporary, cached);
+    } catch (error) {
+      await rm(temporary, { force: true });
+      throw error;
+    }
     await writeFile(target, buffer);
     stats.made += 1;
   }
@@ -179,8 +224,15 @@ export async function main() {
   const started = Date.now();
   await rm(out, { recursive: true, force: true });
   await mkdir(cacheDir, { recursive: true });
-  const sources = [...(await publicImages()), ...(await importedImages())];
-  const stats = { made: 0, cached: 0, failed: [] };
+  // Sizes from an older version of this script (or half-written ones) go.
+  for (const entry of await readdir(cacheDir))
+    if (!entry.startsWith(`${CACHE_VERSION}-`) || entry.endsWith(".tmp"))
+      await rm(path.join(cacheDir, entry), { force: true });
+  const sources = sizedFiles([
+    ...(await publicImages()),
+    ...(await importedImages()),
+  ]);
+  const stats = { made: 0, cached: 0, failed: [], animated: [] };
   const queue = [...sources];
   const workers = Array.from(
     { length: Math.max(2, Math.min(8, os.availableParallelism?.() ?? 4)) },
@@ -196,6 +248,8 @@ export async function main() {
   );
   for (const line of stats.failed)
     console.warn(`[image-variants] couldn't read, original used: ${line}`);
+  for (const name of stats.animated)
+    console.log(`[image-variants] animated, original used: ${name}`);
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {

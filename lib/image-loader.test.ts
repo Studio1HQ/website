@@ -3,19 +3,27 @@ import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import imageLoader, { imageWidth } from "./image-loader";
 import { IMAGE_FOLDERS } from "./image-config.mjs";
-import { importedImages, plan } from "../scripts/image-variants.mjs";
+import {
+  importedImages,
+  plan,
+  publicImages,
+  sizedFiles,
+} from "../scripts/image-variants.mjs";
 
 afterEach(() => {
   vi.unstubAllEnvs();
 });
 
 describe("imageLoader", () => {
-  it("points public images at their build-time size", () => {
+  it("points public images at their build-time size, as name.webp", () => {
     expect(imageLoader({ src: "/assets/logos/litellm.webp", width: 48 })).toBe(
-      "/_img/96/assets/logos/litellm.webp.webp",
+      "/_img/96/assets/logos/litellm.webp",
     );
     expect(imageLoader({ src: "/blog/uploads/x/cover.png", width: 700 })).toBe(
-      "/_img/1280/blog/uploads/x/cover.png.webp",
+      "/_img/1280/blog/uploads/x/cover.webp",
+    );
+    expect(imageLoader({ src: "/careers/team/Photo.JPG", width: 256 })).toBe(
+      "/_img/256/careers/team/Photo.webp",
     );
   });
 
@@ -25,19 +33,26 @@ describe("imageLoader", () => {
         src: "/_next/static/media/jozu.41e3bd9b.webp",
         width: 256,
       }),
-    ).toBe("/_img/256/_media/jozu.webp.webp");
+    ).toBe("/_img/256/_media/jozu.webp");
     expect(
       imageLoader({
         src: "/_next/static/immutable/media/copilotkit-mark.35zozz-gzgq1o.webp",
         width: 64,
       }),
-    ).toBe("/_img/96/_media/copilotkit-mark.webp.webp");
+    ).toBe("/_img/96/_media/copilotkit-mark.webp");
+    expect(
+      imageLoader({ src: "/_next/static/media/nathan.1a2b3c.png", width: 96 }),
+    ).toBe("/_img/96/_media/nathan.webp");
   });
 
   it("serves blog covers as their WebP, keeping the version", () => {
     expect(
       imageLoader({ src: "/blog-cover/aeo-guide?v=5-2026-11-18", width: 3840 }),
     ).toBe("/blog-cover/aeo-guide/cover.webp?v=5-2026-11-18");
+    // Split at the first "?" only: the rest of the query stays whole.
+    expect(imageLoader({ src: "/blog-cover/x?v=a?b", width: 640 })).toBe(
+      "/blog-cover/x/cover.webp?v=a?b",
+    );
   });
 
   it("leaves everything else alone", () => {
@@ -61,14 +76,14 @@ describe("imageLoader", () => {
   it("loads sizes and covers from the CDN when IMAGE_ORIGIN is set", () => {
     vi.stubEnv("IMAGE_ORIGIN", "https://cdn.studio1hq.com");
     expect(imageLoader({ src: "/assets/logos/litellm.webp", width: 48 })).toBe(
-      "https://cdn.studio1hq.com/_img/96/assets/logos/litellm.webp.webp",
+      "https://cdn.studio1hq.com/_img/96/assets/logos/litellm.webp",
     );
     expect(
       imageLoader({
         src: "/_next/static/media/jozu.41e3bd9b.webp",
         width: 256,
       }),
-    ).toBe("https://cdn.studio1hq.com/_img/256/_media/jozu.webp.webp");
+    ).toBe("https://cdn.studio1hq.com/_img/256/_media/jozu.webp");
     expect(imageLoader({ src: "/blog-cover/aeo-guide?v=5", width: 640 })).toBe(
       "https://cdn.studio1hq.com/blog-cover/aeo-guide/cover.webp?v=5",
     );
@@ -132,6 +147,23 @@ describe("image-variants script", () => {
       expect(IMAGE_FOLDERS, `add "${folder}" to IMAGE_FOLDERS`).toContain(
         folder,
       );
+  });
+
+  it("gives every image its own name.webp, and stops on a clash", async () => {
+    const sources = [...(await publicImages()), ...(await importedImages())];
+    const files = sizedFiles(sources);
+    expect(files.every(({ target }) => !/\.\w+\.webp$/.test(target))).toBe(
+      true,
+    );
+    expect(files.map(({ target }) => target)).toContain(
+      "assets/logos/litellm.webp",
+    );
+    expect(() =>
+      sizedFiles([
+        { file: "/p/assets/x.png", name: "assets/x.png" },
+        { file: "/p/assets/x.webp", name: "assets/x.webp" },
+      ]),
+    ).toThrow(/would both be/);
   });
 
   it("finds the images imported in code, each with its own file name", async () => {

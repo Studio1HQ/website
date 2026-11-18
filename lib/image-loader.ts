@@ -1,6 +1,11 @@
 "use client";
 
-import { IMAGE_FOLDERS, IMAGE_WIDTHS, MEDIA_DIR } from "./image-config.mjs";
+import {
+  IMAGE_FOLDERS,
+  IMAGE_WIDTHS,
+  MEDIA_DIR,
+  webpName,
+} from "./image-config.mjs";
 
 /**
  * Every next/image on the site goes through this loader instead of Vercel's
@@ -10,8 +15,8 @@ import { IMAGE_FOLDERS, IMAGE_WIDTHS, MEDIA_DIR } from "./image-config.mjs";
  * into fixed widths under /_img. They're plain files, so Cloudflare caches
  * and serves them, with no per-image cost and no cap.
  *
- *   /assets/logos/x.webp                  → /_img/<width>/assets/logos/x.webp.webp
- *   /_next/static/media/x.3f2a1b.webp     → /_img/<width>/_media/x.webp.webp
+ *   /assets/logos/x.png                   → /_img/<width>/assets/logos/x.webp
+ *   /_next/static/media/x.3f2a1b.webp     → /_img/<width>/_media/x.webp
  *   /blog-cover/<slug>?v=5                → /blog-cover/<slug>/cover.webp?v=5
  *
  * In production these are on cdn.studio1hq.com (IMAGE_ORIGIN, set in
@@ -24,7 +29,7 @@ import { IMAGE_FOLDERS, IMAGE_WIDTHS, MEDIA_DIR } from "./image-config.mjs";
 const IMAGE_FILE = /\.(?:webp|png|jpe?g)$/i;
 /** An image imported in code: /_next/static/[immutable/]media/<name>.<hash>.<ext> */
 const STATIC_MEDIA =
-  /^\/_next\/static\/(?:[\w-]+\/)?media\/(.+)\.[\w-]+\.(webp|png|jpe?g)$/i;
+  /^\/_next\/static\/(?:[\w-]+\/)?media\/(.+)\.[\w-]+\.(?:webp|png|jpe?g)$/i;
 const BLOG_COVER = /^\/blog-cover\/([a-z0-9-]+)$/;
 
 /** The smallest made width that covers what the browser asked for. */
@@ -43,7 +48,11 @@ export default function imageLoader({
   width: number;
   quality?: number;
 }) {
-  const [path, query] = src.split("?");
+  // Split at the first "?" only, so the whole query (even one with a "?" in
+  // it) is kept.
+  const mark = src.indexOf("?");
+  const path = mark === -1 ? src : src.slice(0, mark);
+  const query = mark === -1 ? "" : src.slice(mark + 1);
   const keep = query ? `?${query}` : "";
   const origin = process.env.IMAGE_ORIGIN ?? "";
   // Covers: a WebP drawn at build time by app/blog-cover/[slug]/cover.webp.
@@ -56,8 +65,8 @@ export default function imageLoader({
   }
   const media = STATIC_MEDIA.exec(path);
   if (media)
-    return `${origin}/_img/${made}/${MEDIA_DIR}/${media[1]}.${media[2]}.webp${keep}`;
+    return `${origin}/_img/${made}/${MEDIA_DIR}/${media[1]}.webp${keep}`;
   if (IMAGE_FILE.test(path) && IMAGE_FOLDERS.includes(path.split("/")[1]))
-    return `${origin}/_img/${made}${path}.webp${keep}`;
+    return `${origin}/_img/${made}${webpName(path)}${keep}`;
   return src;
 }
