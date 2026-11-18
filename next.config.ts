@@ -2,7 +2,6 @@ import type { NextConfig } from "next";
 import nextMDX from "@next/mdx";
 import createNextIntlPlugin from "next-intl/plugin";
 import { AI_AGENT_HEADER_PATTERN } from "./lib/ai-agents";
-import { IMAGE_FALLBACKS } from "./lib/image-paths";
 
 const withMDX = nextMDX();
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
@@ -37,8 +36,8 @@ const nextConfig: NextConfig = {
     staleTimes: { dynamic: 300, static: 300 },
   },
   images: {
-    // Images are sized at build time (scripts/image-variants.mjs) and served
-    // as plain files that Cloudflare caches, instead of Vercel's Image
+    // Images are sized before the build (scripts/image-variants.mjs) and
+    // served as plain files that Cloudflare caches, instead of Vercel's Image
     // Optimization, which caps new images per month (lib/image-loader.ts).
     loader: "custom",
     loaderFile: "./lib/image-loader.ts",
@@ -85,10 +84,7 @@ const nextConfig: NextConfig = {
         // build in public/brand, refreshed with scripts/sync-brand.mjs.
         { source: "/brand", destination: "/brand/index.html" },
       ],
-      // A size scripts/image-variants.mjs didn't make (the image is
-      // narrower, or `next dev` never ran it): the original file. Only image
-      // files and blog covers, never a page (lib/image-paths.ts).
-      fallback: IMAGE_FALLBACKS,
+      fallback: [],
     };
   },
   async headers() {
@@ -105,8 +101,9 @@ const nextConfig: NextConfig = {
         ],
       })),
       {
-        // Build-time image sizes: Cloudflare keeps them for 30 days, browsers a day.
-        source: "/_img/:path*",
+        // Build-time image sizes and WebP blog covers: Cloudflare keeps them
+        // for 30 days, browsers a day. Covers change URL (?v=) when they change.
+        source: "/:dir(_img|blog-cover)/:path*",
         headers: [
           {
             key: "Cache-Control",

@@ -5,18 +5,17 @@
  * Optimization caps new images per month; past it they 402). The sizes are
  * plain files under public/_img, which Cloudflare caches in front of the site.
  *
- *   public/_img/<width>/<original path>.webp
+ *   public images         public/_img/<width>/<path in public>.webp
+ *   images imported       public/_img/<width>/_media/<file name>.webp
+ *   in code (from public/)
  *
- * Runs after `next build` (package.json "build"), because two kinds of
- * images only exist then: images imported in code (.next/static/.../media,
- * named with a hash) and the blog covers app/blog-cover draws at build time.
- *
- * A width at or above the image's own is skipped for WebP sources (the
- * /_img fallback rewrite serves the original) and made at the image's own
- * size for PNG and JPEG ones, so those still arrive as WebP. Finished sizes
- * are kept in .next/cache/image-variants (Vercel keeps that folder between
- * builds), so only new or changed images are worked on. A failure skips that
- * image (its original is served) and never fails the build.
+ * Runs before `next build` (package.json "build"): on Vercel, Next packages
+ * the deploy inside `next build`, so files written after it are left out.
+ * Every width exists for every image (a width above the image's own is the
+ * image at its own size), so a page never asks for a file that isn't there.
+ * Finished sizes are kept in .next/cache/image-variants (Vercel restores that
+ * folder before each build), so only new or changed images are worked on. If
+ * an image can't be read, its original bytes stand in for every size.
  *
  * Usage: node scripts/image-variants.mjs
  */
@@ -35,17 +34,24 @@ import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import sharp from "sharp";
-
-/** Keep in step with IMAGE_WIDTHS in lib/image-loader.ts (a test checks). */
-export const IMAGE_WIDTHS = [96, 256, 640, 1280, 1920];
+import {
+  IMAGE_FOLDERS,
+  IMAGE_WIDTHS,
+  MEDIA_DIR,
+} from "../lib/image-config.mjs";
 
 const QUALITY = 75;
 const IMAGE = /\.(?:webp|png|jpe?g)$/i;
-/** public/ folders whose images never go through next/image. */
-const SKIP_PUBLIC = ["_img", "brand", "email"];
+/** Where code may import images from public/. */
+const CODE_DIRS = ["app", "components", "constants", "data", "lib", "content"];
+const CODE = /\.(?:[cm]?[jt]sx?|mdx)$/;
+/** `from "@/public/x.webp"`, `from "../public/x.webp"` and the like. */
+const PUBLIC_IMPORT =
+  /from\s+["'](?:@\/|(?:\.\.?\/)+)public\/([^"']+\.(?:webp|png|jpe?g))["']/gi;
 
 const root = process.cwd();
-const out = path.join(root, "public", "_img");
+const publicDir = path.join(root, "public");
+const out = path.join(publicDir, "_img");
 const cacheDir = path.join(root, ".next", "cache", "image-variants");
 
 async function* walk(dir) {
@@ -57,54 +63,61 @@ async function* walk(dir) {
   }
   for (const entry of entries) {
     const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) yield* walk(full);
-    else if (entry.isFile()) yield full;
+    if (entry.isDirectory()) {
+      if (entry.name !== "node_modules" && !entry.name.startsWith("."))
+        yield* walk(full);
+    } else if (entry.isFile()) yield full;
   }
 }
 
-const urlPath = (from, file) =>
+const toUrl = (from, file) =>
   path.relative(from, file).split(path.sep).join("/");
 
-/** Every image next/image may ask for, as { file, url }. */
-export async function findSources(base = root) {
-  const sources = [];
-  const publicDir = path.join(base, "public");
-  for await (const file of walk(publicDir)) {
-    const rel = urlPath(publicDir, file);
-    if (
-      !IMAGE.test(rel) ||
-      SKIP_PUBLIC.some((skip) => rel === skip || rel.startsWith(`${skip}/`))
-    )
-      continue;
-    sources.push({ file, url: `/${rel}` });
+/** Images in public/ that pages may ask for: { file, name } (name = the path under /_img/<width>/). */
+export async function publicImages(base = root) {
+  const list = [];
+  for (const folder of IMAGE_FOLDERS) {
+    for await (const file of walk(path.join(base, "public", folder))) {
+      if (IMAGE.test(file))
+        list.push({ file, name: toUrl(path.join(base, "public"), file) });
+    }
   }
-  // Images imported in code: /_next/static/.../media/<name>.<hash>.<ext>
-  const staticDir = path.join(base, ".next", "static");
-  for await (const file of walk(staticDir)) {
-    const rel = urlPath(staticDir, file);
-    if (IMAGE.test(rel) && rel.split("/").includes("media"))
-      sources.push({ file, url: `/_next/static/${rel}` });
-  }
-  // Blog covers, drawn at build time by app/blog-cover/[slug] (PNG).
-  const coverDir = path.join(base, ".next", "server", "app", "blog-cover");
-  for await (const file of walk(coverDir)) {
-    if (file.endsWith(".body") && path.dirname(file) === coverDir)
-      sources.push({
-        file,
-        url: `/blog-cover/${path.basename(file, ".body")}`,
-      });
-  }
-  return sources;
+  return list;
 }
 
-/** The widths to make for an image of this width, and whether each is a resize. */
-export function plan(naturalWidth, isWebp) {
-  return IMAGE_WIDTHS.flatMap((width) => {
-    if (width < naturalWidth) return [{ width, resize: true }];
-    // At or above its own size: WebP falls back to the original file;
-    // PNG and JPEG are re-encoded once at their own size.
-    return isWebp ? [] : [{ width, resize: false }];
-  });
+/**
+ * Images imported in code from public/. Next serves those as
+ * /_next/static/media/<name>.<hash>.<ext>; the loader points them at
+ * /_img/<width>/_media/<name>.<ext>.webp, so file names must be unique.
+ */
+export async function importedImages(base = root) {
+  const byName = new Map();
+  for (const dir of CODE_DIRS) {
+    for await (const file of walk(path.join(base, dir))) {
+      if (!CODE.test(file)) continue;
+      const text = await readFile(file, "utf8");
+      for (const match of text.matchAll(PUBLIC_IMPORT)) {
+        const rel = match[1];
+        const name = path.posix.basename(rel);
+        const seen = byName.get(name);
+        if (seen && seen.rel !== rel)
+          throw new Error(
+            `two imported images are both named ${name}: ${seen.rel} and ${rel}`,
+          );
+        byName.set(name, {
+          rel,
+          file: path.join(base, "public", ...rel.split("/")),
+          name: `${MEDIA_DIR}/${name}`,
+        });
+      }
+    }
+  }
+  return [...byName.values()].map(({ file, name }) => ({ file, name }));
+}
+
+/** For each width: resize below the image's own width, the image at its own size from there up. */
+export function plan(naturalWidth) {
+  return IMAGE_WIDTHS.map((width) => ({ width, resize: width < naturalWidth }));
 }
 
 async function exists(file) {
@@ -116,39 +129,46 @@ async function exists(file) {
   }
 }
 
-async function makeOne({ file, url }, stats) {
+async function makeOne({ file, name }, stats) {
   const input = await readFile(file);
-  const meta = await sharp(input).metadata();
-  if (!meta.width || !["webp", "png", "jpeg"].includes(meta.format ?? ""))
+  const targets = IMAGE_WIDTHS.map((width) =>
+    path.join(out, String(width), `${name}.webp`),
+  );
+  await Promise.all(
+    targets.map((target) => mkdir(path.dirname(target), { recursive: true })),
+  );
+  let meta;
+  try {
+    meta = await sharp(input).metadata();
+  } catch (error) {
+    // Unreadable: the original stands in for every size, so nothing 404s.
+    await Promise.all(targets.map((target) => writeFile(target, input)));
+    stats.failed.push(
+      `${name}: ${error instanceof Error ? error.message : error}`,
+    );
     return;
+  }
   const hash = createHash("sha1").update(input).digest("hex").slice(0, 20);
-  let natural = null; // the PNG/JPEG at its own size, made once
-  for (const { width, resize } of plan(meta.width, meta.format === "webp")) {
-    const target = path.join(out, String(width), `${url.slice(1)}.webp`);
+  for (const [index, { width, resize }] of plan(meta.width ?? 0).entries()) {
+    const target = targets[index];
     const cached = path.join(
       cacheDir,
       `${hash}-${resize ? width : "full"}-q${QUALITY}.webp`,
     );
-    await mkdir(path.dirname(target), { recursive: true });
     if (await exists(cached)) {
       await copyFile(cached, target);
       stats.cached += 1;
       continue;
     }
-    let buffer;
-    if (resize) {
-      buffer = await sharp(input)
-        .rotate()
-        .resize({ width })
-        .webp({ quality: QUALITY })
-        .toBuffer();
-    } else {
-      natural ??= await sharp(input)
-        .rotate()
-        .webp({ quality: QUALITY })
-        .toBuffer();
-      buffer = natural;
-    }
+    const buffer = resize
+      ? await sharp(input)
+          .rotate()
+          .resize({ width })
+          .webp({ quality: QUALITY })
+          .toBuffer()
+      : meta.format === "webp"
+        ? input
+        : await sharp(input).rotate().webp({ quality: QUALITY }).toBuffer();
     await writeFile(cached, buffer);
     await writeFile(target, buffer);
     stats.made += 1;
@@ -159,21 +179,14 @@ export async function main() {
   const started = Date.now();
   await rm(out, { recursive: true, force: true });
   await mkdir(cacheDir, { recursive: true });
-  const sources = await findSources();
+  const sources = [...(await publicImages()), ...(await importedImages())];
   const stats = { made: 0, cached: 0, failed: [] };
   const queue = [...sources];
   const workers = Array.from(
     { length: Math.max(2, Math.min(8, os.availableParallelism?.() ?? 4)) },
     async () => {
-      for (let next = queue.shift(); next; next = queue.shift()) {
-        try {
-          await makeOne(next, stats);
-        } catch (error) {
-          stats.failed.push(
-            `${next.url}: ${error instanceof Error ? error.message : error}`,
-          );
-        }
-      }
+      for (let next = queue.shift(); next; next = queue.shift())
+        await makeOne(next, stats);
     },
   );
   await Promise.all(workers);
@@ -182,15 +195,12 @@ export async function main() {
     `[image-variants] ${sources.length} images → ${stats.made} sizes made, ${stats.cached} from cache, in ${seconds}s`,
   );
   for (const line of stats.failed)
-    console.warn(`[image-variants] skipped (original is served): ${line}`);
+    console.warn(`[image-variants] couldn't read, original used: ${line}`);
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
   main().catch((error) => {
-    // Never fail the deploy over images: every one still has its original.
-    console.warn(
-      "[image-variants] couldn't make image sizes; originals will be served.",
-      error,
-    );
+    console.error("[image-variants] failed:", error);
+    process.exit(1);
   });
 }

@@ -10,7 +10,7 @@
     "dev": "next dev --webpack -H localhost",
     "dev:lan": "INTERNAL_DEV_BYPASS= next dev --webpack",
     "cms:local": "npx -y decap-server@3.11.3",
-    "build": "next build && node scripts/image-variants.mjs",
+    "build": "node scripts/image-variants.mjs && next build",
     "start": "next start",
     "format": "prettier --write .",
     "lint": "eslint .",

@@ -1,44 +1,70 @@
-import { describe, expect, it } from "vitest";
-import imageLoader, { IMAGE_WIDTHS, imageWidth } from "./image-loader";
-import {
-  IMAGE_WIDTHS as SCRIPT_WIDTHS,
-  plan,
-} from "../scripts/image-variants.mjs";
+import { readdirSync } from "node:fs";
+import path from "node:path";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import imageLoader, { imageWidth } from "./image-loader";
+import { IMAGE_FOLDERS } from "./image-config.mjs";
+import { importedImages, plan } from "../scripts/image-variants.mjs";
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
 
 describe("imageLoader", () => {
-  it("points local images at their build-time size", () => {
+  it("points public images at their build-time size", () => {
     expect(imageLoader({ src: "/assets/logos/litellm.webp", width: 48 })).toBe(
       "/_img/96/assets/logos/litellm.webp.webp",
     );
-    expect(imageLoader({ src: "/blog/jev1.png", width: 700 })).toBe(
-      "/_img/1280/blog/jev1.png.webp",
+    expect(imageLoader({ src: "/blog/uploads/x/cover.png", width: 700 })).toBe(
+      "/_img/1280/blog/uploads/x/cover.png.webp",
     );
+  });
+
+  it("points images imported in code at their sizes by file name", () => {
     expect(
       imageLoader({
         src: "/_next/static/media/jozu.41e3bd9b.webp",
         width: 256,
       }),
-    ).toBe("/_img/256/_next/static/media/jozu.41e3bd9b.webp.webp");
+    ).toBe("/_img/256/_media/jozu.webp.webp");
+    expect(
+      imageLoader({
+        src: "/_next/static/immutable/media/copilotkit-mark.35zozz-gzgq1o.webp",
+        width: 64,
+      }),
+    ).toBe("/_img/96/_media/copilotkit-mark.webp.webp");
   });
 
-  it("keeps a blog cover's version query", () => {
+  it("serves blog covers as their WebP, keeping the version", () => {
     expect(
       imageLoader({ src: "/blog-cover/aeo-guide?v=5-2026-11-18", width: 3840 }),
-    ).toBe("/_img/1920/blog-cover/aeo-guide.webp?v=5-2026-11-18");
+    ).toBe("/blog-cover/aeo-guide/cover.webp?v=5-2026-11-18");
   });
 
-  it("leaves other sites' images, SVGs and API pictures alone", () => {
+  it("leaves everything else alone", () => {
     expect(imageLoader({ src: "https://example.com/a.png", width: 640 })).toBe(
       "https://example.com/a.png",
     );
     expect(imageLoader({ src: "//cdn.example.com/a.png", width: 640 })).toBe(
       "//cdn.example.com/a.png",
     );
-    expect(
-      imageLoader({ src: "/assets/site/studio1-logo.svg", width: 64 }),
-    ).toBe("/assets/site/studio1-logo.svg");
+    expect(imageLoader({ src: "/internal/blog-media/x.png", width: 640 })).toBe(
+      "/internal/blog-media/x.png",
+    );
+    expect(imageLoader({ src: "/brand/logo.png", width: 640 })).toBe(
+      "/brand/logo.png",
+    );
     expect(imageLoader({ src: "/api/favicon?d=example.com", width: 64 })).toBe(
       "/api/favicon?d=example.com",
+    );
+  });
+
+  it("serves originals in next dev, where the sizes don't exist", () => {
+    vi.stubEnv("NODE_ENV", "development");
+    expect(imageLoader({ src: "/assets/logos/litellm.webp", width: 48 })).toBe(
+      "/assets/logos/litellm.webp?w=96",
+    );
+    expect(imageLoader({ src: "/blog-cover/aeo-guide?v=5", width: 640 })).toBe(
+      "/blog-cover/aeo-guide/cover.webp?v=5",
     );
   });
 
@@ -51,21 +77,46 @@ describe("imageLoader", () => {
 });
 
 describe("image-variants script", () => {
-  it("makes the same widths the loader asks for", () => {
-    expect(SCRIPT_WIDTHS).toEqual([...IMAGE_WIDTHS]);
-  });
-
-  it("resizes below an image's own width, and re-encodes PNG/JPEG at its own size above it", () => {
-    expect(plan(400, true)).toEqual([
+  it("makes every width: resized below the image's own, its own size above", () => {
+    expect(plan(400)).toEqual([
       { width: 96, resize: true },
       { width: 256, resize: true },
-    ]);
-    expect(plan(1600, false)).toEqual([
-      { width: 96, resize: true },
-      { width: 256, resize: true },
-      { width: 640, resize: true },
-      { width: 1280, resize: true },
+      { width: 640, resize: false },
+      { width: 1280, resize: false },
       { width: 1920, resize: false },
     ]);
+  });
+
+  it("covers every public/ folder with images", () => {
+    const IMAGE = /\.(?:webp|png|jpe?g)$/i;
+    const hasImages = (dir: string): boolean =>
+      readdirSync(dir, { withFileTypes: true }).some((entry) =>
+        entry.isDirectory()
+          ? hasImages(path.join(dir, entry.name))
+          : IMAGE.test(entry.name),
+      );
+    const publicDir = path.join(process.cwd(), "public");
+    // brand (a static site of its own) and email (email images) never go through next/image.
+    const folders = readdirSync(publicDir, { withFileTypes: true })
+      .filter(
+        (entry) =>
+          entry.isDirectory() &&
+          !["_img", "brand", "email"].includes(entry.name),
+      )
+      .filter((entry) => hasImages(path.join(publicDir, entry.name)))
+      .map((entry) => entry.name);
+    for (const folder of folders)
+      expect(IMAGE_FOLDERS, `add "${folder}" to IMAGE_FOLDERS`).toContain(
+        folder,
+      );
+  });
+
+  it("finds the images imported in code, each with its own file name", async () => {
+    const images = await importedImages();
+    expect(images.length).toBeGreaterThan(50);
+    expect(new Set(images.map((image) => image.name)).size).toBe(images.length);
+    expect(images.map((image) => image.name)).toContain(
+      "_media/copilotkit-mark.webp",
+    );
   });
 });

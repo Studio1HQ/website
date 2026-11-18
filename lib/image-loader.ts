@@ -1,26 +1,28 @@
 "use client";
 
+import { IMAGE_FOLDERS, IMAGE_WIDTHS, MEDIA_DIR } from "./image-config.mjs";
+
 /**
  * Every next/image on the site goes through this loader instead of Vercel's
  * Image Optimization (which has a monthly cap: past it, new images 402).
  *
- * Images are sized once, at build time (scripts/image-variants.mjs), into a
- * few fixed widths under /_img/<width>/<original path>.webp. They're plain
- * files, so Cloudflare (in front of the site) caches and serves them, with
- * no per-image cost and no cap.
+ * Images are sized once, before `next build` (scripts/image-variants.mjs),
+ * into fixed widths under /_img. They're plain files, so Cloudflare (in front
+ * of the site) caches and serves them, with no per-image cost and no cap.
  *
- * A size the build didn't make (the image is narrower than that width, or
- * it's new and the build hasn't run, as in `next dev`) falls back to the
- * original file through the /_img fallback rewrite in next.config.ts.
+ *   /assets/logos/x.webp                  → /_img/<width>/assets/logos/x.webp.webp
+ *   /_next/static/media/x.3f2a1b.webp     → /_img/<width>/_media/x.webp.webp
+ *   /blog-cover/<slug>?v=5                → /blog-cover/<slug>/cover.webp?v=5
+ *
+ * Anything else (other sites' images, other folders) is left as it is. In
+ * `next dev` the sizes don't exist, so pages get the original files.
  */
 
-/** The widths images are made in. Keep in step with scripts/image-variants.mjs. */
-export const IMAGE_WIDTHS = [96, 256, 640, 1280, 1920] as const;
-
 const IMAGE_FILE = /\.(?:webp|png|jpe?g)$/i;
-
-/** Image routes that render a picture without a file extension. */
-const IMAGE_ROUTES = ["/blog-cover/"];
+/** An image imported in code: /_next/static/[immutable/]media/<name>.<hash>.<ext> */
+const STATIC_MEDIA =
+  /^\/_next\/static\/(?:[\w-]+\/)?media\/(.+)\.[\w-]+\.(webp|png|jpe?g)$/i;
+const BLOG_COVER = /^\/blog-cover\/([a-z0-9-]+)$/;
 
 /** The smallest made width that covers what the browser asked for. */
 export function imageWidth(width: number) {
@@ -39,12 +41,19 @@ export default function imageLoader({
   quality?: number;
 }) {
   const [path, query] = src.split("?");
-  // Other sites' images, SVGs, GIFs and API-made pictures go as they are.
-  if (!path.startsWith("/") || path.startsWith("//")) return src;
-  if (
-    !IMAGE_FILE.test(path) &&
-    !IMAGE_ROUTES.some((route) => path.startsWith(route))
-  )
-    return src;
-  return `/_img/${imageWidth(width)}${path}.webp${query ? `?${query}` : ""}`;
+  const keep = query ? `?${query}` : "";
+  // Covers: a WebP drawn at build time by app/blog-cover/[slug]/cover.webp.
+  const cover = BLOG_COVER.exec(path);
+  if (cover) return `/blog-cover/${cover[1]}/cover.webp${keep}`;
+  const made = imageWidth(width);
+  if (process.env.NODE_ENV === "development") {
+    // No sizes in dev: the original (the width only keeps Next's loader check quiet).
+    return `${src}${query ? "&" : "?"}w=${made}`;
+  }
+  const media = STATIC_MEDIA.exec(path);
+  if (media)
+    return `/_img/${made}/${MEDIA_DIR}/${media[1]}.${media[2]}.webp${keep}`;
+  if (IMAGE_FILE.test(path) && IMAGE_FOLDERS.includes(path.split("/")[1]))
+    return `/_img/${made}${path}.webp${keep}`;
+  return src;
 }
