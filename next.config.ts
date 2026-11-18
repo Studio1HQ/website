@@ -184,6 +184,12 @@ const nextConfig: NextConfig = {
         destination: "/careers",
         permanent: true,
       },
+      // Split into two writer roles on 2026-11-18.
+      {
+        source: "/careers/technical-content-writer-contract",
+        destination: "/careers/technical-writer-agentic-ai",
+        permanent: true,
+      },
       // Split into two roles on 2026-11-11.
       {
         source: "/careers/growth-and-content-lead",

@@ -10,7 +10,7 @@ export default function Hero() {
       pill="Creators · UGC · Launches · Reporting"
       titleAccent="Influencer Management"
       titleRest="for Devtools"
-      description="Developer creators on X, YouTube, LinkedIn, Instagram, and TikTok, vetted for credibility, briefed on your product, and measured against the KPIs you set."
+      description="Vetted developer creators on X, YouTube, LinkedIn, Instagram, and TikTok, briefed on your product."
       primaryCta="Book a Strategy Call"
       secondaryCta="Explore Services"
       stats={[
@@ -19,7 +19,7 @@ export default function Hero() {
         { value: "Nano–mega", label: "creator tiers, sized to budget" },
         { value: "US + EU", label: "developer audiences" },
       ]}
-      highlights={["vetted for credibility", "measured against the KPIs"]}
+      highlights={["Vetted developer creators"]}
       sides={INFLUENCER_SIDES}
     />
   );

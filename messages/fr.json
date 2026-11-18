@@ -59,7 +59,7 @@
       "badge": "Services",
       "titleAccent": "Marketing de contenu technique",
       "titleRest": "pour les outils développeur",
-      "description": "Une agence de marketing de contenu technique pour outils développeur : tutoriels, guides et contenu SEO écrits par des ingénieurs.",
+      "description": "Tutoriels, guides d’intégration et contenu SEO écrits par des ingénieurs, pour les outils développeur.",
       "primaryCta": "Réserver un appel stratégique",
       "secondaryCta": "Explorer les services",
       "stats": {
@@ -73,7 +73,7 @@
       "badge": "Services",
       "titleAccent": "Documentation développeur",
       "titleRest": "et audits DX",
-      "description": "Audits de documentation, revues DX et améliorations docs pour amener les développeurs au premier succès avec votre produit.",
+      "description": "Audits de documentation, revues DX et quickstarts pour produits développeur.",
       "primaryCta": "Réserver un appel stratégique",
       "secondaryCta": "Explorer les services",
       "stats": {
@@ -86,7 +86,7 @@
       "badge": "Services",
       "titleAccent": "Relations développeurs",
       "titleRest": "et campagnes de croissance",
-      "description": "DevRel externalisé pour produits développeur : advocacy, croissance communautaire, campagnes de lancement, distribution organique et programmes créateurs.",
+      "description": "Advocacy, communauté, lancements et programmes créateurs, par une seule équipe DevRel intégrée.",
       "primaryCta": "Réserver un appel stratégique",
       "secondaryCta": "Explorer les services",
       "stats": {
@@ -100,7 +100,7 @@
       "badge": "Services",
       "titleAccent": "Agence de vidéos",
       "titleRest": "et de démos pour devtools",
-      "description": "Démos produit, tutoriels de code et Shorts pour équipes devtool et IA, avec des projets de démo que les développeurs peuvent lancer.",
+      "description": "Démos produit, tutoriels de code et Shorts pour équipes devtool et IA.",
       "primaryCta": "Réserver un appel stratégique",
       "secondaryCta": "Explorer les services"
     }
@@ -111,9 +111,9 @@
     "badgeSuffixShort": "équipes nous font confiance",
     "titleLine1": "Marketing développeur et",
     "titleLine2": "Partenaire pour les",
-    "description": "Les ingénieurs et developer advocates de Studio1 créent le contenu technique, les docs et les démos auxquels les développeurs font confiance, puis mènent les lancements et programmes communautaires qui font adopter votre produit.",
-    "descriptionShort": "Des ingénieurs et developer advocates qui créent le contenu, les docs et les lancements auxquels les développeurs font confiance.",
-    "descriptionRich": "Les ingénieurs et developer advocates de Studio1 créent le contenu technique, les docs et les démos<br></br>auxquels les développeurs font confiance, puis mènent les lancements et programmes communautaires qui font adopter votre produit.",
+    "description": "Studio1 aide les équipes devtool et SaaS à créer du contenu technique et des stratégies DevRel qui stimulent la croissance et l’adoption par les développeurs.",
+    "descriptionShort": "Studio1 aide les équipes devtool et SaaS à créer du contenu technique et des stratégies DevRel qui stimulent la croissance et l’adoption par les développeurs.",
+    "descriptionRich": "Studio1 aide les équipes devtool et SaaS à créer du contenu technique et des stratégies DevRel qui stimulent la croissance et l’adoption par les développeurs.",
     "primaryCta": "Réserver un appel stratégique",
     "secondaryCta": "Voir nos réalisations",
     "primaryCtaShort": "Prendre RDV",
@@ -244,7 +244,7 @@
     "titlePrefix": "Nous recrutons pour des postes",
     "titleHighlight": "tech-native",
     "titleSuffix": "",
-    "description": "Studio1 aide les équipes devtool, IA et open source à grandir grâce au contenu technique et au DevRel, et construit ses propres produits comme Raah et AssetSnip.",
+    "description": "Studio1 aide les équipes devtool, IA et open source à grandir grâce au contenu technique et au DevRel.",
     "internship": "Stage",
     "openings": "{count, plural, one {# poste ouvert} other {# postes ouverts}}",
     "posted": "Publié le {date}",
@@ -422,7 +422,7 @@
     "badge": "Études de cas",
     "titlePrefix": "Études de cas issues du",
     "titleHighlight": "travail de croissance développeur",
-    "description": "Des exemples concrets issus du contenu technique, du DevRel, de la documentation et des lancements.",
+    "description": "Les résultats de notre travail en contenu technique, DevRel, documentation et lancements.",
     "trustedBy": "Des équipes developer-first nous font confiance"
   },
   "NotFound": {

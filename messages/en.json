@@ -59,7 +59,7 @@
       "badge": "Services",
       "titleAccent": "Technical Content",
       "titleRest": "Marketing for Developer Tools",
-      "description": "A technical content marketing agency for developer tools: engineer-written tutorials, guides, and SEO content.",
+      "description": "Engineer-written tutorials, integration guides, and SEO content for developer tools.",
       "primaryCta": "Book a Strategy Call",
       "secondaryCta": "Explore Services",
       "stats": {
@@ -73,7 +73,7 @@
       "badge": "Services",
       "titleAccent": "Developer Documentation",
       "titleRest": "& DX Audits",
-      "description": "Documentation audits, DX reviews, and docs improvements that get developers to first success with your product.",
+      "description": "Docs audits, DX reviews, and quickstarts for developer products.",
       "primaryCta": "Book a Strategy Call",
       "secondaryCta": "Explore Services",
       "stats": {
@@ -86,7 +86,7 @@
       "badge": "Services",
       "titleAccent": "Developer Relations",
       "titleRest": "& Growth Campaigns",
-      "description": "DevRel as a service for developer products: developer advocacy, community growth, launch campaigns, organic distribution, and creator programs.",
+      "description": "Developer advocacy, community, launches, and creator programs from one embedded DevRel team.",
       "primaryCta": "Book a Strategy Call",
       "secondaryCta": "Explore Services",
       "stats": {
@@ -100,7 +100,7 @@
       "badge": "Services",
       "titleAccent": "Developer Video",
       "titleRest": "Production Agency for Devtools",
-      "description": "Product demos, coding tutorials, and Shorts for devtool and AI teams, with demo projects developers can run.",
+      "description": "Product demos, coding tutorials, and Shorts for devtool and AI teams.",
       "primaryCta": "Book a Strategy Call",
       "secondaryCta": "Explore Services"
     }
@@ -111,9 +111,9 @@
     "badgeSuffixShort": "teams",
     "titleLine1": "Developer Marketing &",
     "titleLine2": "Partner for",
-    "description": "Studio1's engineers and developer advocates create the technical content, docs, and demos developers trust, then run the launches and community programs that get your product adopted.",
-    "descriptionShort": "Engineers and developer advocates who make the content, docs, and launches developers trust.",
-    "descriptionRich": "Studio1's engineers and developer advocates create the technical content, docs, and demos<br></br>developers trust, then run the launches and community programs that get your product adopted.",
+    "description": "Studio1 helps devtool and SaaS teams create technical content and DevRel strategies that boost growth and developer adoption.",
+    "descriptionShort": "Studio1 helps devtool and SaaS teams create technical content and DevRel strategies that boost growth and developer adoption.",
+    "descriptionRich": "Studio1 helps devtool and SaaS teams create technical content and DevRel strategies that boost growth and developer adoption.",
     "primaryCta": "Book a Strategy Call",
     "secondaryCta": "Check Our Work",
     "primaryCtaShort": "Book a Call",
@@ -244,7 +244,7 @@
     "titlePrefix": "We're hiring for",
     "titleHighlight": "tech-native",
     "titleSuffix": "roles",
-    "description": "Studio1 helps devtool, AI, and open-source teams grow through technical content and DevRel, and builds its own products like Raah and AssetSnip.",
+    "description": "Studio1 helps devtool, AI, and open-source teams grow through technical content and DevRel.",
     "internship": "Internship",
     "openings": "{count, plural, one {# opening} other {# openings}}",
     "posted": "Posted {date}",
@@ -422,7 +422,7 @@
     "badge": "Case Studies",
     "titlePrefix": "Case Studies From",
     "titleHighlight": "Developer Growth Work",
-    "description": "Proof-led examples from technical content, DevRel, documentation, and launch work.",
+    "description": "Results from our technical content, DevRel, documentation, and launch work.",
     "trustedBy": "Trusted by developer-first teams"
   },
   "NotFound": {

@@ -20,7 +20,7 @@ export default function Hero() {
         { value: "15+", label: t("stats.audits") },
         { value: "4+", label: t("stats.pages") },
       ]}
-      highlights={["Documentation audits, DX reviews", "first success"]}
+      highlights={["Docs audits, DX reviews, and quickstarts"]}
       sides={DOCS_SIDES}
     />
   );

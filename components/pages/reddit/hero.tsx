@@ -10,7 +10,7 @@ export default function Hero() {
       pill="Subreddits · Posts · Launches · Comments"
       titleAccent="Reddit Marketing"
       titleRest="for Devtools"
-      description="A Reddit marketing agency for developer tools: technical posts, launch threads, and answers developers upvote."
+      description="Engineer-written posts, launch threads, and answers for developer subreddits."
       primaryCta="Book a Strategy Call"
       secondaryCta="Explore Services"
       stats={[
@@ -19,10 +19,7 @@ export default function Hero() {
         { value: "50K+", label: "impressions on Memori's Reddit launch" },
         { value: "100+", label: "comments on one Memori thread" },
       ]}
-      highlights={[
-        "Reddit marketing agency for developer tools",
-        "answers developers upvote",
-      ]}
+      highlights={["Engineer-written", "developer subreddits"]}
       sides={REDDIT_SIDES}
     />
   );

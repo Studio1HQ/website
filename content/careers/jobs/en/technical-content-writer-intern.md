@@ -22,7 +22,7 @@ questions:
     hint: "One doc. Make sure anyone with the link can view it."
 ---
 
-Studio1 works with devtool, AI, and SaaS teams on technical content, DevRel, product launches, docs, and developer growth. Alongside client work, we also work on products like Raah and AssetSnip.
+Studio1 works with devtool, AI, and SaaS teams on technical content, DevRel, product launches, docs, and developer growth.
 
 We are looking for a Technical Content Writer Intern who can track what is trending in AI and developer tooling and turn it into clear, well-researched, SEO-optimized blog content. This is not a project-building or demo-coding role. It is a research-and-writing role for someone with a technical background who can read papers, docs, release notes, and community discussions on LLMs and adjacent topics, then explain them accurately for a developer audience while writing in a way that ranks and reads well.
 
@@ -51,7 +51,7 @@ You should have a technical or software background and be comfortable researchin
 
 ## Why join
 
-You will build a public portfolio of technical, SEO-driven writing on some of the fastest-moving topics in AI, while working closely with the Studio1 team on real blog and content strategy for Studio1, Raah, and AssetSnip.
+You will build a public portfolio of technical, SEO-driven writing on some of the fastest-moving topics in AI, while working closely with the Studio1 team on real blog and content strategy for Studio1 and our clients.
 
 ## Internship details
 

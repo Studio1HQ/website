@@ -30,7 +30,7 @@ You will work directly with the founders to improve how Studio1 operates, keep t
 - Build and own internal systems for tracking projects, tasks, deadlines, team progress, and company priorities.
 - Coordinate across content, social, DevRel, design, engineering, and other teams by assigning tasks, following up, reviewing progress, and keeping execution moving.
 - Own client outreach support, sales follow-ups, lead lists, CRM or spreadsheet tracking, and pipeline updates for Studio1 services and products.
-- Support growth, marketing, client research, partnerships, and other initiatives that help Studio1, Raah, and AssetSnip grow.
+- Support growth, marketing, client research, partnerships, and other initiatives that help Studio1 grow.
 - Draft outreach emails, follow-up notes, marketing blog drafts, social media copy, and product update posts when a growth or marketing task needs writing support.
 - Coordinate marketing blog ideas, topic lists, publishing tasks, campaign tasks, product updates, and content packaging with the Studio1 team.
 - Improve internal workflows, documentation, reporting, and processes while identifying blockers early and making sure important work does not get stuck.

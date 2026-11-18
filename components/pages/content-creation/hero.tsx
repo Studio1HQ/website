@@ -16,7 +16,7 @@ export default function Hero() {
       description={t("description")}
       primaryCta={t("primaryCta")}
       secondaryCta={t("secondaryCta")}
-      highlights={["Product demos", "demo projects developers can run"]}
+      highlights={["Product demos", "coding tutorials"]}
       sides={VIDEO_SIDES}
     />
   );

@@ -193,8 +193,6 @@ const PHRASES: [string, Icon | string][] = [
   ["devtool and SaaS teams", UsersThree],
   ["technical content", Article],
   ["DevRel", Megaphone],
-  ["Raah", "/products/raah-logo.svg"],
-  ["AssetSnip", "/products/assetsnip-logo.svg"],
 ];
 
 /** The hero description with small orange icons and product logos inline. */

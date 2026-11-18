@@ -21,10 +21,7 @@ export default function Hero() {
         { value: "35+", label: t("stats.teams") },
         { value: "<7 days", label: t("stats.reddit") },
       ]}
-      highlights={[
-        "technical content marketing agency for developer tools",
-        "engineer-written",
-      ]}
+      highlights={["Engineer-written"]}
       sides={CONTENT_SIDES}
     />
   );
