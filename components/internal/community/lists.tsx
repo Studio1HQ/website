@@ -328,7 +328,7 @@ export function EventPartnerList({
 }) {
   const editor = useEditor<EventPartner>();
   const hrefOf = (id: string) =>
-    side === "event" ? `/internal/community/campus/${id}` : `/internal/community/events/${id}`;
+    side === "event" ? `/community/campus/${id}` : `/community/events/${id}`;
   const fixed = side === "event" ? (host ? [{ ...host, when: undefined }] : []) : hosted;
   const empty = !fixed.length && !links.length;
   return (

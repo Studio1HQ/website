@@ -118,7 +118,7 @@ function rowStatus(row: PayrollRow) {
 function pdfHref(row: PayrollRow, month: string) {
   return row.slip
     ? payslipPdfUrl(row.slip)
-    : `/internal/money/payroll/draft/pdf?email=${encodeURIComponent(row.person.email)}&month=${month}`;
+    : `/money/payroll/draft/pdf?email=${encodeURIComponent(row.person.email)}&month=${month}`;
 }
 
 /* ------------------------------------------------------------------ page */
@@ -187,7 +187,7 @@ export function PayrollView({
     else toast("error", "message" in result ? result.message : "Couldn't send it.");
   };
 
-  const monthLink = (target: string) => `/internal/money/payroll?month=${target}`;
+  const monthLink = (target: string) => `/money/payroll?month=${target}`;
   // Jump straight to an earlier month: the last two years, plus the one
   // open now if it's older than that.
   const monthChoices = Array.from({ length: 24 }, (_, back) => shiftMonth(current, -back));

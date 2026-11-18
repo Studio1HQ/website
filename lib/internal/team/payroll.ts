@@ -41,7 +41,7 @@ import {
  * Payslips (team_payslips): one per person per month. A draft starts from
  * the person's salary lines (team_people), the month's unpaid leave
  * (team_attendance) and their approved expense claims; the admin checks it
- * on /internal/money/payroll, and "Done" emails each one as a PDF. No session
+ * on /money/payroll, and "Done" emails each one as a PDF. No session
  * checks here; the page, actions and PDF route do that. Server only.
  *
  * Emailing a slip marks the month's approved claims paid. They still belong

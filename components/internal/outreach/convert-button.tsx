@@ -32,7 +32,7 @@ export function ConvertButton({ id, name }: { id: string; name: string }) {
       }
       if (result.warning) toast("error", result.warning);
       else toast("success", result.message ?? `${name} is now a client`);
-      if (result.slug) router.push(`/internal/clients/${result.slug}`);
+      if (result.slug) router.push(`/clients/${result.slug}`);
       else router.refresh();
     });
   };

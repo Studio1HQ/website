@@ -149,7 +149,7 @@ export default async function ClientsTemplatesPage() {
           Weekly capacity is in points: each piece counts by its size ({points}
           ).{" "}
           <Link
-            href="/internal/clients/load"
+            href="/clients/load"
             className="text-[var(--i-ink)] underline decoration-[var(--i-line-strong)] underline-offset-[3px] hover:text-[var(--i-accent-text)]"
           >
             See this week&apos;s load

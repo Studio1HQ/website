@@ -11,7 +11,7 @@ import { displayName, isDateKey, type TeamResult } from "@/lib/internal/team/sha
 import { addTeammate, saveTeammate, setTeammateOn, type Actor } from "@/lib/internal/team/teammates";
 import { emailAddress } from "@/lib/internal/token";
 import { isMailerConfigured, sendMail } from "@/lib/mailer";
-import { baseUrl } from "@/lib/site";
+import { dashboardUrl } from "@/lib/internal/host";
 
 /**
  * The People page: admins keep the one team list (who's on it, their
@@ -118,7 +118,7 @@ export async function setTeammateAccess(email: unknown, on: unknown): Promise<Te
  */
 async function sendInvite(target: string, roles: RoleKey[], by: string): Promise<string> {
   if (!isMailerConfigured()) {
-    return `Added ${target}. Email isn't set up, so send them ${baseUrl}/internal/login yourself.`;
+    return `Added ${target}. Email isn't set up, so send them ${dashboardUrl}/login yourself.`;
   }
   const inviter = displayName({ email: by });
   const writerOnly = roles.length === 1 && roles[0] === "blog_writer" && !isStaffEmail(target);
@@ -129,7 +129,7 @@ async function sendInvite(target: string, roles: RoleKey[], by: string): Promise
     body,
     call: {
       label: writerOnly ? "Open the blog editor" : "Open the dashboard",
-      url: `${baseUrl}/internal/login?next=${writerOnly ? "/internal/blog" : "/internal"}`,
+      url: `${dashboardUrl}/login?next=${writerOnly ? "/blog" : "/"}`,
     },
     reason: `You're getting this because a Studio1 admin invited ${target}.`,
   });
@@ -143,7 +143,7 @@ async function sendInvite(target: string, roles: RoleKey[], by: string): Promise
     });
   } catch (error) {
     console.error("[internal] invite email failed", error);
-    return `Added ${target}, but the invite email didn't send. Send them ${baseUrl}/internal/login.`;
+    return `Added ${target}, but the invite email didn't send. Send them ${dashboardUrl}/login.`;
   }
   return `Added ${target} and emailed them an invite.`;
 }

@@ -15,7 +15,7 @@ const PHASE: Record<HackathonStats["phase"], string> = {
 };
 
 /** The guide to adding a hackathon (it's built in code from a GitHub issue). */
-export const HACKATHON_SETUP_PATH = "/internal/hackathons/setup";
+export const HACKATHON_SETUP_PATH = "/hackathons/setup";
 
 /** The list page's link for one hackathon (or all of them), every other filter cleared. */
 export function hackathonListHref(slug?: string, status?: string) {
@@ -99,7 +99,7 @@ export function HackathonTabs({
           </ul>
           <div className="ml-auto flex items-center gap-2">
             {eventPages[current.slug] ? (
-              <Link href={`/internal/community/events/${eventPages[current.slug]}`} className={buttonClass("secondary", "sm")}>
+              <Link href={`/community/events/${eventPages[current.slug]}`} className={buttonClass("secondary", "sm")}>
                 Event page <ArrowRight size={12} />
               </Link>
             ) : (

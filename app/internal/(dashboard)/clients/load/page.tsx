@@ -48,7 +48,7 @@ import {
 export const metadata: Metadata = { title: "Owner load" };
 
 function loadHref(week: string) {
-  return `/internal/clients/load?week=${week}`;
+  return `/clients/load?week=${week}`;
 }
 
 /** Due date first (no date last), then title. */

@@ -431,7 +431,7 @@ export function MyDay({
         <div className="flex min-h-0 flex-col gap-3">
           <Card className="flex flex-col xl:flex-1">
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--i-line)] px-4 py-2.5">
-              <MonthSwitcher month={month} current={current} hrefFor={(value) => `/internal/me?month=${value}`} />
+              <MonthSwitcher month={month} current={current} hrefFor={(value) => `/me?month=${value}`} />
               {!intern ? (
                 <div className="flex items-center">
                   <button

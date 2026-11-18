@@ -64,7 +64,7 @@ export default async function TemplatesPage({ searchParams }: Props) {
         {pipelines.map((key) => (
           <Link
             key={key}
-            href={`/internal/templates?for=${key}`}
+            href={`/templates?for=${key}`}
             aria-current={key === pipeline ? "page" : undefined}
             className={cn(
               "inline-flex h-8 items-center rounded-lg px-3 text-[13px] transition-colors",
@@ -94,7 +94,7 @@ export default async function TemplatesPage({ searchParams }: Props) {
                   return (
                     <Link
                       key={item.key}
-                      href={`/internal/templates?for=${pipeline}&t=${item.key}`}
+                      href={`/templates?for=${pipeline}&t=${item.key}`}
                       scroll={false}
                       aria-current={active ? "true" : undefined}
                       className={cn(

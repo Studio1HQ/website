@@ -30,7 +30,7 @@ export function TodayWork({
     <Card className={cn("flex min-h-0 flex-col", className)}>
       <CardTitle
         action={
-          <Link href="/internal/tasks" className="inline-flex items-center gap-1 text-[12.5px] text-[var(--i-muted)] hover:text-[var(--i-ink)]">
+          <Link href="/tasks" className="inline-flex items-center gap-1 text-[12.5px] text-[var(--i-muted)] hover:text-[var(--i-ink)]">
             Your week <ArrowRight size={12} />
           </Link>
         }

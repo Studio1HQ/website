@@ -93,7 +93,7 @@ export function ReportForm({
         setDirty(false);
         setConfirming(false);
         if (result.id) router.push(reportHref(result.id));
-        else router.push("/internal/tasks/reports");
+        else router.push("/tasks/reports");
       },
     );
 

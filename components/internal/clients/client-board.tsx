@@ -63,7 +63,7 @@ const CLIENT_DRAG = "application/x-studio1-client";
 /** Keeps the view just picked (Table or Board) for this person's next visit. */
 export function RememberClientsView({ view }: { view: ClientsView }) {
   useEffect(() => {
-    document.cookie = `${CLIENTS_VIEW_COOKIE}=${view}; path=/internal/clients; max-age=31536000; samesite=lax${
+    document.cookie = `${CLIENTS_VIEW_COOKIE}=${view}; path=/clients; max-age=31536000; samesite=lax${
       location.protocol === "https:" ? "; secure" : ""
     }`;
   }, [view]);

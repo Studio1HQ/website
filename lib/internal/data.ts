@@ -895,7 +895,7 @@ export async function entryEmails(section: Section, id: string): Promise<EmailLo
  * What an entry page shows besides the record: emails sent from the
  * dashboard and the same person's other entries on any form. Each part
  * fails quietly. The résumé isn't here: the page loads it through
- * /internal/jobs/[id]/resume, which checks the session on every fetch.
+ * /jobs/[id]/resume, which checks the session on every fetch.
  */
 export async function entryExtras(section: Section, record: Row, emails?: ReturnType<typeof entryEmails>) {
   const staff = await requireSection(section);

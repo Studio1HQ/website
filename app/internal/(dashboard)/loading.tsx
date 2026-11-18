@@ -6,9 +6,9 @@ const bar = "rounded-md bg-[var(--i-track)]";
 const panel = "rounded-xl border border-[var(--i-line)] bg-[var(--i-panel)]";
 
 /** Pages that are a filterable list of rows. */
-const LISTS = /^\/internal\/(jobs|hackathons|cohort|subscribers|partner-pool|blog|team|people|templates)$/;
-/** One entry: /internal/jobs/<id> and the like, but not the community pages. */
-const ENTRY = /^\/internal\/(jobs|hackathons|cohort)\/[^/]+$/;
+const LISTS = /^\/(jobs|hackathons|cohort|subscribers|partner-pool|blog|team|people|templates)$/;
+/** One entry: /jobs/<id> and the like, but not the community pages. */
+const ENTRY = /^\/(jobs|hackathons|cohort)\/[^/]+$/;
 
 function Header() {
   return (

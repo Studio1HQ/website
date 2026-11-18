@@ -9,6 +9,7 @@ import { isGithubConfigured } from "@/lib/internal/blog/github";
 import { isSearchConsoleConfigured, searchStats, type SearchNumbers } from "@/lib/internal/search-console";
 import { nameFromEmail } from "@/lib/internal/blog/shared";
 import { requireBlog } from "@/lib/internal/session";
+import { baseUrl } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import { editSitePost, newPost } from "./actions";
 
@@ -47,7 +48,7 @@ function PostRow({ post, me, search }: { post: BlogListItem; me: string; search?
   return (
     <li className="border-b border-[var(--i-line)] last:border-b-0">
       <Link
-        href={`/internal/blog/${post.id}`}
+        href={`/blog/${post.id}`}
         className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-4 py-3.5 transition-colors hover:bg-[var(--i-hover)] sm:gap-x-4 sm:px-5"
       >
         <div className="min-w-0 flex-1 basis-[280px]">
@@ -88,7 +89,7 @@ function SiteRow({ post, search }: { post: SitePost; search?: SearchNumbers | nu
       </div>
       {search !== undefined ? <SearchCell numbers={search} /> : null}
       <span className="text-[12px] text-[var(--i-faint)]">{post.date}</span>
-      <a href={`/blog/${post.slug}`} target="_blank" rel="noreferrer" className={buttonClass("ghost", "sm")}>
+      <a href={`${baseUrl}/blog/${post.slug}`} target="_blank" rel="noreferrer" className={buttonClass("ghost", "sm")}>
         <ArrowSquareOut size={14} /> View
       </a>
       <form action={editSitePost.bind(null, post.slug)}>
@@ -178,7 +179,7 @@ export default async function BlogPage({ searchParams }: Props) {
         {TABS.map((item) => (
           <Link
             key={item.key}
-            href={`/internal/blog?tab=${item.key}`}
+            href={`/blog?tab=${item.key}`}
             aria-current={tab === item.key ? "page" : undefined}
             className={cn(
               "inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-lg px-3 text-[13px] transition-colors",
@@ -225,14 +226,14 @@ export default async function BlogPage({ searchParams }: Props) {
           </span>
           <span className="flex gap-1">
             <Link
-              href="/internal/blog?tab=live"
+              href="/blog?tab=live"
               aria-current={!byClicks ? "page" : undefined}
               className={cn("rounded-md px-2 py-0.5", !byClicks ? "bg-[var(--i-sunken)] text-[var(--i-ink)]" : "hover:bg-[var(--i-hover)]")}
             >
               Newest
             </Link>
             <Link
-              href="/internal/blog?tab=live&sort=clicks"
+              href="/blog?tab=live&sort=clicks"
               aria-current={byClicks ? "page" : undefined}
               className={cn("rounded-md px-2 py-0.5", byClicks ? "bg-[var(--i-sunken)] text-[var(--i-ink)]" : "hover:bg-[var(--i-hover)]")}
             >

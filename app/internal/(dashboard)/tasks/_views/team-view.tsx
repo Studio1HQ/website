@@ -153,7 +153,7 @@ export async function TeamView({ staff, viewer, people, params, today }: ViewPro
                   <td className="whitespace-nowrap">
                     {cell ? (
                       report && (report.status === "submitted" || report.status === "seen") ? (
-                        <Link href={`/internal/tasks/reports/${report.id}`} className="hover:opacity-80">
+                        <Link href={`/tasks/reports/${report.id}`} className="hover:opacity-80">
                           <Pill tone={cell.tone}>{cell.label}</Pill>
                         </Link>
                       ) : (

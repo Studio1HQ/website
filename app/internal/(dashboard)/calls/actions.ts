@@ -62,7 +62,7 @@ function tellCall(call: Pick<Call, "host" | "people" | "whole_team">, by: string
   after(async () => {
     const team = call.whole_team ? await listPeople({ activeOnly: true }) : null;
     const everyone = team?.ok ? team.people.map((person) => person.email) : [];
-    await notify(attendees(call, everyone), by, { kind: "call", title, body, href: "/internal/calls" });
+    await notify(attendees(call, everyone), by, { kind: "call", title, body, href: "/calls" });
   });
 }
 
@@ -125,7 +125,7 @@ export async function saveCall(id: string | null, values: unknown): Promise<Call
         kind: "call",
         title: `${name} added you to a call`,
         body: `${call.title} · ${repeatLabel(call)}`,
-        href: "/internal/calls",
+        href: "/calls",
       }),
     );
   }

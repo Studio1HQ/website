@@ -1,4 +1,4 @@
-import { baseUrl } from "@/lib/site";
+import { dashboardUrl } from "@/lib/internal/host";
 import { withoutLinks } from "@/lib/internal/email-templates";
 import { slackEscape } from "@/lib/internal/slack";
 import { emailAddress } from "@/lib/internal/token";
@@ -259,7 +259,7 @@ export function htmlToText(html: string) {
 /* ----------------------------------------------------------------- slack */
 
 /** The Slack post for a new invoice or claim: one line and a button. */
-export function intakeSlackMessage(item: { title: string; points: string[]; path: string }, site = baseUrl) {
+export function intakeSlackMessage(item: { title: string; points: string[]; path: string }, site = dashboardUrl) {
   const points = item.points.map((point) => slackEscape(point.replace(/\s+/g, " ").trim().slice(0, 100))).filter(Boolean);
   const title = slackEscape(item.title.replace(/\s+/g, " ").trim().slice(0, 120));
   return {
@@ -476,7 +476,7 @@ async function turnAway(
       intakeSlackMessage({
         title: `${mail.kind === "invoice" ? "Invoice" : "Expense claim"} email not taken in`,
         points: [sender, reason],
-        path: mail.kind === "invoice" ? "/internal/money/payments" : "/internal/money/payroll",
+        path: mail.kind === "invoice" ? "/money/payments" : "/money/payroll",
       }),
     );
   }
@@ -488,7 +488,7 @@ async function turnAway(
       kind: "other",
       title: "Emailed invoices from unknown senders are being turned away",
       body: `More than ${INTAKE_HOURLY_LIMIT} in the last hour. Payees on file still get through. See "Emails not taken in" on Payments.`,
-      href: "/internal/money/payments",
+      href: "/money/payments",
     });
   }
   return { ok: true, skipped: `${reason} (${sender})` };
@@ -717,7 +717,7 @@ async function saveInvoice(input: {
         monthLabel(parsed.month, true),
         flags.length ? "Needs a look" : "",
       ],
-      path: "/internal/money/payments",
+      path: "/money/payments",
     }),
   );
   return { ok: true, kind: "invoice", id, flagged: flags.length ? flags.join(" · ") : null };
@@ -766,7 +766,7 @@ async function saveClaim(input: {
     intakeSlackMessage({
       title: `New expense claim: ${person.name || from.name || person.email}`,
       points: [found ? formatMoney(found.amount, found.currency) : "No amount", description.slice(0, 60)],
-      path: "/internal/money/payroll",
+      path: "/money/payroll",
     }),
   );
   return { ok: true, kind: "reimbursement", id: result.id ?? null };

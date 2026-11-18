@@ -34,7 +34,7 @@ function flat(params: Record<string, string | string[] | undefined>) {
  * looked; the board shows the same tasks by status; Month adds them up;
  * Team (founders, the associate, intern reviewers) shows everyone's week
  * at once. Client deliverables and community tasks are read where they
- * live, never copied. Reports live at /internal/tasks/reports.
+ * live, never copied. Reports live at /tasks/reports.
  */
 export default async function TasksPage({
   searchParams,
@@ -105,7 +105,7 @@ export default async function TasksPage({
                 view={view}
               />
             ) : null}
-            <Link href="/internal/tasks/reports" className={buttonClass("secondary")}>
+            <Link href="/tasks/reports" className={buttonClass("secondary")}>
               Reports
             </Link>
           </>

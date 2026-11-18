@@ -2,7 +2,7 @@ import { renderEmail, withoutLinks } from "@/lib/internal/email-templates";
 import { membersWith } from "@/lib/internal/members";
 import { notify } from "@/lib/internal/notifications/data";
 import { isMailerConfigured, sendMail } from "@/lib/mailer";
-import { baseUrl } from "@/lib/site";
+import { dashboardUrl } from "@/lib/internal/host";
 import { nameFromEmail } from "@/lib/internal/blog/data";
 
 /**
@@ -33,7 +33,7 @@ export async function notifyPeople(
     kind: "other",
     title: message.subject.slice(0, 200),
     body: "",
-    href: `/internal/blog/${postId}`,
+    href: `/blog/${postId}`,
   });
   if (!isMailerConfigured()) return;
   const note = withoutLinks(message.note?.trim().slice(0, 2000) ?? "");
@@ -47,7 +47,7 @@ export async function notifyPeople(
     .join("\n\n");
   const { html, text } = renderEmail({
     body,
-    call: { label: "Open the post", url: `${baseUrl}/internal/blog/${postId}` },
+    call: { label: "Open the post", url: `${dashboardUrl}/blog/${postId}` },
     reason: "You're getting this because you write or review posts for the Studio1 blog.",
   });
   await Promise.allSettled(

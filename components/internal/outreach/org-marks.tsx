@@ -9,7 +9,7 @@ import { SiteLogo } from "@/components/internal/site-logo";
  */
 
 export function OrgLogo({ org, size = 24 }: { org: Pick<Org, "id" | "name" | "website">; size?: number }) {
-  return <SiteLogo path={`/internal/outreach/${org.id}/logo`} name={org.name} website={org.website} size={size} />;
+  return <SiteLogo path={`/outreach/${org.id}/logo`} name={org.name} website={org.website} size={size} />;
 }
 
 export function PriorityPill({ priority }: { priority: Org["priority"] }) {

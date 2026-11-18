@@ -98,7 +98,7 @@ export function PeopleView({
 }) {
   const active = people.filter((person) => person.active);
   const tabHref = (value: string) =>
-    value === "team" ? "/internal/people" : `/internal/people?tab=${value}${month !== current ? `&month=${month}` : ""}`;
+    value === "team" ? "/people" : `/people?tab=${value}${month !== current ? `&month=${month}` : ""}`;
 
   return (
     <>
@@ -200,7 +200,7 @@ function Attendance({
           title={admin ? "No one on the team list yet" : "No interns to log for"}
           action={
             admin ? (
-              <Link href="/internal/people" className={buttonClass("primary")}>
+              <Link href="/people" className={buttonClass("primary")}>
                 Add people
               </Link>
             ) : undefined
@@ -284,7 +284,7 @@ function Attendance({
             <MonthSwitcher
               month={month}
               current={current}
-              hrefFor={(value) => `/internal/people?tab=attendance${value === current ? "" : `&month=${value}`}`}
+              hrefFor={(value) => `/people?tab=attendance${value === current ? "" : `&month=${value}`}`}
             />
             {editable.length ? (
               <button type="button" onClick={() => setLeaveOpen(true)} className={buttonClass("secondary", "sm")}>

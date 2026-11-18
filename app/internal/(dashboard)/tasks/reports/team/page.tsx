@@ -37,7 +37,7 @@ import { StatTile, StatsRow } from "@/components/internal/tasks/week-parts";
 
 export const metadata: Metadata = { title: "Team report" };
 
-const LIST = "/internal/tasks/reports";
+const LIST = "/tasks/reports";
 const one = (value: string | string[] | undefined) =>
   Array.isArray(value) ? value[0] : value;
 
@@ -80,7 +80,7 @@ export default async function TeamReportPage({
     <PageHeader
       eyebrow={
         <>
-          <Link href="/internal/tasks">Tasks</Link> ·{" "}
+          <Link href="/tasks">Tasks</Link> ·{" "}
           <Link href={LIST}>Reports</Link>
         </>
       }

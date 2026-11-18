@@ -96,7 +96,7 @@ function Sidebar({ staff, counts }: { staff: Staff; counts: Counts }) {
       influencers={canSeeInfluencers(staff)}
       socials={canSeeSocials(staff)}
       home={home}
-      overview={home === "/internal"}
+      overview={home === "/"}
     />
   );
 }
@@ -175,7 +175,7 @@ export default async function DashboardLayout({
             </Suspense>
             <RefreshButton className="size-10 rounded-lg" />
             <Link
-              href="/internal/profile"
+              href="/profile"
               aria-label="Your profile"
               className="flex size-10 items-center justify-center rounded-lg hover:bg-[var(--i-hover)]"
             >
@@ -212,7 +212,7 @@ export default async function DashboardLayout({
                 stays put) and fade in. */}
             <div className="flex items-center gap-2.5 border-t border-[var(--i-line)] px-1 pt-3 md:border-t-0 md:pt-4 md:group-data-[collapsed=true]/sidebar:flex-col-reverse md:group-data-[collapsed=true]/sidebar:items-start md:group-data-[collapsed=true]/sidebar:gap-1">
               <Link
-                href="/internal/profile"
+                href="/profile"
                 title="Your profile"
                 className={cn(
                   "-mx-1 -my-1 flex min-w-0 max-w-[220px] flex-1 items-center gap-2.5 overflow-hidden rounded-lg px-1 py-1 transition-[max-width,background-color] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]",

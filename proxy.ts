@@ -7,6 +7,14 @@ import {
   shouldBypassLocale,
   splitLocaleFromPathname,
 } from "@/lib/i18n";
+import { AI_AGENTS, AI_ROBOTS_TOKENS } from "@/lib/ai-agents";
+import {
+  LOCAL_DASHBOARD_HOST,
+  dashboardUrl,
+  fromInternalPath,
+  isDashboardHost,
+  toInternalPath,
+} from "@/lib/internal/host";
 import { SESSION_COOKIE, devBypassEmail, readSession } from "@/lib/internal/token";
 
 const legacyRedirects: Record<string, string> = {
@@ -49,6 +57,26 @@ const THEME_SCRIPT = "'sha256-a/T6WihUdllNvOaPlAwIT5TdeEcYmobkkshLrN/KCkc='";
  */
 const LOGO_PATH =
   /^\/internal\/(?:clients\/[a-z0-9-]+|outreach\/[0-9a-f-]{36}|influencers\/channels\/[0-9a-f-]{36})\/logo$/;
+
+/** A path whose last part looks like a file name ("x.webp", "a@b.com"). */
+const FILE_LIKE = /\.[^/]*$/;
+/**
+ * Dashboard routes whose addresses can look like files: profile photos are
+ * keyed by email, draft images end in .webp. They keep their own caching.
+ */
+const DASHBOARD_FILE_ROUTES = new Set(["team-file", "blog-media"]);
+/** The public site's files a dashboard page loads (fonts, icons, pictures). */
+const STATIC_FILE = /\.(?:png|jpe?g|webp|avif|gif|svg|ico|woff2?|ttf|otf|css|js|mjs|map|webmanifest)$/i;
+/** Public routes a dashboard page loads: the email header images in previews. */
+const PUBLIC_ROUTES = new Set(["og"]);
+
+/** The dashboard host's robots.txt: AI crawlers stay out, search engines may read the noindex. */
+const DASHBOARD_ROBOTS = [
+  ...[...AI_AGENTS, ...AI_ROBOTS_TOKENS].map((agent) => `User-agent: ${agent}\nDisallow: /\n`),
+  "User-agent: *\nAllow: /\n",
+].join("\n");
+
+const NOINDEX = "noindex, nofollow";
 const LOGO_POLICY = "default-src 'none'; style-src 'unsafe-inline'; sandbox";
 
 function dashboardPolicy(nonce: string) {
@@ -77,12 +105,19 @@ function dashboardPolicy(nonce: string) {
   ].join("; ");
 }
 
+/**
+ * A dashboard page on the dashboard host: "/tasks" is served by
+ * app/internal/(dashboard)/tasks. Only signed-in staff get past the login
+ * page; pages and data reads check the session again (lib/internal/session.ts).
+ */
 async function internalGate(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
-  const open =
-    pathname === "/internal/login" || pathname.startsWith("/internal/auth/");
+  const route = toInternalPath(pathname);
+  const open = route === "/internal/login" || route.startsWith("/internal/auth/");
   const nonce = btoa(crypto.randomUUID());
-  const logo = LOGO_PATH.test(pathname);
+  const logo = LOGO_PATH.test(route);
+  // Logos, photos and draft images keep the caching their routes set.
+  const file = logo || DASHBOARD_FILE_ROUTES.has(pathname.split("/")[1]);
   const policy = logo ? LOGO_POLICY : dashboardPolicy(nonce);
   let response: NextResponse;
   if (
@@ -94,20 +129,97 @@ async function internalGate(request: NextRequest) {
     const headers = new Headers(request.headers);
     headers.set("x-nonce", nonce);
     headers.set("Content-Security-Policy", policy);
-    response = NextResponse.next({ request: { headers } });
-  } else {
     const url = request.nextUrl.clone();
-    url.pathname = "/internal/login";
+    url.pathname = route;
+    response = NextResponse.rewrite(url, { request: { headers } });
+  } else {
+    const url = dashboardHostUrl(request);
+    url.pathname = "/login";
     url.search = "";
-    if (pathname !== "/internal") url.searchParams.set("next", pathname + search);
+    if (pathname !== "/") url.searchParams.set("next", pathname + search);
     response = NextResponse.redirect(url);
   }
   response.headers.set("Content-Security-Policy", policy);
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("X-Content-Type-Options", "nosniff");
-  response.headers.set("X-Robots-Tag", "noindex, nofollow");
+  response.headers.set("X-Robots-Tag", NOINDEX);
   response.headers.set("Referrer-Policy", "no-referrer");
-  if (!logo || response.status >= 300) response.headers.set("Cache-Control", "private, no-store");
+  if (!file || response.status >= 300) response.headers.set("Cache-Control", "private, no-store");
+  return response;
+}
+
+/** Everything on dashboard.studio1hq.com (and dashboard.localhost). */
+function dashboardHost(request: NextRequest) {
+  const { pathname, search } = request.nextUrl;
+  const first = pathname.split("/")[1];
+
+  if (first === "api" || first === "_next" || first.startsWith("__nextjs")) return NextResponse.next();
+
+  if (pathname === "/robots.txt") {
+    return new NextResponse(DASHBOARD_ROBOTS, {
+      headers: { "Content-Type": "text/plain; charset=utf-8", "X-Robots-Tag": NOINDEX },
+    });
+  }
+
+  if (first === "internal") {
+    // Draft images saved in post bodies keep their /internal/blog-media/…
+    // address; the route checks the session itself.
+    if (FILE_LIKE.test(pathname)) return NextResponse.next();
+    // An old link (or one still in a stored notification): its new address.
+    const url = dashboardHostUrl(request);
+    url.pathname = fromInternalPath(pathname);
+    url.search = search;
+    return noindex(NextResponse.redirect(url, 307));
+  }
+
+  if (PUBLIC_ROUTES.has(first)) return noindex(NextResponse.next());
+
+  if (FILE_LIKE.test(pathname) && !DASHBOARD_FILE_ROUTES.has(first)) {
+    // The public site's own files: fonts, icons and pictures load; pages
+    // and text files (sitemap.xml, llms.txt) belong to www only.
+    return STATIC_FILE.test(pathname)
+      ? noindex(NextResponse.next())
+      : noindex(new NextResponse("Not found", { status: 404 }));
+  }
+
+  return internalGate(request);
+}
+
+/**
+ * This request's URL on the host the browser asked for. `next dev` names
+ * its own address (localhost) in nextUrl, which would send a redirect from
+ * dashboard.localhost back to the public site.
+ */
+function dashboardHostUrl(request: NextRequest) {
+  const url = request.nextUrl.clone();
+  const host = request.headers.get("host");
+  if (host && isDashboardHost(host)) {
+    const [name, port] = host.split(":");
+    url.hostname = name;
+    url.port = port ?? "";
+  }
+  return url;
+}
+
+/**
+ * The main site's /internal/… (an old link, a bookmark): the same page on
+ * the dashboard host. `next dev` on localhost sends it to dashboard.localhost.
+ * 307, not 308, while the move is new: browsers keep a 308 for good, so a
+ * rollback couldn't take it back.
+ */
+function toDashboard(request: NextRequest) {
+  const { pathname, search } = request.nextUrl;
+  const local = /^(?:localhost|127\.0\.0\.1|\[::1\])(?::(\d+))?$/.exec(request.headers.get("host") ?? "");
+  const url = local
+    ? new URL(`http://${LOCAL_DASHBOARD_HOST}${local[1] ? `:${local[1]}` : ""}`)
+    : new URL(dashboardUrl);
+  url.pathname = fromInternalPath(pathname);
+  url.search = search;
+  return noindex(NextResponse.redirect(url, 307));
+}
+
+function noindex(response: NextResponse) {
+  response.headers.set("X-Robots-Tag", NOINDEX);
   return response;
 }
 
@@ -115,8 +227,10 @@ export async function proxy(request: NextRequest) {
   const { nextUrl } = request;
   const { pathname } = nextUrl;
 
+  if (isDashboardHost(request.headers.get("host"))) return dashboardHost(request);
+
   if (pathname === "/internal" || pathname.startsWith("/internal/")) {
-    return internalGate(request);
+    return toDashboard(request);
   }
 
   if (shouldBypassLocale(pathname)) {
@@ -161,5 +275,14 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next|.*\\..*).*)"],
+  matcher: [
+    "/((?!api|_next|.*\\..*).*)",
+    // The dashboard host, file-like paths included (profile photos are keyed
+    // by email, and its robots.txt is its own). Keep in step with
+    // DASHBOARD_HOST_PATTERN in lib/internal/host.ts.
+    {
+      source: "/((?!_next/).*)",
+      has: [{ type: "host", value: "dashboard\\.(?:studio1hq\\.com|localhost)" }],
+    },
+  ],
 };

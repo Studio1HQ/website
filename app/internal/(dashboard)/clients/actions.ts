@@ -222,7 +222,7 @@ function tellAbout(
       kind: "deliverable",
       title,
       body: found ? `${deliverable.title} · ${found.name}` : deliverable.title,
-      href: found ? `/internal/clients/${found.slug}` : "/internal/tasks",
+      href: found ? `/clients/${found.slug}` : "/tasks",
     });
   });
 }

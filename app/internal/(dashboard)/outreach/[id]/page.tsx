@@ -46,7 +46,7 @@ import { FieldDialog } from "@/components/internal/outreach/field-dialog";
 import { OrgLogo, PriorityPill } from "@/components/internal/outreach/org-marks";
 import { StageSelect } from "@/components/internal/outreach/stage-select";
 
-const PATH = "/internal/outreach";
+const PATH = "/outreach";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   // The title is data too: check who's asking before reading the record.
@@ -104,7 +104,7 @@ export default async function OutreachOrgPage({ params }: { params: Promise<{ id
           <>
             <StageSelect id={org.id} value={org.stage} name={org.name} />
             {client ? (
-              <Link href={`/internal/clients/${client.slug}`} className={buttonClass("secondary")}>
+              <Link href={`/clients/${client.slug}`} className={buttonClass("secondary")}>
                 <ArrowSquareOut size={14} /> Open the client
               </Link>
             ) : org.stage === "won" && !org.client_id ? (

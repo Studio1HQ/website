@@ -68,7 +68,7 @@ export default async function ProfilePage() {
             {isAdmin(staff) ? (
               <>
                 Add people and change what they can open on{" "}
-                <Link href="/internal/people" className="text-[var(--i-ink-2)] underline underline-offset-2">
+                <Link href="/people" className="text-[var(--i-ink-2)] underline underline-offset-2">
                   People
                 </Link>
                 .

@@ -85,7 +85,7 @@ export default async function MyDayPage({
           title="You're not on the team list yet"
           action={
             isAdmin(staff) ? (
-              <Link href="/internal/people?tab=directory" className={buttonClass("primary")}>
+              <Link href="/people?tab=directory" className={buttonClass("primary")}>
                 Add yourself on People
               </Link>
             ) : undefined

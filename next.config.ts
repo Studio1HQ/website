@@ -4,11 +4,20 @@ import createNextIntlPlugin from "next-intl/plugin";
 import { AI_AGENT_HEADER_PATTERN } from "./lib/ai-agents";
 import { IMAGE_CDN, IMAGE_WIDTHS } from "./lib/image-config.mjs";
 import { GA_MEASUREMENT_ID } from "./lib/analytics";
+import {
+  DASHBOARD_HOST_PATTERN,
+  LOCAL_DASHBOARD_HOST,
+} from "./lib/internal/host";
 
 const withMDX = nextMDX();
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
+const dashboardHost = [
+  { type: "host" as const, value: DASHBOARD_HOST_PATTERN },
+];
 const nextConfig: NextConfig = {
   pageExtensions: ["js", "jsx", "mdx", "ts", "tsx"],
+  // `next dev` serves the dashboard at http://dashboard.localhost:3000.
+  allowedDevOrigins: [LOCAL_DASHBOARD_HOST],
   // linkedom (app/ai-md) breaks when bundled: its optional canvas support
   // resolves to a stub. Load it from node_modules at runtime instead.
   serverExternalPackages: ["linkedom"],
@@ -115,6 +124,16 @@ const nextConfig: NextConfig = {
           { key: "X-Robots-Tag", value: "noindex, nofollow" },
         ],
       })),
+      // Everything on the dashboard's own host (lib/internal/host.ts).
+      {
+        source: "/:path*",
+        has: dashboardHost,
+        headers: [
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+        ],
+      },
       {
         // Build-time image sizes keep their URL when an image is replaced
         // under the same name, so Cloudflare checks back daily.
@@ -129,8 +148,10 @@ const nextConfig: NextConfig = {
       },
       {
         // WebP blog covers change URL (?v=) when they change: Cloudflare keeps
-        // them for 30 days, browsers a day.
+        // them for 30 days, browsers a day. Not on the dashboard host, where
+        // /blog-cover/<id> is a draft's private cover.
         source: "/blog-cover/:path*",
+        missing: dashboardHost,
         headers: [
           {
             key: "Cache-Control",

@@ -5,6 +5,7 @@ import {
   BELL_LIMIT,
   NOTICE_KINDS,
   noticeCutoffs,
+  noticeHref,
   noticeRows,
   type Notice,
   type Notification,
@@ -47,8 +48,8 @@ function toNotification(row: Record<string, unknown>): Notification | null {
     kind,
     title: row.title,
     body: typeof row.body === "string" ? row.body : "",
-    // Only ever a dashboard path, whatever is in the row.
-    href: row.href.startsWith("/internal") ? row.href : "/internal",
+    // Only ever a dashboard page, whatever is in the row.
+    href: noticeHref(row.href),
     read_at: typeof row.read_at === "string" ? row.read_at : null,
   };
 }

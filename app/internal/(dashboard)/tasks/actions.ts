@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
-import { baseUrl } from "@/lib/site";
+import { dashboardUrl } from "@/lib/internal/host";
 import { isMailerConfigured, sendMail } from "@/lib/mailer";
 import { notify } from "@/lib/internal/notifications/data";
 import { OWNERS } from "@/lib/internal/roles";
@@ -191,7 +191,7 @@ export async function saveTask(id: unknown, values: unknown): Promise<TaskResult
           kind: "task",
           title: `${by} gave you a task`,
           body: due ? `${title} · due ${due}` : title,
-          href: "/internal/tasks",
+          href: "/tasks",
         }),
       );
     }
@@ -586,12 +586,12 @@ export async function submitReport(period: unknown, start: unknown, values: unkn
       kind: "task",
       title: `${name} sent their report`,
       body: periodLabel(which.period, which.start),
-      href: `/internal/tasks/reports/${id}`,
+      href: `/tasks/reports/${id}`,
     }),
   );
   after(async () => {
     if (!isMailerConfigured()) return;
-    const link = `${baseUrl}/internal/tasks/reports/${id}`;
+    const link = `${dashboardUrl}/tasks/reports/${id}`;
     const label = periodLabel(which.period, which.start);
     for (const to of OWNERS) {
       try {
@@ -643,7 +643,7 @@ export async function reviewReport(id: unknown, decision: unknown, note: unknown
     const name = staffName(staff);
     after(async () => {
       if (!isMailerConfigured()) return;
-      const link = `${baseUrl}/internal/tasks/reports/${report.id}`;
+      const link = `${dashboardUrl}/tasks/reports/${report.id}`;
       await sendMail(
         {
           to: report.email,
@@ -664,7 +664,7 @@ export async function reviewReport(id: unknown, decision: unknown, note: unknown
         kind: "task",
         title: `${name} sent your report back`,
         body: periodLabel(report.period, report.starts_on),
-        href: `/internal/tasks/reports/${report.id}`,
+        href: `/tasks/reports/${report.id}`,
       }),
     );
   }

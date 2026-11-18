@@ -213,24 +213,24 @@ export function areasFor(staff: Staff) {
  */
 export function homeFor(staff: Staff) {
   const areas = areasFor(staff);
-  if (isAdmin(staff) || staff.role || areas.length > 1) return "/internal";
-  if (staff.blog) return "/internal/blog";
-  if (staff.community) return "/internal/community";
-  if (staff.clients) return "/internal/clients";
-  if (canSeeOutreach(staff)) return "/internal/outreach";
-  if (canSeeInfluencers(staff)) return "/internal/influencers";
-  if (canSeeSocials(staff)) return "/internal/socials";
-  if (staff.person) return "/internal/me";
-  if (staff.interns.length) return "/internal/people";
-  if (can(staff.roles, "tasks", "view")) return "/internal/tasks";
-  return "/internal/pending";
+  if (isAdmin(staff) || staff.role || areas.length > 1) return "/";
+  if (staff.blog) return "/blog";
+  if (staff.community) return "/community";
+  if (staff.clients) return "/clients";
+  if (canSeeOutreach(staff)) return "/outreach";
+  if (canSeeInfluencers(staff)) return "/influencers";
+  if (canSeeSocials(staff)) return "/socials";
+  if (staff.person) return "/me";
+  if (staff.interns.length) return "/people";
+  if (can(staff.roles, "tasks", "view")) return "/tasks";
+  return "/pending";
 }
 
 /** Any signed-in person with a way in: a role, the team list or interns. */
 export async function requireMember(): Promise<Staff> {
   const staff = await getStaff();
-  if (!staff) redirect("/internal/login");
-  if (!hasAccess(staff)) redirect("/internal/pending");
+  if (!staff) redirect("/login");
+  if (!hasAccess(staff)) redirect("/pending");
   return staff;
 }
 
@@ -244,15 +244,15 @@ export async function requirePeople(): Promise<Staff & { admin: boolean }> {
 
 /** Where someone goes when they can open an area but not at the level a page needs. */
 const DENIED: Record<AreaKey, string> = {
-  hiring: "/internal?denied=1",
-  blog: "/internal/blog?denied=1",
-  community: "/internal/community?denied=1",
-  clients: "/internal/clients?denied=1",
-  tasks: "/internal/tasks?denied=1",
+  hiring: "/?denied=1",
+  blog: "/blog?denied=1",
+  community: "/community?denied=1",
+  clients: "/clients?denied=1",
+  tasks: "/tasks?denied=1",
   // One level each: no access at all already sends them home.
-  outreach: "/internal?denied=1",
-  influencers: "/internal?denied=1",
-  socials: "/internal?denied=1",
+  outreach: "/?denied=1",
+  influencers: "/?denied=1",
+  socials: "/?denied=1",
 };
 
 /**
@@ -285,7 +285,7 @@ export async function requireStaff(minimum: Role = "viewer"): Promise<Staff & { 
 /** Money pages, actions and files: the founders only. */
 export async function requireOwner(): Promise<Staff> {
   const staff = await requireMember();
-  if (!canSeeMoney(staff)) redirect(isAdmin(staff) ? "/internal?denied=1" : homeFor(staff));
+  if (!canSeeMoney(staff)) redirect(isAdmin(staff) ? "/?denied=1" : homeFor(staff));
   return staff;
 }
 
@@ -341,12 +341,12 @@ export function sessionCookieOptions(maxAge: number) {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax" as const,
-    path: "/internal",
+    path: "/",
     maxAge,
   };
 }
 
 /** For the sign-in step's own cookies, which only the login page reads. */
 export function loginCookieOptions(maxAge: number) {
-  return { ...sessionCookieOptions(maxAge), path: "/internal/login" };
+  return { ...sessionCookieOptions(maxAge), path: "/login" };
 }
