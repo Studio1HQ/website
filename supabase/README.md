@@ -14,7 +14,10 @@ The other "contact us" points on the site are `mailto:` links and store nothing.
 
 ## Internal dashboard
 
-The team reads and reviews every form entry at `/internal` (`app/internal`):
+The team reads and reviews every form entry on the dashboard,
+https://dashboard.studio1hq.com (`app/internal`; `proxy.ts` serves it at the
+root of its own host, and old `www.studio1hq.com/internal/...` links redirect
+there). Locally it's http://dashboard.localhost:3000 under `pnpm dev`. It has
 an overview, one page per table (Jobs, Hackathons, DevRel Cohort), the
 `email_subscribers` and `partner_referral_pool` views, CSV export, and a
 status and notes form on each entry (it records who changed it in
@@ -28,10 +31,9 @@ it. Setup:
 1. Run `migrations/*_internal_dashboard.sql`, `migrations/*_internal_team.sql`,
    `migrations/*_blog_and_roles.sql`, `migrations/*_email_delivery.sql` and
    `migrations/*_blog_threads_and_schedule.sql`, in that order.
-2. Authentication → URL Configuration: set Site URL to
-   `https://www.studio1hq.com` and add these Redirect URLs:
-   `https://www.studio1hq.com/internal/auth/callback` and, for local
-   testing, `http://localhost:3000/internal/auth/callback`.
+2. Authentication → URL Configuration: Site URL `https://www.studio1hq.com`.
+   Sign-in is an emailed code now, so no redirect URL is used (`/auth/callback`
+   only sends old links to the login page).
 3. Email: Supabase's built-in sender only mails members of the Supabase
    organization's team, 2 emails an hour. Either add each teammate under
    Organization → Team, or use Resend for sign-in emails too
@@ -45,11 +47,12 @@ it. Setup:
 
 People can hold several roles (`internal_members.roles`): `admin`,
 `hiring_reviewer`, `hiring_viewer`, `blog_reviewer` and `blog_writer`. Admins
-set them on `/internal/team`, where they can also invite people. Anyone
+set them on the dashboard's People page, where they can also invite people. Anyone
 outside `@studio1hq.com` can only be invited, and only as a blog writer (the
 table enforces it too).
 
-Blog posts are written at `/internal/blog` (short link: `/blog/write`).
+Blog posts are written on the dashboard's Blog page (short link:
+`www.studio1hq.com/blog/write`).
 Drafts and their review history live in `blog_posts` and `blog_events`.
 Images uploaded while drafting go to the private `blog-media` bucket as WebP.
 Publishing commits the MDX file and its images to the site's GitHub repo
@@ -61,7 +64,7 @@ highlights it, and threads take replies (`parent_id`) and can be resolved.
 
 Access: Arindam and Amitesh (`lib/internal/roles.ts`) are owners and always
 admins. Anyone else with a `@studio1hq.com` address who signs in is added to
-`internal_members` as pending, and an admin approves them on `/internal/team`
+`internal_members` as pending, and an admin approves them on the People page
 as an Admin, Reviewer (status, tags, notes, emails) or Viewer (read only).
 
 Applicant emails go out through Resend (`RESEND_API_KEY` in `.env.example`) in the paper

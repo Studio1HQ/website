@@ -374,7 +374,7 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
     async (file: File) => {
       const form = new FormData();
       form.append("file", await shrinkImage(file), file.name);
-      const response = await fetch(`/internal/blog-media/${post.id}`, { method: "POST", body: form });
+      const response = await fetch(`/blog-media/${post.id}`, { method: "POST", body: form });
       const json = (await response.json().catch(() => ({}))) as { url?: string; error?: string };
       if (!response.ok || !json.url) {
         const reason = json.error ?? (response.status === 413 ? "That image is too large." : "The upload failed.");
@@ -487,7 +487,7 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
     }
     dirty.current.clear();
     toast("success", "Draft deleted.");
-    router.push("/internal/blog");
+    router.push("/blog");
   };
 
   const pickBanner = () => {
@@ -520,7 +520,7 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
     <div className="pb-10">
       {/* Top bar: sticky from md; on phones the dashboard's own top bar is the sticky one. */}
       <div className="-mx-4 -mt-5 mb-5 flex flex-wrap items-center gap-2 border-b border-[var(--i-line)] bg-[var(--i-bg)]/95 px-4 py-2.5 backdrop-blur sm:-mx-6 sm:-mt-0 sm:px-6 md:sticky md:top-0 md:z-30 lg:-mx-10 lg:px-10">
-        <Link href="/internal/blog" className={buttonClass("ghost", "sm")}>
+        <Link href="/blog" className={buttonClass("ghost", "sm")}>
           <ArrowLeft size={14} /> Blog
         </Link>
         <BlogStatusBadge status={status} live={isLive} />
@@ -529,7 +529,7 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
         </span>
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <a
-            href={`/internal/blog-preview/${post.id}`}
+            href={`/blog-preview/${post.id}`}
             target="_blank"
             rel="noreferrer"
             onClick={(event) => {
@@ -901,7 +901,7 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               key={`${fields.banner_image}-${base}`}
-              src={fields.banner_image ?? `/internal/blog-cover/${post.id}?w=480&v=${encodeURIComponent(base)}`}
+              src={fields.banner_image ?? `/blog-cover/${post.id}?w=480&v=${encodeURIComponent(base)}`}
               alt={fields.banner_image ? fields.banner_image_alt ?? "" : "Generated cover"}
               className="aspect-[16/9] w-full rounded-lg bg-[#f4efe7] object-cover ring-1 ring-[var(--i-line)]"
             />
@@ -930,7 +930,7 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={`/internal/blog-cover/${post.id}?w=480&art=${autoArt}&v=${encodeURIComponent(base)}`}
+                    src={`/blog-cover/${post.id}?w=480&art=${autoArt}&v=${encodeURIComponent(base)}`}
                     alt=""
                     loading="lazy"
                     className="aspect-[16/9] w-full rounded-md bg-[#f4efe7] object-cover"
@@ -949,7 +949,7 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={`/internal/blog-cover/${post.id}?w=480&art=${option.key}&v=${encodeURIComponent(base)}`}
+                      src={`/blog-cover/${post.id}?w=480&art=${option.key}&v=${encodeURIComponent(base)}`}
                       alt=""
                       loading="lazy"
                       className="aspect-[16/9] w-full rounded-md bg-[#f4efe7] object-cover"

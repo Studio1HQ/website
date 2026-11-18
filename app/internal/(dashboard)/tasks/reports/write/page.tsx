@@ -23,7 +23,7 @@ import { ReportSnapshotView, ReportStatePill } from "@/components/internal/tasks
 
 export const metadata: Metadata = { title: "Write a report" };
 
-const LIST = "/internal/tasks/reports";
+const LIST = "/tasks/reports";
 
 function one(value: string | string[] | undefined) {
   return (Array.isArray(value) ? value[0] : value)?.trim() ?? "";

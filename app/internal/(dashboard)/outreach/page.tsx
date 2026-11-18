@@ -60,7 +60,7 @@ import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Outreach" };
 
-const PATH = "/internal/outreach";
+const PATH = "/outreach";
 
 type Now = { today: string; me: string };
 

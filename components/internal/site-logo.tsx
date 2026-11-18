@@ -6,7 +6,7 @@ import { siteHost } from "@/lib/internal/clients/logo-pick";
 
 /**
  * A company's logo: its website's icon, served by one of our logo routes
- * (`path`, e.g. /internal/clients/<slug>/logo), or the first letter of its
+ * (`path`, e.g. /clients/<slug>/logo), or the first letter of its
  * name when there's no website or no icon. The route is linked with
  * ?v=<host>, so a new website gets a new URL and the old icon isn't reused.
  */

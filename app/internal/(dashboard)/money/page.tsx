@@ -122,25 +122,25 @@ export default async function MoneyPage() {
           label="To pay"
           value={totals.ok ? money(totals.toPayByCurrency) : "—"}
           note={totals.ok ? `${totals.toPay} ${totals.toPay === 1 ? "payment" : "payments"}${totals.flagged ? ` · ${totals.flagged} need a look` : ""}` : ""}
-          href="/internal/money/payments"
+          href="/money/payments"
         />
         <Kpi
           label="To receive"
           value={totals.ok ? money(totals.toReceiveByCurrency) : "—"}
           note={totals.ok ? `${totals.toReceive} from sponsors` : ""}
-          href="/internal/money/payments"
+          href="/money/payments"
         />
         <Kpi
           label={`Payroll · ${monthLabel(month, true)}`}
           value={formatMoney(payrollNet)}
           note={`${sent} of ${rows.length} payslips sent`}
-          href="/internal/money/payroll"
+          href="/money/payroll"
         />
         <Kpi
           label="Expense claims"
           value={String(waitingClaims.length)}
           note={waitingClaims.length ? "Waiting for you" : "Nothing waiting"}
-          href="/internal/money/payroll"
+          href="/money/payroll"
         />
       </div>
 
@@ -148,7 +148,7 @@ export default async function MoneyPage() {
         <Card>
           <CardTitle
             action={
-              <Link href="/internal/money/payments" className="inline-flex items-center gap-1 text-[12.5px] text-[var(--i-muted)] hover:text-[var(--i-ink)]">
+              <Link href="/money/payments" className="inline-flex items-center gap-1 text-[12.5px] text-[var(--i-muted)] hover:text-[var(--i-ink)]">
                 All payments <ArrowRight size={12} />
               </Link>
             }
@@ -177,7 +177,7 @@ export default async function MoneyPage() {
         <Card>
           <CardTitle
             action={
-              <Link href="/internal/money/payroll" className="inline-flex items-center gap-1 text-[12.5px] text-[var(--i-muted)] hover:text-[var(--i-ink)]">
+              <Link href="/money/payroll" className="inline-flex items-center gap-1 text-[12.5px] text-[var(--i-muted)] hover:text-[var(--i-ink)]">
                 Open payroll <ArrowRight size={12} />
               </Link>
             }
@@ -206,7 +206,7 @@ export default async function MoneyPage() {
           )}
           {waitingClaims.length ? (
             <Link
-              href="/internal/money/payroll"
+              href="/money/payroll"
               className="flex items-center justify-between border-t border-[var(--i-line)] px-5 py-2.5 text-[12.5px] text-[var(--i-muted)] hover:text-[var(--i-ink)]"
             >
               <span>

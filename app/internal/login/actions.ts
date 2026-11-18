@@ -230,7 +230,7 @@ export async function checkSignInCode(
           kind: "access",
           title: "Someone is asking for dashboard access",
           body: email,
-          href: "/internal/people",
+          href: "/people",
         });
       });
     }

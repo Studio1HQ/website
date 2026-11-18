@@ -528,7 +528,7 @@ export function TodayCalls({
     <Card className={cn("flex min-h-0 flex-col", className)}>
       <CardTitle
         action={
-          <Link href="/internal/calls" className="inline-flex items-center gap-1 text-[12.5px] text-[var(--i-muted)] hover:text-[var(--i-ink)]">
+          <Link href="/calls" className="inline-flex items-center gap-1 text-[12.5px] text-[var(--i-muted)] hover:text-[var(--i-ink)]">
             Your calendar <ArrowRight size={12} />
           </Link>
         }

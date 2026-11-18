@@ -22,10 +22,20 @@ describe("staff addresses", () => {
 
 describe("where to go after signing in", () => {
   it("only ever a dashboard path", () => {
-    expect(safeNext("/internal/tasks?view=week")).toBe("/internal/tasks?view=week");
-    expect(safeNext("//evil.com")).toBe("/internal");
-    expect(safeNext("https://evil.com/internal")).toBe("/internal");
-    expect(safeNext("/internal/../api")).toBe("/internal");
-    expect(safeNext("/internal/login")).toBe("/internal");
+    expect(safeNext("/tasks?view=week")).toBe("/tasks?view=week");
+    expect(safeNext("//evil.com")).toBe("/");
+    expect(safeNext("https://evil.com/internal")).toBe("/");
+    expect(safeNext("/../api")).toBe("/");
+    expect(safeNext("/login")).toBe("/");
+    expect(safeNext("/auth/callback")).toBe("/");
+    expect(safeNext("/api/cron/x")).toBe("/");
+    expect(safeNext("/\\evil.com")).toBe("/");
+    expect(safeNext(undefined)).toBe("/");
+  });
+
+  it("turns an old /internal link into its dashboard address", () => {
+    expect(safeNext("/internal/tasks?view=week")).toBe("/tasks?view=week");
+    expect(safeNext("/internal")).toBe("/");
+    expect(safeNext("/internal/login")).toBe("/");
   });
 });

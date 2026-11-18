@@ -56,7 +56,7 @@ type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-const BASE = "/internal/clients/reports";
+const BASE = "/clients/reports";
 
 function reportsHref(month: string, engagement?: string | null) {
   const query = new URLSearchParams({ month });

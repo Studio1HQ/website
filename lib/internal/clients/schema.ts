@@ -868,7 +868,7 @@ export function namesFrom(
   return names;
 }
 
-/** "/internal/clients/acme". */
+/** "/clients/acme". */
 export function clientPath(slug: string) {
-  return `/internal/clients/${encodeURIComponent(slug)}`;
+  return `/clients/${encodeURIComponent(slug)}`;
 }

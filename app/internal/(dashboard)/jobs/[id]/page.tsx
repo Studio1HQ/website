@@ -38,7 +38,7 @@ export default async function JobApplicationPage({ params, searchParams }: Props
       actions={
         record.resume_path ? (
           <a
-            href={`/internal/jobs/${record.id}/resume`}
+            href={`/jobs/${record.id}/resume`}
             target="_blank"
             rel="noopener noreferrer"
             className={buttonClass("accent")}
@@ -107,7 +107,7 @@ export default async function JobApplicationPage({ params, searchParams }: Props
         <Answers title="Résumé">
           {/* Through the résumé route, so every load checks the session. */}
           <iframe
-            src={`/internal/jobs/${record.id}/resume`}
+            src={`/jobs/${record.id}/resume`}
             title={`Résumé of ${text(record.name)}`}
             className="h-[780px] w-full rounded-lg border border-[var(--i-line)] bg-[var(--i-sunken)]"
           />

@@ -530,10 +530,10 @@ export function isUuid(value: unknown): value is string {
   return typeof value === "string" && UUID.test(value);
 }
 
-/** "/internal/tasks?view=week&person=…" with only the values given. */
+/** "/tasks?view=week&person=…" with only the values given. */
 export function tasksHref(params: Record<string, string | null | undefined>) {
   const query = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) if (value) query.set(key, value);
   const text = query.toString();
-  return text ? `/internal/tasks?${text}` : "/internal/tasks";
+  return text ? `/tasks?${text}` : "/tasks";
 }

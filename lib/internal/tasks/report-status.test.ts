@@ -40,7 +40,7 @@ describe("report states", () => {
   });
 
   it("links to the form for a period", () => {
-    expect(writeHref("week", "2026-11-16")).toBe("/internal/tasks/reports/write?period=week&start=2026-11-16");
+    expect(writeHref("week", "2026-11-16")).toBe("/tasks/reports/write?period=week&start=2026-11-16");
   });
 });
 

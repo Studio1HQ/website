@@ -4,7 +4,7 @@ import { authSecret, sha256 } from "@/lib/internal/token";
 /**
  * Files for the team pages, in the private `team-files` bucket: profile
  * photos (photos/), emailed invoices (invoices/) and expense receipts
- * (receipts/). They're only ever served through /internal/team-file, which
+ * (receipts/). They're only ever served through /team-file, which
  * checks who's asking. Server only.
  */
 

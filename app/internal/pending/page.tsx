@@ -13,7 +13,7 @@ export const metadata: Metadata = { title: "Waiting for approval" };
 /** Where signed-in people land until an admin approves them. */
 export default async function PendingPage() {
   const staff = await getStaff();
-  if (!staff) redirect("/internal/login");
+  if (!staff) redirect("/login");
   // Anyone with a way in goes to their own start page.
   if (hasAccess(staff)) redirect(homeFor(staff));
   // Make sure an admin can see the request (signing in usually filed it).
@@ -65,7 +65,7 @@ export default async function PendingPage() {
           <div className="mt-5 flex gap-2">
             {/* A full page load: a cached "still waiting" answer is never reused. */}
             {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-            <a href="/internal" className={buttonClass("primary")}>
+            <a href="/" className={buttonClass("primary")}>
               Check again
             </a>
             <form action={signOut}>

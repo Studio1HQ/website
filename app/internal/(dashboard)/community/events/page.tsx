@@ -95,7 +95,7 @@ export default async function EventsPage({
             refs={refs}
             owners={owners}
             defaults={{ owner: staff.email }}
-            goTo="/internal/community/events/"
+            goTo="/community/events/"
             trigger={
               <button type="button" className={buttonClass("accent")}>
                 <Plus size={14} /> New event
@@ -165,7 +165,7 @@ export default async function EventsPage({
       if (value && !(key === "view" && value === "upcoming"))
         next.set(key, value);
     const search = next.toString();
-    return `/internal/community/events${search ? `?${search}` : ""}`;
+    return `/community/events${search ? `?${search}` : ""}`;
   };
 
   return (
@@ -185,7 +185,7 @@ export default async function EventsPage({
       />
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <SearchBox
-          action="/internal/community/events"
+          action="/community/events"
           value={query}
           placeholder="Search events, cities, hosts"
           keep={{ view, kind }}
@@ -256,7 +256,7 @@ export default async function EventsPage({
                   </td>
                   <td className="max-w-[22rem]">
                     <RowLink
-                      href={`/internal/community/events/${event.id}`}
+                      href={`/community/events/${event.id}`}
                       sub={[labelOf(EVENT_KINDS, event.kind), where, host]
                         .filter(Boolean)
                         .join(" · ")}

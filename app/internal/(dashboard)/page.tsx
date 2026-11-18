@@ -232,7 +232,7 @@ export default async function OverviewPage({
 }) {
   const [staff, params] = await Promise.all([requireMember(), searchParams]);
   const home = homeFor(staff);
-  if (home !== "/internal") redirect(home);
+  if (home !== "/") redirect(home);
 
   const data = await dashboardOverview(staff);
   const { hiring, blog, team, todo, now } = data;
@@ -299,7 +299,7 @@ export default async function OverviewPage({
                   Your tasks today
                 </>
               }
-              href="/internal/tasks"
+              href="/tasks"
               linkLabel="All tasks"
             >
               {!data.myTasks.ok ? (
@@ -310,7 +310,7 @@ export default async function OverviewPage({
                 <ul>
                   {data.myTasks.items.map((task) => (
                     <li key={task.id} className="border-b border-[var(--i-line)] last:border-b-0">
-                      <Link href="/internal/tasks" className="flex items-center gap-3 px-5 py-2.5 hover:bg-[var(--i-hover)]">
+                      <Link href="/tasks" className="flex items-center gap-3 px-5 py-2.5 hover:bg-[var(--i-hover)]">
                         <span
                           aria-hidden
                           className={cn("size-1.5 shrink-0 rounded-full", task.late ? "bg-amber-500" : "bg-[var(--i-faint)]")}
@@ -330,7 +330,7 @@ export default async function OverviewPage({
                   ))}
                   {data.myTasks.more ? (
                     <li>
-                      <Link href="/internal/tasks" className="block px-5 py-2.5 text-[12.5px] text-[var(--i-muted)] hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)]">
+                      <Link href="/tasks" className="block px-5 py-2.5 text-[12.5px] text-[var(--i-muted)] hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)]">
                         and {data.myTasks.more} more
                       </Link>
                     </li>
@@ -348,7 +348,7 @@ export default async function OverviewPage({
                   Your calls today
                 </>
               }
-              href="/internal/calls"
+              href="/calls"
               linkLabel="Calendar"
             >
               {!data.myCalls.ok ? (
@@ -360,7 +360,7 @@ export default async function OverviewPage({
                   {data.myCalls.items.map((call) => (
                     <li key={call.key} className="flex items-center border-b border-[var(--i-line)] last:border-b-0">
                       <Link
-                        href="/internal/calls?view=day"
+                        href="/calls?view=day"
                         className={cn("flex min-w-0 flex-1 items-center gap-3 px-5 py-2.5 hover:bg-[var(--i-hover)]", call.over ? "opacity-55" : null)}
                       >
                         <span className="w-[6.5rem] shrink-0 text-[12.5px] tabular-nums text-[var(--i-muted)]">
@@ -392,7 +392,7 @@ export default async function OverviewPage({
         {hiring ? (
           <AreaCard
             area="hiring"
-            href="/internal/jobs"
+            href="/jobs"
             value={number(awaiting)}
             unit="to review"
             chart={pipelinesOk ? <Sparkline points={applied} label="Applications a day, last 14 days" /> : null}
@@ -404,7 +404,7 @@ export default async function OverviewPage({
         {blog ? (
           <AreaCard
             area="blog"
-            href="/internal/blog"
+            href="/blog"
             value={blog.reviewer ? blog.inReview : blog.feedback}
             unit={blog.reviewer ? "waiting for review" : "with feedback"}
             chart={<Sparkline points={blog.publishedByMonth} label="Posts published a month, last 6 months" />}
@@ -421,7 +421,7 @@ export default async function OverviewPage({
         {team?.ready && team.people === 0 ? (
           <AreaCard
             area="team"
-            href="/internal/people"
+            href="/people"
             value="No one yet"
             unit="on the team list"
             notes={["Add employees and interns to track attendance and payroll."]}
@@ -429,7 +429,7 @@ export default async function OverviewPage({
         ) : team?.ready ? (
           <AreaCard
             area="team"
-            href="/internal/people"
+            href="/people"
             value={team.working.length}
             unit={`of ${team.people} in today`}
             chart={<Faces people={team.working} />}
@@ -441,7 +441,7 @@ export default async function OverviewPage({
         ) : data.mine ? (
           <AreaCard
             area="team"
-            href="/internal/me"
+            href="/me"
             value={data.mine.day?.kind === "leave" ? "On leave" : (data.mine.day?.start_time ?? "Not started")}
             unit={data.mine.day?.start_time ? (data.mine.day.end_time ? `– ${data.mine.day.end_time}` : "started") : "today"}
             notes={[
@@ -454,7 +454,7 @@ export default async function OverviewPage({
         ) : data.interns ? (
           <AreaCard
             area="team"
-            href="/internal/people"
+            href="/people"
             value={data.interns.logged}
             unit={`of ${data.interns.total} interns logged today`}
           />
@@ -463,7 +463,7 @@ export default async function OverviewPage({
         {team?.ready && team.money ? (
           <AreaCard
             area="money"
-            href="/internal/money"
+            href="/money"
             value={team.money.payments.ok ? money(team.money.payments.toPayByCurrency) : "—"}
             unit="to pay"
             notes={[
@@ -482,7 +482,7 @@ export default async function OverviewPage({
         {data.clients?.ok ? (
           <AreaCard
             area="clients"
-            href="/internal/clients"
+            href="/clients"
             value={number(data.clients.active)}
             unit={data.clients.active === 1 ? "active engagement" : "active engagements"}
             extra={
@@ -505,7 +505,7 @@ export default async function OverviewPage({
         ) : data.clients ? (
           <AreaCard
             area="clients"
-            href="/internal/clients"
+            href="/clients"
             value="—"
             unit={data.clients.missing ? "not set up yet" : "couldn't load"}
           />
@@ -514,7 +514,7 @@ export default async function OverviewPage({
         {data.outreach ? (
           <AreaCard
             area="outreach"
-            href="/internal/outreach"
+            href="/outreach"
             value={number(data.outreach.open)}
             unit="in play"
             chart={<Sparkline points={data.outreach.addedByWeek} label="Organisations added a week, last 8 weeks" />}

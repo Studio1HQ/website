@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils";
 
 /** The pieces the Influencers pages share. Server-safe: nothing here needs the browser. */
 
-export const PATH = "/internal/influencers";
+export const PATH = "/influencers";
 
 export function InfluencerTabs({
   active,

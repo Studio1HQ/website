@@ -27,7 +27,7 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
   if (report === "error") {
     return (
       <>
-        <PageHeader eyebrow={<Link href="/internal/tasks/reports">Reports</Link>} title="Report" />
+        <PageHeader eyebrow={<Link href="/tasks/reports">Reports</Link>} title="Report" />
         <Notice tone="error">Couldn&apos;t load this report just now. Try again in a minute.</Notice>
       </>
     );
@@ -50,7 +50,7 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
   return (
     <>
       <PageHeader
-        eyebrow={<Link href="/internal/tasks/reports">Reports</Link>}
+        eyebrow={<Link href="/tasks/reports">Reports</Link>}
         title={`${owner ? "Your" : `${name}'s`} ${report.period === "week" ? "weekly" : "monthly"} report · ${periodLabel(report.period, report.starts_on)}`}
         description={
           report.submitted_at

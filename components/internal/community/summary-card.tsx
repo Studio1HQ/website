@@ -78,7 +78,7 @@ export async function CommunitySummaryCard() {
   ].filter(Boolean);
 
   return (
-    <Link href="/internal/community" className="group block">
+    <Link href="/community" className="group block">
       <Card className="flex h-full flex-col px-4 py-3.5 transition-colors group-hover:bg-[var(--i-hover)]">
         <div className="flex items-center gap-2">
           <UsersFour size={15} className="text-[var(--i-muted)]" />

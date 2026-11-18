@@ -1,4 +1,4 @@
-import { baseUrl } from "@/lib/site";
+import { dashboardUrl } from "@/lib/internal/host";
 import type { FormKey } from "@/lib/internal/email-templates";
 
 /**
@@ -31,14 +31,14 @@ export type NewEntry = {
 const MAX_POINTS = 3;
 
 const FORMS: Record<FormKey, { label: string; emoji: string; path: string; env: string }> = {
-  jobs: { label: "New job application", emoji: ":briefcase:", path: "/internal/jobs", env: "SLACK_WEBHOOK_URL_JOBS" },
+  jobs: { label: "New job application", emoji: ":briefcase:", path: "/jobs", env: "SLACK_WEBHOOK_URL_JOBS" },
   hackathons: {
     label: "New hackathon registration",
     emoji: ":hammer_and_wrench:",
-    path: "/internal/hackathons",
+    path: "/hackathons",
     env: "SLACK_WEBHOOK_URL_HACKATHONS",
   },
-  cohort: { label: "New DevRel Cohort application", emoji: ":mortar_board:", path: "/internal/cohort", env: "SLACK_WEBHOOK_URL_COHORT" },
+  cohort: { label: "New DevRel Cohort application", emoji: ":mortar_board:", path: "/cohort", env: "SLACK_WEBHOOK_URL_COHORT" },
 };
 
 /** Slack reads <, > and & as markup; everything a visitor typed is escaped. */
@@ -56,7 +56,7 @@ export function webhookFor(form: FormKey, env: Record<string, string | undefined
   return url.startsWith("https://hooks.slack.com/") ? url : null;
 }
 
-export function slackMessage(entry: NewEntry, site = baseUrl) {
+export function slackMessage(entry: NewEntry, site = dashboardUrl) {
   const form = FORMS[entry.form];
   const title = `${form.label}: ${line(entry.name, 80) || "Someone"}`;
   const points = entry.points

@@ -8,7 +8,7 @@ import { OWNERS } from "@/lib/internal/roles";
 import { getPerson } from "@/lib/internal/team/people";
 import { displayName } from "@/lib/internal/team/shared";
 import { isMailerConfigured, sendMail } from "@/lib/mailer";
-import { baseUrl } from "@/lib/site";
+import { dashboardUrl } from "@/lib/internal/host";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
       const person = await getPerson(to);
       const { html, text } = renderEmail({
         body: monthlyBody(report, displayName(person ?? { email: to, name: "" }).split(" ")[0]),
-        call: { label: "Open the dashboard", url: `${baseUrl}/internal` },
+        call: { label: "Open the dashboard", url: dashboardUrl },
         reason: "You're getting this because you're a Studio1 founder. It's sent once a month, on the 1st.",
         section: "Monthly report",
         program: report.label,

@@ -63,7 +63,7 @@ export async function EngagementTime({
           <ul className="space-y-1.5 text-[13px]">
             {people.map(([email, value]) => (
               <li key={email} className="flex items-center justify-between gap-3">
-                <Link href={`/internal/tasks?view=month&month=${month}&person=${encodeURIComponent(email)}`} className="truncate hover:text-[var(--i-accent-text)]">
+                <Link href={`/tasks?view=month&month=${month}&person=${encodeURIComponent(email)}`} className="truncate hover:text-[var(--i-accent-text)]">
                   {personName(email, names)}
                 </Link>
                 <span className="shrink-0 tabular-nums text-[var(--i-muted)]">{tally(value)}</span>

@@ -156,7 +156,7 @@ export async function generateMetadata({
 
 const backLink = (
   <Link
-    href="/internal/clients"
+    href="/clients"
     className="inline-flex items-center gap-1 hover:text-[var(--i-ink)]"
   >
     <ArrowLeft size={13} /> Clients
@@ -355,8 +355,8 @@ export default async function ClientWorkspacePage({
   };
   const reportHref = (target: string) =>
     engagement
-      ? `/internal/clients/reports?month=${target}&engagement=${engagement.id}`
-      : "/internal/clients/reports";
+      ? `/clients/reports?month=${target}&engagement=${engagement.id}`
+      : "/clients/reports";
 
   const template = engagement
     ? templateFor(engagement.type, templates.ok ? templates.rows : [])
@@ -607,7 +607,7 @@ export default async function ClientWorkspacePage({
             link({ tab: "work", month: target, engagement: engagementId })
           }
           reportHref={(target, engagementId) =>
-            `/internal/clients/reports?month=${target}&engagement=${engagementId}`
+            `/clients/reports?month=${target}&engagement=${engagementId}`
           }
           tabHref={(target) => link({ tab: target })}
         />

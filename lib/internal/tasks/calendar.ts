@@ -216,7 +216,7 @@ export function placeCards(input: {
       done,
       tag: "Community",
       client: false,
-      href: "/internal/community/tasks",
+      href: "/community/tasks",
     });
   }
 

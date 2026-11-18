@@ -102,7 +102,7 @@ export async function decideClaim(
         kind: "claim",
         title: approved ? `${by} approved your expense claim` : `${by} didn't approve your expense claim`,
         body: [approved ? `Paid with your ${monthLabel(month)} payslip` : "", said].filter(Boolean).join(" · "),
-        href: "/internal/me",
+        href: "/me",
       }),
     );
     revalidatePath("/internal", "layout");

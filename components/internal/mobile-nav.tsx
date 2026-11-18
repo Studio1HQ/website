@@ -56,7 +56,7 @@ export function MobileNavProvider({
   const toggleCollapsed = useCallback(() => {
     setCollapsed((was) => {
       const next = !was;
-      document.cookie = `${SIDEBAR_COOKIE}=${next ? "collapsed" : "open"}; path=/internal; max-age=31536000; samesite=lax${
+      document.cookie = `${SIDEBAR_COOKIE}=${next ? "collapsed" : "open"}; path=/; max-age=31536000; samesite=lax${
         location.protocol === "https:" ? "; secure" : ""
       }`;
       return next;

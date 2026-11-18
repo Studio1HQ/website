@@ -387,7 +387,7 @@ export default async function AnalyticsPage({
         {RANGES.map((item) => (
           <Link
             key={item.key}
-            href={`/internal/community/analytics${item.key === "12" ? "" : `?range=${item.key}`}`}
+            href={`/community/analytics${item.key === "12" ? "" : `?range=${item.key}`}`}
             aria-current={range === item.key ? "page" : undefined}
             className={cn(
               "inline-flex h-8 items-center rounded-lg px-3 text-[13px]",
@@ -589,7 +589,7 @@ export default async function AnalyticsPage({
                 key: id,
                 label: (
                   <Link
-                    href={`/internal/community/campus/${id}`}
+                    href={`/community/campus/${id}`}
                     className="hover:text-[var(--i-accent-text)]"
                   >
                     {partnerNames.get(id) ?? "Partner"}
@@ -638,7 +638,7 @@ export default async function AnalyticsPage({
                 <tr key={event.id} className={rowClass}>
                   <td className="max-w-[20rem]">
                     <Link
-                      href={`/internal/community/events/${event.id}`}
+                      href={`/community/events/${event.id}`}
                       className="block truncate font-medium hover:text-[var(--i-accent-text)]"
                     >
                       {event.name}

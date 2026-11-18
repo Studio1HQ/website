@@ -509,7 +509,7 @@ export function GuestList({
               <li key={row.key} className="flex items-center gap-3 px-5 py-2">
                 {row.source === "site" ? (
                   <Link
-                    href={`/internal/hackathons/${row.id}`}
+                    href={`/hackathons/${row.id}`}
                     className="min-w-0 flex-1 text-left"
                   >
                     <span className="block truncate text-[13px] font-medium hover:text-[var(--i-accent-text)]">

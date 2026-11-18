@@ -51,17 +51,17 @@ function refresh(id?: string) {
 export async function newPost() {
   const staff = await requireBlog("writer");
   const created = await createPost(staff);
-  if (!created.ok) redirect(`/internal/blog?error=${encodeURIComponent(created.message)}`);
-  redirect(`/internal/blog/${created.id}`);
+  if (!created.ok) redirect(`/blog?error=${encodeURIComponent(created.message)}`);
+  redirect(`/blog/${created.id}`);
 }
 
 /** Opens a live site post in the editor (reviewers only). */
 export async function editSitePost(slug: unknown) {
   const staff = await requireBlog("reviewer");
-  if (typeof slug !== "string" || !/^[a-z0-9-]{1,120}$/.test(slug)) redirect("/internal/blog?tab=live");
+  if (typeof slug !== "string" || !/^[a-z0-9-]{1,120}$/.test(slug)) redirect("/blog?tab=live");
   const opened = await importSitePost(staff, slug);
-  if (!opened.ok) redirect(`/internal/blog?tab=live&error=${encodeURIComponent(opened.message)}`);
-  redirect(`/internal/blog/${opened.id}`);
+  if (!opened.ok) redirect(`/blog?tab=live&error=${encodeURIComponent(opened.message)}`);
+  redirect(`/blog/${opened.id}`);
 }
 
 export async function saveDraft(id: unknown, fields: unknown, base: unknown): Promise<SaveResult> {

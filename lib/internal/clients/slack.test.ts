@@ -122,7 +122,7 @@ describe("client work in Slack", () => {
       week: "2026-11-16",
       lines,
       names: { "priya@studio1hq.com": "Priya" },
-      workspaceUrl: "https://s/internal/clients/bright-data?week=2026-11-16",
+      workspaceUrl: "https://s/clients/bright-data?week=2026-11-16",
     });
     expect(message.text).toBe(
       ":spiral_calendar_pad: Bright Data, week of 16–22 Nov: 1 done · 0 in progress · 0 up next · 1 blocked or waiting",

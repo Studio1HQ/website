@@ -113,7 +113,7 @@ export default async function ClientsPage({
     if (changes.archived ?? showArchived) query.set("archived", "1");
     const pickedView = changes.view ?? (view === "board" ? view : undefined);
     if (pickedView) query.set("view", pickedView);
-    return `/internal/clients${query.size ? `?${query}` : ""}`;
+    return `/clients${query.size ? `?${query}` : ""}`;
   };
 
   const denied =

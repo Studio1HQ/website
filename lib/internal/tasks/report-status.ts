@@ -42,11 +42,11 @@ export function reportsSince(joinedOn: string | null | undefined) {
 
 /** The owner's form for a period. */
 export function writeHref(period: ReportPeriod, start: string) {
-  return `/internal/tasks/reports/write?period=${period}&start=${start}`;
+  return `/tasks/reports/write?period=${period}&start=${start}`;
 }
 
 export function reportHref(id: string) {
-  return `/internal/tasks/reports/${id}`;
+  return `/tasks/reports/${id}`;
 }
 
 export const PERIODS: readonly ReportPeriod[] = ["week", "month"];

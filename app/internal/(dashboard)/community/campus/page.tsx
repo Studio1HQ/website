@@ -77,7 +77,7 @@ export default async function CampusPage({
               owner: staff.email,
               kind: kind === "all" ? "college" : kind,
             }}
-            goTo="/internal/community/campus/"
+            goTo="/community/campus/"
             trigger={
               <button type="button" className={buttonClass("accent")}>
                 <Plus size={14} /> New partner
@@ -146,7 +146,7 @@ export default async function CampusPage({
     };
     for (const [key, value] of Object.entries(merged))
       if (value && value !== "all") next.set(key, value);
-    return `/internal/community/campus${next.size ? `?${next}` : ""}`;
+    return `/community/campus${next.size ? `?${next}` : ""}`;
   };
 
   return (
@@ -173,7 +173,7 @@ export default async function CampusPage({
       />
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <SearchBox
-          action="/internal/community/campus"
+          action="/community/campus"
           value={query}
           placeholder="Search names, cities, tags"
           keep={{ kind: kind === "all" ? undefined : kind, stage }}
@@ -230,7 +230,7 @@ export default async function CampusPage({
                 <tr key={partner.id} className={rowClass}>
                   <td className="max-w-[20rem]">
                     <RowLink
-                      href={`/internal/community/campus/${partner.id}`}
+                      href={`/community/campus/${partner.id}`}
                       sub={[
                         labelOf(PARTNER_KINDS, partner.kind),
                         parent,

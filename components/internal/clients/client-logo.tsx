@@ -3,7 +3,7 @@
 import { SiteLogo } from "@/components/internal/site-logo";
 
 /**
- * A client's logo (its website's icon, from /internal/clients/<slug>/logo),
+ * A client's logo (its website's icon, from /clients/<slug>/logo),
  * or the first letter of its name when there's no website or no icon.
  */
 export function ClientLogo({
@@ -21,7 +21,7 @@ export function ClientLogo({
 }) {
   return (
     <SiteLogo
-      path={`/internal/clients/${encodeURIComponent(slug)}/logo`}
+      path={`/clients/${encodeURIComponent(slug)}/logo`}
       name={name}
       website={website}
       size={size}

@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { baseUrl } from "@/lib/site";
+import { dashboardUrl } from "@/lib/internal/host";
 import { requireClients } from "@/lib/internal/session";
 import { cleanWeek, isUuid } from "@/lib/internal/clients/clean";
 import {
@@ -156,7 +156,7 @@ export async function postClientWeek(
         covered.length > 1
           ? Object.fromEntries(covered.map((item) => [item.id, item.name]))
           : undefined,
-      workspaceUrl: `${baseUrl}${clientPath(client.slug)}?week=${monday}`,
+      workspaceUrl: `${dashboardUrl}${clientPath(client.slug)}?week=${monday}`,
     }),
   );
   return sent

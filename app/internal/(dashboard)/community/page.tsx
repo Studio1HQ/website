@@ -187,7 +187,7 @@ export default async function CommunityOverview({
     if (sponsorFollowUpDue(sponsor, today)) {
       attention.push({
         key: `s${sponsor.id}`,
-        href: `/internal/community/sponsors/${sponsor.id}`,
+        href: `/community/sponsors/${sponsor.id}`,
         title: `Follow up with ${sponsor.name}`,
         detail: sponsor.next_step || "Sponsor",
         day: sponsor.follow_up_on,
@@ -198,7 +198,7 @@ export default async function CommunityOverview({
     if (partnerFollowUpDue(partner, today)) {
       attention.push({
         key: `p${partner.id}`,
-        href: `/internal/community/campus/${partner.id}`,
+        href: `/community/campus/${partner.id}`,
         title: `Follow up with ${partner.name}`,
         detail: partner.next_step || "Campus partner",
         day: partner.follow_up_on,
@@ -213,7 +213,7 @@ export default async function CommunityOverview({
     ) {
       attention.push({
         key: `e${event.id}`,
-        href: `/internal/community/events/${event.id}`,
+        href: `/community/events/${event.id}`,
         title: `${event.name} isn't confirmed yet`,
         detail: `Starts ${relativeDay(event.starts_on, today).toLowerCase()}`,
         day: event.starts_on,
@@ -224,7 +224,7 @@ export default async function CommunityOverview({
     if (phaseOf(event, today) === "past" && event.status !== "done") {
       attention.push({
         key: `d${event.id}`,
-        href: `/internal/community/events/${event.id}`,
+        href: `/community/events/${event.id}`,
         title: `Close out ${event.name}`,
         detail: "Mark it done and record who came",
         day: event.ends_on ?? event.starts_on,
@@ -239,7 +239,7 @@ export default async function CommunityOverview({
     ) {
       attention.push({
         key: `x${expense.id}`,
-        href: "/internal/community/budget",
+        href: "/community/budget",
         title: `Pay ${expense.vendor || expense.description}`,
         detail: formatTotals({ [expense.currency]: expense.amount ?? 0 }),
         day: expense.due_on,
@@ -260,7 +260,7 @@ export default async function CommunityOverview({
     ) {
       attention.push({
         key: `c${deal.id}`,
-        href: `/internal/community/sponsors/${deal.sponsor_id}`,
+        href: `/community/sponsors/${deal.sponsor_id}`,
         title: `Chase payment from ${sponsorNames.get(deal.sponsor_id) ?? "a sponsor"}`,
         detail:
           deal.amount !== null
@@ -296,12 +296,12 @@ export default async function CommunityOverview({
   }) => {
     if (item.sponsor_id)
       return {
-        href: `/internal/community/sponsors/${item.sponsor_id}`,
+        href: `/community/sponsors/${item.sponsor_id}`,
         name: sponsorNames.get(item.sponsor_id),
       };
     if (item.partner_id) {
       return {
-        href: `/internal/community/campus/${item.partner_id}`,
+        href: `/community/campus/${item.partner_id}`,
         name: (partners.ok ? partners.rows : []).find(
           (partner) => partner.id === item.partner_id,
         )?.name,
@@ -309,7 +309,7 @@ export default async function CommunityOverview({
     }
     if (item.event_id)
       return {
-        href: `/internal/community/events/${item.event_id}`,
+        href: `/community/events/${item.event_id}`,
         name: events.rows.find((event) => event.id === item.event_id)?.name,
       };
     return null;
@@ -338,7 +338,7 @@ export default async function CommunityOverview({
           label="Coming up"
           value={nextMonth.length}
           note={`in the next 30 days · ${upcoming.length} planned`}
-          href="/internal/community/events"
+          href="/community/events"
         />
         <Stat
           label="People reached"
@@ -348,14 +348,14 @@ export default async function CommunityOverview({
               ? `${people.returning.toLocaleString("en-IN")} signed up more than once · ${attendedThisYear.toLocaleString("en-IN")} attended in ${year}`
               : "Guest lists and sign-ups"
           }
-          href="/internal/community/analytics"
+          href="/community/analytics"
         />
         {money ? (
           <Stat
             label={`Sponsorship ${year}`}
             value={formatTotals(sumMoney(thisYearDeals))}
             note={`${formatTotals(sumMoney(thisYearDeals.filter((deal) => deal.status === "paid")))} received`}
-            href="/internal/community/budget"
+            href="/community/budget"
           />
         ) : null}
         <Stat
@@ -363,7 +363,7 @@ export default async function CommunityOverview({
           value={openTasks.length}
           note={lateTasks.length ? `${lateTasks.length} late` : "None late"}
           accent={lateTasks.length > 0}
-          href="/internal/community/tasks"
+          href="/community/tasks"
         />
       </div>
 
@@ -373,7 +373,7 @@ export default async function CommunityOverview({
             <CardTitle
               action={
                 <Link
-                  href="/internal/community/events"
+                  href="/community/events"
                   className="inline-flex items-center gap-1 text-[12.5px] text-[var(--i-muted)] hover:text-[var(--i-ink)]"
                 >
                   All events <ArrowRight size={12} />
@@ -413,7 +413,7 @@ export default async function CommunityOverview({
                         )}
                       </span>
                       <Link
-                        href={`/internal/community/events/${event.id}`}
+                        href={`/community/events/${event.id}`}
                         className="group min-w-0 flex-1"
                       >
                         <span className="block truncate text-[13.5px] font-medium group-hover:text-[var(--i-accent-text)]">
@@ -476,7 +476,7 @@ export default async function CommunityOverview({
                   <>
                     Add the next meetup or hackathon on{" "}
                     <Link
-                      href="/internal/community/events"
+                      href="/community/events"
                       className="underline underline-offset-2"
                     >
                       Events

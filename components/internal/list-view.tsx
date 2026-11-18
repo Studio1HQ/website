@@ -524,7 +524,7 @@ export function ListView({
   const exportHref = (ids?: string[]) => {
     const params = filterParams(filters, { page: false });
     for (const id of ids ?? []) params.append("ids", id);
-    return withQuery(`/internal/export/${section.key}`, params);
+    return withQuery(`/export/${section.key}`, params);
   };
 
   const start = (filters.page - 1) * PAGE_SIZE;
