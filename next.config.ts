@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 import nextMDX from "@next/mdx";
 import createNextIntlPlugin from "next-intl/plugin";
 import { AI_AGENT_HEADER_PATTERN } from "./lib/ai-agents";
+import { IMAGE_FALLBACKS } from "./lib/image-paths";
 
 const withMDX = nextMDX();
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
@@ -84,14 +85,10 @@ const nextConfig: NextConfig = {
         // build in public/brand, refreshed with scripts/sync-brand.mjs.
         { source: "/brand", destination: "/brand/index.html" },
       ],
-      fallback: [
-        // A size scripts/image-variants.mjs didn't make (the image is
-        // narrower, or `next dev` never ran it): the original file.
-        {
-          source: "/_img/:width(\\d+)/:file(.+)\\.webp",
-          destination: "/:file",
-        },
-      ],
+      // A size scripts/image-variants.mjs didn't make (the image is
+      // narrower, or `next dev` never ran it): the original file. Only image
+      // files and blog covers, never a page (lib/image-paths.ts).
+      fallback: IMAGE_FALLBACKS,
     };
   },
   async headers() {
