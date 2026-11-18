@@ -45,6 +45,9 @@ export type Act = {
 
 const CHIP = "bg-[#f4efe7] ring-1 ring-inset ring-[#141414]/[0.08]";
 
+/** Studies whose card leads with the client's words even though it has a result. */
+const QUOTE_FIRST: ReadonlySet<string> = new Set(["jozu", "copilotkit"]);
+
 const EASE = [0.16, 1, 0.3, 1] as const;
 
 /** One client's chapter: the problem in a line, the work, the result. */
@@ -58,6 +61,9 @@ function Chapter({
   flip: boolean;
 }) {
   const reduceMotion = useReducedMotion();
+  const metric =
+    QUOTE_FIRST.has(study.slug) && study.quote ? null : study.metric;
+  const orange = metric !== null;
   return (
     <motion.article
       data-chapter={number - 1}
@@ -76,7 +82,12 @@ function Chapter({
         )}
       >
         {/* The story */}
-        <div className={cn("flex min-w-0 flex-col p-5 md:p-8", flip && "md:order-2")}>
+        <div
+          className={cn(
+            "flex min-w-0 flex-col p-5 md:p-8",
+            flip && "md:order-2",
+          )}
+        >
           <div className="flex items-center gap-3">
             {study.logo ? (
               <span className="relative size-11 shrink-0 overflow-hidden rounded-[6px]">
@@ -136,11 +147,11 @@ function Chapter({
           className={cn(
             "relative isolate flex min-h-[200px] min-w-0 flex-col justify-between overflow-hidden rounded-[6px] p-6",
             flip && "md:order-1",
-            study.metric ? "text-white" : "bg-[#141414] text-white",
+            orange ? "text-white" : "bg-[#141414] text-white",
           )}
-          style={study.metric ? { background: PRINT } : undefined}
+          style={orange ? { background: PRINT } : undefined}
         >
-          {study.metric ? (
+          {orange ? (
             // Ink grain over flat print orange, as on the home page hero
             <span
               aria-hidden
@@ -151,29 +162,29 @@ function Chapter({
           <p
             className={cn(
               "text-[11.5px] font-medium uppercase tracking-[0.14em]",
-              study.metric ? "text-white/75" : "text-[#f97316]",
+              orange ? "text-white/75" : "text-[#f97316]",
             )}
           >
-            {study.metric
+            {metric
               ? "The result"
               : study.quote
                 ? "In their words"
                 : "What changed"}
           </p>
-          {study.metric ? (
+          {metric ? (
             <div>
               <p
                 className={cn(
                   "font-medium leading-[0.92] tracking-[-0.055em]",
-                  /^[0-9~<>]/.test(study.metric.value)
+                  /^[0-9~<>]/.test(metric.value)
                     ? "text-[48px] md:text-[56px]"
                     : "text-[30px] md:text-[34px]",
                 )}
               >
-                {study.metric.value}
+                {metric.value}
               </p>
               <p className="mt-3 max-w-[260px] text-[14px] leading-snug text-white/85">
-                {study.metric.label}
+                {metric.label}
               </p>
             </div>
           ) : study.quote ? (
@@ -235,7 +246,7 @@ function Chapter({
               {study.category}
             </p>
           )}
-          {study.logo && study.metric ? (
+          {study.logo && metric ? (
             <span className="pointer-events-none absolute -bottom-8 -right-8 size-40 rotate-[-12deg] overflow-hidden rounded-[6px]">
               <Image
                 src={study.logo}

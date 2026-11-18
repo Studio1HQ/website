@@ -43,6 +43,7 @@ const FILL: Record<string, string> = {
 /** Each mark's own background colour, and how large it sits in its cell. */
 const TILE: Record<string, { bg: string; scale?: number }> = {
   brightdata: { bg: "#3c7ffc" },
+  copilotkit: { bg: "#fbf9f5" },
   "entelligence-ai": { bg: "#000000" },
   ittybit: { bg: "#170a31" },
   jozu: { bg: "#fbf9f5", scale: 0.62 },
@@ -218,7 +219,9 @@ export function CaseMosaic({
         // otherwise the mosaic overflows and its edge photos fall off-screen.
         className="relative left-1/2 hidden w-[calc(100vw/var(--s1-zoom,1))] -translate-x-1/2 lg:block"
         // Fills the first screen, under the 80px navbar
-        style={{ height: "max(560px, calc(100svh / var(--s1-zoom, 1) - 80px))" }}
+        style={{
+          height: "max(560px, calc(100svh / var(--s1-zoom, 1) - 80px))",
+        }}
       >
         {cells}
         <div className="absolute inset-x-[14%] top-1/2 z-10 -translate-y-1/2">

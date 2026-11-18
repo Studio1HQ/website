@@ -135,7 +135,7 @@ They're proactive, easy to work with, and really understand how to create develo
     ],
   },
   {
-    name: "Nathan Telbert",
+    name: "Nathan Tarbert",
     role: "DevRel, CopilotKit",
     avatar: NathanImg.src,
     content: `Working with Studio1 has been an excellent experience for us. The team delivered high-quality blogs focused on exciting projects that perfectly matched our content needs.

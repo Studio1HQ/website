@@ -37,6 +37,8 @@ export function CaseHero({
   logo?: StaticImageData;
 }) {
   const quote = study.quotes[0];
+  // Without results or a quote, the headline takes the empty top-right slot.
+  const hasSide = study.metrics.length > 0 || Boolean(quote);
   const outcomes = study.outcomes.slice(0, 3);
   const marks = PLATFORMS.filter(([test]) =>
     outcomes.some((outcome) => test.test(outcome)),
@@ -57,7 +59,7 @@ export function CaseHero({
       {/* The headline */}
       <Rise
         index={1}
-        className={`relative flex flex-col p-6 md:p-8 xl:col-span-5 ${GLASS}`}
+        className={`relative flex flex-col p-6 md:p-8 ${hasSide ? "xl:col-span-5" : "xl:col-span-8"} ${GLASS}`}
       >
         {study.category ? (
           <p
@@ -88,42 +90,44 @@ export function CaseHero({
       </Rise>
 
       {/* The results, or the client's words */}
-      <Rise index={2} className="xl:col-span-3">
-        {study.metrics.length ? (
-          <ResultsPanel
-            client={study.client}
-            metrics={study.metrics}
-            logo={logo}
-          />
-        ) : quote ? (
-          <figure className="flex h-full flex-col justify-between rounded-[6px] bg-[#f97316] p-6 text-white shadow-[0_22px_44px_-32px_rgba(20,20,20,0.35)]">
-            <blockquote className="line-clamp-6 text-[16px] font-medium leading-[1.5]">
-              &ldquo;{quote.text}&rdquo;
-            </blockquote>
-            <figcaption className="mt-5 flex items-center gap-3">
-              {quote.avatar ? (
-                <span className="relative size-9 shrink-0 overflow-hidden rounded-full ring-2 ring-white/60">
-                  <Image
-                    src={quote.avatar}
-                    alt={quote.author}
-                    fill
-                    sizes="36px"
-                    className="object-cover"
-                  />
-                </span>
-              ) : null}
-              <span className="min-w-0 text-[12.5px] leading-snug">
-                <span className="block font-semibold">{quote.author}</span>
-                {quote.role ? (
-                  <span className="block truncate text-white/80">
-                    {quote.role}
+      {hasSide ? (
+        <Rise index={2} className="xl:col-span-3">
+          {study.metrics.length ? (
+            <ResultsPanel
+              client={study.client}
+              metrics={study.metrics}
+              logo={logo}
+            />
+          ) : quote ? (
+            <figure className="flex h-full flex-col justify-between rounded-[6px] bg-[#f97316] p-6 text-white shadow-[0_22px_44px_-32px_rgba(20,20,20,0.35)]">
+              <blockquote className="line-clamp-6 text-[16px] font-medium leading-[1.5]">
+                &ldquo;{quote.text}&rdquo;
+              </blockquote>
+              <figcaption className="mt-5 flex items-center gap-3">
+                {quote.avatar ? (
+                  <span className="relative size-9 shrink-0 overflow-hidden rounded-full ring-2 ring-white/60">
+                    <Image
+                      src={quote.avatar}
+                      alt={quote.author}
+                      fill
+                      sizes="36px"
+                      className="object-cover"
+                    />
                   </span>
                 ) : null}
-              </span>
-            </figcaption>
-          </figure>
-        ) : null}
-      </Rise>
+                <span className="min-w-0 text-[12.5px] leading-snug">
+                  <span className="block font-semibold">{quote.author}</span>
+                  {quote.role ? (
+                    <span className="block truncate text-white/80">
+                      {quote.role}
+                    </span>
+                  ) : null}
+                </span>
+              </figcaption>
+            </figure>
+          ) : null}
+        </Rise>
+      ) : null}
 
       {/* What changed, as rows */}
       {outcomes.length ? (

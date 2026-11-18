@@ -104,6 +104,7 @@ const CASE_STUDY: Record<string, string> = {
   Jozu: "jozu",
   Corsair: "corsair",
   WebCrumbs: "webcrumbs",
+  CopilotKit: "copilotkit",
 };
 
 /** Percentages rounded so the server and browser render the same string. */

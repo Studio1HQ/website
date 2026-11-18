@@ -18,6 +18,8 @@ export type CaseStudyResultData = {
   heroLabel: string;
   proof: string;
   stats?: CaseStudyResultStat[];
+  /** Image for the card's frame, when a page needs other proof than the default. */
+  art?: string;
 };
 
 type CaseStudyResultProps = {

@@ -9,7 +9,9 @@ import { PaperServiceFaq } from "@/components/pages/shared/paper-service-kit";
 import {
   StoryCards,
   StoryLogos,
+  StoryProof,
 } from "@/components/pages/shared/service-story";
+import type { CaseStudyResultData } from "@/components/case-studies/case-study-result";
 import { PAPER_SCOPE } from "@/lib/paper";
 import { breadcrumbJsonLd, pageMetadata, serviceJsonLd } from "@/lib/seo";
 import { DEFAULT_LOCALE } from "@/lib/i18n";
@@ -133,6 +135,68 @@ const aeoWorkflow = [
   },
 ];
 
+/** Checked in ChatGPT (web search on) and Google, 18 November 2026. */
+const aeoCaseStudyProofs: CaseStudyResultData[] = [
+  {
+    company: "Tensorlake",
+    category: "Google AI Overviews",
+    href: "/case-studies/tensorlake",
+    heroValue: "#1",
+    heroLabel: "on Google, and the first source in its AI Overview",
+    proof:
+      'Google\'s AI Overview for "gemini 3 vs gpt 5.2 coding" cites the Tensorlake comparison we wrote in its opening answer. For "toon vs json", it sends readers to Tensorlake\'s guide.',
+    stats: [
+      { value: "AI Overview", label: "first source" },
+      { value: "2", label: "AI Overviews cite Tensorlake" },
+      { value: "#3", label: 'on Google for "toon vs json"' },
+    ],
+    art: "/case-studies/tensorlake/google-aio-gemini-3-vs-gpt-5-2.webp",
+  },
+  {
+    company: "CopilotKit",
+    category: "ChatGPT + AI Overviews",
+    href: "/case-studies/copilotkit",
+    heroValue: "4",
+    heroLabel: "tutorials ranking #1 on Google",
+    proof:
+      'ChatGPT lists our multi-agent telecom support tutorial among its "useful tutorials and resources", and two tutorials are the first source in Google\'s AI Overview.',
+    stats: [
+      { value: "ChatGPT", label: "recommends the tutorial" },
+      { value: "140", label: "visits from AI assistants" },
+    ],
+    art: "/case-studies/copilotkit/chatgpt-telecom-tutorial.webp",
+  },
+  {
+    company: "LiteLLM",
+    category: "Docs Cited by ChatGPT",
+    href: "/case-studies/litellm",
+    heroValue: "Official guide",
+    heroLabel: "ChatGPT links the SDK Quickstart we built",
+    proof:
+      "Asked whether to start with LiteLLM's Python SDK or the Proxy, ChatGPT links the SDK Quickstart from the Learn section Studio1 built.",
+    stats: [
+      { value: "ChatGPT", label: "cites the docs" },
+      { value: "Learn", label: "section Studio1 built" },
+    ],
+    art: "/case-studies/litellm/chatgpt-sdk-quickstart.webp",
+  },
+  {
+    company: "Webcrumbs",
+    category: "AI Assistant Traffic",
+    href: "/case-studies/webcrumbs",
+    heroValue: "750+",
+    heroLabel: "visits from ChatGPT, Perplexity and Claude",
+    proof:
+      "Our v0 comparison on DEV has 74.7K views, 55.6K of them from Google, and AI assistants keep sending readers to it.",
+    stats: [
+      { value: "74.7K", label: "views on DEV" },
+      { value: "55.6K", label: "from Google" },
+    ],
+    // DEV's traffic sources for the post, with chatgpt.com and perplexity.ai
+    art: "https://mintcdn.com/studio1/NFIzOkeC-xlQv6Ju/images/webcrumbs-traffic.png?fit=max&auto=format&n=NFIzOkeC-xlQv6Ju&q=85&s=1d5c1a660ff0cd432809c1c54f62d463",
+  },
+];
+
 export default function Page() {
   const serviceSchema = serviceJsonLd({
     name: "AEO Agency for Developer Tools",
@@ -169,20 +233,32 @@ export default function Page() {
         steps={aeoWorkflow}
         workflow="aeo-content.yml"
       />
+      <StoryProof
+        index={3}
+        title="AI answers that already cite our work"
+        description="What ChatGPT and Google's AI Overviews said when we asked developer questions in November 2026. Answers change between runs, so we check again every month."
+        studies={aeoCaseStudyProofs}
+      />
       <PaperSection tone="paper">
         <Container>
           <PaperServiceFaq
-            index={3}
+            index={4}
             subtitle="Common questions about answer engine optimization for developer tools."
             items={aeoFaqItems}
           />
           <p className="mt-8 text-center text-[15px] text-[var(--p-muted)]">
             Want to try it yourself? Start with our{" "}
-            <Link href="/blog/answer-engine-optimization-guide" className={linkClass}>
+            <Link
+              href="/blog/answer-engine-optimization-guide"
+              className={linkClass}
+            >
               AEO guide
             </Link>{" "}
             and{" "}
-            <Link href="/blog/generative-engine-optimization-guide" className={linkClass}>
+            <Link
+              href="/blog/generative-engine-optimization-guide"
+              className={linkClass}
+            >
               GEO guide
             </Link>
             , then read{" "}
@@ -204,7 +280,7 @@ export default function Page() {
         </Container>
       </PaperSection>
       <PaperCta
-        index={4}
+        index={5}
         title="Get Your Tool Into AI Answers"
         description="Answer-ready content, docs, and llms.txt for developer tools, plus checks on whether you show up."
       />
