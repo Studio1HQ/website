@@ -149,7 +149,7 @@ export function HackathonCardLink({ card }: { card: HackathonCard }) {
       className={cn("group flex h-full flex-col p-2", CELL)}
     >
       <div className="overflow-hidden rounded-[3px]">
-        <div className="transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03] motion-reduce:transform-none">
+        <div className="transition-transform duration-700 ease-out-quint group-hover:scale-[1.03] motion-reduce:transform-none">
           <HackathonCover
             slug={card.slug}
             name={card.name}

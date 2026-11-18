@@ -57,8 +57,19 @@ const config: Config = {
         "s1-display": ["48px", { lineHeight: "1.1", letterSpacing: "-0.04em" }],
         "s1-hero": ["64px", { lineHeight: "1.05", letterSpacing: "-0.04em" }],
       },
+      // Named, never ease-[…] / duration-[…]: tailwindcss-animate also has
+      // duration-* and ease-* utilities, so an arbitrary value matches both,
+      // Tailwind warns "ambiguous" and writes no CSS for it at all.
       transitionTimingFunction: {
         s1: "cubic-bezier(0.16, 1, 0.3, 1)",
+        "out-quint": "cubic-bezier(0.22, 1, 0.36, 1)",
+        "in-out-cubic": "cubic-bezier(0.65, 0, 0.35, 1)",
+        drawer: "cubic-bezier(0.32, 0.72, 0, 1)",
+      },
+      transitionDuration: {
+        220: "220ms",
+        420: "420ms",
+        1100: "1100ms",
       },
       boxShadow: {
         "s1-raised": "0 2px 8px rgba(0, 0, 0, 0.04)",

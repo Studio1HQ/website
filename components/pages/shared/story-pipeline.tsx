@@ -281,7 +281,7 @@ function Connector({ filled, flowing }: { filled: boolean; flowing: boolean }) {
   return (
     <span className="relative mx-1.5 h-[2px] w-7 shrink-0 self-center overflow-hidden rounded-full bg-[#141414]/[0.12]">
       <span
-        className="absolute inset-0 origin-left transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        className="absolute inset-0 origin-left transition-transform duration-500 ease-s1"
         style={{
           background: PRINT,
           transform: `scaleX(${filled ? 1 : 0})`,

@@ -70,7 +70,7 @@ export function ServiceOfferCards({
                     {/* Hover: a soft orange wash rises from the bottom edge */}
                     <span
                       aria-hidden
-                      className="pointer-events-none absolute inset-0 -z-[5] translate-y-8 opacity-0 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-0 group-hover:opacity-100 motion-reduce:translate-y-0"
+                      className="pointer-events-none absolute inset-0 -z-[5] translate-y-8 opacity-0 transition-[opacity,transform] duration-700 ease-out-quint group-hover:translate-y-0 group-hover:opacity-100 motion-reduce:translate-y-0"
                       style={{
                         background:
                           "radial-gradient(120% 60% at 50% 115%, rgba(249,115,22,0.16) 0%, rgba(249,115,22,0) 70%)",

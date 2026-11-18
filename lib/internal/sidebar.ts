@@ -14,8 +14,8 @@ export function isSidebarCollapsed(value: string | undefined) {
  * Pair it with a transition-[…] class naming what moves.
  */
 export const SIDEBAR_EASE =
-  "duration-[220ms] ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none";
+  "duration-220 ease-drawer motion-reduce:transition-none";
 
 /** Text that fades out as the desktop sidebar folds. */
 export const SIDEBAR_FADE =
-  "transition-opacity duration-[220ms] ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none md:group-data-[collapsed=true]/sidebar:opacity-0";
+  "transition-opacity duration-220 ease-drawer motion-reduce:transition-none md:group-data-[collapsed=true]/sidebar:opacity-0";

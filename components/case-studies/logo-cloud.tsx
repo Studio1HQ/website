@@ -170,7 +170,7 @@ export function LogoCloud({ logos }: { logos: CloudLogo[] }) {
               <Link
                 href={`/case-studies/${item.slug}`}
                 aria-label={`${item.client} case study`}
-                className="relative block aspect-square overflow-hidden rounded-full bg-white shadow-[inset_0_0_0_1px_rgba(20,20,20,0.05)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-[1.05]"
+                className="relative block aspect-square overflow-hidden rounded-full bg-white shadow-[inset_0_0_0_1px_rgba(20,20,20,0.05)] transition-transform duration-500 ease-s1 hover:scale-[1.05]"
                 style={inset ? { background: inset.bg } : undefined}
               >
                 <Image
