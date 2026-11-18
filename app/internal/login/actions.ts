@@ -1,6 +1,6 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
 import {
@@ -12,7 +12,15 @@ import {
 import { accessFor, isInvited, membersWith, requestAccess, touchMember } from "@/lib/internal/members";
 import { notify } from "@/lib/internal/notifications/data";
 import { OWNERS, isOwner, isStaffEmail } from "@/lib/internal/roles";
-import { SIGN_IN_CODE_LIMIT, strictlyWithinLimit } from "@/lib/rate-limit";
+import {
+  SIGN_IN_CODE_ALL_NETWORKS,
+  SIGN_IN_CODE_LIMIT,
+  SIGN_IN_NETWORK_REQUESTS,
+  SIGN_IN_NETWORK_TRIES,
+  clientIp,
+  strictlyWithinLimit,
+  type Limit,
+} from "@/lib/rate-limit";
 import { addToTeam, teamAccessFor } from "@/lib/internal/team/people";
 import { loginCookieOptions, sessionCookieOptions } from "@/lib/internal/session";
 import {
@@ -38,6 +46,25 @@ export type CheckCodeState = { status: "idle" } | { status: "error"; message: st
 
 const NOT_ALLOWED = `Use your @${STAFF_DOMAIN} address. Writers from outside Studio1 need an invite from an admin first.`;
 
+const TOO_MANY = "Too many sign-in tries from this network. Wait an hour and try again.";
+const UNAVAILABLE = "Sign-in is unavailable right now. Try again in a minute.";
+
+/** The caller's IP address, or null without the header (local dev). */
+async function callerIp() {
+  return clientIp(new Request("http://internal", { headers: await headers() }));
+}
+
+/**
+ * The limit for the caller's network, so one script can't send code emails
+ * to made-up addresses or burn through an address's tries. Without an IP
+ * header (local dev) there's nothing to count.
+ */
+async function networkProblem(kind: string, limit: Limit, ip: string | null) {
+  if (!ip) return null;
+  const allowed = await strictlyWithinLimit(kind, ip, limit);
+  return allowed === "limited" ? TOO_MANY : allowed === "unavailable" ? UNAVAILABLE : null;
+}
+
 /** Staff, or an outside writer an admin invited; anyone else gets null. */
 async function allowedEmail(input: unknown) {
   const address = emailAddress(input);
@@ -62,6 +89,8 @@ export async function requestSignInCode(
   if (!emailAddress(formData.get("email"))) {
     return { status: "error", message: "Enter a valid email address." };
   }
+  const blocked = await networkProblem("sign-in-request-ip", SIGN_IN_NETWORK_REQUESTS, await callerIp());
+  if (blocked) return { status: "error", message: blocked };
   const email = await allowedEmail(formData.get("email"));
   if (!email) return { status: "error", message: NOT_ALLOWED };
 
@@ -124,16 +153,27 @@ export async function checkSignInCode(
     return { status: "error", message: "Enter the code from the email." };
   }
 
-  // Every try counts against the address, so a script can't guess its way
-  // in: Supabase's own limit is per IP, and every check comes from our server.
-  const allowed = await strictlyWithinLimit("sign-in-code", pending, SIGN_IN_CODE_LIMIT);
-  if (allowed === "limited") {
+  // The network first, so one script can't work through address after
+  // address.
+  const ip = await callerIp();
+  const blocked = await networkProblem("sign-in-code-ip", SIGN_IN_NETWORK_TRIES, ip);
+  if (blocked) return { status: "error", message: blocked };
+
+  // Then the address, so a script can't guess its way in (Supabase's own
+  // limit is per IP, and every check comes from our server): ten tries an
+  // hour from this network, and forty from every network together. A
+  // network over its ten stops here, before it counts toward the forty, so
+  // one network can't lock the person out for everyone else.
+  const fromHere = await strictlyWithinLimit("sign-in-code", `${pending}|${ip ?? "no-ip"}`, SIGN_IN_CODE_LIMIT);
+  const everywhere =
+    fromHere === "allowed" ? await strictlyWithinLimit("sign-in-code-all", pending, SIGN_IN_CODE_ALL_NETWORKS) : fromHere;
+  if (everywhere === "limited") {
     return {
       status: "error",
       message: "Too many tries for this address. Wait an hour, then ask for a new code.",
     };
   }
-  if (allowed === "unavailable") {
+  if (everywhere === "unavailable") {
     return { status: "error", message: "Sign-in is unavailable right now. Try again in a minute." };
   }
 
@@ -190,7 +230,7 @@ export async function checkSignInCode(
           kind: "access",
           title: "Someone is asking for dashboard access",
           body: email,
-          href: "/internal/people",
+          href: "/people",
         });
       });
     }

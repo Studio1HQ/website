@@ -67,6 +67,8 @@ export function EngagementDialog({
   owners = [],
   names = {},
   me = "",
+  types = ENGAGEMENT_TYPES,
+  money = false,
   trigger,
 }: {
   /** The engagement to edit; leave out to add one. */
@@ -80,6 +82,10 @@ export function EngagementDialog({
   names?: Readonly<Record<string, string>>;
   /** The viewer's email: a new engagement's owner unless changed. */
   me?: string;
+  /** Built-in types and the team's own (engagementTypes()). */
+  types?: readonly { value: EngagementType; label: string }[];
+  /** The viewer is a founder: the contract link is theirs alone to see and set. */
+  money?: boolean;
   trigger: ReactNode;
 }) {
   const router = useRouter();
@@ -104,9 +110,12 @@ export function EngagementDialog({
   const submit = (event: FormEvent) => {
     event.preventDefault();
     setError(null);
+    // Without the contract field, its value never goes: a save here can't blank it.
+    const { contract_url, ...rest } = values;
     startSaving(async () => {
       const result = await saveEngagement(engagement?.id ?? null, {
-        ...values,
+        ...rest,
+        ...(money ? { contract_url } : {}),
         ...(engagement ? {} : { client_id: clientId }),
       });
       if (!result.ok) {
@@ -158,13 +167,13 @@ export function EngagementDialog({
         id="engagement-type"
         label="Type"
         required
-        help="Sets the monthly scope a new month starts with."
+        help="Sets the monthly scope a new month starts with. Make your own under Templates."
       >
         <Select
           id="engagement-type"
           value={values.type}
           onChange={(next) => set("type", next)}
-          options={ENGAGEMENT_TYPES}
+          options={types}
         />
       </FormField>
       <FormField id="engagement-status" label="Status">
@@ -220,9 +229,11 @@ export function EngagementDialog({
       >
         {text("client_tracker_url", "https://", true)}
       </FormField>
-      <FormField id="engagement-contract_url" label="Contract">
-        {text("contract_url", "https://", true)}
-      </FormField>
+      {money ? (
+        <FormField id="engagement-contract_url" label="Contract">
+          {text("contract_url", "https://", true)}
+        </FormField>
+      ) : null}
       <FormField id="engagement-notes" label="Notes" wide>
         <textarea
           id="engagement-notes"

@@ -10,7 +10,7 @@ tldrBullets:
   - "Schema and llms.txt won't get you picked. Ahrefs found no citation lift from adding schema, and FAQ rich results left Google in May 2026."
   - "Measure with Search Console's generative AI report and Bing's AI Performance report, then track clicks. Pages cited in AI Overviews earn more clicks than pages that aren't."
 date: 2026-11-12
-updatedDate: 2026-11-17
+updatedDate: 2026-11-18
 draft: false
 authors:
   - "Arindam Majumder"
@@ -111,10 +111,21 @@ Here is what that looks like in practice. Studio1 helped Tensorlake publish an e
 
 The article wasn't written for AI Overviews. It answered a new question early, defined both formats plainly, and showed a comparison with real numbers. That is most of AEO.
 
+It wasn't a one-off. On November 18, 2026, we ran 22 developer questions from our clients' categories through ChatGPT, with web search on and memory off, and checked the matching searches on Google. These are three of the citations we found for pages Studio1 wrote:
+
+* **Google AI Overview:** Tensorlake's [Gemini 3 vs GPT-5.2 coding comparison](https://tensorlake.ai/blog/gemini3-vs-gpt5-coding) ranks #1 for "gemini 3 vs gpt 5.2 coding", and the AI Overview cites it for its opening answer. See the [Tensorlake case study](/case-studies/tensorlake).
+* **ChatGPT:** asked how to build a multi-agent telecom support system with LangGraph JS, ChatGPT listed CopilotKit's [telecom support tutorial](https://dev.to/copilotkit/build-a-multi-agent-telecom-support-system-with-copilotkit-langgraph-js-52oc) among its recommended resources. See the [CopilotKit case study](/case-studies/copilotkit).
+* **ChatGPT:** asked whether to start with the LiteLLM SDK or the Proxy, ChatGPT linked the [SDK Quickstart](https://docs.litellm.ai/docs/learn/python_sdk_quickstart) from the docs section we built as the official guide. See the [LiteLLM case study](/case-studies/litellm).
+
+![Google AI Overview for gemini 3 vs gpt 5.2 coding, citing Tensorlake for its opening answer and showing Tensorlake's coding comparison as the first source](/blog/uploads/answer-engine-optimization-guide/google-ai-overview-gemini-3-vs-gpt-5-2.webp "The AI Overview for \"gemini 3 vs gpt 5.2 coding\" cites Tensorlake's comparison first (US, November 18, 2026).")
+
+The misses followed a pattern too. Generic how-to questions, such as how to implement RBAC in Supabase, were answered from the platform's own docs, even when a vendor guide ranked on Google's first page. The pages that got cited were comparisons and builds on a specific, named stack.
+
 **Key pointers:**
 
 * Target questions, especially long ones. That's where answer boxes appear most.
 * For each page, list the three follow-up questions a reader would ask next, and answer them on the page.
+* Don't fight the official docs on generic how-to questions. Win the comparisons and the specific builds instead.
 
 ## How to do AEO: a 9-step playbook
 
@@ -276,7 +287,7 @@ For 2027, that points to three priorities. Write answers an agent can act on: cl
 
 Our [AEO work for developer tools](/aeo-agency) follows four steps: list the questions developers ask about the category, make sure engines can reach and read the pages, write the pages engines quote, and check what ChatGPT, Perplexity and Google say every month. Most first fixes are to pages a team already has: a clearer first paragraph, a comparison page, a better quickstart.
 
-The work shows up in the answers. Tensorlake's TOON vs JSON explainer is cited in Google's AI Overview for that query, as shown above. Permit.io's [RBAC in Supabase guide](https://www.permit.io/blog/how-to-implement-rbac-in-supabase), which Studio1 wrote, ranks on Google's first page for its query. We can't promise any engine will quote you. Nobody controls that, and answers change between runs. What we can do is make your pages the easiest ones to quote and show you, every month, whether they are.
+The work shows up in the answers. Tensorlake's TOON vs JSON explainer and its Gemini 3 vs GPT-5.2 comparison are both cited in Google's AI Overviews, as shown above ([case study](/case-studies/tensorlake)). ChatGPT recommends the [CopilotKit](/case-studies/copilotkit) telecom tutorial we wrote and links the [LiteLLM](/case-studies/litellm) SDK Quickstart we built as the official guide. Permit.io's [RBAC in Supabase guide](https://www.permit.io/blog/how-to-implement-rbac-in-supabase), which Studio1 wrote, ranks on Google's first page for its query. We can't promise any engine will quote you. Nobody controls that, and answers change between runs. What we can do is make your pages the easiest ones to quote and show you, every month, whether they are.
 
 ## FAQ
 

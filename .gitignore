@@ -59,3 +59,6 @@ supabase/OPERATIONS.local.md
 
 # Local working notes (e.g. notes/ai-offer-experiment.local.md)
 *.local.md
+
+# Build-time image sizes (scripts/image-variants.mjs)
+/public/_img/

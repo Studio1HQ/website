@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { inScope, type ClientScope } from "@/lib/internal/clients/scope";
-import { requireClients, staffName } from "@/lib/internal/session";
+import { canSeeMoney, requireClients, staffName } from "@/lib/internal/session";
 import {
   cleanBlock,
   cleanClient,
@@ -44,6 +44,7 @@ import {
   getPartner,
   loadCycles,
   loadScopeLines,
+  loadEngagements,
   loadTemplates,
   logStatusEvent,
   resetTemplateRow,
@@ -58,6 +59,8 @@ import {
   MEMBER_FIELDS,
   blockProblem,
   canChangeDeliverable,
+  clashText,
+  editClashes,
   memberMayStartAt,
   isInternal,
   moveProblem,
@@ -74,6 +77,9 @@ import {
   monthLabel,
   shiftMonth,
   templateFor,
+  customTypeKey,
+  engagementTypes,
+  isCustomType,
   todayKey,
   type ActionResult,
   type Deliverable,
@@ -138,7 +144,11 @@ function idOf(value: unknown) {
     : null;
 }
 
-type Viewer = { email: string; clients: ClientsAccess; clientScope: ClientScope };
+type Viewer = {
+  email: string;
+  clients: ClientsAccess;
+  clientScope: ClientScope;
+};
 
 /**
  * Refuses work on a client this person wasn't given (Client team members
@@ -212,7 +222,7 @@ function tellAbout(
       kind: "deliverable",
       title,
       body: found ? `${deliverable.title} · ${found.name}` : deliverable.title,
-      href: found ? `/internal/clients/${found.slug}` : "/internal/tasks",
+      href: found ? `/clients/${found.slug}` : "/tasks",
     });
   });
 }
@@ -285,6 +295,8 @@ export async function saveEngagement(
   const key = id ? idOf(id) : null;
   if (id && !key) return UNKNOWN;
   const input = asInput(values);
+  // The contract is money: only the founders see or set its link.
+  if (!canSeeMoney(staff)) delete input.contract_url;
   const clean = cleanEngagement(input, key ? "update" : "create");
   if (!clean.ok) return clean;
   if (key) {
@@ -434,13 +446,14 @@ export async function saveCycleNotes(
   return { ok: true, message: "Notes saved" };
 }
 
-/** The invoice flag (not sent, sent, paid) and its link. No amounts. */
+/** The invoice flag (not sent, sent, paid) and its link. No amounts. The founders only. */
 export async function setInvoice(
   cycleId: unknown,
   values: unknown,
 ): Promise<ActionResult> {
   const staff = await manager();
-  if (!staff) return DENIED;
+  if (!staff || !canSeeMoney(staff))
+    return { ok: false, message: "Only Arindam or Amitesh can change the invoice." };
   const key = idOf(cycleId);
   if (!key) return UNKNOWN;
   const clean = cleanInvoice(asInput(values));
@@ -503,10 +516,15 @@ export async function removeScopeLine(id: unknown): Promise<ActionResult> {
  * may add one they own or review, and change only dates, links and notes
  * on their own; managers change anything. The status changes through
  * moveDeliverable, the blocked flag through setBlocked/clearBlocked.
+ *
+ * `seen`, when changing one: what the dialog showed for each field it sends
+ * (formValueOf). A field someone else changed since then isn't written over:
+ * the save stops and says so (editClashes).
  */
 export async function saveDeliverable(
   id: unknown,
   values: unknown,
+  seen?: unknown,
 ): Promise<ActionResult> {
   const staff = await requireClients();
   const key = id ? idOf(id) : null;
@@ -599,9 +617,19 @@ export async function saveDeliverable(
       title: String(row.title ?? ""),
     };
     const who = staffName(staff);
-    tellAbout(created, [row.owner as string | null], staff.email, `${who} made you the owner of a deliverable`);
+    tellAbout(
+      created,
+      [row.owner as string | null],
+      staff.email,
+      `${who} made you the owner of a deliverable`,
+    );
     if (row.reviewer && row.reviewer !== row.owner)
-      tellAbout(created, [row.reviewer as string | null], staff.email, `${who} made you the reviewer of a deliverable`);
+      tellAbout(
+        created,
+        [row.reviewer as string | null],
+        staff.email,
+        `${who} made you the reviewer of a deliverable`,
+      );
     refresh();
     return { ...result, message: "Deliverable added" };
   }
@@ -609,6 +637,12 @@ export async function saveDeliverable(
   const found = await changeable(staff, key);
   if (!found.ok) return found.result;
   const { deliverable } = found;
+  const clashes = editClashes(deliverable, asInput(seen), input);
+  if (clashes.length)
+    return {
+      ok: false,
+      message: `Someone else changed ${clashText(clashes)} since you opened this. Close it and open it again to see their change, then make yours.`,
+    };
   const clean = cleanDeliverable(input, "update");
   if (!clean.ok) return clean;
   let patch = clean.row;
@@ -659,12 +693,22 @@ export async function saveDeliverable(
   );
   if (!result.ok) return result;
   if (typeof patch.owner === "string" && patch.owner !== deliverable.owner)
-    tellAbout(deliverable, [patch.owner], staff.email, `${staffName(staff)} made you the owner of a deliverable`);
+    tellAbout(
+      deliverable,
+      [patch.owner],
+      staff.email,
+      `${staffName(staff)} made you the owner of a deliverable`,
+    );
   if (
     typeof patch.reviewer === "string" &&
     patch.reviewer !== deliverable.reviewer
   )
-    tellAbout(deliverable, [patch.reviewer], staff.email, `${staffName(staff)} made you the reviewer of a deliverable`);
+    tellAbout(
+      deliverable,
+      [patch.reviewer],
+      staff.email,
+      `${staffName(staff)} made you the reviewer of a deliverable`,
+    );
   refresh();
   return { ...result, message: "Deliverable saved" };
 }
@@ -826,9 +870,19 @@ export async function moveDeliverable(
     );
   });
   if (move.to === "internal_review")
-    tellAbout(deliverable, [deliverable.reviewer], staff.email, `${by} sent you a deliverable to review`);
+    tellAbout(
+      deliverable,
+      [deliverable.reviewer],
+      staff.email,
+      `${by} sent you a deliverable to review`,
+    );
   if (move.to === "changes_requested")
-    tellAbout(deliverable, [deliverable.owner], staff.email, `${by} asked for changes on your deliverable`);
+    tellAbout(
+      deliverable,
+      [deliverable.owner],
+      staff.email,
+      `${by} asked for changes on your deliverable`,
+    );
   refresh();
   return {
     ok: true,
@@ -947,7 +1001,7 @@ export async function saveTemplate(
 ): Promise<ActionResult> {
   const staff = await manager();
   if (!staff) return DENIED;
-  if (!isOption(ENGAGEMENT_TYPES, type))
+  if (!isOption(ENGAGEMENT_TYPES, type) && !isCustomType(type))
     return { ok: false, message: "Unknown engagement type." };
   const input = asInput(values);
   const lines = cleanTemplateLines(input.lines);
@@ -974,16 +1028,77 @@ export async function saveTemplate(
   };
 }
 
-/** Goes back to the built-in template for a type. */
+/**
+ * Makes a new template (a team-made engagement type) with a name, starting
+ * empty or as a copy of another. values: { name, from? }.
+ */
+export async function createTemplate(values: unknown): Promise<ActionResult> {
+  const staff = await manager();
+  if (!staff) return DENIED;
+  const input = asInput(values);
+  const name =
+    typeof input.name === "string"
+      ? input.name.replace(/\s+/g, " ").trim().slice(0, 60)
+      : "";
+  if (name.length < 2)
+    return { ok: false, message: "Give the template a name." };
+  if (looksLikeSecret(name))
+    return {
+      ok: false,
+      message: "That looks like a password or a key. Pick another name.",
+    };
+  const key = customTypeKey(name);
+  if (!key)
+    return { ok: false, message: "Use letters or numbers in the name." };
+  const saved = await loadTemplates();
+  if (!saved.ok) return { ok: false, message: saved.message };
+  const taken = engagementTypes(saved.rows).some(
+    (type) =>
+      type.value === key || type.label.toLowerCase() === name.toLowerCase(),
+  );
+  if (taken)
+    return { ok: false, message: "A template with that name already exists." };
+  const from = input.from;
+  const start =
+    isOption(ENGAGEMENT_TYPES, from) || isCustomType(from)
+      ? templateFor(from, saved.rows)
+      : { lines: [], rhythm: "" };
+  const result = await saveTemplateRow(
+    { engagement_type: key, name, lines: start.lines, rhythm: start.rhythm },
+    staff.email,
+  );
+  if (!result.ok) return result;
+  refresh();
+  return { ok: true, message: `${name} added. Edit it to set its lines.` };
+}
+
+/**
+ * Goes back to the built-in template for a type. A team-made type is
+ * removed instead, unless an engagement still uses it.
+ */
 export async function resetTemplate(type: unknown): Promise<ActionResult> {
   const staff = await manager();
   if (!staff) return DENIED;
-  if (!isOption(ENGAGEMENT_TYPES, type))
+  const own = isCustomType(type);
+  if (!isOption(ENGAGEMENT_TYPES, type) && !own)
     return { ok: false, message: "Unknown engagement type." };
+  if (own) {
+    const engagements = await loadEngagements();
+    if (!engagements.ok) return { ok: false, message: engagements.message };
+    const using = engagements.rows.filter((row) => row.type === type).length;
+    if (using)
+      return {
+        ok: false,
+        message: `${using === 1 ? "1 engagement uses" : `${using} engagements use`} this template. Change ${using === 1 ? "its" : "their"} type first.`,
+      };
+  }
   const result = await resetTemplateRow(type);
   if (!result.ok) return result;
   refresh();
-  return { ok: true, message: "Back to the built-in template" };
+  return {
+    ok: true,
+    message: own ? "Template removed" : "Back to the built-in template",
+  };
 }
 
 /** Saves a person's capacity row. values: { email, name?, role, weekly_capacity, slack_user_id?, active? }. */

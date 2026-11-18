@@ -7,6 +7,7 @@ import { loadEvents } from "@/lib/internal/community/data";
 import { formatEventDate, todayKey } from "@/lib/internal/community/schema";
 import { SECTIONS } from "@/lib/internal/sections";
 import { requireSection } from "@/lib/internal/session";
+import { baseUrl } from "@/lib/site";
 import { Card, CardTitle, PageHeader, buttonClass } from "@/components/internal/ui";
 
 export const metadata: Metadata = { title: "Add a hackathon" };
@@ -75,7 +76,7 @@ export default async function HackathonSetupPage() {
             <Step n={1} title="Agree the details">
               Name, dates (one day or several), online or in person, team size, prizes, tracks, the sponsors who have
               agreed to be named, and any sponsor tasks or extra questions. Sponsorship amounts and contacts go in{" "}
-              <Link href="/internal/community/sponsors" className="underline underline-offset-2">
+              <Link href="/community/sponsors" className="underline underline-offset-2">
                 Community → Sponsors
               </Link>
               , not in the issue.
@@ -91,7 +92,7 @@ export default async function HackathonSetupPage() {
             </Step>
             <Step n={4} title="Link it in Community">
               Add an event in{" "}
-              <Link href="/internal/community/events" className="underline underline-offset-2">
+              <Link href="/community/events" className="underline underline-offset-2">
                 Community → Events
               </Link>{" "}
               with the type Hackathon, and pick the hackathon under &ldquo;Registrations from the site form&rdquo;. Its
@@ -171,7 +172,7 @@ export default async function HackathonSetupPage() {
                       </p>
                     </div>
                     <a
-                      href={`/hackathons/${hackathon.slug}`}
+                      href={`${baseUrl}/hackathons/${hackathon.slug}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className={buttonClass("ghost", "sm")}
@@ -179,7 +180,7 @@ export default async function HackathonSetupPage() {
                       Page <ArrowSquareOut size={12} aria-hidden />
                     </a>
                     {eventId ? (
-                      <Link href={`/internal/community/events/${eventId}`} className={buttonClass("secondary", "sm")}>
+                      <Link href={`/community/events/${eventId}`} className={buttonClass("secondary", "sm")}>
                         Event page <ArrowRight size={12} aria-hidden />
                       </Link>
                     ) : (

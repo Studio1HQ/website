@@ -15,6 +15,7 @@ import { membersWith } from "@/lib/internal/members";
 import {
   OPEN_STAGES,
   OUTREACH_MIGRATION_HINT,
+  OUTREACH_RESEARCH_HINT,
   type Org,
   type OrgActivity,
   type OrgContact,
@@ -69,10 +70,24 @@ async function selectAll<T>(table: string, params: Record<string, string>, cap =
   return { ok: true, rows, truncated: true };
 }
 
-/* Postgres sends numerics as text; the pages want numbers. */
+/*
+ * Postgres sends numerics as text; the pages want numbers. The research
+ * fields are blank until their migration has run.
+ */
 function toOrg(row: Org): Org {
   const value = row.est_value === null || row.est_value === undefined ? null : Number(row.est_value);
-  return { ...row, est_value: value !== null && Number.isFinite(value) ? value : null, tags: row.tags ?? [] };
+  return {
+    ...row,
+    est_value: value !== null && Number.isFinite(value) ? value : null,
+    tags: row.tags ?? [],
+    priority: row.priority ?? "",
+    about: row.about ?? "",
+    funding: row.funding ?? "",
+    why_fit: row.why_fit ?? "",
+    warm_path: row.warm_path ?? "",
+    signal_url: row.signal_url ?? null,
+    conflict: row.conflict ?? "",
+  };
 }
 
 /* ----------------------------------------------------------------- reads */
@@ -134,9 +149,9 @@ export async function orgsByDomain(domains: readonly string[]): Promise<Map<stri
   return found;
 }
 
-/** People who can own outreach: the admins (the founders included). */
+/** People who can own outreach: whoever has Outreach (the founders included). */
 export async function ownerChoices(): Promise<string[]> {
-  return (await membersWith(["admin"])).sort();
+  return (await membersWith(["outreach_manager"])).sort();
 }
 
 /**
@@ -164,6 +179,8 @@ export const outreachDue = cache(async (email: string): Promise<number> => {
 const GONE: OutreachResult = { ok: false, message: "That isn't there any more. Reload the page." };
 
 function writeError(what: string, message: string): OutreachResult {
+  // A missing column (the tables are there): the research fields' migration hasn't run.
+  if (/PGRST204|42703/.test(message)) return { ok: false, message: OUTREACH_RESEARCH_HINT };
   if (isMissingTable(message)) return { ok: false, message: OUTREACH_MIGRATION_HINT };
   if (message.includes("23505")) {
     return { ok: false, message: "Another organisation already has that website. Open that one instead." };

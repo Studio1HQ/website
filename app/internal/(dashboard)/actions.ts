@@ -54,7 +54,7 @@ export async function changeEntries(
 
 export async function signOut() {
   (await cookies()).set(SESSION_COOKIE, "", sessionCookieOptions(0));
-  redirect("/internal/login?signed-out");
+  redirect("/login?signed-out");
 }
 
 /**

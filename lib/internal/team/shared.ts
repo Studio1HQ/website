@@ -59,7 +59,7 @@ export function displayName(person: { name?: string | null; email: string }) {
 export function photoUrl(person: { email: string; photo_path: string | null } | null | undefined) {
   if (!person?.photo_path) return null;
   const version = person.photo_path.split("/").pop()?.replace(/\.\w+$/, "") ?? "";
-  return `/internal/team-file/photo/${encodeURIComponent(person.email)}?v=${version}`;
+  return `/team-file/photo/${encodeURIComponent(person.email)}?v=${version}`;
 }
 
 /* ------------------------------------------------------------ attendance */
@@ -378,7 +378,7 @@ export type Reimbursement = {
 };
 
 export function receiptUrl(item: Pick<Reimbursement, "id" | "receipt_path">) {
-  return item.receipt_path ? `/internal/team-file/receipt/${item.id}` : null;
+  return item.receipt_path ? `/team-file/receipt/${item.id}` : null;
 }
 
 /* -------------------------------------------------------------- payslips */
@@ -413,7 +413,7 @@ export function payslipNet(slip: Pick<Payslip, "earnings" | "deductions" | "reim
 }
 
 export function payslipPdfUrl(slip: Pick<Payslip, "id">) {
-  return `/internal/money/payroll/${slip.id}/pdf`;
+  return `/money/payroll/${slip.id}/pdf`;
 }
 
 /* -------------------------------------------------------------- payments */
@@ -475,7 +475,7 @@ export function paymentStatusLabel(payment: Pick<Payment, "status" | "direction"
 }
 
 export function invoiceUrl(payment: Pick<Payment, "id" | "invoice_path">) {
-  return payment.invoice_path ? `/internal/team-file/invoice/${payment.id}` : null;
+  return payment.invoice_path ? `/team-file/invoice/${payment.id}` : null;
 }
 
 /* --------------------------------------------------------- email intake */
@@ -518,6 +518,14 @@ export function cleanOwnName(value: unknown): { ok: true; name: string } | { ok:
  */
 export const MAX_UPLOAD_BYTES = 3.5 * 1024 * 1024;
 export const MAX_UPLOAD_LABEL = "3.5 MB";
+
+/**
+ * A PDF receipt can't be shrunk like a photo, so a bigger one skips the
+ * server action and goes from the browser straight to the bucket, which
+ * takes 10 MB (startReceiptUpload in lib/internal/team/files.ts).
+ */
+export const MAX_RECEIPT_PDF_BYTES = 10 * 1024 * 1024;
+export const MAX_RECEIPT_PDF_LABEL = "10 MB";
 
 export type TeamResult = { ok: true; message?: string } | { ok: false; message: string };
 

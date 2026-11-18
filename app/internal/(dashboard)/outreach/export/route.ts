@@ -1,13 +1,20 @@
 import { toCsv } from "@/lib/internal/csv";
 import { todayKey } from "@/lib/internal/community/schema";
 import { loadMainContacts, loadOrgs } from "@/lib/internal/outreach/data";
-import { isAdmin, getStaff } from "@/lib/internal/session";
+import { canSeeOutreach, getStaff } from "@/lib/internal/session";
 
 const COLUMNS = [
   "name",
   "website",
   "kind",
   "stage",
+  "priority",
+  "about",
+  "funding",
+  "why_fit",
+  "warm_path",
+  "signal_url",
+  "conflict",
   "source",
   "owner",
   "next_step",
@@ -22,6 +29,8 @@ const COLUMNS = [
   "contact_name",
   "contact_title",
   "contact_email",
+  "contact_linkedin",
+  "contact_x",
   "do_not_contact",
   "notes",
   "created_at",
@@ -29,12 +38,12 @@ const COLUMNS = [
 
 /**
  * Every organisation as CSV, with its main contact, in the columns the
- * import reads back. Admins only, like the pages; each download is logged.
+ * import reads back. People given Outreach only, like the pages; each download is logged.
  */
 export async function GET() {
   const staff = await getStaff();
   // A file, so no redirect to the sign-in page: just not there.
-  if (!staff || !isAdmin(staff)) return new Response("Not found", { status: 404 });
+  if (!staff || !canSeeOutreach(staff)) return new Response("Not found", { status: 404 });
   const [orgs, contacts] = await Promise.all([loadOrgs(), loadMainContacts()]);
   if (!orgs.ok) return new Response(orgs.message, { status: orgs.missing ? 503 : 502 });
   if (!contacts.ok) return new Response(contacts.message, { status: 502 });
@@ -46,6 +55,8 @@ export async function GET() {
       contact_name: main?.name ?? "",
       contact_title: main?.title ?? "",
       contact_email: main?.email ?? "",
+      contact_linkedin: main?.linkedin ?? "",
+      contact_x: main?.x_handle ?? "",
       do_not_contact: main?.do_not_contact ? "yes" : "",
       created_at: org.created_at.slice(0, 10),
     };

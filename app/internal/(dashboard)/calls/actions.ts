@@ -62,7 +62,7 @@ function tellCall(call: Pick<Call, "host" | "people" | "whole_team">, by: string
   after(async () => {
     const team = call.whole_team ? await listPeople({ activeOnly: true }) : null;
     const everyone = team?.ok ? team.people.map((person) => person.email) : [];
-    await notify(attendees(call, everyone), by, { kind: "call", title, body, href: "/internal/calls" });
+    await notify(attendees(call, everyone), by, { kind: "call", title, body, href: "/calls" });
   });
 }
 
@@ -101,6 +101,34 @@ export async function saveCall(id: string | null, values: unknown): Promise<Call
     const stale = changes.rows.filter((change) => !occursOn(call, change.on_day)).map((change) => change.on_day);
     await dropChanges(id, stale);
   }
+  // People already in it hear only when the schedule or the link changed;
+  // people newly added always do. (A whole-team call tells everyone once.)
+  const name = staffName(staff);
+  const was = new Set(attendees(existing, []));
+  const added = existing.whole_team ? [] : attendees(call, []).filter((email) => !was.has(email));
+  const moved =
+    existing.start_time !== call.start_time ||
+    existing.link !== call.link ||
+    repeatLabel(existing) !== repeatLabel(call) ||
+    existing.starts_on !== call.starts_on;
+  if (moved) {
+    tellCall(
+      { ...call, people: call.people.filter((email) => !added.includes(email)) },
+      staff.email,
+      `${name} changed a call`,
+      `${call.title} · ${repeatLabel(call)}`,
+    );
+  }
+  if (added.length) {
+    after(() =>
+      notify(added, staff.email, {
+        kind: "call",
+        title: `${name} added you to a call`,
+        body: `${call.title} · ${repeatLabel(call)}`,
+        href: "/calls",
+      }),
+    );
+  }
   refresh();
   return { ok: true, message: "Call saved." };
 }
@@ -109,8 +137,11 @@ export async function removeCall(id: string): Promise<CallResult> {
   const staff = await planner();
   if (!staff) return NOT_ALLOWED;
   if (!UUID.test(id)) return GONE;
+  // Read first: once it's gone there's nobody left to tell.
+  const call = await getCall(id);
   const result = await deleteCall(id);
   if (!result.ok) return result;
+  if (call && call !== "error") tellCall(call, staff.email, `${staffName(staff)} removed a call`, call.title);
   refresh();
   return { ok: true, message: "Call deleted." };
 }
@@ -151,6 +182,7 @@ export async function changeOne(
   if (day === onDay && time === call.start_time) {
     const result = await removeChange(id, onDay);
     if (!result.ok) return result;
+    tellCall(call, staff.email, `${staffName(staff)} put a call back`, `${call.title} · ${shortDay(onDay)} at ${clock(call.start_time)}, as usual`);
     refresh();
     return { ok: true, message: "Back to its usual time." };
   }
@@ -181,8 +213,13 @@ export async function restoreOne(id: string, onDay: string): Promise<CallResult>
   const staff = await planner();
   if (!staff) return NOT_ALLOWED;
   if (!UUID.test(id) || !isDay(onDay)) return GONE;
+  const call = await getCall(id);
   const result = await removeChange(id, onDay);
   if (!result.ok) return result;
+  // They were told it was off or moved, so they're told it's back.
+  if (call && call !== "error") {
+    tellCall(call, staff.email, `${staffName(staff)} put a call back`, `${call.title} · ${shortDay(onDay)} at ${clock(call.start_time)}, as usual`);
+  }
   refresh();
   return { ok: true, message: "Back on, as usual." };
 }

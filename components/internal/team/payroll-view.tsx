@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { Fragment, useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as Dialog from "@radix-ui/react-dialog";
@@ -15,9 +15,12 @@ import {
   X,
 } from "@phosphor-icons/react";
 import { decideClaim, emailSlip, saveSlip } from "@/app/internal/(dashboard)/money/payroll/actions";
+import { formatTotals, summarizeClaims } from "@/lib/internal/team/claims-summary";
 import type { PayrollRow } from "@/lib/internal/team/payroll";
 import { LOP_PREFIX, isLopLine, lopAmount, lopLabel } from "@/lib/internal/team/payroll-math";
 import {
+  REIMBURSEMENT_STATUSES,
+  dayLabel,
   daysInMonth,
   displayName,
   formatMoney,
@@ -30,11 +33,13 @@ import {
   sumLines,
   type PayLine,
   type Reimbursement,
+  type ReimbursementStatus,
   type TeamPerson,
 } from "@/lib/internal/team/shared";
 import { cn } from "@/lib/utils";
 import { Select } from "@/components/internal/select";
 import { useToast } from "@/components/internal/toast";
+import { Segmented } from "@/components/internal/team/kit";
 import {
   Avatar,
   Card,
@@ -52,6 +57,7 @@ const TONES = {
   emerald: "bg-emerald-50 text-emerald-800 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-200 dark:ring-emerald-500/25",
   amber: "bg-amber-50 text-amber-800 ring-amber-200 dark:bg-amber-500/10 dark:text-amber-200 dark:ring-amber-500/25",
   sky: "bg-sky-50 text-sky-800 ring-sky-200 dark:bg-sky-500/10 dark:text-sky-200 dark:ring-sky-500/25",
+  rose: "bg-rose-50 text-rose-800 ring-rose-200 dark:bg-rose-500/10 dark:text-rose-200 dark:ring-rose-500/25",
   stone: "bg-[var(--i-sunken)] text-[var(--i-muted)] ring-[var(--i-line)]",
 } as const;
 
@@ -112,7 +118,7 @@ function rowStatus(row: PayrollRow) {
 function pdfHref(row: PayrollRow, month: string) {
   return row.slip
     ? payslipPdfUrl(row.slip)
-    : `/internal/money/payroll/draft/pdf?email=${encodeURIComponent(row.person.email)}&month=${month}`;
+    : `/money/payroll/draft/pdf?email=${encodeURIComponent(row.person.email)}&month=${month}`;
 }
 
 /* ------------------------------------------------------------------ page */
@@ -122,6 +128,7 @@ export function PayrollView({
   current,
   rows,
   waiting,
+  claims,
   people,
   mailer,
 }: {
@@ -129,6 +136,8 @@ export function PayrollView({
   current: string;
   rows: PayrollRow[];
   waiting: Reimbursement[];
+  /** Every claim, whatever its status, for the breakdown. */
+  claims: Reimbursement[];
   people: TeamPerson[];
   mailer: boolean;
 }) {
@@ -178,19 +187,30 @@ export function PayrollView({
     else toast("error", "message" in result ? result.message : "Couldn't send it.");
   };
 
-  const monthLink = (target: string) => `/internal/money/payroll?month=${target}`;
+  const monthLink = (target: string) => `/money/payroll?month=${target}`;
+  // Jump straight to an earlier month: the last two years, plus the one
+  // open now if it's older than that.
+  const monthChoices = Array.from({ length: 24 }, (_, back) => shiftMonth(current, -back));
+  if (!monthChoices.includes(month)) monthChoices.push(month);
 
   return (
     <>
       <PageHeader
         title="Payroll"
-        description="Payslips for everyone on the team list. Check the numbers, then email them all at once. Payslips carry no bank details."
+        description="Payslips for everyone on the team list, for this month or any earlier one. Check the numbers, then email them all at once. Payslips carry no bank details."
         actions={
           <div className="flex items-center gap-1">
             <Link href={monthLink(shiftMonth(month, -1))} aria-label="Previous month" className={buttonClass("secondary", "sm")}>
               <CaretLeft size={13} />
             </Link>
-            <span className="min-w-[8.5rem] text-center text-[13px] font-medium tabular-nums">{monthLabel(month)}</span>
+            <Select
+              value={month}
+              onChange={(next) => router.push(monthLink(next))}
+              aria-label="Payslip month"
+              size="sm"
+              className="w-[10.5rem]"
+              options={monthChoices.map((value) => ({ value, label: monthLabel(value) }))}
+            />
             {month < current ? (
               <Link href={monthLink(shiftMonth(month, 1))} aria-label="Next month" className={buttonClass("secondary", "sm")}>
                 <CaretRight size={13} />
@@ -218,8 +238,9 @@ export function PayrollView({
       {toCheck ? (
         <div className="mb-4">
           <Notice tone="warning">
-            {toCheck} {toCheck === 1 ? "person" : "people"} joined part-way through {monthLabel(month)}. Their payslips
-            aren&apos;t emailed with the rest: open each one, put the pay right for the days worked, and save.
+            {toCheck} {toCheck === 1 ? "payslip needs" : "payslips need"} a look first (someone who joined part-way
+            through {monthLabel(month)}, or has since left). {toCheck === 1 ? "It isn't" : "They aren't"} emailed
+            with the rest: open {toCheck === 1 ? "it" : "each one"}, put the pay right, and save.
           </Notice>
         </div>
       ) : null}
@@ -382,7 +403,7 @@ export function PayrollView({
         )}
       </Card>
 
-      <ClaimsCard month={month} waiting={waiting} rows={rows} people={people} />
+      <ClaimsCard month={month} waiting={waiting} claims={claims} rows={rows} people={people} />
 
       {editing ? (
         <PayslipEditor
@@ -714,13 +735,14 @@ function ClaimRow({
   const [pending, startTransition] = useTransition();
   const [amount, setAmount] = useState(claim.amount === null ? "" : String(claim.amount));
   const [payMonth, setPayMonth] = useState(month);
+  const [note, setNote] = useState("");
   const name = person ? displayName(person) : claim.email;
   const receipt = receiptUrl(claim);
   const months = [shiftMonth(month, -1), month, shiftMonth(month, 1)];
 
   const decide = (decision: "approved" | "rejected") =>
     startTransition(async () => {
-      const result = await decideClaim(claim.id, decision, payMonth, amount).catch(() => ({
+      const result = await decideClaim(claim.id, decision, payMonth, amount, note).catch(() => ({
         ok: false as const,
         message: "The request failed. Try again.",
       }));
@@ -733,73 +755,187 @@ function ClaimRow({
     });
 
   return (
-    <li className="flex flex-wrap items-center gap-x-4 gap-y-2.5 border-b border-[var(--i-line)] px-5 py-3 last:border-b-0">
-      <div className="flex min-w-[14rem] flex-1 items-center gap-3">
-        <Avatar name={name} email={claim.email} size={32} src={photoUrl(person)} />
-        <div className="min-w-0">
-          <p className="truncate text-[13px] font-medium">
-            {name}
-            <span className="font-normal text-[var(--i-muted)]"> · {claim.description || "No description"}</span>
-          </p>
-          <p className="flex flex-wrap items-center gap-x-2 text-[12px] text-[var(--i-muted)]">
-            <span>{claim.spent_on ? `Spent ${claim.spent_on}` : `Added ${relativeDate(claim.created_at)}`}</span>
-            <Pill tone="stone">{claim.source === "email" ? "Email" : "Dashboard"}</Pill>
-            {receipt ? (
-              <a href={receipt} target="_blank" rel="noopener" className="underline underline-offset-2 hover:text-[var(--i-ink)]">
-                Receipt
-              </a>
-            ) : (
-              <span className="text-[var(--i-faint)]">No receipt</span>
-            )}
-            {claim.currency !== "INR" ? <span className="text-amber-700 dark:text-amber-300">{claim.currency}</span> : null}
-          </p>
+    <li className="space-y-2.5 border-b border-[var(--i-line)] px-5 py-3 last:border-b-0">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2.5">
+        <div className="flex min-w-[14rem] flex-1 items-center gap-3">
+          <Avatar name={name} email={claim.email} size={32} src={photoUrl(person)} />
+          <div className="min-w-0">
+            <p className="truncate text-[13px] font-medium">
+              {name}
+              <span className="font-normal text-[var(--i-muted)]"> · {claim.description || "No description"}</span>
+            </p>
+            <p className="flex flex-wrap items-center gap-x-2 text-[12px] text-[var(--i-muted)]">
+              <span>{claim.spent_on ? `Spent ${dayLabel(claim.spent_on)}` : `Added ${relativeDate(claim.created_at)}`}</span>
+              <Pill tone="stone">{claim.source === "email" ? "Email" : "Dashboard"}</Pill>
+              {receipt ? (
+                <a href={receipt} target="_blank" rel="noopener" className="underline underline-offset-2 hover:text-[var(--i-ink)]">
+                  Receipt
+                </a>
+              ) : (
+                <span className="text-[var(--i-faint)]">No receipt</span>
+              )}
+              {claim.currency !== "INR" ? <span className="text-amber-700 dark:text-amber-300">{claim.currency}</span> : null}
+            </p>
+            {claim.note ? <p className="text-[12px] text-[var(--i-muted)]">{claim.note}</p> : null}
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <input
+            value={amount}
+            onChange={(event) => setAmount(event.target.value)}
+            inputMode="decimal"
+            placeholder="Amount"
+            aria-label={`Amount for ${name}'s claim`}
+            className={cn(inputClass("xs"), "w-24 text-right tabular-nums")}
+          />
+          <Select
+            value={payMonth}
+            onChange={setPayMonth}
+            aria-label="Payslip month"
+            size="xs"
+            className="w-auto"
+            options={months.map((value) => ({ value, label: monthLabel(value, true) }))}
+          />
+          <button type="button" onClick={() => decide("approved")} disabled={pending} className={buttonClass("accent", "sm")}>
+            <Check size={13} /> Approve
+          </button>
+          <button type="button" onClick={() => decide("rejected")} disabled={pending} className={buttonClass("ghost", "sm")}>
+            Reject
+          </button>
         </div>
       </div>
-      <div className="flex flex-wrap items-center gap-1.5">
-        <input
-          value={amount}
-          onChange={(event) => setAmount(event.target.value)}
-          inputMode="decimal"
-          placeholder="Amount"
-          aria-label={`Amount for ${name}'s claim`}
-          className={cn(inputClass("xs"), "w-24 text-right tabular-nums")}
-        />
-        <Select
-          value={payMonth}
-          onChange={setPayMonth}
-          aria-label="Payslip month"
-          size="xs"
-          className="w-auto"
-          options={months.map((value) => ({ value, label: monthLabel(value, true) }))}
-        />
-        <button type="button" onClick={() => decide("approved")} disabled={pending} className={buttonClass("accent", "sm")}>
-          <Check size={13} /> Approve
-        </button>
-        <button type="button" onClick={() => decide("rejected")} disabled={pending} className={buttonClass("ghost", "sm")}>
-          Reject
-        </button>
-      </div>
+      <input
+        value={note}
+        onChange={(event) => setNote(event.target.value)}
+        maxLength={300}
+        placeholder={`Note for ${name.split(" ")[0]}: why it's approved or rejected (optional)`}
+        aria-label={`Note on ${name}'s claim`}
+        className={cn(inputClass("xs"), "w-full")}
+      />
     </li>
   );
 }
 
+const CLAIM_PILLS: Record<ReimbursementStatus, keyof typeof TONES> = {
+  submitted: "amber",
+  approved: "sky",
+  rejected: "rose",
+  paid: "emerald",
+};
+
+/** One claim on the breakdown: what, when, how much, where it stands, and the note. */
+function ClaimLine({
+  claim,
+  who,
+  names,
+}: {
+  claim: Reimbursement;
+  /** The claimer's name, on lists that mix people. */
+  who?: string;
+  names: Map<string, TeamPerson>;
+}) {
+  const receipt = receiptUrl(claim);
+  const decider = claim.decided_by ? names.get(claim.decided_by) : undefined;
+  const decided =
+    claim.status !== "submitted" && claim.decided_by
+      ? `${claim.status === "rejected" ? "Rejected" : "Approved"} by ${decider ? displayName(decider) : claim.decided_by}${
+          claim.decided_at ? `, ${formatDate(claim.decided_at)}` : ""
+        }`
+      : null;
+  return (
+    <li className="flex flex-wrap items-start gap-x-3 gap-y-1 py-2 text-[13px]">
+      <div className="min-w-[12rem] flex-1">
+        <p className="break-words">
+          {who ? <span className="font-medium">{who} · </span> : null}
+          {claim.description || "Expense"}
+        </p>
+        <p className="flex flex-wrap items-center gap-x-2 text-[12px] text-[var(--i-muted)]">
+          <span>{claim.spent_on ? dayLabel(claim.spent_on) : `Added ${formatDate(claim.created_at)}`}</span>
+          {receipt ? (
+            <a href={receipt} target="_blank" rel="noopener" className="underline underline-offset-2 hover:text-[var(--i-ink)]">
+              Receipt
+            </a>
+          ) : (
+            <span className="text-[var(--i-faint)]">No receipt</span>
+          )}
+          {claim.month && claim.status !== "rejected" ? <span>{monthLabel(claim.month, true)} payslip</span> : null}
+          {decided ? <span>{decided}</span> : null}
+        </p>
+        {claim.note ? (
+          <p className="mt-0.5 break-words text-[12px] text-[var(--i-ink-2)]">
+            <span className="text-[var(--i-faint)]">Note: </span>
+            {claim.note}
+          </p>
+        ) : null}
+      </div>
+      <span className="tabular-nums">{formatMoney(claim.amount, claim.currency)}</span>
+      <Pill tone={CLAIM_PILLS[claim.status]}>{REIMBURSEMENT_STATUSES[claim.status]}</Pill>
+    </li>
+  );
+}
+
+function ClaimStat({ label, value, sub, wide }: { label: string; value: string; sub: string; wide?: boolean }) {
+  return (
+    <div className={cn("min-w-0 bg-[var(--i-panel)] px-5 py-3", wide && "col-span-2 lg:col-span-1")}>
+      <p className="text-[12px] text-[var(--i-muted)]">{label}</p>
+      <p className="mt-0.5 break-words text-[15px] font-medium tabular-nums">{value}</p>
+      <p className="text-[12px] text-[var(--i-faint)]">{sub}</p>
+    </div>
+  );
+}
+
+type ClaimTab = "waiting" | "people" | "all";
+
 function ClaimsCard({
   month,
   waiting,
+  claims,
   rows,
   people,
 }: {
   month: string;
   waiting: Reimbursement[];
+  claims: Reimbursement[];
   rows: PayrollRow[];
   people: TeamPerson[];
 }) {
   const byEmail = useMemo(() => new Map(people.map((person) => [person.email, person])), [people]);
   const approved = rows.flatMap((row) => row.claims);
+  const [tab, setTab] = useState<ClaimTab>(waiting.length || !claims.length ? "waiting" : "people");
+  const [period, setPeriod] = useState<"month" | "all">("all");
+  const [open, setOpen] = useState<string | null>(null);
+  const summary = useMemo(() => summarizeClaims(claims, period === "month" ? month : null), [claims, period, month]);
+  const { total } = summary;
+  const nameOf = (email: string) => {
+    const person = byEmail.get(email);
+    return person ? displayName(person) : email;
+  };
+  const plural = (count: number) => `${count} claim${count === 1 ? "" : "s"}`;
+  const none = (
+    <p className="px-5 py-4 text-[13px] text-[var(--i-muted)]">
+      {period === "month" ? `No claims for ${monthLabel(month)}.` : "No claims yet. Employees add them on My day."}
+    </p>
+  );
 
   return (
     <Card>
-      <CardTitle>
+      <CardTitle
+        action={
+          claims.length ? (
+            <Select
+              value={period}
+              onChange={(value) => setPeriod(value === "month" ? "month" : "all")}
+              aria-label="Claims from"
+              size="xs"
+              className="w-auto"
+              options={[
+                { value: "all", label: "All time" },
+                { value: "month", label: monthLabel(month) },
+              ]}
+            />
+          ) : null
+        }
+      >
         Expense claims
         {waiting.length ? (
           <span className="ml-2 rounded-full bg-[var(--i-accent-soft)] px-1.5 text-[11px] font-medium leading-[18px] tabular-nums text-[var(--i-accent-text)]">
@@ -807,38 +943,161 @@ function ClaimsCard({
           </span>
         ) : null}
       </CardTitle>
-      {waiting.length ? (
-        <ul>
-          {waiting.map((claim) => (
-            <ClaimRow key={claim.id} claim={claim} person={byEmail.get(claim.email)} month={month} />
-          ))}
-        </ul>
-      ) : (
-        <p className="px-5 py-4 text-[13px] text-[var(--i-muted)]">
-          No claims waiting. Employees add them on My day.
-        </p>
-      )}
-      {approved.length ? (
-        <div className="border-t border-[var(--i-line)] px-5 py-3">
-          <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--i-faint)]">
-            On the {monthLabel(month)} payslips
-          </p>
-          <ul className="space-y-1.5">
-            {approved.map((claim) => {
-              const person = byEmail.get(claim.email);
-              return (
-                <li key={claim.id} className="flex items-center gap-3 text-[13px]">
-                  <span className="min-w-0 flex-1 truncate">
-                    <span className="font-medium">{person ? displayName(person) : claim.email}</span>
-                    <span className="text-[var(--i-muted)]"> · {claim.description || "Expense"}</span>
-                  </span>
-                  <span className="tabular-nums">{formatMoney(claim.amount, claim.currency)}</span>
-                  <Pill tone={claim.status === "paid" ? "emerald" : "amber"}>{claim.status === "paid" ? "Paid" : "Approved"}</Pill>
-                </li>
-              );
-            })}
+
+      {claims.length ? (
+        <>
+          <div className="grid grid-cols-2 gap-px border-b border-[var(--i-line)] bg-[var(--i-line)] lg:grid-cols-5">
+            <ClaimStat
+              wide
+              label="Claimed"
+              value={formatTotals(total.claimed)}
+              sub={`${plural(total.count)} · ${summary.people.length} ${summary.people.length === 1 ? "person" : "people"}`}
+            />
+            <ClaimStat label="Waiting" value={formatTotals(total.submitted)} sub={plural(total.counts.submitted)} />
+            <ClaimStat label="Approved, to pay" value={formatTotals(total.approved)} sub={plural(total.counts.approved)} />
+            <ClaimStat label="Paid" value={formatTotals(total.paid)} sub={plural(total.counts.paid)} />
+            <ClaimStat label="Rejected" value={formatTotals(total.rejected)} sub={plural(total.counts.rejected)} />
+          </div>
+          <div className="border-b border-[var(--i-line)] px-5 py-3">
+            <Segmented<ClaimTab>
+              label="Claims view"
+              value={tab}
+              onChange={setTab}
+              options={[
+                { value: "waiting", label: waiting.length ? `To decide (${waiting.length})` : "To decide" },
+                { value: "people", label: "By person" },
+                { value: "all", label: "All claims" },
+              ]}
+            />
+          </div>
+        </>
+      ) : null}
+
+      {tab === "waiting" ? (
+        <>
+          {waiting.length ? (
+            <ul>
+              {waiting.map((claim) => (
+                <ClaimRow key={claim.id} claim={claim} person={byEmail.get(claim.email)} month={month} />
+              ))}
+            </ul>
+          ) : (
+            <p className="px-5 py-4 text-[13px] text-[var(--i-muted)]">
+              No claims waiting. Employees add them on My day.
+            </p>
+          )}
+          {approved.length ? (
+            <div className="border-t border-[var(--i-line)] px-5 py-3">
+              <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--i-faint)]">
+                On the {monthLabel(month)} payslips
+              </p>
+              <ul className="space-y-1.5">
+                {approved.map((claim) => (
+                  <li key={claim.id} className="flex items-center gap-3 text-[13px]">
+                    <span className="min-w-0 flex-1 truncate">
+                      <span className="font-medium">{nameOf(claim.email)}</span>
+                      <span className="text-[var(--i-muted)]"> · {claim.description || "Expense"}</span>
+                    </span>
+                    <span className="tabular-nums">{formatMoney(claim.amount, claim.currency)}</span>
+                    <Pill tone={claim.status === "paid" ? "emerald" : "amber"}>{claim.status === "paid" ? "Paid" : "Approved"}</Pill>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </>
+      ) : null}
+
+      {tab === "people" ? (
+        summary.people.length ? (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[44rem] text-[13px]">
+              <thead>
+                <tr className="border-b border-[var(--i-line)] text-left text-[12px] text-[var(--i-muted)]">
+                  <th className="px-5 py-2.5 font-normal">Person</th>
+                  <th className="px-3 py-2.5 text-right font-normal">Claimed</th>
+                  <th className="px-3 py-2.5 text-right font-normal">Waiting</th>
+                  <th className="px-3 py-2.5 text-right font-normal">Approved</th>
+                  <th className="px-3 py-2.5 text-right font-normal">Paid</th>
+                  <th className="px-5 py-2.5 text-right font-normal">Rejected</th>
+                </tr>
+              </thead>
+              <tbody>
+                {summary.people.map((entry) => {
+                  const person = byEmail.get(entry.email);
+                  const name = nameOf(entry.email);
+                  const shown = open === entry.email;
+                  return (
+                    <Fragment key={entry.email}>
+                      <tr className="border-b border-[var(--i-line)]">
+                        <td className="px-5 py-2.5">
+                          <button
+                            type="button"
+                            onClick={() => setOpen(shown ? null : entry.email)}
+                            aria-expanded={shown}
+                            className="flex items-center gap-2.5 text-left hover:text-[var(--i-accent-text)]"
+                          >
+                            <CaretRight size={12} className={cn("shrink-0 transition-transform", shown && "rotate-90")} />
+                            <Avatar name={name} email={entry.email} size={24} src={photoUrl(person)} />
+                            <span>
+                              <span className="font-medium">{name}</span>
+                              <span className="text-[var(--i-muted)]"> · {plural(entry.totals.count)}</span>
+                            </span>
+                          </button>
+                        </td>
+                        <td className="px-3 py-2.5 text-right font-medium tabular-nums">{formatTotals(entry.totals.claimed)}</td>
+                        <td className="px-3 py-2.5 text-right tabular-nums">{formatTotals(entry.totals.submitted)}</td>
+                        <td className="px-3 py-2.5 text-right tabular-nums">{formatTotals(entry.totals.approved)}</td>
+                        <td className="px-3 py-2.5 text-right tabular-nums">{formatTotals(entry.totals.paid)}</td>
+                        <td className="px-5 py-2.5 text-right tabular-nums">{formatTotals(entry.totals.rejected)}</td>
+                      </tr>
+                      {shown ? (
+                        <tr className="border-b border-[var(--i-line)] bg-[var(--i-sunken)]">
+                          <td colSpan={6} className="px-5 py-1">
+                            <ul className="divide-y divide-[var(--i-line)]">
+                              {entry.claims.map((claim) => (
+                                <ClaimLine key={claim.id} claim={claim} names={byEmail} />
+                              ))}
+                            </ul>
+                          </td>
+                        </tr>
+                      ) : null}
+                    </Fragment>
+                  );
+                })}
+              </tbody>
+              {summary.people.length > 1 ? (
+                <tfoot>
+                  <tr className="text-[var(--i-muted)]">
+                    <td className="px-5 py-2.5">Total</td>
+                    <td className="px-3 py-2.5 text-right font-medium tabular-nums text-[var(--i-ink)]">{formatTotals(total.claimed)}</td>
+                    <td className="px-3 py-2.5 text-right tabular-nums">{formatTotals(total.submitted)}</td>
+                    <td className="px-3 py-2.5 text-right tabular-nums">{formatTotals(total.approved)}</td>
+                    <td className="px-3 py-2.5 text-right tabular-nums">{formatTotals(total.paid)}</td>
+                    <td className="px-5 py-2.5 text-right tabular-nums">{formatTotals(total.rejected)}</td>
+                  </tr>
+                </tfoot>
+              ) : null}
+            </table>
+          </div>
+        ) : (
+          none
+        )
+      ) : null}
+
+      {tab === "all" ? (
+        summary.people.length ? (
+          <ul className="divide-y divide-[var(--i-line)] px-5 py-1">
+            {summary.people
+              .flatMap((entry) => entry.claims)
+              .sort((a, b) => b.created_at.localeCompare(a.created_at))
+              .map((claim) => (
+                <ClaimLine key={claim.id} claim={claim} who={nameOf(claim.email)} names={byEmail} />
+              ))}
           </ul>
-        </div>
+        ) : (
+          none
+        )
       ) : null}
     </Card>
   );

@@ -7,26 +7,73 @@ import {
   useEffect,
   useRef,
   useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import { usePathname } from "next/navigation";
-import { List, X } from "@phosphor-icons/react";
+import { CaretLeft, List, X } from "@phosphor-icons/react";
+import { SIDEBAR_COOKIE, SIDEBAR_EASE } from "@/lib/internal/sidebar";
 import { cn } from "@/lib/utils";
 
 /*
  * On phones the sidebar is a drawer: a top bar with a menu button opens it
- * from the left. From md up it's the usual sticky sidebar. One sidebar
- * serves both, so its links and counts are rendered once.
+ * from the left. From md up it's the usual sticky sidebar, which folds down
+ * to its icons (the button on its edge, or Cmd/Ctrl+\) to give the page more
+ * room. One sidebar serves all of it, so its links and counts are rendered once.
+ *
+ * Folded, the aside carries data-collapsed="true" and its parts hide their
+ * text with md:group-data-[collapsed=true]/sidebar:… classes, so the server-
+ * rendered bits (logo, profile) fold without needing this context.
  */
 
-type DrawerState = { open: boolean; setOpen: (open: boolean) => void };
+type DrawerState = {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  /** Desktop only: folded down to the icons. */
+  collapsed: boolean;
+  toggleCollapsed: () => void;
+};
 
-const DrawerContext = createContext<DrawerState>({ open: false, setOpen: () => {} });
+const DrawerContext = createContext<DrawerState>({
+  open: false,
+  setOpen: () => {},
+  collapsed: false,
+  toggleCollapsed: () => {},
+});
 
 const MOBILE = "(max-width: 767.98px)";
 
-export function MobileNavProvider({ children }: { children: ReactNode }) {
+export function MobileNavProvider({
+  children,
+  collapsed: collapsedAtFirst = false,
+}: {
+  children: ReactNode;
+  /** From the cookie, so the first paint already has the right width. */
+  collapsed?: boolean;
+}) {
   const pathname = usePathname();
+  const [collapsed, setCollapsed] = useState(collapsedAtFirst);
+  const toggleCollapsed = useCallback(() => {
+    setCollapsed((was) => {
+      const next = !was;
+      document.cookie = `${SIDEBAR_COOKIE}=${next ? "collapsed" : "open"}; path=/; max-age=31536000; samesite=lax${
+        location.protocol === "https:" ? "; secure" : ""
+      }`;
+      return next;
+    });
+  }, []);
+
+  // Cmd+\ (Ctrl+\ elsewhere) folds and unfolds it, like Notion.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "\\" || !(event.metaKey || event.ctrlKey) || event.altKey || event.shiftKey) return;
+      if (window.matchMedia(MOBILE).matches) return;
+      event.preventDefault();
+      toggleCollapsed();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [toggleCollapsed]);
   // The page the drawer was opened on: going to another page (a link, the
   // back button) closes it without an effect.
   const [openOn, setOpenOn] = useState<string | null>(null);
@@ -57,7 +104,73 @@ export function MobileNavProvider({ children }: { children: ReactNode }) {
     };
   }, [open]);
 
-  return <DrawerContext.Provider value={{ open, setOpen }}>{children}</DrawerContext.Provider>;
+  return (
+    <DrawerContext.Provider value={{ open, setOpen, collapsed, toggleCollapsed }}>{children}</DrawerContext.Provider>
+  );
+}
+
+/** Whether the desktop sidebar is folded down to its icons. */
+export function useSidebarCollapsed() {
+  return useContext(DrawerContext).collapsed;
+}
+
+const noSubscribe = () => () => {};
+
+/** "⌘" on a Mac, "Ctrl+" elsewhere (the server guesses a Mac). */
+function useModKey() {
+  return useSyncExternalStore(
+    noSubscribe,
+    () => (/Mac|iPhone|iPad/.test(navigator.platform) ? "⌘" : "Ctrl+"),
+    () => "⌘",
+  );
+}
+
+// The width eases while the icons hold still and the text fades; the edge
+// button rides the same curve.
+const MOTION = SIDEBAR_EASE;
+
+/**
+ * The round button on the sidebar's right edge that folds and unfolds it
+ * (desktop only). It sits outside the aside, which clips its text while it
+ * narrows, so it's fixed to the page and follows the edge itself.
+ */
+function CollapseButton() {
+  const { collapsed, toggleCollapsed } = useContext(DrawerContext);
+  const mod = useModKey();
+  const label = collapsed ? "Expand sidebar" : "Collapse sidebar";
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      aria-expanded={!collapsed}
+      aria-controls="internal-sidebar"
+      aria-keyshortcuts="Meta+Backslash Control+Backslash"
+      title={`${label} (${mod}\\)`}
+      onClick={toggleCollapsed}
+      className={cn(
+        "fixed top-[22px] z-30 hidden size-6 items-center justify-center rounded-full bg-[var(--i-panel)] text-[var(--i-muted)] shadow-[var(--i-shadow)] ring-1 ring-[var(--i-line)] transition-[left,color,transform] hover:scale-110 hover:text-[var(--i-ink)] active:scale-95 md:flex print:hidden",
+        MOTION,
+        // The sidebar's width less half the button.
+        collapsed ? "left-12" : "left-56",
+      )}
+    >
+      <CaretLeft
+        size={12}
+        weight="bold"
+        className={cn("transition-transform", MOTION, collapsed && "rotate-180")}
+      />
+    </button>
+  );
+}
+
+type Tip = { label: string; top: number; left: number };
+
+/** The part of a folded sidebar under the pointer or keyboard that names itself with data-tip. */
+function tipFor(target: EventTarget | null): Tip | null {
+  const el = target instanceof Element ? target.closest<HTMLElement>("[data-tip]") : null;
+  if (!el?.dataset.tip) return null;
+  const rect = el.getBoundingClientRect();
+  return { label: el.dataset.tip, top: rect.top + rect.height / 2, left: rect.right + 10 };
 }
 
 /** The hamburger in the phone top bar. */
@@ -103,9 +216,15 @@ export function MobileNavClose() {
  * accessibility tree. From md up it's a plain sticky column.
  */
 export function MobileNavPanel({ children, className }: { children: ReactNode; className?: string }) {
-  const { open, setOpen } = useContext(DrawerContext);
+  const { open, setOpen, collapsed } = useContext(DrawerContext);
   const panel = useRef<HTMLElement>(null);
   const wasOpen = useRef(false);
+  // Folded, the links are icons only: their names show beside them on
+  // hover or keyboard focus. Drawn outside the aside (its transform would
+  // pin a fixed child to it) and only on desktop.
+  const [tip, setTip] = useState<Tip | null>(null);
+  const showTip = (target: EventTarget | null) =>
+    setTip(collapsed && !window.matchMedia(MOBILE).matches ? tipFor(target) : null);
 
   const close = useCallback(() => setOpen(false), [setOpen]);
 
@@ -162,17 +281,42 @@ export function MobileNavPanel({ children, className }: { children: ReactNode; c
         onClick={(event) => {
           if (event.target instanceof Element && event.target.closest("a[href]")) close();
         }}
+        onPointerOver={(event) => {
+          if (event.pointerType === "mouse") showTip(event.target);
+        }}
+        onPointerLeave={() => setTip(null)}
+        onFocus={(event) => {
+          if (event.target.matches(":focus-visible")) showTip(event.target);
+        }}
+        onBlur={() => setTip(null)}
+        onWheel={() => setTip(null)}
         {...(open ? { role: "dialog", "aria-modal": true } : {})}
+        data-collapsed={collapsed}
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-[min(300px,86vw)] flex-col bg-[var(--i-sidebar)] shadow-[var(--i-shadow-pop)] transition-[transform,visibility] duration-200 ease-out motion-reduce:transition-none",
+          "group/sidebar fixed inset-y-0 left-0 z-50 flex w-[min(300px,86vw)] flex-col bg-[var(--i-sidebar)] shadow-[var(--i-shadow-pop)] transition-[transform,visibility]",
           open ? "visible translate-x-0" : "invisible -translate-x-full",
-          "md:visible md:sticky md:top-0 md:z-auto md:h-screen md:w-[236px] md:shrink-0 md:translate-x-0 md:border-r md:border-[var(--i-line)] md:shadow-none md:transition-none",
+          // Desktop: a sticky column whose width eases between full and
+          // icons; overflow-hidden clips the text as it narrows. 60px puts
+          // the icons (12px padding + 10px inset + 16px) dead centre.
+          "md:visible md:sticky md:top-0 md:z-auto md:h-screen md:shrink-0 md:translate-x-0 md:overflow-hidden md:border-r md:border-[var(--i-line)] md:shadow-none md:transition-[width] md:motion-reduce:transition-none",
+          MOTION,
+          collapsed ? "md:w-[60px]" : "md:w-[236px]",
           "print:hidden",
           className,
         )}
       >
         {children}
       </aside>
+      <CollapseButton />
+      {collapsed && tip ? (
+        <div
+          aria-hidden
+          style={{ top: tip.top, left: tip.left }}
+          className="pointer-events-none fixed z-50 hidden -translate-y-1/2 animate-[internal-tip-in_140ms_ease-out] whitespace-nowrap rounded-md bg-[var(--i-ink)] px-2 py-1 text-[12px] font-medium text-[var(--i-panel)] shadow-[var(--i-shadow-pop)] md:block print:hidden"
+        >
+          {tip.label}
+        </div>
+      ) : null}
     </>
   );
 }

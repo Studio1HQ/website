@@ -81,7 +81,7 @@ export function Avatar({
 }) {
   if (src) {
     return (
-      // Private, already-small WebP from /internal/team-file: no optimizer.
+      // Private, already-small WebP from /team-file: no optimizer.
       // eslint-disable-next-line @next/next/no-img-element
       <img
         src={src}

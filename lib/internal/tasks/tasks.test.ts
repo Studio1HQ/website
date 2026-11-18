@@ -86,11 +86,14 @@ describe("who changes what", () => {
     expect(canGiveTask({ ...employee, roles: ["client_manager"] }, "other@studio1hq.com")).toBe(false);
   });
 
-  it("changes a task: its owner, a founder, or whoever gave it", () => {
+  it("changes a task: its owner, a founder, the associate, or whoever gave it", () => {
     expect(canChangeTask(employee, task)).toBe(true);
     expect(canChangeTask(founder, task)).toBe(true);
-    expect(canChangeTask(associate, task)).toBe(false);
-    expect(canChangeTask(associate, { email: "dev@studio1hq.com", created_by: "assoc@studio1hq.com" })).toBe(true);
+    // The founder's associate keeps everyone's tasks up to date, the founders' too.
+    expect(canChangeTask(associate, task)).toBe(true);
+    expect(canChangeTask(associate, { email: "arindam@studio1hq.com", created_by: "arindam@studio1hq.com" })).toBe(true);
+    expect(canChangeTask(admin, { email: "dev@studio1hq.com", created_by: "dev@studio1hq.com" })).toBe(false);
+    expect(canChangeTask(admin, { email: "dev@studio1hq.com", created_by: "ops@studio1hq.com" })).toBe(true);
     expect(canChangeTask(reviewer, { email: "intern@studio1hq.com", created_by: "lead@studio1hq.com" })).toBe(false);
   });
 

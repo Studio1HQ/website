@@ -108,8 +108,26 @@ export async function withinLimit(kind: string, value: string, { limit, windowSe
   return true;
 }
 
-/** Tries at a dashboard sign-in code, per address (app/internal/login). */
+/**
+ * Tries at one address's dashboard sign-in code from one network
+ * (app/internal/login). Per network, so someone hammering an address from
+ * their own network only locks themselves out, not the person.
+ */
 export const SIGN_IN_CODE_LIMIT: Limit = { limit: 10, windowSeconds: HOUR };
+/**
+ * Tries at one address's code from every network together, the cap on a
+ * guesser spread over many networks. Codes are eight digits (Supabase Auth
+ * setting), so this many tries an hour gives about a 1 in 2.5 million chance
+ * an hour, and locking the person out takes four networks, not one.
+ */
+export const SIGN_IN_CODE_ALL_NETWORKS: Limit = { limit: 40, windowSeconds: HOUR };
+/**
+ * Sign-in from one network: codes asked for, and codes tried. A whole
+ * office shares an address, so these are well above what a team needs and
+ * well below what a script wants.
+ */
+export const SIGN_IN_NETWORK_REQUESTS: Limit = { limit: 20, windowSeconds: HOUR };
+export const SIGN_IN_NETWORK_TRIES: Limit = { limit: 40, windowSeconds: HOUR };
 
 /**
  * The strict count, for sign-in: the attempt is saved first and counted

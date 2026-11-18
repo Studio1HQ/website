@@ -81,7 +81,7 @@ export default async function ReportsPage() {
   if (!staff.person && !founder) {
     return (
       <>
-        <PageHeader eyebrow={<Link href="/internal/tasks">Tasks</Link>} title="Reports" />
+        <PageHeader eyebrow={<Link href="/tasks">Tasks</Link>} title="Reports" />
         <Card>
           <EmptyState icon={<CheckSquare size={20} />} title="You're not on the team list yet">
             Weekly and monthly reports are for people on the team list. Ask Arindam or Amitesh to add you.
@@ -119,12 +119,19 @@ export default async function ReportsPage() {
   return (
     <>
       <PageHeader
-        eyebrow={<Link href="/internal/tasks">Tasks</Link>}
+        eyebrow={<Link href="/tasks">Tasks</Link>}
         title="Reports"
         description={
           founder
             ? "Everyone's weekly and monthly reports. Weekly ones are due Monday at 12:00, monthly ones on the 2nd."
             : "Your weekly and monthly reports to Arindam and Amitesh. The numbers fill themselves in from your tasks, client work and days; you add a few lines."
+        }
+        actions={
+          founder ? (
+            <Link href="/tasks/reports/team" className={buttonClass("secondary")}>
+              Team report
+            </Link>
+          ) : undefined
         }
       />
 

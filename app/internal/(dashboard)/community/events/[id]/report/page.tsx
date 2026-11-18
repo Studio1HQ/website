@@ -114,7 +114,7 @@ export default async function EventReportPage({ params, searchParams }: Props) {
     <article className="mx-auto max-w-[960px]">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3 print:hidden">
         <Link
-          href={`/internal/community/events/${event.id}`}
+          href={`/community/events/${event.id}`}
           className="inline-flex items-center gap-1 text-[12.5px] text-[var(--i-muted)] hover:text-[var(--i-ink)]"
         >
           <ArrowLeft size={13} /> {event.name}
@@ -122,7 +122,7 @@ export default async function EventReportPage({ params, searchParams }: Props) {
         <div className="flex flex-wrap items-center gap-2">
           {canDownload && report.partnerOptIns > 0 ? (
             <a
-              href={`/internal/community/events/${event.id}/report/partner-referrals`}
+              href={`/community/events/${event.id}/report/partner-referrals`}
               className={buttonClass("secondary", "sm")}
             >
               <DownloadSimple size={13} /> Partner referrals CSV

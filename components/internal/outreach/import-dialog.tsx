@@ -76,9 +76,13 @@ export function ImportDialog({ trigger }: { trigger: ReactNode }) {
           <div className="space-y-3 px-5 py-4 text-[13px] leading-relaxed">
             <Dialog.Description className="text-[var(--i-muted)]">
               Save the sheet as CSV, one company per row. It needs a <b className="font-medium text-[var(--i-ink)]">name</b>{" "}
-              (or company) column. These are read too when they&apos;re there: website, kind, stage, source, owner,
-              contact name, contact email, title and notes.
+              (or company) column. These are read too when they&apos;re there: website, kind, stage (or outreach
+              status), source, owner, notes, and the contact&apos;s name, email, role, LinkedIn and X.
             </Dialog.Description>
+            <p className="text-[var(--i-muted)]">
+              Prospect research comes in as well: priority, category, funding, why they fit, warm path, source
+              link and conflict.
+            </p>
             <p className="text-[var(--i-muted)]">
               A company whose website is already here is skipped. An owner who isn&apos;t an admin becomes you.
             </p>

@@ -7,8 +7,9 @@
  *   the founders                everyone's, the reports inbox, and giving
  *                               anyone a task
  *   the founder's associate     (the tasks_viewer role) everyone's tasks,
- *                               logs and weeks, the founders' included, and
- *                               giving anyone a task
+ *                               logs and weeks, the founders' included:
+ *                               giving anyone a task and keeping anyone's
+ *                               tasks up to date (the owner, 18 Nov 2026)
  *   other admins                everyone's except the founders' and other
  *                               admins'; may give tasks to those people
  *   intern reviewers            their interns' boards (read only)
@@ -76,11 +77,12 @@ export function canGiveTask(viewer: TaskViewer, email: string, guarded = false) 
 
 /**
  * May this viewer change (edit, move, delete) this task? The person whose
- * board it's on, a founder, or whoever gave it to them while they still may.
+ * board it's on, a founder, the founder's associate (they manage everyone's
+ * tasks), or whoever gave it to them while they still may.
  */
 export function canChangeTask(viewer: TaskViewer, task: { email: string; created_by: string }) {
   if (task.email.toLowerCase() === viewer.email.toLowerCase()) return true;
-  if (isFounder(viewer)) return true;
+  if (isFounder(viewer) || isAssociate(viewer)) return true;
   return task.created_by.toLowerCase() === viewer.email.toLowerCase() && canGiveTask(viewer, task.email);
 }
 

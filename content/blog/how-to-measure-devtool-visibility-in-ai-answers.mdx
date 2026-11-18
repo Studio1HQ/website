@@ -17,7 +17,7 @@ tldrBullets:
     list twice, so position is mostly noise.
   - Fix your biggest gap first, then run the same audit again next month.
 date: 2026-10-16
-updatedDate: 2026-10-16
+updatedDate: 2026-11-18
 draft: false
 authors:
   - Studio1 Team
@@ -121,6 +121,8 @@ Why three runs? The SparkToro team ran each prompt 60 to 100 times, and they sai
 
 Paste each answer into a second tab as you go. You'll want to reread a few of them later.
 
+Two habits keep the runs honest. Use a temporary chat with memory off, so your own history doesn't steer the answer. And count only what the answer itself cites. ChatGPT's sources list includes every page it read, and in our own November 2026 run, two client pages were read but never cited in the answer.
+
 ### 3. Score the answers
 
 You only need five numbers.
@@ -157,6 +159,8 @@ Now split it into buckets. Each bucket has 27 answers.
 
 That's a very common shape. People who already know the product get a decent answer. People who don't know it basically never meet it. The fix for that is different from the fix for wrong facts, which is why the bucket split matters.
 
+**What a real run looked like.** In November 2026 we ran 22 developer questions from our clients' categories through ChatGPT. The shape was similar. Generic how-to prompts went to official docs. The client pages that got cited were comparisons and builds on a named stack, such as CopilotKit's telecom support tutorial with LangGraph JS ([case study](/case-studies/copilotkit)), plus docs that answered the task directly, such as LiteLLM's SDK Quickstart ([case study](/case-studies/litellm)).
+
 ### 4. Read the results
 
 | What you see                                          | What it probably means                                 | Your first move                                                                           |
@@ -169,6 +173,8 @@ That's a very common shape. People who already know the product get a decent ans
 | Strong in one tool, weak in another                   | Normal, because they read different sources            | Look at what the strong tool cites and learn from it                                      |
 
 When a tool shows its sources, click through them. That list is a to-do list. It tells you which pages the AI trusts on your topic, and whether you're on them.
+
+**Then check the visits.** Answers that link to you send traffic you can see. Look for chatgpt.com, perplexity.ai and claude.ai in your analytics referrers, and in the stats of every platform you publish on. Webcrumbs' v0 comparison on DEV, which Studio1 wrote, shows 753 visits from ChatGPT, Perplexity and Claude in DEV's referrer report, next to 55.6K from Google ([case study](/case-studies/webcrumbs)). That's small next to search, but it shows the answers send real readers.
 
 ### 5. Fix the biggest gap first
 

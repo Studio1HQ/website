@@ -43,9 +43,10 @@ import { ActivityLog } from "@/components/internal/outreach/activity-log";
 import { ContactList } from "@/components/internal/outreach/contact-list";
 import { ConvertButton } from "@/components/internal/outreach/convert-button";
 import { FieldDialog } from "@/components/internal/outreach/field-dialog";
+import { OrgLogo, PriorityPill } from "@/components/internal/outreach/org-marks";
 import { StageSelect } from "@/components/internal/outreach/stage-select";
 
-const PATH = "/internal/outreach";
+const PATH = "/outreach";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   // The title is data too: check who's asking before reading the record.
@@ -68,6 +69,10 @@ export default async function OutreachOrgPage({ params }: { params: Promise<{ id
   ]);
   const open = isOpen(org.stage);
   const people = contacts.ok ? contacts.rows : [];
+  // A researched lead: its reason and way in sit above the log.
+  const researched = Boolean(
+    org.why_fit || org.warm_path || org.conflict || org.funding || org.signal_url || org.priority,
+  );
 
   return (
     <>
@@ -77,9 +82,15 @@ export default async function OutreachOrgPage({ params }: { params: Promise<{ id
             <ArrowLeft size={13} /> Outreach
           </Link>
         }
-        title={org.name}
+        title={
+          <span className="flex min-w-0 items-center gap-3">
+            <OrgLogo org={org} size={32} />
+            <span className="min-w-0 truncate">{org.name}</span>
+          </span>
+        }
         description={[
           labelOf(ORG_KINDS, org.kind),
+          org.about,
           org.interest,
           org.stage === "lost" && org.lost_reason
             ? `Lost: ${org.lost_reason}`
@@ -93,7 +104,7 @@ export default async function OutreachOrgPage({ params }: { params: Promise<{ id
           <>
             <StageSelect id={org.id} value={org.stage} name={org.name} />
             {client ? (
-              <Link href={`/internal/clients/${client.slug}`} className={buttonClass("secondary")}>
+              <Link href={`/clients/${client.slug}`} className={buttonClass("secondary")}>
                 <ArrowSquareOut size={14} /> Open the client
               </Link>
             ) : org.stage === "won" && !org.client_id ? (
@@ -153,13 +164,49 @@ export default async function OutreachOrgPage({ params }: { params: Promise<{ id
         />
         <Stat
           label={open ? "In the pipeline since" : "Closed"}
-          value={formatDay(open ? org.created_at.slice(0, 10) : org.closed_on, today)}
+          value={formatDay(open ? todayKey(new Date(org.created_at)) : org.closed_on, today)}
           note={labelOf(ORG_SOURCES, org.source)}
         />
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="min-w-0 space-y-5">
+          {researched ? (
+            <Card>
+              <CardTitle action={org.priority ? <PriorityPill priority={org.priority} /> : null}>
+                Why reach out
+              </CardTitle>
+              <div className="space-y-4 px-5 py-4">
+                {org.conflict ? (
+                  <Notice tone="warning">
+                    <span className="font-medium">{org.conflict}.</span> Close to a Studio1 client: check with them
+                    before anyone reaches out.
+                  </Notice>
+                ) : null}
+                <Fields>
+                  <Field label="Why they fit" wide>
+                    {org.why_fit ? (
+                      <>
+                        <span className="whitespace-pre-wrap">{org.why_fit}</span>
+                        {org.signal_url ? (
+                          <span className="mt-1 block">
+                            <ExternalLink href={org.signal_url} className="text-[12.5px]" />
+                          </span>
+                        ) : null}
+                      </>
+                    ) : org.signal_url ? (
+                      <ExternalLink href={org.signal_url} />
+                    ) : null}
+                  </Field>
+                  <Field label="Warm path" wide>
+                    {org.warm_path ? <span className="whitespace-pre-wrap">{org.warm_path}</span> : null}
+                  </Field>
+                  <Field label="What they do">{org.about}</Field>
+                  <Field label="Funding">{org.funding}</Field>
+                </Fields>
+              </div>
+            </Card>
+          ) : null}
           <ActivityLog
             orgId={org.id}
             items={activity.ok ? activity.rows : []}

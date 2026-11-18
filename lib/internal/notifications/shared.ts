@@ -7,7 +7,9 @@
  * Table: supabase/migrations/20261117110000_notifications.sql.
  */
 
-export const NOTICE_KINDS = ["task", "call", "deliverable", "claim", "access", "other"] as const;
+import { fromInternalPath, isLocalPath, toInternalPath } from "@/lib/internal/host";
+
+export const NOTICE_KINDS =["task", "call", "deliverable", "claim", "access", "other"] as const;
 export type NoticeKind = (typeof NOTICE_KINDS)[number];
 
 export type Notification = {
@@ -36,6 +38,20 @@ export type Notice = {
 export const BELL_LIMIT = 30;
 export const NOTICE_PEOPLE_LIMIT = 60;
 
+/**
+ * How long the bell keeps things. The daily clean-up
+ * (app/api/cron/purge-rejected) deletes a notification once it has been
+ * read for this many days, and any notification, read or not, this old.
+ */
+export const KEEP_READ_DAYS = 30;
+export const KEEP_ANY_DAYS = 90;
+
+/** The instants before which read, and any, notifications go. */
+export function noticeCutoffs(now = new Date()) {
+  const daysAgo = (days: number) => new Date(now.getTime() - days * 24 * 60 * 60 * 1000).toISOString();
+  return { read: daysAgo(KEEP_READ_DAYS), any: daysAgo(KEEP_ANY_DAYS) };
+}
+
 /** Who a notice goes to: lowercased, once each, never the person who did it. */
 export function noticeRecipients(to: readonly (string | null | undefined)[], actor: string) {
   const me = actor.trim().toLowerCase();
@@ -50,18 +66,28 @@ export function noticeLine(value: string | null | undefined, max: number) {
   return (value ?? "").replace(/\s+/g, " ").trim().slice(0, max).trim();
 }
 
-/** The rows to save for a notice, or none when it has no title or a path outside the dashboard. */
+/**
+ * The rows to save for a notice, or none when it has no title or a path
+ * outside the dashboard. The table keeps the app/internal path ("/tasks" is
+ * saved as "/internal/tasks"; its check wants that prefix), and noticeHref
+ * turns it back into the address on the dashboard host.
+ */
 export function noticeRows(to: readonly (string | null | undefined)[], actor: string, notice: Notice) {
   const title = noticeLine(notice.title, 200);
-  if (!title || !notice.href.startsWith("/internal")) return [];
+  if (!title || !isLocalPath(notice.href)) return [];
   return noticeRecipients(to, actor).map((email) => ({
     email,
     actor: actor.trim().toLowerCase(),
     kind: notice.kind,
     title,
     body: noticeLine(notice.body, 300),
-    href: notice.href,
+    href: toInternalPath(notice.href),
   }));
+}
+
+/** Where a saved notification opens: its dashboard address, or the Overview. */
+export function noticeHref(saved: string): string {
+  return saved.startsWith("/internal") && isLocalPath(saved) ? fromInternalPath(saved) : "/";
 }
 
 /** "9+" past nine: the badge stays one or two characters wide. */

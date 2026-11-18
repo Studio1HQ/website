@@ -9,9 +9,15 @@ export type HackathonStatus = "live" | "upcoming" | "past";
 
 const DAY = 86_400_000;
 
-/** Dates are whole days in UTC; an end date runs to the end of that day. */
-const startOf = (date: string) => Date.parse(`${date}T00:00:00Z`);
+/**
+ * Dates are whole days in IST, like everything in the dashboard; an end date
+ * runs to the end of that day. (In UTC, the form stayed open until 05:30 IST
+ * the morning after the dashboard showed registration closed.)
+ */
+const startOf = (date: string) => Date.parse(`${date}T00:00:00+05:30`);
 const endOf = (date: string) => startOf(date) + DAY;
+/** The calendar day itself, for labels: UTC midnight, read back in UTC. */
+const labelDay = (date: string) => new Date(`${date}T00:00:00Z`);
 
 export function statusOf(
   hackathon: Hackathon,
@@ -41,7 +47,7 @@ export const STATUS_LABEL: Record<HackathonStatus, string> = {
 };
 
 function parts(date: string) {
-  const value = new Date(startOf(date));
+  const value = labelDay(date);
   return {
     month: value.toLocaleDateString("en-US", {
       month: "short",
@@ -181,14 +187,13 @@ export function eventWindow(hackathon: Hackathon) {
   return { start: startOf(hackathon.startDate), end: endOf(hackathon.endDate) };
 }
 
-/** "Nov 2", for compact labels. */
+/** "Nov 2", for compact labels. An instant is shown as its IST day. */
 export function formatShortDate(date: string | number) {
-  const value =
-    typeof date === "number" ? new Date(date) : new Date(startOf(date));
+  const value = typeof date === "number" ? new Date(date) : labelDay(date);
   return value.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
-    timeZone: "UTC",
+    timeZone: typeof date === "number" ? "Asia/Kolkata" : "UTC",
   });
 }
 

@@ -29,9 +29,9 @@ async function redirectTo(path: string) {
 
 /**
  * Files from the team pages, each checked against who's asking:
- *   /internal/team-file/photo/<email>    a profile photo: anyone signed in
- *   /internal/team-file/receipt/<id>     an expense receipt: its owner or an admin
- *   /internal/team-file/invoice/<id>     an invoice: admins only
+ *   /team-file/photo/<email>    a profile photo: anyone signed in
+ *   /team-file/receipt/<id>     an expense receipt: its owner or an admin
+ *   /team-file/invoice/<id>     an invoice: admins only
  */
 export async function GET(_: NextRequest, { params }: Props) {
   const staff = await requireMember();

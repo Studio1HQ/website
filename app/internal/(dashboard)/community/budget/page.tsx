@@ -62,7 +62,7 @@ export default async function BudgetPage({
 }) {
   const [staff, params] = await Promise.all([requireCommunity(), searchParams]);
   // The whole page is money: managers and admins only. Before any read.
-  if (!seesMoney(staff.community)) redirect("/internal/community");
+  if (!seesMoney(staff.community)) redirect("/community");
   const canEdit = staff.community === "manager";
   const [
     events,
@@ -216,12 +216,12 @@ export default async function BudgetPage({
           ...years.map((item) => ({
             key: item,
             label: item === today.slice(0, 4) ? `This year (${item})` : item,
-            href: `/internal/community/budget?year=${item}`,
+            href: `/community/budget?year=${item}`,
           })),
           {
             key: "all",
             label: "All time",
-            href: "/internal/community/budget?year=all",
+            href: "/community/budget?year=all",
           },
         ]}
       />
@@ -286,7 +286,7 @@ export default async function BudgetPage({
                 <tr key={event.id} className={rowClass}>
                   <td className="max-w-[18rem]">
                     <RowLink
-                      href={`/internal/community/events/${event.id}`}
+                      href={`/community/events/${event.id}`}
                       sub={formatEventDate(
                         event.starts_on,
                         event.ends_on,
@@ -433,7 +433,7 @@ export default async function BudgetPage({
               {toCollect.slice(0, 8).map((line) => (
                 <li key={line.id}>
                   <Link
-                    href={`/internal/community/sponsors/${line.sponsor_id}`}
+                    href={`/community/sponsors/${line.sponsor_id}`}
                     className="flex items-center gap-3 px-5 py-2.5 text-[13px] hover:bg-[var(--i-hover)]"
                   >
                     <span className="min-w-0 flex-1">

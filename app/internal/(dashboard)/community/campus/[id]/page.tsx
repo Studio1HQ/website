@@ -143,7 +143,7 @@ export default async function PartnerPage({
       <PageHeader
         eyebrow={
           <Link
-            href="/internal/community/campus"
+            href="/community/campus"
             className="inline-flex items-center gap-1 hover:text-[var(--i-ink)]"
           >
             <ArrowLeft size={13} /> Campus partners
@@ -173,7 +173,7 @@ export default async function PartnerPage({
               refs={refs}
               owners={owners}
               readOnly={!canEdit}
-              deletedHref="/internal/community/campus"
+              deletedHref="/community/campus"
               trigger={
                 <button
                   type="button"
@@ -287,7 +287,7 @@ export default async function PartnerPage({
                   return (
                     <li key={event.id}>
                       <Link
-                        href={`/internal/community/events/${event.id}`}
+                        href={`/community/events/${event.id}`}
                         className="flex items-center gap-3 px-5 py-2.5 text-[13px] hover:bg-[var(--i-hover)]"
                       >
                         <span className="min-w-0 flex-1">
@@ -353,7 +353,7 @@ export default async function PartnerPage({
                 {children.map((child) => (
                   <li key={child.id}>
                     <Link
-                      href={`/internal/community/campus/${child.id}`}
+                      href={`/community/campus/${child.id}`}
                       className="flex items-center justify-between gap-3 px-5 py-2.5 text-[13px] hover:bg-[var(--i-hover)]"
                     >
                       <span className="truncate font-medium">{child.name}</span>
@@ -382,7 +382,7 @@ export default async function PartnerPage({
                 <Field label="College">
                   {parent ? (
                     <Link
-                      href={`/internal/community/campus/${parent.id}`}
+                      href={`/community/campus/${parent.id}`}
                       className="underline decoration-[var(--i-line-strong)] underline-offset-[3px] hover:text-[var(--i-accent-text)]"
                     >
                       {parent.name}

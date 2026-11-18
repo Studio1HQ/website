@@ -6,7 +6,7 @@ import { NextResponse, type NextRequest } from "next/server";
  * back to the login page with a note. Safe to delete once those have gone.
  */
 export function GET(request: NextRequest) {
-  const url = new URL("/internal/login", request.url);
+  const url = new URL("/login", request.url);
   url.searchParams.set("error", "expired");
   return NextResponse.redirect(url, 303);
 }

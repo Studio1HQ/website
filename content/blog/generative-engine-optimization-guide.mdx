@@ -10,7 +10,7 @@ tldrBullets:
   - "Engines cite Wikipedia, Reddit and YouTube heavily, and brand mentions track AI visibility far more closely than backlinks. Earn mentions where engines look."
   - "AI assistants sent under 0.5% of website traffic in October 2026, so judge GEO by mentions, citations and share of voice across a fixed prompt set, then by conversions."
 date: 2026-11-12
-updatedDate: 2026-11-12
+updatedDate: 2026-11-18
 draft: false
 authors:
   - Arindam Majumder
@@ -123,12 +123,17 @@ Both OpenAI and Perplexity also have user-triggered fetchers (`ChatGPT-User`, `P
 
 ![Perplexity answer to how to implement RBAC in Supabase, with YouTube tutorial thumbnails at the top and a sources panel listing Supabase documentation pages](/blog/uploads/generative-engine-optimization-guide/perplexity-rbac-supabase.webp "Perplexity's answer to \"how to implement RBAC in Supabase\": official docs, GitHub and YouTube supplied all 25 sources (November 2026).")
 
+**ChatGPT showed the same split.** On November 18, 2026, we ran 22 developer questions from our clients' categories through ChatGPT, with web search on and memory off. Generic how-to questions, such as how to add RBAC to a Next.js app, were answered from official docs. What it did cite from our work was specific. It listed CopilotKit's [multi-agent telecom support tutorial](https://dev.to/copilotkit/build-a-multi-agent-telecom-support-system-with-copilotkit-langgraph-js-52oc) among its recommended resources for that build ([case study](/case-studies/copilotkit)), and linked LiteLLM's [SDK Quickstart](https://docs.litellm.ai/docs/learn/python_sdk_quickstart), from the docs section we built, as the official guide ([case study](/case-studies/litellm)).
+
+![ChatGPT answer listing Multi-Agent Telecom Support with CopilotKit and LangGraph JS among useful tutorials and resources, next to LangGraph's documentation](/blog/uploads/generative-engine-optimization-guide/chatgpt-copilotkit-telecom-tutorial.webp "ChatGPT recommends the CopilotKit telecom tutorial Studio1 wrote, next to LangGraph's own docs (November 18, 2026).")
+
 **Answers change every time.** Reporting on a SparkToro and Gumshoe study, Search Engine Journal found there was [less than a 1-in-100 chance](https://www.searchenginejournal.com/ai-recommendations-change-with-nearly-every-query-sparktoro/566242/) that an AI tool would return the same list of brands twice, and the same order less than 0.1% of the time. Ranking in one answer means nothing. Being mentioned across many runs does.
 
 **Key pointers:**
 
 * Check your robots.txt against the table above. Blocking `OAI-SearchBot` to stop training removes you from ChatGPT search.
 * For how-to questions, the official docs, GitHub and YouTube supply the answer. Make sure your product shows up in all three.
+* Name the stack in the title. ChatGPT recommended "Multi-Agent Telecom Support with CopilotKit and LangGraph JS" for exactly that build.
 
 ## How to do GEO: a 9-step playbook
 
@@ -230,6 +235,8 @@ You measure GEO by what the engines say, not by rank: how often you're mentioned
 | Semrush AI Toolkit | An [AI Visibility Score](https://www.semrush.com/kb/1493-ai-toolkit), share of voice and sentiment | Semrush's prompt set |
 | Your analytics | Visits and signups from chatgpt.com, perplexity.ai, gemini.google.com, claude.ai and copilot.microsoft.com | Some AI visits arrive with no referrer |
 
+AI referrals are small next to search, but they're real, and they come to pages that already rank. Webcrumbs' v0 comparison on DEV, which Studio1 wrote, has 74.7K views. DEV's analytics show 55.6K of them came from Google and 753 from AI assistants: ChatGPT (389), Perplexity (303) and Claude (61), as of November 2026 ([case study](/case-studies/webcrumbs)). Check the referrer report on every platform you publish on, not just your own site.
+
 If you'd rather start without paying for a tool, our two-hour spreadsheet method in [how to measure your devtool's visibility in AI answers](/blog/how-to-measure-devtool-visibility-in-ai-answers) covers the prompt set, the runs and the scoring.
 
 **Key pointers:**
@@ -273,7 +280,7 @@ For 2027, that adds three items to the playbook. Make your site usable by an age
 
 Studio1 is a DevRel and developer marketing agency, and our [AEO and GEO work for developer tools](/aeo-agency) covers both sides: the pages engines quote and the places engines look. We write docs-quality tutorials, comparisons and explainers, run community and Reddit programs, and produce developer video, then check every month what ChatGPT, Perplexity, Gemini and Google say about the category.
 
-It shows up in the answers. The TOON vs JSON explainer we helped Tensorlake publish is cited in Google's AI Overview for that query, as our [AEO guide](/blog/answer-engine-optimization-guide) shows. For Entelligence AI, one Reddit post we ran in a developer community reached [205,000 views and 278 upvotes](/case-studies/entelligence-ai), the kind of thread engines cite. We can't promise what any engine will say, and answers change between runs. We can make your product the easiest one to find, quote and describe correctly.
+It shows up in the answers. The TOON vs JSON explainer and the Gemini 3 vs GPT-5.2 comparison we helped Tensorlake publish are both cited in Google's AI Overviews, as our [AEO guide](/blog/answer-engine-optimization-guide) shows ([case study](/case-studies/tensorlake)). ChatGPT recommends the [CopilotKit](/case-studies/copilotkit) telecom tutorial we wrote and links the [LiteLLM](/case-studies/litellm) SDK Quickstart we built as the official guide. For Entelligence AI, one Reddit post we ran in a developer community reached [205,000 views and 278 upvotes](/case-studies/entelligence-ai), the kind of thread engines cite. We can't promise what any engine will say, and answers change between runs. We can make your product the easiest one to find, quote and describe correctly.
 
 ## FAQ
 

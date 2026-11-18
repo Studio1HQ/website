@@ -459,7 +459,15 @@
     },
     "legal": {
       "terms": "नियम और शर्तें",
-      "privacy": "Privacy Policy"
+      "privacy": "Privacy Policy",
+      "cookies": "कुकी सेटिंग्स"
     }
+  },
+  "CookieBanner": {
+    "label": "कुकी सहमति",
+    "text": "कौन-से पेज उपयोगी हैं, यह जानने के लिए हम Google Analytics कुकीज़ का उपयोग करते हैं। क्या आप सहमत हैं?",
+    "accept": "स्वीकार करें",
+    "decline": "अस्वीकार करें",
+    "privacy": "Privacy Policy"
   }
 }

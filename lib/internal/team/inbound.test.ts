@@ -138,11 +138,11 @@ describe("senders and bodies", () => {
 describe("intake Slack posts", () => {
   it("escapes what senders typed and links to the dashboard", () => {
     const message = intakeSlackMessage(
-      { title: "New invoice: <!channel> (WR-07)", points: ["₹12,500", "Nov 2026"], path: "/internal/money/payments" },
+      { title: "New invoice: <!channel> (WR-07)", points: ["₹12,500", "Nov 2026"], path: "/money/payments" },
       "https://example.com",
     );
     expect(message.text).toBe("New invoice: &lt;!channel&gt; (WR-07) · ₹12,500 · Nov 2026");
-    expect(JSON.stringify(message.blocks)).toContain("https://example.com/internal/money/payments");
+    expect(JSON.stringify(message.blocks)).toContain("https://example.com/money/payments");
   });
 
   it("only posts to Slack's webhook host", () => {

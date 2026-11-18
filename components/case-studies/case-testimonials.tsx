@@ -9,6 +9,9 @@ type Quote = CaseStudyMeta["quotes"][number];
 const GLASS =
   "rounded-[6px] bg-[#fbf9f5] shadow-[0_30px_60px_-46px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/[0.07]";
 
+/** Quotes up to this many characters count as one-liners (see CaseTestimonials). */
+const SHORT_QUOTE = 120;
+
 const initials = (name: string) =>
   name
     .split(/\s+/)
@@ -17,8 +20,34 @@ const initials = (name: string) =>
     .slice(0, 2)
     .toUpperCase();
 
-/** The person, as a face: their photo, or their initials on ink. */
-function Portrait({ quote, size }: { quote: Quote; size: string }) {
+/**
+ * The person, as a face: their photo; without one, the client's logo when
+ * given (a team or community voice), else their initials on ink.
+ */
+function Portrait({
+  quote,
+  size,
+  logo,
+}: {
+  quote: Quote;
+  size: string;
+  logo?: StaticImageData;
+}) {
+  if (!quote.avatar && logo) {
+    return (
+      <span
+        className={`relative block shrink-0 overflow-hidden rounded-[6px] bg-white ring-1 ring-inset ring-[#141414]/[0.08] ${size}`}
+      >
+        <Image
+          src={logo}
+          alt=""
+          fill
+          sizes="80px"
+          className="object-contain p-1"
+        />
+      </span>
+    );
+  }
   return quote.avatar ? (
     <span
       className={`relative block shrink-0 overflow-hidden rounded-[6px] ${size}`}
@@ -53,6 +82,56 @@ export function CaseTestimonials({
 }) {
   const [lead, ...rest] = study.quotes;
   if (!lead) return null;
+
+  // Several one-liners don't fill the lead card: give them equal cards side
+  // by side. A lone short quote keeps the lead card.
+  if (
+    study.quotes.length > 1 &&
+    study.quotes.every((quote) => quote.text.length <= SHORT_QUOTE)
+  ) {
+    return (
+      <section aria-label={`What ${study.client} said`} className="mt-16">
+        <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-[#c2410c]">
+          In their words
+        </p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          {study.quotes.map((quote) => (
+            <figure
+              key={quote.text}
+              className={`flex flex-col p-6 sm:last:odd:col-span-2 md:p-8 ${GLASS}`}
+            >
+              <span
+                aria-hidden
+                className="font-accent text-[56px] leading-[0.6] text-[#f97316] md:text-[72px]"
+              >
+                &ldquo;
+              </span>
+              <blockquote className="mt-3 text-[19px] font-medium leading-[1.45] tracking-[-0.02em] text-[#141414] md:text-[21px]">
+                <NumericText>{quote.text}</NumericText>
+              </blockquote>
+              <figcaption className="mt-auto flex items-center gap-3.5 pt-8">
+                <Portrait
+                  quote={quote}
+                  size="size-12 text-[15px]"
+                  logo={logo}
+                />
+                <span className="min-w-0 text-[13.5px] leading-snug">
+                  <span className="block font-semibold text-[#141414]">
+                    {quote.author}
+                  </span>
+                  {quote.role ? (
+                    <span className="block truncate text-[#141414]/55">
+                      {quote.role}
+                    </span>
+                  ) : null}
+                </span>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section aria-label={`What ${study.client} said`} className="mt-16">
@@ -123,16 +202,19 @@ export function CaseTestimonials({
         </div>
       </figure>
 
-      {/* More voices */}
+      {/* More voices; a lone (or odd last) one takes the full row */}
       {rest.length ? (
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
           {rest.map((quote) => (
-            <figure key={quote.text} className={`flex flex-col p-5 ${GLASS}`}>
+            <figure
+              key={quote.text}
+              className={`flex flex-col p-5 sm:last:odd:col-span-2 md:p-6 ${GLASS}`}
+            >
               <blockquote className="text-[15.5px] leading-[1.6] text-[#141414]/80">
                 &ldquo;<NumericText>{quote.text}</NumericText>&rdquo;
               </blockquote>
               <figcaption className="mt-auto flex items-center gap-3 pt-4">
-                <Portrait quote={quote} size="size-9 text-[12px]" />
+                <Portrait quote={quote} size="size-9 text-[12px]" logo={logo} />
                 <span className="min-w-0 text-[13px] leading-snug">
                   <span className="block font-semibold text-[#141414]">
                     {quote.author}

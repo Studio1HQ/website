@@ -137,6 +137,22 @@ describe("roleChangeProblem: owners and other admins", () => {
     ).toMatch(/team's tasks/);
   });
 
+  it("keeps Outreach, Influencers and Social growth with the owners", () => {
+    for (const role of ["outreach_manager", "influencer_manager", "socials_manager"] as const) {
+      expect(roleChangeProblem(admin, { status: "active", roles: [] }, { status: "active", roles: [role] })).toMatch(/Only/);
+      expect(roleChangeProblem(admin, { status: "active", roles: [role] }, { status: "active", roles: [] })).toMatch(/Only/);
+      expect(roleChangeProblem(admin, { status: "pending", roles: [] }, { status: "active", roles: ["blog_writer", role] })).toMatch(
+        /Only/,
+      );
+      // Left as it was, the rest can change around it.
+      expect(
+        roleChangeProblem(admin, { status: "active", roles: [role] }, { status: "active", roles: ["client_member", role] }),
+      ).toBeNull();
+      // The owners can give and take it.
+      expect(roleChangeProblem({ owner: true }, { status: "active", roles: [] }, { status: "active", roles: [role] })).toBeNull();
+    }
+  });
+
   it("lets an admin change other roles around a tasks_viewer left as it was", () => {
     expect(
       roleChangeProblem(

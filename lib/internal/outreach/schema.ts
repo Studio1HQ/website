@@ -50,6 +50,20 @@ export const OPEN_STAGES: readonly OrgStage[] = [
   "proposal",
 ];
 
+/** How likely it is to turn into work: what to reach for first. */
+export const ORG_PRIORITIES = options([
+  ["high", "High", "orange"],
+  ["medium", "Medium", "amber"],
+  ["low", "Low", "stone"],
+] as const);
+export type OrgPriority = (typeof ORG_PRIORITIES)[number]["value"];
+
+/** Highest first; not set goes last. */
+export function priorityRank(priority: string | null | undefined) {
+  const index = ORG_PRIORITIES.findIndex((option) => option.value === priority);
+  return index === -1 ? ORG_PRIORITIES.length : index;
+}
+
 export const ORG_SOURCES = options([
   ["outbound", "We reached out"],
   ["inbound_call", "They booked a call"],
@@ -92,8 +106,29 @@ export const ORG_FIELDS: readonly FieldDef[] = [
   { key: "website", label: "Website", type: "url", placeholder: "https://acme.dev" },
   { key: "kind", label: "Kind", type: "select", options: ORG_KINDS },
   { key: "stage", label: "Stage", type: "select", options: ORG_STAGES },
+  {
+    key: "priority",
+    label: "Priority",
+    type: "select",
+    options: [{ value: "", label: "Not set" }, ...ORG_PRIORITIES],
+    initial: "",
+  },
   { key: "source", label: "How it started", type: "select", options: ORG_SOURCES },
   { key: "owner", label: "Owner", type: "owner" },
+  {
+    key: "about",
+    label: "What they do",
+    type: "text",
+    max: 140,
+    placeholder: "Runtime for coding agents",
+  },
+  {
+    key: "funding",
+    label: "Funding",
+    type: "text",
+    max: 140,
+    placeholder: "Seed $6M (Bessemer), Sep 2026",
+  },
   {
     key: "interest",
     label: "Interested in",
@@ -121,6 +156,39 @@ export const ORG_FIELDS: readonly FieldDef[] = [
     wide: true,
     showIf: { key: "stage", values: ["lost"] },
     placeholder: "Went with an in-house hire",
+  },
+  {
+    key: "why_fit",
+    label: "Why they fit",
+    type: "textarea",
+    max: 1000,
+    wide: true,
+    placeholder: "Raised a $6M seed on Sep 8 with no DevRel or content staff",
+    help: "The recent, dated reason to reach out now.",
+  },
+  {
+    key: "warm_path",
+    label: "Warm path",
+    type: "textarea",
+    max: 1000,
+    wide: true,
+    placeholder: "Arindam replied to their launch post on Sep 8",
+    help: "A past interaction, a shared event, or the best cold route.",
+  },
+  {
+    key: "signal_url",
+    label: "Source link",
+    type: "url",
+    placeholder: "https://x.com/…",
+    help: "The post or page behind why they fit.",
+  },
+  {
+    key: "conflict",
+    label: "Client conflict",
+    type: "text",
+    max: 140,
+    placeholder: "Possible: Motia",
+    help: "Close to a Studio1 client? Name it, and check before reaching out.",
   },
   { key: "tags", label: "Tags", type: "tags", placeholder: "Comma separated", wide: true },
   { key: "notes", label: "Notes", type: "textarea", max: 5000, wide: true },
@@ -173,6 +241,15 @@ export type Org = Stamps & {
   tags: string[];
   notes: string;
   client_id: string | null;
+  /** "" when not set. */
+  priority: OrgPriority | "";
+  about: string;
+  funding: string;
+  why_fit: string;
+  warm_path: string;
+  signal_url: string | null;
+  /** "" or the client it's close to: "Possible: Motia". */
+  conflict: string;
 };
 
 export type OrgContact = Stamps & {
@@ -211,6 +288,9 @@ export type OutreachResult =
 
 export const OUTREACH_MIGRATION_HINT =
   "Outreach needs its tables first: run supabase/migrations/20261117100000_outreach.sql in the Supabase SQL editor, then reload.";
+
+export const OUTREACH_RESEARCH_HINT =
+  "Priority, why they fit and the other research fields need one more step: run supabase/migrations/20261118120000_outreach_research.sql in the Supabase SQL editor, then try again.";
 
 export function isOrgStage(value: unknown): value is OrgStage {
   return ORG_STAGES.some((stage) => stage.value === value);

@@ -107,7 +107,7 @@ export default async function SponsorPage({
       <PageHeader
         eyebrow={
           <Link
-            href="/internal/community/sponsors"
+            href="/community/sponsors"
             className="inline-flex items-center gap-1 hover:text-[var(--i-ink)]"
           >
             <ArrowLeft size={13} /> Sponsors
@@ -135,7 +135,7 @@ export default async function SponsorPage({
               record={sponsor}
               owners={owners}
               readOnly={!canEdit}
-              deletedHref="/internal/community/sponsors"
+              deletedHref="/community/sponsors"
               trigger={
                 <button
                   type="button"
@@ -247,7 +247,7 @@ export default async function SponsorPage({
                 {sponsoredEvents.map((eventId) => (
                   <li key={eventId}>
                     <Link
-                      href={`/internal/community/events/${eventId}/report?sponsor=${sponsor.id}`}
+                      href={`/community/events/${eventId}/report?sponsor=${sponsor.id}`}
                       className="flex items-center gap-3 px-5 py-2.5 text-[13px] hover:bg-[var(--i-hover)]"
                     >
                       <ChartBar size={15} className="text-[var(--i-muted)]" />

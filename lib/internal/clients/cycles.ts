@@ -4,6 +4,7 @@ import {
   deleteRecord,
   insertMany,
   insertRecord,
+  loadClients,
   loadCycles,
   loadEngagements,
   loadScopeLines,
@@ -161,11 +162,16 @@ export async function ensureNextCycles(options: {
   by: string;
   engagementIds?: readonly string[];
 }): Promise<EnsureResult> {
-  const [engagements, templates] = await Promise.all([
+  const [engagements, templates, clients] = await Promise.all([
     loadEngagements({ statuses: ["active"] }),
     loadTemplates(),
+    loadClients(),
   ]);
   if (!engagements.ok) return { ok: false, message: engagements.message };
+  if (!clients.ok) return { ok: false, message: clients.message };
+  // An archived client gets no new months, even if nobody ended its
+  // engagements when it was archived.
+  const live = new Set(clients.rows.map((client) => client.id));
   // A failed read must not quietly start every month on the built-in plan
   // (the month then exists, so no later run would put it right).
   if (!templates.ok && !templates.missing)
@@ -173,7 +179,8 @@ export async function ensureNextCycles(options: {
   const saved: ScopeTemplate[] = templates.ok ? templates.rows : [];
   const wanted = options.engagementIds ? new Set(options.engagementIds) : null;
   const pool = engagements.rows.filter(
-    (engagement) => !wanted || wanted.has(engagement.id),
+    (engagement) =>
+      live.has(engagement.client_id) && (!wanted || wanted.has(engagement.id)),
   );
   const cycles = await loadCycles({
     engagementIds: pool.map((engagement) => engagement.id),

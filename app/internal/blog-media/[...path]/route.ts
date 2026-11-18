@@ -7,8 +7,9 @@ type Props = { params: Promise<{ path: string[] }> };
 
 /**
  * Draft images, only for people who can see the post.
- *   GET  /internal/blog-media/<post-id>/<file>.webp   the image
- *   POST /internal/blog-media/<post-id>               upload (form field "file")
+ *   GET  /internal/blog-media/<post-id>/<file>.webp   the image (the address saved
+ *        in post bodies; the dashboard host serves it as it is)
+ *   POST /blog-media/<post-id>   upload (form field "file"), on the dashboard host
  */
 export async function GET(_: NextRequest, { params }: Props) {
   const staff = await requireBlog("writer");

@@ -33,7 +33,7 @@ export function NotificationBell({
 }: {
   items: Notification[];
   unread: number;
-  /** Where the list opens: below the top bar on phones, beside the sidebar on desktop. */
+  /** Where the list opens: below the bell (the default), or to its right. */
   side?: "bottom" | "right";
   className?: string;
 }) {

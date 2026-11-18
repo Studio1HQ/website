@@ -109,7 +109,7 @@ export default async function SponsorsPage({
             entity="sponsor"
             owners={owners}
             defaults={{ owner: staff.email }}
-            goTo="/internal/community/sponsors/"
+            goTo="/community/sponsors/"
             trigger={
               <button type="button" className={buttonClass("accent")}>
                 <Plus size={14} /> New sponsor
@@ -167,7 +167,7 @@ export default async function SponsorsPage({
     const next = new URLSearchParams();
     if (key !== "open") next.set("view", key);
     if (query) next.set("q", query);
-    return `/internal/community/sponsors${next.size ? `?${next}` : ""}`;
+    return `/community/sponsors${next.size ? `?${next}` : ""}`;
   };
 
   // The funnel: count and asks per stage.
@@ -234,7 +234,7 @@ export default async function SponsorsPage({
       />
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <SearchBox
-          action="/internal/community/sponsors"
+          action="/community/sponsors"
           value={query}
           placeholder="Search companies, tiers, tags"
           keep={{ view: view.key === "open" ? undefined : view.key }}
@@ -264,7 +264,7 @@ export default async function SponsorsPage({
               <tr key={sponsor.id} className={rowClass}>
                 <td className="max-w-[18rem]">
                   <RowLink
-                    href={`/internal/community/sponsors/${sponsor.id}`}
+                    href={`/community/sponsors/${sponsor.id}`}
                     sub={[sponsor.industry, sponsor.tier, sponsor.next_step]
                       .filter(Boolean)
                       .join(" · ")}

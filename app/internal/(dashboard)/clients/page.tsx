@@ -10,13 +10,16 @@ import {
   asClientsView,
   type ClientsView,
 } from "@/lib/internal/clients/overview-view";
-import { loadClientWork, loadCycles } from "@/lib/internal/clients/data";
+import {
+  loadClientWork,
+  loadCycles,
+  loadTypeOptions,
+} from "@/lib/internal/clients/data";
 import type { EngagementRow } from "@/lib/internal/clients/rules";
 import {
   CLIENT_STATUSES,
   CYCLE_STATES,
   ENGAGEMENT_STATUSES,
-  ENGAGEMENT_TYPES,
   clientPath,
   labelOf,
   monthLabel,
@@ -91,9 +94,10 @@ export default async function ClientsPage({
   const next = shiftMonth(current, 1);
   const today = todayKey();
 
-  const [allWork, nextCycles] = await Promise.all([
+  const [allWork, nextCycles, types] = await Promise.all([
     loadClientWork(month),
     manager ? loadCycles({ month: next }) : Promise.resolve(null),
+    loadTypeOptions(),
   ]);
   // Client team members an admin gave specific clients see only those.
   const work = scopeWork(staff.clientScope, allWork);
@@ -109,7 +113,7 @@ export default async function ClientsPage({
     if (changes.archived ?? showArchived) query.set("archived", "1");
     const pickedView = changes.view ?? (view === "board" ? view : undefined);
     if (pickedView) query.set("view", pickedView);
-    return `/internal/clients${query.size ? `?${query}` : ""}`;
+    return `/clients${query.size ? `?${query}` : ""}`;
   };
 
   const denied =
@@ -275,7 +279,7 @@ export default async function ClientsPage({
                 ],
                 [
                   "Add an engagement",
-                  "On the client's page: the type of work, the account owner, and links to the contract and their tracker.",
+                  "On the client's page: the type of work, the account owner, and a link to their tracker.",
                 ],
                 [
                   "Start the month",
@@ -484,7 +488,7 @@ export default async function ClientsPage({
                         </td>
                         <td>
                           <OptionBadge
-                            list={ENGAGEMENT_TYPES}
+                            list={types}
                             value={row.engagement.type}
                           />
                         </td>
@@ -553,7 +557,7 @@ export default async function ClientsPage({
                               </p>
                               <p className="truncate text-[12px] text-[var(--i-muted)]">
                                 {row.engagement.name} ·{" "}
-                                {labelOf(ENGAGEMENT_TYPES, row.engagement.type)}
+                                {labelOf(types, row.engagement.type)}
                               </p>
                             </div>
                           </div>
@@ -651,7 +655,8 @@ export default async function ClientsPage({
                       <th>Status</th>
                       <th>Engagements</th>
                       <th>Primary contact</th>
-                      <th>Notes</th>
+                      {/* Notes are for client managers, not the Client team. */}
+                      {manager ? <th>Notes</th> : null}
                     </>
                   }
                 >
@@ -688,11 +693,13 @@ export default async function ClientsPage({
                       <td className="max-w-[10rem] truncate text-[12.5px]">
                         {client.contact_name || <Muted>—</Muted>}
                       </td>
-                      <td className="max-w-[20rem] text-[12.5px] text-[var(--i-muted)]">
-                        <span className="line-clamp-2">
-                          {client.notes || "—"}
-                        </span>
-                      </td>
+                      {manager ? (
+                        <td className="max-w-[20rem] text-[12.5px] text-[var(--i-muted)]">
+                          <span className="line-clamp-2">
+                            {client.notes || "—"}
+                          </span>
+                        </td>
+                      ) : null}
                     </tr>
                   ))}
                 </Table>
@@ -726,7 +733,7 @@ export default async function ClientsPage({
                             engagementsOf.get(client.id) ?? [],
                           )}
                         </p>
-                        {client.notes ? (
+                        {manager && client.notes ? (
                           <p className="mt-1 line-clamp-2 text-[12.5px] text-[var(--i-ink-2)]">
                             {client.notes}
                           </p>

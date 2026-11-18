@@ -3,7 +3,9 @@ import Link from "next/link";
 import { CheckSquare } from "@phosphor-icons/react/dist/ssr";
 import { requireMember } from "@/lib/internal/session";
 import { istNow } from "@/lib/internal/team/shared";
-import { canSeeOthers } from "@/lib/internal/tasks/access";
+import { isDateKey, weekEnd, weekStart } from "@/lib/internal/clients/schema";
+import { canGiveTask, canSeeOthers } from "@/lib/internal/tasks/access";
+import { earliestCardDay } from "@/lib/internal/tasks/calendar";
 import { taskViewer, visiblePeople } from "@/lib/internal/tasks/load";
 import { tasksHref } from "@/lib/internal/tasks/shared";
 import { Card, EmptyState, Notice, PageHeader, buttonClass } from "@/components/internal/ui";
@@ -32,7 +34,7 @@ function flat(params: Record<string, string | string[] | undefined>) {
  * looked; the board shows the same tasks by status; Month adds them up;
  * Team (founders, the associate, intern reviewers) shows everyone's week
  * at once. Client deliverables and community tasks are read where they
- * live, never copied. Reports live at /internal/tasks/reports.
+ * live, never copied. Reports live at /tasks/reports.
  */
 export default async function TasksPage({
   searchParams,
@@ -65,6 +67,10 @@ export default async function TasksPage({
     people.find((item) => item.email === staff.email) ??
     people[0];
   const own = person.email === staff.email;
+  // Someone else's week that still takes new cards (the calendar's "+ New" days).
+  const shownWeek = weekStart(isDateKey(params.week) ? params.week : today);
+  const giving =
+    view === "week" && !own && canGiveTask(viewer, person.email, person.guarded) && weekEnd(shownWeek) >= earliestCardDay(today);
 
   const props: ViewProps = { staff, viewer, person, own, people, params, today };
   const keep = (extra: Record<string, string | null>) =>
@@ -85,7 +91,9 @@ export default async function TasksPage({
             ? "Everyone's week: time logged, what got done, and whose report is in."
             : own
               ? "Your week, day by day: add what you did or plan to, and tag the client it's for. Your reports build from it."
-              : `What ${person.name || person.email} worked on.`
+              : giving
+                ? `What ${person.name || person.email} is working on. Add a task on a day to give it to them; it shows on their bell.`
+                : `What ${person.name || person.email} worked on.`
         }
         actions={
           <>
@@ -97,7 +105,7 @@ export default async function TasksPage({
                 view={view}
               />
             ) : null}
-            <Link href="/internal/tasks/reports" className={buttonClass("secondary")}>
+            <Link href="/tasks/reports" className={buttonClass("secondary")}>
               Reports
             </Link>
           </>

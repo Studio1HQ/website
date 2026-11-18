@@ -215,7 +215,7 @@ export default async function EventPage({
       <PageHeader
         eyebrow={
           <Link
-            href="/internal/community/events"
+            href="/community/events"
             className="inline-flex items-center gap-1 hover:text-[var(--i-ink)]"
           >
             <ArrowLeft size={13} /> Events
@@ -241,7 +241,7 @@ export default async function EventPage({
               canEdit={canEdit}
               label="Event status"
             />
-            <Link href={`/internal/community/events/${event.id}/report`} className={buttonClass("secondary")}>
+            <Link href={`/community/events/${event.id}/report`} className={buttonClass("secondary")}>
               <ChartBar size={14} /> Report
             </Link>
             {registrationUrl ? (
@@ -260,7 +260,7 @@ export default async function EventPage({
               refs={refs}
               owners={owners}
               readOnly={!canEdit}
-              deletedHref="/internal/community/events"
+              deletedHref="/community/events"
               trigger={
                 <button
                   type="button"
@@ -465,7 +465,7 @@ export default async function EventPage({
                   {partner ? (
                     <>
                       <Link
-                        href={`/internal/community/campus/${partner.id}`}
+                        href={`/community/campus/${partner.id}`}
                         className="underline decoration-[var(--i-line-strong)] underline-offset-[3px] hover:text-[var(--i-accent-text)]"
                       >
                         {partner.name}

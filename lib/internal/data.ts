@@ -1,3 +1,4 @@
+import { rollingCounts } from "@/lib/internal/trend";
 import { cache } from "react";
 import { unstable_cache } from "next/cache";
 import { HACKATHONS, getHackathon } from "@/data/hackathons";
@@ -545,6 +546,8 @@ export type PipelineStats = {
   total: number;
   awaiting: number;
   lastWeek: number;
+  /** Entries a day for the last 14 days, oldest first (for the Overview's sparkline). */
+  daily: number[];
   overdue: number;
   byStatus: { status: string; count: number }[];
 };
@@ -577,7 +580,7 @@ export async function overview() {
         // The same rows the section's list uses: no read of its own.
         const result = await loadSection(section);
         if (!result.ok) {
-          return { key, ok: false, total: 0, awaiting: 0, lastWeek: 0, overdue: 0, byStatus: [] };
+          return { key, ok: false, total: 0, awaiting: 0, lastWeek: 0, daily: [], overdue: 0, byStatus: [] };
         }
         const counts = new Map<string, number>();
         for (const row of result.rows) {
@@ -591,6 +594,12 @@ export async function overview() {
           awaiting: counts.get("new") ?? 0,
           lastWeek: result.rows.filter((row) => Date.parse(String(row[section.dateColumn])) >= weekAgo)
             .length,
+          daily: rollingCounts(
+            result.rows.map((row) => row[section.dateColumn]),
+            Date.now(),
+            24 * 60 * 60 * 1000,
+            14,
+          ),
           overdue: result.rows.filter((row) => isOverdue(row, section)).length,
           byStatus: (section.statuses ?? []).map((status) => ({
             status,
@@ -886,7 +895,7 @@ export async function entryEmails(section: Section, id: string): Promise<EmailLo
  * What an entry page shows besides the record: emails sent from the
  * dashboard and the same person's other entries on any form. Each part
  * fails quietly. The résumé isn't here: the page loads it through
- * /internal/jobs/[id]/resume, which checks the session on every fetch.
+ * /jobs/[id]/resume, which checks the session on every fetch.
  */
 export async function entryExtras(section: Section, record: Row, emails?: ReturnType<typeof entryEmails>) {
   const staff = await requireSection(section);

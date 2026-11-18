@@ -7,6 +7,7 @@
  * HMAC-SHA256 of `session.<payload>`.
  */
 
+import { fromInternalPath, isLocalPath } from "@/lib/internal/host";
 import { STAFF_DOMAIN } from "@/lib/internal/roles";
 
 export { STAFF_DOMAIN };
@@ -50,12 +51,13 @@ export function authSecret(): string | null {
 
 /**
  * Local development only: with INTERNAL_DEV_BYPASS set to a staff address in
- * .env.local, `next dev` on localhost skips sign-in and acts as that
- * address. Production builds (NODE_ENV=production) never take this path.
+ * .env.local, `next dev` on localhost (and dashboard.localhost) skips
+ * sign-in and acts as that address. Production builds (NODE_ENV=production)
+ * never take this path.
  */
 export function devBypassEmail(host: string | null | undefined): string | null {
   if (process.env.NODE_ENV !== "development") return null;
-  if (!/^(?:localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/.test(host ?? "")) return null;
+  if (!/^(?:localhost|127\.0\.0\.1|\[::1\]|dashboard\.localhost)(?::\d+)?$/i.test(host ?? "")) return null;
   return staffEmail(process.env.INTERNAL_DEV_BYPASS);
 }
 
@@ -74,24 +76,32 @@ export function emailAddress(input: unknown): string | null {
   return local.test(name) && !name.includes("..") && host.test(domain) ? email : null;
 }
 
-/** Lowercased address on the staff domain, or null for anything else. */
+/**
+ * Lowercased address on the staff domain, or null for anything else.
+ * "name+tag@" is refused: it lands in name@'s inbox, so it would let one
+ * person sign in as a second, new member (even after being turned off).
+ */
 export function staffEmail(input: unknown): string | null {
   const email = emailAddress(input);
-  return email && email.endsWith(`@${STAFF_DOMAIN}`) ? email : null;
+  return email && email.endsWith(`@${STAFF_DOMAIN}`) && !email.includes("+") ? email : null;
 }
 
-/** Where to go after signing in: a dashboard path, never another site. */
+/**
+ * Where to go after signing in: a page on the dashboard host, never another
+ * site. Old links that still say /internal/… land on their new address.
+ */
 export function safeNext(value: unknown): string {
-  if (typeof value !== "string") return "/internal";
+  if (typeof value !== "string") return "/";
+  const path = fromInternalPath(value);
   if (
-    !/^\/internal(?:[/?]|$)/.test(value) ||
-    value.includes("\\") ||
-    value.includes("..") ||
-    /^\/internal\/(?:login|auth)(?:[/?]|$)/.test(value)
+    !isLocalPath(path) ||
+    path.includes("..") ||
+    /\s/.test(path) ||
+    /^\/(?:login|auth|api|_next)(?:[/?#]|$)/.test(path)
   ) {
-    return "/internal";
+    return "/";
   }
-  return value.slice(0, 500);
+  return path.slice(0, 500);
 }
 
 export function nowSeconds() {

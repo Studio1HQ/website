@@ -8,7 +8,8 @@ import {
   ownerChoices,
 } from "@/lib/internal/clients/data";
 import {
-  ENGAGEMENT_TYPES,
+  engagementTypes,
+  isCustomType,
   SIZES,
   SIZE_POINTS,
   templateFor,
@@ -19,7 +20,10 @@ import {
   ClientsLoadNotice,
   ClientsMigrationNotice,
 } from "@/components/internal/clients/ui";
-import { TemplateCard } from "@/components/internal/clients/template-card";
+import {
+  NewTemplateButton,
+  TemplateCard,
+} from "@/components/internal/clients/template-card";
 import { CapacityTable } from "@/components/internal/clients/capacity-table";
 import type { CapacityPerson } from "@/components/internal/clients/capacity-dialog";
 
@@ -94,6 +98,7 @@ export default async function ClientsTemplatesPage() {
         Number(a.role !== null && a.active) ||
       (a.name || a.email).localeCompare(b.name || b.email),
   );
+  const types = engagementTypes(templates.rows);
   const points = SIZES.map(
     (size) => `${size.value} = ${SIZE_POINTS[size.value]}`,
   ).join(", ");
@@ -104,21 +109,29 @@ export default async function ClientsTemplatesPage() {
       <ClientsLoadNotice show={incomplete(templates, people)} />
 
       <section aria-labelledby="templates-heading" className="mb-10">
-        <h2 id="templates-heading" className="text-[15px] font-medium">
-          Scope templates
-        </h2>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 id="templates-heading" className="text-[15px] font-medium">
+            Scope templates
+          </h2>
+          <NewTemplateButton
+            types={types.map(({ value, label }) => ({ value, label }))}
+          />
+        </div>
         <p className="mb-4 mt-1 max-w-2xl text-[13px] leading-relaxed text-[var(--i-muted)]">
           Quantities are set per contract; this only sets what next month&apos;s
           cycle starts with. The account owner adjusts each month before it goes
-          active.
+          active. Need a mix that isn&apos;t here, like launch support? Make a
+          new template and pick it as an engagement&apos;s type.
         </p>
         <div className="grid gap-5 lg:grid-cols-2">
-          {ENGAGEMENT_TYPES.map((type) => {
+          {types.map((type) => {
             const template = templateFor(type.value, templates.rows);
             return (
               <TemplateCard
                 key={type.value}
                 type={type.value}
+                name={type.label}
+                own={isCustomType(type.value)}
                 lines={template.lines}
                 rhythm={template.rhythm}
                 custom={template.custom}
@@ -136,7 +149,7 @@ export default async function ClientsTemplatesPage() {
           Weekly capacity is in points: each piece counts by its size ({points}
           ).{" "}
           <Link
-            href="/internal/clients/load"
+            href="/clients/load"
             className="text-[var(--i-ink)] underline decoration-[var(--i-line-strong)] underline-offset-[3px] hover:text-[var(--i-accent-text)]"
           >
             See this week&apos;s load

@@ -27,9 +27,11 @@ import {
   OPEN_STAGES,
   ORG_FIELDS,
   ORG_KINDS,
+  ORG_PRIORITIES,
   ORG_STAGES,
   isOrgKind,
   type Org,
+  type OrgPriority,
 } from "@/lib/internal/outreach/schema";
 import {
   Card,
@@ -52,12 +54,13 @@ import {
 } from "@/components/internal/community/ui";
 import { FieldDialog } from "@/components/internal/outreach/field-dialog";
 import { ImportDialog } from "@/components/internal/outreach/import-dialog";
+import { ConflictMark, OrgLogo, PriorityPill } from "@/components/internal/outreach/org-marks";
 import { StageSelect } from "@/components/internal/outreach/stage-select";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Outreach" };
 
-const PATH = "/internal/outreach";
+const PATH = "/outreach";
 
 type Now = { today: string; me: string };
 
@@ -73,6 +76,11 @@ const VIEWS = [
   },
 ] as const;
 
+/** Client prospects are most of the list, so only the other kinds are named. */
+function kindNote(org: Org) {
+  return org.kind === "client" ? null : labelOf(ORG_KINDS, org.kind);
+}
+
 export default async function OutreachPage({
   searchParams,
 }: {
@@ -85,16 +93,25 @@ export default async function OutreachPage({
   const view = VIEWS.find((item) => item.key === one(params.view)) ?? VIEWS[0];
   const query = one(params.q)?.slice(0, 100) ?? "";
   const kind = isOrgKind(one(params.kind)) ? (one(params.kind) as Org["kind"]) : null;
+  const priority =
+    (ORG_PRIORITIES.find((option) => option.value === one(params.priority))?.value as OrgPriority | undefined) ?? null;
   // The board is the open pipeline's columns; won and closed are lists.
   const boardable = view.key !== "won" && view.key !== "closed";
   const board = boardable && one(params.show) === "board";
 
-  const link = (change: { view?: string; kind?: string | null; show?: "board" | "table" }) => {
+  const link = (change: {
+    view?: string;
+    kind?: string | null;
+    priority?: string | null;
+    show?: "board" | "table";
+  }) => {
     const next = new URLSearchParams();
     const nextView = change.view ?? view.key;
     if (nextView !== "open") next.set("view", nextView);
     const nextKind = change.kind === undefined ? kind : change.kind;
     if (nextKind) next.set("kind", nextKind);
+    const nextPriority = change.priority === undefined ? priority : change.priority;
+    if (nextPriority) next.set("priority", nextPriority);
     if (query) next.set("q", query);
     if ((change.show ?? (board ? "board" : "table")) === "board") next.set("show", "board");
     return `${PATH}${next.size ? `?${next}` : ""}`;
@@ -147,10 +164,24 @@ export default async function OutreachPage({
   }
 
   const person = new Map((contacts.ok ? contacts.rows : []).map((contact) => [contact.org_id, contact]));
-  const ofKind = orgs.rows.filter((org) => !kind || org.kind === kind);
+  const ofKind = orgs.rows.filter((org) => (!kind || org.kind === kind) && (!priority || org.priority === priority));
   const searched = ofKind.filter((org) => {
     const main = person.get(org.id);
-    return matches(query, org.name, org.domain, org.interest, org.next_step, org.tags, org.owner, main?.name, main?.email);
+    return matches(
+      query,
+      org.name,
+      org.domain,
+      org.about,
+      org.interest,
+      org.next_step,
+      org.why_fit,
+      org.warm_path,
+      org.conflict,
+      org.tags,
+      org.owner,
+      main?.name,
+      main?.email,
+    );
   });
   const rows = searched.filter((org) => view.match(org, now)).sort(byFollowUp);
 
@@ -217,6 +248,7 @@ export default async function OutreachPage({
           keep={{
             view: view.key === "open" ? undefined : view.key,
             kind: kind ?? undefined,
+            priority: priority ?? undefined,
             show: board ? "board" : undefined,
           }}
         />
@@ -227,6 +259,26 @@ export default async function OutreachPage({
               <Link
                 key={option.value ?? "all"}
                 href={link({ kind: option.value })}
+                aria-current={on ? "true" : undefined}
+                className={cn(
+                  "inline-flex h-8 items-center rounded-lg px-2.5 text-[12.5px]",
+                  on
+                    ? "bg-[var(--i-panel)] font-medium text-[var(--i-ink)] shadow-[var(--i-shadow-sm)] ring-1 ring-[var(--i-line)]"
+                    : "text-[var(--i-muted)] hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)]",
+                )}
+              >
+                {option.label}
+              </Link>
+            );
+          })}
+        </nav>
+        <nav aria-label="Priority" className="flex flex-wrap gap-1">
+          {[{ value: null, label: "Any priority" }, ...ORG_PRIORITIES].map((option) => {
+            const on = option.value === priority;
+            return (
+              <Link
+                key={option.value ?? "any"}
+                href={link({ priority: option.value })}
                 aria-current={on ? "true" : undefined}
                 className={cn(
                   "inline-flex h-8 items-center rounded-lg px-2.5 text-[12.5px]",
@@ -294,21 +346,36 @@ export default async function OutreachPage({
                   {cards.map((org) => (
                     <li key={org.id}>
                       <Card className="px-3.5 py-3">
-                        <Link href={`${PATH}/${org.id}`} className="group block min-w-0">
-                          <span className="block truncate text-[13px] font-medium group-hover:text-[var(--i-accent-text)]">
-                            {org.name}
-                          </span>
-                          <span className="mt-0.5 block truncate text-[12px] text-[var(--i-muted)]">
-                            {[labelOf(ORG_KINDS, org.kind), person.get(org.id)?.name].filter(Boolean).join(" · ")}
-                          </span>
-                          {org.next_step ? (
-                            <span className="mt-1.5 line-clamp-2 block text-[12.5px] leading-snug text-[var(--i-ink-2)]">
-                              {org.next_step}
+                        <Link href={`${PATH}/${org.id}`} className="group flex min-w-0 items-start gap-2.5">
+                          <OrgLogo org={org} size={28} />
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-[13px] font-medium group-hover:text-[var(--i-accent-text)]">
+                              {org.name}
                             </span>
-                          ) : null}
+                            <span className="mt-0.5 block truncate text-[12px] text-[var(--i-muted)]">
+                              {[kindNote(org), org.about || org.domain, person.get(org.id)?.name]
+                                .filter(Boolean)
+                                .join(" · ")}
+                            </span>
+                          </span>
                         </Link>
+                        {org.next_step ? (
+                          <p className="mt-2 line-clamp-2 text-[12.5px] leading-snug text-[var(--i-ink-2)]">
+                            {org.next_step}
+                          </p>
+                        ) : org.why_fit ? (
+                          <p className="mt-2 line-clamp-2 text-[12.5px] leading-snug text-[var(--i-muted)]">
+                            {org.why_fit}
+                          </p>
+                        ) : null}
+                        {org.conflict ? (
+                          <p className="mt-1.5">
+                            <ConflictMark conflict={org.conflict} />
+                          </p>
+                        ) : null}
                         <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2">
                           <StageSelect id={org.id} value={org.stage} name={org.name} />
+                          {org.priority ? <PriorityPill priority={org.priority} /> : null}
                           <DueDate day={org.follow_up_on} today={today} />
                         </div>
                         <p className="mt-2 truncate text-[12px] text-[var(--i-muted)]">
@@ -333,7 +400,7 @@ export default async function OutreachPage({
             head={
               <>
                 <th>Organisation</th>
-                <th>Kind</th>
+                <th>Priority</th>
                 <th>Stage</th>
                 <th>Next step</th>
                 <th>Follow up</th>
@@ -344,23 +411,38 @@ export default async function OutreachPage({
           >
             {rows.map((org) => (
               <tr key={org.id} className={rowClass}>
-                <td className="max-w-[16rem]">
-                  <RowLink
-                    href={`${PATH}/${org.id}`}
-                    sub={[org.domain, person.get(org.id)?.name].filter(Boolean).join(" · ")}
-                  >
-                    {org.name}
-                  </RowLink>
+                <td className="max-w-[18rem]">
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    <OrgLogo org={org} size={26} />
+                    <div className="min-w-0 flex-1">
+                      <RowLink
+                        href={`${PATH}/${org.id}`}
+                        sub={[kindNote(org), org.about || org.domain, person.get(org.id)?.name]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      >
+                        {org.name}
+                      </RowLink>
+                      {org.conflict ? <ConflictMark conflict={org.conflict} /> : null}
+                    </div>
+                  </div>
                 </td>
-                <td className="whitespace-nowrap text-[var(--i-ink-2)]">{labelOf(ORG_KINDS, org.kind)}</td>
+                <td>
+                  <PriorityPill priority={org.priority} />
+                </td>
                 <td>
                   <StageSelect id={org.id} value={org.stage} name={org.name} />
                 </td>
-                <td className="max-w-[16rem]">
+                <td className="max-w-[18rem]">
                   {org.stage === "lost" && org.lost_reason ? (
                     <span className="line-clamp-2 text-[var(--i-muted)]">Lost: {org.lost_reason}</span>
                   ) : org.next_step ? (
                     <span className="line-clamp-2">{org.next_step}</span>
+                  ) : org.why_fit && isOpen(org.stage) ? (
+                    // Nothing planned yet: the reason to reach out is the next step.
+                    <span className="line-clamp-2 text-[var(--i-muted)]" title={org.why_fit}>
+                      {org.why_fit}
+                    </span>
                   ) : (
                     <Muted>—</Muted>
                   )}

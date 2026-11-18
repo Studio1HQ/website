@@ -44,6 +44,8 @@ export type CalendarCard =
       reason: string;
       /** Who added it, when it wasn't the person. */
       from: string | null;
+      /** Whether the viewer may edit, move or delete it (set by the page). */
+      editable?: boolean;
     }
   | {
       kind: "deliverable";
@@ -97,6 +99,12 @@ function tagFor(key: string, engagements: ReadonlyMap<string, EngagementLabel>) 
 
 function inRange(day: string | null | undefined, from: string, to: string): boolean {
   return Boolean(day && day >= from && day <= to);
+}
+
+/** The 1st of last month: the earliest day a card can go on. */
+export function earliestCardDay(today: string) {
+  const [year, month] = today.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 2, 1)).toISOString().slice(0, 10);
 }
 
 export function placeCards(input: {
@@ -208,7 +216,7 @@ export function placeCards(input: {
       done,
       tag: "Community",
       client: false,
-      href: "/internal/community/tasks",
+      href: "/community/tasks",
     });
   }
 

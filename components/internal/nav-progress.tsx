@@ -9,13 +9,13 @@ import { refreshData } from "@/app/internal/(dashboard)/actions";
 import { cn } from "@/lib/utils";
 
 /** Links that answer with a file or leave the dashboard shell: no page change to wait for. */
-const NOT_A_PAGE = /\/(export|pdf|resume|team-file|blog-media|blog-cover)(\/|$)/;
+const NOT_A_PAGE = /^\/api\/|\/(export|pdf|resume|team-file|blog-media|blog-cover)(\/|$)/;
 
 /**
  * A thin bar across the top from the moment a dashboard link is clicked
  * until its page shows, so a tab or sidebar click answers at once even when
- * the page's data takes a moment. It listens for clicks on any link inside
- * /internal, so every tab strip gets it without changes of its own.
+ * the page's data takes a moment. It listens for clicks on any link on the
+ * dashboard host, so every tab strip gets it without changes of its own.
  */
 export function NavProgress() {
   const pathname = usePathname();
@@ -31,7 +31,7 @@ export function NavProgress() {
       const link = event.target instanceof Element ? event.target.closest("a[href]") : null;
       if (!(link instanceof HTMLAnchorElement) || (link.target && link.target !== "_self") || link.hasAttribute("download")) return;
       const url = new URL(link.href, window.location.href);
-      if (url.origin !== window.location.origin || !url.pathname.startsWith("/internal") || NOT_A_PAGE.test(url.pathname)) return;
+      if (url.origin !== window.location.origin || NOT_A_PAGE.test(url.pathname)) return;
       if (url.pathname === window.location.pathname && url.search === window.location.search) return;
       setFrom(`${window.location.pathname}?${window.location.search.replace(/^\?/, "")}`);
       clearTimeout(timer);

@@ -11,9 +11,9 @@ const notFound = () => new NextResponse("Not found", { status: 404, headers: { "
 
 /**
  * A payslip as a PDF, made on the fly (nothing is stored):
- *   /internal/money/payroll/<id>/pdf                         a saved slip: admins, or
+ *   /money/payroll/<id>/pdf                         a saved slip: admins, or
  *                                                      its own employee once sent
- *   /internal/money/payroll/draft/pdf?email=…&month=YYYY-MM  an unsaved draft: admins
+ *   /money/payroll/draft/pdf?email=…&month=YYYY-MM  an unsaved draft: admins
  */
 export async function GET(request: NextRequest, { params }: Props) {
   const staff = await requireMember();

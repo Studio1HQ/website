@@ -20,7 +20,7 @@ import {
   Trophy,
 } from "@phosphor-icons/react/dist/ssr";
 import { inScope } from "@/lib/internal/clients/scope";
-import { requireClients } from "@/lib/internal/session";
+import { canSeeMoney, requireClients } from "@/lib/internal/session";
 import { clientsSlackReady } from "@/lib/internal/clients/slack";
 import { readLinks } from "@/lib/internal/clients/links";
 import {
@@ -59,7 +59,6 @@ import {
   CYCLE_STATES,
   DELIVERABLE_KINDS,
   ENGAGEMENT_STATUSES,
-  ENGAGEMENT_TYPES,
   INVOICE_STATES,
   addDays,
   clientPath,
@@ -71,6 +70,7 @@ import {
   plural,
   shiftWeek,
   templateFor,
+  engagementTypes,
   thisMonth,
   statusLabel,
   todayKey,
@@ -156,7 +156,7 @@ export async function generateMetadata({
 
 const backLink = (
   <Link
-    href="/internal/clients"
+    href="/clients"
     className="inline-flex items-center gap-1 hover:text-[var(--i-ink)]"
   >
     <ArrowLeft size={13} /> Clients
@@ -194,6 +194,9 @@ export default async function ClientWorkspacePage({
     searchParams,
   ]);
   const manager = staff.clients === "manager";
+  // Invoices and the contract are money: the founders' alone. Notes are for
+  // client managers, not the Client team.
+  const money = canSeeMoney(staff);
   const found = await loadClientBySlug(slug);
   if (!found.ok) {
     return (
@@ -352,12 +355,13 @@ export default async function ClientWorkspacePage({
   };
   const reportHref = (target: string) =>
     engagement
-      ? `/internal/clients/reports?month=${target}&engagement=${engagement.id}`
-      : "/internal/clients/reports";
+      ? `/clients/reports?month=${target}&engagement=${engagement.id}`
+      : "/clients/reports";
 
   const template = engagement
     ? templateFor(engagement.type, templates.ok ? templates.rows : [])
     : null;
+  const types = engagementTypes(templates.ok ? templates.rows : []);
   const internal = engagement ? isInternal(engagement.type) : false;
   const viewer = { email: staff.email, clients: staff.clients };
 
@@ -368,6 +372,8 @@ export default async function ClientWorkspacePage({
       owners={owners}
       names={names}
       me={staff.email}
+      types={types}
+      money={money}
       trigger={
         <button
           type="button"
@@ -601,7 +607,7 @@ export default async function ClientWorkspacePage({
             link({ tab: "work", month: target, engagement: engagementId })
           }
           reportHref={(target, engagementId) =>
-            `/internal/clients/reports?month=${target}&engagement=${engagementId}`
+            `/clients/reports?month=${target}&engagement=${engagementId}`
           }
           tabHref={(target) => link({ tab: target })}
         />
@@ -641,12 +647,14 @@ export default async function ClientWorkspacePage({
                         state={cycle.state}
                         canEdit={manager}
                       />
-                      <InvoiceControl
-                        cycleId={cycle.id}
-                        state={cycle.invoice_state}
-                        url={cycle.invoice_url}
-                        canEdit={manager}
-                      />
+                      {money ? (
+                        <InvoiceControl
+                          cycleId={cycle.id}
+                          state={cycle.invoice_state}
+                          url={cycle.invoice_url}
+                          canEdit={manager}
+                        />
+                      ) : null}
                       <Link
                         href={reportHref(month)}
                         className="inline-flex items-center gap-1 text-[12.5px] text-[var(--i-muted)] hover:text-[var(--i-ink)]"
@@ -675,8 +683,9 @@ export default async function ClientWorkspacePage({
                       href={(target) => link({ month: target })}
                       reportHref={reportHref}
                       current={current}
+                      money={money}
                     />
-                    <Card className="h-fit">
+                    <Card>
                       <CardTitle>Notes for the month</CardTitle>
                       <div className="px-5 py-4">
                         <CycleNotes
@@ -716,7 +725,7 @@ export default async function ClientWorkspacePage({
                     }
                   >
                     {manager
-                      ? `It starts with last month's numbers. If there was no last month, it starts with the ${labelOf(ENGAGEMENT_TYPES, engagement.type).toLowerCase()} plan: ${
+                      ? `It starts with last month's numbers. If there was no last month, it starts with the ${labelOf(types, engagement.type).toLowerCase()} plan: ${
                           template?.lines
                             .filter((line) => line.quantity > 0)
                             .map(
@@ -803,18 +812,27 @@ export default async function ClientWorkspacePage({
             <div className="min-w-0">
               {engagement ? (
                 <EngagementCard
+                  types={types}
                   engagement={engagement}
+                  money={money}
+                  manager={manager}
                   rhythm={template?.rhythm ?? ""}
                   names={names}
                   action={
                     <span className="flex items-center gap-1">
                       {manager ? (
                         <EngagementDialog
-                          engagement={engagement}
+                          engagement={
+                            money
+                              ? engagement
+                              : { ...engagement, contract_url: null }
+                          }
                           clientId={client.id}
                           workspacePath={base}
                           owners={owners}
                           names={names}
+                          types={types}
+                          money={money}
                           trigger={
                             <button
                               type="button"
@@ -865,7 +883,7 @@ export default async function ClientWorkspacePage({
                       ? formatDay(client.started_on, today)
                       : null}
                   </Field>
-                  {client.notes ? (
+                  {manager && client.notes ? (
                     <Field label="Notes" wide>
                       <span className="whitespace-pre-wrap break-words">
                         {client.notes}
@@ -894,14 +912,22 @@ export default async function ClientWorkspacePage({
 
 function EngagementCard({
   engagement,
+  types,
   rhythm,
   names,
   action,
+  money,
+  manager,
 }: {
   engagement: Engagement;
+  types: ReturnType<typeof engagementTypes>;
   rhythm: string;
   names: Readonly<Record<string, string>>;
   action: ReactNode;
+  /** A founder: sees the contract link. */
+  money: boolean;
+  /** A client manager: sees the notes. */
+  manager: boolean;
 }) {
   const today = todayKey();
   return (
@@ -910,7 +936,7 @@ function EngagementCard({
       <div className="px-5 py-4">
         <Fields>
           <Field label="Type">
-            <OptionBadge list={ENGAGEMENT_TYPES} value={engagement.type} />
+            <OptionBadge list={types} value={engagement.type} />
           </Field>
           <Field label="Status">
             <OptionBadge list={ENGAGEMENT_STATUSES} value={engagement.status} />
@@ -938,14 +964,16 @@ function EngagementCard({
               </ExternalLink>
             ) : null}
           </Field>
-          <Field label="Contract">
-            {engagement.contract_url ? (
-              <ExternalLink href={engagement.contract_url}>
-                Open the contract
-              </ExternalLink>
-            ) : null}
-          </Field>
-          {engagement.notes ? (
+          {money ? (
+            <Field label="Contract">
+              {engagement.contract_url ? (
+                <ExternalLink href={engagement.contract_url}>
+                  Open the contract
+                </ExternalLink>
+              ) : null}
+            </Field>
+          ) : null}
+          {manager && engagement.notes ? (
             <Field label="Notes" wide>
               <span className="whitespace-pre-wrap break-words">
                 {engagement.notes}
@@ -1085,6 +1113,7 @@ function MonthByMonth({
   current,
   href,
   reportHref,
+  money,
 }: {
   cycles: readonly Cycle[];
   lines: readonly ScopeLine[];
@@ -1094,10 +1123,12 @@ function MonthByMonth({
   current: string;
   href: (month: string) => string;
   reportHref: (month: string) => string;
+  /** A founder: sees each month's invoice flag. */
+  money: boolean;
 }) {
   const ordered = [...cycles].sort((a, b) => b.month.localeCompare(a.month));
   return (
-    <Card className="h-fit">
+    <Card>
       <CardTitle>
         Month by month{" "}
         <span className="font-normal text-[var(--i-faint)]">
@@ -1153,10 +1184,12 @@ function MonthByMonth({
                   </div>
                   <span className="flex flex-wrap items-center gap-2">
                     <OptionBadge list={CYCLE_STATES} value={item.state} />
-                    <OptionBadge
-                      list={INVOICE_STATES}
-                      value={item.invoice_state}
-                    />
+                    {money ? (
+                      <OptionBadge
+                        list={INVOICE_STATES}
+                        value={item.invoice_state}
+                      />
+                    ) : null}
                     <Link
                       href={reportHref(item.month)}
                       className="text-[12.5px] text-[var(--i-muted)] underline decoration-[var(--i-line-strong)] underline-offset-[3px] hover:text-[var(--i-ink)]"

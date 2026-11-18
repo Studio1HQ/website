@@ -184,6 +184,21 @@ const distributionCaseStudyProofs: CaseStudyResultData[] = [
       { value: "44K", label: "views on one Reddit post" },
     ],
   },
+  {
+    company: "Webcrumbs",
+    category: "DEV and Medium Distribution",
+    href: "/case-studies/webcrumbs",
+    heroValue: "74.7K",
+    heroLabel: "views on one comparison post on DEV",
+    proof:
+      "A v0 comparison published on DEV, then repurposed into DevGenius on Medium. Google sent 55.6K of its views, and ChatGPT, Perplexity and Claude sent 750+ more.",
+    stats: [
+      { value: "55.6K", label: "views from Google" },
+      { value: "750+", label: "from AI assistants" },
+    ],
+    // DEV's traffic sources for the post
+    art: "https://mintcdn.com/studio1/NFIzOkeC-xlQv6Ju/images/webcrumbs-traffic.png?fit=max&auto=format&n=NFIzOkeC-xlQv6Ju&q=85&s=1d5c1a660ff0cd432809c1c54f62d463",
+  },
 ];
 
 export default function Page() {

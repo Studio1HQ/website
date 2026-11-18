@@ -33,7 +33,7 @@ describe("slack alerts", () => {
           ["Can start", "Immediately"],
         ],
       },
-      "https://www.studio1hq.com",
+      "https://dashboard.studio1hq.com",
     );
     expect(message.text).toBe("New job application: Ada Lovelace · Growth Lead · Bengaluru, India · Immediately");
     expect(message.blocks).toEqual([
@@ -50,7 +50,7 @@ describe("slack alerts", () => {
           {
             type: "button",
             text: { type: "plain_text", text: "Open in dashboard" },
-            url: "https://www.studio1hq.com/internal/jobs/abc",
+            url: "https://dashboard.studio1hq.com/jobs/abc",
             style: "primary",
           },
         ],

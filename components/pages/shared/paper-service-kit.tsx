@@ -328,7 +328,7 @@ export function PaperCaseStudyCard({
   position?: number;
 }) {
   const slug = study.href.split("/").filter(Boolean).pop() ?? "";
-  const art = CASE_ART[slug];
+  const art = study.art ?? CASE_ART[slug];
 
   if (variant === "featured") {
     return (

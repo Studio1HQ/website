@@ -118,7 +118,7 @@ export default async function CallsPage({
     };
     for (const [key, value] of Object.entries(values)) if (value) query.set(key, value);
     const text = query.toString();
-    return `/internal/calls${text ? `?${text}` : ""}`;
+    return `/calls${text ? `?${text}` : ""}`;
   };
   const dayHref = href({ view: "day", date: "{date}" }).replace("%7Bdate%7D", "{date}");
 

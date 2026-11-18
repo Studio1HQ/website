@@ -41,7 +41,7 @@ import {
  * Payslips (team_payslips): one per person per month. A draft starts from
  * the person's salary lines (team_people), the month's unpaid leave
  * (team_attendance) and their approved expense claims; the admin checks it
- * on /internal/money/payroll, and "Done" emails each one as a PDF. No session
+ * on /money/payroll, and "Done" emails each one as a PDF. No session
  * checks here; the page, actions and PDF route do that. Server only.
  *
  * Emailing a slip marks the month's approved claims paid. They still belong
@@ -186,6 +186,11 @@ function savedFigures(slip: Payslip, claims: readonly Reimbursement[]): PayslipF
 
 function joinCheck(person: TeamPersonPay, month: string, slip: Payslip | null): string | null {
   if (slip) return null;
+  // Someone who has left shows in earlier months so an old payslip can still
+  // be made, but it's never emailed until an admin has saved it.
+  if (!person.active) {
+    return `Marked as left. If they were paid for ${monthLabel(month)}, check the lines and save before emailing.`;
+  }
   const part = joinedPartWay(person.joined_on, month);
   if (!part) return null;
   return part.days === 0
@@ -207,7 +212,9 @@ function toRow(person: TeamPersonPay, month: string, slip: Payslip | null, claim
 
 /**
  * Everyone's payslip for a month: active people, plus anyone who has a slip
- * that month and has since left. `people` is the whole roster, for names.
+ * that month and has since left. An earlier month also lists people who've
+ * left with no slip (unless they joined after it), so a payslip that was
+ * never made can be made now. `people` is the whole roster, for names.
  */
 export async function payrollMonth(month: string): Promise<PayrollMonth> {
   const [people, slips, claims] = await Promise.all([
@@ -220,7 +227,13 @@ export async function payrollMonth(month: string): Promise<PayrollMonth> {
   if (!claims.ok) return claims;
 
   const slipFor = new Map(slips.slips.map((slip) => [slip.email, slip]));
-  const included = people.people.filter((person) => person.active || slipFor.has(person.email));
+  const earlier = month < monthOf(istNow().date);
+  const included = people.people.filter(
+    (person) =>
+      person.active ||
+      slipFor.has(person.email) ||
+      (earlier && joinedPartWay(person.joined_on, month)?.days !== 0),
+  );
   const lop = await lopByPerson(
     month,
     included.map((person) => person.email),

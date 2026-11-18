@@ -85,7 +85,7 @@ export default async function MyDayPage({
           title="You're not on the team list yet"
           action={
             isAdmin(staff) ? (
-              <Link href="/internal/people?tab=directory" className={buttonClass("primary")}>
+              <Link href="/people?tab=directory" className={buttonClass("primary")}>
                 Add yourself on People
               </Link>
             ) : undefined
@@ -117,7 +117,7 @@ export default async function MyDayPage({
   return (
     <>
       {failed && !failed.ok ? (
-        <div className="mb-5">
+        <div className="mb-3">
           <Notice tone={failed.missing ? "warning" : "error"}>{failed.message}</Notice>
         </div>
       ) : null}
@@ -134,22 +134,24 @@ export default async function MyDayPage({
         payslips={payslips.ok ? payslips.slips : []}
         claims={claims.ok ? claims.items : []}
         inboundAddress={process.env.INBOUND_EMAIL_ADDRESS?.trim() || null}
-        work={
-          <>
-            {calls ? (
-              <CallsProvider value={calls.context}>
-                <TodayCalls items={calls.items} />
-              </CallsProvider>
-            ) : null}
-            {work.missing ? null : (
-              <TodayWork
-                cards={work.cards.filter((card) => card.day === now.date)}
-                today={now.date}
-                ended={Boolean(today && today.kind !== "leave" && today.slots.length && !openSlot(today.slots))}
-                options={options}
-              />
-            )}
-          </>
+        calls={
+          calls ? (
+            <CallsProvider value={calls.context}>
+              {/* With tasks above, the calls keep to under half the column. */}
+              <TodayCalls items={calls.items} className={work.missing ? "xl:flex-1" : "shrink-0 xl:max-h-[45%]"} />
+            </CallsProvider>
+          ) : null
+        }
+        tasks={
+          work.missing ? null : (
+            <TodayWork
+              cards={work.cards.filter((card) => card.day === now.date)}
+              today={now.date}
+              ended={Boolean(today && today.kind !== "leave" && today.slots.length && !openSlot(today.slots))}
+              options={options}
+              className="min-h-[14rem] xl:flex-1"
+            />
+          )
         }
       />
     </>

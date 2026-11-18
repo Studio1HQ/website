@@ -187,7 +187,7 @@ export function LoadPerson({
             <Warning size={13} aria-hidden /> Capacity not set
             {manager ? (
               <Link
-                href="/internal/clients/templates"
+                href="/clients/templates"
                 className="text-[var(--i-accent-text)] underline decoration-[var(--i-line-strong)] underline-offset-[3px] hover:decoration-[var(--i-accent)]"
               >
                 Set it

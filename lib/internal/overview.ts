@@ -4,12 +4,17 @@ import { clientNeeds, loadClientWork } from "@/lib/internal/clients/data";
 import { communityBadges } from "@/lib/internal/community/data";
 import { hackathonBreakdown, overview as hiringOverview } from "@/lib/internal/data";
 import { pendingCount } from "@/lib/internal/members";
-import { outreachDue } from "@/lib/internal/outreach/data";
+import { canSeeCalls } from "@/lib/internal/calls/access";
+import { listCalls, listChanges } from "@/lib/internal/calls/data";
+import { loadOrgs, outreachDue } from "@/lib/internal/outreach/data";
+import { outreachSummary, todayCalls, todayTasks } from "@/lib/internal/overview-today";
+import { listTasks } from "@/lib/internal/tasks/data";
 import { SECTIONS, sectionAccess } from "@/lib/internal/sections";
-import { canSeeMoney, isAdmin, type Staff } from "@/lib/internal/session";
+import { canSeeMoney, canSeeOutreach, isAdmin, type Staff } from "@/lib/internal/session";
 import { listDays } from "@/lib/internal/team/attendance";
 import { teamOverview } from "@/lib/internal/team/overview";
 import { taskNeeds } from "@/lib/internal/tasks/needs";
+import { monthCounts } from "@/lib/internal/trend";
 import { writeHref } from "@/lib/internal/tasks/report-status";
 import { periodLabel } from "@/lib/internal/tasks/shared";
 import {
@@ -88,6 +93,12 @@ async function blogSummary(staff: Staff & { blog: NonNullable<Staff["blog"]> }) 
     publishedThisMonth: result.posts.filter(
       (post) => post.status === "published" && typeof post.published_at === "string" && post.published_at.startsWith(month),
     ).length,
+    /** Posts published in each of the last six months, oldest first. */
+    publishedByMonth: monthCounts(
+      result.posts.filter((post) => post.status === "published").map((post) => post.published_at),
+      month,
+      6,
+    ),
     // Writers: their own posts with feedback to act on.
     feedback: result.posts.filter(
       (post) => post.created_by === staff.email && (post.status === "changes_requested" || post.status === "approved"),
@@ -103,7 +114,7 @@ export async function dashboardOverview(staff: Staff) {
   // People who log days but aren't admins see their own day and their interns'.
   const ownEmails = admin ? [] : [...(staff.person ? [staff.person.email] : []), ...staff.interns];
 
-  const [pipelines, team, blog, requests, community, ownDays, hackathons, clientsMine, clients, tasks, outreach] = await Promise.all([
+  const [pipelines, team, blog, requests, community, ownDays, hackathons, clientsMine, clients, tasks, outreach, myTasks, myCalls, orgs] = await Promise.all([
     // Every pipeline this person can open: the hiring ones and, for
     // community staff and admins, hackathon registrations.
     staff.role || staff.community ? hiringOverview() : Promise.resolve(null),
@@ -116,7 +127,13 @@ export async function dashboardOverview(staff: Staff) {
     staff.clients ? clientNeeds(staff.email, staff.clientScope) : Promise.resolve(null),
     staff.clients ? clientsSummary(staff.clientScope) : Promise.resolve(null),
     taskNeeds(staff),
-    admin ? outreachDue(staff.email) : Promise.resolve(0),
+    canSeeOutreach(staff) ? outreachDue(staff.email) : Promise.resolve(0),
+    // Today, for the person themselves: their own tasks and their own calls.
+    staff.person ? listTasks({ emails: [staff.person.email], from: now.date, to: now.date }) : Promise.resolve(null),
+    canSeeCalls(staff)
+      ? Promise.all([listCalls({ from: now.date }), listChanges(now.date, now.date)])
+      : Promise.resolve(null),
+    canSeeOutreach(staff) ? loadOrgs() : Promise.resolve(null),
   ]);
 
   // The Hiring card: job and cohort pipelines only (hackathons have their own).
@@ -144,9 +161,9 @@ export async function dashboardOverview(staff: Staff) {
   }
 
   if (blog?.reviewer && blog.inReview) {
-    todo.push({ area: "blog", label: `${plural(blog.inReview, "blog post")} waiting for review`, href: "/internal/blog" });
+    todo.push({ area: "blog", label: `${plural(blog.inReview, "blog post")} waiting for review`, href: "/blog" });
   } else if (blog && !blog.reviewer && blog.feedback) {
-    todo.push({ area: "blog", label: `${plural(blog.feedback, "post")} of yours with feedback`, href: "/internal/blog" });
+    todo.push({ area: "blog", label: `${plural(blog.feedback, "post")} of yours with feedback`, href: "/blog" });
   }
 
   if (team?.ready && team.money) {
@@ -155,7 +172,7 @@ export async function dashboardOverview(staff: Staff) {
       todo.push({
         area: "money",
         label: `${plural(payroll.claimsWaiting, "expense claim")} to approve`,
-        href: "/internal/money/payroll",
+        href: "/money/payroll",
       });
     }
     if (payments.ok && payments.toPay) {
@@ -164,7 +181,7 @@ export async function dashboardOverview(staff: Staff) {
         area: "money",
         label: `${plural(payments.toPay, "payment")} to make`,
         detail: [amount || null, payments.flagged ? `${payments.flagged} need a look` : null].filter(Boolean).join(" · ") || undefined,
-        href: "/internal/money/payments",
+        href: "/money/payments",
         urgent: payments.flagged > 0,
       });
     }
@@ -174,7 +191,7 @@ export async function dashboardOverview(staff: Staff) {
       todo.push({
         area: "money",
         label: `${plural(unsent, "payslip")} to send for ${monthLabel(month)}`,
-        href: "/internal/money/payroll",
+        href: "/money/payroll",
       });
     }
   }
@@ -187,7 +204,7 @@ export async function dashboardOverview(staff: Staff) {
           .slice(0, 3)
           .map((person) => person.name || person.email.split("@")[0])
           .join(", "),
-        href: "/internal/people",
+        href: "/people",
       });
     }
   }
@@ -196,25 +213,25 @@ export async function dashboardOverview(staff: Staff) {
     todo.push({
       area: "access",
       label: `${plural(requests, "person", "people")} asking for dashboard access`,
-      href: "/internal/people",
+      href: "/people",
     });
   }
 
   if (community) {
     if (community.tasks) {
-      todo.push({ area: "community", label: `${plural(community.tasks, "community task")} due`, href: "/internal/community/tasks", urgent: true });
+      todo.push({ area: "community", label: `${plural(community.tasks, "community task")} due`, href: "/community/tasks", urgent: true });
     }
     if (community.sponsors) {
-      todo.push({ area: "community", label: `${plural(community.sponsors, "sponsor follow-up")} due`, href: "/internal/community/sponsors" });
+      todo.push({ area: "community", label: `${plural(community.sponsors, "sponsor follow-up")} due`, href: "/community/sponsors" });
     }
     if (community.partners) {
-      todo.push({ area: "community", label: `${plural(community.partners, "campus partner follow-up")} due`, href: "/internal/community/campus" });
+      todo.push({ area: "community", label: `${plural(community.partners, "campus partner follow-up")} due`, href: "/community/campus" });
     }
   }
 
   if (clientsMine) {
     // Owner load lists each person's own deliverables: due, late and to review.
-    const board = "/internal/clients/load";
+    const board = "/clients/load";
     if (clientsMine.late) {
       todo.push({ area: "clients", label: `${plural(clientsMine.late, "client deliverable")} of yours late`, href: board, urgent: true });
     }
@@ -228,30 +245,30 @@ export async function dashboardOverview(staff: Staff) {
       todo.push({
         area: "clients",
         label: `${plural(clientsMine.blocked, "item")} blocked on engagements you own`,
-        href: "/internal/clients",
+        href: "/clients",
         urgent: true,
       });
     }
   }
   if (clients?.ok && staff.clients === "manager" && clients.red) {
-    todo.push({ area: "clients", label: `${plural(clients.red, "client engagement")} at risk`, href: "/internal/clients", urgent: true });
+    todo.push({ area: "clients", label: `${plural(clients.red, "client engagement")} at risk`, href: "/clients", urgent: true });
   }
 
-  // Outreach (admins): their own follow-ups due on organisations still in play.
+  // Outreach (people given it): their own follow-ups due on organisations still in play.
   if (outreach) {
     todo.push({
       area: "outreach",
       label: `${plural(outreach, "outreach follow-up")} due`,
-      href: "/internal/outreach?view=due",
+      href: "/outreach?view=due",
     });
   }
 
   // Tasks: your own cards that are late or due today.
   if (tasks.tasksLate) {
-    todo.push({ area: "team", label: `${plural(tasks.tasksLate, "task")} of yours late`, href: "/internal/tasks", urgent: true });
+    todo.push({ area: "team", label: `${plural(tasks.tasksLate, "task")} of yours late`, href: "/tasks", urgent: true });
   }
   if (tasks.tasksToday) {
-    todo.push({ area: "team", label: `${plural(tasks.tasksToday, "task")} of yours due today`, href: "/internal/tasks" });
+    todo.push({ area: "team", label: `${plural(tasks.tasksToday, "task")} of yours due today`, href: "/tasks" });
   }
 
   // Tasks: your weekly / monthly report, and the founders' reports to read.
@@ -273,7 +290,7 @@ export async function dashboardOverview(staff: Staff) {
     todo.push({
       area: "team",
       label: `${plural(tasks.reportsToRead, "report")} to read`,
-      href: "/internal/tasks/reports",
+      href: "/tasks/reports",
     });
   }
 
@@ -281,10 +298,10 @@ export async function dashboardOverview(staff: Staff) {
   const days = ownDays && ownDays.ok ? ownDays.days : [];
   const myDay: AttendanceDay | null = staff.person ? (days.find((day) => day.email === staff.person?.email) ?? null) : null;
   if (!admin && staff.person && staff.person.kind === "employee" && !myDay && !isWeekend(now.date)) {
-    todo.push({ area: "team", label: "You haven't started your day", href: "/internal/me" });
+    todo.push({ area: "team", label: "You haven't started your day", href: "/me" });
   }
   if (admin && staff.person && team?.ready && team.notLogged.some((person) => person.email === staff.email)) {
-    todo.unshift({ area: "team", label: "You haven't started your day", href: "/internal/me" });
+    todo.unshift({ area: "team", label: "You haven't started your day", href: "/me" });
   }
 
   return {
@@ -300,6 +317,16 @@ export async function dashboardOverview(staff: Staff) {
     community: staff.community !== null,
     /** The Clients card: this month across active engagements; null without access. */
     clients,
+    /** Your own tasks due today or late; null off the team list, `ok: false` when unread. */
+    myTasks: myTasks ? (myTasks.ok ? { ok: true as const, ...todayTasks(myTasks.rows, now.date) } : { ok: false as const }) : null,
+    /** The calls you're in today; null without the Calls page. */
+    myCalls: myCalls
+      ? myCalls[0].ok
+        ? { ok: true as const, items: todayCalls(myCalls[0].rows, myCalls[1].ok ? myCalls[1].rows : [], staff.email, now.date, now.time) }
+        : { ok: false as const }
+      : null,
+    /** The Outreach card (people given it): the pipeline in numbers; null when it can't be read. */
+    outreach: orgs?.ok ? { ...outreachSummary(orgs.rows, now.date), mineDue: outreach } : null,
     mine: staff.person
       ? {
           day: myDay,

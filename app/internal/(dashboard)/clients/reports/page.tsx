@@ -10,6 +10,7 @@ import { scopeWork } from "@/lib/internal/clients/scope";
 import { requireClients } from "@/lib/internal/session";
 import {
   loadClientWork,
+  loadTypeOptions,
   loadMilestones,
   type ClientWork,
 } from "@/lib/internal/clients/data";
@@ -21,7 +22,6 @@ import {
 import { cycleProgress, slippedItems } from "@/lib/internal/clients/rules";
 import {
   CYCLE_STATES,
-  ENGAGEMENT_TYPES,
   clientPath,
   isMonthKey,
   isOwnedBy,
@@ -56,7 +56,7 @@ type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-const BASE = "/internal/clients/reports";
+const BASE = "/clients/reports";
 
 function reportsHref(month: string, engagement?: string | null) {
   const query = new URLSearchParams({ month });
@@ -98,7 +98,10 @@ export default async function ClientsReportsPage({ searchParams }: Props) {
     );
   }
 
-  if (!engagementId) return <ReportList work={work} month={month} />;
+  if (!engagementId)
+    return (
+      <ReportList work={work} month={month} types={await loadTypeOptions()} />
+    );
 
   const engagement = work.engagements.find((item) => item.id === engagementId);
   const cycle = engagement
@@ -218,7 +221,9 @@ function BackLink({
 function ReportList({
   work,
   month,
+  types,
 }: {
+  types: Awaited<ReturnType<typeof loadTypeOptions>>;
   work: Extract<ClientWork, { ok: true }>;
   month: string;
 }) {
@@ -340,10 +345,7 @@ function ReportList({
                         </Link>
                       </td>
                       <td className="whitespace-nowrap">
-                        <OptionBadge
-                          list={ENGAGEMENT_TYPES}
-                          value={row.engagement.type}
-                        />
+                        <OptionBadge list={types} value={row.engagement.type} />
                       </td>
                       <td>
                         <OptionBadge

@@ -1,13 +1,17 @@
+import { cleanUrl } from "@/lib/internal/community/clean";
 import { parseCsv } from "@/lib/internal/community/csv";
 import {
   OPEN_STAGES,
   ORG_KINDS,
+  ORG_PRIORITIES,
   ORG_SOURCES,
   ORG_STAGES,
+  priorityRank,
   type ActivityKind,
   type Direction,
   type Org,
   type OrgKind,
+  type OrgPriority,
   type OrgStage,
 } from "@/lib/internal/outreach/schema";
 
@@ -114,26 +118,83 @@ export type ImportedOrg = {
   source: string;
   owner: string;
   notes: string;
-  contact: { name: string; email: string; title: string } | null;
+  priority: OrgPriority | "";
+  about: string;
+  funding: string;
+  why_fit: string;
+  warm_path: string;
+  signal_url: string;
+  conflict: string;
+  contact: { name: string; email: string; title: string; linkedin: string; x_handle: string } | null;
 };
 
 export type OrgImport =
   | { ok: true; orgs: ImportedOrg[]; skipped: number }
   | { ok: false; message: string };
 
-/** Header names as people write them, squeezed to letters and digits. */
+/**
+ * Header names as people write them, squeezed to letters and digits. The
+ * export's own column names are among them, so an export reads back in.
+ */
 const HEADERS = {
   name: ["name", "company", "companyname", "organisation", "organization", "org", "account", "brand", "creator"],
   website: ["website", "url", "site", "domain", "link", "companywebsite", "web"],
-  kind: ["kind", "type", "category"],
-  stage: ["stage", "status", "pipeline"],
+  kind: ["kind", "type"],
+  stage: ["stage", "status", "pipeline", "outreachstatus"],
   source: ["source", "from", "channel", "leadsource"],
   owner: ["owner", "assignee", "assignedto", "rep", "accountowner"],
   contactName: ["contactname", "contact", "person", "fullname", "pointofcontact", "poc", "firstname"],
   contactEmail: ["contactemail", "email", "emailaddress", "mail"],
   title: ["title", "contacttitle", "role", "jobtitle", "designation", "position"],
+  linkedin: ["linkedin", "contactlinkedin", "linkedinurl"],
+  x: ["x", "contactx", "twitter", "xhandle", "twitterhandle"],
   notes: ["notes", "note", "comments", "comment", "description"],
+  priority: ["priority"],
+  about: ["about", "category", "whattheydo", "industry", "sector"],
+  funding: ["funding", "stagefunding", "fundingstage", "round", "lastround"],
+  whyFit: ["whyfit", "whytheyfit", "whynow", "signal", "reason"],
+  warmPath: ["warmpath", "wayin", "route", "intro"],
+  signalUrl: ["signalurl", "sourcelink", "sourceurl", "signallink", "proof", "evidence"],
+  conflict: ["conflict", "clientconflict", "conflicts"],
 } as const;
+
+/** Status words prospect sheets use that aren't the stage names here. */
+const STAGE_WORDS: Record<string, OrgStage> = {
+  notcontacted: "lead",
+  new: "lead",
+  intalks: "replied",
+  talking: "replied",
+  meeting: "call_booked",
+};
+
+/** "Med" and friends, squeezed. */
+const PRIORITY_WORDS: Record<string, OrgPriority> = {
+  med: "medium",
+  mid: "medium",
+  hi: "high",
+  lo: "low",
+  p1: "high",
+  p2: "medium",
+  p3: "low",
+};
+
+/** A web link as the forms keep it (https:// added when missing); "" when it isn't one. */
+function linkFrom(text: string) {
+  return /\s/.test(text) ? "" : (cleanUrl(text) ?? "");
+}
+
+/** "@handle" from "@handle", "handle" or an x.com / twitter.com profile link; "" otherwise. */
+export function xHandleFrom(text: string) {
+  const value = text.trim();
+  const fromLink = value.match(/^(?:https?:\/\/)?(?:www\.|mobile\.)?(?:x|twitter)\.com\/@?([A-Za-z0-9_]{1,15})\/?(?:[?#].*)?$/i);
+  const handle = fromLink ? fromLink[1] : value.replace(/^@/, "");
+  return /^[A-Za-z0-9_]{1,15}$/.test(handle) && !/^(home|intent|share|search|i)$/i.test(handle) ? `@${handle}` : "";
+}
+
+/** A conflict cell: "None", "No" and dashes mean there isn't one. */
+function conflictFrom(text: string) {
+  return /^(none|no|n\/a|na|-+|—)$/i.test(text.trim()) ? "" : text.trim();
+}
 
 function squeeze(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -181,7 +242,16 @@ export function orgsFromCsv(text: string, limit = 2000): OrgImport {
     contactName: find(headers, HEADERS.contactName),
     contactEmail: find(headers, HEADERS.contactEmail),
     title: find(headers, HEADERS.title),
+    linkedin: find(headers, HEADERS.linkedin),
+    x: find(headers, HEADERS.x),
     notes: find(headers, HEADERS.notes),
+    priority: find(headers, HEADERS.priority),
+    about: find(headers, HEADERS.about),
+    funding: find(headers, HEADERS.funding),
+    whyFit: find(headers, HEADERS.whyFit),
+    warmPath: find(headers, HEADERS.warmPath),
+    signalUrl: find(headers, HEADERS.signalUrl),
+    conflict: find(headers, HEADERS.conflict),
   };
   if (at.name === -1) return { ok: false, message: 'Couldn\'t find a name column. Name its header "name" or "company".' };
   if (rows.length - 1 > limit) {
@@ -212,18 +282,37 @@ export function orgsFromCsv(text: string, limit = 2000): OrgImport {
     const email = cell(row, at.contactEmail, 200).toLowerCase();
     const contactEmail = EMAIL.test(email) ? email : "";
     const owner = cell(row, at.owner, 120).toLowerCase();
+    const stageText = cell(row, at.stage, 40);
+    const priorityText = cell(row, at.priority, 40);
+    // Research sheets put the link behind the signal in "Source"; a link
+    // there isn't how it started, so it goes with the signal.
+    const sourceText = cell(row, at.source, 500);
+    const sourceLink = /^https?:\/\//i.test(sourceText) ? linkFrom(sourceText) : "";
     orgs.push({
       name,
       website: domain ? (/^https?:\/\//i.test(website) ? website : `https://${website}`) : "",
       domain,
       kind: optionFrom(ORG_KINDS, cell(row, at.kind, 40), "client"),
-      stage: optionFrom(ORG_STAGES, cell(row, at.stage, 40), "lead"),
-      source: optionFrom(ORG_SOURCES, cell(row, at.source, 40), "outbound"),
+      stage: STAGE_WORDS[squeeze(stageText)] ?? optionFrom(ORG_STAGES, stageText, "lead"),
+      source: sourceLink ? "outbound" : optionFrom(ORG_SOURCES, sourceText, "outbound"),
       owner: EMAIL.test(owner) ? owner : "",
       notes: cell(row, at.notes, 5000),
+      priority: PRIORITY_WORDS[squeeze(priorityText)] ?? optionFrom<OrgPriority | "">(ORG_PRIORITIES, priorityText, ""),
+      about: cell(row, at.about, 140),
+      funding: cell(row, at.funding, 140),
+      why_fit: cell(row, at.whyFit, 1000),
+      warm_path: cell(row, at.warmPath, 1000),
+      signal_url: linkFrom(cell(row, at.signalUrl, 500)) || sourceLink,
+      conflict: conflictFrom(cell(row, at.conflict, 140)),
       contact:
         contactName || contactEmail
-          ? { name: contactName || contactEmail.split("@")[0], email: contactEmail, title: cell(row, at.title, 120) }
+          ? {
+              name: contactName || contactEmail.split("@")[0],
+              email: contactEmail,
+              title: cell(row, at.title, 120),
+              linkedin: linkFrom(cell(row, at.linkedin, 500)),
+              x_handle: xHandleFrom(cell(row, at.x, 300)),
+            }
           : null,
     });
   }
@@ -233,7 +322,13 @@ export function orgsFromCsv(text: string, limit = 2000): OrgImport {
 
 /* ----------------------------------------------------------------- lists */
 
-/** Follow-ups first (oldest date on top), then by name. */
-export function byFollowUp(a: Pick<Org, "follow_up_on" | "name">, b: Pick<Org, "follow_up_on" | "name">) {
-  return (a.follow_up_on ?? "9999").localeCompare(b.follow_up_on ?? "9999") || a.name.localeCompare(b.name);
+type Sortable = Pick<Org, "follow_up_on" | "name"> & { priority?: string | null };
+
+/** Follow-ups first (oldest date on top), then by priority (high first), then by name. */
+export function byFollowUp(a: Sortable, b: Sortable) {
+  return (
+    (a.follow_up_on ?? "9999").localeCompare(b.follow_up_on ?? "9999") ||
+    priorityRank(a.priority) - priorityRank(b.priority) ||
+    a.name.localeCompare(b.name)
+  );
 }

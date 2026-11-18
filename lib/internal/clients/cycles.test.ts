@@ -11,6 +11,9 @@ import {
   DELIVERABLE_KINDS,
   DELIVERABLE_STATUSES,
   ENGAGEMENT_TYPES,
+  customTypeKey,
+  engagementTypes,
+  isCustomType,
   isMonthKey,
   isWeekKey,
   monthElapsed,
@@ -113,6 +116,40 @@ describe("next month's cycles", () => {
       lines: [],
       rhythm: "Custom",
       custom: true,
+    });
+  });
+
+  it("takes the team's own types next to the built-in ones", () => {
+    expect(customTypeKey("Launch support")).toBe("custom_launch_support");
+    expect(customTypeKey("  GTM + blogs! ")).toBe("custom_gtm_blogs");
+    expect(customTypeKey("!!!")).toBeNull();
+    expect(isCustomType("custom_launch_support")).toBe(true);
+    expect(isCustomType("campaign")).toBe(false);
+    expect(isCustomType("custom_Launch Support")).toBe(false);
+
+    const saved = [
+      {
+        engagement_type: "custom_launch_support" as const,
+        name: "Launch support",
+        lines: DEFAULT_TEMPLATES.campaign.lines,
+        rhythm: "Per launch",
+      },
+      { engagement_type: "custom_gtm_blogs" as const, lines: [], rhythm: "" },
+      { engagement_type: "campaign" as const, lines: [], rhythm: "" },
+    ];
+    const types = engagementTypes(saved);
+    expect(types.slice(0, ENGAGEMENT_TYPES.length)).toEqual(ENGAGEMENT_TYPES);
+    expect(
+      types.slice(ENGAGEMENT_TYPES.length).map((type) => type.label),
+    ).toEqual(["Gtm blogs", "Launch support"]);
+    expect(templateFor("custom_launch_support", saved).rhythm).toBe(
+      "Per launch",
+    );
+    // Its row is gone: a new month starts empty.
+    expect(templateFor("custom_gone")).toEqual({
+      lines: [],
+      rhythm: "",
+      custom: false,
     });
   });
 });

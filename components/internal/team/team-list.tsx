@@ -14,6 +14,7 @@ import {
   allowedLevels,
   areaAccess,
   gridFromRoles,
+  isGrantedOnly,
   isStaffEmail,
   levelInfo,
   rolesFromGrid,
@@ -26,6 +27,11 @@ import type { Teammate } from "@/lib/internal/team/teammates";
 import { cn } from "@/lib/utils";
 
 const FOUNDERS = "Arindam or Amitesh";
+/** "Outreach, Influencers and Social growth": the areas Admin doesn't open. */
+const GRANTED_LABELS = AREA_LIST.filter((area) => isGrantedOnly(area.key))
+  .map((area) => area.label)
+  .join(", ")
+  .replace(/, ([^,]*)$/, " and $1");
 const EVERYONE = "My day, Tasks and Calls";
 
 /* -------------------------------------------------------------- the list */
@@ -163,8 +169,19 @@ function AccessChips({ teammate, clients }: { teammate: Teammate; clients: Clien
       </span>
     );
   }
-  if (teammate.roles.includes("admin")) return <Chip tone="violet">Admin: everything but Money</Chip>;
   const grid = gridFromRoles(teammate.roles);
+  if (teammate.roles.includes("admin")) {
+    // Admin, plus any of the areas given one by one.
+    const extra = AREA_LIST.filter((area) => isGrantedOnly(area.key) && grid[area.key]);
+    return (
+      <span className="flex flex-wrap gap-1">
+        <Chip tone="violet">Admin</Chip>
+        {extra.map((area) => (
+          <Chip key={area.key}>{area.label}</Chip>
+        ))}
+      </span>
+    );
+  }
   const chips = AREA_LIST.flatMap((area) => {
     const info = levelInfo(area.key, grid[area.key]);
     if (!info) return [];
@@ -257,6 +274,8 @@ function TeammateDialog({
   const outside = teammate ? teammate.outside : address.includes("@") && !isStaffEmail(address);
   const self = teammate?.email === me;
   const founder = teammate?.status === "owner";
+  // A founder's own details are theirs and the other founder's to change.
+  const detailsLocked = founder && !owner;
 
   // Why the access part can't change at all, if it can't.
   const lock = founder
@@ -332,7 +351,7 @@ function TeammateDialog({
           </button>
           <button
             type="button"
-            disabled={pending || (isNew && (!address.includes("@") || (outside && !owner)))}
+            disabled={pending || detailsLocked || (isNew && (!address.includes("@") || (outside && !owner)))}
             onClick={save}
             className={buttonClass("accent")}
           >
@@ -341,82 +360,84 @@ function TeammateDialog({
         </>
       }
     >
-      <Section title="Details">
-        <div className="grid gap-3 sm:grid-cols-2">
-          {isNew ? (
-            <Label label="Email">
+      <Section title="Details" note={detailsLocked ? `Only ${FOUNDERS} change a founder's details.` : undefined}>
+        <fieldset disabled={detailsLocked} className="m-0 min-w-0 space-y-3 border-0 p-0">
+          <div className="grid gap-3 sm:grid-cols-2">
+            {isNew ? (
+              <Label label="Email">
+                <input
+                  type="email"
+                  value={email}
+                  autoFocus
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="name@studio1hq.com"
+                  className={inputClass()}
+                />
+              </Label>
+            ) : null}
+            <Label label="Name" hint={isNew ? "they can change it" : undefined} className={isNew ? undefined : "sm:col-span-2"}>
               <input
-                type="email"
-                value={email}
-                autoFocus
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="name@studio1hq.com"
+                value={name}
+                maxLength={80}
+                onChange={(event) => setName(event.target.value)}
+                placeholder={address.includes("@") ? displayName({ email: address }) : "Priya Sharma"}
                 className={inputClass()}
               />
             </Label>
-          ) : null}
-          <Label label="Name" hint={isNew ? "they can change it" : undefined} className={isNew ? undefined : "sm:col-span-2"}>
-            <input
-              value={name}
-              maxLength={80}
-              onChange={(event) => setName(event.target.value)}
-              placeholder={address.includes("@") ? displayName({ email: address }) : "Priya Sharma"}
-              className={inputClass()}
-            />
-          </Label>
-        </div>
-        {outside ? null : (
-          <>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Label group label="Type">
-                <Segmented
-                  label="Type"
-                  value={kind}
-                  onChange={setKind}
-                  options={[
-                    { value: "employee", label: "Employee" },
-                    { value: "intern", label: "Intern" },
-                  ]}
-                />
-              </Label>
-              {kind === "intern" ? (
-                <Label label="Reviewer" hint="logs their days">
-                  <SuggestInput
-                    value={reviewer}
-                    onChange={setReviewer}
-                    options={reviewers.filter((option) => option !== address).map((option) => ({ value: option }))}
-                    placeholder="mentor@studio1hq.com"
+          </div>
+          {outside ? null : (
+            <>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Label group label="Type">
+                  <Segmented
+                    label="Type"
+                    value={kind}
+                    onChange={setKind}
+                    options={[
+                      { value: "employee", label: "Employee" },
+                      { value: "intern", label: "Intern" },
+                    ]}
                   />
                 </Label>
-              ) : (
-                <p className="self-end pb-2 text-[12px] text-[var(--i-faint)]">Employees log their own days on My day.</p>
-              )}
-            </div>
-            <div className="grid gap-3 sm:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)]">
-              <Label label="Designation">
-                <input
-                  value={designation}
-                  maxLength={80}
-                  onChange={(event) => setDesignation(event.target.value)}
-                  placeholder="DevRel Engineer"
-                  className={inputClass()}
-                />
-              </Label>
-              <Label label="Employee ID" hint="optional">
-                <input
-                  value={code}
-                  maxLength={24}
-                  onChange={(event) => setCode(event.target.value)}
-                  placeholder="S1-001"
-                  className={inputClass()}
-                />
-              </Label>
-              <Label label="Joined on">
-                <DateField value={joined} onChange={setJoined} />
-              </Label>
-            </div>
-          </>
-        )}
+                {kind === "intern" ? (
+                  <Label label="Reviewer" hint="logs their days">
+                    <SuggestInput
+                      value={reviewer}
+                      onChange={setReviewer}
+                      options={reviewers.filter((option) => option !== address).map((option) => ({ value: option }))}
+                      placeholder="mentor@studio1hq.com"
+                    />
+                  </Label>
+                ) : (
+                  <p className="self-end pb-2 text-[12px] text-[var(--i-faint)]">Employees log their own days on My day.</p>
+                )}
+              </div>
+              <div className="grid gap-3 sm:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)]">
+                <Label label="Designation">
+                  <input
+                    value={designation}
+                    maxLength={80}
+                    onChange={(event) => setDesignation(event.target.value)}
+                    placeholder="DevRel Engineer"
+                    className={inputClass()}
+                  />
+                </Label>
+                <Label label="Employee ID" hint="optional">
+                  <input
+                    value={code}
+                    maxLength={24}
+                    onChange={(event) => setCode(event.target.value)}
+                    placeholder="S1-001"
+                    className={inputClass()}
+                  />
+                </Label>
+                <Label label="Joined on">
+                  <DateField value={joined} onChange={setJoined} />
+                </Label>
+              </div>
+            </>
+          )}
+        </fieldset>
       </Section>
 
       <Section title="What they can open" note={outside ? undefined : `Everyone gets ${EVERYONE}.`}>
@@ -435,10 +456,23 @@ function TeammateDialog({
                   key={area.key}
                   area={area}
                   email={address}
-                  value={admin || founder ? areaAccess(["admin"], area.key) : grid[area.key]}
-                  disabled={!canEditAccess || admin || founder}
+                  value={
+                    founder
+                      ? topLevel(area)
+                      : admin && !isGrantedOnly(area.key)
+                        ? areaAccess(["admin"], area.key)
+                        : grid[area.key]
+                  }
+                  // Admin covers every area but the ones given one by one.
+                  disabled={!canEditAccess || founder || (admin && !isGrantedOnly(area.key))}
                   locked={
-                    !owner && area.key === "tasks" ? `Only ${FOUNDERS} can change who sees the team's tasks.` : null
+                    owner
+                      ? null
+                      : area.key === "tasks"
+                        ? `Only ${FOUNDERS} can change who sees the team's tasks.`
+                        : isGrantedOnly(area.key)
+                          ? `Only ${FOUNDERS} can give or take away ${area.label}.`
+                          : null
                   }
                   onChange={(level) => {
                     setAccessTouched(true);
@@ -481,9 +515,15 @@ function Section({ title, note, children }: { title: string; note?: string; chil
   );
 }
 
+/** An area's highest level: what the founders have in it. */
+function topLevel(area: AreaInfo): AreaLevel {
+  return area.levels[area.levels.length - 1].level;
+}
+
 /** What having no access to an area means. */
 function noneText(area: AreaInfo) {
   if (area.key === "tasks") return "They see and update their own tasks, like everyone.";
+  if (isGrantedOnly(area.key)) return `They don't see ${area.label}. Admin alone doesn't open it.`;
   return `They don't see ${area.key === "clients" ? "client work" : `the ${area.label.toLowerCase()} area`}.`;
 }
 
@@ -649,7 +689,7 @@ function AdminRow({
         </button>
         <span className="text-[12px] leading-relaxed text-[var(--i-muted)]">
           {note ?? ROLE_INFO.admin.description}
-          {on ? " Every area above is at its top level." : ""}
+          {on ? ` Every area above is at its top level, except ${GRANTED_LABELS}, which are given one by one.` : ""}
         </span>
       </div>
     </div>

@@ -1,7 +1,7 @@
 import "server-only";
 import { inScope, type ClientScope } from "@/lib/internal/clients/scope";
 import { cache } from "react";
-import { deleteRows, inList, insertRow, selectRows, updateRows } from "@/lib/supabase-server";
+import { deleteRows, inList, insertRow, insertRows, selectRows, updateRows } from "@/lib/supabase-server";
 import { listMembers } from "@/lib/internal/members";
 import { OWNERS } from "@/lib/internal/roles";
 import { thisMonth, type Deliverable, type DeliverableStatus } from "@/lib/internal/clients/schema";
@@ -221,6 +221,13 @@ async function insertWithId(table: string, row: Record<string, unknown>): Promis
 
 export function insertTask(row: Record<string, unknown>) {
   return insertWithId(TABLES.tasks, row);
+}
+
+/** Adds several tasks in one write: all of them or none (a pasted list). */
+export async function insertTasks(rows: Record<string, unknown>[]): Promise<TaskResult> {
+  const result = await insertRows(TABLES.tasks, rows.map((row) => ({ id: crypto.randomUUID(), ...row })));
+  if (!result.ok) return writeFailed(TABLES.tasks, result.message);
+  return { ok: true };
 }
 
 /**

@@ -59,7 +59,7 @@ const COUNT_LABEL: Record<string, string> = {
 };
 
 function href(week: string, current: string) {
-  return `/internal/clients/board${week === current ? "" : `?week=${week}`}`;
+  return `/clients/board${week === current ? "" : `?week=${week}`}`;
 }
 
 /**

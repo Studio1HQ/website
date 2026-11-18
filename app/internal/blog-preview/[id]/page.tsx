@@ -80,7 +80,7 @@ export default async function BlogPreviewPage({ params }: Props) {
       <div className="bg-[#f4efe7]">
         <div className="sticky top-0 z-50 flex items-center gap-3 border-b border-black/10 bg-[#141414] px-4 py-2 text-[13px] text-white">
           <Link
-            href={`/internal/blog/${post.id}`}
+            href={`/blog/${post.id}`}
             className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 hover:bg-white/10"
           >
             <ArrowLeft size={14} /> Back to the editor
@@ -102,11 +102,11 @@ export default async function BlogPreviewPage({ params }: Props) {
           slug={slug}
           bannerImage={post.banner_image ?? undefined}
           bannerImageAlt={post.banner_image_alt ?? title}
-          previewCover={`/internal/blog-cover/${post.id}?v=${encodeURIComponent(post.updated_at)}`}
+          previewCover={`/blog-cover/${post.id}?v=${encodeURIComponent(post.updated_at)}`}
           readingTimeMinutes={estimateReadingMinutes(content)}
           wordCount={countBlogWords(content)}
           shareUrl={`${baseUrl}/blog/${slug}`}
-          markdownUrl={`/blog/${slug}.md`}
+          markdownUrl={`${baseUrl}/blog/${slug}.md`}
           tldrSummary={post.tldr_summary.trim() || description}
           keyTakeaways={keyTakeaways}
           latest={getLatestPosts(undefined, 3)}

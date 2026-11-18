@@ -512,16 +512,23 @@ function CallRow({ call, next }: { call: Call; next: Occurrence | null }) {
 }
 
 /** My day's "Your calls today": today's calls you're in, with Join. */
-export function TodayCalls({ items }: { items: Occurrence[] }) {
+export function TodayCalls({
+  items,
+  className,
+}: {
+  items: Occurrence[];
+  /** Height and the like: with a max height, the calls scroll inside. */
+  className?: string;
+}) {
   const { calls, now: serverNow } = useCalls();
   const now = useNow(serverNow);
   const left = items.filter((item) => !item.cancelled && callState(item, now) !== "past").length;
   const next = items.find((item) => !item.cancelled && callState(item, now) !== "past");
   return (
-    <Card>
+    <Card className={cn("flex min-h-0 flex-col", className)}>
       <CardTitle
         action={
-          <Link href="/internal/calls" className="inline-flex items-center gap-1 text-[12.5px] text-[var(--i-muted)] hover:text-[var(--i-ink)]">
+          <Link href="/calls" className="inline-flex items-center gap-1 text-[12.5px] text-[var(--i-muted)] hover:text-[var(--i-ink)]">
             Your calendar <ArrowRight size={12} />
           </Link>
         }
@@ -532,14 +539,14 @@ export function TodayCalls({ items }: { items: Occurrence[] }) {
         </span>
       </CardTitle>
       {items.length ? (
-        <div className="p-3">
+        <div className="min-h-0 flex-1 overflow-y-auto p-3">
           {next && calls[next.call_id] ? (
             <p className="mb-2 px-1 text-[12.5px] text-[var(--i-muted)]">
               {callState(next, now) === "live" ? "On now: " : "Next: "}
               <span className="font-medium text-[var(--i-ink)]">{calls[next.call_id].title}</span> at {timeRange(next.start, next.minutes)}
             </p>
           ) : null}
-          <ul className="grid gap-1.5 sm:grid-cols-2">
+          <ul className="grid gap-1.5 sm:grid-cols-2 2xl:grid-cols-3">
             {items.map((item) => (
               <li key={item.key}>
                 <CallCard item={item} now={now} />

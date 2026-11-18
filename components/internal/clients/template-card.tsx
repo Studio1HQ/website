@@ -1,7 +1,13 @@
 "use client";
 
 import { useAfterSave } from "@/components/internal/clients/use-after-save";
-import { useEffect, useRef, useState, useTransition } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useTransition,
+  type FormEvent,
+} from "react";
 import {
   ArrowCounterClockwise,
   ArrowDown,
@@ -11,13 +17,13 @@ import {
   Trash,
 } from "@phosphor-icons/react";
 import {
+  createTemplate,
   resetTemplate,
   saveTemplate,
 } from "@/app/internal/(dashboard)/clients/actions";
 import {
   DELIVERABLE_KINDS,
   DUE_RULES,
-  ENGAGEMENT_TYPES,
   PERSON_ROLES,
   labelOf,
   type DeliverableKind,
@@ -27,6 +33,11 @@ import {
   type TemplateLine,
 } from "@/lib/internal/clients/schema";
 import { cn } from "@/lib/utils";
+import {
+  FormDialog,
+  FormField,
+  useDialogOpen,
+} from "@/components/internal/clients/client-dialog-shell";
 import { useToast } from "@/components/internal/toast";
 import { Select } from "@/components/internal/select";
 import { Pill } from "@/components/internal/community/ui";
@@ -68,13 +79,111 @@ const KIND_OPTIONS = DELIVERABLE_KINDS.map(({ value, label }) => ({
 }));
 const DUE_OPTIONS = DUE_RULES.map(({ value, label }) => ({ value, label }));
 
+/**
+ * "New template": a name and, if wanted, another template to copy. It
+ * shows up as a card here and as a type on the engagement form.
+ */
+export function NewTemplateButton({
+  types,
+}: {
+  types: readonly { value: string; label: string }[];
+}) {
+  const afterSave = useAfterSave();
+  const toast = useToast();
+  const [name, setName] = useState("");
+  const [from, setFrom] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [busy, start] = useTransition();
+  const [open, setOpen] = useDialogOpen(() => {
+    setName("");
+    setFrom("");
+    setError(null);
+  });
+
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    if (name.trim().length < 2) {
+      setError("Give the template a name.");
+      return;
+    }
+    setError(null);
+    start(async () => {
+      const result = await createTemplate({ name, from }).catch(() => ({
+        ok: false as const,
+        message: "The request failed. Try again in a minute.",
+      }));
+      if (!result.ok) {
+        setError(result.message);
+        return;
+      }
+      toast("success", result.message ?? "Template added");
+      setOpen(false);
+      afterSave();
+    });
+  };
+
+  return (
+    <FormDialog
+      open={open}
+      onOpenChange={setOpen}
+      trigger={
+        <button type="button" className={buttonClass("secondary", "sm")}>
+          <Plus size={13} /> New template
+        </button>
+      }
+      title="New template"
+      description="A new kind of engagement with its own monthly plan."
+      width="sm"
+      onSubmit={submit}
+      busy={busy}
+      error={error}
+      submitLabel="Create"
+    >
+      <FormField
+        id="new-template-name"
+        label="Name"
+        required
+        help="What this kind of engagement is called. It can't be renamed later."
+      >
+        <input
+          id="new-template-name"
+          type="text"
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          maxLength={60}
+          placeholder="Launch support, GTM and blogs…"
+          className={inputClass()}
+          autoFocus
+        />
+      </FormField>
+      <FormField
+        id="new-template-from"
+        label="Start from"
+        help="Copies that template's lines. You can change them after."
+      >
+        <Select
+          id="new-template-from"
+          value={from}
+          onChange={setFrom}
+          options={[{ value: "", label: "Empty" }, ...types]}
+        />
+      </FormField>
+    </FormDialog>
+  );
+}
+
 export function TemplateCard({
   type,
+  name,
+  own,
   lines,
   rhythm,
   custom,
 }: {
   type: EngagementType;
+  name: string;
+  /** A team-made type: it can be removed, not reset. */
+  own: boolean;
   lines: TemplateLine[];
   rhythm: string;
   /** Saved for this type (edited), rather than the built-in default. */
@@ -89,7 +198,6 @@ export function TemplateCard({
   const [saving, startSaving] = useTransition();
   const [confirmReset, setConfirmReset] = useState(false);
   const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const name = labelOf(ENGAGEMENT_TYPES, type);
 
   useEffect(
     () => () => {
@@ -172,7 +280,10 @@ export function TemplateCard({
         toast("error", result.message);
         return;
       }
-      toast("success", result.message ?? "Back to the default");
+      toast(
+        "success",
+        result.message ?? (own ? "Template removed" : "Back to the default"),
+      );
       setEditing(false);
       afterSave();
     });
@@ -183,8 +294,8 @@ export function TemplateCard({
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--i-line)] px-5 py-3">
         <h2 className="flex items-center gap-2 text-[13.5px] font-medium">
           {name}
-          <Pill tone={custom ? "violet" : "stone"}>
-            {custom ? "Edited" : "Default"}
+          <Pill tone={own ? "sky" : custom ? "violet" : "stone"}>
+            {own ? "Yours" : custom ? "Edited" : "Default"}
           </Pill>
         </h2>
         {!editing ? (
@@ -196,8 +307,18 @@ export function TemplateCard({
                 disabled={saving}
                 className={buttonClass(confirmReset ? "danger" : "ghost", "sm")}
               >
-                <ArrowCounterClockwise size={13} />
-                {confirmReset ? "Click again to reset" : "Reset to default"}
+                {own ? (
+                  <Trash size={13} />
+                ) : (
+                  <ArrowCounterClockwise size={13} />
+                )}
+                {own
+                  ? confirmReset
+                    ? "Click again to remove"
+                    : "Remove"
+                  : confirmReset
+                    ? "Click again to reset"
+                    : "Reset to default"}
               </button>
             ) : null}
             <button

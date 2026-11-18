@@ -459,7 +459,15 @@
     },
     "legal": {
       "terms": "Conditions générales",
-      "privacy": "Politique de confidentialité"
+      "privacy": "Politique de confidentialité",
+      "cookies": "Paramètres des cookies"
     }
+  },
+  "CookieBanner": {
+    "label": "Consentement aux cookies",
+    "text": "Nous utilisons les cookies de Google Analytics pour savoir quelles pages sont utiles. Êtes-vous d’accord ?",
+    "accept": "Accepter",
+    "decline": "Refuser",
+    "privacy": "Politique de confidentialité"
   }
 }

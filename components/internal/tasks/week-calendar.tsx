@@ -12,14 +12,18 @@ import { Select } from "@/components/internal/select";
 import { Label, Segmented, TeamDialog, useTeamAction } from "@/components/internal/team/kit";
 import { forSelectOptions } from "@/components/internal/tasks/for-options";
 import { TaskNote } from "@/components/internal/tasks/task-note";
-import type { CalendarCard } from "@/lib/internal/tasks/calendar";
+import { earliestCardDay, type CalendarCard } from "@/lib/internal/tasks/calendar";
 import { STUDIO_LINK, TASK_STATUSES, suggestLink, type LinkOption, type TaskStatus } from "@/lib/internal/tasks/shared";
 
 /* The week calendar: a column per day, a card per task, the way the old
    tracker looked. Your own cards: "+ New" on a day, click the pill to
-   change the status, click the card to edit, drag it to another day. */
+   change the status, click the card to edit, drag it to another day. On
+   someone else's week, the same for whoever may give them tasks and
+   change their cards (lib/internal/tasks/access.ts). */
 
 const DRAG = "application/x-studio1-card";
+/** Also set when the dragged card is done: a done card can't go on a day that hasn't come yet. */
+const DRAG_DONE = "application/x-studio1-done";
 
 const weekdayFormat = new Intl.DateTimeFormat("en-GB", { weekday: "short", timeZone: "UTC" });
 const dateFormat = new Intl.DateTimeFormat("en-GB", { day: "numeric", timeZone: "UTC" });
@@ -30,11 +34,6 @@ function at(day: string) {
   return new Date(`${day}T00:00:00Z`);
 }
 
-/** The 1st of last month: the earliest day a card can go on. */
-export function earliestCardDay(today: string) {
-  const [year, month] = today.split("-").map(Number);
-  return new Date(Date.UTC(year, month - 2, 1)).toISOString().slice(0, 10);
-}
 
 /** "- item", "• item", "1. item", "[x] item" → "item". */
 function cleanPasted(text: string) {
@@ -51,6 +50,8 @@ export function WeekCalendar({
   tray,
   options,
   own,
+  canAdd: mayAdd = own,
+  person,
 }: {
   days: string[];
   today: string;
@@ -59,17 +60,24 @@ export function WeekCalendar({
   options: LinkOption[];
   /** The viewer's own week: they can add, edit and move cards. */
   own: boolean;
+  /** May add cards to this week (own, or giving the person tasks). */
+  canAdd?: boolean;
+  /** Whose week it is, when it isn't the viewer's: new cards go to them. */
+  person?: { email: string; name: string };
 }) {
   const { run } = useTeamAction();
   const [over, setOver] = useState<string | null>(null);
   const earliest = earliestCardDay(today);
+  const movable = [...cards, ...tray].some((card) => canEdit(card, own));
 
   const drop = (day: string) => (event: DragEvent) => {
     event.preventDefault();
     setOver(null);
     const id = event.dataTransfer.getData(DRAG);
     const card = [...cards, ...tray].find((item) => item.kind === "task" && item.id === id);
-    if (card && card.day !== day) run(() => editTask(id, { day }));
+    if (!card || !canEdit(card, own) || card.day === day) return;
+    if (card.kind === "task" && card.status === "done" && day > today) return;
+    run(() => editTask(id, { day }));
   };
 
   return (
@@ -78,7 +86,7 @@ export function WeekCalendar({
         <section aria-label="No day yet" className="rounded-xl bg-[var(--i-sunken)] p-2 ring-1 ring-[var(--i-line)]">
           <h2 className="px-1.5 pb-2 text-[12.5px] font-medium text-[var(--i-ink-2)]">
             No day yet, or from earlier <span className="font-normal tabular-nums text-[var(--i-faint)]">{tray.length}</span>
-            {own ? <span className="font-normal text-[var(--i-faint)]"> · drag one onto a day</span> : null}
+            {movable ? <span className="font-normal text-[var(--i-faint)]"> · drag one onto a day</span> : null}
           </h2>
           <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
             {tray.map((card) => (
@@ -97,14 +105,15 @@ export function WeekCalendar({
           {days.map((day) => {
             const list = cards.filter((card) => card.day === day);
             const isToday = day === today;
-            const canAdd = own && day >= earliest;
+            const canAdd = mayAdd && day >= earliest;
             return (
               <section
                 key={day}
                 aria-label={fullFormat.format(at(day))}
                 aria-current={isToday ? "date" : undefined}
                 onDragOver={(event) => {
-                  if (own && day >= earliest && event.dataTransfer.types.includes(DRAG)) {
+                  const types = event.dataTransfer.types;
+                  if (movable && day >= earliest && types.includes(DRAG) && !(day > today && types.includes(DRAG_DONE))) {
                     event.preventDefault();
                     setOver(day);
                   }
@@ -141,7 +150,7 @@ export function WeekCalendar({
                       ))}
                     </ul>
                   ) : null}
-                  {canAdd ? <AddCard day={day} today={today} options={options} /> : null}
+                  {canAdd ? <AddCard day={day} today={today} options={options} person={person} /> : null}
                   {!list.length && !canAdd ? <p className="px-1.5 py-1 text-[12px] text-[var(--i-faint)]">Nothing.</p> : null}
                 </div>
               </section>
@@ -165,12 +174,18 @@ export function AddCard({
   today,
   options,
   open: startOpen = false,
+  inline = false,
+  person,
 }: {
   day: string;
   today: string;
   options: LinkOption[];
   /** Start with the box open, with a Day to pick at the top (My day). */
   open?: boolean;
+  /** With open: one row (what, for, day, save), for a wide card. */
+  inline?: boolean;
+  /** Giving someone else tasks: they go on this person's week, Not started. */
+  person?: { email: string; name: string };
 }) {
   const { pending, run } = useTeamAction();
   const [open, setOpen] = useState(startOpen);
@@ -190,6 +205,7 @@ export function AddCard({
   const choices = useMemo(() => forSelectOptions(options), [options]);
   const suggestion = !picked && text.trim().length > 3 ? suggestLink(text, options) : null;
   const ahead = on > today;
+  const firstName = person ? person.name.split(/[\s@]/)[0] : "";
   const several = list.length > 0;
   const empty = !several && !text.trim() && !note.trim();
 
@@ -212,7 +228,7 @@ export function AddCard({
     const items = several ? list.map((title) => ({ title, link })) : [{ title: text.trim(), notes: note.trim(), link }];
     if (!items.some((item) => item.title)) return;
     run(
-      () => addTasks(on, items),
+      () => addTasks(on, items, person ? { email: person.email } : undefined),
       () => {
         reset();
         box.current?.focus();
@@ -249,6 +265,180 @@ export function AddCard({
     );
   }
 
+  const dayPicker = (
+    <DateField
+      value={on}
+      onChange={(next) => setOn(next || day)}
+      min={earliestCardDay(today)}
+      required
+      aria-label="Day these tasks are for"
+      className={cn(
+        "w-auto px-2 text-[12.5px]",
+        inline ? "h-8" : "h-7",
+        moved && "border-[var(--i-accent)] text-[var(--i-accent-text)]",
+      )}
+    />
+  );
+
+  const movedNote = moved ? (
+    <>
+      <span>
+        {shortFormat.format(at(on))}, not {day === today ? "today" : shortFormat.format(at(day))}
+      </span>
+      <button type="button" onClick={() => setOn(day)} className="text-[var(--i-faint)] underline hover:text-[var(--i-ink)]">
+        Back to {day === today ? "today" : shortFormat.format(at(day))}
+      </button>
+    </>
+  ) : null;
+
+  const pastedList = (
+    <div className="rounded-md bg-[var(--i-sunken)] px-2 py-1.5 text-[12px]">
+      <p className="flex items-center justify-between gap-2 text-[var(--i-muted)]">
+        {list.length} tasks
+        <button
+          type="button"
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={() => setList([])}
+          className="text-[var(--i-faint)] hover:text-[var(--i-ink)]"
+        >
+          Clear
+        </button>
+      </p>
+      <ul className="mt-1 max-h-32 space-y-0.5 overflow-y-auto">
+        {list.map((title, index) => (
+          <li key={index} className="truncate">
+            {title}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+
+  const textBox = (
+    <input
+      ref={box}
+      autoFocus
+      value={text}
+      disabled={pending}
+      onChange={(event) => setText(event.target.value)}
+      onKeyDown={keys}
+      onPaste={(event: ClipboardEvent<HTMLInputElement>) => {
+        const pasted = event.clipboardData.getData("text");
+        if (!/\r?\n/.test(pasted.trim())) return;
+        event.preventDefault();
+        setList(cleanPasted(pasted).slice(0, 30));
+        setText("");
+      }}
+      maxLength={200}
+      placeholder={person ? `A task for ${firstName}` : ahead ? "What's planned?" : "What did you do?"}
+      title="Paste a list to add several at once."
+      aria-label={`New task on ${fullFormat.format(at(on))}`}
+      className={cn(inputClass("sm"), inline && "min-w-[12rem] flex-1 basis-56")}
+    />
+  );
+
+  const noteField = noting ? (
+    <textarea
+      ref={noteBox}
+      autoFocus
+      value={note}
+      disabled={pending}
+      onChange={(event) => setNote(event.target.value)}
+      onKeyDown={keys}
+      rows={inline ? 2 : 3}
+      maxLength={4000}
+      placeholder="Context for whoever checks it"
+      aria-label="Note"
+      className={cn(textareaClass, "resize-none px-2 py-1.5 text-[12.5px] leading-snug")}
+    />
+  ) : (
+    <button
+      type="button"
+      onMouseDown={(event) => event.preventDefault()}
+      onClick={() => setNoting(true)}
+      className="flex items-center gap-1 px-0.5 text-[11.5px] text-[var(--i-faint)] hover:text-[var(--i-ink)]"
+    >
+      <Plus size={11} /> Add a note
+    </button>
+  );
+
+  const linkPicker = (
+    <Select
+      aria-label="For"
+      size={inline ? "sm" : "xs"}
+      value={link}
+      onChange={(value) => {
+        setLink(value);
+        setPicked(true);
+      }}
+      options={choices}
+      className={inline ? "w-full sm:w-48" : "w-full"}
+    />
+  );
+
+  const suggestionChip =
+    suggestion && suggestion.value !== link ? (
+      <button
+        type="button"
+        onMouseDown={(event) => event.preventDefault()}
+        onClick={() => {
+          setLink(suggestion.value);
+          setPicked(true);
+          box.current?.focus();
+        }}
+        className={cn(
+          "flex items-center gap-1 rounded-md bg-[var(--i-accent-soft)] px-2 py-1 text-left text-[11.5px] text-[var(--i-accent-text)]",
+          inline ? "max-w-full" : "w-full",
+        )}
+      >
+        <Sparkle size={11} weight="fill" className="shrink-0" />
+        <span className="truncate">For {suggestion.label}?</span>
+      </button>
+    ) : null;
+
+  const buttons = (
+    <>
+      {!startOpen || !empty || moved ? (
+        <button
+          type="button"
+          onClick={close}
+          className={cn(buttonClass("ghost", inline ? "md" : "sm"), !startOpen && "flex-1 px-1")}
+        >
+          {startOpen ? "Clear" : "Cancel"}
+        </button>
+      ) : null}
+      <button
+        type="button"
+        onClick={save}
+        disabled={pending || (!several && !text.trim())}
+        title={`Saves as ${person || ahead ? "Not started" : "Done"}`}
+        className={cn(buttonClass("primary", inline ? "md" : "sm"), !startOpen && "flex-1 px-1")}
+      >
+        {pending ? "Saving…" : several ? `Save ${list.length}` : "Save"}
+      </button>
+    </>
+  );
+
+  // My day: one row (what, for, day, save); the note and hints open under it.
+  if (inline) {
+    return (
+      <div ref={panel} className="space-y-1.5">
+        {several ? pastedList : null}
+        <div className="flex flex-wrap items-center gap-1.5">
+          {several ? <span className="flex-1" /> : textBox}
+          {linkPicker}
+          {dayPicker}
+          {buttons}
+        </div>
+        {movedNote ? (
+          <p className="flex flex-wrap items-center gap-x-2 px-0.5 text-[12px] text-[var(--i-muted)]">{movedNote}</p>
+        ) : null}
+        {!several && (noting || text.trim()) ? noteField : null}
+        {suggestionChip}
+      </div>
+    );
+  }
+
   return (
     <div
       ref={panel}
@@ -264,143 +454,28 @@ export function AddCard({
       {startOpen ? (
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-[var(--i-muted)]">
           <span>Day</span>
-          <DateField
-            value={on}
-            onChange={(next) => setOn(next || day)}
-            min={earliestCardDay(today)}
-            required
-            aria-label="Day these tasks are for"
-            className={cn("h-7 w-auto px-2 text-[12.5px]", moved && "border-[var(--i-accent)] text-[var(--i-accent-text)]")}
-          />
-          {moved ? (
-            <>
-              <span>
-                {shortFormat.format(at(on))}, not {day === today ? "today" : shortFormat.format(at(day))}
-              </span>
-              <button type="button" onClick={() => setOn(day)} className="text-[var(--i-faint)] underline hover:text-[var(--i-ink)]">
-                Back to {day === today ? "today" : shortFormat.format(at(day))}
-              </button>
-            </>
-          ) : null}
+          {dayPicker}
+          {movedNote}
         </div>
       ) : null}
       {several ? (
-        <div className="rounded-md bg-[var(--i-sunken)] px-2 py-1.5 text-[12px]">
-          <p className="flex items-center justify-between gap-2 text-[var(--i-muted)]">
-            {list.length} tasks
-            <button
-              type="button"
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() => setList([])}
-              className="text-[var(--i-faint)] hover:text-[var(--i-ink)]"
-            >
-              Clear
-            </button>
-          </p>
-          <ul className="mt-1 max-h-32 space-y-0.5 overflow-y-auto">
-            {list.map((title, index) => (
-              <li key={index} className="truncate">
-                {title}
-              </li>
-            ))}
-          </ul>
-        </div>
+        pastedList
       ) : (
         <>
-          <input
-            ref={box}
-            autoFocus
-            value={text}
-            disabled={pending}
-            onChange={(event) => setText(event.target.value)}
-            onKeyDown={keys}
-            onPaste={(event: ClipboardEvent<HTMLInputElement>) => {
-              const pasted = event.clipboardData.getData("text");
-              if (!/\r?\n/.test(pasted.trim())) return;
-              event.preventDefault();
-              setList(cleanPasted(pasted).slice(0, 30));
-              setText("");
-            }}
-            maxLength={200}
-            placeholder={ahead ? "What's planned?" : "What did you do?"}
-            title="Paste a list to add several at once."
-            aria-label={`New task on ${fullFormat.format(at(on))}`}
-            className={inputClass("sm")}
-          />
-          {noting ? (
-            <textarea
-              ref={noteBox}
-              autoFocus
-              value={note}
-              disabled={pending}
-              onChange={(event) => setNote(event.target.value)}
-              onKeyDown={keys}
-              rows={3}
-              maxLength={4000}
-              placeholder="Context for whoever checks it"
-              aria-label="Note"
-              className={cn(textareaClass, "resize-none px-2 py-1.5 text-[12.5px] leading-snug")}
-            />
-          ) : (
-            <button
-              type="button"
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() => setNoting(true)}
-              className="flex items-center gap-1 px-0.5 text-[11.5px] text-[var(--i-faint)] hover:text-[var(--i-ink)]"
-            >
-              <Plus size={11} /> Add a note
-            </button>
-          )}
+          {textBox}
+          {noteField}
         </>
       )}
-      <Select
-        aria-label="For"
-        size="xs"
-        value={link}
-        onChange={(value) => {
-          setLink(value);
-          setPicked(true);
-        }}
-        options={choices}
-        className="w-full"
-      />
-      {suggestion && suggestion.value !== link ? (
-        <button
-          type="button"
-          onMouseDown={(event) => event.preventDefault()}
-          onClick={() => {
-            setLink(suggestion.value);
-            setPicked(true);
-            box.current?.focus();
-          }}
-          className="flex w-full items-center gap-1 rounded-md bg-[var(--i-accent-soft)] px-2 py-1 text-left text-[11.5px] text-[var(--i-accent-text)]"
-        >
-          <Sparkle size={11} weight="fill" className="shrink-0" />
-          <span className="truncate">For {suggestion.label}?</span>
-        </button>
-      ) : null}
-      <div className="flex items-center justify-end gap-1">
-        {!startOpen || !empty || moved ? (
-          <button
-            type="button"
-            onClick={close}
-            className={cn(buttonClass("ghost", "sm"), !startOpen && "flex-1 px-1")}
-          >
-            {startOpen ? "Clear" : "Cancel"}
-          </button>
-        ) : null}
-        <button
-          type="button"
-          onClick={save}
-          disabled={pending || (!several && !text.trim())}
-          title={`Saves as ${ahead ? "Not started" : "Done"}`}
-          className={cn(buttonClass("primary", "sm"), !startOpen && "flex-1 px-1")}
-        >
-          {pending ? "Saving…" : several ? `Save ${list.length}` : "Save"}
-        </button>
-      </div>
+      {linkPicker}
+      {suggestionChip}
+      <div className="flex items-center justify-end gap-1">{buttons}</div>
     </div>
   );
+}
+
+/** Whether the viewer may edit, move or delete a card: the page says, else your own week's tasks. */
+function canEdit(card: CalendarCard, own: boolean) {
+  return card.kind === "task" && (card.editable ?? own);
 }
 
 /** A status as a coloured dot and its name: quieter than a pill on a small card. */
@@ -495,7 +570,9 @@ function Card({
 }) {
   const { pending, run } = useTeamAction();
   const [editing, setEditing] = useState(false);
-  const editable = own && card.kind === "task";
+  /** Bumped on each open: the editor starts again from the card, not a cancelled draft. */
+  const [opened, setOpened] = useState(0);
+  const editable = canEdit(card, own);
   const done = card.kind === "task" ? card.status === "done" : card.done;
 
   return (
@@ -503,6 +580,7 @@ function Card({
       draggable={editable}
       onDragStart={(event) => {
         event.dataTransfer.setData(DRAG, card.id);
+        if (done) event.dataTransfer.setData(DRAG_DONE, "1");
         event.dataTransfer.effectAllowed = "move";
       }}
       className={cn(
@@ -515,7 +593,10 @@ function Card({
       {editable ? (
         <button
           type="button"
-          onClick={() => setEditing(true)}
+          onClick={() => {
+            setOpened((count) => count + 1);
+            setEditing(true);
+          }}
           className="flex w-full items-start gap-1.5 text-left text-[13px] font-medium leading-snug hover:text-[var(--i-accent-text)]"
         >
           {done ? <CheckCircle size={14} weight="fill" className="mt-px shrink-0 text-emerald-600 dark:text-emerald-400" /> : null}
@@ -537,7 +618,7 @@ function Card({
       {showDay && card.day ? <p className="mt-1 text-[11px] text-[var(--i-faint)]">Was for {card.day}</p> : null}
       {card.kind === "task" && card.from ? <p className="mt-1 text-[11px] text-[var(--i-faint)]">From {card.from}</p> : null}
       {editable && card.kind === "task" ? (
-        <EditCard open={editing} onOpenChange={setEditing} card={card} options={options} today={today} />
+        <EditCard key={opened} open={editing} onOpenChange={setEditing} card={card} options={options} today={today} />
       ) : null}
     </article>
   );
@@ -661,18 +742,26 @@ export function DayList({
   cards: CalendarCard[];
   options: LinkOption[];
 }) {
+  // The box on top, the cards under it; in a card with a set height (My day
+  // on a wide screen) the cards scroll on their own.
   return (
-    <div className="space-y-2 p-3">
-      {cards.length ? (
-        <ul className="grid gap-1.5 sm:grid-cols-2">
-          {cards.map((card) => (
-            <li key={`${card.kind}:${card.id}`}>
-              <Card card={card} own options={options} today={today} />
-            </li>
-          ))}
-        </ul>
-      ) : null}
-      <AddCard day={day} today={today} options={options} open />
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="shrink-0 border-b border-[var(--i-line)] p-3">
+        <AddCard day={day} today={today} options={options} open inline />
+      </div>
+      <div className="min-h-0 flex-1 overflow-y-auto p-3">
+        {cards.length ? (
+          <ul className="grid gap-1.5 sm:grid-cols-2">
+            {cards.map((card) => (
+              <li key={`${card.kind}:${card.id}`}>
+                <Card card={card} own options={options} today={today} />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="px-1 py-2 text-[12.5px] text-[var(--i-faint)]">Nothing here yet. Add what you work on as you go.</p>
+        )}
+      </div>
     </div>
   );
 }

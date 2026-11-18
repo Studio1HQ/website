@@ -1,7 +1,15 @@
 import "server-only";
 import { cache } from "react";
-import { insertRows, selectRows, updateRows } from "@/lib/supabase-server";
-import { BELL_LIMIT, NOTICE_KINDS, noticeRows, type Notice, type Notification } from "@/lib/internal/notifications/shared";
+import { deleteRows, insertRows, selectRows, updateRows } from "@/lib/supabase-server";
+import {
+  BELL_LIMIT,
+  NOTICE_KINDS,
+  noticeCutoffs,
+  noticeHref,
+  noticeRows,
+  type Notice,
+  type Notification,
+} from "@/lib/internal/notifications/shared";
 
 /**
  * Reads and writes for the bell. Every function takes the person's email
@@ -40,8 +48,8 @@ function toNotification(row: Record<string, unknown>): Notification | null {
     kind,
     title: row.title,
     body: typeof row.body === "string" ? row.body : "",
-    // Only ever a dashboard path, whatever is in the row.
-    href: row.href.startsWith("/internal") ? row.href : "/internal",
+    // Only ever a dashboard page, whatever is in the row.
+    href: noticeHref(row.href),
     read_at: typeof row.read_at === "string" ? row.read_at : null,
   };
 }
@@ -57,6 +65,22 @@ export const bellFor = cache(async (email: string): Promise<{ items: Notificatio
   const items = latest.rows.map(toNotification).filter((item): item is Notification => item !== null);
   return { items, unread: unread.ok ? (unread.total ?? 0) : items.filter((item) => !item.read_at).length };
 });
+
+/**
+ * Deletes notifications read more than KEEP_READ_DAYS ago, and every one
+ * older than KEEP_ANY_DAYS. No session check: only the daily cron route
+ * calls this, after checking its secret.
+ */
+export async function pruneNotifications(now = new Date()): Promise<{ ok: true; deleted: number } | { ok: false; message: string }> {
+  const { read, any } = noticeCutoffs(now);
+  const [wasRead, old] = await Promise.all([
+    deleteRows(TABLE, new URLSearchParams({ read_at: `lt.${read}` })),
+    deleteRows(TABLE, new URLSearchParams({ created_at: `lt.${any}` })),
+  ]);
+  const failed = [wasRead, old].find((result) => !result.ok);
+  if (failed && !failed.ok) return { ok: false, message: failed.message };
+  return { ok: true, deleted: (wasRead.ok ? wasRead.count : 0) + (old.ok ? old.count : 0) };
+}
 
 /** Marks this person's unread notifications read: one by id, or all of them. */
 export async function markRead(email: string, id?: string) {

@@ -21,7 +21,7 @@ import {
 } from "@/lib/internal/tasks/data";
 import { buildSnapshot, istDay } from "@/lib/internal/tasks/report";
 import { linkOptions } from "@/lib/internal/tasks/board-data";
-import { placeCards } from "@/lib/internal/tasks/calendar";
+import { placeCards, type CalendarCard } from "@/lib/internal/tasks/calendar";
 import {
   periodEnd,
   type CommunityCard,
@@ -188,9 +188,16 @@ export { isFounder };
 
 /**
  * One person's week on the calendar: their cards per day and the "No day
- * yet" tray (see placeCards in lib/internal/tasks/calendar.ts).
+ * yet" tray (see placeCards in lib/internal/tasks/calendar.ts). With
+ * `mayChange`, each task card says whether the viewer may change it.
  */
-export async function loadWeekCards(email: string, week: string, today: string, names?: Record<string, string>) {
+export async function loadWeekCards(
+  email: string,
+  week: string,
+  today: string,
+  names?: Record<string, string>,
+  mayChange?: (task: Task) => boolean,
+) {
   email = email.toLowerCase();
   const end = addDaysKey(week, 6);
   const [tasks, deliverables, reviewing, community, engagements] = await Promise.all([
@@ -214,12 +221,30 @@ export async function loadWeekCards(email: string, week: string, today: string, 
     names,
     clientPath,
   });
+  if (mayChange && tasks.ok) {
+    const byId = new Map(tasks.rows.map((task) => [task.id, task]));
+    const mark = (card: CalendarCard): CalendarCard => {
+      const task = card.kind === "task" ? byId.get(card.id) : undefined;
+      return card.kind === "task" ? { ...card, editable: Boolean(task && mayChange(task)) } : card;
+    };
+    placed.cards = placed.cards.map(mark);
+    placed.tray = placed.tray.map(mark);
+  }
   const failed = [tasks, deliverables, community].find((result) => !result.ok);
   return {
     ...placed,
     failed: failed && !failed.ok ? failed.message : null,
     missing: !tasks.ok && tasks.missing,
   };
+}
+
+/**
+ * The "For" picker when giving someone else a task: Studio1 and its areas,
+ * and the running clients the viewer can open (like the board's add box).
+ */
+export async function giveChoices(staff: Staff): Promise<LinkOption[]> {
+  const clients = staff.clients ? choicesFor(staff.clientScope, await engagementChoices()) : [];
+  return linkOptions({ tasks: [], deliverables: [], reviewing: [], community: [], engagements: new Map() }, clients);
 }
 
 /**
