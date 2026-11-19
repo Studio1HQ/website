@@ -753,6 +753,56 @@ function Player({ file, chapters }: { file: string; chapters: string[] }) {
   );
 }
 
+/** A launch video suite: the hero film, two thread clips and a short ad cut. */
+function LaunchVideo() {
+  const clip = (name: string, length: string, accent = false) => (
+    <div style={card(accent ? { width: 230, border: `3px solid ${PRINT}` } : { width: 230 })}>
+      <div style={flex({ height: 96, margin: "12px 12px 0", alignItems: "center", justifyContent: "center", background: INK })}>
+        <div style={flex({ width: 40, height: 40, borderRadius: 999, alignItems: "center", justifyContent: "center", background: accent ? PRINT : "rgba(244,239,231,0.18)" })}>
+          <svg width={18} height={18} viewBox="0 0 24 24">
+            <path d={PLAY_PATH} fill="#fff" />
+          </svg>
+        </div>
+      </div>
+      <div style={flex({ alignItems: "center", justifyContent: "space-between", padding: "10px 14px 12px", fontSize: 15 })}>
+        <div style={flex({ fontWeight: 500 })}>{name}</div>
+        <div style={flex({ color: MUTED })}>{length}</div>
+      </div>
+    </div>
+  );
+  return (
+    <div style={flex({ gap: 18, alignItems: "flex-start" })}>
+      <div style={card({ width: 440 })}>
+        <div style={flex({ alignItems: "center", justifyContent: "space-between", padding: "14px 20px", borderBottom: `1px solid ${LINE}`, background: CREAM })}>
+          <div style={flex({ fontSize: 17, fontWeight: 500 })}>hero.mp4</div>
+          <Tag>2:30</Tag>
+        </div>
+        <div style={flex({ position: "relative", height: 300, margin: "20px 22px 0", alignItems: "center", justifyContent: "center", background: INK })}>
+          <div style={flex({ position: "absolute", left: 22, top: 22, flexDirection: "column", gap: 11 })}>
+            <Bar width={190} height={10} color="rgba(244,239,231,0.3)" />
+            <Bar width={120} height={10} color={PRINT} />
+          </div>
+          <div style={flex({ width: 92, height: 92, borderRadius: 999, alignItems: "center", justifyContent: "center", background: PRINT })}>
+            <svg width={38} height={38} viewBox="0 0 24 24">
+              <path d={PLAY_PATH} fill="#fff" />
+            </svg>
+          </div>
+        </div>
+        <div style={flex({ padding: "18px 22px 24px" })}>
+          <div style={flex({ width: "100%", height: 8, background: CREAM })}>
+            <div style={flex({ width: "38%", background: PRINT })} />
+          </div>
+        </div>
+      </div>
+      <div style={flex({ flexDirection: "column", gap: 14 })}>
+        {clip("clip 1", "0:35")}
+        {clip("clip 2", "0:40")}
+        {clip("ad cut", "0:15", true)}
+      </div>
+    </div>
+  );
+}
+
 /** A launch timeline from prep to the week after, launch day in print orange. */
 function LaunchPlan() {
   const rows: [string, string][] = [
@@ -1248,6 +1298,7 @@ const ART: Record<CoverArtKey, (post: CoverPost) => Art> = {
       { bar: 260, accent: true },
     ]),
   }),
+  "launch-video": () => ({ label: "launch-videos.fig", node: <LaunchVideo />, scale: 0.95 }),
   video: () => ({ label: "demo.fig", node: <Player file="demo.mp4" chapters={["Install", "First call", "Deploy"]} /> }),
   youtube: () => ({ label: "channel.fig", node: <Player file="youtube / tutorial" chapters={["Intro", "Build", "Ship"]} /> }),
   "what-is": (post) => {
