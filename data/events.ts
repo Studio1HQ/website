@@ -106,7 +106,7 @@ export const EVENTS: StudioEvent[] = [
     summary:
       'Shivay Lamba and Vikash Tiwary ran the workshop "Building AI-Powered React Apps with TanStack AI".',
   },
-  // Nebius: hidden until Nebius approves marketing use.
+  // need-review
   // {
   //   slug: "nebius-podcast-dylan-bristot",
   //   name: "Podcast with Dylan Bristot of Nebius",
@@ -217,7 +217,7 @@ export const EVENTS: StudioEvent[] = [
       "/assets/events/ai-engineer-singapore/05.webp",
     ],
     summary:
-      // Nebius: hidden until Nebius approves marketing use.
+      // need-review
       // "Met an engineer from Z.ai, the team behind the GLM models, Tejas, and the Nebius, Vercel and Cursor teams.",
       "Met an engineer from Z.ai, the team behind the GLM models, Tejas, and the Vercel and Cursor teams.",
   },
@@ -435,7 +435,7 @@ export const EVENTS: StudioEvent[] = [
     summary:
       "A walkthrough of KitOps, the CNCF-hosted open-source project for packaging models, data and code into one versioned, reproducible artifact.",
   },
-  // Nebius: hidden until Nebius approves marketing use.
+  // need-review
   // {
   //   slug: "nebius-webinar",
   //   name: "Nebius webinar",

@@ -31,7 +31,7 @@ export const STUDIO1_AGENCY: Agency = {
   ],
   bestFor:
     "Devtool, AI, and open-source teams that want content, launches, and community work from one team, with public results.",
-  // Nebius: hidden until Nebius approves marketing use.
+  // need-review
   // clients: "Nebius, Memori, LiteLLM, Permit.io",
   clients: "Memori, LiteLLM, Permit.io, Jozu",
   pricing: "No public price list. Book a call to scope it.",

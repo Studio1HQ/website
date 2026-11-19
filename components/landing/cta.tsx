@@ -24,7 +24,7 @@ const RING_SHOTS = [
   "/case-studies/jozu/kubecon-jozu-booth.webp",
   "/case-studies/tensorlake/Toon-blog.webp",
   "/case-studies/openlore/openlore-homepage.webp",
-  // Nebius: hidden until Nebius approves marketing use.
+  // need-review
   // "/case-studies/nebius/workshop-dublin-poster.webp",
   "/case-studies/corsair/corsair-homepage.webp",
   "/case-studies/tensorlake/tensorlake-home.webp",

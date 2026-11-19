@@ -565,7 +565,7 @@ export default function PaperHero() {
                     "Community booth · Jozu",
                     "/assets/logos/jozu.webp",
                   ],
-                  // Nebius: hidden until Nebius approves marketing use.
+                  // need-review
                   // [
                   //   "Workshop, Dublin",
                   //   "Hands-on AI agents · Nebius",

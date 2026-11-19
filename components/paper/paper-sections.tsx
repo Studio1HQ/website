@@ -1185,7 +1185,7 @@ function MarkedSummary({ text, mark }: { text: string; mark: string }) {
  * "Nebius" to show its sheet again.
  */
 const FEATURED = [
-  // Nebius: hidden until Nebius approves marketing use.
+  // need-review
   // "Nebius",
   "Memori",
   "LiteLLM",
@@ -2077,7 +2077,7 @@ export function PaperWork() {
 /** One real Studio1 screen per reason, in homeFeatures order. */
 const REASON_SHOTS = [
   "/case-studies/brightdata/brightdata-homepage.webp",
-  // Nebius: hidden until Nebius approves marketing use.
+  // need-review
   // "/case-studies/nebius/token-factory.webp",
   "/case-studies/openlore/openlore-homepage.webp",
   "/case-studies/tensorlake/tensorlake-home.webp",

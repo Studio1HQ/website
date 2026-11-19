@@ -58,7 +58,7 @@ export const homeFeatures: Feature[] = [
   },
   {
     title: "Collaboration",
-    // Nebius: hidden until Nebius approves marketing use.
+    // need-review
     // description:
     //   "30+ successful partnerships with fast-moving teams. Trusted by industry leaders like Permit.io, Bright Data, and Nebius.",
     description:
@@ -67,7 +67,7 @@ export const homeFeatures: Feature[] = [
   },
   {
     title: "Testimonials",
-    // Nebius: hidden until Nebius approves marketing use.
+    // need-review
     // description:
     //   "Trusted by founders, CMOs, and DevRel teams at companies like Jozu, Nebius, and Velt to drive developer impact.",
     description:

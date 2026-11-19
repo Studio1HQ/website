@@ -60,7 +60,7 @@ const githubFaqItems: FAQItem[] = [
   },
   {
     question: "Can you get our repo trending on GitHub or Trendshift?",
-    // Nebius: hidden until Nebius approves marketing use.
+    // need-review
     // answer:
     //   "Nobody can promise a trending spot, but the same work that earns stars also earns trending runs. Nebius's open-source library of 130+ agent examples reached 16K+ stars and trended on GitHub twice, and OpenLore reached #3 in Go on Trendshift.",
     answer:

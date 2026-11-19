@@ -168,7 +168,7 @@ export const AWESOME_STACK = [
 
 /** Sponsors listed in the Awesome AI Apps README. */
 export const AWESOME_SPONSORS = [
-  // Nebius: hidden until Nebius approves marketing use.
+  // need-review
   // "Nebius Token Factory",
   // "Bright Data", hidden while its case study is in review
   "ScrapeGraphAI",
@@ -224,7 +224,7 @@ export const OSS_REPOS: OssRepo[] = [
       "A proactive agent app on open models. Bots send a morning brief, check your connected apps and flag what needs you. Anything that sends, posts or pays waits for your OK.",
     language: "TypeScript",
     license: "MIT",
-    // Nebius: hidden until Nebius approves marketing use.
+    // need-review
     // stack: ["Mastra", "Nebius Token Factory", "Tavily", "Browserbase"],
     stack: ["Mastra", "Tavily", "Browserbase"],
     featured: true,
@@ -239,7 +239,7 @@ export const OSS_REPOS: OssRepo[] = [
       "An open-source alternative to Grok Bot. Each bot has its own model, tools, memory and cloud browser. Talk to one, or put several in a room and let them split the work.",
     language: "TypeScript",
     license: "MIT",
-    // Nebius: hidden until Nebius approves marketing use.
+    // need-review
     // stack: ["Mastra", "Nebius Token Factory", "Browserbase"],
     stack: ["Mastra", "Browserbase"],
     featured: true,
@@ -320,7 +320,7 @@ export const OSS_REPOS: OssRepo[] = [
       "A bounded tool-calling agent that fixes real faults on a Civo cluster, with policy-checked changes, sandboxed tests and hidden verification.",
     language: "Python",
     license: "Apache-2.0",
-    // Nebius: hidden until Nebius approves marketing use.
+    // need-review
     // stack: ["Kubernetes", "Civo", "Nebius Token Factory"],
     stack: ["Kubernetes", "Civo"],
     stars: 0,
@@ -344,7 +344,7 @@ export const OSS_REPOS: OssRepo[] = [
     name: "Muse Spark Open Bench",
     tagline: "Meta's Muse Spark Open, reviewing 50 real merged pull requests.",
     description:
-      // Nebius: hidden until Nebius approves marketing use.
+      // need-review
       // "An open benchmark of code review on pull requests from popular open-source projects, run on Nebius Token Factory.",
       "An open benchmark of code review on pull requests from popular open-source projects.",
     language: "TypeScript",
@@ -372,12 +372,12 @@ export const OSS_REPOS: OssRepo[] = [
     name: "AgentC",
     tagline: "A coding agent you host, with a sandbox for every repo.",
     description:
-      // Nebius: hidden until Nebius approves marketing use.
+      // need-review
       // "Pi runs on your app server with Nebius Token Factory; Daytona sandboxes run the clones, shell commands and the sites the agent builds.",
       "Pi runs on your app server; Daytona sandboxes run the clones, shell commands and the sites the agent builds.",
     language: "TypeScript",
     license: null,
-    // Nebius: hidden until Nebius approves marketing use.
+    // need-review
     // stack: ["Pi", "Daytona", "Nebius Token Factory"],
     stack: ["Pi", "Daytona"],
     stars: 2,
@@ -408,7 +408,7 @@ export const AWESOME_PICKS: AwesomePick[] = [
     description:
       "A 3D Shark Tank room where three investor sharks question your pitch round by round, then write a deal memo.",
     category: "advanced",
-    // Nebius: hidden until Nebius approves marketing use.
+    // need-review
     // tags: ["Mastra", "Nebius", "3D", "SQLite"],
     tags: ["Mastra", "3D", "SQLite"],
     featured: true,
@@ -445,7 +445,7 @@ export const AWESOME_PICKS: AwesomePick[] = [
     description:
       "Two coding models, seven challenges, hidden tests, partial-credit scoring and an independent judge.",
     category: "advanced",
-    // Nebius: hidden until Nebius approves marketing use.
+    // need-review
     // tags: ["Benchmark", "Nebius", "Evals"],
     tags: ["Benchmark", "Evals"],
   },
@@ -455,7 +455,7 @@ export const AWESOME_PICKS: AwesomePick[] = [
     description:
       "A council of agents that debates your question with NVIDIA's Cosmos reasoning model.",
     category: "advanced",
-    // Nebius: hidden until Nebius approves marketing use.
+    // need-review
     // tags: ["LangGraph", "NVIDIA Cosmos", "Nebius"],
     tags: ["LangGraph", "NVIDIA Cosmos"],
   },
@@ -498,7 +498,7 @@ export const AWESOME_PICKS: AwesomePick[] = [
     description:
       "A tool-calling agent that spots patient deterioration with NEWS2, qSOFA, personal baselines and trends.",
     category: "advanced",
-    // Nebius: hidden until Nebius approves marketing use.
+    // need-review
     // tags: ["Tool calling", "Healthcare", "Nebius"],
     tags: ["Tool calling", "Healthcare"],
   },
@@ -518,7 +518,7 @@ export const AWESOME_PICKS: AwesomePick[] = [
     description:
       "Talk to your codebase: summaries, architecture Q&A and optional edits through the Cursor SDK.",
     category: "voice",
-    // Nebius: hidden until Nebius approves marketing use.
+    // need-review
     // tags: ["Deepgram", "Cursor SDK", "Nebius"],
     tags: ["Deepgram", "Cursor SDK"],
     featured: true,
@@ -529,7 +529,7 @@ export const AWESOME_PICKS: AwesomePick[] = [
     description:
       "A voice coach that listens to your pitch and asks the questions an investor would.",
     category: "voice",
-    // Nebius: hidden until Nebius approves marketing use.
+    // need-review
     // tags: ["Gradium", "LangChain", "Nebius"],
     tags: ["Gradium", "LangChain"],
   },
@@ -672,7 +672,7 @@ export const AWESOME_PICKS: AwesomePick[] = [
     description:
       "Ask a video a question and jump to the exact moment that answers it.",
     category: "rag",
-    // Nebius: hidden until Nebius approves marketing use.
+    // need-review
     // tags: ["Gemini embeddings", "Weaviate", "Nebius"],
     tags: ["Gemini embeddings", "Weaviate"],
     featured: true,
@@ -691,7 +691,7 @@ export const AWESOME_PICKS: AwesomePick[] = [
     description:
       "Extracts a knowledge graph from your documents and answers with Cypher-backed retrieval.",
     category: "rag",
-    // Nebius: hidden until Nebius approves marketing use.
+    // need-review
     // tags: ["Neo4j", "GraphRAG", "Nebius"],
     tags: ["Neo4j", "GraphRAG"],
     featured: true,
@@ -710,7 +710,7 @@ export const AWESOME_PICKS: AwesomePick[] = [
     description:
       "Local OCR that finds math errors and duplicate charges, and pins the evidence on the scan.",
     category: "rag",
-    // Nebius: hidden until Nebius approves marketing use.
+    // need-review
     // tags: ["LiteParse", "OCR", "Nebius"],
     tags: ["LiteParse", "OCR"],
   },
@@ -736,7 +736,7 @@ export const AWESOME_PICKS: AwesomePick[] = [
     description:
       "Teacher-student distillation: generate support data, curate it in Data Lab, fine-tune and deploy.",
     category: "fine-tuning",
-    // Nebius: hidden until Nebius approves marketing use.
+    // need-review
     // tags: ["LoRA", "Distillation", "Nebius"],
     tags: ["LoRA", "Distillation"],
     featured: true,
@@ -764,7 +764,7 @@ export const AWESOME_PICKS: AwesomePick[] = [
     path: "simple_ai_agents/browser_agent",
     description: "Drives a real browser to finish tasks on the web.",
     category: "simple",
-    // Nebius: hidden until Nebius approves marketing use.
+    // need-review
     // tags: ["browser-use", "Nebius"],
     tags: ["browser-use"],
   },
@@ -821,7 +821,7 @@ export const AWESOME_PICKS: AwesomePick[] = [
     path: "starter_ai_agents/langgraph_starter",
     description: "LangGraph's prebuilt ReAct agent with custom tools.",
     category: "starter",
-    // Nebius: hidden until Nebius approves marketing use.
+    // need-review
     // tags: ["LangGraph", "Nebius"],
     tags: ["LangGraph"],
   },
@@ -830,7 +830,7 @@ export const AWESOME_PICKS: AwesomePick[] = [
     path: "starter_ai_agents/mastra_starter",
     description: "A TypeScript-first agent with a custom tool.",
     category: "starter",
-    // Nebius: hidden until Nebius approves marketing use.
+    // need-review
     // tags: ["Mastra", "TypeScript", "Nebius"],
     tags: ["Mastra", "TypeScript"],
   },

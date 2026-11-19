@@ -608,7 +608,7 @@ function RepoCard() {
       tag="Trending"
       tagIcon={TrendUp}
       value="16K+"
-      // Nebius: hidden until Nebius approves marketing use.
+      // need-review
       // note="stars for Nebius"
       note="GitHub stars"
     >
@@ -621,7 +621,7 @@ function RepoCard() {
           </span>
         </p>
         <p className="mt-1.5 flex items-center gap-1.5 text-[10.5px] text-[#141414]/55">
-          {/* Nebius: hidden until Nebius approves marketing use.
+          {/* need-review
           <Logo src="/assets/logos/nebius.webp" size={16} />
           Powered by Nebius · maintained by Studio1 */}
           Maintained by Studio1
@@ -1098,12 +1098,12 @@ export const DOCS_SIDES: HeroSides = {
 export const DEVREL_SIDES: HeroSides = {
   cards: [
     { label: "pass · kubecon-india", card: <PassCard /> },
-    // Nebius: hidden until Nebius approves marketing use.
+    // need-review
     // { label: "workshop · dublin", card: <WorkshopCard /> },
     { label: "slideflow-demo.mp4", card: <PlayerCard /> },
   ],
   stats: [
-    // Nebius: hidden until Nebius approves marketing use.
+    // need-review
     // {
     //   label: "stat · integrations",
     //   value: "29",
@@ -1238,7 +1238,7 @@ export const REDDIT_SIDES: HeroSides = {
       client: "Entelligence AI",
       icon: RedditLogo,
     },
-    // Nebius: hidden until Nebius approves marketing use.
+    // need-review
     // {
     //   label: "stat · nebius-reddit",
     //   value: "221",

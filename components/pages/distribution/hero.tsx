@@ -17,7 +17,7 @@ export default function Hero() {
         { value: "304K+", label: "Reddit impressions for Entelligence AI" },
         { value: "100K+", label: "OpenLore impressions in one month" },
         { value: "50K", label: "on one daily.dev post" },
-        // Nebius: hidden until Nebius approves marketing use.
+        // need-review
         // { value: "40+", label: "videos and shorts for Nebius" },
       ]}
       highlights={["rebuilt for"]}

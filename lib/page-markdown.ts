@@ -259,7 +259,7 @@ export function pageToMarkdown(doc: Document, options: PageMarkdownOptions) {
     block("About Studio1", [
       "Studio1 is a DevRel and developer marketing agency for devtool, AI, and open-source teams, covering technical content, docs, video, launches, and community.",
       "- Services: technical content, SEO and AEO, developer relations, documentation, product launches and community growth",
-      // Nebius: hidden until Nebius approves marketing use.
+      // need-review
       // "- Clients include Memori, Nebius, LiteLLM, Permit.io, Jozu, OpenLore and ScrapeGraphAI",
       "- Clients include Memori, LiteLLM, Permit.io, Jozu, OpenLore and ScrapeGraphAI",
       "- Contact: contact@studio1hq.com · https://cal.com/studio1/collab",

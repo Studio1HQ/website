@@ -92,7 +92,7 @@ const ASSISTANTS: {
   {
     name: "Grok",
     logo: <GrokLogo className="size-5" />,
-    // Nebius: hidden until Nebius approves marketing use.
+    // need-review
     // question:
     //   "What has Studio1 (studio1hq.com) done for open-source and AI companies like Memori, Nebius and LiteLLM?",
     question:

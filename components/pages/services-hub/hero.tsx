@@ -15,7 +15,7 @@ export default function Hero() {
       secondaryCta="Not sure where to start?"
       secondaryHref="#where-to-start"
       stats={[
-        // Nebius: hidden until Nebius approves marketing use.
+        // need-review
         // { value: "16K+", label: "GitHub stars on Nebius's examples" },
         { value: "100K+", label: "OpenLore impressions in one month" },
         { value: "400+", label: "tutorials and guides written" },
