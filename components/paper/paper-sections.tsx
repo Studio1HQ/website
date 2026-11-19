@@ -827,7 +827,7 @@ export function PaperServices() {
                   {/* Hover: flat print orange with ink grain rises from the bottom edge */}
                   <span
                     aria-hidden
-                    className="pointer-events-none !absolute inset-0 -z-[5] translate-y-8 opacity-0 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-0 group-hover:opacity-100 motion-reduce:translate-y-0"
+                    className="pointer-events-none !absolute inset-0 -z-[5] translate-y-8 opacity-0 transition-[opacity,transform] duration-700 ease-out-quint group-hover:translate-y-0 group-hover:opacity-100 motion-reduce:translate-y-0"
                     style={{ background: PRINT }}
                   >
                     <span
@@ -1396,7 +1396,7 @@ function TwoInkStat({
   return (
     <span className="relative inline-block whitespace-nowrap tabular-nums">
       <span
-        className="absolute left-0 top-0 translate-x-[0.045em] translate-y-[0.035em] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/sheet:translate-x-0 group-hover/sheet:translate-y-0"
+        className="absolute left-0 top-0 translate-x-[0.045em] translate-y-[0.035em] transition-transform duration-700 ease-s1 group-hover/sheet:translate-x-0 group-hover/sheet:translate-y-0"
         style={{ color: PRINT }}
       >
         {figure}
@@ -1574,7 +1574,7 @@ function TapedPrint({
   return (
     <span
       className={cn(
-        "absolute block bg-white shadow-[0_22px_40px_-24px_rgba(20,20,20,0.55),0_1px_0_rgba(20,20,20,0.05)] ring-1 ring-[#141414]/[0.06] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
+        "absolute block bg-white shadow-[0_22px_40px_-24px_rgba(20,20,20,0.55),0_1px_0_rgba(20,20,20,0.05)] ring-1 ring-[#141414]/[0.06] transition-transform duration-700 ease-s1",
         className,
       )}
       style={{ aspectRatio: print.ratio }}
@@ -1899,7 +1899,7 @@ function ProofSheet({
                 second.ratio > 3 ? "w-[60%]" : "w-[44%]",
               )}
             />
-            <div className="absolute bottom-[4%] left-0 z-20 w-[74%] max-w-[340px] -rotate-[1.5deg] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/sheet:rotate-0 sm:w-[62%]">
+            <div className="absolute bottom-[4%] left-0 z-20 w-[74%] max-w-[340px] -rotate-[1.5deg] transition-transform duration-700 ease-s1 group-hover/sheet:rotate-0 sm:w-[62%]">
               <SignOff work={work} active={active} />
             </div>
           </div>
@@ -2188,7 +2188,7 @@ export function PaperReasons() {
                       aria-hidden={isCopy || undefined}
                       tabIndex={isCopy ? -1 : undefined}
                       className={cn(
-                        "whitespace-nowrap rounded-full px-7 py-3.5 text-[26px] font-medium leading-none tracking-[-0.03em] transition-[background-color,color,box-shadow] duration-[420ms] ease-[cubic-bezier(0.4,0,0.2,1)] md:text-[34px]",
+                        "whitespace-nowrap rounded-full px-7 py-3.5 text-[26px] font-medium leading-none tracking-[-0.03em] transition-[background-color,color,box-shadow] duration-420 ease-in-out md:text-[34px]",
                         isActive
                           ? "bg-white text-[#141414] ring-1 ring-inset ring-white"
                           : "text-white/90 ring-1 ring-inset ring-white/40 hover:ring-white/80",
@@ -2236,7 +2236,7 @@ export function PaperReasons() {
             {REASON_SHOTS.map((src, index) => (
               <span
                 key={src}
-                className="absolute inset-0 overflow-hidden rounded-[6px] bg-white shadow-[0_18px_44px_-18px_rgba(20,20,20,0.4)] ring-1 ring-[#141414]/10 transition-[transform,opacity] duration-[1100ms] ease-[cubic-bezier(0.65,0,0.35,1)] will-change-transform"
+                className="absolute inset-0 overflow-hidden rounded-[6px] bg-white shadow-[0_18px_44px_-18px_rgba(20,20,20,0.4)] ring-1 ring-[#141414]/10 transition-[transform,opacity] duration-1100 ease-in-out-cubic will-change-transform"
                 style={shotStyle(mod(index - active, total), total)}
               >
                 <Image

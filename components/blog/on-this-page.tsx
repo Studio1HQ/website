@@ -126,7 +126,7 @@ export function OnThisPage() {
         {marker ? (
           <span
             aria-hidden
-            className="absolute left-[4px] top-3 w-px bg-[#f97316] transition-[height] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+            className="absolute left-[4px] top-3 w-px bg-[#f97316] transition-[height] duration-500 ease-s1"
             style={{ height: Math.max(0, marker.top + marker.height / 2 - 12) }}
           />
         ) : null}
@@ -151,7 +151,7 @@ export function OnThisPage() {
                 <span
                   aria-hidden
                   className={cn(
-                    "relative mt-[5px] size-[9px] shrink-0 rounded-full border-[1.5px] transition-[background-color,border-color,box-shadow,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
+                    "relative mt-[5px] size-[9px] shrink-0 rounded-full border-[1.5px] transition-[background-color,border-color,box-shadow,transform] duration-500 ease-s1",
                     filled
                       ? "border-[#f97316] bg-[#f97316]"
                       : "border-[#141414]/25 bg-white",

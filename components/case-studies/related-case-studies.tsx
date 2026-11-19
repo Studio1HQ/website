@@ -35,7 +35,7 @@ function RelatedCard({ study }: { study: CaseStudyMeta }) {
       >
         <div className="flex items-center">
           <span
-            className={`${RIM} relative z-[1] translate-x-[6px] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-[12px] motion-reduce:transform-none`}
+            className={`${RIM} relative z-[1] translate-x-[6px] transition-transform duration-500 ease-s1 group-hover:translate-x-[12px] motion-reduce:transform-none`}
           >
             <span className="flex size-full items-center justify-center rounded-full bg-white">
               <Image
@@ -49,7 +49,7 @@ function RelatedCard({ study }: { study: CaseStudyMeta }) {
             </span>
           </span>
           <span
-            className={`${RIM} relative z-[2] -translate-x-[6px] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-x-[12px] motion-reduce:transform-none`}
+            className={`${RIM} relative z-[2] -translate-x-[6px] transition-transform duration-500 ease-s1 group-hover:-translate-x-[12px] motion-reduce:transform-none`}
           >
             <span className="relative block size-full overflow-hidden rounded-full bg-white">
               {logo ? (

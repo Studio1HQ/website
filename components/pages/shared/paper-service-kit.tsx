@@ -188,7 +188,7 @@ function CasePill({
 /** Logo tile that breaks out of the banner's top edge. */
 function PoppingMark({ href }: { href: string }) {
   return (
-    <span className="absolute -top-7 right-7 rotate-[6deg] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1 group-hover:rotate-[2deg]">
+    <span className="absolute -top-7 right-7 rotate-[6deg] transition-transform duration-500 ease-s1 group-hover:-translate-y-1 group-hover:rotate-[2deg]">
       <ClientMark
         href={href}
         className="size-16 rounded-[6px] bg-white p-2.5 shadow-[0_18px_34px_-16px_rgba(20,20,20,0.55)]"
@@ -211,7 +211,7 @@ function CaseFrame({
   imageHeight: string;
 }) {
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-[6px] bg-white p-1.5 text-[#141414] shadow-[0_1px_0_rgba(27,23,20,0.06)] ring-1 ring-[#141414]/[0.07] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1">
+    <div className="flex h-full flex-col overflow-hidden rounded-[6px] bg-white p-1.5 text-[#141414] shadow-[0_1px_0_rgba(27,23,20,0.06)] ring-1 ring-[#141414]/[0.07] transition-transform duration-700 ease-s1 group-hover:-translate-y-1">
       <div className="flex items-center gap-2 px-2 pb-2 pt-1">
         <ClientMark href={study.href} className="size-6 rounded-[5px] p-0.5" />
         <span className="truncate text-[12.5px] font-medium">
@@ -304,7 +304,7 @@ function EdgeChip({
     <span
       aria-hidden
       className={cn(
-        "pointer-events-none absolute z-10 hidden items-center gap-2 rounded-full bg-[#fbf9f5] py-1.5 pl-1.5 pr-4 text-[12.5px] font-medium text-[#141414] shadow-[0_14px_30px_-14px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/[0.07] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1 md:flex",
+        "pointer-events-none absolute z-10 hidden items-center gap-2 rounded-full bg-[#fbf9f5] py-1.5 pl-1.5 pr-4 text-[12.5px] font-medium text-[#141414] shadow-[0_14px_30px_-14px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/[0.07] transition-transform duration-700 ease-s1 group-hover:-translate-y-1 md:flex",
         className,
       )}
     >

@@ -189,11 +189,11 @@ function BookCall({
       >
         <ArrowUpRight
           weight="bold"
-          className="size-4 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-5 group-hover:translate-x-5"
+          className="size-4 transition-transform duration-500 ease-s1 group-hover:-translate-y-5 group-hover:translate-x-5"
         />
         <ArrowUpRight
           weight="bold"
-          className="absolute size-4 -translate-x-5 translate-y-5 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-0 group-hover:translate-y-0"
+          className="absolute size-4 -translate-x-5 translate-y-5 transition-transform duration-500 ease-s1 group-hover:translate-x-0 group-hover:translate-y-0"
         />
       </span>
     </a>
@@ -383,7 +383,7 @@ function OfferKey({
     <span
       aria-hidden
       className={cn(
-        "relative flex shrink-0 items-center justify-center transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:[transform:translateY(-6px)_rotateX(12deg)_rotateY(-16deg)] motion-reduce:transform-none",
+        "relative flex shrink-0 items-center justify-center transition-transform duration-700 ease-s1 group-hover:[transform:translateY(-6px)_rotateX(12deg)_rotateY(-16deg)] motion-reduce:transform-none",
         large ? "size-[92px] rounded-[6px]" : "size-[68px] rounded-[6px]",
       )}
       style={{
@@ -425,7 +425,7 @@ function OfferCard({
       id={offer.id}
       {...cardReveal(reduceMotion, position)}
       className={cn(
-        "group relative isolate flex scroll-mt-28 flex-col gap-1 rounded-[6px] p-2.5 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 motion-reduce:transform-none",
+        "group relative isolate flex scroll-mt-28 flex-col gap-1 rounded-[6px] p-2.5 transition-transform duration-500 ease-s1 hover:-translate-y-1 motion-reduce:transform-none",
         core
           ? "text-white"
           : "bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.07] shadow-[0_1px_0_rgba(20,20,20,0.04),0_22px_44px_-32px_rgba(20,20,20,0.35)]",
@@ -541,7 +541,7 @@ function OfferCard({
                   >
                     <span
                       className={cn(
-                        "block whitespace-nowrap rounded-full bg-white/25 px-3.5 py-1.5 text-[13px] font-medium text-white ring-1 ring-inset ring-white/40 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
+                        "block whitespace-nowrap rounded-full bg-white/25 px-3.5 py-1.5 text-[13px] font-medium text-white ring-1 ring-inset ring-white/40 transition-transform duration-700 ease-s1",
                         slot === 0
                           ? "rotate-[4deg] group-hover:-translate-y-1.5"
                           : "-rotate-[3deg] group-hover:translate-x-1.5",
@@ -740,7 +740,7 @@ function MoreProofCard() {
       {/* Half-cropped screenshot sliding out of the corner */}
       <span
         aria-hidden
-        className="pointer-events-none absolute -bottom-10 -right-12 w-[58%] rotate-[-6deg] overflow-hidden rounded-[6px] bg-white p-1.5 shadow-[0_30px_60px_-30px_rgba(20,20,20,0.5)] ring-1 ring-[#141414]/[0.06] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-x-2 group-hover:-translate-y-2 group-hover:rotate-[-3deg]"
+        className="pointer-events-none absolute -bottom-10 -right-12 w-[58%] rotate-[-6deg] overflow-hidden rounded-[6px] bg-white p-1.5 shadow-[0_30px_60px_-30px_rgba(20,20,20,0.5)] ring-1 ring-[#141414]/[0.06] transition-transform duration-700 ease-s1 group-hover:-translate-x-2 group-hover:-translate-y-2 group-hover:rotate-[-3deg]"
       >
         {/* Not used as any case card's art, so it never repeats beside one */}
         <Image

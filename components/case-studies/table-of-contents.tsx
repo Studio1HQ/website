@@ -239,13 +239,13 @@ export function TableOfContents({
             className="group mt-2 flex items-center gap-3 rounded-[6px] bg-[#141414] p-2 pr-4 text-[13px] font-medium text-white shadow-[0_1px_0_rgba(27,23,20,0.06)] transition-colors hover:bg-[#262626]"
           >
             {/* The calendar; on hover the Studio1 mark slides in and merges */}
-            <span className="relative flex h-8 w-8 shrink-0 items-center transition-[width] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:w-[46px] motion-reduce:transition-none">
+            <span className="relative flex h-8 w-8 shrink-0 items-center transition-[width] duration-500 ease-s1 group-hover:w-[46px] motion-reduce:transition-none">
               <span className="relative z-[1] flex size-8 items-center justify-center rounded-full bg-white/10 ring-1 ring-inset ring-white/15">
                 <CalendarDots weight="bold" className="size-4" />
               </span>
               <span
                 aria-hidden
-                className="absolute left-0 z-[2] flex size-8 translate-x-[22px] scale-75 items-center justify-center rounded-full bg-white opacity-0 shadow-[0_0_0_2px_#141414] transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-[14px] group-hover:scale-100 group-hover:opacity-100 motion-reduce:transition-none"
+                className="absolute left-0 z-[2] flex size-8 translate-x-[22px] scale-75 items-center justify-center rounded-full bg-white opacity-0 shadow-[0_0_0_2px_#141414] transition-[transform,opacity] duration-500 ease-s1 group-hover:translate-x-[14px] group-hover:scale-100 group-hover:opacity-100 motion-reduce:transition-none"
               >
                 <Image
                   src="/assets/site/studio1-logo.svg"
