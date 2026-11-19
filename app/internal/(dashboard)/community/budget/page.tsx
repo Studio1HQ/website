@@ -23,9 +23,10 @@ import {
   type Expense,
   type Sponsorship,
 } from "@/lib/internal/community/schema";
+import { bestAmount, budgetBreakdown } from "@/lib/internal/community/budget";
 import {
-  addMoney,
   costPerHead,
+  costTotals,
   eventStarts,
   moneyByEvent,
   moneyYear,
@@ -89,7 +90,7 @@ export default async function BudgetPage({
     <PageHeader
       eyebrow="Community"
       title="Budget"
-      description="What events cost against their budgets, what's still to pay, and sponsorship money coming in."
+      description="What each event was expected to cost against its final cost, what's still to pay, and sponsorship money coming in."
     />
   );
   if (!events.ok || !expenses.ok || !sponsorships.ok) {
@@ -145,10 +146,8 @@ export default async function BudgetPage({
       currency: event.currency,
     })),
   );
-  const spent = sumMoney(
-    costs.filter((line) => line.status === "to_pay" || line.status === "paid"),
-  );
-  const planned = sumMoney(costs.filter((line) => line.status === "planned"));
+  const spent = costTotals(costs, ["to_pay", "paid"]);
+  const planned = costTotals(costs, ["planned"]);
   const toPay = costs
     .filter((line) => line.status === "to_pay")
     .sort((a, b) => (a.due_on ?? "9999").localeCompare(b.due_on ?? "9999"));
@@ -172,10 +171,9 @@ export default async function BudgetPage({
   const categories = EXPENSE_CATEGORIES.map((category) => ({
     ...category,
     total: sumMoney(
-      costs.filter(
-        (line) =>
-          line.category === category.value && line.status !== "cancelled",
-      ),
+      costs
+        .filter((line) => line.category === category.value)
+        .map((line) => ({ amount: bestAmount(line), currency: line.currency })),
     ),
   }))
     .filter((category) => Object.keys(category.total).length)
@@ -185,10 +183,19 @@ export default async function BudgetPage({
     ...categories.map((category) => inCurrency(category.total)),
   );
 
+  const costsByEvent = new Map<string, Expense[]>();
+  for (const line of costs) {
+    if (!line.event_id) continue;
+    costsByEvent.set(line.event_id, [
+      ...(costsByEvent.get(line.event_id) ?? []),
+      line,
+    ]);
+  }
   const eventRows = periodEvents
     .map((event) => ({
       event,
       money: byEvent.get(event.id),
+      plan: budgetBreakdown(costsByEvent.get(event.id) ?? [], event.currency),
       numbers: turnout.get(event.id)!,
     }))
     .filter(({ event, money }) => event.budget !== null || money)
@@ -261,20 +268,17 @@ export default async function BudgetPage({
             head={
               <>
                 <th>Event</th>
-                <th>Budget</th>
-                <th>Spent</th>
-                <th className="w-40">Used, with plans</th>
+                <th>Expected</th>
+                <th>Final</th>
+                <th className="w-40">Of the limit</th>
                 <th>Sponsorship</th>
                 <th>Net</th>
                 <th>Per attendee</th>
               </>
             }
           >
-            {eventRows.map(({ event, money, numbers }) => {
-              const used = inCurrency(
-                addMoney(money?.spent ?? {}, money?.planned ?? {}),
-                event.currency,
-              );
+            {eventRows.map(({ event, money, plan, numbers }) => {
+              const used = plan.total.forecast;
               const perHead = money
                 ? costPerHead(money.spent, numbers.attended, event.currency)
                 : null;
@@ -297,14 +301,40 @@ export default async function BudgetPage({
                     </RowLink>
                   </td>
                   <td className="whitespace-nowrap tabular-nums">
-                    {event.budget !== null ? (
-                      formatTotals({ [event.currency]: event.budget })
+                    {plan.fixed.lines.length || plan.variable.lines.length ? (
+                      <>
+                        {formatTotals({ [event.currency]: plan.total.expected })}
+                        <span className="block text-[12px] text-[var(--i-muted)]">
+                          {formatTotals({ [event.currency]: plan.fixed.expected })}{" "}
+                          fixed ·{" "}
+                          {formatTotals({ [event.currency]: plan.variable.expected })}{" "}
+                          variable
+                        </span>
+                      </>
                     ) : (
                       <Muted>—</Muted>
                     )}
                   </td>
                   <td className="whitespace-nowrap tabular-nums">
-                    {formatTotals(money?.spent ?? {})}
+                    {plan.fixed.lines.length || plan.variable.lines.length ? (
+                      <>
+                        <span
+                          className={cn(
+                            plan.difference > 0.004 &&
+                              "text-rose-600 dark:text-rose-300",
+                          )}
+                        >
+                          {formatTotals({ [event.currency]: plan.total.forecast })}
+                        </span>
+                        <span className="block text-[12px] text-[var(--i-muted)]">
+                          {plan.total.waiting
+                            ? `${plan.total.waiting} still estimated`
+                            : "All costs final"}
+                        </span>
+                      </>
+                    ) : (
+                      <Muted>—</Muted>
+                    )}
                   </td>
                   <td>
                     {event.budget ? (
@@ -324,7 +354,7 @@ export default async function BudgetPage({
                         </span>
                       </span>
                     ) : (
-                      <Muted>No budget</Muted>
+                      <Muted>No limit</Muted>
                     )}
                   </td>
                   <td className="whitespace-nowrap tabular-nums">
@@ -384,8 +414,8 @@ export default async function BudgetPage({
           </Table>
         ) : (
           <p className="px-5 py-6 text-[13px] text-[var(--i-muted)]">
-            No budgets or costs {year === "all" ? "yet" : `in ${year}`}. Set a
-            budget on an event and add its expenses to track them here.
+            No budgets or costs {year === "all" ? "yet" : `in ${year}`}. Add
+            an event&apos;s costs on its page to track them here.
           </p>
         )}
       </Card>
@@ -413,7 +443,7 @@ export default async function BudgetPage({
                   </span>
                   <span className="text-right">
                     <span className="block tabular-nums">
-                      {formatTotals({ [line.currency]: line.amount ?? 0 })}
+                      {formatTotals({ [line.currency]: bestAmount(line) ?? 0 })}
                     </span>
                     <DueDate day={line.due_on} today={today} quiet />
                   </span>

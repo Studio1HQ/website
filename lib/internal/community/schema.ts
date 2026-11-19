@@ -123,6 +123,23 @@ export const EXPENSE_CATEGORIES = options([
   ["other", "Other"],
 ] as const);
 
+/**
+ * Fixed costs stay the same whatever the turnout; variable ones grow with
+ * headcount. The event budget splits on this.
+ */
+export const COST_TYPES = options([
+  ["fixed", "Fixed"],
+  ["variable", "Variable"],
+] as const);
+
+/** Categories that usually grow with headcount: a new cost starts as variable. */
+export const VARIABLE_CATEGORIES: readonly string[] = ["food", "swag", "travel"];
+
+/** The cost type a new cost gets from its category, until someone picks one. */
+export function costTypeFor(category: string): "fixed" | "variable" {
+  return VARIABLE_CATEGORIES.includes(category) ? "variable" : "fixed";
+}
+
 export const EXPENSE_STATUSES = options([
   ["planned", "Planned", "stone"],
   ["to_pay", "To pay", "amber"],
@@ -271,6 +288,11 @@ export type FieldDef = {
   /** A select's value for new records, when it isn't the first option. */
   initial?: string;
   /**
+   * On a new record, this field's value follows another field's until
+   * someone sets it by hand (a cost's type follows its category).
+   */
+  follows?: { key: string; value: (other: string) => string };
+  /**
    * A monetary detail: managers only. Community interns never get its
    * value (see visibility.ts).
    */
@@ -391,7 +413,13 @@ export const ENTITIES: Record<EntityKey, EntityDef> = {
         help: "Only when the guest list isn't kept here.",
       },
       { key: "attended_count", label: "Attended (typed in)", type: "int" },
-      { key: "budget", label: "Budget", type: "money", money: true },
+      {
+        key: "budget",
+        label: "Budget limit",
+        type: "money",
+        money: true,
+        help: "The most you can spend. Expected and final costs are added up from the event's cost lines.",
+      },
       { key: "currency", label: "Currency", type: "currency", money: true },
       OWNER,
       {
@@ -662,27 +690,50 @@ export const ENTITIES: Record<EntityKey, EntityDef> = {
         placeholder: "Pizza for 80",
       },
       {
-        key: "event_id",
-        label: "Event",
-        type: "ref",
-        ref: "event",
-        help: "Blank for general community spend.",
-      },
-      {
         key: "category",
         label: "Category",
         type: "select",
         options: EXPENSE_CATEGORIES,
       },
-      { key: "amount", label: "Amount", type: "money", money: true },
-      { key: "currency", label: "Currency", type: "currency", money: true },
+      {
+        key: "cost_type",
+        label: "Cost type",
+        type: "select",
+        options: COST_TYPES,
+        follows: { key: "category", value: costTypeFor },
+        help: "Variable grows with headcount (food, swag, travel). Fixed doesn't (venue, prizes, tools).",
+      },
+      {
+        key: "expected_amount",
+        label: "Expected",
+        type: "money",
+        money: true,
+        placeholder: "25000",
+        help: "The estimate while planning.",
+      },
+      {
+        key: "amount",
+        label: "Final",
+        type: "money",
+        money: true,
+        placeholder: "Once the bill is in",
+        help: "What it really cost.",
+      },
       {
         key: "status",
         label: "Status",
         type: "select",
         options: EXPENSE_STATUSES,
       },
+      { key: "currency", label: "Currency", type: "currency", money: true },
       { key: "vendor", label: "Paid to", type: "text", max: 120 },
+      {
+        key: "event_id",
+        label: "Event",
+        type: "ref",
+        ref: "event",
+        help: "Blank for general community spend.",
+      },
       { key: "due_on", label: "Due on", type: "date" },
       { key: "paid_on", label: "Paid on", type: "date" },
       {
@@ -934,8 +985,13 @@ export type Sponsorship = Stamps & {
 export type Expense = Stamps & {
   event_id: string | null;
   category: string;
+  /** "fixed" or "variable" (COST_TYPES). */
+  cost_type: string;
   description: string;
   vendor: string;
+  /** The estimate while planning. */
+  expected_amount: number | null;
+  /** The final cost; blank until the bill is known. */
   amount: number | null;
   currency: string;
   status: string;

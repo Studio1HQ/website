@@ -189,11 +189,17 @@ function RecordForm({
   const start = useMemo(() => {
     const source = { ...(defaults ?? {}), ...(record ?? {}) };
     const values: Values = {};
-    for (const field of fields)
-      values[field.key] = initialValue(field, source[field.key]);
+    for (const field of fields) {
+      values[field.key] =
+        !record && field.follows && source[field.key] === undefined
+          ? field.follows.value(String(values[field.follows.key] ?? ""))
+          : initialValue(field, source[field.key]);
+    }
     return values;
   }, [fields, defaults, record]);
   const [values, setValues] = useState<Values>(start);
+  // Fields set by hand, which stop following another field (FieldDef.follows).
+  const setByHand = useRef(new Set<string>());
 
   useEffect(
     () => () => {
@@ -202,8 +208,19 @@ function RecordForm({
     [],
   );
 
-  const set = (key: string, value: string | boolean) =>
-    setValues((current) => ({ ...current, [key]: value }));
+  const set = (key: string, value: string | boolean) => {
+    setByHand.current.add(key);
+    setValues((current) => {
+      const next = { ...current, [key]: value };
+      if (!record) {
+        for (const field of fields) {
+          if (field.follows?.key === key && !setByHand.current.has(field.key))
+            next[field.key] = field.follows.value(String(value));
+        }
+      }
+      return next;
+    });
+  };
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
