@@ -156,7 +156,7 @@ export function checkPay(
       default:
         return {
           ok: false,
-          error: "Enter an amount in rupees, like 60000 or 60k.",
+          error: "Enter an amount in rupees, like 40000 or 40k.",
         };
     }
   }
