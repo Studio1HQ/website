@@ -13,6 +13,7 @@ openings: 5
 order: 5.2
 postedDate: 2026-11-18T00:00:00.000Z
 requisitionId: STU_TECH_EDITOR_019
+pay: article
 questions:
   - id: edited-work
     label: "Technical articles you have edited or reviewed, and what you changed"
@@ -24,11 +25,6 @@ questions:
     type: link
     required: true
     hint: "Pick any post on studio1hq.com/blog. Leave the comments you would leave for the writer, in a Google Doc anyone with the link can view."
-  - id: rate
-    label: "Your expected pay, per hour or per article"
-    type: short
-    required: true
-    hint: "In INR. Tell us which you prefer."
 ---
 
 Studio1 publishes a lot of developer content: tutorials, integration guides, and deep dives for AI, devtool, and open-source companies, written by engineers around the world. We are hiring five contract Technical Content Reviewers to check every piece before it goes out.
@@ -64,7 +60,7 @@ Applications for this role will open soon. When they open, have these ready:
 
 1. Technical articles you have edited or reviewed, and what you changed.
 2. Your review of one post from the Studio1 blog, as comments in a shared doc.
-3. Your expected pay, per hour or per article.
+3. Your expected pay per article reviewed, in INR. If you'd rather work per hour, say so in your application.
 
 Once applications open, we usually respond within 1 week if there is a fit.
 

@@ -29,6 +29,10 @@ questions:
     type: long
     required: true
     hint: "Short paragraphs or bullet points are fine."
+  - id: agency-experience
+    label: "Agency experience, if you have it"
+    type: long
+    hint: "The agency, the kind of clients, and how many accounts you handled at once. A big plus for this role."
 ---
 
 Studio1 does DevRel and developer marketing for devtool, AI, and open-source teams. Every week we ship tutorials, docs, videos, social posts, and launches for several clients at once, with engineers, writers, designers, and video creators working on each one.

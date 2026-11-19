@@ -7,6 +7,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { Container, EASE } from "@/components/home/ui";
 import { AboutStudio1 } from "@/components/careers/about-studio1";
 import { ApplicationForm } from "@/components/careers/application-form";
+import { payLabel } from "@/lib/job-application";
 import {
   IndexBar,
   MUTED,
@@ -52,24 +53,21 @@ const UNAVAILABLE_LABEL: Record<Exclude<Availability, "open">, string> = {
   closed: "This role is closed",
 };
 
-/** What every application should carry, matching the prefilled email. */
-const WHAT_TO_SEND = [
-  "Your resume",
-  "Links to past work: repos, demos, blogs, docs or videos",
-  "The short doc or plan the role asks for",
-  "Why this role fits you",
-];
-
-/** The checklist for a role with its own questions: those, between the basics. */
+/**
+ * What an application carries, in the form's order: the basics, the role's
+ * own questions (or the generic plan), and the pay the applicant expects.
+ */
 function whatToSend(job: JobDetail) {
-  if (!job.questions.length) return WHAT_TO_SEND;
   return [
     "Your resume",
     "Links to past work: repos, demos, blogs, docs or videos",
-    ...job.questions.map((question) =>
-      question.required ? question.label : `${question.label} (optional)`,
-    ),
+    ...(job.questions.length
+      ? job.questions.map((question) =>
+          question.required ? question.label : `${question.label} (optional)`,
+        )
+      : ["The short doc or plan the role asks for"]),
     "Why this role fits you",
+    payLabel(job.type, job.pay).replace(" (INR)", ", in INR"),
   ];
 }
 
@@ -469,7 +467,10 @@ export function JobDetailPage({
               <ApplicationForm
                 jobId={job.id}
                 jobTitle={job.title}
+                jobType={job.type}
                 questions={job.questions}
+                pay={job.pay}
+                openAbroad={!/india/i.test(job.location)}
               />
             </div>
           </Container>

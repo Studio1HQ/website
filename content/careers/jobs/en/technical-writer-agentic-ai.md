@@ -13,6 +13,7 @@ openings: 4
 order: 5
 postedDate: 2026-11-18T00:00:00.000Z
 requisitionId: STU_TECH_WRITER_AI_017
+pay: article
 questions:
   - id: published-articles
     label: "2-4 articles you wrote that were published on a company's blog or docs"
@@ -24,11 +25,6 @@ questions:
     type: link
     required: true
     placeholder: "github.com/…"
-  - id: rate
-    label: "Your expected pay per article"
-    type: short
-    required: true
-    hint: "In USD or INR, for a 1,500-2,500 word tutorial with a working demo."
 ---
 
 Studio1 does DevRel and developer content for AI, devtool, and open-source companies. We are hiring four contract technical writers who are engineers first: you build the AI agent or GenAI app, get it working, and then write the article that shows other developers how to do it.
@@ -62,7 +58,7 @@ Applications for this role will open soon. When they open, have these ready:
 
 1. 2-4 articles you wrote that were published on a company's blog or docs, not your personal blog.
 2. A repo you built for one of them, or another AI project you built.
-3. Your expected pay per article.
+3. Your expected pay per article in INR, for a 1,500-2,500 word tutorial with a working demo. Outside India? Convert from your currency.
 
 We review your published articles, your code, and your rate, then let you know whether we want to go ahead. Once applications open, we usually respond within 1 week if there is a fit.
 
