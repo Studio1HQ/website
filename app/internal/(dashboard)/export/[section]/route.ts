@@ -1,4 +1,6 @@
 import { toCsv } from "@/lib/internal/csv";
+import { isOwner } from "@/lib/internal/roles";
+import { getStaff } from "@/lib/internal/session";
 import { ROW_LIMIT, exportRows } from "@/lib/internal/data";
 import { unsubscribeUrl } from "@/lib/unsubscribe";
 import { UUID_PATTERN, parseFilters, sectionFor } from "@/lib/internal/sections";
@@ -28,6 +30,17 @@ export async function GET(
   if (section.key === "subscribers") {
     for (const row of result.rows) {
       row.unsubscribe_url = typeof row.email === "string" ? await unsubscribeUrl(row.email) : null;
+    }
+  }
+
+  // Expected pay is money, which only the founders see.
+  if (section.key === "jobs") {
+    const staff = await getStaff();
+    if (!staff || !isOwner(staff.email)) {
+      for (const row of result.rows) {
+        delete row.expected_pay_inr;
+        delete row.expected_pay_per;
+      }
     }
   }
 

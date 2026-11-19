@@ -59,7 +59,7 @@
       "badge": "सेवाएँ",
       "titleAccent": "Technical Content Marketing",
       "titleRest": "Developer Tools के लिए",
-      "description": "Developer tools के लिए technical content marketing agency: engineers के लिखे tutorials, guides और SEO content.",
+      "description": "Developer tools के लिए engineers के लिखे tutorials, integration guides और SEO content.",
       "primaryCta": "रणनीति कॉल बुक करें",
       "secondaryCta": "सेवाएँ देखें",
       "stats": {
@@ -73,7 +73,7 @@
       "badge": "सेवाएँ",
       "titleAccent": "Developer Documentation",
       "titleRest": "और DX Audits",
-      "description": "Documentation audits, DX reviews और docs improvements जो developers को आपके product के साथ first success तक पहुँचाते हैं।",
+      "description": "Developer products के लिए docs audits, DX reviews और quickstarts.",
       "primaryCta": "रणनीति कॉल बुक करें",
       "secondaryCta": "सेवाएँ देखें",
       "stats": {
@@ -86,7 +86,7 @@
       "badge": "सेवाएँ",
       "titleAccent": "Developer Relations",
       "titleRest": "और Growth Campaigns",
-      "description": "Developer products के लिए DevRel as a service: developer advocacy, community growth, launch campaigns, organic distribution और creator programs.",
+      "description": "Developer advocacy, community, launches और creator programs, एक embedded DevRel team से.",
       "primaryCta": "रणनीति कॉल बुक करें",
       "secondaryCta": "सेवाएँ देखें",
       "stats": {
@@ -100,7 +100,7 @@
       "badge": "सेवाएँ",
       "titleAccent": "Developer Video",
       "titleRest": "Production Agency, Devtools के लिए",
-      "description": "Devtool और AI teams के लिए product demos, coding tutorials और Shorts, साथ में ऐसे demo projects जिन्हें developers खुद चला सकते हैं.",
+      "description": "Devtool और AI teams के लिए product demos, coding tutorials और Shorts.",
       "primaryCta": "रणनीति कॉल बुक करें",
       "secondaryCta": "सेवाएँ देखें"
     }
@@ -111,9 +111,9 @@
     "badgeSuffixShort": "टीमों का भरोसा",
     "titleLine1": "डेवलपर मार्केटिंग और",
     "titleLine2": "पार्टनर फॉर",
-    "description": "Studio1 के engineers और developer advocates वह technical content, docs और demos बनाते हैं जिन पर developers भरोसा करते हैं, फिर वे launches और community programs चलाते हैं जिनसे आपका product अपनाया जाता है.",
-    "descriptionShort": "Engineers और developer advocates, जो वह content, docs और launches बनाते हैं जिन पर developers भरोसा करते हैं.",
-    "descriptionRich": "Studio1 के engineers और developer advocates वह technical content, docs और demos बनाते हैं<br></br>जिन पर developers भरोसा करते हैं, फिर वे launches और community programs चलाते हैं जिनसे आपका product अपनाया जाता है.",
+    "description": "Studio1 devtool और SaaS teams को technical content और DevRel strategies बनाने में मदद करता है, जो growth और developer adoption बढ़ाती हैं.",
+    "descriptionShort": "Studio1 devtool और SaaS teams को technical content और DevRel strategies बनाने में मदद करता है, जो growth और developer adoption बढ़ाती हैं.",
+    "descriptionRich": "Studio1 devtool और SaaS teams को technical content और DevRel strategies बनाने में मदद करता है, जो growth और developer adoption बढ़ाती हैं.",
     "primaryCta": "रणनीति कॉल बुक करें",
     "secondaryCta": "हमारा काम देखें",
     "primaryCtaShort": "कॉल बुक करें",
@@ -244,7 +244,7 @@
     "titlePrefix": "हम",
     "titleHighlight": "tech-native",
     "titleSuffix": "roles के लिए hiring कर रहे हैं",
-    "description": "Studio1 technical content और DevRel से devtool, AI और open-source teams को grow करने में मदद करता है, और Raah व AssetSnip जैसे अपने products भी बनाता है.",
+    "description": "Studio1 technical content और DevRel से devtool, AI और open-source teams को grow करने में मदद करता है.",
     "internship": "Internship",
     "openings": "{count, plural, one {# opening} other {# openings}}",
     "posted": "Posted {date}",
@@ -422,7 +422,7 @@
     "badge": "केस स्टडीज़",
     "titlePrefix": "Developer Growth Work की",
     "titleHighlight": "Case Studies",
-    "description": "Technical content, DevRel, documentation और launch work से proof-led examples.",
+    "description": "हमारे technical content, DevRel, documentation और launch work के results.",
     "trustedBy": "Developer-first teams द्वारा trusted"
   },
   "NotFound": {

@@ -3,6 +3,7 @@ import path from "path";
 import matter from "gray-matter";
 import { parseQuestions, type FormQuestion } from "@/lib/form-questions";
 import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n";
+import { PAY_BASES, type PayBasis } from "@/lib/job-application";
 
 const jobsDirectory = path.join(process.cwd(), "content/careers/jobs");
 const jobFilePattern = /\.mdx?$/;
@@ -30,6 +31,8 @@ export type JobDetail = JobOpening & {
    * generic plan link. From the brief's `questions` frontmatter.
    */
   questions: FormQuestion[];
+  /** What the form's expected-pay field asks per: `pay` in the brief, or a month. */
+  pay: PayBasis;
 };
 
 type JobFrontmatter = {
@@ -47,6 +50,7 @@ type JobFrontmatter = {
   postedDate?: string | Date | number;
   requisitionId?: string | number;
   questions?: unknown;
+  pay?: unknown;
 };
 
 function toFrontmatterString(value: unknown): string | undefined {
@@ -89,6 +93,15 @@ function toJobOpening(
   };
 }
 
+/** A brief's `pay` (month or article); a typo fails the build. */
+function parsePayBasis(raw: unknown, where: string): PayBasis {
+  if (raw == null) return "month";
+  const value = String(raw).trim().toLowerCase();
+  if ((PAY_BASES as readonly string[]).includes(value))
+    return value as PayBasis;
+  throw new Error(`${where}: "pay" must be one of ${PAY_BASES.join(", ")}.`);
+}
+
 function localeDirectory(locale: Locale) {
   return path.join(jobsDirectory, locale);
 }
@@ -121,13 +134,12 @@ function readJobFile(fileName: string, locale: Locale): JobDetail | null {
 
   if (!meta) return null;
 
+  const where = `content/careers/jobs/${locale}/${fileName}`;
   return {
     ...meta,
     content: content.trim(),
-    questions: parseQuestions(
-      (data as JobFrontmatter).questions,
-      `content/careers/jobs/${locale}/${fileName}`,
-    ),
+    questions: parseQuestions((data as JobFrontmatter).questions, where),
+    pay: parsePayBasis((data as JobFrontmatter).pay, where),
   };
 }
 

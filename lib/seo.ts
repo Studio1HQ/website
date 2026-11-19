@@ -410,15 +410,19 @@ export function jobPostingJsonLd(job: {
   const isUnavailable =
     normalizedStatus.includes("soon") || normalizedStatus.includes("closed");
   const jobType = job.type.toLowerCase();
-  const employmentType = jobType.includes("full-time")
-    ? "FULL_TIME"
-    : jobType.includes("contract")
-      ? "CONTRACTOR"
-      : jobType.includes("intern")
-        ? "INTERN"
-        : jobType.includes("part-time")
-          ? "PART_TIME"
-          : "OTHER";
+  // "Internship / Contract" lists both, as schema.org allows
+  const types = (
+    [
+      ["full-time", "FULL_TIME"],
+      ["part-time", "PART_TIME"],
+      ["contract", "CONTRACTOR"],
+      ["intern", "INTERN"],
+    ] as const
+  )
+    .filter(([word]) => jobType.includes(word))
+    .map(([, type]) => type);
+  const employmentType =
+    types.length === 0 ? "OTHER" : types.length === 1 ? types[0] : types;
 
   return {
     "@context": "https://schema.org",

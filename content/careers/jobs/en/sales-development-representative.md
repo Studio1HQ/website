@@ -10,7 +10,7 @@ status: Open
 applySubject: SDR
 isRemote: true
 openings: 1
-order: 3.2
+order: 9
 postedDate: 2026-11-14T00:00:00.000Z
 requisitionId: STU_SDR_014
 questions:
@@ -69,7 +69,7 @@ We care about the quality of a meeting more than raw volume. No bought lists sen
 
 ## Role details
 
-This is a full-time remote role for India-based candidates. Many of the teams you'll reach are in the US and Europe, so you'll plan sends and follow-ups around their time zones. You'll work with the founders, our Sales Engineer (we're hiring for that role too), and the team that delivers the work you sell.
+This is a full-time remote role for India-based candidates. Many of the teams you'll reach are in the US and Europe, so you'll plan sends and follow-ups around their time zones. You will work closely with the founders and the entire team.
 
 ## How to apply
 

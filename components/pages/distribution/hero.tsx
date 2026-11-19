@@ -10,7 +10,7 @@ export default function Hero() {
       pill="Reddit · X · daily.dev · Dev.to · YouTube"
       titleAccent="Developer Content"
       titleRest="Distribution"
-      description="Developer content distribution: we rebuild each piece for Reddit, X, LinkedIn, daily.dev, Dev.to, and YouTube."
+      description="Developer content, rebuilt for Reddit, X, LinkedIn, daily.dev, Dev.to, and YouTube."
       primaryCta="Book a Strategy Call"
       secondaryCta="Explore Services"
       stats={[
@@ -19,7 +19,7 @@ export default function Hero() {
         { value: "50K", label: "on one daily.dev post" },
         { value: "40+", label: "videos and shorts for Nebius" },
       ]}
-      highlights={["Developer content distribution", "rebuild each piece"]}
+      highlights={["rebuilt for"]}
       sides={DISTRIBUTION_SIDES}
     />
   );

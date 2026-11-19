@@ -22,11 +22,7 @@ export default function Hero() {
         { value: "30+", label: t("stats.partners") },
         { value: "3M+", label: t("stats.views") },
       ]}
-      highlights={[
-        "Developer advocacy",
-        "launch campaigns",
-        "creator programs",
-      ]}
+      highlights={["Developer advocacy", "one embedded DevRel team"]}
       sides={DEVREL_SIDES}
     />
   );

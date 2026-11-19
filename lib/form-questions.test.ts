@@ -32,6 +32,7 @@ const APPLICATION = {
   workLinks: "youtube.com/@asha",
   why: "I have made developer explainers for two years and want to do it full time with a team that ships every day.",
   start: "Within 2 weeks",
+  expectedPay: "45,000",
   contactConsent: true,
   emailUpdates: true,
 };
@@ -194,5 +195,20 @@ describe("role briefs", () => {
     );
     expect(body).toContain(job.questions[0].label);
     expect(body).not.toContain("1-week plan");
+    expect(body).toContain("Expected monthly stipend (INR):");
+  });
+
+  it("reads each brief's pay basis; only roles paid per article differ", () => {
+    for (const id of getJobIds()) {
+      const job = getJobById(id)!;
+      expect(["month", "article"], id).toContain(job.pay);
+      // A role that asks pay through the form doesn't ask it again as a question.
+      expect(
+        job.questions.some((question) => question.id === "rate"),
+        `${id} still has its own pay question`,
+      ).toBe(false);
+    }
+    expect(getJobById("technical-writer-agentic-ai")!.pay).toBe("article");
+    expect(getJobById("devrel-engineer")!.pay).toBe("month");
   });
 });

@@ -116,10 +116,12 @@ export async function POST(request: Request) {
       answers: parseAnswers(field("answers")),
       why: field("why"),
       start: field("start"),
+      expectedPay: field("expectedPay"),
       contactConsent: field("contactConsent"),
       emailUpdates: field("emailUpdates"),
     },
     job.questions,
+    job.pay,
   );
   const resume = form.get("resume");
   const file = resume instanceof File ? resume : null;
@@ -142,7 +144,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const { values, links } = result;
+  const { values, links, pay } = result;
   // Counted per inbox ("+tags" ignored), before anything is stored.
   if (!(await addressWithinLimit(values.email))) {
     return NextResponse.json({ error: TOO_MANY_FOR_ADDRESS }, { status: 429 });
@@ -159,7 +161,7 @@ export async function POST(request: Request) {
 
   const id = randomUUID();
   const answers = storedAnswers(job.questions, values.answers);
-  const row = {
+  let row: Record<string, unknown> = {
     id,
     job_id: job.id,
     job_title: job.title,
@@ -173,14 +175,26 @@ export async function POST(request: Request) {
     plan_link: values.planLink || null,
     why: values.why,
     start_availability: values.start,
+    // Rupees, per expected_pay_per (the role's basis when they applied).
+    expected_pay_inr: pay,
+    expected_pay_per: job.pay,
     resume_path: path,
     contact_consent: values.contactConsent,
     email_updates: values.emailUpdates,
   };
-  let saved = await insertRow(
-    "job_applications",
-    job.questions.length ? { ...row, answers } : row,
-  );
+  const withAnswers = () => (job.questions.length ? { ...row, answers } : row);
+  let saved = await insertRow("job_applications", withAnswers());
+  // Before 20261119120000_job_expected_pay.sql runs there are no pay
+  // columns: keep the application without its pay. Never under "why": pay
+  // is founders-only, and the whole hiring team reads "why".
+  if (!saved.ok && !saved.duplicate && /expected_pay/.test(saved.message)) {
+    console.error(
+      `[careers] expected pay columns missing; saving ${id} without its pay. Run 20261119120000_job_expected_pay.sql.`,
+    );
+    const { expected_pay_inr: _pay, expected_pay_per: _per, ...rest } = row;
+    row = rest;
+    saved = await insertRow("job_applications", withAnswers());
+  }
   // Before 20261114160000_job_answers.sql runs there's no answers column and
   // the plan link is required: keep the application, with the answers
   // written under "why" so nothing the applicant sent is lost.
@@ -199,7 +213,7 @@ export async function POST(request: Request) {
     saved = await insertRow("job_applications", {
       ...row,
       plan_link: "",
-      why: written ? `${values.why}\n\n---\n\n${written}` : values.why,
+      why: written ? `${String(row.why)}\n\n---\n\n${written}` : row.why,
     });
   }
 

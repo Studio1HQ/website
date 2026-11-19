@@ -21,7 +21,7 @@ questions:
     hint: "One short doc. Focus on the channels you are best at. Make sure anyone with the link can view it."
 ---
 
-Studio1 works with devtool, AI, and SaaS teams on technical content, DevRel, product launches, docs, and developer growth. Alongside client work, we also work on products like Raah and AssetSnip.
+Studio1 works with devtool, AI, and SaaS teams on technical content, DevRel, product launches, docs, and developer growth.
 
 We are looking for interns who can help us grow Studio1 and product social channels with sharp writing, trend research, LinkedIn posts, X threads, memes, technical explainers, community posts, and marketing content experiments for developer audiences.
 
@@ -58,7 +58,7 @@ This is a 3-month remote internship for India-based candidates, with extension p
 
 Apply with the form on this page. Include your resume, past work links if you have them, and one clean short doc with a 1-week content plan or strategy to grow our socials. Our audience is developers and software companies, and our target channels are X, LinkedIn, Reddit, Instagram, YouTube Shorts, Threads, and Facebook pages.
 
-You do not need to cover every channel. Focus on the channels and content styles you are best at. The plan can include memes, virality angles, developer explainers, AI-agent/technical breakdowns, community research ideas, or content experiments for Studio1, Raah, and AssetSnip.
+You do not need to cover every channel. Focus on the channels and content styles you are best at. The plan can include memes, virality angles, developer explainers, AI-agent/technical breakdowns, community research ideas, or content experiments for Studio1.
 
 We usually respond within 1 week if there is a fit.
 

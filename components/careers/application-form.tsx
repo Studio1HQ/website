@@ -20,11 +20,15 @@ import {
   APPLICATION_LIMITS,
   EMPTY_APPLICATION,
   START_OPTIONS,
+  checkPay,
+  describePay,
+  payLabel,
   resumeError,
   validateApplication,
   type ApplicationErrors,
   type ApplicationField,
   type ApplicationValues,
+  type PayBasis,
 } from "@/lib/job-application";
 import type { ContactConsentValues } from "@/lib/contact-consent";
 import {
@@ -50,6 +54,7 @@ function fieldOrder(questions: readonly FormQuestion[]): ApplicationField[] {
       ? questions.map((question) => answerField(question.id))
       : (["planLink"] as const)),
     "why",
+    "expectedPay",
     "resume",
     "contactConsent",
     "emailUpdates",
@@ -71,12 +76,21 @@ function formatBytes(bytes: number) {
 export function ApplicationForm({
   jobId,
   jobTitle,
+  jobType,
   questions = [],
+  pay = "month",
+  openAbroad = false,
 }: {
   jobId: string;
   jobTitle: string;
+  /** "Full-time", "Internship", "Contract"…: words the pay field's label. */
+  jobType: string;
   /** The role's own questions, asked in place of the generic plan link. */
   questions?: FormQuestion[];
+  /** What expected pay is asked per. */
+  pay?: PayBasis;
+  /** The role takes people outside India, who may think in another currency. */
+  openAbroad?: boolean;
 }) {
   const id = useId();
   const order = fieldOrder(questions);
@@ -129,7 +143,7 @@ export function ApplicationForm({
     if (submitting) return;
     setMessage("");
 
-    const check = validateApplication(values, questions);
+    const check = validateApplication(values, questions, pay);
     const fileError = resumeError(resume);
     const found: ApplicationErrors = {
       ...(check.ok ? {} : check.errors),
@@ -209,6 +223,20 @@ export function ApplicationForm({
   }
 
   const whyCount = `${values.why.length}/${APPLICATION_LIMITS.why.max}`;
+  // Reads the figure back ("₹1,20,000 a month") so "1.2L" or "60k" is clear.
+  const typedPay = values.expectedPay.trim()
+    ? checkPay(values.expectedPay, pay)
+    : null;
+  const payHint = typedPay?.ok
+    ? `${describePay(typedPay.amount, pay)}${pay === "month" ? ", before tax" : ""}.`
+    : [
+        pay === "month"
+          ? "Before tax. 60000, 60k or 1.2L all work."
+          : "60000 or 60k both work.",
+        openAbroad ? "Outside India? Convert from your currency." : "",
+      ]
+        .filter(Boolean)
+        .join(" ");
 
   return (
     <form ref={formRef} onSubmit={submit} noValidate className="p-5 sm:p-8">
@@ -350,6 +378,30 @@ export function ApplicationForm({
             onChange={(event) => set("why", event.target.value)}
             className={cn(CONTROL, "resize-y py-3 leading-[1.55]")}
           />
+        </Field>
+        <Field
+          id={ids("expectedPay")}
+          label={payLabel(jobType, pay)}
+          error={errors.expectedPay}
+          hint={payHint}
+        >
+          <div className="relative">
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-[15px] text-[#141414]/45"
+            >
+              ₹
+            </span>
+            <input
+              {...control("expectedPay", true)}
+              type="text"
+              autoComplete="off"
+              maxLength={60}
+              placeholder={pay === "article" ? "8,000" : "60,000"}
+              onChange={(event) => set("expectedPay", event.target.value)}
+              className={cn(CONTROL, "h-12 pl-9 tabular-nums")}
+            />
+          </div>
         </Field>
 
         {/* Résumé: a styled label around a visually hidden file input */}

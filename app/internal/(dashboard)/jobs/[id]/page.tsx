@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { FilePdf } from "@phosphor-icons/react/dist/ssr";
 import { readStoredAnswers } from "@/lib/form-questions";
+import { isOwner } from "@/lib/internal/roles";
+import { PAY_BASES, describePay, type PayBasis } from "@/lib/job-application";
 import { Answers, RecordView, loadRecord } from "@/components/internal/section-views";
 import {
   ExternalLink,
@@ -26,6 +28,8 @@ export default async function JobApplicationPage({ params, searchParams }: Props
   const workLinks = Array.isArray(record.work_links) ? record.work_links : [];
   // The role's own questions (from its brief), in place of the plan link.
   const answers = readStoredAnswers(record.answers);
+  // Pay is money: founders only, like the Money area.
+  const pay = isOwner(data.staff.email) ? expectedPay(record) : null;
   return (
     <RecordView
       sectionKey="jobs"
@@ -59,6 +63,7 @@ export default async function JobApplicationPage({ params, searchParams }: Props
             <ExternalLink href={record.portfolio} />
           </Field>
           <Field label="Can start">{text(record.start_availability)}</Field>
+          {pay ? <Field label="Expected pay">{pay}</Field> : null}
           <Field label="Requisition">{text(record.requisition_id) || text(record.job_id)}</Field>
         </Fields>
       </Answers>
@@ -118,4 +123,14 @@ export default async function JobApplicationPage({ params, searchParams }: Props
       ) : null}
     </RecordView>
   );
+}
+
+/** "₹60,000 a month", or null for applications sent before pay was asked. */
+function expectedPay(record: Record<string, unknown>) {
+  const amount = Number(record.expected_pay_inr);
+  if (!record.expected_pay_inr || !Number.isFinite(amount)) return null;
+  const per = (PAY_BASES as readonly unknown[]).includes(record.expected_pay_per)
+    ? (record.expected_pay_per as PayBasis)
+    : "month";
+  return describePay(amount, per);
 }

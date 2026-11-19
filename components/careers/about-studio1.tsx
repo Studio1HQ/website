@@ -14,7 +14,7 @@ export const STUDIO1_PRINCIPLES = [
   {
     title: "Real work from week one",
     description:
-      "Demos, tutorials, docs, videos and launches for Studio1, Raah, AssetSnip and client products across AI, devtools and open source.",
+      "Demos, tutorials, docs, videos and launches for Studio1 and client products across AI, devtools and open source.",
   },
   {
     title: "Proof over pedigree",
@@ -50,9 +50,6 @@ const NUMBERS = [
   ["40+", "Developer events"],
 ] as const;
 
-/** Clients already named on the site. */
-const CLIENTS = ["Nebius", "CodeRabbit", "CopilotKit", "LiteLLM", "Permit.io", "Velt"];
-
 export function AboutStudio1({ index }: { index: number }) {
   return (
     <PaperSection id="about-studio1" tone="paper" className="pt-4 md:pt-6">
@@ -67,10 +64,6 @@ export function AboutStudio1({ index }: { index: number }) {
               Studio1 does DevRel and developer marketing for devtool, AI and open-source teams. We build demos and sample
               apps, write tutorials and docs, make videos, run launches and grow developer communities, so more developers
               find a product and actually use it.
-            </p>
-            <p className={cn("mt-4 max-w-[620px] text-[15px] leading-[1.65]", MUTED)}>
-              Teams we have worked with include {CLIENTS.slice(0, -1).join(", ")} and {CLIENTS.at(-1)}. Alongside client
-              work, we also work on our own products, Raah and AssetSnip.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <OutlineLink href="/case-studies">Case studies</OutlineLink>

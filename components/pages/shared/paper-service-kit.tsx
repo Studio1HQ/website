@@ -457,12 +457,15 @@ export function PaperCaseStudyCard({
 const ORANGE_PANEL = { background: PRINT };
 
 /** Real Studio1 event photos behind the process scene, one per step. */
+// One event photo per step, from the team's recent talks, hackathons and
+// meetups, so the scene changes as the reader moves through the process.
 const STORY_PHOTOS = [
-  "/case-studies/openlore/openlore-hackspire-talk.webp",
-  "/case-studies/jozu/devfest-jozu-booth.webp",
-  "/case-studies/jozu/kubecon-jozu-booth.webp",
-  "/case-studies/jozu/devfest-pune-2025.webp",
-  "/case-studies/jozu/kubecon-india-2025.webp",
+  "/assets/events/kubecon-india-2026/01.webp",
+  "/assets/events/aki-hacks/03.webp",
+  "/assets/events/hackspire-2/01.webp",
+  "/assets/events/react-alicante/02.webp",
+  "/assets/events/claude-code-delhi/02.webp",
+  "/assets/events/ai-engineer-singapore/04.webp",
 ];
 
 const STORY_EASE = [0.16, 1, 0.3, 1] as const;
