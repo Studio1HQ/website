@@ -5,6 +5,7 @@ import {
   blockProblem,
   blockedDays,
   canChangeDeliverable,
+  canMoveDeliverableDay,
   canMove,
   cycleProgress,
   daysStuck,
@@ -237,6 +238,25 @@ describe("who may change a deliverable", () => {
         deliverable,
       ),
     ).toBe(false);
+  });
+});
+
+describe("who may move a deliverable's day on a Tasks week", () => {
+  const deliverable = { owner: "priya@studio1hq.com" };
+  it("lets managers and the owner, not the reviewer or anyone else", () => {
+    const manager = { email: "boss@studio1hq.com", clients: "manager" as const, clientScope: null };
+    const owner = { email: "Priya@studio1hq.com", clients: "member" as const, clientScope: null };
+    const reviewer = { email: "ravi@studio1hq.com", clients: "member" as const, clientScope: null };
+    expect(canMoveDeliverableDay(manager, deliverable, "acme")).toBe(true);
+    expect(canMoveDeliverableDay(owner, deliverable, "acme")).toBe(true);
+    expect(canMoveDeliverableDay(reviewer, deliverable, "acme")).toBe(false);
+    expect(canMoveDeliverableDay({ ...owner, clients: null }, deliverable, "acme")).toBe(false);
+  });
+  it("only on a client they were given", () => {
+    const owner = { email: "priya@studio1hq.com", clients: "member" as const, clientScope: ["acme"] };
+    expect(canMoveDeliverableDay(owner, deliverable, "acme")).toBe(true);
+    expect(canMoveDeliverableDay(owner, deliverable, "globex")).toBe(false);
+    expect(canMoveDeliverableDay(owner, deliverable, undefined)).toBe(false);
   });
 });
 

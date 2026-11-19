@@ -197,8 +197,8 @@ export async function loadWeekCards(
   today: string,
   names?: Record<string, string>,
   mayChange?: (task: Task) => boolean,
-  /** Whether the viewer may set the due date of one of the person's open client deliverables. */
-  mayMoveDeliverable?: (deliverable: Deliverable) => boolean,
+  /** Whether the viewer may set the due date of one of the person's open client deliverables (with its client's id). */
+  mayMoveDeliverable?: (deliverable: Deliverable, clientId: string | undefined) => boolean,
 ) {
   email = email.toLowerCase();
   const end = addDaysKey(week, 6);
@@ -238,7 +238,7 @@ export async function loadWeekCards(
     const mark = (card: CalendarCard): CalendarCard => {
       if (card.kind !== "deliverable" || card.done) return card;
       const row = owned.get(card.id);
-      return row ? { ...card, editable: mayMoveDeliverable(row) } : card;
+      return row ? { ...card, editable: mayMoveDeliverable(row, engagements.get(row.engagement_id)?.clientId) } : card;
     };
     placed.cards = placed.cards.map(mark);
     placed.tray = placed.tray.map(mark);
