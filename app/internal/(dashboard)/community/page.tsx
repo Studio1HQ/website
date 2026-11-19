@@ -241,7 +241,9 @@ export default async function CommunityOverview({
         key: `x${expense.id}`,
         href: "/community/budget",
         title: `Pay ${expense.vendor || expense.description}`,
-        detail: formatTotals({ [expense.currency]: expense.amount ?? 0 }),
+        detail: formatTotals({
+          [expense.currency]: expense.amount ?? expense.expected_amount ?? 0,
+        }),
         day: expense.due_on,
       });
     }

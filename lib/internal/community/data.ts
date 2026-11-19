@@ -16,6 +16,7 @@ import {
   wouldLoop,
 } from "@/lib/internal/community/clean";
 import { mergedStatus, type ImportedGuest } from "@/lib/internal/community/csv";
+import { withBudgetFields } from "@/lib/internal/community/budget";
 import {
   COMMUNITY_MIGRATION_HINT,
   ENTITIES,
@@ -210,17 +211,24 @@ export const loadSponsorships = async (
       })
     : NONE;
 
-/** Expenses: managers only. Interns get none, and nothing is read. */
-export const loadExpenses = async (
+/**
+ * Expenses: managers only. Interns get none, and nothing is read. Rows
+ * saved before the budget columns existed are read the way the migration
+ * converts them (withBudgetFields).
+ */
+export async function loadExpenses(
   access: Access,
   filter: Filter = {},
-): Promise<Loaded<Expense>> =>
-  seesMoney(access)
-    ? selectAll<Expense>("community_expenses", {
-        ...filterParams(filter),
-        order: "created_at.desc",
-      })
-    : NONE;
+): Promise<Loaded<Expense>> {
+  if (!seesMoney(access)) return NONE;
+  const result = await selectAll<Expense>("community_expenses", {
+    ...filterParams(filter),
+    order: "created_at.desc",
+  });
+  return result.ok
+    ? { ...result, rows: result.rows.map(withBudgetFields) }
+    : result;
+}
 
 /**
  * The sponsors backing an event (sponsorships not cancelled), by id and

@@ -12,6 +12,7 @@ import {
   type Sponsorship,
   type Turnout,
 } from "@/lib/internal/community/schema";
+import { bestAmount } from "@/lib/internal/community/budget";
 
 /**
  * Sums the community pages share: event phases, turnout and money per
@@ -60,7 +61,7 @@ export function turnouts(
 export type Totals = Record<string, number>;
 
 export type EventMoney = {
-  /** Estimates not yet owed. */
+  /** Costs not yet owed. Each cost counts at its final amount if known, else its estimate. */
   planned: Totals;
   /** Owed or paid: what's been spent. */
   spent: Totals;
@@ -102,19 +103,27 @@ export function moneyByEvent(
   return result;
 }
 
+/** Costs with these statuses, per currency, at their best-known amount. */
+export function costTotals(
+  expenses: readonly Expense[],
+  statuses: readonly string[],
+): Totals {
+  return sumMoney(
+    expenses
+      .filter((item) => statuses.includes(item.status))
+      .map((item) => ({ amount: bestAmount(item), currency: item.currency })),
+  );
+}
+
 export function moneyOf(
   expenses: Expense[],
   sponsorships: Sponsorship[],
 ): EventMoney {
   if (!expenses.length && !sponsorships.length) return empty();
   return {
-    planned: sumMoney(expenses.filter((item) => item.status === "planned")),
-    spent: sumMoney(
-      expenses.filter(
-        (item) => item.status === "to_pay" || item.status === "paid",
-      ),
-    ),
-    paid: sumMoney(expenses.filter((item) => item.status === "paid")),
+    planned: costTotals(expenses, ["planned"]),
+    spent: costTotals(expenses, ["to_pay", "paid"]),
+    paid: costTotals(expenses, ["paid"]),
     income: sumMoney(
       sponsorships.filter((item) => item.status !== "cancelled"),
     ),

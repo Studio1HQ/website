@@ -68,10 +68,10 @@ import { ActivityLog } from "@/components/internal/community/activity-log";
 import { GuestList } from "@/components/internal/community/guest-list";
 import {
   EventPartnerList,
-  ExpenseList,
   SponsorshipList,
   TaskList,
 } from "@/components/internal/community/lists";
+import { BudgetBreakdown } from "@/components/internal/community/budget-breakdown";
 import { QuickSelect } from "@/components/internal/community/quick-select";
 import { RecordDialog } from "@/components/internal/community/record-dialog";
 import {
@@ -341,7 +341,7 @@ export default async function EventPage({
                       <Meter value={projected} max={event.budget} />
                     </span>
                     {Math.round((projected / event.budget) * 100)}% of the{" "}
-                    {formatTotals({ [currency]: event.budget })} budget with
+                    {formatTotals({ [currency]: event.budget })} limit with
                     plans
                   </span>
                 ) : perHead ? (
@@ -421,23 +421,27 @@ export default async function EventPage({
             isOver={phase === "past"}
           />
           {showMoney ? (
-            <div className="grid gap-5 xl:grid-cols-2">
-              <ExpenseList
+            <>
+              <BudgetBreakdown
                 expenses={expenses.ok ? expenses.rows : []}
+                currency={currency}
+                limit={event.budget}
+                people={
+                  event.capacity
+                    ? {
+                        expected: event.capacity,
+                        expectedLabel: "seats",
+                        attended: turnout.attended,
+                      }
+                    : {
+                        expected: turnout.signedUp || null,
+                        expectedLabel: "signed up",
+                        attended: turnout.attended,
+                      }
+                }
+                eventId={event.id}
                 canEdit={canEdit}
                 refs={refs}
-                defaults={{ event_id: event.id, currency, status: "planned" }}
-                title={
-                  <>
-                    Expenses{" "}
-                    {event.budget ? (
-                      <span className="font-normal text-[var(--i-muted)]">
-                        · {formatTotals({ [currency]: spent })} of{" "}
-                        {formatTotals({ [currency]: event.budget })}
-                      </span>
-                    ) : null}
-                  </>
-                }
               />
               <SponsorshipList
                 sponsorships={sponsorships.ok ? sponsorships.rows : []}
@@ -446,7 +450,7 @@ export default async function EventPage({
                 refs={refs}
                 defaults={{ event_id: event.id, currency }}
               />
-            </div>
+            </>
           ) : null}
         </div>
 
@@ -484,7 +488,7 @@ export default async function EventPage({
                 ) : null}
                 {showMoney ? (
                   <>
-                    <Field label="Budget">
+                    <Field label="Budget limit">
                       {event.budget !== null
                         ? formatTotals({ [currency]: event.budget })
                         : null}

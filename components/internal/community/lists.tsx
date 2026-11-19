@@ -20,6 +20,7 @@ import {
 } from "@phosphor-icons/react";
 import { setQuickField } from "@/app/internal/(dashboard)/community/actions";
 import {
+  COST_TYPES,
   EVENT_PARTNER_ROLES,
   EXPENSE_CATEGORIES,
   TASK_PRIORITIES,
@@ -139,7 +140,7 @@ export function ExpenseList({
       empty={
         expenses.length ? undefined : (
           <p className="px-5 py-6 text-[13px] text-[var(--i-muted)]">
-            No expenses yet. Add planned costs to see them against the budget.
+            No expenses yet. Add costs on an event&apos;s page to plan its budget.
           </p>
         )
       }
@@ -159,6 +160,7 @@ export function ExpenseList({
                 <span className="block truncate text-[12px] text-[var(--i-muted)]">
                   {[
                     labelOf(EXPENSE_CATEGORIES, expense.category),
+                    labelOf(COST_TYPES, expense.cost_type).toLowerCase(),
                     expense.vendor,
                     eventNames && expense.event_id
                       ? eventNames[expense.event_id]
@@ -175,8 +177,19 @@ export function ExpenseList({
                     .join(" · ")}
                 </span>
               </span>
-              <span className="shrink-0 tabular-nums">
-                {formatMoney(expense.amount, expense.currency)}
+              <span className="shrink-0 text-right tabular-nums">
+                {expense.amount !== null ? (
+                  formatMoney(expense.amount, expense.currency)
+                ) : (
+                  <>
+                    {formatMoney(expense.expected_amount, expense.currency)}
+                    {expense.expected_amount !== null ? (
+                      <span className="block text-[11.5px] text-[var(--i-faint)]">
+                        expected
+                      </span>
+                    ) : null}
+                  </>
+                )}
               </span>
             </button>
             <QuickSelect
