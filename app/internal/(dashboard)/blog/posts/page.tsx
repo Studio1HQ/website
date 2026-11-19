@@ -9,6 +9,10 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import { BlogStatusBadge } from "@/components/internal/blog/status";
 import { DeleteDraftButton } from "@/components/internal/blog/delete-draft";
+import {
+  DraftCheckbox,
+  DraftSelection,
+} from "@/components/internal/blog/draft-select";
 import { SearchBox } from "@/components/internal/community/ui";
 import { matches, one } from "@/lib/internal/community/stats";
 import {
@@ -118,6 +122,11 @@ function PostRow({
   const title = post.title.trim() || "Untitled post";
   return (
     <li className="flex items-center border-b border-[var(--i-line)] transition-colors last:border-b-0 hover:bg-[var(--i-hover)]">
+      {canDelete ? (
+        <span className="flex shrink-0 items-center pl-4 sm:pl-5">
+          <DraftCheckbox id={post.id} title={title} />
+        </span>
+      ) : null}
       <Link
         href={`/blog/${post.id}`}
         className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1.5 px-4 py-3.5 sm:gap-x-4 sm:px-5"
@@ -370,6 +379,9 @@ export default async function BlogPostsPage({ searchParams }: Props) {
     siteOnly.sort((a, b) => value(b.slug) - value(a.slug));
   }
   const rows = groups[tab];
+  // Drafts this person may delete: their own, or any for reviewers; never a live post's draft.
+  const deletable = (post: BlogListItem) =>
+    !post.source_path && (reviewer || post.created_by === staff.email);
   const sorts = SORTS.filter(
     (item) => item.key === "newest" || (item.key === "views" ? views : clicks),
   );
@@ -516,29 +528,34 @@ export default async function BlogPostsPage({ searchParams }: Props) {
 
       <Card>
         {rows.length ? (
-          <ul>
-            {rows.map((post) =>
-              tab === "live" ? (
-                <LiveRow
-                  key={post.id}
-                  post={post}
-                  numbers={numbersFor(post.slug)}
-                  stats={reviewer}
-                />
-              ) : (
-                <PostRow
-                  key={post.id}
-                  post={post}
-                  me={staff.email}
-                  canDelete={
-                    tab === "drafts" &&
-                    !post.source_path &&
-                    (reviewer || post.created_by === staff.email)
-                  }
-                />
-              ),
-            )}
-          </ul>
+          <DraftSelection
+            ids={
+              tab === "drafts"
+                ? rows.filter(deletable).map((post) => post.id)
+                : []
+            }
+            show={tab === "drafts" && rows.some(deletable)}
+          >
+            <ul>
+              {rows.map((post) =>
+                tab === "live" ? (
+                  <LiveRow
+                    key={post.id}
+                    post={post}
+                    numbers={numbersFor(post.slug)}
+                    stats={reviewer}
+                  />
+                ) : (
+                  <PostRow
+                    key={post.id}
+                    post={post}
+                    me={staff.email}
+                    canDelete={tab === "drafts" && deletable(post)}
+                  />
+                ),
+              )}
+            </ul>
+          </DraftSelection>
         ) : tab !== "live" || !siteOnly.length ? (
           q ? (
             <EmptyState
