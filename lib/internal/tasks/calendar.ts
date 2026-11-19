@@ -59,6 +59,8 @@ export type CalendarCard =
       tag: string;
       client: boolean;
       href: string | null;
+      /** The viewer may move it to another day, which sets its due date (set by the page; open ones they own or manage). */
+      editable?: boolean;
     }
   | {
       kind: "community";

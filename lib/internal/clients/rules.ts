@@ -29,6 +29,7 @@ import {
   POST_KINDS,
 } from "@/lib/internal/clients/schema";
 import type { ClientsAccess } from "@/lib/internal/roles";
+import { inScope, type ClientScope } from "@/lib/internal/clients/scope";
 
 /**
  * The client work rules, pure so they're easy to test: the status workflow
@@ -160,6 +161,28 @@ export function canChangeDeliverable(
   return (
     isOwnedBy(deliverable.owner, viewer.email) ||
     isOwnedBy(deliverable.reviewer, viewer.email)
+  );
+}
+
+/**
+ * May this person drag this deliverable to another day on a Tasks week (it
+ * sets the due date)? Client managers, or the member who owns it, and only
+ * on a client they were given (`clientId`, the deliverable's client). A
+ * reviewer leaves the owner's date alone.
+ */
+export function canMoveDeliverableDay(
+  viewer: {
+    email: string;
+    clients: ClientsAccess | null | undefined;
+    clientScope: ClientScope;
+  },
+  deliverable: Pick<Deliverable, "owner">,
+  clientId: string | null | undefined,
+) {
+  if (!inScope(viewer.clientScope, clientId)) return false;
+  if (viewer.clients === "manager") return true;
+  return (
+    viewer.clients === "member" && isOwnedBy(deliverable.owner, viewer.email)
   );
 }
 

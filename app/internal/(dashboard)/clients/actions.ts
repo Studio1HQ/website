@@ -638,11 +638,11 @@ export async function saveDeliverable(
   if (!found.ok) return found.result;
   const { deliverable } = found;
   const clashes = editClashes(deliverable, asInput(seen), input);
-  if (clashes.length)
-    return {
-      ok: false,
-      message: `Someone else changed ${clashText(clashes)} since you opened this. Close it and open it again to see their change, then make yours.`,
-    };
+  const clashed = (fields: Parameters<typeof clashText>[0]): ActionResult => ({
+    ok: false,
+    message: `Someone else changed ${clashText(fields)} since you opened this. Close it and open it again to see their change, then make yours.`,
+  });
+  if (clashes.length) return clashed(clashes);
   const clean = cleanDeliverable(input, "update");
   if (!clean.ok) return clean;
   let patch = clean.row;
@@ -684,14 +684,28 @@ export async function saveDeliverable(
   }
   if (!Object.keys(patch).length)
     return { ok: true, id: key, message: "Nothing changed" };
+  // The due date is written only if it's still the one just checked (a drop
+  // on the Tasks week can race the dialog): a change in between is a clash.
+  const guardDue =
+    "due_on" in patch && typeof asInput(seen).due_on === "string";
   const result = await updateRecord(
     TABLES.deliverables,
     "deliverable",
     key,
     patch,
     staff.email,
+    guardDue
+      ? { due_on: deliverable.due_on ? `eq.${deliverable.due_on}` : "is.null" }
+      : {},
   );
-  if (!result.ok) return result;
+  if (!result.ok) {
+    if (guardDue) {
+      const now = await getDeliverable(key);
+      if (now && now !== "error" && (now.due_on ?? null) !== (deliverable.due_on ?? null))
+        return clashed(["due_on"]);
+    }
+    return result;
+  }
   if (typeof patch.owner === "string" && patch.owner !== deliverable.owner)
     tellAbout(
       deliverable,

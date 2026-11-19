@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, type DragEvent } from "react";
+import { useOptimistic, useState, type ReactNode } from "react";
+import { DndContext, DragOverlay, useDraggable, useDroppable, type DragEndEvent } from "@dnd-kit/core";
 import { Plus, Prohibit, UserCircle } from "@phosphor-icons/react";
 import { blockTask, moveTask } from "@/app/internal/(dashboard)/tasks/actions";
 import { setQuickField } from "@/app/internal/(dashboard)/community/actions";
@@ -14,6 +15,7 @@ import { StatusBadge } from "@/components/internal/clients/ui";
 import { TaskDialog } from "@/components/internal/tasks/task-dialog";
 import { TaskNote } from "@/components/internal/tasks/task-note";
 import { ForChip, type ForOption, type LogTarget } from "@/components/internal/tasks/kit";
+import { cardAnnouncements, dragHandlers, underPointer, useCardSensors } from "@/components/internal/tasks/drag";
 import { displayName } from "@/lib/internal/team/shared";
 import type { ClientsAccess } from "@/lib/internal/clients/rules";
 import type { Deliverable } from "@/lib/internal/clients/schema";
@@ -22,12 +24,15 @@ import {
   communityColumn,
   communityStatusFor,
   deliverableColumn,
+  isTaskStatus,
   type Column,
   type CommunityCard,
   type Task,
 } from "@/lib/internal/tasks/shared";
 
-/* The board: one person's work from three places in four columns. */
+/* The board: one person's work from three places in four columns. Drag a
+   task (or a community task) to another column, or pick one on the card:
+   it moves at once and the save follows; a failed save puts it back. */
 
 export type BoardDeliverable = {
   deliverable: Deliverable;
@@ -57,13 +62,13 @@ export type BoardProps = {
   names: Record<string, string>;
 };
 
-const TASK_DRAG = "application/x-studio1-task";
-const COMMUNITY_DRAG = "application/x-studio1-community";
-
 type Item =
   | { kind: "task"; column: Column; sort: string; data: BoardTask }
   | { kind: "deliverable"; column: Column; sort: string; data: BoardDeliverable }
   | { kind: "community"; column: Column; sort: string; data: CommunityCard };
+
+/** What's being dragged: one of the person's tasks, or a community task. */
+type Lifted = { kind: "task"; item: BoardTask } | { kind: "community"; card: CommunityCard };
 
 function sortKey(blocked: boolean, due: string | null | undefined, title: string) {
   return `${blocked ? "0" : "1"}${due ?? "9999-99-99"}${title.toLowerCase()}`;
@@ -71,12 +76,27 @@ function sortKey(blocked: boolean, due: string | null | undefined, title: string
 
 export function Board(props: BoardProps) {
   const { person, viewer, today } = props;
-  const { pending, run } = useTeamAction();
+  const { run } = useTeamAction();
+  const sensors = useCardSensors();
   const [adding, setAdding] = useState(false);
-  const [over, setOver] = useState<Column | null>(null);
+  const [lifted, setLifted] = useState<Lifted | null>(null);
+  /** Cards moved and still saving ("task:id" / "community:id" → new status): they show in their new column already. */
+  const [moved, show] = useOptimistic<Record<string, string>, { key: string; status: string }>({}, (state, next) => ({
+    ...state,
+    [next.key]: next.status,
+  }));
+
+  const tasks = props.tasks.map((item): BoardTask => {
+    const status = moved[`task:${item.task.id}`];
+    return status && isTaskStatus(status) ? { ...item, task: { ...item.task, status } } : item;
+  });
+  const community = props.community.map((card): CommunityCard => {
+    const status = moved[`community:${card.id}`];
+    return status ? { ...card, status } : card;
+  });
 
   const items: Item[] = [
-    ...props.tasks.map((data): Item => ({
+    ...tasks.map((data): Item => ({
       kind: "task",
       column: data.task.status,
       sort: sortKey(data.task.blocked, data.task.due_on, data.task.title),
@@ -88,7 +108,7 @@ export function Board(props: BoardProps) {
       sort: sortKey(data.deliverable.blocked, data.deliverable.due_on, data.deliverable.title),
       data,
     })),
-    ...props.community.map((data): Item => ({
+    ...community.map((data): Item => ({
       kind: "community",
       column: communityColumn(data.status),
       sort: sortKey(data.status === "blocked", data.due_on, data.title),
@@ -100,21 +120,46 @@ export function Board(props: BoardProps) {
     viewer.community === "manager" ||
     (viewer.community === "viewer" && (card.owner ?? "").toLowerCase() === viewer.email.toLowerCase());
 
-  const drop = (column: Column) => (event: DragEvent) => {
-    event.preventDefault();
-    setOver(null);
-    const task = event.dataTransfer.getData(TASK_DRAG);
-    const community = event.dataTransfer.getData(COMMUNITY_DRAG);
-    if (task) {
-      const found = props.tasks.find((item) => item.task.id === task);
-      if (found && found.task.status !== column) run(() => moveTask(task, column));
-    } else if (community) {
-      const status = communityStatusFor(column);
-      const found = props.community.find((item) => item.id === community);
-      if (!status) return;
-      if (found && communityColumn(found.status) !== column) run(() => setQuickField("task", community, status));
-    }
+  const moveTaskTo = (item: BoardTask, to: Column) => {
+    if (item.task.status === to) return;
+    run(() => {
+      show({ key: `task:${item.task.id}`, status: to });
+      return moveTask(item.task.id, to);
+    });
   };
+
+  const moveCommunity = (card: CommunityCard, status: string) => {
+    if (card.status === status) return;
+    run(() => {
+      show({ key: `community:${card.id}`, status });
+      return setQuickField("task", card.id, status);
+    });
+  };
+
+  /** The column a dragged card sits in now. */
+  const home = (what: Lifted) => (what.kind === "task" ? what.item.task.status : communityColumn(what.card.status));
+
+  /** Whether a dragged card may land in a column (the community list has no "In review"). */
+  const fits = (what: Lifted | null, column: Column) =>
+    !!what &&
+    home(what) !== column &&
+    (what.kind === "task" ? what.item.changeable : canMoveCommunity(what.card) && communityStatusFor(column) !== null);
+
+  const drop = ({ active, over }: DragEndEvent) => {
+    setLifted(null);
+    const what = active.data.current as Lifted | undefined;
+    const column = over?.id;
+    if (!what || !isTaskStatus(column) || !fits(what, column)) return;
+    if (what.kind === "task") moveTaskTo(what.item, column);
+    else moveCommunity(what.card, communityStatusFor(column) ?? what.card.status);
+  };
+
+  const titleOf = (id: string | number) =>
+    typeof id === "string"
+      ? (props.tasks.find((item) => `task:${item.task.id}` === id)?.task.title ??
+        props.community.find((card) => `community:${card.id}` === id)?.title)
+      : undefined;
+  const announcements = cardAnnouncements(titleOf, (id) => TASK_STATUSES.find((column) => column.value === id)?.label);
 
   const doneCount = items.filter((item) => item.column === "done").length;
 
@@ -146,43 +191,40 @@ export function Board(props: BoardProps) {
         </section>
       ) : null}
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <DndContext
+        sensors={sensors}
+        collisionDetection={underPointer}
+        accessibility={{ announcements }}
+        onDragStart={({ active }) => setLifted((active.data.current as Lifted | undefined) ?? null)}
+        onDragCancel={() => setLifted(null)}
+        onDragEnd={drop}
+      >
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {TASK_STATUSES.map((column) => {
             const list = items.filter((item) => item.column === column.value);
             return (
-              <section
+              <BoardColumn
                 key={column.value}
-                aria-label={`${column.label}: ${list.length}`}
-                onDragOver={(event) => {
-                  const types = event.dataTransfer.types;
-                  if (types.includes(TASK_DRAG) || (types.includes(COMMUNITY_DRAG) && column.value !== "review")) {
-                    event.preventDefault();
-                    setOver(column.value);
-                  }
-                }}
-                onDragLeave={() => setOver((current) => (current === column.value ? null : current))}
-                onDrop={drop(column.value)}
-                className={cn(
-                  "min-w-0 rounded-xl bg-[var(--i-sunken)] p-2 ring-1 ring-[var(--i-line)] transition-shadow",
-                  over === column.value && "ring-2 ring-[var(--i-accent)]",
-                  pending && "opacity-90",
-                )}
+                column={column}
+                count={list.length}
+                fits={fits(lifted, column.value)}
+                dimmed={!!lifted && !fits(lifted, column.value) && home(lifted) !== column.value}
               >
-                <h2 className="flex items-center gap-2 px-2 pb-2 pt-1 text-[12.5px] font-medium text-[var(--i-ink-2)]">
-                  <span aria-hidden className={cn("size-1.5 rounded-full", TONES[column.tone].dot)} />
-                  {column.value === "done" ? "Done this week" : column.label}
-                  <span className="ml-auto font-normal tabular-nums text-[var(--i-faint)]">{list.length}</span>
-                </h2>
                 {list.length ? (
                   <ul className="space-y-2">
                     {list.map((item) => (
                       <li key={`${item.kind}:${item.kind === "community" ? item.data.id : item.kind === "task" ? item.data.task.id : item.data.deliverable.id}`}>
                         {item.kind === "task" ? (
-                          <TaskCard item={item.data} props={props} />
+                          <TaskCard item={item.data} props={props} onMove={(to) => moveTaskTo(item.data, to)} />
                         ) : item.kind === "deliverable" ? (
                           <ClientCard item={item.data} viewer={viewer} names={props.names} today={today} />
                         ) : (
-                          <CommunityTaskCard card={item.data} today={today} canMove={canMoveCommunity(item.data)} />
+                          <CommunityTaskCard
+                            card={item.data}
+                            today={today}
+                            canMove={canMoveCommunity(item.data)}
+                            onMove={(status) => moveCommunity(item.data, status)}
+                          />
                         )}
                       </li>
                     ))}
@@ -192,10 +234,14 @@ export function Board(props: BoardProps) {
                     {column.value === "todo" && props.canAdd ? "Nothing waiting. Add a task." : "Nothing here."}
                   </p>
                 )}
-              </section>
+              </BoardColumn>
             );
           })}
-      </div>
+        </div>
+
+        {/* The lifted card follows the pointer; its place stays faded until it's dropped. */}
+        <DragOverlay dropAnimation={null}>{lifted ? <LiftedCard what={lifted} /> : null}</DragOverlay>
+      </DndContext>
 
       {props.canAdd ? (
         <TaskDialog
@@ -210,6 +256,62 @@ export function Board(props: BoardProps) {
         />
       ) : null}
     </div>
+  );
+}
+
+/** A column of the board, and a place to drop cards while one is dragged. */
+function BoardColumn({
+  column,
+  count,
+  fits,
+  dimmed,
+  children,
+}: {
+  column: (typeof TASK_STATUSES)[number];
+  count: number;
+  /** The dragged card may land here. */
+  fits: boolean;
+  /** A card is dragged and can't go here. */
+  dimmed: boolean;
+  children: ReactNode;
+}) {
+  const { setNodeRef, isOver } = useDroppable({ id: column.value });
+  return (
+    <section
+      ref={setNodeRef}
+      aria-label={`${column.label}: ${count}`}
+      className={cn(
+        "min-w-0 rounded-xl bg-[var(--i-sunken)] p-2 ring-1 ring-[var(--i-line)] transition-[background-color,box-shadow,opacity] duration-150",
+        isOver && fits && "bg-[var(--i-accent-soft)] ring-2 ring-[var(--i-accent)]",
+        dimmed && "opacity-50",
+      )}
+    >
+      <h2 className="flex items-center gap-2 px-2 pb-2 pt-1 text-[12.5px] font-medium text-[var(--i-ink-2)]">
+        <span aria-hidden className={cn("size-1.5 rounded-full", TONES[column.tone].dot)} />
+        {column.value === "done" ? "Done this week" : column.label}
+        <span className="ml-auto font-normal tabular-nums text-[var(--i-faint)]">{count}</span>
+      </h2>
+      {children}
+    </section>
+  );
+}
+
+/** The copy of a card that follows the pointer while it's dragged. */
+function LiftedCard({ what }: { what: Lifted }) {
+  const title = what.kind === "task" ? what.item.task.title : what.card.title;
+  const status = what.kind === "task" ? TASK_STATUSES.find((option) => option.value === what.item.task.status) : null;
+  return (
+    <article className="flex cursor-grabbing flex-col gap-2 rounded-xl border border-[var(--i-line-strong)] bg-[var(--i-panel)] p-3 shadow-[0_12px_28px_-8px_rgb(0_0_0/0.3)] [transform:rotate(1.5deg)]">
+      <div className="min-w-0 space-y-1">
+        {what.kind === "task" ? <ForChip label={what.item.forLabel} client={what.item.client} /> : <ForChip label="Community task list" />}
+        <p className="text-[13.5px] font-medium leading-snug">{title}</p>
+      </div>
+      {status ? (
+        <div>
+          <Pill tone={status.tone}>{status.label}</Pill>
+        </div>
+      ) : null}
+    </article>
   );
 }
 
@@ -255,25 +357,29 @@ function ClientCard({
   );
 }
 
-function TaskCard({ item, props }: { item: BoardTask; props: BoardProps }) {
+function TaskCard({ item, props, onMove }: { item: BoardTask; props: BoardProps; onMove: (to: Column) => void }) {
   const { task, changeable } = item;
   const { pending, run } = useTeamAction();
   const [editing, setEditing] = useState(false);
   const [blocking, setBlocking] = useState(false);
   const [reason, setReason] = useState(task.block_reason);
   const given = task.created_by && task.created_by.toLowerCase() !== task.email.toLowerCase();
+  const { setNodeRef, listeners, isDragging } = useDraggable({
+    id: `task:${task.id}`,
+    data: { kind: "task", item } satisfies Lifted,
+    disabled: !changeable,
+  });
   return (
     <article
-      draggable={changeable}
-      onDragStart={(event) => {
-        event.dataTransfer.setData(TASK_DRAG, task.id);
-        event.dataTransfer.effectAllowed = "move";
-      }}
+      ref={setNodeRef}
+      {...dragHandlers(listeners)}
       className={cn(
-        "flex flex-col gap-2 rounded-xl border bg-[var(--i-panel)] p-3 shadow-[var(--i-shadow-sm)] transition-colors hover:border-[var(--i-line-strong)]",
-        changeable && "md:cursor-grab md:active:cursor-grabbing",
+        "flex flex-col gap-2 rounded-xl border bg-[var(--i-panel)] p-3 shadow-[var(--i-shadow-sm)] transition-[border-color,opacity] hover:border-[var(--i-line-strong)]",
+        // Hold to drag on a phone: no text selection or callout getting in the way.
+        changeable && "touch-manipulation select-none [-webkit-touch-callout:none] md:cursor-grab",
         task.blocked ? "border-rose-200 dark:border-rose-500/30" : "border-[var(--i-line)]",
         pending && "opacity-60",
+        isDragging && "opacity-40",
       )}
     >
       <div className="min-w-0 space-y-1">
@@ -304,7 +410,7 @@ function TaskCard({ item, props }: { item: BoardTask; props: BoardProps }) {
             aria-label={`Move ${task.title}`}
             size="xs"
             value={task.status}
-            onChange={(status) => run(() => moveTask(task.id, status))}
+            onChange={onMove}
             options={TASK_STATUSES.map((option) => ({ value: option.value, label: option.label }))}
             className="w-[7.5rem]"
           />
@@ -391,24 +497,27 @@ function CommunityTaskCard({
   card,
   today,
   canMove,
+  onMove,
 }: {
   card: CommunityCard;
   today: string;
   canMove: boolean;
+  onMove: (status: string) => void;
 }) {
-  const { pending, run } = useTeamAction();
+  const { setNodeRef, listeners, isDragging } = useDraggable({
+    id: `community:${card.id}`,
+    data: { kind: "community", card } satisfies Lifted,
+    disabled: !canMove,
+  });
   return (
     <article
-      draggable={canMove}
-      onDragStart={(event) => {
-        event.dataTransfer.setData(COMMUNITY_DRAG, card.id);
-        event.dataTransfer.effectAllowed = "move";
-      }}
+      ref={setNodeRef}
+      {...dragHandlers(listeners)}
       className={cn(
-        "flex flex-col gap-2 rounded-xl border bg-[var(--i-panel)] p-3 shadow-[var(--i-shadow-sm)]",
-        canMove && "md:cursor-grab md:active:cursor-grabbing",
+        "flex flex-col gap-2 rounded-xl border bg-[var(--i-panel)] p-3 shadow-[var(--i-shadow-sm)] transition-opacity",
+        canMove && "touch-manipulation select-none [-webkit-touch-callout:none] md:cursor-grab",
         card.status === "blocked" ? "border-rose-200 dark:border-rose-500/30" : "border-[var(--i-line)]",
-        pending && "opacity-60",
+        isDragging && "opacity-40",
       )}
     >
       <div className="min-w-0 space-y-1">
@@ -421,7 +530,7 @@ function CommunityTaskCard({
             aria-label={`Move ${card.title}`}
             size="xs"
             value={COMMUNITY_STATUSES.some((option) => option.value === card.status) ? card.status : "todo"}
-            onChange={(status) => run(() => setQuickField("task", card.id, status))}
+            onChange={onMove}
             options={COMMUNITY_STATUSES.map((option) => ({ value: option.value, label: option.label }))}
             className="w-[7.5rem]"
           />

@@ -10,7 +10,7 @@ import { requireMember, staffName } from "@/lib/internal/session";
 import { findPerson, getPerson } from "@/lib/internal/team/people";
 import { dayLabel, displayName, istNow, isDateKey } from "@/lib/internal/team/shared";
 import { isOwnedBy } from "@/lib/internal/clients/schema";
-import { moveDeliverable } from "@/app/internal/(dashboard)/clients/actions";
+import { moveDeliverable, saveDeliverable } from "@/app/internal/(dashboard)/clients/actions";
 import type { Deliverable } from "@/lib/internal/clients/schema";
 import type { ClientScope } from "@/lib/internal/clients/scope";
 import {
@@ -482,6 +482,22 @@ export async function editTask(id: unknown, values: unknown): Promise<TaskResult
   const also = status !== task.status || "link" in data ? await startDeliverable(staff, deliverable, status) : null;
   refresh();
   return { ok: true, message: also ? `Saved, and ${also}` : undefined };
+}
+
+/**
+ * Drops one of the person's client deliverables on a day of the Week view:
+ * sets its due date through the clients area's own save (the same access
+ * check, and it stops if someone changed the date since: `was`), then
+ * refreshes Tasks as well as Clients.
+ */
+export async function setDeliverableDay(id: unknown, day: unknown, was: unknown): Promise<TaskResult> {
+  const { staff } = await viewer();
+  if (!staff.clients) return { ok: false, message: "You can't change client work." };
+  if (typeof day !== "string" || !isDateKey(day)) return { ok: false, message: "Pick a valid day." };
+  const result = await saveDeliverable(id, { due_on: day }, { due_on: typeof was === "string" ? was : "" });
+  if (!result.ok) return { ok: false, message: result.message };
+  refresh();
+  return { ok: true };
 }
 
 /* -------------------------------------------------------------- reports */

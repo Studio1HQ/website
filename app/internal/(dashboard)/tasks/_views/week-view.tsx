@@ -1,4 +1,5 @@
 import { isDateKey, shiftWeek, weekDays, weekEnd, weekLabel, weekStart } from "@/lib/internal/clients/schema";
+import { canMoveDeliverableDay } from "@/lib/internal/clients/rules";
 import { canChangeTask, canGiveTask } from "@/lib/internal/tasks/access";
 import { cardChoices, giveChoices, loadWeekCards } from "@/lib/internal/tasks/load";
 import { weekTally } from "@/lib/internal/tasks/calendar";
@@ -37,7 +38,14 @@ export async function WeekView({ staff, viewer, person, own, people, params, tod
   const canAdd = own || canGiveTask(viewer, person.email, person.guarded);
 
   const [data, options] = await Promise.all([
-    loadWeekCards(person.email, week, today, names, (task) => canChangeTask(viewer, task)),
+    loadWeekCards(
+      person.email,
+      week,
+      today,
+      names,
+      (task) => canChangeTask(viewer, task),
+      (deliverable, clientId) => canMoveDeliverableDay(staff, deliverable, clientId),
+    ),
     own ? cardChoices(staff) : canAdd ? giveChoices(staff) : Promise.resolve([]),
   ]);
   const tally = weekTally(data.cards);
