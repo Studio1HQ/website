@@ -32,7 +32,9 @@ const STUDIO1 = {
     "DevRel and developer marketing for devtool, AI, and open-source teams",
   team: "Studio1's own engineers and writers",
   pricing: "No public price list. Book a call to scope it.",
-  clients: "Nebius, Memori, LiteLLM, Permit.io, Jozu",
+  // need-review
+  // clients: "Nebius, Memori, LiteLLM, Permit.io, Jozu",
+  clients: "Memori, LiteLLM, Permit.io, Jozu, OpenLore",
 };
 
 export const COMPARISONS: Comparison[] = [
@@ -244,7 +246,9 @@ export const COMPARISONS: Comparison[] = [
       },
     ],
     chooseStudio1: [
-      "You're launching or growing an open-source project and want a team with public GitHub results: Memori to 12,000+ stars, Corsair from about 300 to 2,000 in five weeks, and Nebius's examples library at 16K+.",
+      // need-review
+      // "You're launching or growing an open-source project and want a team with public GitHub results: Memori to 12,000+ stars, Corsair from about 300 to 2,000 in five weeks, and Nebius's examples library at 16K+.",
+      "You're launching or growing an open-source project and want a team with public GitHub results: Memori to 12,000+ stars and Corsair from about 300 to 2,000 in five weeks.",
       "You want a launch run as a service: launch plan, demo video, and launch day across Reddit, Hacker News, X, LinkedIn, and Product Hunt.",
       "You want in-person DevRel as well as content, such as talks at KubeCon India and DevFest, workshops, and hackathons.",
     ],
@@ -267,7 +271,9 @@ export const COMPARISONS: Comparison[] = [
       {
         question: "Which has more GitHub growth results?",
         answer:
-          "Both publish GitHub results. Studio1's public results include Memori growing to 12,000+ GitHub stars, Corsair going from about 300 to 2,000 in five weeks, OpenLore from about 135 to 1,700+ in one month, and Nebius's examples library reaching 16K+ stars. Every number links to its case study on our results page.",
+          // need-review
+          // "Both publish GitHub results. Studio1's public results include Memori growing to 12,000+ GitHub stars, Corsair going from about 300 to 2,000 in five weeks, OpenLore from about 135 to 1,700+ in one month, and Nebius's examples library reaching 16K+ stars. Every number links to its case study on our results page.",
+          "Both publish GitHub results. Studio1's public results include Memori growing to 12,000+ GitHub stars, Corsair going from about 300 to 2,000 in five weeks, and OpenLore from about 135 to 1,700+ in one month. Every number links to its case study on our results page.",
       },
       {
         question: "How does pricing compare?",

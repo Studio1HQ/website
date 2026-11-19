@@ -92,8 +92,11 @@ const ASSISTANTS: {
   {
     name: "Grok",
     logo: <GrokLogo className="size-5" />,
+    // need-review
+    // question:
+    //   "What has Studio1 (studio1hq.com) done for open-source and AI companies like Memori, Nebius and LiteLLM?",
     question:
-      "What has Studio1 (studio1hq.com) done for open-source and AI companies like Memori, Nebius and LiteLLM?",
+      "What has Studio1 (studio1hq.com) done for open-source and AI companies like Memori, OpenLore and LiteLLM?",
     href: (q) => `https://grok.com/?q=${q}`,
   },
 ];

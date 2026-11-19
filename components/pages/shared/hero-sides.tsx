@@ -608,7 +608,9 @@ function RepoCard() {
       tag="Trending"
       tagIcon={TrendUp}
       value="16K+"
-      note="stars for Nebius"
+      // need-review
+      // note="stars for Nebius"
+      note="GitHub stars"
     >
       <div className="px-1">
         <p className="flex items-center gap-1.5 text-[12px]">
@@ -619,8 +621,10 @@ function RepoCard() {
           </span>
         </p>
         <p className="mt-1.5 flex items-center gap-1.5 text-[10.5px] text-[#141414]/55">
+          {/* need-review
           <Logo src="/assets/logos/nebius.webp" size={16} />
-          Powered by Nebius · maintained by Studio1
+          Powered by Nebius · maintained by Studio1 */}
+          Maintained by Studio1
         </p>
         <p className="mt-2 flex flex-wrap gap-1">
           {["130+ projects", "GitHub Trending", "AI agents"].map((chip) => (
@@ -1094,15 +1098,25 @@ export const DOCS_SIDES: HeroSides = {
 export const DEVREL_SIDES: HeroSides = {
   cards: [
     { label: "pass · kubecon-india", card: <PassCard /> },
-    { label: "workshop · dublin", card: <WorkshopCard /> },
+    // need-review
+    // { label: "workshop · dublin", card: <WorkshopCard /> },
+    { label: "slideflow-demo.mp4", card: <PlayerCard /> },
   ],
   stats: [
+    // need-review
+    // {
+    //   label: "stat · integrations",
+    //   value: "29",
+    //   text: "framework integrations shipped with launch support",
+    //   client: "Nebius",
+    //   icon: GitDiff,
+    // },
     {
-      label: "stat · integrations",
-      value: "29",
-      text: "framework integrations shipped with launch support",
-      client: "Nebius",
-      icon: GitDiff,
+      label: "stat · content-views",
+      value: "3M+",
+      text: "content views across our client work",
+      client: "Studio1",
+      icon: Eye,
     },
     {
       label: "stat · meetups",
@@ -1224,11 +1238,19 @@ export const REDDIT_SIDES: HeroSides = {
       client: "Entelligence AI",
       icon: RedditLogo,
     },
+    // need-review
+    // {
+    //   label: "stat · nebius-reddit",
+    //   value: "221",
+    //   text: "upvotes on one launch-day post, with a 97% upvote ratio",
+    //   client: "Nebius",
+    //   icon: UsersThree,
+    // },
     {
-      label: "stat · nebius-reddit",
-      value: "221",
-      text: "upvotes on one launch-day post, with a 97% upvote ratio",
-      client: "Nebius",
+      label: "stat · memori-thread",
+      value: "100+",
+      text: "comments on one Memori thread",
+      client: "Memori",
       icon: UsersThree,
     },
   ],

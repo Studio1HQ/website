@@ -17,7 +17,8 @@ export default function Hero() {
         { value: "50K+", label: "Memori Reddit launch" },
         { value: "136", label: "points on Hacker News" },
         { value: "#3", label: "Webcrumbs on Product Hunt" },
-        { value: "2", label: "Nebius launches" },
+        // need-review
+        // { value: "2", label: "Nebius launches" },
       ]}
       highlights={["Launch plans", "launch-day support"]}
       sides={LAUNCH_SIDES}
