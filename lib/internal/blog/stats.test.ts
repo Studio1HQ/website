@@ -3,12 +3,22 @@ import {
   changeShare,
   fillDays,
   gaDay,
+  lastMonths,
+  monthWindow,
+  movers,
   pathSlug,
+  pick,
+  postPathPattern,
+  postSlug,
   rankPosts,
   readTime,
   readerSources,
+  runningTotal,
+  searchPagePattern,
+  searchSince,
   statsRange,
   statsWindow,
+  sumByMonth,
   sumDays,
 } from "@/lib/internal/blog/stats";
 
@@ -134,5 +144,66 @@ describe("blog stats", () => {
         1,
       ),
     ).toEqual([{ source: "b", views: 2 }]);
+  });
+});
+
+describe("blog overview", () => {
+  it("lists months up to this one, across a year end", () => {
+    expect(lastMonths("2027-02", 4)).toEqual(["2026-11", "2026-12", "2027-01", "2027-02"]);
+  });
+
+  it("compares this month so far with the same days of last month", () => {
+    expect(monthWindow(new Date("2026-11-19T10:00:00Z"))).toEqual({
+      month: "2026-11",
+      start: "2026-11-01",
+      end: "2026-11-19",
+      lastStart: "2026-10-01",
+      lastEnd: "2026-10-19",
+    });
+  });
+
+  it("cuts last month at its last day", () => {
+    const window = monthWindow(new Date("2027-03-31T23:00:00Z"));
+    expect(window.lastStart).toBe("2027-02-01");
+    expect(window.lastEnd).toBe("2027-02-28");
+    expect(monthWindow(new Date("2027-01-15T00:00:00Z")).lastStart).toBe("2026-12-01");
+  });
+
+  it("starts Search Console's all time inside its 16 months", () => {
+    expect(searchSince(new Date("2026-11-19T00:00:00Z"))).toBe("2025-07-21");
+  });
+
+  it("adds days up per month and keeps a running total", () => {
+    expect(sumByMonth({ "2026-10-30": 2, "2026-11-01": 3, "2026-11-19": 4, "2025-01-01": 9 }, ["2026-10", "2026-11"])).toEqual([2, 7]);
+    expect(runningTotal([{ day: "a", value: 2 }, { day: "b", value: 0 }, { day: "c", value: 5 }])).toEqual([
+      { day: "a", value: 2 },
+      { day: "b", value: 2 },
+      { day: "c", value: 7 },
+    ]);
+  });
+
+  it("finds the biggest gains and losses, ignoring tiny posts", () => {
+    const moved = movers({ a: 40, b: 10, c: 3, d: 30 }, { a: 10, b: 25, c: 0, e: 12, d: 30 }, { min: 5 });
+    expect(moved.up).toEqual([{ slug: "a", now: 40, before: 10, delta: 30 }]);
+    expect(moved.down).toEqual([
+      { slug: "b", now: 10, before: 25, delta: -15 },
+      { slug: "e", now: 0, before: 12, delta: -12 },
+    ]);
+  });
+
+  it("picks one number per post", () => {
+    expect(pick({ a: { views: 3, readers: 1 } }, (item) => item.views)).toEqual({ a: 3 });
+    expect(pick(null, () => 1)).toEqual({});
+  });
+
+  it("only takes real slugs into a pattern", () => {
+    expect(postSlug("my-post-2")).toBe("my-post-2");
+    expect(postSlug("../x")).toBeNull();
+    expect(postSlug(["a"])).toBeNull();
+    expect(postPathPattern("a-b")).toBe("^(/[a-z]{2}(-[A-Za-z]{2})?)?/blog/a-b/?$");
+    expect(searchPagePattern("a-b")).toBe("/blog/a-b/?$");
+    expect(() => postPathPattern(".*")).toThrow();
+    expect(new RegExp(postPathPattern("a-b")).test("/fr/blog/a-b/")).toBe(true);
+    expect(new RegExp(postPathPattern("a-b")).test("/blog/a-b-c")).toBe(false);
   });
 });

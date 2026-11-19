@@ -1,5 +1,13 @@
 import { unstable_cache } from "next/cache";
-import { pathSlug, type SearchNumbers, type StatsWindow } from "@/lib/internal/blog/stats";
+import {
+  lastMonths,
+  pathSlug,
+  searchPagePattern,
+  searchSince,
+  type MonthWindow,
+  type SearchNumbers,
+  type StatsWindow,
+} from "@/lib/internal/blog/stats";
 import { GOOGLE_SCOPES, googleAccessToken, googleError, serviceAccount } from "@/lib/internal/google";
 
 /**
@@ -184,11 +192,7 @@ const loadReport = unstable_cache(
       ok: true,
       daily: byDay(days),
       posts: bySlug(pages),
-      queries: queries.flatMap((row) =>
-        row.keys?.[0]
-          ? [{ query: row.keys[0], clicks: row.clicks ?? 0, impressions: row.impressions ?? 0, position: row.position ?? 0 }]
-          : [],
-      ),
+      queries: toQueries(queries),
     };
   },
   ["search-console-blog-stats"],
@@ -205,4 +209,117 @@ export async function searchReport(window: StatsWindow): Promise<SearchReport> {
     console.error(`[search console] ${message}`);
     return { ok: false, message };
   }
+}
+
+/** Runs `read` and turns a failure into a message; never throws, and a failure isn't cached. */
+async function safely<T>(read: () => Promise<T>): Promise<({ ok: true } & T) | { ok: false; message: string }> {
+  if (!isSearchConsoleConfigured()) return { ok: false, message: "Search Console isn't connected." };
+  try {
+    return { ok: true, ...(await read()) };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`[search console] ${message}`);
+    return { ok: false, message };
+  }
+}
+
+const toQueries = (rows: readonly Row[]): SearchQuery[] =>
+  rows.flatMap((row) =>
+    row.keys?.[0]
+      ? [{ query: row.keys[0], clicks: row.clicks ?? 0, impressions: row.impressions ?? 0, position: row.position ?? 0 }]
+      : [],
+  );
+
+/* ------------------------------------------------------- Blog overview */
+
+export type SearchOverview =
+  | {
+      ok: true;
+      /** Each day of the last 12 months, this one included. */
+      daily: Record<string, SearchDay>;
+      /** Per post: this month so far, the last 28 days, the 28 before them, and the 16 months Google keeps. */
+      monthPosts: Record<string, SearchNumbers>;
+      recent: Record<string, SearchNumbers>;
+      before: Record<string, SearchNumbers>;
+      lifetime: Record<string, SearchNumbers>;
+      /** The first day of `lifetime`. */
+      since: string;
+    }
+  | { ok: false; message: string };
+
+const loadOverview = unstable_cache(
+  async (month: string, monthStart: string, today: string, start: string, end: string, previousStart: string, previousEnd: string) => {
+    const since = searchSince(new Date(`${today}T12:00:00Z`));
+    const filters = { dataState: "all", dimensionFilterGroups: [{ filters: [POST_PAGES] }] };
+    const pages = (startDate: string, endDate: string) =>
+      query({ ...filters, startDate, endDate, dimensions: ["page"], rowLimit: 5000 });
+    const [days, monthPages, recent, before, lifetime] = await Promise.all([
+      query({ ...filters, startDate: `${lastMonths(month, 12)[0]}-01`, endDate: today, dimensions: ["date"], rowLimit: 1000 }),
+      pages(monthStart, today),
+      pages(start, end),
+      pages(previousStart, previousEnd),
+      pages(since, today),
+    ]);
+    return {
+      daily: byDay(days),
+      monthPosts: bySlug(monthPages),
+      recent: bySlug(recent),
+      before: bySlug(before),
+      lifetime: bySlug(lifetime),
+      since,
+    };
+  },
+  ["search-console-blog-overview"],
+  { revalidate: 60 * 60 },
+);
+
+/** Clicks a day for a year, and per post for this month, two 28-day stretches and all time; never throws. */
+export function searchOverview(month: MonthWindow, stretch: StatsWindow): Promise<SearchOverview> {
+  return safely(() =>
+    loadOverview(month.month, month.start, month.end, stretch.start, stretch.end, stretch.previousStart, stretch.previousEnd),
+  );
+}
+
+/* ------------------------------------------------------------ One post */
+
+export type SearchPost =
+  | {
+      ok: true;
+      /** Each day from the previous stretch's start to the end. */
+      daily: Record<string, SearchDay>;
+      queries: SearchQuery[];
+      /** The 16 months Google keeps, from `since`. */
+      lifetime: { clicks: number; impressions: number };
+      since: string;
+    }
+  | { ok: false; message: string };
+
+const loadPost = unstable_cache(
+  async (slug: string, start: string, end: string, previousStart: string) => {
+    const since = searchSince(new Date(`${end}T12:00:00Z`));
+    const filters = {
+      dataState: "all",
+      dimensionFilterGroups: [
+        { filters: [{ dimension: "page", operator: "includingRegex", expression: searchPagePattern(slug) }] },
+      ],
+    };
+    const [days, queries, lifetime] = await Promise.all([
+      query({ ...filters, startDate: previousStart, endDate: end, dimensions: ["date"], rowLimit: 1000 }),
+      query({ ...filters, startDate: start, endDate: end, dimensions: ["query"], rowLimit: 15 }),
+      query({ ...filters, startDate: since, endDate: end }),
+    ]);
+    return {
+      daily: byDay(days),
+      queries: toQueries(queries),
+      lifetime: { clicks: lifetime[0]?.clicks ?? 0, impressions: lifetime[0]?.impressions ?? 0 },
+      since,
+    };
+  },
+  ["search-console-blog-post"],
+  { revalidate: 60 * 60 },
+);
+
+/** One post's clicks a day, top searches and all-time clicks; never throws. */
+export function searchPost(slug: string, window: StatsWindow): Promise<SearchPost> {
+  return safely(() => loadPost(slug, window.start, window.end, window.previousStart));
 }

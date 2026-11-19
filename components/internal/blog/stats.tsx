@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ArrowDown, ArrowUp } from "@phosphor-icons/react/dist/ssr";
 import {
   Sparkline,
@@ -5,7 +6,6 @@ import {
   compact,
 } from "@/components/internal/community/charts";
 import { readTime, type PostStat } from "@/lib/internal/blog/stats";
-import { baseUrl } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 /*
@@ -117,17 +117,15 @@ function PostRow({
           <span className="w-5 shrink-0 text-right text-[11.5px] tabular-nums text-[var(--i-faint)]">
             {rank}
           </span>
-          <a
-            href={`${baseUrl}/blog/${row.slug}`}
-            target="_blank"
-            rel="noreferrer"
+          <Link
+            href={`/blog/stats/${row.slug}`}
             title={
               row.date ? `${row.title} · published ${row.date}` : row.title
             }
             className="line-clamp-2 min-w-0 text-[13.5px] hover:underline sm:line-clamp-1"
           >
             {row.title}
-          </a>
+          </Link>
         </div>
         <span
           aria-hidden

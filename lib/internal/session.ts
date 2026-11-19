@@ -245,7 +245,7 @@ export async function requirePeople(): Promise<Staff & { admin: boolean }> {
 /** Where someone goes when they can open an area but not at the level a page needs. */
 const DENIED: Record<AreaKey, string> = {
   hiring: "/?denied=1",
-  blog: "/blog?denied=1",
+  blog: "/blog/posts?denied=1",
   community: "/community?denied=1",
   clients: "/clients?denied=1",
   tasks: "/tasks?denied=1",

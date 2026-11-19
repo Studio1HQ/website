@@ -45,22 +45,23 @@ const SLOW_DOWN = "That's a lot in a few minutes. Wait a little, then try again.
 
 function refresh(id?: string) {
   revalidatePath("/internal/blog");
+  revalidatePath("/internal/blog/posts");
   if (id) revalidatePath(`/internal/blog/${id}`);
 }
 
 export async function newPost() {
   const staff = await requireBlog("writer");
   const created = await createPost(staff);
-  if (!created.ok) redirect(`/blog?error=${encodeURIComponent(created.message)}`);
+  if (!created.ok) redirect(`/blog/posts?error=${encodeURIComponent(created.message)}`);
   redirect(`/blog/${created.id}`);
 }
 
 /** Opens a live site post in the editor (reviewers only). */
 export async function editSitePost(slug: unknown) {
   const staff = await requireBlog("reviewer");
-  if (typeof slug !== "string" || !/^[a-z0-9-]{1,120}$/.test(slug)) redirect("/blog?tab=live");
+  if (typeof slug !== "string" || !/^[a-z0-9-]{1,120}$/.test(slug)) redirect("/blog/posts?tab=live");
   const opened = await importSitePost(staff, slug);
-  if (!opened.ok) redirect(`/blog?tab=live&error=${encodeURIComponent(opened.message)}`);
+  if (!opened.ok) redirect(`/blog/posts?tab=live&error=${encodeURIComponent(opened.message)}`);
   redirect(`/blog/${opened.id}`);
 }
 
@@ -70,7 +71,7 @@ export async function saveDraft(id: unknown, fields: unknown, base: unknown): Pr
     return { ok: false, message: "That save isn't valid." };
   }
   const result = await savePost(staff, id, fields, base);
-  if (result.ok) revalidatePath("/internal/blog");
+  if (result.ok) refresh();
   return result;
 }
 
