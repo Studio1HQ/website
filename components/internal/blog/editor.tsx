@@ -487,7 +487,7 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
     }
     dirty.current.clear();
     toast("success", "Draft deleted.");
-    router.push("/blog");
+    router.push("/blog/posts");
   };
 
   const pickBanner = () => {
@@ -520,8 +520,8 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
     <div className="pb-10">
       {/* Top bar: sticky from md; on phones the dashboard's own top bar is the sticky one. */}
       <div className="-mx-4 -mt-5 mb-5 flex flex-wrap items-center gap-2 border-b border-[var(--i-line)] bg-[var(--i-bg)]/95 px-4 py-2.5 backdrop-blur sm:-mx-6 sm:-mt-0 sm:px-6 md:sticky md:top-0 md:z-30 lg:-mx-10 lg:px-10">
-        <Link href="/blog" className={buttonClass("ghost", "sm")}>
-          <ArrowLeft size={14} /> Blog
+        <Link href="/blog/posts" className={buttonClass("ghost", "sm")}>
+          <ArrowLeft size={14} /> Posts
         </Link>
         <BlogStatusBadge status={status} live={isLive} />
         <span className="inline-flex items-center gap-1 text-[12px] text-[var(--i-muted)]" aria-live="polite">

@@ -161,9 +161,9 @@ export async function dashboardOverview(staff: Staff) {
   }
 
   if (blog?.reviewer && blog.inReview) {
-    todo.push({ area: "blog", label: `${plural(blog.inReview, "blog post")} waiting for review`, href: "/blog" });
+    todo.push({ area: "blog", label: `${plural(blog.inReview, "blog post")} waiting for review`, href: "/blog/posts?tab=review" });
   } else if (blog && !blog.reviewer && blog.feedback) {
-    todo.push({ area: "blog", label: `${plural(blog.feedback, "post")} of yours with feedback`, href: "/blog" });
+    todo.push({ area: "blog", label: `${plural(blog.feedback, "post")} of yours with feedback`, href: "/blog/posts?tab=drafts" });
   }
 
   if (team?.ready && team.money) {

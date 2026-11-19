@@ -45,22 +45,23 @@ const SLOW_DOWN = "That's a lot in a few minutes. Wait a little, then try again.
 
 function refresh(id?: string) {
   revalidatePath("/internal/blog");
+  revalidatePath("/internal/blog/posts");
   if (id) revalidatePath(`/internal/blog/${id}`);
 }
 
 export async function newPost() {
   const staff = await requireBlog("writer");
   const created = await createPost(staff);
-  if (!created.ok) redirect(`/blog?error=${encodeURIComponent(created.message)}`);
+  if (!created.ok) redirect(`/blog/posts?error=${encodeURIComponent(created.message)}`);
   redirect(`/blog/${created.id}`);
 }
 
 /** Opens a live site post in the editor (reviewers only). */
 export async function editSitePost(slug: unknown) {
   const staff = await requireBlog("reviewer");
-  if (typeof slug !== "string" || !/^[a-z0-9-]{1,120}$/.test(slug)) redirect("/blog?tab=live");
+  if (typeof slug !== "string" || !/^[a-z0-9-]{1,120}$/.test(slug)) redirect("/blog/posts?tab=live");
   const opened = await importSitePost(staff, slug);
-  if (!opened.ok) redirect(`/blog?tab=live&error=${encodeURIComponent(opened.message)}`);
+  if (!opened.ok) redirect(`/blog/posts?tab=live&error=${encodeURIComponent(opened.message)}`);
   redirect(`/blog/${opened.id}`);
 }
 
@@ -70,7 +71,7 @@ export async function saveDraft(id: unknown, fields: unknown, base: unknown): Pr
     return { ok: false, message: "That save isn't valid." };
   }
   const result = await savePost(staff, id, fields, base);
-  if (result.ok) revalidatePath("/internal/blog");
+  if (result.ok) refresh();
   return result;
 }
 
@@ -223,4 +224,39 @@ export async function deleteDraft(id: unknown): Promise<ActionResult> {
   await removePostImages(post.id, draftImages(post.id, post.body, post.banner_image));
   refresh();
   return { ok: true };
+}
+
+/** The most drafts one press of "Delete selected" may remove. */
+const MAX_BULK_DELETE = 100;
+
+export type BulkDeleteResult = { ok: true; deleted: number; skipped: number } | { ok: false; message: string };
+
+/**
+ * Several drafts at once, from the Posts list. Each one passes the same
+ * checks as a single delete (it exists, this person may see it, it isn't
+ * live), and only drafts and posts with changes asked for go: anything in
+ * review is skipped. Each draft's uploaded images go with it.
+ */
+export async function deleteDrafts(ids: unknown): Promise<BulkDeleteResult> {
+  const staff = await requireBlog("writer");
+  if (!Array.isArray(ids) || !ids.length) return { ok: false, message: "Pick at least one draft." };
+  if (ids.length > MAX_BULK_DELETE) return { ok: false, message: `Pick up to ${MAX_BULK_DELETE} drafts at a time.` };
+  if (!ids.every((id) => typeof id === "string" && UUID.test(id))) return { ok: false, message: "That selection isn't valid." };
+  let deleted = 0;
+  let skipped = 0;
+  for (const id of new Set(ids as string[])) {
+    const post = await getPost(staff, id);
+    if (!post || post.source_path || (post.status !== "draft" && post.status !== "changes_requested")) {
+      skipped += 1;
+      continue;
+    }
+    if (!(await deletePost(post.id))) {
+      skipped += 1;
+      continue;
+    }
+    await removePostImages(post.id, draftImages(post.id, post.body, post.banner_image));
+    deleted += 1;
+  }
+  if (deleted) refresh();
+  return { ok: true, deleted, skipped };
 }

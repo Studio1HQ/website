@@ -51,8 +51,11 @@ set them on the dashboard's People page, where they can also invite people. Anyo
 outside `@studio1hq.com` can only be invited, and only as a blog writer (the
 table enforces it too).
 
-Blog posts are written on the dashboard's Blog page (short link:
-`www.studio1hq.com/blog/write`).
+The dashboard's Blog is a section of its own: Overview (this month's
+numbers, top and moving posts, the review pipeline), Posts (drafts, review
+and live posts; short link `www.studio1hq.com/blog/write`), Stats (every
+post, and a page per post) and External (copies on DEV). Writers only see
+Posts.
 Drafts and their review history live in `blog_posts` and `blog_events`.
 Images uploaded while drafting go to the private `blog-media` bucket as WebP.
 Publishing commits the MDX file and its images to the site's GitHub repo
@@ -86,11 +89,12 @@ channel.
 
 ### Blog numbers
 
-Blog → Stats (`dashboard.studio1hq.com/blog/stats`, blog reviewers) shows views, readers
-and read time from Google Analytics, and clicks, impressions and top
-searches from Search Console. The Blog page's Live tab also shows each
-post's Google Search clicks. Both read as one Google service account
-(`lib/internal/google.ts`); nobody signs in to Google.
+Blog → Overview and Blog → Stats (`dashboard.studio1hq.com/blog`,
+`/blog/stats` and `/blog/stats/<slug>`, blog reviewers) show views, readers,
+read time, sources and countries from Google Analytics, and clicks,
+impressions, positions and searches from Search Console. Posts → Live also
+shows each post's 28-day views and Google clicks. Both read as one Google
+service account (`lib/internal/google.ts`); nobody signs in to Google.
 
 The service account already exists: `search-console-reader@studio1-dashboard.iam.gserviceaccount.com`
 in the Google Cloud project `studio1-dashboard`, with the Google Search
@@ -111,3 +115,23 @@ connect it:
 
 Google Analytics only has numbers from 18 Nov 2026, when the site started
 sending them.
+
+### Blog → External (DEV)
+
+`/blog/external` (blog reviewers) shows the team's DEV (dev.to) account like
+DEV's own dashboard: reactions, comments and views per article, with the
+copies of Studio1 posts marked (matched by canonical URL). A reviewer can
+send a live post to DEV as an unpublished draft whose canonical URL is
+`https://www.studio1hq.com/blog/<slug>`; it checks DEV first, so a post is
+never copied twice. Drafts stay private until someone publishes them on DEV.
+Code: `lib/internal/blog/devto.ts` (conversion, tested) and `devto-api.ts`.
+
+1. Sign in to DEV as the account the copies should live on, open Settings →
+   Extensions → "DEV Community API Keys" and generate a key.
+2. In Vercel, add it as `DEV_API_KEY` (Production, Sensitive) and redeploy.
+3. Optional: to make drafts under a DEV organization, also set
+   `DEV_ORGANIZATION_ID`, the `id` from
+   `https://dev.to/api/organizations/<org-username>`. The key's account must
+   be a member.
+
+The article list is kept for 10 minutes and refreshed after every send.

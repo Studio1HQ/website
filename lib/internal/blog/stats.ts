@@ -110,7 +110,7 @@ export type PostStat = {
 };
 
 /** "my-post-title" as "My post title", for a page that's no longer a post on the site. */
-function titleFromSlug(slug: string) {
+export function titleFromSlug(slug: string) {
   const words = slug.replace(/-/g, " ");
   return words.charAt(0).toUpperCase() + words.slice(1);
 }
@@ -209,4 +209,125 @@ export function readerSources(
     .filter((row) => row.views > 0)
     .sort((a, b) => b.views - a.views || a.source.localeCompare(b.source))
     .slice(0, limit);
+}
+
+/* ------------------------------------------- Blog overview and one post */
+
+/** "2026-11" → the `count` months up to it, oldest first. */
+export function lastMonths(month: string, count: number) {
+  const [year, index] = month.split("-").map(Number);
+  return Array.from({ length: count }, (_, i) =>
+    new Date(Date.UTC(year, index - 1 - (count - 1 - i), 1))
+      .toISOString()
+      .slice(0, 7),
+  );
+}
+
+export type MonthWindow = {
+  /** "2026-11" */
+  month: string;
+  /** The 1st of this month to today (UTC). */
+  start: string;
+  end: string;
+  /** The same days of last month, cut at its last day: 1–19 Oct against 1–19 Nov. */
+  lastStart: string;
+  lastEnd: string;
+};
+
+/** This month so far, and the same stretch of last month. */
+export function monthWindow(now = new Date()): MonthWindow {
+  const year = now.getUTCFullYear();
+  const month = now.getUTCMonth();
+  const today = now.getUTCDate();
+  const lastDays = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  return {
+    month: dayKey(new Date(Date.UTC(year, month, 1))).slice(0, 7),
+    start: dayKey(new Date(Date.UTC(year, month, 1))),
+    end: dayKey(new Date(Date.UTC(year, month, today))),
+    lastStart: dayKey(new Date(Date.UTC(year, month - 1, 1))),
+    lastEnd: dayKey(new Date(Date.UTC(year, month - 1, Math.min(today, lastDays)))),
+  };
+}
+
+/** The first day Search Console still has: it keeps 16 months. */
+export function searchSince(now = new Date()) {
+  return dayKey(
+    new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 16, now.getUTCDate() + 2),
+    ),
+  );
+}
+
+/** Daily values added up per month, in the order of `months`. */
+export function sumByMonth(
+  values: Record<string, number>,
+  months: readonly string[],
+) {
+  const totals = new Map(months.map((month) => [month, 0]));
+  for (const [day, value] of Object.entries(values)) {
+    const month = day.slice(0, 7);
+    if (totals.has(month)) totals.set(month, totals.get(month)! + value);
+  }
+  return months.map((month) => totals.get(month)!);
+}
+
+/** A running total of the points, in order. */
+export function runningTotal<T extends { value: number }>(points: readonly T[]) {
+  let total = 0;
+  return points.map((point) => ({ ...point, value: (total += point.value) }));
+}
+
+export type Mover = { slug: string; now: number; before: number; delta: number };
+
+/**
+ * The posts that gained and lost the most between two stretches. Small
+ * numbers swing a lot, so a post needs `min` in one of the two to count.
+ */
+export function movers(
+  now: Record<string, number>,
+  before: Record<string, number>,
+  { min = 5, limit = 5 } = {},
+) {
+  const rows: Mover[] = [...new Set([...Object.keys(now), ...Object.keys(before)])]
+    .map((slug) => {
+      const a = now[slug] ?? 0;
+      const b = before[slug] ?? 0;
+      return { slug, now: a, before: b, delta: a - b };
+    })
+    .filter((row) => Math.max(row.now, row.before) >= min && row.delta !== 0);
+  const order = (a: Mover, b: Mover) =>
+    Math.abs(b.delta) - Math.abs(a.delta) || a.slug.localeCompare(b.slug);
+  return {
+    up: rows.filter((row) => row.delta > 0).sort(order).slice(0, limit),
+    down: rows.filter((row) => row.delta < 0).sort(order).slice(0, limit),
+  };
+}
+
+/** One number per post, out of a map of fuller numbers. */
+export function pick<T>(
+  posts: Record<string, T> | null | undefined,
+  value: (item: T) => number,
+) {
+  const out: Record<string, number> = {};
+  for (const [slug, item] of Object.entries(posts ?? {})) out[slug] = value(item);
+  return out;
+}
+
+const SLUG = /^[a-z0-9-]{1,120}$/;
+
+/** A post slug from a URL segment, or null if it can't be one. */
+export function postSlug(value: unknown) {
+  return typeof value === "string" && SLUG.test(value) ? value : null;
+}
+
+/** One post's pages, with or without a locale prefix, as an RE2 pattern for Google Analytics. */
+export function postPathPattern(slug: string) {
+  if (!SLUG.test(slug)) throw new Error("Not a post slug.");
+  return `^(/[a-z]{2}(-[A-Za-z]{2})?)?/blog/${slug}/?$`;
+}
+
+/** One post's URLs as an RE2 pattern for Search Console. */
+export function searchPagePattern(slug: string) {
+  if (!SLUG.test(slug)) throw new Error("Not a post slug.");
+  return `/blog/${slug}/?$`;
 }
