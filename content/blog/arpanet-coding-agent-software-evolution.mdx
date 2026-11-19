@@ -1,0 +1,144 @@
+---
+title: "How Software Development Evolved From ARPANET to AI Coding Agents"
+seoTitle: "How Software Evolved From ARPANET to Coding Agents"
+slug: "arpanet-coding-agent-software-evolution"
+description: "Trace how software development evolved from ARPANET and the open web to cloud computing and AI coding agents, and what each shift changed for developers."
+tldrSummary: "From ARPANET to coding agents, each shift changed how developers build and ship software. Networks connected computers, the web made software easier to reach, the cloud made infrastructure rentable, and AI tools made it possible to draft code from plain-language instructions"
+tldrBullets:
+  - "The average chip grew from about 2,300 transistors in 1971 to 58.2 billion in 2021, a doubling roughly every two years."
+  - "About 6.3 billion people, or 76% of the world’s population, were online in 2026. In December 1969 the whole network had four computers."
+  - "GitHub now serves more than 225 million developers, and agents started over 40% of its pull requests in September 2026."
+date: 2026-11-19
+updatedDate: 2026-11-19
+draft: false
+authors:
+  - "Nancy"
+tags:
+  - "software-development"
+  - "technology-history"
+  - "open-source"
+  - "ai-coding-agents"
+---
+The first ARPANET message was supposed to say “login.” The system crashed after two letters. Today, a coding agent can open a pull request from a plain-language prompt. This timeline traces what changed in between and how each shift changed the way developers build and ship software.
+
+## **How has software development changed since 1969?**
+
+Here’s what each milestone changed for developers:
+
+| Year | What happened                                                                                                         | Why a developer cares                            |
+| ---- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| 1969 | The first ARPANET message goes from UCLA to Stanford and crashes after two letters. Four sites are linked by December | The seed of every network call you make today    |
+| 1971 | Intel ships the 4004 chip with 2,300 transistors                                                                      | Hardware got faster on its own for decades       |
+| 1991 | Linus Torvalds announces a free operating system on August 25                                                         | Open source starts to feel normal                |
+| 1993 | CERN puts the web in the public domain on April 30                                                                    | Anyone can build a site with no license fee      |
+| 2006 | Amazon S3 launches on March 14 at 15 cents per gigabyte                                                               | Storage becomes something you call with an API   |
+| 2017 | The paper "Attention Is All You Need" introduces the Transformer                                                      | The design behind today's language models        |
+| 2022 | ChatGPT launched on November 30 and reached an estimated 100 million users in two months                              | Chat becomes a new front door to software        |
+| 2026 | Agents start more than 40% of pull requests on GitHub                                                                 | Reviewing code now matters as much as writing it |
+
+## What happened between 1969 and 1990?
+
+Computers learned to talk to each other, and chips kept shrinking.
+
+On October 29, 1969, a UCLA team led by professor Leonard Kleinrock tried to log in to a computer at the Stanford Research Institute. They meant to send the word "login". The system crashed after two letters, so the first message ever sent on [the network that became the internet](https://cacm.acm.org/news/236058-celebrating-50-years-since-lo/fulltext) was just "lo". About an hour later, the full login worked. By December 1969, four sites were linked: UCLA, Stanford Research Institute, UC Santa Barbara, and the University of Utah. [UCLA's own history page](https://retirees.ucla.edu/event-6176423) counts 57 nodes by 1975 and 213 by 1981.
+
+Chips were doing something just as odd. Intel's first microprocessor, the 4004, arrived in 1971 with 2,300 transistors. [Our World in Data](https://ourworldindata.org/data-insights/moores-law-has-accurately-predicted-the-progress-in-transistor-counts-over-the-last-50-years), using a dataset kept by researcher Karl Rupp, puts the average chip at 2,308 transistors in 1971 and 58.2 billion in 2021. That works out to a doubling every 2.03 years, very close to what Gordon Moore predicted in 1975.
+
+For a few decades, that was a quiet gift to developers. A slow program often fixed itself when the next machine arrived. I think that habit explains why so much software is heavier than it needs to be.
+
+## How did the web and open source get started?
+
+Two decisions to give things away shaped what came after.
+
+The web began as a March 1989 proposal by Tim Berners-Lee at CERN. By Christmas 1990, the first browser, website, and server were running there. On April 30, 1993, [CERN put the web software in the public domain](https://web30.web.cern.ch/web-history.html) so it would stay an open standard. By the end of 1994, [the web had more than 10,000 servers](https://timeline.web.cern.ch/timeline-header/90).
+
+The same stretch gave us Linux. On August 25, 1991, a student in Helsinki named Linus Torvalds [posted to a Usenet group](https://www.tomshardware.com/software/linux/linux-is-34-years-old-today-linus-torvalds-meekly-announced-this-free-new-os-in-the-comp-os-minix-newsgroup-on-this-day-in-1991) that he was building a free operating system. He described it as a hobby that would not grow big and professional. The first release had just over 10,000 lines of code, and [the kernel has since passed 40 million lines](https://www.linuxpromagazine.com/index.php/layout/set/print/Online/News/Happy-Birthday-Linux).
+
+Neither choice looked like a big business idea at the time. I would say that is the pattern of this whole story: the pieces that were given away became the ground everything else stood on.
+
+## When did the cloud and containers take over?
+
+Servers turned into something you rent, and then into something you package.
+
+Amazon launched S3 on March 14, 2006, as a plain way to store and fetch files over the web. At launch, it offered about one petabyte of total capacity across roughly 400 storage nodes, at 15 cents per gigabyte. Today it holds more than 500 trillion objects, handles over 200 million requests per second, and costs a little over 2 cents per gigabyte, about 85% less than at launch. [AWS also says](https://aws.amazon.com/blogs/aws/twenty-years-of-amazon-s3-and-building-whats-next) code written for S3 in 2006 still runs unchanged.
+
+That falling price is the part developers felt. A startup no longer had to buy servers before it had a single user.
+
+Containers came next. Packaging an app in a container and running it with Kubernetes became a standard way to deploy. In [the CNCF's 2025 survey](https://www.cncf.io/announcements/2026/01/20/kubernetes-established-as-the-de-facto-operating-system-for-ai-as-production-use-hits-82-in-2025-cncf-annual-cloud-native-survey/), 82% of container users ran Kubernetes in production, up from 66% in 2023. One caveat: the survey draws on people already close to cloud native tools, so it likely runs higher than the whole industry.
+
+## **How did AI move from research to developer workflows?**
+
+A research paper turned into a product that millions of people tried within weeks.
+
+In 2017, a group of researchers published the paper ["Attention Is All You Need"](https://arxiv.org/abs/1706.03762). It introduced the Transformer, which [GitHub's Octoverse team describes](https://github.blog/news-insights/octoverse/octoverse-commits-pushes-reach-new-highs-in-2026-as-developers-build-with-agents/) as the design behind today's large language models. For a few years, it stayed mostly a topic for researchers.
+
+Then ChatGPT launched on November 30, 2022. Sam Altman later said it added a million users in five days, and [press coverage](https://dataconomy.com/?p=69743) puts it at an estimated 100 million users within two months, against about nine months for TikTok and two and a half years for Instagram. Treat the 100 million figure as an estimate, since it comes from third-party tracking rather than a company filing.
+
+For developers, the shift was simple. You could describe what you wanted in plain words and get code back. It was often wrong, but it was fast.
+
+## What does the 2026 data say about AI and developers?
+
+GitHub activity rose sharply in 2026 as coding agents became more common in developer workflows. [GitHub's Octoverse report](https://github.blog/news-insights/octoverse/octoverse-commits-pushes-reach-new-highs-in-2026-as-developers-build-with-agents/), published October 28, 2026, covers October 2025 to September 2026. It says activity bent sharply upward around June, when agents began tracking progress across days and running work in the cloud.
+
+| Measure (12 months to September 30) | 2024         | 2025         | 2026         |
+| ----------------------------------- | ------------ | ------------ | ------------ |
+| Code pushes                         | 5.2 billion  | 6.7 billion  | 17.9 billion |
+| Commits                             | 10.0 billion | 12.9 billion | 34.3 billion |
+| GitHub Actions jobs                 | 8.0 billion  | 14.0 billion | 45.4 billion |
+| Merged pull requests                | 402 million  | 538 million  | 1.3 billion  |
+
+These counts include public and private repositories, and GitHub recalculated the earlier years on the same definitions.
+
+The agent numbers are the ones I keep rereading. In March 2026, agents started 17% of pull requests. By September, it was more than 40%, about 110 million pull requests in a single month. GitHub says it only counts agents it can detect, so the true share is likely higher. Among Copilot's monthly users, 55% now use agentic features, up from 35% a year ago.
+
+Languages moved too. TypeScript is still the most used language on GitHub by contributors, ahead of Python and JavaScript, and Rust doubled in a year. AI shows up in about 40% to 44% of merged pull requests in TypeScript, Python, and Rust.
+
+Developers use all this, but they do not hand over the keys. [Stack Overflow's 2026 survey](https://itbrief.com.au/story/stack-overflow-survey-shows-developers-trust-ai-with-caveats) drew more than 30,000 responses from 169 countries. Only 17.2% of respondents said they do not use AI tools at work, and 66% use coding assistants or agents. Yet just 6.6% would trust AI with an important decision, and 78.7% said knowing where an answer came from matters. JavaScript was [the most used language for the twelfth year running](https://itbrief.com.au/story/stack-overflow-survey-finds-developers-wary-of-ai-tools), at 62%.
+
+![Github-activity-growth](/blog/uploads/arpanet-coding-agent-software-evolution/image-16-dc4398.webp)
+
+## What does this history mean for developers?
+
+Five things stand out to me.
+
+1. Cheap things win. Chips, storage, and now code generation all got cheaper first and bigger second. If something you rely on is expensive today, plan for the day it is not. S3 went from 15 cents to about 2 cents per gigabyte.
+2. Giving things away works. The web went public domain in 1993, Linux went free in 1991, and public open source contributions on GitHub [reached 2.5 billion in 2026](https://github.blog/news-insights/octoverse/octoverse-commits-pushes-reach-new-highs-in-2026-as-developers-build-with-agents/).
+3. Boring tools last. JavaScript has topped Stack Overflow's survey twelve years in a row, and S3 code from 2006 still runs. Choose tools you expect to still work in ten years, and if you build one, treat backward compatibility as a feature, the way S3 has.
+4. **Review matters more when agents draft changes.** If agents start more than 40% of pull requests, someone has to read them. If you ship a developer tool, assume coding assistants are reading your docs and examples too. GitHub says use of AI code review and its security scanning each grew more than 90% year over year, while only 6.6% of surveyed developers would trust AI with an important decision.
+5. Long forecasts are guesses. GitHub ran 43 models for developer growth to 2031. About half say the count more than triples, and three say it grows less than double. When the people holding the data cannot agree, plan in short steps.
+
+If you build a developer tool, these shifts also change how people find you. Our guides on [getting your tool recommended by ChatGPT, Perplexity, and Google](https://www.studio1hq.com/blog/how-to-get-your-tool-recommended-by-chatgpt-perplexity-google), and on [llms.txt](https://www.studio1hq.com/blog/llms-txt-explained-developer-tools-guide) cover that side.
+
+## FAQ
+
+### How has technology evolved over time?
+
+In five big steps: networks (1969), the public web (1993), cloud storage (2006), AI chat tools (2022), and coding agents (2026). Each step made software cheaper to build and easier to reach for more people.
+
+### What was the first message sent over the internet?
+
+The word "lo". On October 29, 1969, a team at UCLA tried to send "login" to the Stanford Research Institute, and [the system crashed after two letters](https://cacm.acm.org/news/236058-celebrating-50-years-since-lo/fulltext).
+
+### Is Moore's law still true?
+
+Through 2021, [the average chip doubled its transistor count every 2.03 years](https://ourworldindata.org/data-insights/moores-law-has-accurately-predicted-the-progress-in-transistor-counts-over-the-last-50-years), close to Moore's prediction. That dataset ends in 2021, so I cannot confirm the pace since then.
+
+### When did cloud computing start?
+
+A common starting point is [Amazon S3, which launched on March 14, 2006](https://aws.amazon.com/blogs/aws/twenty-years-of-amazon-s3-and-building-whats-next).
+
+### How many developers are there in the world?
+
+It depends on who is counting. [GitHub says it serves more than 225 million developers](https://github.blog/news-insights/octoverse/octoverse-commits-pushes-reach-new-highs-in-2026-as-developers-build-with-agents/), but that counts people on its platform, not people paid to write code. [SlashData estimated 47.2 million developers worldwide in 2025](https://quashbugs.com/blog/software-development-statistics), including 36.5 million professionals.
+
+### How much code is written by AI?
+
+Nobody has one clean number. On GitHub, [agents started more than 40% of pull requests in September 2026](https://github.blog/news-insights/octoverse/octoverse-commits-pushes-reach-new-highs-in-2026-as-developers-build-with-agents/), and AI involvement was detected in about 21% to 44% of merged pull requests across the top languages. GitHub counts only what it can detect.
+
+### Do developers trust AI tools?
+
+Partly. In [Stack Overflow's 2026 survey](https://itbrief.co.uk/story/stack-overflow-survey-finds-developers-wary-of-ai-tools), nearly half said they trust AI output when they can verify it easily, and only 6.6% would trust it with an important decision.
+
+### What comes next?
+
+Nobody knows. [GitHub's own 43 forecasting models](https://github.blog/news-insights/octoverse/octoverse-commits-pushes-reach-new-highs-in-2026-as-developers-build-with-agents/) for developer growth to 2031 range from less than double to more than triple the current count, and GitHub says they no longer agree.
