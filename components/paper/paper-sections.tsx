@@ -918,8 +918,7 @@ const WORK = [
     headline: "16K+ GitHub stars and 29 integrations around Token Factory",
     mark: "every major Token Factory moment",
     logo: "/assets/logos/nebius.webp",
-    // No href while the case study is a draft (content/case-studies/en/nebius.mdx).
-    // Add `href: "/case-studies/nebius"` back when it is published.
+    // need-review: add `href: "/case-studies/nebius"` back when it is published.
     photo: "/case-studies/nebius/meetup-talk.webp",
     image: "/case-studies/nebius/workshop-dublin-recap.webp",
     ratio: 1194 / 1164,
@@ -1023,8 +1022,7 @@ const WORK = [
     headline: "Page-one Google rankings from 50+ technical articles",
     mark: "docs architecture for AI engineers",
     logo: "/assets/logos/brightdata.webp",
-    // No href while the case study is a draft (content/case-studies/en/brightdata.mdx).
-    // Add `href: "/case-studies/brightdata"` back when it is published.
+    // need-review: add `href: "/case-studies/brightdata"` back when it is published.
     image: "/case-studies/brightdata/brightdata-homepage.webp",
     ratio: 2000 / 1150,
     metrics: [
@@ -1181,8 +1179,7 @@ function MarkedSummary({ text, mark }: { text: string; mark: string }) {
 
 /**
  * The case studies featured on the home page; the rest live on /case-studies.
- * Bright Data is off the home page for now: add "Bright Data" back after
- * "Nebius" to show its sheet again.
+ * need-review: add "Bright Data" back after "Nebius" to show its sheet again.
  */
 const FEATURED = [
   // need-review

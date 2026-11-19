@@ -170,7 +170,8 @@ export const AWESOME_STACK = [
 export const AWESOME_SPONSORS = [
   // need-review
   // "Nebius Token Factory",
-  // "Bright Data", hidden while its case study is in review
+  // need-review
+  // "Bright Data",
   "ScrapeGraphAI",
   "Memori",
   "CopilotKit",
