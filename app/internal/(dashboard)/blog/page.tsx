@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowSquareOut, NotePencil, PencilSimple, Plus } from "@phosphor-icons/react/dist/ssr";
+import { ArrowSquareOut, ChartLine, NotePencil, PencilSimple, Plus } from "@phosphor-icons/react/dist/ssr";
 import { BlogStatusBadge } from "@/components/internal/blog/status";
 import { Card, EmptyState, Notice, PageHeader, buttonClass, formatDate, relativeDate } from "@/components/internal/ui";
 import { TeamAvatar } from "@/components/internal/team-photos";
@@ -155,11 +155,18 @@ export default async function BlogPage({ searchParams }: Props) {
             : "Write your posts here. When one is ready, ask for a review; a Studio1 reviewer publishes it."
         }
         actions={
-          <form action={newPost}>
-            <button type="submit" className={buttonClass("accent")}>
-              <Plus size={15} /> New post
-            </button>
-          </form>
+          <>
+            {reviewer ? (
+              <Link href="/blog/stats" className={buttonClass("secondary")}>
+                <ChartLine size={15} /> Stats
+              </Link>
+            ) : null}
+            <form action={newPost}>
+              <button type="submit" className={buttonClass("accent")}>
+                <Plus size={15} /> New post
+              </button>
+            </form>
+          </>
         }
       />
 
@@ -207,7 +214,7 @@ export default async function BlogPage({ searchParams }: Props) {
         <div className="mb-4">
           <Notice tone="info">
             Connect Google Search Console to see each post&apos;s clicks, impressions and average position here. Setup is in
-            supabase/README.md under &quot;Search numbers&quot;.
+            supabase/README.md under &quot;Blog numbers&quot;.
           </Notice>
         </div>
       ) : null}
