@@ -18,6 +18,7 @@ import {
   EnvelopeOpen,
   EnvelopeSimple,
   FileText,
+  Files,
   Folders,
   Gauge,
   Handshake,
@@ -25,6 +26,7 @@ import {
   Kanban,
   NotePencil,
   Receipt,
+  ShareNetwork,
   SlidersHorizontal,
   SquaresFour,
   Trophy,
@@ -184,6 +186,9 @@ const CLIENT_PAGES = [
   "/clients/templates",
 ];
 
+/** The blog pages with a link of their own; Posts covers the list and every post's editor. */
+const BLOG_PAGES = ["/blog/stats", "/blog/external"];
+
 export type TeamNav = {
   /** On the team list: My day. */
   me: boolean;
@@ -264,9 +269,9 @@ export function InternalNav({
       : pathname === href || pathname.startsWith(`${href}/`);
   const groups = ["Pipelines", "Audiences"] as const;
 
-  // Community, Clients and Money are sections of their own: inside one, the
-  // sidebar shows only that section's pages, so the main sidebar stays
-  // short. Hackathon registrations belong to Community.
+  // Community, Clients, Money and Blog are sections of their own: inside
+  // one, the sidebar shows only that section's pages, so the main sidebar
+  // stays short. Hackathon registrations belong to Community.
   const section =
     (isActive("/community") || isActive(SECTIONS.hackathons.path)) && community
       ? "community"
@@ -274,8 +279,17 @@ export function InternalNav({
         ? "clients"
         : isActive("/money") && team.money
           ? "money"
-          : null;
-  const sectionName = section === "money" ? "Money" : section === "clients" ? "Clients" : "Community";
+          : isActive("/blog") && blog
+            ? "blog"
+            : null;
+  const sectionName =
+    section === "money"
+      ? "Money"
+      : section === "clients"
+        ? "Clients"
+        : section === "blog"
+          ? "Blog"
+          : "Community";
   if (section) {
     const back = !home.startsWith(`/${section}`);
     return (
@@ -336,6 +350,39 @@ export function InternalNav({
                   icon={SlidersHorizontal}
                   active={isActive("/clients/templates")}
                 />
+              ) : null}
+            </>
+          ) : section === "blog" && blog ? (
+            <>
+              {/* Writers have no Google numbers: Posts is their whole section. */}
+              {blog === "reviewer" ? (
+                <NavLink href="/blog" label="Overview" icon={NotePencil} active={pathname === "/blog"} />
+              ) : null}
+              <NavLink
+                href="/blog/posts"
+                label="Posts"
+                icon={Files}
+                badge={blogBadge}
+                badgeTitle={
+                  blog === "reviewer"
+                    ? `${blogBadge} waiting for review`
+                    : `${blogBadge} with feedback`
+                }
+                active={
+                  pathname !== "/blog" &&
+                  !BLOG_PAGES.some((page) => isActive(page))
+                }
+              />
+              {blog === "reviewer" ? (
+                <>
+                  <NavLink href="/blog/stats" label="Stats" icon={ChartLineUp} active={isActive("/blog/stats")} />
+                  <NavLink
+                    href="/blog/external"
+                    label="External"
+                    icon={ShareNetwork}
+                    active={isActive("/blog/external")}
+                  />
+                </>
               ) : null}
             </>
           ) : section === "money" ? (

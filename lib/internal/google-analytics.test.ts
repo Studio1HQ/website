@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 // The cache wrapper needs Next's server runtime; the parsing doesn't.
 vi.mock("next/cache", () => ({ unstable_cache: (fn: unknown) => fn }));
 
-const { isAnalyticsConfigured, readReports } =
+const { isAnalyticsConfigured, postReads, rangeReads, readReports, viewsBy } =
   await import("@/lib/internal/google-analytics");
 const { serviceAccount } = await import("@/lib/internal/google");
 
@@ -77,5 +77,28 @@ describe("google analytics", () => {
     });
     vi.stubEnv("GSC_PRIVATE_KEY", "not a key");
     expect(serviceAccount()).toBeNull();
+  });
+
+  it("reads named ranges and keeps one range of a per-post report", () => {
+    const ranged = (path: string, range: string, ...metrics: number[]) => ({
+      dimensionValues: [{ value: path }, { value: range }],
+      metricValues: metrics.map((value) => ({ value: String(value) })),
+    });
+    const report = {
+      rows: [
+        ranged("/blog/a", "recent", 30, 20, 600),
+        ranged("/blog/a", "before", 10, 8, 200),
+        ranged("/blog/b/", "recent", 5, 5, 50),
+        ranged("/pricing", "recent", 99, 99, 99),
+      ],
+    };
+    expect(postReads(report, "recent")).toEqual({
+      a: { views: 30, readers: 20, engaged: 600 },
+      b: { views: 5, readers: 5, engaged: 50 },
+    });
+    expect(postReads(report, "before")).toEqual({ a: { views: 10, readers: 8, engaged: 200 } });
+    expect(rangeReads({ rows: [row("lifetime", 7, 3, 90)] }, "lifetime")).toEqual({ views: 7, readers: 3, engaged: 90 });
+    expect(rangeReads({ rows: [] }, "month")).toEqual({ views: 0, readers: 0, engaged: 0 });
+    expect(viewsBy({ rows: [row("India", 12)] })).toEqual([{ source: "India", views: 12 }]);
   });
 });

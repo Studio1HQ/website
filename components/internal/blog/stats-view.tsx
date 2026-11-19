@@ -123,7 +123,7 @@ export function BlogStatsView({
           </Link>
         }
         title="Stats"
-        description="How the blog is read: views from Google Analytics, clicks and searches from Google Search Console."
+        description="How every post is read: views from Google Analytics, clicks and searches from Google Search Console. Open a post for its own numbers."
         actions={
           <FilterDropdown
             label="Range"
