@@ -7,8 +7,8 @@
 -- Pay is money: the dashboard shows it to the founders only and leaves it
 -- out of other people's CSV exports.
 --
--- Until this runs, applications still save: the pay is written under "why"
--- instead (and logged). Safe to run again.
+-- Until this runs, applications still save, without the pay (and logged):
+-- it isn't written anywhere other staff can read. Safe to run again.
 
 alter table public.job_applications
   add column if not exists expected_pay_inr integer,

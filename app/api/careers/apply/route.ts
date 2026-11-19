@@ -16,7 +16,6 @@ import {
 } from "@/lib/rate-limit";
 import {
   APPLICATION_LIMITS,
-  describePay,
   isJobOpen,
   resumeError,
   validateApplication,
@@ -186,16 +185,14 @@ export async function POST(request: Request) {
   const withAnswers = () => (job.questions.length ? { ...row, answers } : row);
   let saved = await insertRow("job_applications", withAnswers());
   // Before 20261119120000_job_expected_pay.sql runs there are no pay
-  // columns: keep the application, with the pay written under "why".
+  // columns: keep the application without its pay. Never under "why": pay
+  // is founders-only, and the whole hiring team reads "why".
   if (!saved.ok && !saved.duplicate && /expected_pay/.test(saved.message)) {
     console.error(
-      `[careers] expected pay columns missing; saving ${id} with its pay in "why". Run 20261119120000_job_expected_pay.sql.`,
+      `[careers] expected pay columns missing; saving ${id} without its pay. Run 20261119120000_job_expected_pay.sql.`,
     );
     const { expected_pay_inr: _pay, expected_pay_per: _per, ...rest } = row;
-    row = {
-      ...rest,
-      why: `${values.why}\n\nExpected pay: ${describePay(pay, job.pay)}`,
-    };
+    row = rest;
     saved = await insertRow("job_applications", withAnswers());
   }
   // Before 20261114160000_job_answers.sql runs there's no answers column and
