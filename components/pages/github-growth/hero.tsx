@@ -15,7 +15,8 @@ export default function Hero() {
       secondaryCta="Explore Services"
       stats={[
         { value: "12K+", label: "stars for Memori" },
-        { value: "16K+", label: "stars for Nebius" },
+        // Nebius: hidden until Nebius approves marketing use.
+        // { value: "16K+", label: "stars for Nebius" },
         { value: "12x", label: "OpenLore in a month" },
         { value: "+567%", label: "Corsair stars in 5 weeks" },
       ]}

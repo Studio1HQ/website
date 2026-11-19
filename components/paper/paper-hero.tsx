@@ -565,11 +565,12 @@ export default function PaperHero() {
                     "Community booth · Jozu",
                     "/assets/logos/jozu.webp",
                   ],
-                  [
-                    "Workshop, Dublin",
-                    "Hands-on AI agents · Nebius",
-                    "/assets/logos/nebius.webp",
-                  ],
+                  // Nebius: hidden until Nebius approves marketing use.
+                  // [
+                  //   "Workshop, Dublin",
+                  //   "Hands-on AI agents · Nebius",
+                  //   "/assets/logos/nebius.webp",
+                  // ],
                 ].map(([event, detail, logo]) => (
                   <li
                     key={event}

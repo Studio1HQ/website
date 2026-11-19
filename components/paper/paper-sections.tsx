@@ -1184,7 +1184,12 @@ function MarkedSummary({ text, mark }: { text: string; mark: string }) {
  * Bright Data is off the home page for now: add "Bright Data" back after
  * "Nebius" to show its sheet again.
  */
-const FEATURED = ["Nebius", "Memori", "LiteLLM"];
+const FEATURED = [
+  // Nebius: hidden until Nebius approves marketing use.
+  // "Nebius",
+  "Memori",
+  "LiteLLM",
+];
 
 /** Official GitHub and Google marks, set inline right before the word. */
 function BrandMark({ brand }: { brand: "GitHub" | "Google" }) {
@@ -2072,7 +2077,9 @@ export function PaperWork() {
 /** One real Studio1 screen per reason, in homeFeatures order. */
 const REASON_SHOTS = [
   "/case-studies/brightdata/brightdata-homepage.webp",
-  "/case-studies/nebius/token-factory.webp",
+  // Nebius: hidden until Nebius approves marketing use.
+  // "/case-studies/nebius/token-factory.webp",
+  "/case-studies/openlore/openlore-homepage.webp",
   "/case-studies/tensorlake/tensorlake-home.webp",
   "/case-studies/entelligence-ai/entelligence-homepage.webp",
   "/case-studies/corsair/corsair-homepage.webp",

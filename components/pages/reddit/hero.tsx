@@ -15,7 +15,8 @@ export default function Hero() {
       secondaryCta="Explore Services"
       stats={[
         { value: "304K+", label: "Reddit impressions for Entelligence AI" },
-        { value: "44K", label: "views on one Nebius launch-day post" },
+        // Nebius: hidden until Nebius approves marketing use.
+        // { value: "44K", label: "views on one Nebius launch-day post" },
         { value: "50K+", label: "impressions on Memori's Reddit launch" },
         { value: "100+", label: "comments on one Memori thread" },
       ]}

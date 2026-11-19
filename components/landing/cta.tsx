@@ -24,14 +24,15 @@ const RING_SHOTS = [
   "/case-studies/jozu/kubecon-jozu-booth.webp",
   "/case-studies/tensorlake/Toon-blog.webp",
   "/case-studies/openlore/openlore-homepage.webp",
-  "/case-studies/nebius/workshop-dublin-poster.webp",
+  // Nebius: hidden until Nebius approves marketing use.
+  // "/case-studies/nebius/workshop-dublin-poster.webp",
   "/case-studies/corsair/corsair-homepage.webp",
   "/case-studies/tensorlake/tensorlake-home.webp",
-  "/case-studies/nebius/token-factory.webp",
+  // "/case-studies/nebius/token-factory.webp",
   "/case-studies/jozu/jozu-platform-overview.webp",
   "/case-studies/entelligence-ai/entelligence-homepage.webp",
   "/case-studies/tensorlake/Claude-Cowork-dev.webp",
-  "/case-studies/nebius/workshop-dublin-recap.webp",
+  // "/case-studies/nebius/workshop-dublin-recap.webp",
   "/case-studies/openlore/openlore-readme-after.webp",
 ];
 
