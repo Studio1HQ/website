@@ -225,3 +225,38 @@ export async function deleteDraft(id: unknown): Promise<ActionResult> {
   refresh();
   return { ok: true };
 }
+
+/** The most drafts one press of "Delete selected" may remove. */
+const MAX_BULK_DELETE = 100;
+
+export type BulkDeleteResult = { ok: true; deleted: number; skipped: number } | { ok: false; message: string };
+
+/**
+ * Several drafts at once, from the Posts list. Each one passes the same
+ * checks as a single delete (it exists, this person may see it, it isn't
+ * live), and only drafts and posts with changes asked for go: anything in
+ * review is skipped. Each draft's uploaded images go with it.
+ */
+export async function deleteDrafts(ids: unknown): Promise<BulkDeleteResult> {
+  const staff = await requireBlog("writer");
+  if (!Array.isArray(ids) || !ids.length) return { ok: false, message: "Pick at least one draft." };
+  if (ids.length > MAX_BULK_DELETE) return { ok: false, message: `Pick up to ${MAX_BULK_DELETE} drafts at a time.` };
+  if (!ids.every((id) => typeof id === "string" && UUID.test(id))) return { ok: false, message: "That selection isn't valid." };
+  let deleted = 0;
+  let skipped = 0;
+  for (const id of new Set(ids as string[])) {
+    const post = await getPost(staff, id);
+    if (!post || post.source_path || (post.status !== "draft" && post.status !== "changes_requested")) {
+      skipped += 1;
+      continue;
+    }
+    if (!(await deletePost(post.id))) {
+      skipped += 1;
+      continue;
+    }
+    await removePostImages(post.id, draftImages(post.id, post.body, post.banner_image));
+    deleted += 1;
+  }
+  if (deleted) refresh();
+  return { ok: true, deleted, skipped };
+}
