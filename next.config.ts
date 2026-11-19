@@ -14,6 +14,22 @@ const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 const dashboardHost = [
   { type: "host" as const, value: DASHBOARD_HOST_PATTERN },
 ];
+// DEV saves "&" in organization links as "&amp;", which breaks every UTM tag
+// after the first. The DEV org page and post CTA link to the short /go/devto-*
+// paths below instead, and the redirect adds the full tags for Google Analytics.
+const devtoUtm = (content: string) =>
+  `utm_source=dev.to&utm_medium=referral&utm_campaign=devto-org&utm_content=${content}`;
+const devtoLinks = [
+  { slug: "header", to: "/", content: "header-button" },
+  {
+    slug: "call",
+    to: "https://cal.com/studio1/collab",
+    content: "header-book-call",
+  },
+  { slug: "results", to: "/case-studies", content: "header-results" },
+  { slug: "services", to: "/services", content: "header-services" },
+  { slug: "post", to: "https://cal.com/studio1/collab", content: "post-cta" },
+];
 const nextConfig: NextConfig = {
   pageExtensions: ["js", "jsx", "mdx", "ts", "tsx"],
   // `next dev` serves the dashboard at http://dashboard.localhost:3000.
@@ -175,6 +191,11 @@ const nextConfig: NextConfig = {
   async redirects() {
     // Keep old service URLs alive while the public pages use SEO-friendly names.
     return [
+      ...devtoLinks.map(({ slug, to, content }) => ({
+        source: `/go/devto-${slug}`,
+        destination: `${to}?${devtoUtm(content)}`,
+        permanent: false,
+      })),
       // A short, easy link for writers to the dashboard's blog editor.
       {
         source: "/blog/write",
