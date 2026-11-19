@@ -84,18 +84,30 @@ gave and a link into the dashboard. Never their name, email or answers. Make an 
 `SLACK_WEBHOOK_URL_JOBS`, `_HACKATHONS` and `_COHORT` send a form to its own
 channel.
 
-### Search numbers
+### Blog numbers
 
-The Blog page's Live tab shows each post's Google Search clicks,
-impressions and average position for the last 28 days
-(`lib/internal/search-console.ts`). To connect it:
+Blog → Stats (`dashboard.studio1hq.com/blog/stats`, blog reviewers) shows views, readers
+and read time from Google Analytics, and clicks, impressions and top
+searches from Search Console. The Blog page's Live tab also shows each
+post's Google Search clicks. Both read as one Google service account
+(`lib/internal/google.ts`); nobody signs in to Google.
 
-1. In Google Cloud, create a project (or pick one), turn on the "Google
-   Search Console API", and create a service account. Under its Keys, add a
-   JSON key and download it.
-2. In Search Console, open the studio1hq.com property → Settings → Users and
-   permissions → Add user: the service account's email, Restricted.
-3. In Vercel, set `GSC_CLIENT_EMAIL` (the service account email) and
+The service account already exists: `search-console-reader@studio1-dashboard.iam.gserviceaccount.com`
+in the Google Cloud project `studio1-dashboard`, with the Google Search
+Console API on, added to the studio1hq.com property as Restricted. To
+connect it:
+
+1. Under the service account's Keys, add a JSON key and download it.
+2. In Vercel, set `GSC_CLIENT_EMAIL` (the service account email) and
    `GSC_PRIVATE_KEY` (the JSON file's `private_key`), both Production and
-   Sensitive. If the property is a URL-prefix one rather than a domain one,
-   also set `GSC_SITE_URL` to `https://www.studio1hq.com/`.
+   Sensitive. The property is a domain one, so `GSC_SITE_URL` stays unset
+   (a URL-prefix property would need `https://www.studio1hq.com/`).
+3. For views (`lib/internal/google-analytics.ts`): turn on the "Google
+   Analytics Data API" in the same Google Cloud project; in Google
+   Analytics → Admin → Property access management, add the service
+   account's email as a Viewer; and set `GA_PROPERTY_ID` in Vercel to the
+   property's number (Admin → Property details).
+4. Redeploy, then delete the downloaded key file.
+
+Google Analytics only has numbers from 18 Nov 2026, when the site started
+sending them.
