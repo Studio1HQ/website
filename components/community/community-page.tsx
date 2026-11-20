@@ -18,7 +18,6 @@ import { PaperPageHeader } from "@/components/paper/paper-page-header";
 import { IndexBar, PaperSection } from "@/components/paper/paper-sections";
 import { DitherField } from "@/components/home/dither-field";
 import { DotWord } from "@/components/team/dot-word";
-import { CityIcon } from "@/components/hackathons/city-icons";
 import { CommunityBento, TogetherSpread, TogetherWeBuild } from "@/components/community/community-sections";
 import type { CommunityData, CommunityItem, CommunityKind } from "@/lib/community";
 import { GRAIN, PAPER_SCOPE, PRINT } from "@/lib/paper";
@@ -39,6 +38,12 @@ const parts = (date: string) => {
 };
 
 const CONTACT = "mailto:contact@studio1hq.com";
+
+const COUNTRY: Record<string, string> = {
+  Kolkata: "India", Bengaluru: "India", "Delhi NCR": "India", Mumbai: "India", Pune: "India",
+  Hyderabad: "India", Chennai: "India", Taipei: "Taiwan", Alicante: "Spain", Athens: "Greece",
+  Istanbul: "Türkiye", Singapore: "Singapore", "Sri Lanka": "Sri Lanka",
+};
 
 function rise(reduce: boolean, delay = 0) {
   return {
@@ -138,7 +143,6 @@ export function CommunityPage({ data }: { data: CommunityData }) {
   const meetups = [...upcoming, ...past].filter((e) => e.kind === "meetup").slice(0, 4);
   const hackathons = [...upcoming, ...past].filter((e) => e.kind === "hackathon").slice(0, 4);
   const byId = new Map([...upcoming, ...past].map((e) => [e.id, e]));
-  const marquee = [...cities.map((c) => c.city), "Online"];
   const stats: [number, string, Icon][] = [
     [totals.events, "Events", CalendarDots],
     [totals.cities, "Cities", MapPin],
@@ -204,22 +208,6 @@ export function CommunityPage({ data }: { data: CommunityData }) {
           </dl>
         </Container>
       </PaperPageHeader>
-
-      {/* Every city we have been to, scrolling past */}
-      <div className="overflow-hidden bg-[#141414] py-4 text-white" aria-hidden>
-        <motion.div
-          className="flex w-max gap-8 whitespace-nowrap text-[15px] font-medium uppercase tracking-[0.16em]"
-          animate={reduce ? undefined : { x: ["0%", "-50%"] }}
-          transition={{ duration: 40, ease: "linear", repeat: Infinity }}
-        >
-          {[...marquee, ...marquee, ...marquee, ...marquee].map((city, i) => (
-            <span key={i} className="flex items-center gap-8">
-              {city}
-              <span className="size-2 bg-[#f97316]" />
-            </span>
-          ))}
-        </motion.div>
-      </div>
 
       {/* 01 Up next */}
       <PaperSection id="up-next" tone="paper" className="scroll-mt-24">
@@ -296,15 +284,39 @@ export function CommunityPage({ data }: { data: CommunityData }) {
             <h2 className="mt-6 max-w-[640px] text-[34px] font-medium leading-[1.05] tracking-[-0.045em] md:text-[48px]">
               City by city, <span style={{ color: PRINT }}>in person</span>
             </h2>
-            <ul className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {cities.map((c, i) => (
-                <motion.li key={c.city} {...rise(reduce, Math.min(i, 8) * 0.04)} className="flex flex-col justify-between gap-6 rounded-[6px] bg-white/80 p-5 ring-1 ring-inset ring-[#141414]/10">
-                  <CityIcon city={c.city} className="size-10 text-[#141414]/70" />
-                  <div>
-                    <p className="text-[18px] font-medium tracking-[-0.02em]">{c.city}</p>
-                    <p className="mt-1 text-[13px] text-[#141414]/50">
-                      {c.count} {c.count === 1 ? "event" : "events"} · {c.kinds.map((k) => KIND[k].label).join(", ")}
-                    </p>
+                <motion.li key={c.city} {...rise(reduce, Math.min(i, 8) * 0.04)} className="min-w-0">
+                  <div className="relative flex h-full overflow-hidden rounded-[6px] bg-white ring-1 ring-inset ring-[#141414]/10">
+                    {/* Stub: how many times we have been there */}
+                    <div className="relative isolate flex w-[96px] shrink-0 flex-col items-center justify-center py-5 text-white" style={{ background: PRINT }}>
+                      <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 opacity-[0.14] mix-blend-multiply" style={{ backgroundImage: GRAIN }} />
+                      <span className="text-[40px] font-medium leading-none tracking-[-0.05em] tabular-nums">{c.count}</span>
+                      <span className="mt-1.5 text-[11px] font-medium uppercase tracking-[0.16em] text-white/80">{c.count === 1 ? "Event" : "Events"}</span>
+                    </div>
+                    {/* Perforation */}
+                    <span aria-hidden className="relative w-0 border-l-2 border-dashed border-[#141414]/15">
+                      <span className="absolute -left-[9px] -top-[9px] size-4 rounded-full bg-[#f4efe7]" />
+                      <span className="absolute -bottom-[9px] -left-[9px] size-4 rounded-full bg-[#f4efe7]" />
+                    </span>
+                    <div className="flex min-w-0 flex-1 flex-col justify-center gap-2 px-5 py-4">
+                      <p className="flex items-center gap-1.5 text-[12px] font-medium uppercase tracking-[0.14em] text-[#141414]/45">
+                        <MapPin weight="fill" className="size-3.5" style={{ color: PRINT }} />
+                        {COUNTRY[c.city] ?? ""}
+                      </p>
+                      <p className="truncate text-[22px] font-medium leading-tight tracking-[-0.03em]">{c.city}</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {c.kinds.map((k) => {
+                          const K = KIND[k];
+                          return (
+                            <span key={k} className="inline-flex items-center gap-1 rounded-full bg-[#f4efe7] px-2.5 py-0.5 text-[12px] font-medium text-[#141414]/70">
+                              <K.icon weight="bold" className="size-3" style={{ color: PRINT }} />
+                              {K.label}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
                 </motion.li>
               ))}
