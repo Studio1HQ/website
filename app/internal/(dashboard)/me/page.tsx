@@ -9,7 +9,7 @@ import { TodayCalls } from "@/components/internal/calls/call-views";
 import { canPlanCalls, canSeeCalls } from "@/lib/internal/calls/access";
 import { callPeople, listCalls, listChanges } from "@/lib/internal/calls/data";
 import { isIn, occurrences } from "@/lib/internal/calls/shared";
-import { cardChoices, loadWeekCards } from "@/lib/internal/tasks/load";
+import { cardChoices, loadWeekCards, teammates } from "@/lib/internal/tasks/load";
 import { weekStart } from "@/lib/internal/clients/schema";
 import { isAdmin, requireMember } from "@/lib/internal/session";
 import { listDays } from "@/lib/internal/team/attendance";
@@ -99,7 +99,7 @@ export default async function MyDayPage({
     );
   }
 
-  const [monthDays, todayDays, payslips, claims, work, options, calls] = await Promise.all([
+  const [monthDays, todayDays, payslips, claims, work, options, calls, team] = await Promise.all([
     listDays({ from: `${month}-01`, to: `${month}-${String(daysInMonth(month)).padStart(2, "0")}`, emails: [person.email] }),
     listDays({ from: now.date, to: now.date, emails: [person.email] }),
     listPayslips({ email: person.email, status: "sent" }),
@@ -108,6 +108,7 @@ export default async function MyDayPage({
     loadWeekCards(person.email, weekStart(now.date), now.date),
     cardChoices(staff),
     todaysCalls(staff, now),
+    teammates(),
   ]);
 
   const today = todayDays.ok ? (todayDays.days[0] ?? null) : null;
@@ -149,6 +150,8 @@ export default async function MyDayPage({
               today={now.date}
               ended={Boolean(today && today.kind !== "leave" && today.slots.length && !openSlot(today.slots))}
               options={options}
+              who={person.email.toLowerCase()}
+              team={team}
               className="min-h-[14rem] xl:flex-1"
             />
           )

@@ -12,14 +12,18 @@
  */
 
 import { DELIVERABLE_STATUSES, statusLabel, toneOf, type Deliverable } from "@/lib/internal/clients/schema";
+import { displayName } from "@/lib/internal/team/shared";
 import {
   STUDIO_LINK,
   forKey,
   forLabel,
   isClientKey,
+  peopleOn,
+  priorityRank,
   type CommunityCard,
   type EngagementLabel,
   type Task,
+  type TaskPriority,
   type TaskStatus,
   type Tone,
 } from "@/lib/internal/tasks/shared";
@@ -33,6 +37,7 @@ export type CalendarCard =
       notes: string;
       day: string | null;
       status: TaskStatus;
+      priority: TaskPriority;
       /** "Nebius · DevRel retainer", "Studio1 · Hiring", "Studio1". */
       forLabel: string;
       /** A short tag: the client's name, or the Studio1 area; "" for plain Studio1. */
@@ -42,8 +47,14 @@ export type CalendarCard =
       link: string;
       blocked: boolean;
       reason: string;
-      /** Who added it, when it wasn't the person. */
+      /** Who added it, when it wasn't the person (and it isn't shared with them). */
       from: string | null;
+      /** Whose task it is (lowercase email); someone else's when it's shared with the person. */
+      owner: string;
+      /** Who it's shared with (lowercase emails), besides its owner. */
+      people: string[];
+      /** First names of everyone else on it, for "With …". */
+      withNames: string[];
       /** Whether the viewer may edit, move or delete it (set by the page). */
       editable?: boolean;
     }
@@ -99,6 +110,8 @@ function tagFor(key: string, engagements: ReadonlyMap<string, EngagementLabel>) 
   return label === "Studio1" ? "" : label.replace(/^Studio1 · /, "");
 }
 
+const firstName = (name: string) => name.trim().split(/\s+/)[0] || name;
+
 function inRange(day: string | null | undefined, from: string, to: string): boolean {
   return Boolean(day && day >= from && day <= to);
 }
@@ -132,6 +145,7 @@ export function placeCards(input: {
   const tray: CalendarCard[] = [];
   const current = input.today <= end;
 
+  const me = input.person.toLowerCase();
   for (const task of input.tasks) {
     const key = forKey(task);
     const card: CalendarCard = {
@@ -141,6 +155,7 @@ export function placeCards(input: {
       notes: task.notes ?? "",
       day: null,
       status: task.status,
+      priority: task.priority,
       forLabel: forLabel(key, engagements),
       tag: tagFor(key, engagements),
       client: isClientKey(key, engagements),
@@ -148,9 +163,14 @@ export function placeCards(input: {
       blocked: task.blocked,
       reason: task.block_reason,
       from:
-        task.created_by && task.created_by.toLowerCase() !== input.person.toLowerCase()
+        task.created_by && task.created_by.toLowerCase() !== me && task.email.toLowerCase() === me
           ? (input.names?.[task.created_by.toLowerCase()] ?? task.created_by)
           : null,
+      owner: task.email.toLowerCase(),
+      people: task.with_emails ?? [],
+      withNames: peopleOn(task)
+        .filter((email) => email !== me)
+        .map((email) => firstName(input.names?.[email] || displayName({ email }))),
     };
     const due = task.due_on;
     if (task.status === "done") {
@@ -222,10 +242,14 @@ export function placeCards(input: {
     });
   }
 
-  // Within a day: open first (blocked on top), then done; then by title.
-  const rank = (card: CalendarCard) =>
-    card.kind === "task" ? (card.status === "done" ? 2 : card.blocked ? 0 : 1) : card.done ? 2 : 1;
-  cards.sort((a, b) => rank(a) - rank(b) || a.title.localeCompare(b.title));
+  // Within a day: open first, then done; each by priority (Top first; client
+  // and community cards count as Medium), blocked on top of its priority, then by title.
+  const rank = (card: CalendarCard) => (card.kind === "task" ? (card.status === "done" ? 1 : 0) : card.done ? 1 : 0);
+  const priority = (card: CalendarCard) => priorityRank(card.kind === "task" ? card.priority : undefined);
+  const blocked = (card: CalendarCard) => (card.kind === "task" && card.blocked ? 0 : 1);
+  cards.sort(
+    (a, b) => rank(a) - rank(b) || priority(a) - priority(b) || blocked(a) - blocked(b) || a.title.localeCompare(b.title),
+  );
   tray.sort((a, b) => (a.day ?? "9999").localeCompare(b.day ?? "9999") || a.title.localeCompare(b.title));
   return { cards, tray };
 }

@@ -2,7 +2,7 @@
 
 import { useOptimistic, useState, type ReactNode } from "react";
 import { DndContext, DragOverlay, useDraggable, useDroppable, type DragEndEvent } from "@dnd-kit/core";
-import { Plus, Prohibit, UserCircle } from "@phosphor-icons/react";
+import { Plus, Prohibit, UserCircle, UsersThree } from "@phosphor-icons/react";
 import { blockTask, moveTask } from "@/app/internal/(dashboard)/tasks/actions";
 import { setQuickField } from "@/app/internal/(dashboard)/community/actions";
 import { cn } from "@/lib/utils";
@@ -14,6 +14,8 @@ import { DeliverableCard } from "@/components/internal/clients/deliverable-card"
 import { StatusBadge } from "@/components/internal/clients/ui";
 import { TaskDialog } from "@/components/internal/tasks/task-dialog";
 import { TaskNote } from "@/components/internal/tasks/task-note";
+import { PriorityMark } from "@/components/internal/tasks/priority";
+import { withLabel } from "@/components/internal/tasks/with-picker";
 import { ForChip, type ForOption, type LogTarget } from "@/components/internal/tasks/kit";
 import { cardAnnouncements, dragHandlers, underPointer, useCardSensors } from "@/components/internal/tasks/drag";
 import { displayName } from "@/lib/internal/team/shared";
@@ -25,9 +27,12 @@ import {
   communityStatusFor,
   deliverableColumn,
   isTaskStatus,
+  peopleOn,
+  priorityRank,
   type Column,
   type CommunityCard,
   type Task,
+  type Teammate,
 } from "@/lib/internal/tasks/shared";
 
 /* The board: one person's work from three places in four columns. Drag a
@@ -60,6 +65,8 @@ export type BoardProps = {
   targets: LogTarget[];
   /** email → name, for owners on client cards. */
   names: Record<string, string>;
+  /** Everyone active on the team list: who a task can be shared with. */
+  team: Teammate[];
 };
 
 type Item =
@@ -70,8 +77,14 @@ type Item =
 /** What's being dragged: one of the person's tasks, or a community task. */
 type Lifted = { kind: "task"; item: BoardTask } | { kind: "community"; card: CommunityCard };
 
-function sortKey(blocked: boolean, due: string | null | undefined, title: string) {
-  return `${blocked ? "0" : "1"}${due ?? "9999-99-99"}${title.toLowerCase()}`;
+/** Within a column: Top priority first and Low last (client cards count as Medium), then blocked, then by due date. */
+function sortKey(rank: number, blocked: boolean, due: string | null | undefined, title: string) {
+  return `${rank}${blocked ? "0" : "1"}${due ?? "9999-99-99"}${title.toLowerCase()}`;
+}
+
+/** A community task's priority (low / normal / high / urgent) on the same 0–2 scale. */
+function communityRank(priority: string) {
+  return priority === "urgent" || priority === "high" ? 0 : priority === "low" ? 2 : 1;
 }
 
 export function Board(props: BoardProps) {
@@ -99,19 +112,19 @@ export function Board(props: BoardProps) {
     ...tasks.map((data): Item => ({
       kind: "task",
       column: data.task.status,
-      sort: sortKey(data.task.blocked, data.task.due_on, data.task.title),
+      sort: sortKey(priorityRank(data.task.priority), data.task.blocked, data.task.due_on, data.task.title),
       data,
     })),
     ...props.deliverables.map((data): Item => ({
       kind: "deliverable",
       column: deliverableColumn(data.deliverable.status),
-      sort: sortKey(data.deliverable.blocked, data.deliverable.due_on, data.deliverable.title),
+      sort: sortKey(1, data.deliverable.blocked, data.deliverable.due_on, data.deliverable.title),
       data,
     })),
     ...community.map((data): Item => ({
       kind: "community",
       column: communityColumn(data.status),
-      sort: sortKey(data.status === "blocked", data.due_on, data.title),
+      sort: sortKey(communityRank(data.priority), data.status === "blocked", data.due_on, data.title),
       data,
     })),
   ].sort((a, b) => a.sort.localeCompare(b.sort));
@@ -253,6 +266,7 @@ export function Board(props: BoardProps) {
           canClients={viewer.clients !== null}
           canCommunity={viewer.community === "manager"}
           today={today}
+          team={props.team}
         />
       ) : null}
     </div>
@@ -363,7 +377,10 @@ function TaskCard({ item, props, onMove }: { item: BoardTask; props: BoardProps;
   const [editing, setEditing] = useState(false);
   const [blocking, setBlocking] = useState(false);
   const [reason, setReason] = useState(task.block_reason);
-  const given = task.created_by && task.created_by.toLowerCase() !== task.email.toLowerCase();
+  const person = props.person.email.toLowerCase();
+  // From someone else, on the person's own task; shared ones say who else is on them instead.
+  const given = task.created_by && task.created_by.toLowerCase() !== task.email.toLowerCase() && task.email.toLowerCase() === person;
+  const others = peopleOn(task).filter((email) => email !== person);
   const { setNodeRef, listeners, isDragging } = useDraggable({
     id: `task:${task.id}`,
     data: { kind: "task", item } satisfies Lifted,
@@ -403,6 +420,11 @@ function TaskCard({ item, props, onMove }: { item: BoardTask; props: BoardProps;
             <UserCircle size={12} /> From {props.names[task.created_by.toLowerCase()] ?? displayName({ email: task.created_by })}
           </p>
         ) : null}
+        {others.length ? (
+          <p title="Shared: it's on each of their lists" className="flex items-center gap-1 text-[11.5px] text-[var(--i-muted)]">
+            <UsersThree size={12} className="shrink-0" /> With {withLabel(others, props.team)}
+          </p>
+        ) : null}
       </div>
       <div className="flex flex-wrap items-center gap-2">
         {changeable ? (
@@ -419,6 +441,7 @@ function TaskCard({ item, props, onMove }: { item: BoardTask; props: BoardProps;
             {TASK_STATUSES.find((option) => option.value === task.status)?.label}
           </Pill>
         )}
+        <PriorityMark priority={task.priority} />
         {task.due_on ? (
           <span className="text-[12px]">
             <DueDate day={task.due_on} done={task.status === "done"} today={props.today} />
@@ -447,6 +470,7 @@ function TaskCard({ item, props, onMove }: { item: BoardTask; props: BoardProps;
           canClients={props.viewer.clients !== null}
           canCommunity={false}
           today={props.today}
+          team={props.team}
         />
       ) : null}
       {changeable ? (

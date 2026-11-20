@@ -7,7 +7,7 @@ import { isMailerConfigured, sendMail } from "@/lib/mailer";
 import { notify } from "@/lib/internal/notifications/data";
 import { OWNERS } from "@/lib/internal/roles";
 import { requireMember, staffName } from "@/lib/internal/session";
-import { findPerson, getPerson } from "@/lib/internal/team/people";
+import { findPerson, getPerson, listPeople } from "@/lib/internal/team/people";
 import { dayLabel, displayName, istNow, isDateKey } from "@/lib/internal/team/shared";
 import { isOwnedBy } from "@/lib/internal/clients/schema";
 import { moveDeliverable, saveDeliverable } from "@/app/internal/(dashboard)/clients/actions";
@@ -39,9 +39,12 @@ import { liveSnapshot, taskViewer } from "@/lib/internal/tasks/load";
 import { reportEmailHtml, reportText } from "@/lib/internal/tasks/report";
 import { reportsSince } from "@/lib/internal/tasks/report-status";
 import {
+  MAX_WITH,
   STUDIO_LINK,
+  isOnTask,
   isPeriodStart,
   isStudioArea,
+  isTaskPriority,
   parseLink,
   isTaskStatus,
   isUuid,
@@ -52,6 +55,7 @@ import {
   tasksHref,
   type ReportPeriod,
   type TaskArea,
+  type TaskPriority,
   type TaskResult,
   type TaskStatus,
 } from "@/lib/internal/tasks/shared";
@@ -85,6 +89,52 @@ function line(value: unknown, max: number) {
 
 function block(value: unknown, max: number) {
   return typeof value === "string" ? value.replace(/\r\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim().slice(0, max) : "";
+}
+
+/**
+ * A priority to write: Top or Low as picked. Medium (the column's default) is
+ * left out, so tasks still save before the priority migration has run.
+ */
+function priorityField(value: unknown): { priority?: TaskPriority } {
+  return isTaskPriority(value) && value !== "medium" ? { priority: value } : {};
+}
+
+/**
+ * The people a task is shared with: emails of people active on the team
+ * list, not its own person. Checked against the list, so a stray address
+ * can't put a task anywhere.
+ */
+async function cleanWith(value: unknown, owner: string): Promise<{ ok: true; emails: string[] } | { ok: false; message: string }> {
+  const wanted = [
+    ...new Set(
+      (Array.isArray(value) ? value : [])
+        .filter((item): item is string => typeof item === "string")
+        .map((item) => item.trim().toLowerCase())
+        .filter((item) => item && item !== owner.toLowerCase()),
+    ),
+  ];
+  if (!wanted.length) return { ok: true, emails: [] };
+  if (wanted.length > MAX_WITH) return { ok: false, message: `Share it with ${MAX_WITH} people at most.` };
+  const found = await listPeople({ emails: wanted, activeOnly: true });
+  if (!found.ok) return { ok: false, message: "Couldn't check the team list just now. Try again in a minute." };
+  const active = new Set(found.people.map((person) => person.email.toLowerCase()));
+  if (wanted.some((email) => !active.has(email))) return { ok: false, message: "Someone you picked isn't on the active team list." };
+  return { ok: true, emails: wanted.sort() };
+}
+
+/** Tells people a task is now shared with them: on their bell, never an email. */
+function tellShared(emails: readonly string[], staff: Staffish, titles: readonly string[], day: string | null) {
+  const to = emails.filter((email) => email !== staff.email.toLowerCase());
+  if (!to.length) return;
+  const by = staffName(staff);
+  after(() =>
+    notify(to, staff.email, {
+      kind: "task",
+      title: titles.length === 1 ? `${by} shared a task with you` : `${by} shared ${titles.length} tasks with you`,
+      body: `${titles.slice(0, 3).join(" · ")}${titles.length > 3 ? " …" : ""}${day ? ` · ${dayLabel(day)}` : ""}`,
+      href: day ? tasksHref({ week: day }) : "/tasks",
+    }),
+  );
 }
 
 /** Same check as client work: no passwords or keys in notes. */
@@ -148,7 +198,8 @@ async function cleanFor(staff: { clients: unknown; clientScope: ClientScope }, v
 /**
  * Adds a task (no id) or changes one. values: { email? (whose board; a
  * founder or intern reviewer may give someone a task), title, notes, area,
- * engagement_id?, deliverable_id?, due_on?, status? }.
+ * engagement_id?, deliverable_id?, due_on?, status?, priority?, with? (emails
+ * it's shared with) }.
  */
 export async function saveTask(id: unknown, values: unknown): Promise<TaskResult> {
   const { staff, viewer: me } = await viewer();
@@ -171,6 +222,8 @@ export async function saveTask(id: unknown, values: unknown): Promise<TaskResult
     const person = await getPerson(email);
     if (!person || !person.active) return email === staff.email ? NOT_ON_LIST : { ok: false, message: "They're not on the active team list." };
     const status: TaskStatus = isTaskStatus(data.status) ? data.status : "todo";
+    const shared = await cleanWith(data.with, email);
+    if (!shared.ok) return shared;
     const result = await insertTask({
       email,
       title,
@@ -180,9 +233,13 @@ export async function saveTask(id: unknown, values: unknown): Promise<TaskResult
       due_on: due,
       created_by: staff.email,
       updated_by: staff.email,
+      ...priorityField(data.priority),
+      // Left out when nobody's picked, so tasks still save before the sharing migration.
+      ...(shared.emails.length ? { with_emails: shared.emails } : {}),
       ...where,
     });
     if (!result.ok) return result;
+    tellShared(shared.emails, staff, [title], due);
     // A task from someone else is news: it shows on their bell.
     if (email !== staff.email) {
       const by = staffName(staff);
@@ -204,8 +261,15 @@ export async function saveTask(id: unknown, values: unknown): Promise<TaskResult
   if (task === "error") return TRY_AGAIN;
   if (!task) return UNKNOWN;
   if (!canChangeTask(me, task)) return { ok: false, message: "You can only change your own tasks." };
-  const result = await updateTask(task.id, { title, notes, due_on: due, ...where }, staff.email);
+  // Priority and people only when they changed, so tasks still save before their migration.
+  const priority = isTaskPriority(data.priority) && data.priority !== task.priority ? { priority: data.priority } : {};
+  const shared = "with" in data ? await cleanWith(data.with, task.email) : { ok: true as const, emails: task.with_emails };
+  if (!shared.ok) return shared;
+  const added = shared.emails.filter((email) => !task.with_emails.includes(email));
+  const people = added.length || shared.emails.length !== task.with_emails.length ? { with_emails: shared.emails } : {};
+  const result = await updateTask(task.id, { title, notes, due_on: due, ...priority, ...people, ...where }, staff.email);
   if (!result.ok) return result;
+  tellShared(added, staff, [title], due);
   refresh();
   return { ok: true, id: task.id, message: "Saved" };
 }
@@ -253,11 +317,31 @@ export async function removeTask(id: unknown): Promise<TaskResult> {
   const task = await getTask(id);
   if (task === "error") return TRY_AGAIN;
   if (!task) return UNKNOWN;
-  if (!canChangeTask(me, task)) return { ok: false, message: "You can only delete your own tasks." };
+  // Someone it's only shared with takes themselves off (leaveTask); deleting is for its own person.
+  if (!canChangeTask(me, { ...task, with_emails: [] })) {
+    return isOnTask(task, me.email)
+      ? { ok: false, message: "It's shared with you: take yourself off it instead." }
+      : { ok: false, message: "You can only delete your own tasks." };
+  }
   const result = await deleteTask(task.id);
   if (!result.ok) return result;
   refresh();
   return { ok: true, message: "Task deleted. Time logged on it stays in your days." };
+}
+
+/** Takes the signed-in person off a task shared with them; it stays on everyone else's list. */
+export async function leaveTask(id: unknown): Promise<TaskResult> {
+  const { staff } = await viewer();
+  if (typeof id !== "string" || !isUuid(id)) return UNKNOWN;
+  const task = await getTask(id);
+  if (task === "error") return TRY_AGAIN;
+  if (!task) return UNKNOWN;
+  const me = staff.email.toLowerCase();
+  if (!task.with_emails.includes(me)) return { ok: false, message: "It isn't shared with you." };
+  const result = await updateTask(task.id, { with_emails: task.with_emails.filter((email) => email !== me) }, staff.email);
+  if (!result.ok) return result;
+  refresh();
+  return { ok: true, message: "Taken off your list" };
 }
 
 /* ---------------------------------------------------- the week calendar */
@@ -341,10 +425,11 @@ async function startDeliverable(staff: Staffish, deliverable: Deliverable | null
 
 /**
  * Adds cards on a day (the week calendar's "+ New", My day): one or several
- * (a pasted list). items: [{ title, notes?, link? }]; extra: { email?, status? }.
+ * (a pasted list). items: [{ title, notes?, link?, priority? }]; extra: { email?, status?, with? }.
  * email: whose week (left out = your own); giving someone else a task goes
  * through canGiveTask, like the board. status: left out = Done on today or
  * a past day for your own, Not started on a day ahead or for someone else.
+ * with: people to share every one of them with (on their lists too).
  */
 export async function addTasks(day: unknown, items: unknown, extra?: unknown): Promise<TaskResult> {
   const { staff, viewer: me } = await viewer();
@@ -370,10 +455,12 @@ export async function addTasks(day: unknown, items: unknown, extra?: unknown): P
   const state: TaskStatus = isTaskStatus(options.status) ? options.status : other || date > today ? "todo" : "done";
   const list = (Array.isArray(items) ? items : [items]).map(input).slice(0, 30);
   const clean = list
-    .map((item) => ({ title: line(item.title, 200), notes: block(item.notes, 4000), link: item.link }))
+    .map((item) => ({ title: line(item.title, 200), notes: block(item.notes, 4000), link: item.link, priority: item.priority }))
     .filter((item) => item.title);
   if (!clean.length) return { ok: false, message: "Write what it is." };
   if (clean.some((item) => looksLikeSecret(item.title) || looksLikeSecret(item.notes))) return SECRET;
+  const shared = await cleanWith(options.with, email);
+  if (!shared.ok) return shared;
 
   // Check every line first, then save them in one write: all or none, so a
   // failed save can be retried without adding the first ones twice.
@@ -391,6 +478,8 @@ export async function addTasks(day: unknown, items: unknown, extra?: unknown): P
       done_on: state === "done" ? doneDay(date, today) : null,
       created_by: staff.email,
       updated_by: staff.email,
+      ...priorityField(item.priority),
+      ...(shared.emails.length ? { with_emails: shared.emails } : {}),
       ...tied.fields,
     });
     if (tied.deliverable) deliverables.set(tied.deliverable.id, tied.deliverable);
@@ -415,6 +504,7 @@ export async function addTasks(day: unknown, items: unknown, extra?: unknown): P
       }),
     );
   }
+  tellShared(shared.emails, staff, clean.map((item) => item.title), date);
   refresh();
   // Say the day when it isn't today, so a task put on another day isn't "lost".
   const where = date === today ? "" : ` on ${dayLabel(date)}`;
@@ -423,7 +513,7 @@ export async function addTasks(day: unknown, items: unknown, extra?: unknown): P
 }
 
 /**
- * Changes a card: { title?, notes?, link?, status?, day? }. Done stamps the card's
+ * Changes a card: { title?, notes?, link?, status?, priority?, with?, day? }. Done stamps the card's
  * day (or today, for a day ahead); moving a done card moves its done day.
  */
 export async function editTask(id: unknown, values: unknown): Promise<TaskResult> {
@@ -455,6 +545,17 @@ export async function editTask(id: unknown, values: unknown): Promise<TaskResult
     Object.assign(patch, tied.fields);
     deliverable = tied.deliverable;
   }
+  if ("priority" in data) {
+    if (!isTaskPriority(data.priority)) return { ok: false, message: "Pick Top, Medium or Low." };
+    if (data.priority !== task.priority) patch.priority = data.priority;
+  }
+  let added: string[] = [];
+  if ("with" in data) {
+    const shared = await cleanWith(data.with, task.email);
+    if (!shared.ok) return shared;
+    added = shared.emails.filter((email) => !task.with_emails.includes(email));
+    if (added.length || shared.emails.length !== task.with_emails.length) patch.with_emails = shared.emails;
+  }
   let day = task.due_on;
   if ("day" in data) {
     if (typeof data.day !== "string" || !isDateKey(data.day)) return { ok: false, message: "Pick a valid day." };
@@ -479,6 +580,7 @@ export async function editTask(id: unknown, values: unknown): Promise<TaskResult
 
   const result = await updateTask(task.id, patch, staff.email, { status: `eq.${task.status}` });
   if (!result.ok) return result;
+  tellShared(added, staff, [typeof patch.title === "string" ? patch.title : task.title], day);
   const also = status !== task.status || "link" in data ? await startDeliverable(staff, deliverable, status) : null;
   refresh();
   return { ok: true, message: also ? `Saved, and ${also}` : undefined };

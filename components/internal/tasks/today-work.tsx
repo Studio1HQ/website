@@ -3,7 +3,7 @@ import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { Card, CardTitle } from "@/components/internal/ui";
 import { DayList } from "@/components/internal/tasks/week-calendar";
 import type { CalendarCard } from "@/lib/internal/tasks/calendar";
-import type { LinkOption } from "@/lib/internal/tasks/shared";
+import type { LinkOption, Teammate } from "@/lib/internal/tasks/shared";
 import { cn } from "@/lib/utils";
 
 /**
@@ -15,6 +15,8 @@ export function TodayWork({
   today,
   ended,
   options,
+  who,
+  team,
   className,
 }: {
   cards: CalendarCard[];
@@ -22,6 +24,10 @@ export function TodayWork({
   /** The day has been started and every slot has ended. */
   ended: boolean;
   options: LinkOption[];
+  /** Whose day it is (lowercase email). */
+  who: string;
+  /** Everyone active on the team list: who a task can be shared with. */
+  team: Teammate[];
   /** Height and the like: with a set height, the cards scroll inside. */
   className?: string;
 }) {
@@ -45,7 +51,7 @@ export function TodayWork({
           You&apos;ve ended your day. Add what you worked on, so it counts in your week and your report.
         </p>
       ) : null}
-      <DayList day={today} today={today} cards={cards} options={options} />
+      <DayList day={today} today={today} cards={cards} options={options} who={who} team={team} />
     </Card>
   );
 }

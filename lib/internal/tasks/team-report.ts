@@ -62,11 +62,10 @@ export type TeamInput = {
     WorkLog,
     "email" | "day" | "minutes" | "engagement_id" | "area"
   >[];
-  /** Open tasks, and the ones done in the period. */
-  tasks: readonly Pick<
-    Task,
-    "email" | "status" | "done_on" | "due_on" | "blocked"
-  >[];
+  /** Open tasks, and the ones done in the period. Shared ones count for everyone on them. */
+  tasks: readonly (Pick<Task, "email" | "status" | "done_on" | "due_on" | "blocked"> & {
+    with_emails?: readonly string[];
+  })[];
   pieces: readonly PublishedPiece[];
   engagements: ReadonlyMap<string, EngagementLabel>;
 };
@@ -118,7 +117,9 @@ export function teamRows(input: TeamInput): TeamRow[] {
             ? Math.round(logged / loggedDays)
             : null;
 
-      const tasks = mine(input.tasks);
+      const tasks = input.tasks.filter(
+        (task) => task.email.toLowerCase() === email || task.with_emails?.some((other) => other.toLowerCase() === email),
+      );
       const open = tasks.filter((task) => task.status !== "done");
       const pieces: Record<Size, number> = { S: 0, M: 0, L: 0 };
       for (const piece of input.pieces)

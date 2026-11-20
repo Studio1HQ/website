@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { removeTask, saveTask } from "@/app/internal/(dashboard)/tasks/actions";
+import { leaveTask, removeTask, saveTask } from "@/app/internal/(dashboard)/tasks/actions";
 import { saveDeliverable } from "@/app/internal/(dashboard)/clients/actions";
 import { saveRecord } from "@/app/internal/(dashboard)/community/actions";
 import { buttonClass, inputClass, textareaClass } from "@/components/internal/ui";
@@ -9,8 +9,18 @@ import { DateField } from "@/components/internal/pickers";
 import { Select } from "@/components/internal/select";
 import { Label, Segmented, TeamDialog, useTeamAction } from "@/components/internal/team/kit";
 import { forOptionLabel, type ForOption, type LogTarget } from "@/components/internal/tasks/kit";
+import { WithPicker } from "@/components/internal/tasks/with-picker";
 import { DELIVERABLE_KINDS, weekStart, type DeliverableKind } from "@/lib/internal/clients/schema";
-import { TASK_AREAS, isStudioArea, type StudioArea, type Task } from "@/lib/internal/tasks/shared";
+import {
+  DEFAULT_PRIORITY,
+  TASK_AREAS,
+  TASK_PRIORITIES,
+  isStudioArea,
+  type StudioArea,
+  type Task,
+  type TaskPriority,
+  type Teammate,
+} from "@/lib/internal/tasks/shared";
 
 const COMMUNITY = "__community__";
 
@@ -33,6 +43,7 @@ export function TaskDialog({
   canClients,
   canCommunity,
   today,
+  team,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -48,6 +59,8 @@ export function TaskDialog({
   /** The viewer manages the community task list. */
   canCommunity: boolean;
   today: string;
+  /** Everyone active on the team list: who a task can be shared with. */
+  team: readonly Teammate[];
 }) {
   const { pending, run } = useTeamAction();
   const start = () => ({
@@ -57,6 +70,8 @@ export function TaskDialog({
     area: (task && isStudioArea(task.area) ? task.area : "content") as StudioArea,
     partOf: task?.deliverable_id ?? "",
     due: task?.due_on ?? "",
+    priority: (task?.priority ?? DEFAULT_PRIORITY) as TaskPriority,
+    people: task?.with_emails ?? [],
     asDeliverable: !task,
     kind: "blog" as DeliverableKind,
   });
@@ -87,7 +102,8 @@ export function TaskDialog({
             title,
             owner: person.email,
             due_on: form.due || null,
-            priority: "normal",
+            // The community list's own scale: Top is high, Low is low.
+            priority: form.priority === "top" ? "high" : form.priority === "low" ? "low" : "normal",
             status: "todo",
             details: form.notes,
           }),
@@ -121,6 +137,8 @@ export function TaskDialog({
           engagement_id: engagement?.id ?? null,
           deliverable_id: engagement && form.partOf ? form.partOf : null,
           due_on: form.due || null,
+          priority: form.priority,
+          with: form.people,
         }),
       close,
     );
@@ -146,7 +164,12 @@ export function TaskDialog({
       }
       footer={
         <>
-          {task ? (
+          {task && person.own && task.email.toLowerCase() !== person.email.toLowerCase() ? (
+            // Shared with them by someone else: they take themselves off rather than delete it for everyone.
+            <button type="button" className={buttonClass("ghost")} disabled={pending} onClick={() => run(() => leaveTask(task.id), close)}>
+              Take me off
+            </button>
+          ) : task ? (
             confirming ? (
               <button
                 type="button"
@@ -154,7 +177,7 @@ export function TaskDialog({
                 disabled={pending}
                 onClick={() => run(() => removeTask(task.id), close)}
               >
-                Delete it
+                {task.with_emails.length ? "Delete it for everyone" : "Delete it"}
               </button>
             ) : (
               <button type="button" className={buttonClass("ghost")} onClick={() => setConfirming(true)}>
@@ -246,6 +269,25 @@ export function TaskDialog({
             onChange={(partOf) => set({ partOf })}
             options={[{ value: "", label: "None" }, ...partOfOptions.map((item) => ({ value: item.id, label: item.title }))]}
             className="w-full"
+          />
+        </Label>
+      ) : null}
+      <Label label="Priority" group>
+        <Segmented
+          label="Priority"
+          value={form.priority}
+          onChange={(priority) => set({ priority })}
+          options={TASK_PRIORITIES.map((option) => ({ value: option.value, label: option.label }))}
+        />
+      </Label>
+      {!community && !asDeliverable ? (
+        <Label label="With" hint="shared: on their lists too" group>
+          <WithPicker
+            team={team}
+            value={form.people}
+            onChange={(people) => set({ people })}
+            exclude={[task?.email ?? person.email]}
+            variant="field"
           />
         </Label>
       ) : null}

@@ -2,7 +2,7 @@ import { Notice } from "@/components/internal/ui";
 import { Board, type BoardDeliverable } from "@/components/internal/tasks/board";
 import { canChangeTask, canGiveTask } from "@/lib/internal/tasks/access";
 import { choicesFor, engagementChoices } from "@/lib/internal/tasks/data";
-import { loadBoard, thisWeek } from "@/lib/internal/tasks/load";
+import { loadBoard, teammates, thisWeek } from "@/lib/internal/tasks/load";
 import { boardPieces } from "@/lib/internal/tasks/board-data";
 import type { ViewProps } from "./types";
 
@@ -14,9 +14,10 @@ import type { ViewProps } from "./types";
 export async function BoardView({ staff, viewer, person, own, people, today }: ViewProps) {
   const week = thisWeek();
   const canAdd = canGiveTask(viewer, person.email, person.guarded);
-  const [board, choices] = await Promise.all([
+  const [board, choices, team] = await Promise.all([
     loadBoard(person.email, week),
     staff.clients && canAdd ? engagementChoices().then((list) => choicesFor(staff.clientScope, list)) : Promise.resolve([]),
+    teammates(),
   ]);
 
   if (board.missing) {
@@ -49,6 +50,7 @@ export async function BoardView({ staff, viewer, person, own, people, today }: V
         forOptions={choices}
         targets={own ? pieces.targets : []}
         names={names}
+        team={team}
       />
     </>
   );

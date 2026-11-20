@@ -77,11 +77,13 @@ export function canGiveTask(viewer: TaskViewer, email: string, guarded = false) 
 
 /**
  * May this viewer change (edit, move, delete) this task? The person whose
- * board it's on, a founder, the founder's associate (they manage everyone's
- * tasks), or whoever gave it to them while they still may.
+ * board it's on, anyone it's shared with (it's on their list too), a
+ * founder, the founder's associate (they manage everyone's tasks), or
+ * whoever gave it to them while they still may.
  */
-export function canChangeTask(viewer: TaskViewer, task: { email: string; created_by: string }) {
+export function canChangeTask(viewer: TaskViewer, task: { email: string; created_by: string; with_emails?: readonly string[] }) {
   if (task.email.toLowerCase() === viewer.email.toLowerCase()) return true;
+  if (task.with_emails?.some((email) => email.toLowerCase() === viewer.email.toLowerCase())) return true;
   if (isFounder(viewer) || isAssociate(viewer)) return true;
   return task.created_by.toLowerCase() === viewer.email.toLowerCase() && canGiveTask(viewer, task.email);
 }

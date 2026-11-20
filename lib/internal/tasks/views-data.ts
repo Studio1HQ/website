@@ -3,6 +3,7 @@ import { selectRows } from "@/lib/supabase-server";
 import { addDays } from "@/lib/internal/clients/schema";
 import { istMidnight, listTasks } from "@/lib/internal/tasks/data";
 import { istDay } from "@/lib/internal/tasks/report";
+import { peopleOn } from "@/lib/internal/tasks/shared";
 
 /**
  * Reads for the Team view: how much each person finished in a range, from
@@ -50,7 +51,9 @@ export async function doneCounts(emails: readonly string[], from: string, to: st
     if (day) byDay[email][day] = (byDay[email][day] ?? 0) + 1;
   };
   for (const task of tasks.rows)
-    if (task.status === "done" && task.done_on && task.done_on >= from && task.done_on <= to) add(task.email, task.done_on);
+    // A shared task counts for everyone on it.
+    if (task.status === "done" && task.done_on && task.done_on >= from && task.done_on <= to)
+      for (const email of peopleOn(task)) add(email, task.done_on);
   // Client work and community are counted when they can be read; a hiccup
   // there leaves those out rather than hiding the whole team.
   if (deliverables.ok) for (const row of deliverables.rows) add(row.owner, istDay(row.published_at));

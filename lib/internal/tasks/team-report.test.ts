@@ -176,6 +176,26 @@ describe("team report", () => {
     });
   });
 
+  it("counts a shared task for everyone on it", () => {
+    const [dev, priya] = teamRows({
+      people: [
+        { email: "dev@studio1hq.com", name: "Dev" },
+        { email: "priya@studio1hq.com", name: "Priya" },
+      ],
+      from: "2026-11-16",
+      to: "2026-11-22",
+      today: "2026-11-20",
+      days: null,
+      logs: [],
+      tasks: [
+        { email: "priya@studio1hq.com", with_emails: ["dev@studio1hq.com"], status: "done", done_on: "2026-11-17", due_on: null, blocked: false },
+      ],
+      pieces: [],
+      engagements,
+    });
+    expect([dev.tasksDone, priya.tasksDone]).toEqual([1, 1]);
+  });
+
   it("totals the team", () => {
     expect(teamTotals(rows)).toEqual({
       clocked: 720,

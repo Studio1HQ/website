@@ -17,9 +17,11 @@ import {
   dueOn,
   forKey,
   forLabel,
+  isOnTask,
   isPastDue,
   isPeriodStart,
   owedPeriods,
+  peopleOn,
   periodEnd,
   periodStart,
   readyOn,
@@ -95,6 +97,20 @@ describe("who changes what", () => {
     expect(canChangeTask(admin, { email: "dev@studio1hq.com", created_by: "dev@studio1hq.com" })).toBe(false);
     expect(canChangeTask(admin, { email: "dev@studio1hq.com", created_by: "ops@studio1hq.com" })).toBe(true);
     expect(canChangeTask(reviewer, { email: "intern@studio1hq.com", created_by: "lead@studio1hq.com" })).toBe(false);
+  });
+
+  it("lets the people a task is shared with change it too", () => {
+    const shared = { email: "lead@studio1hq.com", created_by: "lead@studio1hq.com", with_emails: ["dev@studio1hq.com"] };
+    expect(canChangeTask(employee, shared)).toBe(true);
+    expect(canChangeTask(employee, { ...shared, with_emails: ["other@studio1hq.com"] })).toBe(false);
+    expect(canChangeTask(employee, { ...shared, with_emails: [] })).toBe(false);
+  });
+
+  it("puts a shared task on everyone's list, once each", () => {
+    const shared = { email: "Lead@studio1hq.com", with_emails: ["dev@studio1hq.com", "lead@studio1hq.com"] };
+    expect(peopleOn(shared)).toEqual(["lead@studio1hq.com", "dev@studio1hq.com"]);
+    expect(isOnTask(shared, "DEV@studio1hq.com")).toBe(true);
+    expect(isOnTask(shared, "other@studio1hq.com")).toBe(false);
   });
 
   it("keeps logs and reports personal (founders read reports)", () => {
@@ -200,6 +216,8 @@ function task(partial: Partial<Task>): Task {
     title: "A task",
     notes: "",
     status: "todo",
+    priority: "medium",
+    with_emails: [],
     area: "content",
     engagement_id: null,
     deliverable_id: null,

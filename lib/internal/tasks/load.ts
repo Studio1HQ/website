@@ -1,8 +1,9 @@
 import "server-only";
+import { cache } from "react";
 import type { Staff } from "@/lib/internal/session";
 import { listDays } from "@/lib/internal/team/attendance";
 import { listPeople } from "@/lib/internal/team/people";
-import { istNow, type TeamPerson } from "@/lib/internal/team/shared";
+import { displayName, istNow, type TeamPerson } from "@/lib/internal/team/shared";
 import { clientPath, weekStart, type Deliverable } from "@/lib/internal/clients/schema";
 import { canSeeOthers, canSeeTasksOf, isFounder, type TaskViewer } from "@/lib/internal/tasks/access";
 import {
@@ -30,6 +31,7 @@ import {
   type ReportPeriod,
   type ReportSnapshot,
   type Task,
+  type Teammate,
   type WorkLog,
 } from "@/lib/internal/tasks/shared";
 
@@ -100,6 +102,18 @@ function problem(...results: Loaded<unknown>[]) {
   const failed = results.find((result) => !result.ok);
   return failed && !failed.ok ? failed : null;
 }
+
+/**
+ * Everyone active on the team list, by name: who a task can be shared with,
+ * and the names on shared cards. Empty when the list can't be read.
+ */
+export const teammates = cache(async (): Promise<Teammate[]> => {
+  const result = await listPeople({ activeOnly: true });
+  if (!result.ok) return [];
+  return result.people
+    .map((person) => ({ email: person.email.toLowerCase(), name: displayName(person) }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+});
 
 /**
  * One person's board for a week: their open work from all three places
@@ -202,13 +216,16 @@ export async function loadWeekCards(
 ) {
   email = email.toLowerCase();
   const end = addDaysKey(week, 6);
-  const [tasks, deliverables, reviewing, community, engagements] = await Promise.all([
+  const [tasks, deliverables, reviewing, community, engagements, team] = await Promise.all([
     listTasks({ emails: [email], from: week, to: end }),
     ownedDeliverables(email, week),
     reviewingDeliverables(email),
     ownedCommunityTasks(email, week),
     engagementLabels(),
+    // Names for shared cards ("With …") when the page didn't pass them.
+    names ? Promise.resolve(null) : teammates(),
   ]);
+  names ??= team ? Object.fromEntries(team.map((person) => [person.email, person.name])) : undefined;
   const placed = placeCards({
     week,
     end,
