@@ -48,7 +48,7 @@ export function BeenHere({ items }: { items: CommunityItem[] }) {
           transition={{ duration: 1.1, ease: EASE }}
           className="ml-auto max-w-[640px] text-right"
         >
-          <h2 className="text-[38px] font-medium leading-[1.02] tracking-[-0.05em] md:text-[56px]">
+          <h2 className="text-[34px] font-medium leading-[1.04] tracking-[-0.045em] md:text-[48px]">
             Picture a world where
             <br />
             <span style={{ color: PRINT }}>you were here:</span>
@@ -71,7 +71,7 @@ export function BeenHere({ items }: { items: CommunityItem[] }) {
               >
                 <Wrap
                   item={e}
-                  className="group relative isolate flex min-h-[380px] flex-col justify-end overflow-hidden rounded-[14px] p-7 text-white md:min-h-[400px] md:p-9"
+                  className="group relative isolate flex min-h-[240px] flex-col justify-end overflow-hidden rounded-[12px] p-6 text-white md:min-h-[250px] md:p-7"
                 >
                   {/* the photo, under a wash of the card's colour */}
                   <Image src={e.image as string} alt="" fill sizes="(min-width: 768px) 50vw, 100vw" className="-z-20 object-cover" />
@@ -85,20 +85,19 @@ export function BeenHere({ items }: { items: CommunityItem[] }) {
                   {e.logo ? (
                     <span
                       aria-hidden
-                      className="absolute left-7 top-7 block size-[68px] bg-white md:left-9 md:top-9 md:size-[84px]"
+                      className="absolute left-6 top-6 block size-[40px] bg-white md:left-7 md:top-7 md:size-[46px]"
                       style={{ WebkitMask: `url(${e.logo}) left top / contain no-repeat`, mask: `url(${e.logo}) left top / contain no-repeat` }}
                     />
                   ) : null}
 
-                  <h3 className="max-w-[90%] text-[28px] font-semibold leading-[1.06] tracking-[-0.035em] md:text-[34px]">{e.name}</h3>
-                  <p className="mt-3 line-clamp-2 max-w-[460px] pr-20 text-[15.5px] leading-[1.5] text-white/90 md:text-[16.5px]">{e.summary}</p>
-                  <span className="mt-6 inline-flex h-11 w-fit items-center gap-2 rounded-[8px] bg-white px-5 text-[14.5px] font-semibold text-[#141414]">
+                  <h3 className="max-w-[90%] pr-24 text-[22px] font-semibold leading-[1.1] tracking-[-0.03em] md:text-[26px]">{e.name}</h3>
+                  <p className="mt-2 line-clamp-1 max-w-[460px] pr-24 text-[14.5px] leading-[1.5] text-white/85">{e.summary}</p>
+                  <span className="mt-4 inline-flex h-9 w-fit items-center gap-2 rounded-[8px] bg-white px-4 text-[13.5px] font-semibold text-[#141414]">
                     {e.cta === "Recap" ? "See the recap" : e.cta} <ArrowRight weight="bold" className="size-4" />
                   </span>
-                  <span className="mt-3 text-[13.5px] italic text-white/80">{e.online ? "Online" : e.city}</span>
 
                   {/* the date, on a tag in the corner */}
-                  <span className="absolute bottom-0 right-0 rounded-tl-[12px] bg-[#141414] px-5 py-2.5 text-[14px] font-semibold text-white">
+                  <span className="absolute bottom-0 right-0 rounded-tl-[10px] bg-[#141414] px-4 py-2 text-[13px] font-semibold text-white">
                     {dated(e.date)}
                   </span>
                 </Wrap>
