@@ -120,33 +120,24 @@ function EventCard({ item }: { item: CommunityItem }) {
   );
 }
 
-/** A wide card for when there are only one or two: photo left, details right. */
-function WideCard({ item }: { item: CommunityItem }) {
-  const KindIcon = KIND_ICON[item.kind];
+/** One or two events: a compact row each. */
+function ListRow({ item }: { item: CommunityItem }) {
   return (
-    <Wrap
-      item={item}
-      className="group grid overflow-hidden rounded-[14px] bg-white/85 ring-1 ring-inset ring-[#141414]/[0.09] transition-[background-color,box-shadow] duration-300 hover:bg-white hover:ring-[#141414]/20 md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]"
-    >
-      <Cover item={item} className="aspect-[16/10] w-full md:aspect-auto md:min-h-[260px] [&>span:last-child]:text-[24px] md:[&>span:last-child]:text-[28px]" />
-      <div className="flex flex-col justify-between gap-6 p-6 md:p-9">
-        <div>
-          <p className="flex items-center gap-2.5 text-[12px] font-medium uppercase tracking-[0.16em] text-[#141414]/50">
-            <span className="flex size-8 items-center justify-center bg-[#141414] text-[#f4efe7]">
-              <KindIcon weight="regular" className="size-4" />
-            </span>
-            {KIND_LABEL[item.kind]}
-          </p>
-          <h3 className="mt-5 text-[26px] font-semibold leading-[1.12] tracking-[-0.03em] md:text-[32px]">{item.name}</h3>
-          <p className="mt-3 text-[15px] text-[#141414]/60">
-            {when(item)} <span className="mx-1">·</span> {where(item)}
-          </p>
-          {item.summary ? <p className="mt-3 max-w-[520px] text-[15.5px] leading-[1.6] text-[#141414]/60">{item.summary}</p> : null}
-        </div>
-        <span className="inline-flex h-11 w-fit items-center gap-2 rounded-full bg-[#141414] px-5 text-[14.5px] font-medium text-white transition-colors duration-300 group-hover:bg-[#f97316]">
-          {item.cta} <ArrowUpRight weight="bold" className="size-4 transition-transform duration-300 group-hover:rotate-45" />
-        </span>
+    <Wrap item={item} className="group flex items-center gap-4 rounded-[6px] bg-white/80 p-3 ring-1 ring-inset ring-[#141414]/10 transition-[background-color,box-shadow] duration-300 hover:bg-white hover:shadow-[0_18px_34px_-26px_rgba(20,20,20,0.45)] sm:gap-6 sm:p-4">
+      <Cover item={item} className="aspect-[4/3] w-[104px] shrink-0 rounded-[4px] sm:w-[210px] [&>span:last-child]:hidden sm:[&>span:last-child]:block sm:[&>span:last-child]:text-[17px]" />
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[11.5px] font-medium uppercase tracking-[0.16em] text-[#141414]/50">
+          {where(item)} <span style={{ color: PRINT }}>//</span> {when(item)}
+        </p>
+        <h3 className="mt-1.5 line-clamp-2 text-[18px] font-medium leading-[1.2] tracking-[-0.03em] sm:text-[22px]">{item.name}</h3>
+        <p className="mt-1.5 hidden truncate text-[14.5px] text-[#141414]/55 md:block">{item.summary ?? ""}</p>
       </div>
+      <span className="hidden shrink-0 items-center gap-2 text-[14px] font-medium sm:flex">
+        {item.cta}
+        <span className="flex size-8 items-center justify-center rounded-full bg-[#141414] text-white transition-[transform,background-color] duration-300 group-hover:rotate-45 group-hover:bg-[#f97316]">
+          <ArrowUpRight weight="bold" className="size-3.5" />
+        </span>
+      </span>
     </Wrap>
   );
 }
@@ -176,7 +167,7 @@ export function UpcomingEvents({
         </Link>
       </div>
       {items.length ? (
-        <ul className={wide ? "mt-10 flex flex-col gap-4" : "mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"}>
+        <ul className={wide ? "mt-10 flex flex-col gap-3" : "mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"}>
           {items.map((item, i) => (
             <motion.li
               key={item.id}
@@ -186,7 +177,7 @@ export function UpcomingEvents({
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 1, ease: EASE, delay: Math.min(i, 5) * 0.1 }}
             >
-              {wide ? <WideCard item={item} /> : <EventCard item={item} />}
+              {wide ? <ListRow item={item} /> : <EventCard item={item} />}
             </motion.li>
           ))}
         </ul>

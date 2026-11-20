@@ -8,7 +8,7 @@ import { Container, EASE } from "@/components/home/ui";
 import { Cursor, PrintBlock, SelectionFrame } from "@/components/paper/paper-hero";
 import type { CommunityItem } from "@/lib/community";
 import { DiscordIcon } from "@/components/community/discord-icon";
-import { DISCORD_URL, LUMA_URL, Subscribe } from "@/components/community/join";
+import { DISCORD_URL, LUMA_URL } from "@/components/community/join";
 import { LumaLogo } from "@/components/community/luma-logo";
 import { SketchDesk } from "@/components/community/sketch-desk";
 import { GRAIN, INK, PAPER, PRINT } from "@/lib/paper";
@@ -108,7 +108,7 @@ export function CommunityHero({ totals, next = [] }: { totals: Totals; next?: Co
 
         {/* Up next card, lower left: the real calendar */}
         {next.length ? (
-          <motion.div {...float(0.75)} className="absolute left-[2.5%] top-[54%] w-[19%] max-w-[290px]">
+          <motion.div {...float(0.75)} className="absolute left-[2.5%] top-[42%] w-[19%] max-w-[290px]">
             <SelectionFrame label="card-up-next" className="p-1.5">
               <div className="bg-white px-4 py-3.5 shadow-[0_1px_0_rgba(27,23,20,0.06)]">
                 <div className="flex items-center justify-between">
@@ -159,14 +159,8 @@ export function CommunityHero({ totals, next = [] }: { totals: Totals; next?: Co
           Meetups, hackathons and the people who build at them, in {totals.cities} cities and online.
         </motion.p>
 
-        <motion.div {...enter(0.55)} className="mt-9 w-full max-w-[520px]">
-          <Subscribe wide light />
-        </motion.div>
-        <motion.p {...enter(0.62)} className="mt-3 text-[13px] text-[#141414]/45">
-          One email when a hackathon or meetup opens near you. Free, always.
-        </motion.p>
 
-        <motion.div {...enter(0.75)} className="mt-8 flex flex-wrap items-center justify-center gap-2.5">
+        <motion.div {...enter(0.55)} className="mt-9 flex flex-wrap items-center justify-center gap-2.5">
           <a href={DISCORD_URL} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-2 rounded-full bg-white px-5 text-[14px] font-medium ring-1 ring-inset ring-[#141414]/[0.12] transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_28px_-20px_rgba(20,20,20,0.5)]">
             <DiscordIcon className="size-4 text-[#5865F2]" /> Join the Discord
           </a>
