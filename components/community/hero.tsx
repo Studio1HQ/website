@@ -9,6 +9,7 @@ import { Cursor, PrintBlock, SelectionFrame } from "@/components/paper/paper-her
 import { DiscordIcon } from "@/components/community/discord-icon";
 import { DISCORD_URL, LUMA_URL, Subscribe } from "@/components/community/join";
 import { LumaLogo } from "@/components/community/luma-logo";
+import { SketchDesk } from "@/components/community/sketch-desk";
 import { GRAIN, INK, PAPER, PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 
@@ -44,6 +45,11 @@ export function CommunityHero({ totals }: { totals: Totals }) {
   return (
     <section className="relative isolate overflow-hidden" style={{ background: PAPER, color: INK }}>
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 opacity-30 mix-blend-multiply" style={{ backgroundImage: GRAIN }} />
+
+      {/* the sketched desk, clear behind the words and fading out at the bottom */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-[8] opacity-[0.5] [mask-image:radial-gradient(ellipse_40%_42%_at_50%_40%,rgba(0,0,0,0.25)_30%,black_90%)]">
+        <SketchDesk className="absolute inset-0 size-full" />
+      </div>
 
       {/* ----- Canvas artefacts (large screens) ----- */}
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-[5] hidden xl:block">

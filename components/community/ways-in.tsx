@@ -73,6 +73,7 @@ function Way({
   body,
   action,
   pills,
+  mock,
 }: {
   index: number;
   photos: string[];
@@ -81,7 +82,8 @@ function Way({
   title: ReactNode;
   body: string;
   action: ReactNode;
-  pills?: [ReactNode, string][];
+  pills?: [ReactNode, ReactNode, string][];
+  mock?: ReactNode;
   flip?: boolean;
   extra?: ReactNode;
 }) {
@@ -97,14 +99,16 @@ function Way({
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 1.1, ease: EASE }}
       whileHover={reduce ? undefined : { y: -4 }}
-      className="group relative isolate min-h-[420px] overflow-hidden rounded-[10px] bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.08] transition-shadow duration-500 hover:shadow-[0_40px_70px_-45px_rgba(20,20,20,0.55)] md:min-h-[380px]"
+      className="group relative isolate min-h-[420px] rounded-[10px] bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.08] transition-shadow duration-500 hover:shadow-[0_40px_70px_-45px_rgba(20,20,20,0.55)] md:min-h-[380px]"
     >
-      {/* the photos, moving with the scroll, filling the right of the card */}
-      <motion.div style={reduce ? undefined : { y }} className="absolute inset-y-[-10%] right-0 -z-20 w-full md:w-[66%]">
-        <Turning photos={photos} offset={index * 900} className="size-full rounded-none transition-transform duration-[1.4s] ease-out group-hover:scale-[1.04]" />
-      </motion.div>
-      {/* paper over the left of the photo, so the words sit on paper and the photo melts in */}
-      <span aria-hidden className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(251,249,245,0)_25%,rgba(251,249,245,0.92)_55%,#fbf9f5_70%)] md:bg-[linear-gradient(90deg,#fbf9f5_32%,rgba(251,249,245,0.88)_48%,rgba(251,249,245,0)_72%)]" />
+      <div className="absolute inset-0 -z-10 overflow-hidden rounded-[10px]">
+        {/* the photos, moving with the scroll, filling the right of the card */}
+        <motion.div style={reduce ? undefined : { y }} className="absolute inset-y-[-10%] right-0 w-full md:w-[66%]">
+          <Turning photos={photos} offset={index * 900} className="size-full rounded-none transition-transform duration-[1.4s] ease-out group-hover:scale-[1.04]" />
+        </motion.div>
+        {/* paper over the left of the photo, so the words sit on paper and the photo melts in */}
+        <span aria-hidden className="absolute inset-0 bg-[linear-gradient(180deg,rgba(251,249,245,0)_25%,rgba(251,249,245,0.92)_55%,#fbf9f5_70%)] md:bg-[linear-gradient(90deg,#fbf9f5_32%,rgba(251,249,245,0.88)_48%,rgba(251,249,245,0)_72%)]" />
+      </div>
 
       <div className="relative flex min-h-[420px] flex-col justify-end gap-8 p-6 md:min-h-[380px] md:flex-row md:items-end md:justify-between md:p-10">
         <div className="max-w-[460px]">
@@ -123,23 +127,25 @@ function Way({
           <div className="mt-7">{action}</div>
         </div>
         {pills?.length ? (
-          <ul className="flex flex-col items-start gap-2 md:items-end">
-            {pills.map(([value, text], i) => (
+          <ul className="flex flex-col items-start gap-2 md:-mr-16 md:items-end lg:-mr-20">
+            {pills.map(([icon, value, text], i) => (
               <motion.li
                 key={text}
                 initial={reduce ? false : { opacity: 0, x: 30, filter: "blur(6px)" }}
                 whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, ease: EASE, delay: 0.35 + i * 0.12 }}
-                className="flex items-center gap-3 rounded-full bg-white/85 py-2.5 pl-5 pr-6 shadow-[0_12px_28px_-20px_rgba(20,20,20,0.6)] ring-1 ring-inset ring-[#141414]/[0.06] backdrop-blur-md"
+                whileHover={reduce ? undefined : { x: -6 }}
+                className="flex items-center gap-3 rounded-full bg-white/90 py-3 pl-5 pr-7 shadow-[0_18px_36px_-22px_rgba(20,20,20,0.6)] ring-1 ring-inset ring-[#141414]/[0.07] backdrop-blur-md"
               >
-                <span className="size-1.5 rounded-full" style={{ background: PRINT }} />
+                <span className="text-[#141414]/55">{icon}</span>
                 <span className="text-[19px] font-medium tabular-nums tracking-[-0.02em]">{value}</span>
                 <span className="text-[14.5px] text-[#141414]/60">{text}</span>
               </motion.li>
             ))}
           </ul>
         ) : null}
+        {mock}
       </div>
     </motion.article>
   );
@@ -174,10 +180,10 @@ export function WaysIn({ data, index }: { data: CommunityData; index: number }) 
             title={<>Our online <span style={{ color: PRINT }}>community</span></>}
             body="Chat, ask for help with your builds, and hear about every meetup and hackathon first. The people you met at the last event are already in there."
             pills={[
-              [`${totals.events}+`, "Events so far"],
-              [totals.cities, "Cities"],
-              [totals.meetups, "Meetups"],
-              [totals.hackathons, "Hackathons"],
+              [<CalendarBlank key="e" weight="bold" className="size-4" />, `${totals.events}+`, "Events so far"],
+              [<span key="c" className="text-[16px] font-semibold">#</span>, totals.cities, "Cities"],
+              [<UsersThree key="m" weight="bold" className="size-4" />, totals.meetups, "Meetups"],
+              [<Code key="h" weight="bold" className="size-4" />, totals.hackathons, "Hackathons"],
             ]}
             action={
               <a href={DISCORD_URL} target="_blank" rel="noopener noreferrer" className={primary}>
@@ -218,6 +224,47 @@ export function WaysIn({ data, index }: { data: CommunityData; index: number }) 
             photos={[P("coscup/03"), P("cityjs-athens/02"), P("ai-engineer-singapore/05")]}
             icon={<CalendarBlank weight="bold" className="size-4" />}
             label="Calendar"
+            mock={
+              <motion.div
+                initial={reduce ? false : { opacity: 0, x: 40, rotate: 3 }}
+                whileInView={{ opacity: 1, x: 0, rotate: 2 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1, ease: EASE, delay: 0.3 }}
+                className="hidden w-[300px] shrink-0 rounded-[12px] bg-white p-4 shadow-[0_30px_60px_-30px_rgba(20,20,20,0.55)] ring-1 ring-[#141414]/[0.07] transition-transform duration-500 group-hover:rotate-0 md:-mr-16 md:block lg:-mr-20"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-[13px] font-semibold">Studio1</span>
+                  <LumaLogo className="h-[12px] w-auto text-[#141414]/50" />
+                </div>
+                <ul className="mt-3 space-y-2">
+                  {(
+                    [
+                      ["NOV", "26", "KubeCon NA co-located", "Atlanta"],
+                      ["DEC", "06", "Kolkata Cloud & AI meetup", "Kolkata"],
+                      ["JAN", "17", "Claude Code meetup", "New Delhi"],
+                    ] as const
+                  ).map(([m, d, name, city], i) => (
+                    <motion.li
+                      key={name}
+                      initial={reduce ? false : { opacity: 0, y: 10 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.6, ease: EASE, delay: 0.6 + i * 0.12 }}
+                      className="flex items-center gap-3 rounded-[8px] bg-[#f6f3ee] p-2.5"
+                    >
+                      <span className="flex w-10 shrink-0 flex-col items-center rounded-[6px] bg-white py-1 ring-1 ring-[#141414]/[0.06]">
+                        <span className="text-[9px] font-semibold tracking-[0.1em]" style={{ color: PRINT }}>{m}</span>
+                        <span className="text-[15px] font-semibold leading-none">{d}</span>
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block truncate text-[13px] font-medium">{name}</span>
+                        <span className="block text-[11.5px] text-[#141414]/50">{city}</span>
+                      </span>
+                    </motion.li>
+                  ))}
+                </ul>
+              </motion.div>
+            }
             title={<>Every event, <span style={{ color: PRINT }}>in your calendar</span></>}
             body="Follow Studio1 on Luma and new meetups and hackathons land in your calendar the day they open."
             action={
