@@ -98,15 +98,29 @@ const DRAWINGS: Record<string, ReactNode> = {
   // India Gate: the great arch, inscribed attic, stepped crown and dome
   "Delhi NCR": (
     <>
-      <path d="M6 74h108M30 74h60v-3H30z" />
-      <path d="M36 71V22h48v49" />
-      <path d="M48 71V44a12 12 0 0 1 24 0v27" />
-      <path d="M44 71V40M76 71V40M44 40a16 16 0 0 1 32 0" opacity=".45" />
-      <path d="M36 32h48M36 28h48M38 30h44" />
-      <path d="M33 22h54M34 19h52v3H34z" />
-      <path d="M40 19v-5h40v5M44 14V9h32v5M48 9V6h24v3" />
-      <path d="M53 6c0-6 14-6 14 0M60 0v1" />
-      <path d="M40 60h4M76 60h4M40 50h4M76 50h4" />
+      <path d="M6 72h108" />
+      {/* platform and steps */}
+      <path d="M22 72v-3h76v3M26 69v-3h68v3" />
+      {/* the gate's body */}
+      <path d="M30 66V24h60v42" />
+      {/* the great arch, with its inner moulding and imposts */}
+      <path d="M46 66V40a14 14 0 0 1 28 0v26" />
+      <path d="M50 66V41a10 10 0 0 1 20 0v25" opacity=".45" />
+      <path d="M43 40h3M74 40h3" />
+      {/* pier panels and niches */}
+      <path d="M34 62V46h8v16M78 62V46h8v16M34 42h8M78 42h8" />
+      <path d="M38 46v16M82 46v16" opacity=".45" />
+      {/* cornice and the inscribed attic */}
+      <path d="M28 33h64M28 30h64v3" />
+      <path d="M28 24h64v6" />
+      {range(9).map((i) => (
+        <path key={`ig${i}`} d={`M${38 + i * 5} 27h3`} opacity=".45" />
+      ))}
+      {/* stepped crown and the shallow dome */}
+      <path d="M34 24v-4h52v4M40 20v-4h40v4M46 16v-3h28v3" />
+      <path d="M50 13a10 6 0 0 1 20 0M60 7v-2" />
+      {/* lamp posts either side */}
+      <path d="M14 72V58M11 58h6M12 55h4l-2-3zM106 72V58M103 58h6M104 55h4l-2-3z" />
     </>
   ),
   // Blue Mosque: cascade of domes over the prayer hall, six slim minarets
@@ -144,13 +158,25 @@ const DRAWINGS: Record<string, ReactNode> = {
   // Sigiriya: the lion rock rising from the forest, the lion's paw gate
   "Sri Lanka": (
     <>
-      <path d="M6 74h108" />
-      <path d="M26 74c2-14 6-24 10-34 4-10 6-22 16-24 10-2 18 0 22 8 4 10 6 20 10 30 3 8 6 14 8 20" />
-      <path d="M38 40h44M34 50h52M30 60h60" opacity=".45" />
-      <path d="M50 74V64h20v10M54 64c0-8 12-8 12 0" />
-      <path d="M46 74c0-4 2-6 4-6M74 74c0-4-2-6-4-6" />
-      {[8, 16, 98, 106, 112].map((x, i) => (
-        <path key={`tr${i}`} d={`M${x} 74c-4 0-6-4-4-8 0-4 4-6 6-4 2-4 8-2 8 2 4 0 4 6 0 8-2 2-6 2-10 2z`} />
+      <path d="M6 72h108" />
+      {/* the rock: a flat-topped column of stone with steep, bulging sides */}
+      <path d="M24 72C28 62 30 52 31 40C32 30 34 22 39 16H81C86 22 88 30 89 40C90 52 92 62 96 72" />
+      {/* the stone's layers */}
+      <path d="M33 28c10 2 18-1 28 1s16 1 26-1M31 42c12 2 22-1 32 1s16 1 26-1M30 56c12 2 24-1 34 1s18 1 26-1" opacity=".45" />
+      {/* palace ruins on the summit */}
+      <path d="M41 16v-3h9v3M54 16v-5h12v5M70 16v-3h9v3M57 11v-2h6v2" />
+      {/* the path climbing the face */}
+      <path d="M60 60l-7-6 7-6-7-6 7-6" opacity=".45" />
+      {/* the lion's paws and the stair between them */}
+      <path d="M46 72v-7c0-3 2-5 5-5h3v12M74 72v-7c0-3-2-5-5-5h-3v12" />
+      <path d="M46 72h2v-2M50 72v-2M70 72v-2M74 72h-2v-2" />
+      <path d="M56 72h8M57 69h6M58 66h4M59 63h2" />
+      {/* forest at the foot of the rock */}
+      {[12, 22, 98, 108].map((x, i) => (
+        <g key={`tr${i}`}>
+          <path d={`M${x} 72v-6`} />
+          <path d={`M${x - 6} 66a4 4 0 0 1 2-7a5 5 0 0 1 8-2a4 4 0 0 1 2 9z`} />
+        </g>
       ))}
     </>
   ),

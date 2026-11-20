@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useReducedMotion } from "motion/react";
+import { motion, useInView, useReducedMotion } from "motion/react";
 import {
   ArrowUpRight,
   Broadcast,
@@ -13,7 +13,7 @@ import {
 } from "@phosphor-icons/react";
 import { Container, EASE } from "@/components/home/ui";
 import { IndexBar, PaperSection } from "@/components/paper/paper-sections";
-import { Landmark } from "@/components/community/landmarks";
+import { Landmark, Skyline } from "@/components/community/landmarks";
 import { CommunityBento, TogetherSpread, TogetherWeBuild } from "@/components/community/community-sections";
 import { RegistrationBar, UpcomingEvents } from "@/components/community/upcoming";
 import { JoinCommunity } from "@/components/community/join";
@@ -22,6 +22,7 @@ import { CommunityHero } from "@/components/community/hero";
 import { WaysIn } from "@/components/community/ways-in";
 import type { CommunityData, CommunityKind } from "@/lib/community";
 import { PAPER_SCOPE, PRINT } from "@/lib/paper";
+import { cn } from "@/lib/utils";
 
 const KIND: Record<CommunityKind, { label: string; icon: Icon }> = {
   meetup: { label: "Meetup", icon: UsersThree },
@@ -55,10 +56,11 @@ function rise(reduce: boolean, delay = 0) {
 const pill =
   "inline-flex h-10 items-center gap-1.5 rounded-full bg-white px-4 text-[13.5px] font-medium ring-1 ring-inset ring-[#141414]/15 transition-colors hover:bg-[#141414] hover:text-white";
 
-/** The closing banner: bring Studio1 to your city. */
-function YourCity() {
+/** The closing banner: every city's landmark drawn in as it scrolls into view. */
+function YourCity({ cities }: { cities: string[] }) {
   const reduce = !!useReducedMotion();
   const ref = useRef<HTMLDivElement>(null);
+  const drawn = useInView(ref, { once: true, margin: "-120px" });
   return (
     <PaperSection tone="paper" className="!pt-4">
       <Container>
@@ -80,6 +82,11 @@ function YourCity() {
               </a>
             </div>
           </div>
+          {/* the cities we've been to, in ink, standing on the bottom edge */}
+          <div className={cn("s1-skyline relative px-4 md:px-10", (drawn || reduce) && "is-drawn")} style={{ color: "rgba(20,20,20,0.55)" }}>
+            <Skyline cities={cities.slice(0, 9)} />
+          </div>
+          <span aria-hidden className="block h-px bg-[#141414]/20" />
         </motion.div>
       </Container>
     </PaperSection>
@@ -191,7 +198,7 @@ export function CommunityPage({ data }: { data: CommunityData }) {
       <JoinCommunity />
 
 
-      <YourCity />
+      <YourCity cities={cities.map((c) => c.city)} />
 
       <RegistrationBar item={registering} />
     </div>
