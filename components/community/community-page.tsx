@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef } from "react";
-import { animate, motion, useInView, useReducedMotion } from "motion/react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { AnimatePresence, animate, motion, useInView, useReducedMotion } from "motion/react";
 import {
   ArrowUpRight,
   Broadcast,
@@ -15,6 +15,8 @@ import { Container, EASE } from "@/components/home/ui";
 import { PaperPageHeader } from "@/components/paper/paper-page-header";
 import { IndexBar, PaperSection } from "@/components/paper/paper-sections";
 import { DotArt } from "@/components/community/dot-art";
+import { ImpactArt, type ImpactKind } from "@/components/community/impact-art";
+import { LumaLogo } from "@/components/community/luma-logo";
 import { Landmark, Skyline } from "@/components/community/landmarks";
 import { CommunityBento, TogetherSpread, TogetherWeBuild } from "@/components/community/community-sections";
 import { RegistrationBar, UpcomingEvents } from "@/components/community/upcoming";
@@ -34,6 +36,7 @@ const KIND: Record<CommunityKind, { label: string; icon: Icon }> = {
 };
 
 const CONTACT = "mailto:contact@studio1hq.com";
+const LUMA_URL = "https://luma.com/studio1";
 const HOST = `${CONTACT}?subject=${encodeURIComponent("Host a Studio1 meetup")}`;
 const PARTNER = `${CONTACT}?subject=${encodeURIComponent("Partner on a Studio1 hackathon")}`;
 
@@ -126,6 +129,38 @@ function YourCity({ cities }: { cities: string[] }) {
   );
 }
 
+const WORDS = ["show up", "build", "ship", "learn", "hack"];
+
+/** The verb in the headline, turning over every few seconds. */
+function RotatingWord() {
+  const reduce = !!useReducedMotion();
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    if (reduce) return;
+    const id = window.setInterval(() => setI((v) => (v + 1) % WORDS.length), 2600);
+    return () => window.clearInterval(id);
+  }, [reduce]);
+  return (
+    <span className="relative inline-flex overflow-hidden whitespace-nowrap pb-[0.08em] align-bottom">
+      <span className="sr-only">{WORDS[0]}</span>
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.span
+          key={WORDS[i]}
+          aria-hidden
+          className="inline-block"
+          style={{ color: PRINT }}
+          initial={{ y: "70%", opacity: 0, filter: "blur(6px)" }}
+          animate={{ y: "0%", opacity: 1, filter: "blur(0px)" }}
+          exit={{ y: "-70%", opacity: 0, filter: "blur(6px)" }}
+          transition={{ duration: 0.45, ease: EASE }}
+        >
+          {WORDS[i]}
+        </motion.span>
+      </AnimatePresence>
+    </span>
+  );
+}
+
 export function CommunityPage({ data }: { data: CommunityData }) {
   const reduce = !!useReducedMotion();
   const { upcoming, past, cities, totals } = data;
@@ -147,35 +182,29 @@ export function CommunityPage({ data }: { data: CommunityData }) {
       {/* Hero: the community, in dots */}
       <PaperPageHeader className="pb-12 pt-28 md:pb-16 md:pt-36">
         <Container>
-          <DotArt src="/assets/community/hand-in-hand.png" alt="Five people walking hand in hand" className="mx-auto max-w-[1100px]" />
+          <DotArt src="/assets/community/hand-in-hand.png" alt="Five people walking hand in hand" className="w-full" />
 
-          <div className="mt-12 flex flex-col items-center text-center md:mt-14">
-            <motion.h1
-              className="max-w-[760px] text-balance text-[36px] font-medium leading-[1.05] tracking-[-0.045em] sm:text-[48px] lg:text-[56px]"
-              initial={reduce ? false : { opacity: 0, y: 20 }}
+          <div className="mt-12 flex flex-col gap-8 md:mt-16 lg:flex-row lg:items-end lg:justify-between">
+            <motion.div
+              initial={reduce ? false : { opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, ease: EASE, delay: 0.45 }}
             >
-              Developers who show up, together
-            </motion.h1>
-            <motion.div
-              className="mt-5 flex flex-col items-center"
-              initial={reduce ? false : { opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, ease: EASE, delay: 0.6 }}
-            >
-              <p className="max-w-[500px] text-balance text-[16px] leading-[1.6] text-[#141414]/60 md:text-[18px]">
+              <h1 className="text-balance text-[36px] font-medium leading-[1.05] tracking-[-0.045em] sm:text-[44px] lg:whitespace-nowrap lg:text-[44px] xl:text-[52px]">
+                Together, developers who <RotatingWord />
+              </h1>
+              <p className="mt-4 max-w-[520px] text-[16px] leading-[1.6] text-[#141414]/60 md:text-[17px]">
                 Meetups, hackathons and the people who build at them. Find one near you, or bring one to your city.
               </p>
-              <div className="mt-7 flex flex-wrap justify-center gap-2">
-                <a href={DISCORD_URL} target="_blank" rel="noopener noreferrer" className="inline-flex h-12 items-center gap-2 rounded-full bg-[#141414] px-6 text-[14.5px] font-medium text-white transition-colors hover:bg-[#f97316]">
-                  <DiscordIcon className="size-4" /> Join the Discord
-                </a>
-                <a href="#up-next" className="inline-flex h-12 items-center gap-2 rounded-full bg-white/70 px-6 text-[14.5px] font-medium ring-1 ring-inset ring-[#141414]/15 transition-colors hover:bg-white">
-                  See what&apos;s next
-                </a>
-              </div>
             </motion.div>
+            <div className="flex shrink-0 flex-wrap gap-2 md:pb-1">
+              <motion.a initial={reduce ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: EASE, delay: 0.7 }} href={DISCORD_URL} target="_blank" rel="noopener noreferrer" className="inline-flex h-12 items-center gap-2 rounded-full bg-[#141414] px-6 text-[14.5px] font-medium text-white transition-colors hover:bg-[#f97316]">
+                <DiscordIcon className="size-4" /> Join the Discord
+              </motion.a>
+              <motion.a initial={reduce ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: EASE, delay: 0.82 }} href={LUMA_URL} target="_blank" rel="noopener noreferrer" className="inline-flex h-12 items-center gap-2 rounded-full bg-white/70 px-6 text-[14.5px] font-medium ring-1 ring-inset ring-[#141414]/15 transition-colors hover:bg-white">
+                Follow on <LumaLogo className="h-[15px] w-auto translate-y-[1px]" />
+              </motion.a>
+            </div>
           </div>
 
         </Container>
@@ -193,9 +222,12 @@ export function CommunityPage({ data }: { data: CommunityData }) {
               <motion.div
                 key={label}
                 {...rise(reduce, 0.06 + i * 0.08)}
-                className="flex min-w-0 flex-col justify-between gap-10 rounded-[6px] bg-white/80 p-5 ring-1 ring-inset ring-[#141414]/10 transition-[background-color,box-shadow] duration-500 hover:bg-white hover:shadow-[0_18px_34px_-26px_rgba(20,20,20,0.45)] md:p-7"
+                className="group flex min-w-0 flex-col justify-between gap-8 rounded-[6px] bg-white/80 p-5 ring-1 ring-inset ring-[#141414]/10 transition-[background-color,box-shadow] duration-500 hover:bg-white hover:shadow-[0_18px_34px_-26px_rgba(20,20,20,0.45)] md:p-7"
               >
-                <dt className="text-[12px] font-medium uppercase tracking-[0.16em] text-[#141414]/45">{label}</dt>
+                <div className="flex items-start justify-between gap-4">
+                  <dt className="text-[12px] font-medium uppercase tracking-[0.16em] text-[#141414]/45">{label}</dt>
+                  <ImpactArt kind={label.toLowerCase() as ImpactKind} className="-mr-1 -mt-1 size-20 shrink-0 md:size-24" />
+                </div>
                 <dd>
                   <span className="block text-[48px] font-medium leading-none tracking-[-0.06em] md:text-[64px]">
                     <Count to={value} />

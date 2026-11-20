@@ -16,7 +16,25 @@ type Dot = { hx: number; hy: number; x: number; y: number; vx: number; vy: numbe
  * Dots appear left to right, like the figures walking in, and move away
  * from the cursor before springing back.
  */
-export function DotArt({ src, alt, className }: { src: string; alt: string; className?: string }) {
+export function DotArt({
+  src,
+  alt,
+  className,
+  ratio = "1200 / 403",
+  pitch: fixedPitch,
+  radius = RADIUS,
+  push = PUSH,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+  /** The image's aspect ratio, so the box holds its height before it loads. */
+  ratio?: string;
+  /** Dot spacing in CSS pixels; by default it follows the width. */
+  pitch?: number;
+  radius?: number;
+  push?: number;
+}) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const reduceMotion = useReducedMotion();
@@ -51,8 +69,8 @@ export function DotArt({ src, alt, className }: { src: string; alt: string; clas
       width = wrap.clientWidth;
       const scale = width / probe.width;
       height = Math.round(probe.height * scale);
-      const pitch = width < 640 ? 4 : width < 1024 ? 5 : 6;
-      dotR = pitch * 0.4;
+      const pitch = fixedPitch ?? (width < 640 ? 3 : width < 1024 ? 3.5 : 4);
+      dotR = pitch * 0.42;
 
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = Math.round(width * dpr);
@@ -95,8 +113,8 @@ export function DotArt({ src, alt, className }: { src: string; alt: string; clas
           const dx = d.hx - mouse.x;
           const dy = d.hy - mouse.y;
           const dist = Math.hypot(dx, dy);
-          if (dist < RADIUS && dist > 0.01) {
-            const f = (1 - dist / RADIUS) ** 2 * PUSH;
+          if (dist < radius && dist > 0.01) {
+            const f = (1 - dist / radius) ** 2 * push;
             d.vx += (d.hx + (dx / dist) * f - d.x) * 0.16;
             d.vy += (d.hy + (dy / dist) * f - d.y) * 0.16;
           }
@@ -133,7 +151,7 @@ export function DotArt({ src, alt, className }: { src: string; alt: string; clas
       const rect = canvas.getBoundingClientRect();
       mouse.x = e.clientX - rect.left;
       mouse.y = e.clientY - rect.top;
-      mouse.inside = mouse.x > -RADIUS && mouse.y > -RADIUS && mouse.x < rect.width + RADIUS && mouse.y < rect.height + RADIUS;
+      mouse.inside = mouse.x > -radius && mouse.y > -radius && mouse.x < rect.width + radius && mouse.y < rect.height + radius;
       if (mouse.inside) kick();
     };
     const onLeave = () => {
@@ -167,11 +185,11 @@ export function DotArt({ src, alt, className }: { src: string; alt: string; clas
       window.removeEventListener("pointermove", onMove);
       document.removeEventListener("pointerleave", onLeave);
     };
-  }, [src, reduceMotion]);
+  }, [src, reduceMotion, fixedPitch, radius, push]);
 
   return (
     <div ref={wrapRef} className={cn("relative w-full", className)}>
-      <canvas ref={canvasRef} role="img" aria-label={alt} className="block w-full" style={{ aspectRatio: "1200 / 403" }} />
+      <canvas ref={canvasRef} role="img" aria-label={alt} className="block w-full" style={{ aspectRatio: ratio }} />
     </div>
   );
 }

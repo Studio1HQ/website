@@ -155,9 +155,9 @@ export function PartnerWall({ index }: { index: number }) {
           </figure>
 
           {/* Every partner, as even tiles */}
-          <ul className="grid grid-cols-3 gap-2 border-t border-[#141414]/[0.07] bg-[#f6f3ee]/60 p-2 sm:grid-cols-5 md:p-3">
+          <ul className="grid grid-cols-3 gap-px border-t border-[#141414]/[0.08] bg-[#141414]/[0.08] sm:grid-cols-5">
             {ENTRIES.map((e, i) => (
-              <li key={e.company}>
+              <li key={e.company} className="bg-[#f8f6f2]">
                 <button
                   type="button"
                   aria-label={`${e.company}: what they said`}
@@ -173,8 +173,8 @@ export function PartnerWall({ index }: { index: number }) {
                   }}
                   onClick={() => setActive(i)}
                   className={cn(
-                    "group/row flex h-[72px] w-full items-center justify-center rounded-[6px] px-4 outline-none transition-[background-color,box-shadow] duration-500 md:h-[84px] md:px-6",
-                    i === active ? "bg-white shadow-[0_10px_24px_-18px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08]" : "hover:bg-white/70",
+                    "group/row flex h-[80px] w-full items-center justify-center px-4 outline-none transition-colors duration-500 hover:bg-white md:h-[96px] md:px-6",
+                    i === active ? "bg-white" : "",
                   )}
                 >
                   <Mark p={e} active={i === active} align="center" scale={0.9} />
