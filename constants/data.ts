@@ -198,6 +198,12 @@ export const navItems: NavItem[] = [
         description: "Articles and insights from the Studio1 team",
       },
       {
+        title: "Community",
+        path: "/community",
+        icon: UsersThree,
+        description: "Meetups and hackathons, and how to join",
+      },
+      {
         title: "Events",
         path: "/events",
         icon: CalendarDots,

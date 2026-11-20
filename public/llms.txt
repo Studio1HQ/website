@@ -127,6 +127,7 @@ Selected results: Memori grew from launch to 12,000+ GitHub stars. Corsair went 
 - [Brand Assets](https://www.studio1hq.com/brand): The Studio1 brand page: the Studio1 Sans typeface (free under the SIL OFL), colors, logo files, and the design system with tokens, CSS, a Tailwind preset, and DESIGN.md rules for designers, developers, and AI tools. Downloads for the fonts and the full kit.
 - [Team](https://www.studio1hq.com/team): The Studio1 team: the two co-founders, then the writers, developer advocates and builders who do the work.
 - [Events](https://www.studio1hq.com/events): Conferences, hackathons, meetups, podcasts and livestreams the Studio1 team has spoken at, run or joined, from KubeCon and CityJS to campus hackathons across India.
+- [Community](https://www.studio1hq.com/community): Studio1 community meetups and hackathons: what is coming up, the cities the team has run or joined events in, and how to host one.
 - [Calendar](https://www.studio1hq.com/calendar): Studio1 events laid out month by month, each linking to its entry on the Events page.
 - [DevRel Jobs](https://www.studio1hq.com/devrel-jobs): A curated board of developer relations, developer advocacy, and community roles.
 - [Terms of Use](https://www.studio1hq.com/terms)
