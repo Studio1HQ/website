@@ -159,43 +159,53 @@ function Desk() {
   );
 }
 
+/** The whole desk, repeated small across the area as one tilted pattern. */
 export function SketchDesk({ className }: { className?: string }) {
   const reduce = !!useReducedMotion();
   const id = useId().replace(/:/g, "");
   return (
     <motion.svg
       aria-hidden
-      viewBox="0 0 1600 1000"
-      preserveAspectRatio="xMidYMid slice"
       className={cn("pointer-events-none", className)}
-      initial={reduce ? false : { opacity: 0, scale: 1.04 }}
+      initial={reduce ? false : { opacity: 0, scale: 1.03 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 1.8, ease: EASE }}
     >
       <defs>
-        <filter id={`pencil-${id}`} x="-5%" y="-5%" width="110%" height="110%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7" />
-          <feDisplacementMap in="SourceGraphic" scale="5" />
+        <pattern
+          id={`desk-${id}`}
+          patternUnits="userSpaceOnUse"
+          x="-200"
+          y="-60"
+          width="2000"
+          height="1080"
+          patternTransform="rotate(-10) scale(0.36)"
+        >
+          <g fill="none" stroke="#ef5a2c" strokeLinecap="round" strokeLinejoin="round">
+            <g strokeWidth="4.6" strokeOpacity="0.6">
+              <Desk />
+            </g>
+            {/* the second, lighter pass, a hair off: the sketch's double line */}
+            <g strokeWidth="2.4" strokeOpacity="0.35" transform="translate(5 4)">
+              <Desk />
+            </g>
+          </g>
+        </pattern>
+        <filter id={`pencil-${id}`}>
+          <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="2" seed="7" />
+          <feDisplacementMap in="SourceGraphic" scale="2.2" />
         </filter>
       </defs>
-      <motion.g
+      <motion.rect
+        x="-5%"
+        y="-5%"
+        width="110%"
+        height="110%"
+        fill={`url(#desk-${id})`}
         filter={`url(#pencil-${id})`}
-        fill="none"
-        stroke="#ef5a2c"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        transform="rotate(-10 800 500) scale(1.1) translate(-80 -40)"
-        animate={reduce ? undefined : { y: [0, -10, 0] }}
-        transition={{ duration: 14, ease: "easeInOut", repeat: Infinity }}
-      >
-        <g strokeWidth="2.6" strokeOpacity="0.55">
-          <Desk />
-        </g>
-        {/* the second, lighter pass, a hair off: the sketch's double line */}
-        <g strokeWidth="1.4" strokeOpacity="0.35" transform="translate(3 2)">
-          <Desk />
-        </g>
-      </motion.g>
+        animate={reduce ? undefined : { y: ["-5%", "-3%", "-5%"] }}
+        transition={{ duration: 16, ease: "easeInOut", repeat: Infinity }}
+      />
     </motion.svg>
   );
 }
