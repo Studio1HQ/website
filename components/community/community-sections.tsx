@@ -380,6 +380,8 @@ export function CommunityBento({ data, index }: { data: CommunityData; index: nu
     ["Online", byKind("online"), ChatsCircle],
     ["Workshops", byKind("workshop"), Lightbulb],
   ];
+  const shown = formats.filter(([, v]) => v > 0).sort((x, y) => y[1] - x[1]);
+  const top = Math.max(1, ...shown.map(([, v]) => v));
   const card = "rounded-[10px] bg-white ring-1 ring-inset ring-[#141414]/[0.07]";
   return (
     <PaperSection tone="paper">
@@ -391,12 +393,12 @@ export function CommunityBento({ data, index }: { data: CommunityData; index: nu
         <div className="mt-10 grid gap-3 lg:grid-cols-[1.15fr_1fr]">
           {/* The team, in grayscale photos */}
           <motion.div {...rise(reduce)} className={cn(card, "flex flex-col gap-6 p-5 md:p-6")}>
-            <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
+            <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-4">
               {FACES.map((m, i) => (
                 <motion.div
                   key={m.name}
                   title={m.name}
-                  className="relative aspect-[3/4] overflow-hidden rounded-[6px] bg-[#e6e3de]"
+                  className="relative aspect-[3/4] overflow-hidden lg:aspect-square rounded-[6px] bg-[#e6e3de]"
                   initial={reduce ? false : { opacity: 0, y: 12 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
@@ -445,15 +447,45 @@ export function CommunityBento({ data, index }: { data: CommunityData; index: nu
           </motion.div>
 
           <div className="flex flex-col gap-3">
-            {/* The count, on a faint grid */}
-            <motion.div {...rise(reduce, 0.08)} className={cn(card, "relative isolate flex flex-col gap-4 overflow-hidden p-6 sm:flex-row sm:items-end sm:justify-between md:p-7")}>
-              <div>
-                <p className="text-[72px] font-medium leading-[0.9] tracking-[-0.07em] tabular-nums md:text-[84px]">
-                  <Counter to={data.totals.events} />
-                  <span style={{ color: PRINT }}>+</span>
+            {/* The count, and what it was made of */}
+            <motion.div {...rise(reduce, 0.08)} className={cn(card, "p-6 md:p-7")}>
+              <div className="flex items-end justify-between gap-4">
+                <div>
+                  <p className="text-[64px] font-medium leading-[0.9] tracking-[-0.07em] tabular-nums md:text-[76px]">
+                    <Counter to={data.totals.events} />
+                    <span style={{ color: PRINT }}>+</span>
+                  </p>
+                  <p className="mt-2 text-[15px] text-[#141414]/55">Events run, spoken at or joined</p>
+                </div>
+                <p className="pb-1 text-right text-[13px] leading-snug text-[#141414]/45">
+                  across {data.totals.cities} cities
+                  <br />
+                  and online
                 </p>
-                <p className="mt-2 text-[16px] text-[#141414]/55">Events run, spoken at or joined</p>
               </div>
+              <ul className="mt-6 space-y-3 border-t border-[#141414]/[0.07] pt-5">
+                {shown.map(([label, value, KindIcon], i) => (
+                  <li key={label} className="group grid grid-cols-[112px_1fr_32px] items-center gap-3">
+                    <span className="flex items-center gap-2 text-[13.5px] text-[#141414]/70">
+                      <KindIcon weight="regular" className="size-4 text-[#141414]/45 transition-colors duration-300 group-hover:text-[#f97316]" />
+                      {label}
+                    </span>
+                    <span className="h-2 overflow-hidden rounded-full bg-[#141414]/[0.06]">
+                      <motion.span
+                        className="block h-full rounded-full"
+                        style={{ background: i === 0 ? PRINT : "#141414", opacity: i === 0 ? 1 : 0.75 }}
+                        initial={reduce ? false : { width: 0 }}
+                        whileInView={{ width: `${(value / top) * 100}%` }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 1.2, ease: EASE, delay: 0.2 + i * 0.1 }}
+                      />
+                    </span>
+                    <span className="text-right text-[14px] font-medium tabular-nums">
+                      <Counter to={value} />
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </motion.div>
 
             {/* Communities we show up with: their marks */}
@@ -464,7 +496,7 @@ export function CommunityBento({ data, index }: { data: CommunityData; index: nu
                   <li
                     key={p.name}
                     title={p.name}
-                    className="flex min-h-[52px] items-center justify-center"
+                    className="flex min-h-[52px] items-center justify-center opacity-55 grayscale transition-[filter,opacity] duration-500 hover:opacity-100 hover:grayscale-0"
                   >
                     <PartnerMark p={p} />
                     <span className="sr-only">{p.name}</span>
@@ -474,34 +506,6 @@ export function CommunityBento({ data, index }: { data: CommunityData; index: nu
             </motion.div>
           </div>
 
-          {/* What we run: one strip, four numbers */}
-          <motion.div {...rise(reduce, 0.2)} className={cn(card, "overflow-hidden lg:col-span-2")}>
-            <ul className="grid grid-cols-2 md:grid-cols-4">
-              {formats.filter(([, v]) => v > 0).map(([label, value, KindIcon], i) => (
-                <motion.li
-                  key={label}
-                  className={cn(
-                    "group flex items-center justify-between gap-4 p-5 md:p-7",
-                    i % 2 === 1 && "border-l border-[#141414]/[0.07]",
-                    i > 1 && "max-md:border-t max-md:border-[#141414]/[0.07]",
-                    i === 2 && "md:border-l md:border-[#141414]/[0.07]",
-                  )}
-                  initial={reduce ? false : { opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.9, ease: EASE, delay: 0.2 + i * 0.1 }}
-                >
-                  <div>
-                    <p className="text-[40px] font-medium leading-none tracking-[-0.05em] tabular-nums md:text-[48px]"><Counter to={value} /></p>
-                    <p className="mt-2 text-[14px] text-[#141414]/55">{label}</p>
-                  </div>
-                  <span className="flex size-10 shrink-0 items-center justify-center bg-[#141414] text-[#f4efe7] transition-colors duration-500 group-hover:bg-[#f97316]">
-                    <KindIcon weight="regular" className="size-5" />
-                  </span>
-                </motion.li>
-              ))}
-            </ul>
-          </motion.div>
         </div>
       </Container>
     </PaperSection>
