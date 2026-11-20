@@ -31,6 +31,7 @@ import { Container, EASE } from "@/components/home/ui";
 import { IndexBar, PaperSection } from "@/components/paper/paper-sections";
 import type { CommunityData, CommunityItem } from "@/lib/community";
 import { TEAM } from "@/data/team";
+import { SketchDesk } from "@/components/community/sketch-desk";
 import { DotSilhouette } from "@/components/team/team-page";
 import { PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
@@ -293,7 +294,11 @@ export function TogetherWeBuild() {
   const headY = useSpring(useTransform(scrollYProgress, [0.15, 0.5], [50, 0]), { stiffness: 60, damping: 20 });
   const headOpacity = useTransform(scrollYProgress, [0.12, 0.35], [0, 1]);
   return (
-    <PaperSection tone="paper">
+    <PaperSection tone="paper" className="relative isolate overflow-hidden">
+      {/* the pencil sketch behind, stronger at the edges, softer behind the headline */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 opacity-[0.38] [mask-image:radial-gradient(ellipse_30%_32%_at_50%_50%,rgba(0,0,0,0.3)_40%,black_85%),linear-gradient(to_bottom,transparent,black_25%,black_70%,transparent)] [mask-composite:intersect] [-webkit-mask-composite:source-in]">
+        <SketchDesk className="absolute inset-0 size-full" />
+      </div>
       <Container>
         {/* Desktop: photos circle the line */}
         <div ref={ref} className="relative hidden h-[700px] overflow-visible lg:block">
