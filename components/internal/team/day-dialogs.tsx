@@ -12,6 +12,8 @@ import {
   ATTENDANCE_KINDS,
   LEAVE_TYPES,
   MAX_SLOTS,
+  activeAfterBreaks,
+  breakMinutes,
   dayLabel,
   formatMinutes,
   minutesBetween,
@@ -90,7 +92,11 @@ function DayDialogBody({
   const timesBad = kind !== "leave" && bad.length > 0;
   // A third, narrow column for the remove buttons once there's more than one row.
   const slotGrid = slots.length > 1 ? "grid-cols-[1fr_1fr_2rem]" : "grid-cols-2";
-  const [active, setActive] = useState(hoursText(existing?.active_minutes ?? null));
+  // Active hours start blank: the slots decide, so a slot added or an end
+  // changed counts. Breaks the saved day took off its slots stay off (the
+  // box follows the slots, less those) until someone types their own figure.
+  const [breaks] = useState(() => (existing ? breakMinutes(existing) : 0));
+  const [typed, setTyped] = useState<string | null>(null);
   const [note, setNote] = useState(existing?.note ?? "");
 
   // The time in the slots, once every one that's filled in has both ends.
@@ -99,6 +105,8 @@ function DayDialogBody({
     filled.length && filled.every((slot) => slot.start && slot.end)
       ? filled.reduce((sum, slot) => sum + (minutesBetween(slot.start, slot.end) ?? 0), 0)
       : null;
+  const lessBreaks = activeAfterBreaks(slots, breaks);
+  const active = typed ?? hoursText(lessBreaks);
   const save = () =>
     run(
       () =>
@@ -233,7 +241,9 @@ function DayDialogBody({
           label="Active hours"
           hint={
             span !== null
-              ? `${formatMinutes(span)} ${filled.length > 1 ? `across ${filled.length} slots` : "from start to end"}`
+              ? `${formatMinutes(span)} ${filled.length > 1 ? `across ${filled.length} slots` : "from start to end"}${
+                  typed === null && lessBreaks !== null ? `, less ${formatMinutes(breaks)} of breaks` : ""
+                }`
               : "the time you actually worked"
           }
         >
@@ -241,7 +251,7 @@ function DayDialogBody({
             inputMode="decimal"
             value={active}
             placeholder={span !== null ? hoursText(span) : "7.5"}
-            onChange={(event) => setActive(event.target.value)}
+            onChange={(event) => setTyped(event.target.value)}
             className={inputClass()}
           />
         </Label>
@@ -249,7 +259,9 @@ function DayDialogBody({
       {kind !== "leave" ? (
         <p className="-mt-2 text-[12px] text-[var(--i-faint)]">
           {span !== null
-            ? "Leave it blank to use that, or put less for breaks inside a slot."
+            ? typed === null && lessBreaks !== null
+              ? "It follows your slots. Clear it to count every minute in them."
+              : "Leave it blank to use that, or put less for breaks inside a slot."
             : "Like 7.5 or 7:30. Leave it blank to use the time in your slots."}
         </p>
       ) : null}

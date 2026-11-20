@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { cantLog } from "@/lib/internal/team/access";
 import { cleanDay } from "@/lib/internal/team/attendance";
 import {
+  activeAfterBreaks,
+  breakMinutes,
   cleanLines,
   cleanTime,
   dateRange,
@@ -155,6 +157,24 @@ describe("attendance", () => {
     expect(minutesSoFar({ slots, active_minutes: 210 }, "17:00")).toBe(270);
     expect(minutesSoFar({ slots, active_minutes: 180 }, "17:00")).toBe(240);
     expect(minutesSoFar({ slots: [{ start: "09:30", end: "18:00" }], active_minutes: 510 }, "19:00")).toBeNull();
+  });
+
+  it("keeps breaks, not old active hours, when a day's slots change", () => {
+    const morning = { start: "11:00", end: "13:40" };
+    const evening = { start: "15:00", end: "19:00" };
+    // Active hours that were just the slots: nothing to carry, the new slots decide (the 20 Nov bug: 6h 40m saved as 2h 40m).
+    expect(breakMinutes({ slots: [morning], active_minutes: 160 })).toBe(0);
+    expect(activeAfterBreaks([morning, evening], 0)).toBeNull();
+    // Saved with the second slot still running: the earlier slot's time is no break either.
+    expect(breakMinutes({ slots: [morning, { start: "15:00", end: null }], active_minutes: 160 })).toBe(0);
+    // 20 minutes off for a break stays off as a slot is added.
+    const breaks = breakMinutes({ slots: [morning], active_minutes: 140 });
+    expect(breaks).toBe(20);
+    expect(activeAfterBreaks([morning, evening], breaks)).toBe(380);
+    expect(activeAfterBreaks([morning, { start: "15:00", end: "" }], breaks)).toBe(140);
+    // Slots cut shorter than the breaks: back to the slots alone.
+    expect(activeAfterBreaks([{ start: "11:00", end: "11:10" }], breaks)).toBeNull();
+    expect(breakMinutes({ slots: [morning], active_minutes: null })).toBe(0);
   });
 
   it("names people without a name from their email", () => {
