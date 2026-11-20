@@ -18,7 +18,7 @@ import {
 import { Container, EASE } from "@/components/home/ui";
 import { PaperPageHeader } from "@/components/paper/paper-page-header";
 import { IndexBar, PaperSection } from "@/components/paper/paper-sections";
-import { DotWord } from "@/components/team/dot-word";
+import { HandInHand } from "@/components/community/hands";
 import { Landmark, Skyline } from "@/components/community/landmarks";
 import { CommunityBento, TogetherSpread, TogetherWeBuild } from "@/components/community/community-sections";
 import { RegistrationBar, UpcomingEvents } from "@/components/community/upcoming";
@@ -198,7 +198,7 @@ export function CommunityPage({ data }: { data: CommunityData }) {
       <PaperPageHeader className="pb-10 pt-32 md:pb-14 md:pt-40">
         <Container>
           <h1 className="sr-only">Studio1 Community</h1>
-          <DotWord text="Studio1" />
+          <HandInHand className="mx-auto block h-auto w-full max-w-[860px]" />
           <div className="mt-6 flex flex-wrap items-end justify-between gap-6 md:mt-8">
             <motion.p
               aria-hidden

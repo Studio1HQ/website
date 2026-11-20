@@ -109,7 +109,7 @@ function SpreadSlot({ s, className, captionClass, sizes, delay, reduce }: { s: S
             exit={{ opacity: 0, transition: { duration: 0.7, ease: EASE, delay: delay + 0.35 } }}
             transition={{ duration: 0.85, ease: EASE, delay }}
           >
-            <Link href={s.href} className="block size-full">
+            <Link href={s.href} className="relative block size-full">
               <Image src={s.src} alt={s.event} fill sizes={sizes} className="object-cover" />
             </Link>
           </motion.div>

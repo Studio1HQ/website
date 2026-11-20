@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { ArrowLeft, ArrowRight } from "@phosphor-icons/react";
 import { Container, EASE } from "@/components/home/ui";
 import { IndexBar, PaperSection } from "@/components/paper/paper-sections";
 import { homeTestimonials } from "@/data/home";
@@ -49,24 +50,26 @@ const ENTRIES = LOGOS.map((p) => ({
 
 const TURN = 7000;
 
-/** Every mark in the same ink, through a mask, so the wall reads as one set. */
-function Mark({ p, active }: { p: Partner; active: boolean }) {
+/** Every mark in the same ink, through a mask, so the set reads as one. */
+function Mark({ p, active, align = "left", scale = 0.78 }: { p: Partner; active?: boolean; align?: "left" | "center"; scale?: number }) {
   return (
     <span
       aria-hidden
       className={cn(
-        "block w-full transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]",
-        active ? "opacity-100" : "opacity-35 group-hover/cell:opacity-100",
+        "block w-full max-w-[150px] transition-opacity duration-500 ease-out",
+        active === undefined ? "" : active ? "opacity-100" : "opacity-40 group-hover/row:opacity-100",
       )}
       style={{
-        height: p.height,
+        height: Math.round(p.height * scale),
         backgroundColor: "#141414",
-        WebkitMask: `url(${p.logo}) center / contain no-repeat`,
-        mask: `url(${p.logo}) center / contain no-repeat`,
+        WebkitMask: `url(${p.logo}) ${align} center / contain no-repeat`,
+        mask: `url(${p.logo}) ${align} center / contain no-repeat`,
       }}
     />
   );
 }
+
+const pad = (n: number) => String(n).padStart(2, "0");
 
 export function PartnerWall({ index }: { index: number }) {
   const reduce = !!useReducedMotion();
@@ -77,36 +80,84 @@ export function PartnerWall({ index }: { index: number }) {
     if (reduce || hover) return;
     const id = window.setInterval(() => setActive((v) => (v + 1) % ENTRIES.length), TURN);
     return () => window.clearInterval(id);
-  }, [reduce, hover]);
+  }, [reduce, hover, active]);
   const current = ENTRIES[active];
   if (!current) return null;
   const words = current.quote.content.replace(/\s+/g, " ").trim();
-  const quote = words.length > 170 ? `${words.slice(0, words.lastIndexOf(" ", 165))}…` : words;
+  const quote = words.length > 190 ? `${words.slice(0, words.lastIndexOf(" ", 185))}…` : words;
+  const step = (d: number) => setActive((v) => (v + d + ENTRIES.length) % ENTRIES.length);
+  const fade = {
+    initial: reduce ? false : { opacity: 0, y: 12, filter: "blur(6px)" },
+    animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+    exit: { opacity: 0, y: -8, filter: "blur(6px)" },
+  } as const;
+  const enter = (delay = 0) =>
+    ({
+      initial: reduce ? false : { opacity: 0, y: 24 },
+      whileInView: { opacity: 1, y: 0 },
+      viewport: { once: true, margin: "-80px" },
+      transition: { duration: 1, ease: EASE, delay },
+    }) as const;
 
   return (
     <PaperSection tone="paper">
       <Container>
         <IndexBar index={index} name="Partners" />
-        <motion.h2
-          initial={reduce ? false : { opacity: 0, y: 36 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 1.1, ease: EASE }}
-          className="mt-6 max-w-[680px] text-[34px] font-medium leading-[1.05] tracking-[-0.045em] md:text-[48px]"
-        >
+        <motion.h2 {...enter()} className="mt-6 max-w-[680px] text-[34px] font-medium leading-[1.05] tracking-[-0.045em] md:text-[48px]">
           Partnering with the best in <span style={{ color: PRINT }}>developer tooling</span>
         </motion.h2>
+
         <motion.div
-          initial={reduce ? false : { opacity: 0, y: 36 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 1.1, ease: EASE, delay: 0.1 }}
-          className="mt-10 grid grid-cols-1 overflow-hidden rounded-[6px] bg-white/80 ring-1 ring-inset ring-[#141414]/10 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]"
+          {...enter(0.08)}
+          className="mt-10 overflow-hidden rounded-[6px] bg-white/80 ring-1 ring-inset ring-[#141414]/10"
           onMouseLeave={() => setHover(false)}
         >
-          <ul className="grid grid-cols-3 gap-px bg-[#141414]/[0.08] sm:grid-cols-5">
+          {/* The featured quote */}
+          <figure className="relative isolate grid gap-8 p-6 md:grid-cols-[minmax(0,1fr)_auto] md:gap-12 md:p-10" onMouseEnter={() => setHover(true)}>
+            <div className="flex min-h-[230px] flex-col justify-between gap-8 md:min-h-[210px]">
+              <div className="relative">
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.blockquote
+                    key={current.company}
+                    {...fade}
+                    transition={{ duration: 0.5, ease: EASE }}
+                    className="line-clamp-4 max-w-[860px] text-[21px] font-medium leading-[1.4] tracking-[-0.025em] md:text-[28px]"
+                  >
+                    &ldquo;{quote}&rdquo;
+                  </motion.blockquote>
+                </AnimatePresence>
+              </div>
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.figcaption key={current.company} {...fade} transition={{ duration: 0.5, ease: EASE, delay: 0.06 }} className="flex items-center gap-3">
+                  <span className="relative size-11 shrink-0 overflow-hidden rounded-full bg-[#e6e1d9]">
+                    <Image src={current.quote.avatar} alt="" fill sizes="44px" className="object-cover" />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-[15px] font-medium">{current.quote.name}</span>
+                    <span className="block truncate text-[13px] text-[#141414]/55">{current.quote.role}</span>
+                  </span>
+                </motion.figcaption>
+              </AnimatePresence>
+            </div>
+            <div className="flex items-center gap-1.5 md:flex-col md:items-end md:justify-between">
+              <span className="mr-auto text-[13px] font-medium tabular-nums text-[#141414]/45 md:mr-0">
+                <span style={{ color: PRINT }}>{pad(active + 1)}</span> / {pad(ENTRIES.length)}
+              </span>
+              <div className="flex gap-1.5">
+                <button type="button" onClick={() => step(-1)} aria-label="Previous partner" className="flex size-10 items-center justify-center rounded-[6px] ring-1 ring-inset ring-[#141414]/15 transition-colors hover:bg-[#141414] hover:text-white">
+                  <ArrowLeft weight="bold" className="size-4" />
+                </button>
+                <button type="button" onClick={() => step(1)} aria-label="Next partner" className="flex size-10 items-center justify-center rounded-[6px] bg-[#141414] text-white transition-colors hover:bg-[#f97316]">
+                  <ArrowRight weight="bold" className="size-4" />
+                </button>
+              </div>
+            </div>
+          </figure>
+
+          {/* Every partner, as even tiles */}
+          <ul className="grid grid-cols-3 gap-2 border-t border-[#141414]/[0.07] bg-[#f6f3ee]/60 p-2 sm:grid-cols-5 md:p-3">
             {ENTRIES.map((e, i) => (
-              <li key={e.company} className="bg-[#fbfaf8]">
+              <li key={e.company}>
                 <button
                   type="button"
                   aria-label={`${e.company}: what they said`}
@@ -122,54 +173,15 @@ export function PartnerWall({ index }: { index: number }) {
                   }}
                   onClick={() => setActive(i)}
                   className={cn(
-                    "group/cell relative flex h-[92px] w-full items-center justify-center px-4 outline-none transition-colors duration-500 md:h-[110px] md:px-6",
-                    i === active ? "bg-white" : "",
+                    "group/row flex h-[72px] w-full items-center justify-center rounded-[6px] px-4 outline-none transition-[background-color,box-shadow] duration-500 md:h-[84px] md:px-6",
+                    i === active ? "bg-white shadow-[0_10px_24px_-18px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.08]" : "hover:bg-white/70",
                   )}
                 >
-                  <Mark p={e} active={i === active} />
+                  <Mark p={e} active={i === active} align="center" scale={0.9} />
                 </button>
               </li>
             ))}
           </ul>
-          <div className="flex h-[320px] flex-col justify-between gap-6 overflow-hidden border-t lg:h-auto border-[#141414]/[0.08] p-7 md:p-9 lg:border-l lg:border-t-0">
-            <div>
-              <p className="text-[13px] font-medium tabular-nums" style={{ color: PRINT }}>
-                {String(active + 1).padStart(2, "0")} / {String(ENTRIES.length).padStart(2, "0")}
-              </p>
-              <div className="relative mt-4">
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.blockquote
-                    key={current.company}
-                    className="line-clamp-6 text-[18px] font-medium leading-[1.45] tracking-[-0.02em] md:text-[19px]"
-                    initial={reduce ? false : { opacity: 0, y: 10, filter: "blur(4px)" }}
-                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                    exit={{ opacity: 0, y: -8, filter: "blur(4px)" }}
-                    transition={{ duration: 0.5, ease: EASE }}
-                  >
-                    &ldquo;{quote}&rdquo;
-                  </motion.blockquote>
-                </AnimatePresence>
-              </div>
-            </div>
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={current.company}
-                className="flex items-center gap-3"
-                initial={reduce ? false : { opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.5, ease: EASE, delay: 0.08 }}
-              >
-                <span className="relative size-11 shrink-0 overflow-hidden rounded-full bg-[#e6e1d9]">
-                  <Image src={current.quote.avatar} alt="" fill sizes="44px" className="object-cover" />
-                </span>
-                <span className="min-w-0">
-                  <span className="block text-[15px] font-medium">{current.quote.name}</span>
-                  <span className="block truncate text-[13px] text-[#141414]/55">{current.quote.role}</span>
-                </span>
-              </motion.div>
-            </AnimatePresence>
-          </div>
         </motion.div>
       </Container>
     </PaperSection>
