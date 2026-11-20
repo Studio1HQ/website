@@ -8,6 +8,7 @@ import { ArrowRight } from "@phosphor-icons/react";
 import { Container, EASE } from "@/components/home/ui";
 import type { CommunityItem } from "@/lib/community";
 import { PRINT } from "@/lib/paper";
+import { PaperSection } from "@/components/paper/paper-sections";
 
 /*
  * "Picture a world where you were here": past events as big cards, two to a
@@ -35,10 +36,10 @@ function Wrap({ item, className, children }: { item: CommunityItem; className: s
 
 export function BeenHere({ items }: { items: CommunityItem[] }) {
   const reduce = !!useReducedMotion();
-  const cards = items.filter((e) => e.image && e.summary).slice(0, 4);
+  const cards = [...items.filter((e) => e.image && e.summary && e.logo), ...items.filter((e) => e.image && e.summary && !e.logo)].slice(0, 4);
   if (!cards.length) return null;
   return (
-    <section className="py-20 md:py-28">
+    <PaperSection tone="paper" className="relative isolate overflow-hidden">
       <Container>
         <motion.div
           initial={reduce ? false : { opacity: 0, y: 30 }}
@@ -70,29 +71,31 @@ export function BeenHere({ items }: { items: CommunityItem[] }) {
               >
                 <Wrap
                   item={e}
-                  className="group relative isolate flex min-h-[360px] flex-col justify-end overflow-hidden rounded-[14px] p-7 text-white md:min-h-[400px] md:p-9"
+                  className="group relative isolate flex min-h-[380px] flex-col justify-end overflow-hidden rounded-[14px] p-7 text-white md:min-h-[400px] md:p-9"
                 >
-                  <Image
-                    src={e.image as string}
-                    alt=""
-                    fill
-                    sizes="(min-width: 768px) 50vw, 100vw"
-                    className="-z-20 object-cover transition-transform duration-[1.6s] ease-out group-hover:scale-[1.05]"
-                  />
+                  {/* the photo, under a wash of the card's colour */}
+                  <Image src={e.image as string} alt="" fill sizes="(min-width: 768px) 50vw, 100vw" className="-z-20 object-cover" />
                   <span
                     aria-hidden
                     className="absolute inset-0 -z-10"
-                    style={{ background: `linear-gradient(to top, ${tone} 0%, ${tone}f2 42%, ${tone}99 66%, transparent 90%)` }}
+                    style={{ background: `linear-gradient(to top, ${tone} 0%, ${tone}f0 45%, ${tone}b3 75%, ${tone}80 100%)` }}
                   />
 
-                  <p className="text-[12px] font-medium uppercase tracking-[0.18em] text-white/80">
-                    {e.online ? "Online" : e.city}
-                  </p>
-                  <h3 className="mt-2 max-w-[90%] text-[28px] font-semibold leading-[1.06] tracking-[-0.035em] md:text-[34px]">{e.name}</h3>
-                  <p className="mt-3 line-clamp-2 max-w-[460px] pr-24 text-[15.5px] leading-[1.5] text-white/90 md:text-[16.5px]">{e.summary}</p>
-                  <span className="mt-6 inline-flex h-11 w-fit items-center gap-2 rounded-[8px] bg-white px-5 text-[14.5px] font-semibold text-[#141414] transition-[gap] duration-300 group-hover:gap-3">
+                  {/* the event's mark, big, as the card's art */}
+                  {e.logo ? (
+                    <span
+                      aria-hidden
+                      className="absolute left-7 top-7 block size-[68px] bg-white md:left-9 md:top-9 md:size-[84px]"
+                      style={{ WebkitMask: `url(${e.logo}) left top / contain no-repeat`, mask: `url(${e.logo}) left top / contain no-repeat` }}
+                    />
+                  ) : null}
+
+                  <h3 className="max-w-[90%] text-[28px] font-semibold leading-[1.06] tracking-[-0.035em] md:text-[34px]">{e.name}</h3>
+                  <p className="mt-3 line-clamp-2 max-w-[460px] pr-20 text-[15.5px] leading-[1.5] text-white/90 md:text-[16.5px]">{e.summary}</p>
+                  <span className="mt-6 inline-flex h-11 w-fit items-center gap-2 rounded-[8px] bg-white px-5 text-[14.5px] font-semibold text-[#141414]">
                     {e.cta === "Recap" ? "See the recap" : e.cta} <ArrowRight weight="bold" className="size-4" />
                   </span>
+                  <span className="mt-3 text-[13.5px] italic text-white/80">{e.online ? "Online" : e.city}</span>
 
                   {/* the date, on a tag in the corner */}
                   <span className="absolute bottom-0 right-0 rounded-tl-[12px] bg-[#141414] px-5 py-2.5 text-[14px] font-semibold text-white">
@@ -104,6 +107,6 @@ export function BeenHere({ items }: { items: CommunityItem[] }) {
           })}
         </div>
       </Container>
-    </section>
+    </PaperSection>
   );
 }

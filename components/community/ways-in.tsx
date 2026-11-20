@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { AnimatePresence, motion, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
+import { useRef, type ReactNode } from "react";
+import { motion, useReducedMotion } from "motion/react";
 import { ArrowUpRight, CalendarBlank, Code, UsersThree } from "@phosphor-icons/react";
 import { Container, EASE } from "@/components/home/ui";
 import { IndexBar, PaperSection } from "@/components/paper/paper-sections";
@@ -17,49 +17,11 @@ import { cn } from "@/lib/utils";
 const HOST = `mailto:contact@studio1hq.com?subject=${encodeURIComponent("Host a Studio1 meetup")}`;
 const P = (p: string) => `/assets/events/${p}.webp`;
 
-/** Photos that take turns, each easing in from a soft blur and slowly zooming. */
-function Turning({ photos, offset = 0, className }: { photos: string[]; offset?: number; className?: string }) {
-  const reduce = !!useReducedMotion();
-  const [i, setI] = useState(0);
-  useEffect(() => {
-    if (reduce || photos.length < 2) return;
-    let id = 0;
-    const start = window.setTimeout(() => {
-      setI((v) => (v + 1) % photos.length);
-      id = window.setInterval(() => setI((v) => (v + 1) % photos.length), 4200);
-    }, 4200 + offset);
-    return () => {
-      window.clearTimeout(start);
-      window.clearInterval(id);
-    };
-  }, [reduce, photos.length, offset]);
+/** The card's photo, still. */
+function Turning({ photos, className }: { photos: string[]; offset?: number; className?: string }) {
   return (
     <div className={cn("relative overflow-hidden rounded-[6px] bg-[#e6e1d9]", className)}>
-      <AnimatePresence initial={false}>
-        <motion.div
-          key={photos[i]}
-          className="absolute inset-0"
-          initial={reduce ? false : { opacity: 0, filter: "blur(8px)" }}
-          animate={{ opacity: 1, filter: "blur(0px)" }}
-          exit={{ opacity: 0, transition: { duration: 0.8, ease: EASE, delay: 0.3 } }}
-          transition={{ duration: 0.9, ease: EASE }}
-        >
-          <motion.div
-            className="absolute inset-0"
-            initial={{ scale: 1.08 }}
-            animate={{ scale: reduce ? 1.08 : 1 }}
-            transition={{ duration: 6, ease: "linear" }}
-          >
-            <Image src={photos[i]} alt="" fill sizes="(min-width: 1024px) 45vw, 100vw" className="object-cover" />
-          </motion.div>
-        </motion.div>
-      </AnimatePresence>
-      {/* which photo is showing */}
-      <div className="absolute bottom-3 left-3 flex gap-1">
-        {photos.map((p, k) => (
-          <span key={p} className={cn("h-1 rounded-full bg-white transition-all duration-500", k === i ? "w-5 opacity-100" : "w-1.5 opacity-60")} />
-        ))}
-      </div>
+      <Image src={photos[0]} alt="" fill sizes="(min-width: 1024px) 45vw, 100vw" className="object-cover" />
     </div>
   );
 }
@@ -89,8 +51,6 @@ function Way({
 }) {
   const reduce = !!useReducedMotion();
   const ref = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const y = useSpring(useTransform(scrollYProgress, [0, 1], ["-8%", "8%"]), { stiffness: 80, damping: 24 });
   return (
     <motion.article
       ref={ref}
@@ -102,9 +62,9 @@ function Way({
     >
       <div className="absolute inset-0 -z-10 overflow-hidden rounded-[10px]">
         {/* the photos, moving with the scroll, filling the right of the card */}
-        <motion.div style={reduce ? undefined : { y }} className="absolute inset-y-[-10%] right-0 w-full md:w-[66%]">
-          <Turning photos={photos} offset={index * 900} className="size-full rounded-none transition-transform duration-[1.4s] ease-out group-hover:scale-[1.04]" />
-        </motion.div>
+        <div className="absolute inset-y-0 right-0 w-full md:w-[66%]">
+          <Turning photos={photos} className="size-full rounded-none" />
+        </div>
         {/* paper over the left of the photo, so the words sit on paper and the photo melts in */}
         <span aria-hidden className="absolute inset-0 bg-[linear-gradient(180deg,rgba(251,249,245,0)_25%,rgba(251,249,245,0.92)_55%,#fbf9f5_70%)] md:bg-[linear-gradient(90deg,#fbf9f5_32%,rgba(251,249,245,0.88)_48%,rgba(251,249,245,0)_72%)]" />
       </div>
