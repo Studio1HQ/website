@@ -3,6 +3,7 @@ import {
   canChangeLog,
   canChangeTask,
   canGiveTask,
+  canShareTask,
   canReadReports,
   canSeeOthers,
   canSeeTasksOf,
@@ -104,6 +105,10 @@ describe("who changes what", () => {
     expect(canChangeTask(employee, shared)).toBe(true);
     expect(canChangeTask(employee, { ...shared, with_emails: ["other@studio1hq.com"] })).toBe(false);
     expect(canChangeTask(employee, { ...shared, with_emails: [] })).toBe(false);
+    // Who it's shared with stays with its own person (and founders, the associate, the giver).
+    expect(canShareTask(employee, shared)).toBe(false);
+    expect(canShareTask(employee, { ...shared, email: "dev@studio1hq.com" })).toBe(true);
+    expect(canShareTask(founder, shared)).toBe(true);
   });
 
   it("puts a shared task on everyone's list, once each", () => {

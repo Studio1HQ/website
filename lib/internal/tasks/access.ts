@@ -89,6 +89,16 @@ export function canChangeTask(viewer: TaskViewer, task: { email: string; created
 }
 
 /**
+ * May this viewer change who a task is shared with? Its own person, a
+ * founder, the associate or whoever gave it: canChangeTask without the
+ * share list. Someone it's shared with can update it, and take themselves
+ * off (leaveTask), but not add or remove others.
+ */
+export function canShareTask(viewer: TaskViewer, task: { email: string; created_by: string }) {
+  return canChangeTask(viewer, { email: task.email, created_by: task.created_by });
+}
+
+/**
  * Whether someone's hours on a client may show to this viewer in that
  * client's workspace, given the guarded people (the founders and admins):
  * the founders and the founder's associate (Team tasks: view as a role, not

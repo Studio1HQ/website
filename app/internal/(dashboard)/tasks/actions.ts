@@ -16,6 +16,7 @@ import type { ClientScope } from "@/lib/internal/clients/scope";
 import {
   canChangeTask,
   canGiveTask,
+  canShareTask,
   canReadReports,
   isFounder,
   owesReports,
@@ -121,6 +122,13 @@ async function cleanWith(value: unknown, owner: string): Promise<{ ok: true; ema
   if (wanted.some((email) => !active.has(email))) return { ok: false, message: "Someone you picked isn't on the active team list." };
   return { ok: true, emails: wanted.sort() };
 }
+
+const sameList = (a: readonly string[], b: readonly string[]) => [...a].sort().join() === [...b].sort().join();
+
+const NOT_SHARER: TaskResult = {
+  ok: false,
+  message: "Only the person whose task it is can change who it's shared with. You can take yourself off it.",
+};
 
 /** Tells people a task is now shared with them: on their bell, never an email. */
 function tellShared(emails: readonly string[], staff: Staffish, titles: readonly string[], day: string | null) {
@@ -265,6 +273,7 @@ export async function saveTask(id: unknown, values: unknown): Promise<TaskResult
   const priority = isTaskPriority(data.priority) && data.priority !== task.priority ? { priority: data.priority } : {};
   const shared = "with" in data ? await cleanWith(data.with, task.email) : { ok: true as const, emails: task.with_emails };
   if (!shared.ok) return shared;
+  if (!sameList(shared.emails, task.with_emails) && !canShareTask(me, task)) return NOT_SHARER;
   const added = shared.emails.filter((email) => !task.with_emails.includes(email));
   const people = added.length || shared.emails.length !== task.with_emails.length ? { with_emails: shared.emails } : {};
   const result = await updateTask(task.id, { title, notes, due_on: due, ...priority, ...people, ...where }, staff.email);
@@ -553,6 +562,7 @@ export async function editTask(id: unknown, values: unknown): Promise<TaskResult
   if ("with" in data) {
     const shared = await cleanWith(data.with, task.email);
     if (!shared.ok) return shared;
+    if (!sameList(shared.emails, task.with_emails) && !canShareTask(me, task)) return NOT_SHARER;
     added = shared.emails.filter((email) => !task.with_emails.includes(email));
     if (added.length || shared.emails.length !== task.with_emails.length) patch.with_emails = shared.emails;
   }

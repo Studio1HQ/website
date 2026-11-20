@@ -942,7 +942,7 @@ function EditCard({
           options={TASK_PRIORITIES.map((option) => ({ value: option.value, label: option.label }))}
         />
       </Label>
-      {team.length ? (
+      {team.length && !leaving ? (
         <Label label="With" hint="shared: on their lists too" group>
           <WithPicker team={team} value={form.people} onChange={(people) => setForm({ ...form, people })} exclude={[card.owner]} variant="field" />
         </Label>

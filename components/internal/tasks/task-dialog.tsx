@@ -280,7 +280,7 @@ export function TaskDialog({
           options={TASK_PRIORITIES.map((option) => ({ value: option.value, label: option.label }))}
         />
       </Label>
-      {!community && !asDeliverable ? (
+      {!community && !asDeliverable && !(task && person.own && task.email.toLowerCase() !== person.email.toLowerCase()) ? (
         <Label label="With" hint="shared: on their lists too" group>
           <WithPicker
             team={team}
