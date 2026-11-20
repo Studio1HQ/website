@@ -1,211 +1,205 @@
 "use client";
 
-import { useId } from "react";
+import { useId, type ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { EASE } from "@/components/home/ui";
 import { cn } from "@/lib/utils";
 
 /*
- * DevRel, drawn in pencil: talk notes, a stage screen, a microphone, a
- * camera, a conference badge, a terminal, docs, a pull request, GitHub
- * stars, a laptop and questions from the room, joined by circuit traces. Every line is drawn twice, a
- * little apart, and run through a slight wobble so it reads as a sketch.
+ * DevRel in pencil: a set of small drawings (talk notes, slides, mics,
+ * cameras, badges, terminals, docs, pull requests, stars, laptops, coffee,
+ * trophies and more) scattered across the area. Each spot on a loose grid
+ * gets its own drawing, angle and size, so nothing reads as a repeat. Every
+ * line is drawn twice, a hair apart, and given a slight wobble. It stays
+ * still.
  */
 
 const range = (n: number) => Array.from({ length: n }, (_, i) => i);
 
-function Desk() {
+/** Each drawing sits in a 100 x 100 box. */
+const ICONS: ReactNode[] = [
+  // spiral notebook
+  <>
+    <rect x="22" y="10" width="62" height="80" rx="4" />
+    {range(5).map((i) => <circle key={i} cx="22" cy={22 + i * 14} r="4" />)}
+    <path d="M34 26 h38 M34 40 h30 M34 54 h38 M34 68 h22" />
+  </>,
+  // stage screen with slides
+  <>
+    <rect x="8" y="14" width="84" height="54" rx="3" />
+    <path d="M50 68 v12 M34 84 h32 M18 56 l18 -16 12 9 18 -20 14 13 M18 28 h30" />
+  </>,
+  // microphone on a stand
+  <>
+    <rect x="38" y="8" width="24" height="40" rx="12" />
+    <path d="M42 20 h16 M42 30 h16 M42 40 h16 M28 34 a22 22 0 0 0 44 0 M50 56 v28 M34 88 h32" />
+  </>,
+  // camera
+  <>
+    <rect x="10" y="28" width="80" height="54" rx="7" />
+    <circle cx="50" cy="55" r="17" />
+    <circle cx="50" cy="55" r="8" />
+    <rect x="22" y="20" width="24" height="9" rx="3" />
+    <circle cx="80" cy="38" r="3" />
+  </>,
+  // conference badge
+  <>
+    <path d="M30 6 L50 30 M70 6 L50 30" />
+    <rect x="28" y="30" width="44" height="62" rx="5" />
+    <circle cx="50" cy="52" r="9" />
+    <path d="M38 72 h24 M42 82 h16" />
+  </>,
+  // terminal
+  <>
+    <rect x="8" y="18" width="84" height="64" rx="5" />
+    <path d="M8 30 h84 M20 44 l8 7 -8 7 M34 58 h22" />
+    <circle cx="16" cy="24" r="2" />
+    <circle cx="23" cy="24" r="2" />
+  </>,
+  // docs page
+  <>
+    <path d="M22 8 h40 l16 16 v68 h-56 z M62 8 v16 h16" />
+    <path d="M32 36 h36 M32 48 h36 M32 60 h28 M32 72 h36" />
+  </>,
+  // pull request
+  <>
+    <circle cx="28" cy="20" r="7" />
+    <circle cx="28" cy="80" r="7" />
+    <circle cx="74" cy="80" r="7" />
+    <path d="M28 27 v46 M74 73 v-30 a14 14 0 0 0 -14 -14 h-16 M50 20 l-8 9 8 9" />
+  </>,
+  // star
+  <path d="M50 12 l11 23 25 4 -18 18 4 25 -22 -12 -22 12 4 -25 -18 -18 25 -4 z" />,
+  // laptop
+  <>
+    <rect x="18" y="20" width="64" height="44" rx="4" />
+    <path d="M8 72 h84 l-6 10 h-72 z M42 36 l-8 8 8 8 M58 36 l8 8 -8 8" />
+  </>,
+  // coffee, from above
+  <>
+    <circle cx="46" cy="50" r="26" />
+    <circle cx="46" cy="50" r="18" />
+    <path d="M72 44 h8 a8 8 0 0 1 0 16 h-8 M36 48 c4 -5 10 -5 14 0 s10 5 14 0" />
+  </>,
+  // trophy
+  <path d="M30 14 h40 v18 a20 20 0 0 1 -40 0 z M30 20 h-10 a10 10 0 0 0 10 14 M70 20 h10 a10 10 0 0 1 -10 14 M50 52 v16 M36 68 h28 v12 h-28 z" />,
+  // headphones
+  <>
+    <path d="M18 60 v-12 a32 32 0 0 1 64 0 v12" />
+    <rect x="10" y="54" width="16" height="30" rx="5" />
+    <rect x="74" y="54" width="16" height="30" rx="5" />
+  </>,
+  // </> sticker
+  <>
+    <circle cx="50" cy="50" r="34" />
+    <path d="M38 38 l-12 12 12 12 M62 38 l12 12 -12 12 M55 32 l-10 36" />
+  </>,
+  // chat bubbles
+  <>
+    <path d="M10 18 h56 a8 8 0 0 1 8 8 v24 a8 8 0 0 1 -8 8 h-34 l-12 12 v-12 h-10 a8 8 0 0 1 -8 -8 v-24 a8 8 0 0 1 8 -8 z" />
+    <path d="M20 32 h40 M20 44 h26 M80 50 h6 a6 6 0 0 1 6 6 v18 a6 6 0 0 1 -6 6 h-4 v8 l-8 -8 h-22" />
+  </>,
+  // pizza slice
+  <>
+    <path d="M18 22 l66 -6 -30 72 z M24 30 a50 50 0 0 0 56 -6" />
+    <circle cx="50" cy="40" r="5" />
+    <circle cx="56" cy="58" r="4" />
+  </>,
+  // video player
+  <>
+    <rect x="8" y="18" width="84" height="58" rx="5" />
+    <path d="M42 34 l20 13 -20 13 z M16 68 h68" />
+    <circle cx="36" cy="68" r="3" />
+  </>,
+  // keyboard
+  <>
+    <rect x="6" y="32" width="88" height="40" rx="5" />
+    {range(2).map((r) => range(7).map((c) => <rect key={`${r}${c}`} x={12 + c * 11.5} y={38 + r * 12} width="8" height="8" rx="1.5" />))}
+    <path d="M26 64 h48" />
+  </>,
+  // phone
+  <>
+    <rect x="30" y="8" width="40" height="80" rx="8" />
+    <path d="M44 16 h12 M44 80 h12" />
+  </>,
+  // rocket: launch day
+  <>
+    <path d="M50 8 c16 12 20 34 14 56 h-28 c-6 -22 -2 -44 14 -56 z M36 50 l-12 14 v14 l14 -10 M64 50 l12 14 v14 l-14 -10 M44 72 l6 16 6 -16" />
+    <circle cx="50" cy="34" r="7" />
+  </>,
+  // light bulb: an idea
+  <path d="M50 10 a24 24 0 0 0 -14 44 v12 h28 v-12 a24 24 0 0 0 -14 -44 z M38 74 h24 M42 84 h16 M44 40 l6 8 6 -8" />,
+  // github mark, as an outline
+  <>
+    <circle cx="50" cy="50" r="36" />
+    <path d="M40 84 v-12 c-10 2 -14 -4 -16 -8 M60 84 v-12 c0 -4 -2 -6 -4 -8 c10 -2 18 -6 18 -20 c0 -4 -2 -8 -4 -10 c1 -4 0 -8 -1 -10 c-4 0 -8 2 -10 4 a32 32 0 0 0 -14 0 c-2 -2 -6 -4 -10 -4 c-1 2 -2 6 -1 10 c-2 2 -4 6 -4 10 c0 14 8 18 18 20 c-2 2 -4 4 -4 8" />
+  </>,
+];
+
+/** A small seeded random, so the scatter is the same on every render. */
+function rand(n: number) {
+  const v = Math.sin(n * 127.1 + 311.7) * 43758.5453;
+  return v - Math.floor(v);
+}
+
+const COLS = 13;
+const ROWS = 8;
+const CELL_W = 1600 / COLS;
+const CELL_H = 1000 / ROWS;
+
+/** One drawing per cell, nudged off the grid, turned and sized a little differently each time. */
+const SPOTS = range(COLS * ROWS).map((k) => {
+  const c = k % COLS;
+  const r = Math.floor(k / COLS);
+  // every other row shifted half a cell; neighbours always get different drawings
+  const icon = (c * 7 + r * 11 + Math.floor(rand(k) * 5)) % ICONS.length;
+  const x = c * CELL_W + (r % 2 ? CELL_W / 2 : 0) + (rand(k + 1) - 0.5) * 34;
+  const y = r * CELL_H + (rand(k + 2) - 0.5) * 30;
+  const turn = (rand(k + 3) - 0.5) * 40;
+  const size = 0.62 + rand(k + 4) * 0.3;
+  return { k, icon, x, y, turn, size };
+});
+
+function Scatter() {
   return (
     <>
-      {/* spiral notebook: talk notes */}
-      <rect x="120" y="90" width="290" height="370" rx="10" />
-      <rect x="146" y="108" width="246" height="334" rx="4" />
-      {range(8).map((i) => (
-        <g key={`r${i}`}>
-          <circle cx="120" cy={130 + i * 42} r="13" />
-          <path d={`M120 ${130 + i * 42} h-24`} />
+      {SPOTS.map((s) => (
+        <g key={s.k} transform={`translate(${s.x} ${s.y}) rotate(${s.turn} 50 50) scale(${s.size})`}>
+          {ICONS[s.icon]}
         </g>
-      ))}
-      <rect x="182" y="140" width="170" height="38" />
-      {range(7).map((i) => (
-        <path key={`h${i}`} d={`M${190 + i * 22} 174 l18 -30`} />
-      ))}
-      {range(6).map((i) => (
-        <path key={`l${i}`} d={`M176 ${222 + i * 34} h ${i % 2 ? 150 : 190}`} />
-      ))}
-
-      {/* stage screen with slides */}
-      <rect x="520" y="30" width="480" height="290" rx="10" />
-      <rect x="544" y="52" width="432" height="246" rx="4" />
-      <path d="M760 320 v40 M700 372 h120" />
-      <path d="M580 96 h220 M580 132 h150" />
-      <path d="M590 270 l70 -60 50 34 80 -86 60 54" />
-      <circle cx="900" cy="120" r="34" />
-      <path d="M900 86 v34 h34" />
-
-      {/* microphone on a stand */}
-      <rect x="1110" y="40" width="64" height="104" rx="32" />
-      {range(4).map((i) => (
-        <path key={`m${i}`} d={`M1114 ${66 + i * 18} h56`} />
-      ))}
-      <path d="M1090 110 a52 52 0 0 0 104 0 M1142 162 v130 M1096 292 h92" />
-
-      {/* camera */}
-      <rect x="1250" y="200" width="230" height="150" rx="16" />
-      <circle cx="1365" cy="275" r="52" />
-      <circle cx="1365" cy="275" r="30" />
-      <rect x="1290" y="180" width="70" height="22" rx="6" />
-      <circle cx="1450" cy="226" r="8" />
-
-      {/* conference badge on a lanyard */}
-      <path d="M190 520 L260 600 M330 520 L260 600" />
-      <rect x="196" y="600" width="128" height="170" rx="12" />
-      <rect x="232" y="612" width="56" height="10" rx="5" />
-      <circle cx="260" cy="670" r="26" />
-      <path d="M220 724 h80 M232 746 h56" />
-
-      {/* terminal */}
-      <rect x="430" y="440" width="420" height="250" rx="12" />
-      <path d="M430 482 h420" />
-      {[456, 478, 500].map((x) => (
-        <circle key={x} cx={x} cy="461" r="7" />
-      ))}
-      <path d="M462 520 l20 16 -20 16 M500 552 h70" />
-      <path d="M462 590 l20 16 -20 16 M500 622 h150" />
-      <rect x="664" y="608" width="14" height="28" />
-
-      {/* docs page */}
-      <path d="M900 420 h200 l50 50 v250 h-250 z M1100 420 v50 h50" />
-      <path d="M930 470 h120 M930 512 h180 M930 544 h160 M930 576 h180" />
-      <rect x="930" y="606" width="180" height="80" rx="6" />
-      <path d="M950 632 h90 M950 658 h120" />
-
-      {/* pull request */}
-      <circle cx="1270" cy="470" r="18" />
-      <circle cx="1270" cy="640" r="18" />
-      <circle cx="1400" cy="640" r="18" />
-      <path d="M1270 488 v134 M1400 622 v-90 a40 40 0 0 0 -40 -40 h-50 M1330 470 l-20 22 20 22" />
-
-      {/* github stars */}
-      {[[1490, 470, 30], [1540, 560, 20], [1470, 700, 24]].map(([x, y, r]) => (
-        <path
-          key={`s${x}`}
-          d={`M${x} ${y - r} l${r * 0.29} ${r * 0.6} ${r * 0.66} ${r * 0.09} -${r * 0.48} ${r * 0.46} ${r * 0.12} ${r * 0.66} -${r * 0.59} -${r * 0.31} -${r * 0.59} ${r * 0.31} ${r * 0.12} -${r * 0.66} -${r * 0.48} -${r * 0.46} ${r * 0.66} -${r * 0.09} z`}
-        />
-      ))}
-
-      {/* laptop, lower middle */}
-      <rect x="560" y="760" width="380" height="200" rx="12" />
-      <rect x="582" y="780" width="336" height="160" rx="4" />
-      <path d="M530 970 h440" />
-      <path d="M700 830 l-24 24 24 24 M800 830 l24 24 -24 24 M766 822 l-32 64" />
-
-      {/* speech bubbles: questions from the room */}
-      <path d="M1030 790 h170 a20 20 0 0 1 20 20 v60 a20 20 0 0 1 -20 20 h-120 l-30 30 v-30 h-20 a20 20 0 0 1 -20 -20 v-60 a20 20 0 0 1 20 -20 z" />
-      <path d="M1050 830 h120 M1050 856 h80" />
-      <path d="M1290 780 h120 a18 18 0 0 1 18 18 v44 a18 18 0 0 1 -18 18 h-16 v24 l-24 -24 h-80 a18 18 0 0 1 -18 -18 v-44 a18 18 0 0 1 18 -18 z" />
-      <path d="M1330 812 h50" />
-
-      {/* hackathon trophy */}
-      <path d="M0 820 h100 v30 a50 50 0 0 1 -100 0 z M0 836 h-22 a22 22 0 0 0 22 30 M100 836 h22 a22 22 0 0 1 -22 30 M50 900 v30 M20 930 h60 v20 h-60 z" />
-
-      {/* headphones */}
-      <path d="M1500 120 v-30 a70 70 0 0 1 140 0 v30" />
-      <rect x="1486" y="104" width="30" height="56" rx="10" />
-      <rect x="1624" y="104" width="30" height="56" rx="10" />
-
-      {/* coffee, from above */}
-      <circle cx="460" cy="850" r="44" />
-      <circle cx="460" cy="850" r="32" />
-      <path d="M504 840 h20 a16 16 0 0 1 0 32 h-20" />
-      <path d="M440 846 c6 -8 16 -8 22 0 s16 8 22 0" />
-
-      {/* a </> sticker */}
-      <circle cx="465" cy="385" r="42" />
-      <path d="M448 370 l-14 15 14 15 M482 370 l14 15 -14 15 M470 364 l-10 42" />
-
-      {/* pizza slice: hackathon night */}
-      <path d="M1500 860 l120 -30 -40 120 z M1520 868 a90 90 0 0 0 76 -24" />
-      <circle cx="1556" cy="880" r="8" />
-      <circle cx="1580" cy="908" r="6" />
-
-      {/* a video player */}
-      <rect x="-190" y="250" width="240" height="150" rx="10" />
-      <path d="M-90 300 l40 25 -40 25 z M-170 380 h200" />
-      <circle cx="-110" cy="380" r="6" />
-
-      {/* a chat window */}
-      <rect x="1560" y="440" width="220" height="230" rx="12" />
-      <path d="M1560 476 h220" />
-      {[0, 1, 2].map((i) => (
-        <g key={`ch${i}`}>
-          <circle cx="1592" cy={512 + i * 52} r="12" />
-          <path d={`M1614 ${506 + i * 52} h${100 - i * 20} M1614 ${522 + i * 52} h${60 + i * 10}`} />
-        </g>
-      ))}
-
-      {/* circuit traces between things */}
-      <path d="M410 280 h60 v-150 h50" />
-      <path d="M1000 180 h60 v-60 h50" />
-      <path d="M1142 292 v60 h108" />
-      <path d="M324 690 h106" />
-      <path d="M850 560 h50" />
-      <path d="M1150 600 h70 v40 h32" />
-      <path d="M940 860 h90" />
-      {[[470, 280], [1060, 180], [1142, 352], [380, 690], [875, 560], [1220, 600], [985, 860]].map(([x, y]) => (
-        <circle key={`n${x}`} cx={x} cy={y} r="6" />
       ))}
     </>
   );
 }
 
-/** The whole desk, repeated small across the area as one tilted pattern. */
 export function SketchDesk({ className }: { className?: string }) {
   const reduce = !!useReducedMotion();
   const id = useId().replace(/:/g, "");
   return (
     <motion.svg
       aria-hidden
+      viewBox="0 0 1600 1000"
+      preserveAspectRatio="xMidYMid slice"
       className={cn("pointer-events-none", className)}
-      initial={reduce ? false : { opacity: 0, scale: 1.03 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 1.8, ease: EASE }}
+      initial={reduce ? false : { opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 1.6, ease: EASE }}
     >
       <defs>
-        <pattern
-          id={`desk-${id}`}
-          patternUnits="userSpaceOnUse"
-          x="-200"
-          y="-60"
-          width="2000"
-          height="1080"
-          patternTransform="rotate(-10) scale(0.36)"
-        >
-          <g fill="none" stroke="#ef5a2c" strokeLinecap="round" strokeLinejoin="round">
-            <g strokeWidth="4.6" strokeOpacity="0.6">
-              <Desk />
-            </g>
-            {/* the second, lighter pass, a hair off: the sketch's double line */}
-            <g strokeWidth="2.4" strokeOpacity="0.35" transform="translate(5 4)">
-              <Desk />
-            </g>
-          </g>
-        </pattern>
-        <filter id={`pencil-${id}`}>
-          <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="2" seed="7" />
-          <feDisplacementMap in="SourceGraphic" scale="2.2" />
+        <filter id={`pencil-${id}`} x="-2%" y="-2%" width="104%" height="104%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="7" />
+          <feDisplacementMap in="SourceGraphic" scale="2.4" />
         </filter>
       </defs>
-      <motion.rect
-        x="-5%"
-        y="-5%"
-        width="110%"
-        height="110%"
-        fill={`url(#desk-${id})`}
-        filter={`url(#pencil-${id})`}
-        animate={reduce ? undefined : { y: ["-5%", "-3%", "-5%"] }}
-        transition={{ duration: 16, ease: "easeInOut", repeat: Infinity }}
-      />
+      <g filter={`url(#pencil-${id})`} fill="none" stroke="#ef5a2c" strokeLinecap="round" strokeLinejoin="round">
+        <g strokeWidth="2.6" strokeOpacity="0.6">
+          <Scatter />
+        </g>
+        {/* the second, lighter pass, a hair off: the sketch's double line */}
+        <g strokeWidth="1.3" strokeOpacity="0.32" transform="translate(2 1.5)">
+          <Scatter />
+        </g>
+      </g>
     </motion.svg>
   );
 }
