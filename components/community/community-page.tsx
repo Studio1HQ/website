@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { AnimatePresence, animate, motion, useInView, useReducedMotion } from "motion/react";
+import { useRef } from "react";
+import { motion, useInView, useReducedMotion } from "motion/react";
 import {
   ArrowUpRight,
   Broadcast,
@@ -12,20 +12,18 @@ import {
   type Icon,
 } from "@phosphor-icons/react";
 import { Container, EASE } from "@/components/home/ui";
-import { PaperPageHeader } from "@/components/paper/paper-page-header";
 import { IndexBar, PaperSection } from "@/components/paper/paper-sections";
-import { DotArt } from "@/components/community/dot-art";
-import { ImpactArt, type ImpactKind } from "@/components/community/impact-art";
-import { LumaLogo } from "@/components/community/luma-logo";
+import { FaceWall } from "@/components/community/face-wall";
 import { Landmark, Skyline } from "@/components/community/landmarks";
 import { CommunityBento, TogetherSpread, TogetherWeBuild } from "@/components/community/community-sections";
 import { RegistrationBar, UpcomingEvents } from "@/components/community/upcoming";
 import { PartnerWall } from "@/components/community/partner-wall";
-import { DISCORD_URL, JoinCommunity } from "@/components/community/join";
+import { JoinCommunity } from "@/components/community/join";
+import { CommunityHero } from "@/components/community/hero";
+import { WaysIn } from "@/components/community/ways-in";
 import type { CommunityData, CommunityKind } from "@/lib/community";
-import { GRAIN, PAPER_SCOPE, PRINT } from "@/lib/paper";
+import { PAPER_SCOPE, PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
-import { DiscordIcon } from "@/components/community/discord-icon";
 
 const KIND: Record<CommunityKind, { label: string; icon: Icon }> = {
   meetup: { label: "Meetup", icon: UsersThree },
@@ -36,7 +34,6 @@ const KIND: Record<CommunityKind, { label: string; icon: Icon }> = {
 };
 
 const CONTACT = "mailto:contact@studio1hq.com";
-const LUMA_URL = "https://luma.com/studio1";
 const HOST = `${CONTACT}?subject=${encodeURIComponent("Host a Studio1 meetup")}`;
 const PARTNER = `${CONTACT}?subject=${encodeURIComponent("Partner on a Studio1 hackathon")}`;
 
@@ -56,34 +53,6 @@ function rise(reduce: boolean, delay = 0) {
   } as const;
 }
 
-/**
- * Counts up to a number when it scrolls into view. The real number is in
- * the server HTML; it is set to 0 before the first paint and counted up.
- */
-function Count({ to }: { to: number }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const seen = useInView(ref, { once: true, margin: "-60px" });
-  const reduce = !!useReducedMotion();
-  useLayoutEffect(() => {
-    if (!reduce && ref.current) ref.current.textContent = "0";
-  }, [reduce]);
-  useEffect(() => {
-    if (!seen || reduce) return;
-    const controls = animate(0, to, {
-      duration: 1.6,
-      ease: EASE,
-      onUpdate: (v) => {
-        if (ref.current) ref.current.textContent = String(Math.round(v));
-      },
-    });
-    return () => controls.stop();
-  }, [seen, reduce, to]);
-  return (
-    <span ref={ref} className="tabular-nums">
-      {to}
-    </span>
-  );
-}
 
 const pill =
   "inline-flex h-10 items-center gap-1.5 rounded-full bg-white px-4 text-[13.5px] font-medium ring-1 ring-inset ring-[#141414]/15 transition-colors hover:bg-[#141414] hover:text-white";
@@ -96,68 +65,32 @@ function YourCity({ cities }: { cities: string[] }) {
   return (
     <PaperSection tone="paper" className="!pt-4">
       <Container>
-        <motion.div {...rise(reduce)} ref={ref} className="relative isolate overflow-hidden rounded-[8px] bg-[#141414] text-white">
-          <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 opacity-[0.07]" style={{ backgroundImage: GRAIN }} />
-          <div className="relative flex flex-col items-center px-6 pb-10 pt-14 text-center md:pt-20">
-            <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-white/50">Your city, next</p>
-            <h2 className="mt-4 max-w-[720px] text-[38px] font-medium leading-[1.02] tracking-[-0.045em] md:text-[60px]">
+        <motion.div {...rise(reduce)} ref={ref} className="relative isolate overflow-hidden rounded-[8px] bg-white/80 ring-1 ring-inset ring-[#141414]/10">
+          <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 [background-image:radial-gradient(rgba(20,20,20,0.12)_1px,transparent_1.2px)] [background-size:22px_22px] [mask-image:radial-gradient(ellipse_60%_70%_at_50%_40%,transparent_30%,black_90%)]" />
+          <div className="relative flex flex-col items-center px-6 pb-12 pt-14 text-center md:pb-14 md:pt-20">
+            <h2 className="max-w-[720px] text-balance text-[36px] font-medium leading-[1.04] tracking-[-0.045em] md:text-[56px]">
               Bring Studio1 to <span style={{ color: PRINT }}>your city</span>
             </h2>
-            <p className="mt-5 max-w-[520px] text-[16px] leading-[1.6] text-white/65">
+            <p className="mt-5 max-w-[500px] text-[16px] leading-[1.6] text-[#141414]/60 md:text-[17px]">
               Run a college club, a community or a devtool company? Host a meetup with us, or partner on a hackathon.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-2">
-              <a href={HOST} className="inline-flex h-12 items-center gap-3 rounded-full bg-white py-1.5 pl-5 pr-1.5 text-[14px] font-medium text-[#141414]">
-                Host a meetup
-                <span className="flex size-9 items-center justify-center rounded-full text-white" style={{ background: PRINT }}>
-                  <ArrowUpRight weight="bold" className="size-4" />
-                </span>
+              <a href={HOST} className="inline-flex h-12 items-center gap-2 rounded-full bg-[#141414] px-6 text-[14.5px] font-medium text-white transition-colors hover:bg-[#f97316]">
+                Host a meetup <ArrowUpRight weight="bold" className="size-4" />
               </a>
-              <a href={PARTNER} className="inline-flex h-12 items-center rounded-full px-5 text-[14px] font-medium ring-1 ring-inset ring-white/35 transition-colors hover:bg-white/10">
+              <a href={PARTNER} className="inline-flex h-12 items-center rounded-full bg-white px-6 text-[14.5px] font-medium ring-1 ring-inset ring-[#141414]/15 transition-colors hover:bg-[#f4efe7]">
                 Partner on a hackathon
               </a>
             </div>
           </div>
-          {/* Skyline: every city we have been to, drawn in, standing on the bottom edge */}
-          <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-56 [background:radial-gradient(ellipse_60%_100%_at_50%_100%,rgba(249,115,22,0.35),transparent_70%)]" />
-          <div className={cn("s1-skyline relative px-3 md:px-6", (drawn || reduce) && "is-drawn")} style={{ color: "#fbd2b0" }}>
+          {/* the cities we've been to, in ink, standing on the bottom edge */}
+          <div className={cn("s1-skyline relative px-4 md:px-10", (drawn || reduce) && "is-drawn")} style={{ color: "rgba(20,20,20,0.55)" }}>
             <Skyline cities={cities.slice(0, 9)} />
           </div>
+          <span aria-hidden className="block h-px bg-[#141414]/20" />
         </motion.div>
       </Container>
     </PaperSection>
-  );
-}
-
-const WORDS = ["show up", "build", "ship", "learn", "hack"];
-
-/** The verb in the headline, turning over every few seconds. */
-function RotatingWord() {
-  const reduce = !!useReducedMotion();
-  const [i, setI] = useState(0);
-  useEffect(() => {
-    if (reduce) return;
-    const id = window.setInterval(() => setI((v) => (v + 1) % WORDS.length), 2600);
-    return () => window.clearInterval(id);
-  }, [reduce]);
-  return (
-    <span className="relative inline-flex overflow-hidden whitespace-nowrap pb-[0.08em] align-bottom">
-      <span className="sr-only">{WORDS[0]}</span>
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.span
-          key={WORDS[i]}
-          aria-hidden
-          className="inline-block"
-          style={{ color: PRINT }}
-          initial={{ y: "70%", opacity: 0, filter: "blur(6px)" }}
-          animate={{ y: "0%", opacity: 1, filter: "blur(0px)" }}
-          exit={{ y: "-70%", opacity: 0, filter: "blur(6px)" }}
-          transition={{ duration: 0.45, ease: EASE }}
-        >
-          {WORDS[i]}
-        </motion.span>
-      </AnimatePresence>
-    </span>
   );
 }
 
@@ -168,78 +101,14 @@ export function CommunityPage({ data }: { data: CommunityData }) {
   const byId = new Map(all.map((e) => [e.id, e]));
   // The soonest event taking registrations, for the pill along the bottom
   const registering = upcoming.find((e) => e.cta === "Register" && e.href) ?? upcoming.find((e) => e.href) ?? null;
-  const stats: [number, string, string][] = [
-    [totals.events, "Events", "Run, spoken at or joined"],
-    [totals.cities, "Cities", "Where we've shown up in person"],
-    [totals.meetups, "Meetups", "Evening talks and demos"],
-    [totals.hackathons, "Hackathons", "Build weekends with tool teams"],
-  ];
   const hackathons = upcoming.filter((e) => e.kind === "hackathon").slice(0, 4);
   const meetups = upcoming.filter((e) => e.kind !== "hackathon").slice(0, 4);
 
   return (
     <div style={PAPER_SCOPE}>
-      {/* Hero: the community, in dots */}
-      <PaperPageHeader className="pb-12 pt-28 md:pb-16 md:pt-36">
-        <Container>
-          <DotArt src="/assets/community/hand-in-hand.png" alt="Five people walking hand in hand" className="w-full" />
+      <CommunityHero totals={totals} />
 
-          <div className="mt-12 flex flex-col gap-8 md:mt-16 lg:flex-row lg:items-end lg:justify-between">
-            <motion.div
-              initial={reduce ? false : { opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, ease: EASE, delay: 0.45 }}
-            >
-              <h1 className="text-balance text-[36px] font-medium leading-[1.05] tracking-[-0.045em] sm:text-[44px] lg:whitespace-nowrap lg:text-[44px] xl:text-[52px]">
-                Together, developers who <RotatingWord />
-              </h1>
-              <p className="mt-4 max-w-[520px] text-[16px] leading-[1.6] text-[#141414]/60 md:text-[17px]">
-                Meetups, hackathons and the people who build at them. Find one near you, or bring one to your city.
-              </p>
-            </motion.div>
-            <div className="flex shrink-0 flex-wrap gap-2 md:pb-1">
-              <motion.a initial={reduce ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: EASE, delay: 0.7 }} href={DISCORD_URL} target="_blank" rel="noopener noreferrer" className="inline-flex h-12 items-center gap-2 rounded-full bg-[#141414] px-6 text-[14.5px] font-medium text-white transition-colors hover:bg-[#f97316]">
-                <DiscordIcon className="size-4" /> Join the Discord
-              </motion.a>
-              <motion.a initial={reduce ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: EASE, delay: 0.82 }} href={LUMA_URL} target="_blank" rel="noopener noreferrer" className="inline-flex h-12 items-center gap-2 rounded-full bg-white/70 px-6 text-[14.5px] font-medium ring-1 ring-inset ring-[#141414]/15 transition-colors hover:bg-white">
-                Follow on <LumaLogo className="h-[15px] w-auto translate-y-[1px]" />
-              </motion.a>
-            </div>
-          </div>
-
-        </Container>
-      </PaperPageHeader>
-
-      {/* 01 Impact: the numbers */}
-      <PaperSection tone="paper">
-        <Container>
-          <IndexBar index={1} name="Impact" />
-          <motion.h2 {...rise(reduce)} className="mt-6 max-w-[680px] text-[34px] font-medium leading-[1.05] tracking-[-0.045em] md:text-[48px]">
-            Where ideas meet <span style={{ color: PRINT }}>the people who build them</span>
-          </motion.h2>
-          <dl className="mt-10 grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
-            {stats.map(([value, label, line], i) => (
-              <motion.div
-                key={label}
-                {...rise(reduce, 0.06 + i * 0.08)}
-                className="group flex min-w-0 flex-col justify-between gap-8 rounded-[6px] bg-white/80 p-5 ring-1 ring-inset ring-[#141414]/10 transition-[background-color,box-shadow] duration-500 hover:bg-white hover:shadow-[0_18px_34px_-26px_rgba(20,20,20,0.45)] md:p-7"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <dt className="text-[12px] font-medium uppercase tracking-[0.16em] text-[#141414]/45">{label}</dt>
-                  <ImpactArt kind={label.toLowerCase() as ImpactKind} className="-mr-1 -mt-1 size-20 shrink-0 md:size-24" />
-                </div>
-                <dd>
-                  <span className="block text-[48px] font-medium leading-none tracking-[-0.06em] md:text-[64px]">
-                    <Count to={value} />
-                    <span style={{ color: PRINT }}>+</span>
-                  </span>
-                  <span className="mt-3 block text-[14px] leading-[1.5] text-[#141414]/55">{line}</span>
-                </dd>
-              </motion.div>
-            ))}
-          </dl>
-        </Container>
-      </PaperSection>
+      <WaysIn data={data} index={1} />
 
       {/* 02 Hackathons */}
       <PaperSection id="up-next" tone="paper" className="scroll-mt-24">
@@ -327,7 +196,10 @@ export function CommunityPage({ data }: { data: CommunityData }) {
 
       <PartnerWall index={cities.length ? 7 : 6} />
 
-      <JoinCommunity index={cities.length ? 8 : 7} />
+      <FaceWall events={totals.events} />
+
+      <JoinCommunity />
+
 
       <YourCity cities={cities.map((c) => c.city)} />
 

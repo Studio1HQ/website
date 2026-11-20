@@ -108,7 +108,7 @@ export function ResultsPanel({
       </motion.div>
 
       {rest.length ? (
-        <motion.dl className="mt-auto grid grid-cols-2 gap-2" {...rise(0.55)}>
+        <motion.dl className="mt-auto grid grid-cols-[repeat(2,minmax(0,1fr))] gap-2" {...rise(0.55)}>
           {rest.map((metric) => (
             <div
               key={metric.label}
@@ -117,7 +117,7 @@ export function ResultsPanel({
               <dt className="mt-2 text-[12px] leading-snug text-white/80">
                 {metric.label}
               </dt>
-              <dd className="text-[19px] font-medium leading-[1.05] tracking-[-0.035em] 2xl:text-[24px]">
+              <dd className="min-w-0 hyphens-auto break-words text-[19px] font-medium leading-[1.05] tracking-[-0.035em] [overflow-wrap:anywhere] 2xl:text-[clamp(19px,1.25vw,24px)]">
                 <CountUp value={metric.value} />
               </dd>
             </div>
