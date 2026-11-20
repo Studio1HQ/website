@@ -137,6 +137,18 @@ describe("the access grid", () => {
     }
   });
 
+  it("opens the DevRel jobs board with its own role or Admin, and nothing else with it", () => {
+    expect(areaAccess(["job_board_editor"], "jobboard")).toBe("manage");
+    expect(areaAccess(["admin"], "jobboard")).toBe("manage");
+    expect(areaAccess(["community_manager"], "jobboard")).toBeNull();
+    for (const other of AREA_KEYS) if (other !== "jobboard") expect(areaAccess(["job_board_editor"], other)).toBeNull();
+    expect(gridFromRoles(["job_board_editor"])).toEqual({ ...EMPTY_GRID, jobboard: "manage" });
+    expect(rolesFromGrid({ ...EMPTY_GRID, community: "manage", jobboard: "manage" }, false)).toEqual([
+      "community_manager",
+      "job_board_editor",
+    ]);
+  });
+
   it("gives the founders every area", () => {
     for (const area of AREA_KEYS) expect(areaAccess(OWNER_ROLES, area)).toBe(AREAS[area].levels.at(-1)?.level);
   });
@@ -177,7 +189,7 @@ describe("the access grid", () => {
   it("holds outside addresses to Blog: own work", () => {
     const outside = "writer@example.com";
     expect(allowedLevels(outside, "blog")).toEqual(["own"]);
-    for (const area of ["hiring", "community", "clients", "outreach", "influencers", "socials"] as const) {
+    for (const area of ["hiring", "community", "clients", "outreach", "influencers", "socials", "jobboard"] as const) {
       expect(allowedLevels(outside, area)).toEqual([]);
     }
     expect(allowedLevels("someone@studio1hq.com", "hiring")).toEqual(["view", "manage"]);
@@ -190,6 +202,7 @@ describe("the access grid", () => {
       outreach: "manage",
       influencers: "manage",
       socials: "manage",
+      jobboard: "manage",
     };
     const clean = cleanRoles(outside, rolesFromGrid(everything, true));
     expect(clean).toEqual(["blog_writer"]);

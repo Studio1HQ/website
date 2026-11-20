@@ -27,13 +27,13 @@ describe("where each person's dashboard starts", () => {
   it("gives the founders the overview with every area, Money included", () => {
     const founder = staff({ email: "arindam@studio1hq.com", status: "owner", roles: ["admin"], role: "admin", blog: "reviewer", community: "manager", clients: "manager" });
     expect(homeFor(founder)).toBe("/");
-    expect(areasFor(founder)).toEqual(["hiring", "blog", "community", "clients", "team", "money"]);
+    expect(areasFor(founder)).toEqual(["hiring", "blog", "community", "clients", "jobboard", "team", "money"]);
   });
 
   it("keeps Money from an admin who isn't a founder", () => {
     const admin = staff({ roles: ["admin"], role: "admin", blog: "reviewer", community: "manager", clients: "manager" });
     expect(homeFor(admin)).toBe("/");
-    expect(areasFor(admin)).toEqual(["hiring", "blog", "community", "clients", "team"]);
+    expect(areasFor(admin)).toEqual(["hiring", "blog", "community", "clients", "jobboard", "team"]);
     // The status alone isn't enough either: it has to be a founder's address.
     expect(areasFor(staff({ status: "owner", roles: ["admin"], role: "admin" }))).not.toContain("money");
   });
@@ -43,6 +43,7 @@ describe("where each person's dashboard starts", () => {
     expect(homeFor(staff({ roles: ["blog_writer"], blog: "writer" }))).toBe("/blog");
     expect(homeFor(staff({ roles: ["client_manager"], clients: "manager" }))).toBe("/clients");
     expect(homeFor(staff({ roles: ["client_member"], clients: "member" }))).toBe("/clients");
+    expect(homeFor(staff({ roles: ["job_board_editor"] }))).toBe("/job-board");
     expect(homeFor(staff({ person }))).toBe("/me");
     expect(homeFor(staff({ interns: ["i@studio1hq.com"] }))).toBe("/people");
   });

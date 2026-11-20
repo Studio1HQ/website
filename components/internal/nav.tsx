@@ -29,6 +29,7 @@ import {
   ShareNetwork,
   SlidersHorizontal,
   SquaresFour,
+  SuitcaseSimple,
   Trophy,
   UserSound,
   UsersThree,
@@ -236,6 +237,7 @@ export function InternalNav({
   outreach = null,
   influencers = false,
   socials = false,
+  jobBoard = false,
   home,
   overview,
 }: {
@@ -257,6 +259,8 @@ export function InternalNav({
   influencers?: boolean;
   /** Social growth: given one by one, like Outreach. */
   socials?: boolean;
+  /** The public DevRel jobs board's listings: given on People, or Admin. */
+  jobBoard?: boolean;
   /** Where this person's dashboard starts; the sections link back to it. */
   home: string;
   /** Show the Overview link: everyone whose home is the Overview. */
@@ -501,7 +505,7 @@ export function InternalNav({
           active={isActive("/")}
         />
       ) : null}
-      {clients || blog || community || team.money || outreach || influencers || socials ? (
+      {clients || blog || community || team.money || outreach || influencers || socials || jobBoard ? (
         <NavGroup title="Workspaces">
           {clients ? (
             <NavLink
@@ -542,6 +546,14 @@ export function InternalNav({
               label="Social growth"
               icon={ChartLineUp}
               active={isActive("/socials")}
+            />
+          ) : null}
+          {jobBoard ? (
+            <NavLink
+              href="/job-board"
+              label="DevRel jobs"
+              icon={SuitcaseSimple}
+              active={isActive("/job-board")}
             />
           ) : null}
           {blog ? (

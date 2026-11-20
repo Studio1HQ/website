@@ -18,6 +18,7 @@ import { awaitingCounts } from "@/lib/internal/data";
 import { pendingCount } from "@/lib/internal/members";
 import { isStaffEmail, rolesLabel } from "@/lib/internal/roles";
 import {
+  canEditJobBoard,
   canSeeInfluencers,
   canSeeMoney,
   canSeeOutreach,
@@ -95,6 +96,7 @@ function Sidebar({ staff, counts }: { staff: Staff; counts: Counts }) {
       outreach={canSeeOutreach(staff) ? { due: counts.outreach } : null}
       influencers={canSeeInfluencers(staff)}
       socials={canSeeSocials(staff)}
+      jobBoard={canEditJobBoard(staff)}
       home={home}
       overview={home === "/"}
     />

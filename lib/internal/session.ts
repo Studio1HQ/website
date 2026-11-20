@@ -147,6 +147,14 @@ export function canSeeSocials(staff: Pick<Staff, "roles">) {
   return can(staff.roles, "socials", "manage");
 }
 
+/**
+ * The public DevRel jobs board (studio1hq.com/devrel-jobs): people given
+ * DevRel jobs on People, and admins.
+ */
+export function canEditJobBoard(staff: Pick<Staff, "roles">) {
+  return can(staff.roles, "jobboard", "manage");
+}
+
 /** True when someone has any way in: a role, the team list or interns to log. */
 export function hasAccess(staff: Staff) {
   return staff.roles.length > 0 || staff.person !== null || staff.interns.length > 0;
@@ -190,8 +198,18 @@ export const getStaff = cache(async (): Promise<Staff | null> => {
 
 /** The dashboard areas someone can open, in sidebar order. */
 export function areasFor(staff: Staff) {
-  const areas: ("hiring" | "blog" | "community" | "clients" | "outreach" | "influencers" | "socials" | "team" | "money")[] =
-    [];
+  const areas: (
+    | "hiring"
+    | "blog"
+    | "community"
+    | "clients"
+    | "outreach"
+    | "influencers"
+    | "socials"
+    | "jobboard"
+    | "team"
+    | "money"
+  )[] = [];
   if (staff.role) areas.push("hiring");
   if (staff.blog) areas.push("blog");
   if (staff.community) areas.push("community");
@@ -199,6 +217,7 @@ export function areasFor(staff: Staff) {
   if (canSeeOutreach(staff)) areas.push("outreach");
   if (canSeeInfluencers(staff)) areas.push("influencers");
   if (canSeeSocials(staff)) areas.push("socials");
+  if (canEditJobBoard(staff)) areas.push("jobboard");
   if (staff.person || staff.interns.length || isAdmin(staff) || can(staff.roles, "tasks", "view")) areas.push("team");
   if (canSeeMoney(staff)) areas.push("money");
   return areas;
@@ -220,6 +239,7 @@ export function homeFor(staff: Staff) {
   if (canSeeOutreach(staff)) return "/outreach";
   if (canSeeInfluencers(staff)) return "/influencers";
   if (canSeeSocials(staff)) return "/socials";
+  if (canEditJobBoard(staff)) return "/job-board";
   if (staff.person) return "/me";
   if (staff.interns.length) return "/people";
   if (can(staff.roles, "tasks", "view")) return "/tasks";
@@ -253,6 +273,7 @@ const DENIED: Record<AreaKey, string> = {
   outreach: "/?denied=1",
   influencers: "/?denied=1",
   socials: "/?denied=1",
+  jobboard: "/?denied=1",
 };
 
 /**
