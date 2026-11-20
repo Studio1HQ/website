@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { motion, useReducedMotion } from "motion/react";
-import { ArrowUpRight } from "@phosphor-icons/react";
 import Logo from "@/components/ui/svgs/logo";
 import { Container, EASE } from "@/components/home/ui";
 import { Cursor, PrintBlock, SelectionFrame } from "@/components/paper/paper-hero";
@@ -26,6 +25,53 @@ const STRIP = [
 ].map((p) => "/assets/events/" + p + ".webp");
 
 type Totals = { events: number; cities: number; meetups: number; hackathons: number };
+
+/** A pushpin, seen a little from above. */
+function Pin({ color }: { color: string }) {
+  return (
+    <svg viewBox="0 0 28 28" className="absolute -top-3 left-1/2 z-10 size-7 -translate-x-1/2 drop-shadow-[0_3px_2px_rgba(20,20,20,0.35)]">
+      <circle cx="14" cy="12" r="9" fill={color} />
+      <circle cx="11" cy="9" r="3" fill="white" opacity="0.55" />
+      <path d="M14 21 v6" stroke="#6b6b6b" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/** A print pinned to the board: white border, caption underneath, a pin on top. */
+function Pinned({
+  src,
+  caption,
+  pin,
+  tilt,
+  className,
+  delay,
+  reduce,
+}: {
+  src: string;
+  caption: string;
+  pin: string;
+  tilt: number;
+  className: string;
+  delay: number;
+  reduce: boolean;
+}) {
+  return (
+    <motion.figure
+      className={`absolute bg-white p-1.5 pb-0 shadow-[0_18px_30px_-18px_rgba(20,20,20,0.55)] ring-1 ring-[#141414]/[0.05] ${className}`}
+      style={{ rotate: tilt }}
+      initial={reduce ? false : { opacity: 0, y: -16, rotate: tilt * 2, filter: "blur(6px)" }}
+      animate={{ opacity: 1, y: 0, rotate: tilt, filter: "blur(0px)" }}
+      transition={{ duration: 1, ease: EASE, delay }}
+    >
+      <Pin color={pin} />
+      <div className="relative aspect-[4/3] overflow-hidden bg-[#e6e1d9]">
+        <Image src={src} alt="" fill sizes="190px" className="object-cover" />
+        <span className="absolute inset-0 opacity-20 mix-blend-multiply" style={{ backgroundImage: GRAIN }} />
+      </div>
+      <figcaption className="py-1.5 text-center text-[11px] font-medium tracking-[0.02em] text-[#141414]/60">{caption}</figcaption>
+    </motion.figure>
+  );
+}
 
 export function CommunityHero({ totals }: { totals: Totals }) {
   const reduce = !!useReducedMotion();
@@ -63,44 +109,21 @@ export function CommunityHero({ totals }: { totals: Totals }) {
           <Cursor className="absolute -bottom-8 -right-6" />
         </motion.div>
 
-        {/* Stats card, top right */}
-        <motion.div {...float(0.6)} className="absolute right-[3%] top-[16%] w-[19%] max-w-[290px]">
-          <SelectionFrame label="card-community" className="p-1.5">
-            <div className="bg-white px-4 py-3.5 shadow-[0_1px_0_rgba(27,23,20,0.06)]">
-              <div className="flex items-end justify-between">
-                <div>
-                  <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-[#141414]/55">Events so far</p>
-                  <p className="mt-1 text-[30px] font-medium leading-none tracking-[-0.04em]">
-                    {totals.events}
-                    <span style={{ color: PRINT }}>+</span>
-                  </p>
-                </div>
-                <span className="mb-1 inline-flex items-center gap-1 px-1.5 py-0.5 text-[11px] font-medium text-white" style={{ background: PRINT }}>
-                  <ArrowUpRight weight="bold" className="size-3" />
-                  growing
-                </span>
-              </div>
-              <div className="mt-3 grid grid-cols-3 border-t border-[#141414]/10 pt-3">
-                {(
-                  [
-                    [totals.cities, "Cities"],
-                    [totals.meetups, "Meetups"],
-                    [totals.hackathons, "Hackathons"],
-                  ] as const
-                ).map(([value, label]) => (
-                  <div key={label} className="min-w-0 pr-2">
-                    <p className="text-[17px] font-medium leading-none tracking-[-0.03em]">{value}</p>
-                    <p className="mt-1 truncate text-[10.5px] text-[#141414]/50">{label}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </SelectionFrame>
-          <Cursor className="absolute -bottom-7 left-[22%]" />
-        </motion.div>
+        {/* Mood board, top right: prints pinned up */}
+        <div className="absolute right-[2.5%] top-[12%] h-[330px] w-[340px] 2xl:right-[4%]">
+          <Pinned src="/assets/events/kubecon-india-2025/01.webp" caption="KubeCon India" pin="#ef5a2c" tilt={-5} className="left-0 top-6 w-[150px]" delay={0.5} reduce={reduce} />
+          <Pinned src="/assets/events/hacktropica/01.webp" caption="Hacktropica" pin="#2451d6" tilt={6} className="right-0 top-0 w-[150px]" delay={0.62} reduce={reduce} />
+          <Pinned src="/assets/events/blr-tech-week/01.webp" caption="BLR Tech Week" pin="#17a55b" tilt={-2} className="left-[96px] top-[176px] w-[160px]" delay={0.74} reduce={reduce} />
+        </div>
+
+        {/* Mood board, lower left */}
+        <div className="absolute left-[2.5%] top-[47%] h-[220px] w-[300px] 2xl:left-[4%]">
+          <Pinned src="/assets/events/rejekts-na-2024/01.webp" caption="Rejekts NA" pin="#f6bf1d" tilt={4} className="left-0 top-0 w-[150px]" delay={0.86} reduce={reduce} />
+          <Pinned src="/assets/events/agentsnexus/01.webp" caption="AgentsNexus" pin="#f4a3c4" tilt={-6} className="left-[124px] top-[44px] w-[150px]" delay={0.98} reduce={reduce} />
+        </div>
 
         {/* Block print: the reaching hand, lower right */}
-        <motion.div {...float(0.8)} className="absolute -right-[1%] top-[44%] h-[130px] w-[170px] 2xl:w-[200px]">
+        <motion.div {...float(0.8)} className="absolute -right-[1%] top-[58%] h-[110px] w-[150px] 2xl:w-[180px]">
           <PrintBlock className="size-full">
             <Image src="/assets/site/hand-right.png" alt="" fill sizes="20vw" className="object-contain object-left p-[8%] [filter:brightness(0)_invert(96%)_sepia(8%)]" />
           </PrintBlock>
