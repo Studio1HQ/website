@@ -98,45 +98,65 @@ export function Subscribe({ wide = false, light = false }: { wide?: boolean; lig
  * The newsletter: a wall of photos from our events, and on it one card that
  * asks for an email, with the Discord as the other way in.
  */
-export function JoinCommunity({ hero = false }: { hero?: boolean }) {
-  const reduce = !!useReducedMotion();
-  const Heading = hero ? "h1" : "h2";
+/** One column of the wall, drifting slowly up or down for ever. */
+function Column({ photos, down, speed, reduce }: { photos: string[]; down: boolean; speed: number; reduce: boolean }) {
+  const loop = [...photos, ...photos];
   return (
-    <section id="join" className={cn("relative isolate scroll-mt-24 overflow-hidden bg-[#141414]", hero && "mt-[72px] md:mt-[84px]")}>
-      {/* The wall */}
-      <div aria-hidden className="absolute inset-0 -z-10 grid grid-cols-3 grid-rows-6 md:grid-cols-6 md:grid-rows-3">
-        {WALL.map((src, i) => (
-          <motion.div
-            key={src}
-            className="relative overflow-hidden"
-            initial={reduce ? false : { opacity: 0 }}
-            {...(hero ? { animate: { opacity: 1 } } : { whileInView: { opacity: 1 }, viewport: { once: true, margin: "-60px" } })}
-            transition={{ duration: 1.2, ease: EASE, delay: (i % 6) * 0.06 + Math.floor(i / 6) * 0.1 }}
-          >
+    <div className="relative h-full overflow-hidden">
+      <motion.div
+        className="flex flex-col gap-3"
+        animate={reduce ? undefined : { y: down ? ["-50%", "0%"] : ["0%", "-50%"] }}
+        transition={{ duration: speed, ease: "linear", repeat: Infinity }}
+      >
+        {loop.map((src, i) => (
+          <div key={src + "-" + i} className="relative aspect-[4/5] shrink-0 overflow-hidden rounded-[6px] bg-[#e6e1d9]">
             <Image src={src} alt="" fill sizes="(min-width: 768px) 17vw, 34vw" className="object-cover" />
-          </motion.div>
+          </div>
         ))}
-        <span className="absolute inset-0 bg-[#141414]/35" />
+      </motion.div>
+    </div>
+  );
+}
+
+/**
+ * The newsletter: drifting columns of photos from our events, faded into the
+ * paper above and below, and on them one white card asking for an email.
+ */
+export function JoinCommunity() {
+  const reduce = !!useReducedMotion();
+  const cols = [0, 1, 2, 3, 4, 5].map((c) => WALL.filter((_, i) => i % 6 === c));
+  return (
+    <section id="join" className="relative isolate scroll-mt-24 overflow-hidden py-20 md:py-28">
+      {/* The wall, faded into the page at the top and bottom */}
+      <div
+        aria-hidden
+        className="absolute inset-0 -z-10 grid grid-cols-3 gap-3 px-3 [mask-image:linear-gradient(to_bottom,transparent,black_20%,black_80%,transparent)] md:grid-cols-6"
+      >
+        {cols.map((photos, c) => (
+          <div key={c} className={cn("h-full", c > 2 && "hidden md:block")}>
+            <Column photos={photos} down={c % 2 === 1} speed={60 + c * 7} reduce={reduce} />
+          </div>
+        ))}
       </div>
+      {/* a paper wash, so the card reads */}
+      <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 [background:radial-gradient(ellipse_45%_60%_at_50%_50%,rgba(244,239,231,0.75),rgba(244,239,231,0.15)_80%)]" />
 
-      {/* The card */}
-      <div className={cn("px-4", hero ? "py-14 md:py-20" : "py-20 md:py-28")}>
+      <div className="px-4">
         <motion.div
-          initial={reduce ? false : { opacity: 0, y: 40 }}
-          {...(hero ? { animate: { opacity: 1, y: 0 } } : { whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: "-80px" } })}
-          transition={{ duration: 1.1, ease: EASE, delay: hero ? 0.35 : 0 }}
-          className="mx-auto max-w-[760px] rounded-[14px] bg-[#141414] px-5 py-10 text-center shadow-[0_40px_80px_-30px_rgba(0,0,0,0.7)] sm:px-10 md:px-14 md:py-14"
+          initial={reduce ? false : { opacity: 0, y: 40, filter: "blur(8px)" }}
+          whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 1.1, ease: EASE }}
+          className="mx-auto max-w-[740px] rounded-[10px] bg-[#fbf9f5] px-5 py-10 text-center shadow-[0_40px_80px_-40px_rgba(20,20,20,0.55)] ring-1 ring-inset ring-[#141414]/[0.08] sm:px-10 md:px-14 md:py-14"
         >
-          {hero ? <p className="mb-4 text-[12px] font-medium uppercase tracking-[0.2em] text-white/45">Studio1 Community</p> : null}
-          <Heading className="mx-auto max-w-[560px] text-balance text-[30px] font-medium leading-[1.1] tracking-[-0.04em] text-white md:text-[44px]">
-            Picture a weekend where you <span style={{ color: PRINT }}>built it with us:</span>
-          </Heading>
+          <h2 className="mx-auto max-w-[560px] text-balance text-[30px] font-medium leading-[1.1] tracking-[-0.04em] md:text-[44px]">
+            Picture a weekend where you <span style={{ color: PRINT }}>built it with us</span>
+          </h2>
 
-          <div className="relative mt-9 grid grid-cols-2 gap-1.5 overflow-hidden rounded-[10px]">
+          <div className="relative mt-9 grid grid-cols-2 gap-1.5 overflow-hidden rounded-[8px]">
             {COLLAGE.map(([src, word], i) => (
-              <div key={src} className="relative aspect-[16/10] overflow-hidden">
-                <Image src={src} alt="" fill sizes="(min-width: 768px) 330px, 45vw" className="object-cover" />
-                <span aria-hidden className="absolute inset-0 bg-black/15" />
+              <div key={src} className="group relative aspect-[16/10] overflow-hidden">
+                <Image src={src} alt="" fill sizes="(min-width: 768px) 330px, 45vw" className="object-cover transition-transform duration-[1.4s] ease-out group-hover:scale-[1.06]" />
                 <motion.span
                   className={cn(
                     "absolute rounded-[4px] bg-white px-2.5 py-1 text-[12.5px] font-medium text-[#141414] shadow-[0_8px_18px_-10px_rgba(0,0,0,0.6)]",
@@ -154,23 +174,29 @@ export function JoinCommunity({ hero = false }: { hero?: boolean }) {
                 </motion.span>
               </div>
             ))}
-            {/* A flag across the middle */}
-            <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-6 whitespace-nowrap rounded-[6px] px-4 py-2 text-[18px] font-semibold tracking-[-0.02em] text-white shadow-[0_14px_30px_-12px_rgba(0,0,0,0.7)] md:text-[24px]" style={{ background: PRINT }}>
+            <motion.span
+              initial={reduce ? false : { opacity: 0, scale: 0.7, rotate: -14 }}
+              whileInView={{ opacity: 1, scale: 1, rotate: -6 }}
+              viewport={{ once: true }}
+              transition={{ type: "spring", bounce: 0.35, duration: 0.9, delay: 0.9 }}
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-[6px] px-4 py-2 text-[18px] font-semibold tracking-[-0.02em] text-white shadow-[0_14px_30px_-12px_rgba(0,0,0,0.6)] md:text-[24px]"
+              style={{ background: PRINT }}
+            >
               welcome to Studio1
-            </span>
+            </motion.span>
           </div>
 
           <div className="mt-9">
-            <Subscribe />
+            <Subscribe light />
           </div>
-          <p className="mt-4 text-[13px] text-white/50">
+          <p className="mt-4 text-[13px] text-[#141414]/50">
             One email when a hackathon or meetup opens. Rather chat?{" "}
-            <a href={DISCORD_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-medium text-white underline decoration-white/30 underline-offset-4 transition-colors hover:decoration-[#f97316]">
-              <DiscordIcon className="size-3.5" /> Join the Discord <ArrowUpRight weight="bold" className="size-3" />
+            <a href={DISCORD_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-medium text-[#141414] underline decoration-[#141414]/25 underline-offset-4 transition-colors hover:decoration-[#f97316]">
+              <DiscordIcon className="size-3.5 text-[#5865F2]" /> Join the Discord <ArrowUpRight weight="bold" className="size-3" />
             </a>
-            <span className="mx-2 text-white/25">/</span>
-            <a href={LUMA_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-medium text-white underline decoration-white/30 underline-offset-4 transition-colors hover:decoration-[#f97316]">
-              Follow on <LumaLogo className="h-[12px] w-auto translate-y-[1px]" />
+            <span className="mx-2 text-[#141414]/25">/</span>
+            <a href={LUMA_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-medium text-[#141414] underline decoration-[#141414]/25 underline-offset-4 transition-colors hover:decoration-[#f97316]">
+              Follow on <LumaLogo className="h-[14px] w-auto -translate-y-px" />
             </a>
           </p>
         </motion.div>
