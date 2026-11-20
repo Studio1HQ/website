@@ -106,7 +106,7 @@ export function CommunityPage({ data }: { data: CommunityData }) {
 
   return (
     <div style={PAPER_SCOPE}>
-      <CommunityHero totals={totals} />
+      <CommunityHero totals={totals} next={upcoming} />
 
       <WaysIn data={data} index={1} />
 

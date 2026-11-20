@@ -5,7 +5,8 @@ import { motion, useReducedMotion } from "motion/react";
 import { ArrowUpRight } from "@phosphor-icons/react";
 import Logo from "@/components/ui/svgs/logo";
 import { Container, EASE } from "@/components/home/ui";
-import { Cursor, PrintBlock, SelectionFrame } from "@/components/paper/paper-hero";
+import { Cursor, PrintBlock, SelectionFrame, SWATCHES } from "@/components/paper/paper-hero";
+import type { CommunityItem } from "@/lib/community";
 import { DiscordIcon } from "@/components/community/discord-icon";
 import { DISCORD_URL, LUMA_URL, Subscribe } from "@/components/community/join";
 import { LumaLogo } from "@/components/community/luma-logo";
@@ -27,7 +28,13 @@ const STRIP = [
 
 type Totals = { events: number; cities: number; meetups: number; hackathons: number };
 
-export function CommunityHero({ totals }: { totals: Totals }) {
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const day = (iso: string) => {
+  const [, m, d] = iso.split("-").map(Number);
+  return [MONTHS[m - 1], String(d).padStart(2, "0")] as const;
+};
+
+export function CommunityHero({ totals, next = [] }: { totals: Totals; next?: CommunityItem[] }) {
   const reduce = !!useReducedMotion();
   const enter = (delay: number) =>
     ({
@@ -98,6 +105,51 @@ export function CommunityHero({ totals }: { totals: Totals }) {
           </SelectionFrame>
           <Cursor className="absolute -bottom-7 left-[22%]" />
         </motion.div>
+
+        {/* Palette strip, top left, as a swatch layer */}
+        <motion.div {...float(0.45)} className="absolute left-[13%] top-[11%]">
+          <SelectionFrame label="palette" labelPosition="top-left" className="p-1">
+            <div className="flex">
+              {SWATCHES.map((c) => (
+                <span key={c} className="h-5 w-5 2xl:h-6 2xl:w-6" style={{ background: c }} />
+              ))}
+            </div>
+          </SelectionFrame>
+        </motion.div>
+
+        {/* Up next card, lower left: the real calendar */}
+        {next.length ? (
+          <motion.div {...float(0.75)} className="absolute left-[2.5%] top-[54%] w-[19%] max-w-[290px]">
+            <SelectionFrame label="card-up-next" className="p-1.5">
+              <div className="bg-white px-4 py-3.5 shadow-[0_1px_0_rgba(27,23,20,0.06)]">
+                <div className="flex items-center justify-between">
+                  <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-[#141414]/55">Up next</p>
+                  <span className="text-[11px] font-medium" style={{ color: PRINT }}>
+                    {next.length} on the calendar
+                  </span>
+                </div>
+                <ul className="mt-2.5 divide-y divide-[#141414]/[0.07]">
+                  {next.slice(0, 3).map((e) => {
+                    const [m, d] = day(e.date);
+                    return (
+                      <li key={e.id} className="flex items-center gap-3 py-2">
+                        <span className="flex w-9 shrink-0 flex-col items-center border border-[#141414]/10 py-0.5">
+                          <span className="text-[9px] font-semibold uppercase tracking-[0.08em]" style={{ color: PRINT }}>{m}</span>
+                          <span className="text-[14px] font-medium leading-none">{d}</span>
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block truncate text-[12.5px] font-medium">{e.name}</span>
+                          <span className="block truncate text-[11px] text-[#141414]/50">{e.online ? "Online" : e.city}</span>
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </SelectionFrame>
+            <Cursor className="absolute -bottom-7 left-[30%]" />
+          </motion.div>
+        ) : null}
 
         {/* Block print: the reaching hand, lower right */}
         <motion.div {...float(0.8)} className="absolute -right-[1%] top-[44%] h-[130px] w-[170px] 2xl:w-[200px]">
