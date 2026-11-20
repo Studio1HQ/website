@@ -98,8 +98,7 @@ function Way({
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 1.1, ease: EASE }}
-      whileHover={reduce ? undefined : { y: -4 }}
-      className="group relative isolate min-h-[420px] rounded-[10px] bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.08] transition-shadow duration-500 hover:shadow-[0_40px_70px_-45px_rgba(20,20,20,0.55)] md:min-h-[380px]"
+      className="group relative isolate min-h-[420px] rounded-[10px] bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.08] md:min-h-[380px]"
     >
       <div className="absolute inset-0 -z-10 overflow-hidden rounded-[10px]">
         {/* the photos, moving with the scroll, filling the right of the card */}
