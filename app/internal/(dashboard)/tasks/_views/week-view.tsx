@@ -1,7 +1,7 @@
 import { isDateKey, shiftWeek, weekDays, weekEnd, weekLabel, weekStart } from "@/lib/internal/clients/schema";
 import { canMoveDeliverableDay } from "@/lib/internal/clients/rules";
 import { canChangeTask, canGiveTask } from "@/lib/internal/tasks/access";
-import { cardChoices, giveChoices, loadWeekCards } from "@/lib/internal/tasks/load";
+import { cardChoices, giveChoices, loadWeekCards, teammates } from "@/lib/internal/tasks/load";
 import { weekTally } from "@/lib/internal/tasks/calendar";
 import { tasksHref } from "@/lib/internal/tasks/shared";
 import { Notice } from "@/components/internal/ui";
@@ -37,7 +37,7 @@ export async function WeekView({ staff, viewer, person, own, people, params, tod
   const names = Object.fromEntries(people.map((item) => [item.email.toLowerCase(), item.name || item.email]));
   const canAdd = own || canGiveTask(viewer, person.email, person.guarded);
 
-  const [data, options] = await Promise.all([
+  const [data, options, team] = await Promise.all([
     loadWeekCards(
       person.email,
       week,
@@ -47,6 +47,7 @@ export async function WeekView({ staff, viewer, person, own, people, params, tod
       (deliverable, clientId) => canMoveDeliverableDay(staff, deliverable, clientId),
     ),
     own ? cardChoices(staff) : canAdd ? giveChoices(staff) : Promise.resolve([]),
+    teammates(),
   ]);
   const tally = weekTally(data.cards);
 
@@ -88,6 +89,8 @@ export async function WeekView({ staff, viewer, person, own, people, params, tod
             own={own}
             canAdd={canAdd}
             person={own ? undefined : { email: person.email, name: person.name || person.email }}
+            who={person.email.toLowerCase()}
+            team={team}
           />
         </>
       )}

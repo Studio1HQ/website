@@ -7,8 +7,12 @@ import { OWNERS } from "@/lib/internal/roles";
 import { thisMonth, type Deliverable, type DeliverableStatus } from "@/lib/internal/clients/schema";
 import { readSnapshot, type ReportDeliverable, type ReportMove } from "@/lib/internal/tasks/report";
 import {
+  DEFAULT_PRIORITY,
+  PEOPLE_MIGRATION_HINT,
+  PRIORITY_MIGRATION_HINT,
   TASKS_MIGRATION_HINT,
   isTaskArea,
+  isTaskPriority,
   isTaskStatus,
   isUuid,
   type CommunityCard,
@@ -75,6 +79,10 @@ function toTask(row: Record<string, unknown>): Task | null {
     title: text(row.title),
     notes: text(row.notes),
     status: isTaskStatus(row.status) ? row.status : "todo",
+    priority: isTaskPriority(row.priority) ? row.priority : DEFAULT_PRIORITY,
+    with_emails: Array.isArray(row.with_emails)
+      ? [...new Set(row.with_emails.filter((item): item is string => typeof item === "string").map((item) => item.toLowerCase()))]
+      : [],
     area: isTaskArea(row.area) ? row.area : "other",
     engagement_id: textOrNull(row.engagement_id),
     deliverable_id: textOrNull(row.deliverable_id),
@@ -135,6 +143,31 @@ function mapRows<T>(rows: Record<string, unknown>[], fn: (row: Record<string, un
 /* --------------------------------------------------------------- tasks */
 
 /**
+ * Tasks on these people's lists: their own, and the ones shared with them
+ * (a PostgREST "or" body). Emails come through emailsOk, so they need no escaping.
+ */
+function whose(emails: readonly string[]) {
+  const quoted = emails.map((email) => `"${email}"`).join(",");
+  return `email.in.(${quoted}),with_emails.ov.{${quoted}}`;
+}
+
+/**
+ * The with_emails column isn't there yet (its migration hasn't run): read
+ * the way it was before, and skip the shared read for a few minutes.
+ */
+let sharingMissingUntil = 0;
+function beforeSharing(message: string) {
+  const missing = /with_emails/.test(message);
+  if (missing) {
+    // Expected until the migration runs; after that, a sign the shared read is broken.
+    console.warn(`[tasks] reading shared tasks failed, reading people's own only: ${message.slice(0, 300)}`);
+    sharingMissingUntil = Date.now() + 5 * 60_000;
+  }
+  return missing;
+}
+const sharingReady = () => Date.now() >= sharingMissingUntil;
+
+/**
  * How many of this person's open tasks are due today and how many are
  * late, for the sidebar badge, "Needs you" and the morning email. Null when
  * it can't be read.
@@ -142,25 +175,42 @@ function mapRows<T>(rows: Record<string, unknown>[], fn: (row: Record<string, un
 export async function dueTaskCounts(email: string, today: string): Promise<{ today: number; late: number } | null> {
   const [me] = emailsOk([email]);
   if (!me) return { today: 0, late: 0 };
-  const result = await selectRows(
-    TABLES.tasks,
-    new URLSearchParams({ select: "due_on", email: `eq.${me}`, status: "neq.done", due_on: `lte.${today}`, limit: "500" }),
-  );
+  const query = (shared: boolean) =>
+    new URLSearchParams({
+      select: "due_on",
+      ...(shared ? { or: `(${whose([me])})` } : { email: `eq.${me}` }),
+      status: "neq.done",
+      due_on: `lte.${today}`,
+      limit: "500",
+    });
+  let result = await selectRows(TABLES.tasks, query(sharingReady()));
+  if (!result.ok && beforeSharing(result.message)) result = await selectRows(TABLES.tasks, query(false));
   if (!result.ok) return null;
   const late = result.rows.filter((row) => typeof row.due_on === "string" && row.due_on < today).length;
   return { today: result.rows.length - late, late };
 }
 
 /**
- * These people's tasks: every open one, plus the ones done between `from`
- * and `to` (both days included; leave both out for every done one).
+ * The tasks on these people's lists (their own and the ones shared with
+ * them): every open one, plus the ones done between `from` and `to` (both
+ * days included; leave both out for every done one).
  */
 export async function listTasks(options: { emails: readonly string[]; from?: string; to?: string }): Promise<Loaded<Task>> {
   const emails = emailsOk(options.emails);
   if (!emails.length) return { ok: true, rows: [] };
-  const query = new URLSearchParams({ select: "*", email: inList(emails), order: "due_on.asc.nullslast,created_at.asc", limit: "3000" });
-  if (options.from && options.to) query.set("or", `(status.neq.done,and(done_on.gte.${options.from},done_on.lte.${options.to}))`);
-  const result = await selectRows(TABLES.tasks, query);
+  // Open ones, and the ones done in the range.
+  const range = options.from && options.to ? `status.neq.done,and(done_on.gte.${options.from},done_on.lte.${options.to})` : null;
+  const query = (shared: boolean) => {
+    const params = new URLSearchParams({ select: "*", order: "due_on.asc.nullslast,created_at.asc", limit: "3000" });
+    if (shared) params.set("and", `(or(${whose(emails)})${range ? `,or(${range})` : ""})`);
+    else {
+      params.set("email", inList(emails));
+      if (range) params.set("or", `(${range})`);
+    }
+    return params;
+  };
+  let result = await selectRows(TABLES.tasks, query(sharingReady()));
+  if (!result.ok && beforeSharing(result.message)) result = await selectRows(TABLES.tasks, query(false));
   if (!result.ok) return failed(TABLES.tasks, result.message, "tasks");
   return { ok: true, rows: mapRows(result.rows, toTask) };
 }
@@ -203,6 +253,8 @@ export async function getTask(id: string): Promise<Task | null | "error"> {
 }
 
 function writeFailed(table: string, message: string): TaskResult {
+  if (/PGRST204/.test(message) && message.includes("priority")) return { ok: false, message: PRIORITY_MIGRATION_HINT };
+  if (/PGRST204/.test(message) && message.includes("with_emails")) return { ok: false, message: PEOPLE_MIGRATION_HINT };
   if (MISSING.test(message)) return { ok: false, message: TASKS_MIGRATION_HINT };
   // Before 20261116120000_tasks_optional_time.sql runs, every line needs a time.
   if (/null value in column \\?"minutes\\?"/.test(message))

@@ -3,8 +3,8 @@
 import { startTransition, useMemo, useOptimistic, useRef, useState, type ClipboardEvent, type KeyboardEvent, type ReactNode } from "react";
 import Link from "next/link";
 import { DndContext, DragOverlay, useDraggable, useDroppable, type DragEndEvent } from "@dnd-kit/core";
-import { CheckCircle, Plus, Prohibit, Sparkle } from "@phosphor-icons/react";
-import { addTasks, editTask, removeTask, setDeliverableDay } from "@/app/internal/(dashboard)/tasks/actions";
+import { CheckCircle, Plus, Prohibit, Sparkle, UsersThree } from "@phosphor-icons/react";
+import { addTasks, editTask, leaveTask, removeTask, setDeliverableDay } from "@/app/internal/(dashboard)/tasks/actions";
 import { cn } from "@/lib/utils";
 import { buttonClass, inputClass, textareaClass } from "@/components/internal/ui";
 import { DateField } from "@/components/internal/pickers";
@@ -13,9 +13,21 @@ import { Select } from "@/components/internal/select";
 import { Label, Segmented, TeamDialog, useTeamAction } from "@/components/internal/team/kit";
 import { forSelectOptions } from "@/components/internal/tasks/for-options";
 import { TaskNote } from "@/components/internal/tasks/task-note";
+import { PriorityMark, PriorityPicker } from "@/components/internal/tasks/priority";
+import { WithPicker } from "@/components/internal/tasks/with-picker";
 import { cardAnnouncements, dragHandlers, underPointer, useCardSensors } from "@/components/internal/tasks/drag";
 import { earliestCardDay, type CalendarCard } from "@/lib/internal/tasks/calendar";
-import { STUDIO_LINK, TASK_STATUSES, suggestLink, type LinkOption, type TaskStatus } from "@/lib/internal/tasks/shared";
+import {
+  DEFAULT_PRIORITY,
+  STUDIO_LINK,
+  TASK_PRIORITIES,
+  TASK_STATUSES,
+  suggestLink,
+  type LinkOption,
+  type TaskPriority,
+  type TaskStatus,
+  type Teammate,
+} from "@/lib/internal/tasks/shared";
 
 /* The week calendar: a column per day, a card per task, the way the old
    tracker looked. Your own cards: "+ New" on a day, click the pill to
@@ -52,6 +64,8 @@ export function WeekCalendar({
   own,
   canAdd: mayAdd = own,
   person,
+  who,
+  team = [],
 }: {
   days: string[];
   today: string;
@@ -64,6 +78,10 @@ export function WeekCalendar({
   canAdd?: boolean;
   /** Whose week it is, when it isn't the viewer's: new cards go to them. */
   person?: { email: string; name: string };
+  /** Whose week it is (lowercase email), own or not. */
+  who: string;
+  /** Everyone active on the team list: who a task can be shared with. */
+  team?: Teammate[];
 }) {
   const { run } = useTeamAction();
   const sensors = useCardSensors();
@@ -118,7 +136,7 @@ export function WeekCalendar({
             <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
               {waiting.map((card) => (
                 <li key={`${card.kind}:${card.id}`}>
-                  <Card card={card} own={own} options={options} today={today} showDay movable />
+                  <Card card={card} own={own} who={who} team={team} options={options} today={today} showDay movable />
                 </li>
               ))}
             </ul>
@@ -138,12 +156,12 @@ export function WeekCalendar({
                     <ul className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-1">
                       {list.map((card) => (
                         <li key={`${card.kind}:${card.id}`}>
-                          <Card card={card} own={own} options={options} today={today} movable />
+                          <Card card={card} own={own} who={who} team={team} options={options} today={today} movable />
                         </li>
                       ))}
                     </ul>
                   ) : null}
-                  {canAdd ? <AddCard day={day} today={today} options={options} person={person} /> : null}
+                  {canAdd ? <AddCard day={day} today={today} options={options} person={person} who={who} team={team} /> : null}
                   {!list.length && !canAdd ? <p className="px-1.5 py-1 text-[12px] text-[var(--i-faint)]">Nothing.</p> : null}
                 </DayColumn>
               );
@@ -210,7 +228,8 @@ function DayColumn({
 
 /**
  * "+ New" at the bottom of a day: the task, an optional note for whoever
- * checks it, then Save, which closes the box. Enter in the task moves to the
+ * checks it, anyone it's shared with, what it's for and its priority, then
+ * Save, which closes the box. Enter in the task moves to the
  * note; ⌘/Ctrl+Enter saves from either. Pasting a list lines up one task per line. On My day
  * the box has a Day at the top, for work that belongs to another day (last
  * night's, entered after midnight).
@@ -222,6 +241,8 @@ export function AddCard({
   open: startOpen = false,
   inline = false,
   person,
+  who,
+  team = [],
 }: {
   day: string;
   today: string;
@@ -232,6 +253,10 @@ export function AddCard({
   inline?: boolean;
   /** Giving someone else tasks: they go on this person's week, Not started. */
   person?: { email: string; name: string };
+  /** Whose the new tasks are (lowercase email): not offered as someone to share with. */
+  who: string;
+  /** Everyone active on the team list: who the tasks can be shared with. */
+  team?: Teammate[];
 }) {
   const { pending, run } = useTeamAction();
   const [open, setOpen] = useState(startOpen);
@@ -242,6 +267,9 @@ export function AddCard({
   const [list, setList] = useState<string[]>([]);
   const [link, setLink] = useState(STUDIO_LINK);
   const [picked, setPicked] = useState(false);
+  const [priority, setPriority] = useState<TaskPriority>(DEFAULT_PRIORITY);
+  /** Who the tasks are shared with: on their lists too. */
+  const [sharedWith, setSharedWith] = useState<string[]>([]);
   /** The day the tasks go on: the box's own, unless another is picked. */
   const [on, setOn] = useState(day);
   const moved = on !== day;
@@ -262,6 +290,8 @@ export function AddCard({
     setList([]);
     setLink(STUDIO_LINK);
     setPicked(false);
+    setPriority(DEFAULT_PRIORITY);
+    setSharedWith([]);
   };
 
   const close = () => {
@@ -271,10 +301,12 @@ export function AddCard({
   };
 
   const save = () => {
-    const items = several ? list.map((title) => ({ title, link })) : [{ title: text.trim(), notes: note.trim(), link }];
+    const items = several
+      ? list.map((title) => ({ title, link, priority }))
+      : [{ title: text.trim(), notes: note.trim(), link, priority }];
     if (!items.some((item) => item.title)) return;
     run(
-      () => addTasks(on, items, person ? { email: person.email } : undefined),
+      () => addTasks(on, items, { ...(person ? { email: person.email } : {}), ...(sharedWith.length ? { with: sharedWith } : {}) }),
       () => {
         // Saved: the box closes back to "+ New" (My day's box stays, empty, for the next one).
         // In the action's transition, so the box goes as the new card shows up.
@@ -385,7 +417,7 @@ export function AddCard({
       placeholder={person ? `A task for ${firstName}` : ahead ? "What's planned?" : "What did you do?"}
       title="Paste a list to add several at once."
       aria-label={`New task on ${fullFormat.format(at(on))}`}
-      className={cn(inputClass("sm"), inline && "min-w-[12rem] flex-1 basis-56")}
+      className={cn(inputClass("sm"), inline && "min-w-[12rem] flex-1 basis-52")}
     />
   );
 
@@ -427,6 +459,10 @@ export function AddCard({
       className={inline ? "w-full sm:w-48" : "w-full"}
     />
   );
+
+  const peoplePicker = <WithPicker team={team} value={sharedWith} onChange={setSharedWith} exclude={[who]} disabled={pending} />;
+
+  const priorityPicker = <PriorityPicker value={priority} onChange={setPriority} size={inline ? "sm" : "xs"} disabled={pending} />;
 
   const suggestionChip =
     suggestion && suggestion.value !== link ? (
@@ -479,13 +515,26 @@ export function AddCard({
         <div className="flex flex-wrap items-center gap-1.5">
           {several ? <span className="flex-1" /> : textBox}
           {linkPicker}
+          {priorityPicker}
           {dayPicker}
           {buttons}
         </div>
         {movedNote ? (
           <p className="flex flex-wrap items-center gap-x-2 px-0.5 text-[12px] text-[var(--i-muted)]">{movedNote}</p>
         ) : null}
-        {!several && (noting || text.trim()) ? noteField : null}
+        {several ? (
+          peoplePicker
+        ) : noting ? (
+          <>
+            {noteField}
+            {peoplePicker}
+          </>
+        ) : text.trim() || sharedWith.length ? (
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            {noteField}
+            {peoplePicker}
+          </div>
+        ) : null}
         {suggestionChip}
       </div>
     );
@@ -498,7 +547,10 @@ export function AddCard({
         // Clicking away from an empty box closes it; anything typed keeps it open.
         if (startOpen || !empty) return;
         setTimeout(() => {
-          if (!panel.current?.contains(document.activeElement)) setOpen(false);
+          const focused = document.activeElement;
+          // The For list and the people and priority menus open in a portal: still in the box.
+          if (focused?.closest("[data-radix-popper-content-wrapper]")) return;
+          if (!panel.current?.contains(focused)) setOpen(false);
         }, 150);
       }}
       className="space-y-1.5 rounded-lg bg-[var(--i-panel)] p-1.5 ring-1 ring-[var(--i-line)]"
@@ -511,16 +563,32 @@ export function AddCard({
         </div>
       ) : null}
       {several ? (
-        pastedList
+        <>
+          {pastedList}
+          {peoplePicker}
+        </>
       ) : (
         <>
           {textBox}
-          {noteField}
+          {noting ? (
+            <>
+              {noteField}
+              {peoplePicker}
+            </>
+          ) : (
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              {noteField}
+              {peoplePicker}
+            </div>
+          )}
         </>
       )}
       {linkPicker}
       {suggestionChip}
-      <div className="flex items-center justify-end gap-1">{buttons}</div>
+      <div className="flex items-center justify-end gap-1">
+        {priorityPicker}
+        {buttons}
+      </div>
     </div>
   );
 }
@@ -552,8 +620,9 @@ function StatusText({ tone, label }: { tone?: keyof typeof TONES; label: string 
 
 /**
  * The line under a card's title. Done cards keep just the tick by the title;
- * open ones show where they stand (yours: click to change). Only client tags
- * show (what syncs to client pages); a Studio1 area shows when editing.
+ * open ones show where they stand (yours: click to change). Top and Low
+ * priority show (Medium is the default). Only client tags show (what syncs
+ * to client pages); a Studio1 area shows when editing.
  */
 function CardMeta({
   card,
@@ -607,9 +676,11 @@ function CardMeta({
         <Prohibit size={13} />
       </span>
     ) : null;
-  if (!status && !tag && !blocked) return null;
+  const priority = card.kind === "task" && card.priority !== "medium" ? <PriorityMark priority={card.priority} /> : null;
+  if (!status && !tag && !blocked && !priority) return null;
   return (
     <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1">
+      {priority}
       {status}
       {tag}
       {blocked}
@@ -644,6 +715,8 @@ function LiftedCard({ card }: { card: CalendarCard }) {
 function Card({
   card: saved,
   own,
+  who,
+  team,
   options,
   today,
   showDay = false,
@@ -651,6 +724,9 @@ function Card({
 }: {
   card: CalendarCard;
   own: boolean;
+  /** Whose week or day it's on (lowercase email). */
+  who: string;
+  team: Teammate[];
   options: LinkOption[];
   today: string;
   showDay?: boolean;
@@ -720,8 +796,24 @@ function Card({
       />
       {showDay && card.day ? <p className="mt-1 text-[11px] text-[var(--i-faint)]">Was for {card.day}</p> : null}
       {card.kind === "task" && card.from ? <p className="mt-1 text-[11px] text-[var(--i-faint)]">From {card.from}</p> : null}
+      {card.kind === "task" && card.withNames.length ? (
+        <p title="Shared: it's on each of their lists" className="mt-1 flex items-center gap-1 text-[11px] text-[var(--i-muted)]">
+          <UsersThree size={12} className="shrink-0" />
+          <span className="truncate">With {card.withNames.join(", ")}</span>
+        </p>
+      ) : null}
       {editable && card.kind === "task" ? (
-        <EditCard key={opened} open={editing} onOpenChange={setEditing} card={card} options={options} today={today} />
+        <EditCard
+          key={opened}
+          open={editing}
+          onOpenChange={setEditing}
+          card={card}
+          options={options}
+          today={today}
+          team={team}
+          // Shared with this person by someone else: they take themselves off rather than delete it for everyone.
+          leaving={own && card.owner !== who}
+        />
       ) : null}
     </article>
   );
@@ -733,12 +825,17 @@ function EditCard({
   card,
   options,
   today,
+  team,
+  leaving,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   card: Extract<CalendarCard, { kind: "task" }>;
   options: LinkOption[];
   today: string;
+  team: Teammate[];
+  /** It's shared with the viewer: Delete takes them off instead. */
+  leaving: boolean;
 }) {
   const { pending, run } = useTeamAction();
   const start = () => ({
@@ -746,6 +843,8 @@ function EditCard({
     notes: card.notes,
     link: card.link,
     status: card.status as TaskStatus,
+    priority: card.priority,
+    people: card.people,
     day: card.day ?? "",
   });
   const [form, setForm] = useState(start);
@@ -763,6 +862,8 @@ function EditCard({
     if (form.notes.trim() !== card.notes) patch.notes = form.notes;
     if (form.link !== card.link) patch.link = form.link;
     if (form.status !== card.status) patch.status = form.status;
+    if (form.priority !== card.priority) patch.priority = form.priority;
+    if ([...form.people].sort().join() !== [...card.people].sort().join()) patch.with = form.people;
     if (form.day && form.day !== card.day) patch.day = form.day;
     if (!Object.keys(patch).length) return close();
     run(() => editTask(card.id, patch), close);
@@ -778,9 +879,13 @@ function EditCard({
       title="Edit task"
       footer={
         <>
-          {confirming ? (
+          {leaving ? (
+            <button type="button" className={buttonClass("ghost")} disabled={pending} onClick={() => run(() => leaveTask(card.id), close)}>
+              Take me off
+            </button>
+          ) : confirming ? (
             <button type="button" className={buttonClass("danger")} disabled={pending} onClick={() => run(() => removeTask(card.id), close)}>
-              Delete it
+              {card.people.length ? "Delete it for everyone" : "Delete it"}
             </button>
           ) : (
             <button type="button" className={buttonClass("ghost")} onClick={() => setConfirming(true)}>
@@ -829,6 +934,19 @@ function EditCard({
           options={TASK_STATUSES.map((option) => ({ value: option.value, label: option.label }))}
         />
       </Label>
+      <Label label="Priority" group>
+        <Segmented
+          label="Priority"
+          value={form.priority}
+          onChange={(priority) => setForm({ ...form, priority })}
+          options={TASK_PRIORITIES.map((option) => ({ value: option.value, label: option.label }))}
+        />
+      </Label>
+      {team.length && !leaving ? (
+        <Label label="With" hint="shared: on their lists too" group>
+          <WithPicker team={team} value={form.people} onChange={(people) => setForm({ ...form, people })} exclude={[card.owner]} variant="field" />
+        </Label>
+      ) : null}
     </TeamDialog>
   );
 }
@@ -839,25 +957,31 @@ export function DayList({
   today,
   cards,
   options,
+  who,
+  team = [],
 }: {
   day: string;
   today: string;
   cards: CalendarCard[];
   options: LinkOption[];
+  /** Whose day it is (lowercase email). */
+  who: string;
+  /** Everyone active on the team list: who a task can be shared with. */
+  team?: Teammate[];
 }) {
   // The box on top, the cards under it; in a card with a set height (My day
   // on a wide screen) the cards scroll on their own.
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="shrink-0 border-b border-[var(--i-line)] p-3">
-        <AddCard day={day} today={today} options={options} open inline />
+        <AddCard day={day} today={today} options={options} open inline who={who} team={team} />
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto p-3">
         {cards.length ? (
           <ul className="grid gap-1.5 sm:grid-cols-2">
             {cards.map((card) => (
               <li key={`${card.kind}:${card.id}`}>
-                <Card card={card} own options={options} today={today} />
+                <Card card={card} own who={who} team={team} options={options} today={today} />
               </li>
             ))}
           </ul>

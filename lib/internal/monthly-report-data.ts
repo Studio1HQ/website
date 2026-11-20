@@ -8,6 +8,7 @@ import { teamRows } from "@/lib/internal/tasks/team-report";
 import { listDays } from "@/lib/internal/team/attendance";
 import { listPeople } from "@/lib/internal/team/people";
 import { displayName } from "@/lib/internal/team/shared";
+import { peopleOn } from "@/lib/internal/tasks/shared";
 
 /**
  * The numbers for one month's report (lib/internal/monthly-report.ts).
@@ -60,7 +61,8 @@ export async function loadMonthlyReport(month: string): Promise<MonthlyReport> {
     if (tasks.ok) {
       const done = new Map<string, number>();
       for (const task of tasks.rows) {
-        if (task.status === "done") done.set(task.email.toLowerCase(), (done.get(task.email.toLowerCase()) ?? 0) + 1);
+        // A shared task counts for everyone on it.
+        if (task.status === "done") for (const email of peopleOn(task)) done.set(email, (done.get(email) ?? 0) + 1);
       }
       // Hours: clocked on My day, or logged on tasks when nothing was clocked.
       const [days, logs] = await Promise.all([

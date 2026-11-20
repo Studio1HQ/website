@@ -173,6 +173,23 @@ export function minutesSoFar(day: Pick<AttendanceDay, "slots" | "active_minutes"
   return carried + (minutesBetween(open.start, now) ?? 0);
 }
 
+/**
+ * Minutes a logged day took off its ended slots for breaks: their time less
+ * its active hours, or 0 when the active hours are just the slots. The day
+ * form keeps this much off as the slots change, rather than keeping the old
+ * active hours (which made a slot added later count for nothing).
+ */
+export function breakMinutes(day: Pick<AttendanceDay, "slots" | "active_minutes">) {
+  if (day.active_minutes === null) return 0;
+  return Math.max(0, slotMinutes(day.slots) - day.active_minutes);
+}
+
+/** Active minutes for slots with `breaks` taken off; null when there are no breaks, or they'd leave nothing. */
+export function activeAfterBreaks(slots: WorkSlot[], breaks: number) {
+  const ended = slotMinutes(slots);
+  return breaks > 0 && ended > breaks ? ended - breaks : null;
+}
+
 /** "09:30–13:00, 15:00–…" */
 export function slotsLabel(slots: WorkSlot[]) {
   return slots.map((slot) => `${slot.start}–${slot.end ?? "…"}`).join(", ");

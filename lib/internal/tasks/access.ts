@@ -77,13 +77,25 @@ export function canGiveTask(viewer: TaskViewer, email: string, guarded = false) 
 
 /**
  * May this viewer change (edit, move, delete) this task? The person whose
- * board it's on, a founder, the founder's associate (they manage everyone's
- * tasks), or whoever gave it to them while they still may.
+ * board it's on, anyone it's shared with (it's on their list too), a
+ * founder, the founder's associate (they manage everyone's tasks), or
+ * whoever gave it to them while they still may.
  */
-export function canChangeTask(viewer: TaskViewer, task: { email: string; created_by: string }) {
+export function canChangeTask(viewer: TaskViewer, task: { email: string; created_by: string; with_emails?: readonly string[] }) {
   if (task.email.toLowerCase() === viewer.email.toLowerCase()) return true;
+  if (task.with_emails?.some((email) => email.toLowerCase() === viewer.email.toLowerCase())) return true;
   if (isFounder(viewer) || isAssociate(viewer)) return true;
   return task.created_by.toLowerCase() === viewer.email.toLowerCase() && canGiveTask(viewer, task.email);
+}
+
+/**
+ * May this viewer change who a task is shared with? Its own person, a
+ * founder, the associate or whoever gave it: canChangeTask without the
+ * share list. Someone it's shared with can update it, and take themselves
+ * off (leaveTask), but not add or remove others.
+ */
+export function canShareTask(viewer: TaskViewer, task: { email: string; created_by: string }) {
+  return canChangeTask(viewer, { email: task.email, created_by: task.created_by });
 }
 
 /**

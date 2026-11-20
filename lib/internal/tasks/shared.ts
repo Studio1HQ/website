@@ -47,6 +47,51 @@ export function statusLabel(status: TaskStatus) {
 }
 
 /**
+ * How much a task matters today. Medium is the default and stays quiet on
+ * cards; Top and Low show. Lists put Top first.
+ */
+export const TASK_PRIORITIES = [
+  { value: "top", label: "Top" },
+  { value: "medium", label: "Medium" },
+  { value: "low", label: "Low" },
+] as const;
+export type TaskPriority = (typeof TASK_PRIORITIES)[number]["value"];
+export const DEFAULT_PRIORITY: TaskPriority = "medium";
+
+export function isTaskPriority(value: unknown): value is TaskPriority {
+  return TASK_PRIORITIES.some((option) => option.value === value);
+}
+
+/** 0 for Top, 1 for Medium, 2 for Low: for sorting. */
+export function priorityRank(priority: TaskPriority | undefined) {
+  return priority === "top" ? 0 : priority === "low" ? 2 : 1;
+}
+
+/** Saving Top or Low before 20261121120000_task_priority_and_people.sql has run. */
+export const PRIORITY_MIGRATION_HINT =
+  "Top and Low need the latest database update (supabase/migrations/20261121120000_task_priority_and_people.sql). Medium saves now.";
+
+/** The most people a task is shared with, besides its own person. */
+export const MAX_WITH = 10;
+
+/** Adding people to a task before that same update has run. */
+export const PEOPLE_MIGRATION_HINT =
+  "Sharing a task needs the latest database update (supabase/migrations/20261121120000_task_priority_and_people.sql).";
+
+/** Someone a task can be shared with: active on the team list. */
+export type Teammate = { email: string; name: string };
+
+/** Everyone a task is on: its person, then the people it's shared with (lowercase). */
+export function peopleOn(task: Pick<Task, "email" | "with_emails">) {
+  return [...new Set([task.email, ...(task.with_emails ?? [])].map((email) => email.toLowerCase()))];
+}
+
+/** Whether a task is on this person's list: theirs, or shared with them. */
+export function isOnTask(task: Pick<Task, "email" | "with_emails">, email: string) {
+  return peopleOn(task).includes(email.toLowerCase());
+}
+
+/**
  * What kind of Studio1 work a task is. "client" isn't picked: it's set when
  * a task is for a client engagement.
  */
@@ -93,6 +138,9 @@ export type Task = {
   title: string;
   notes: string;
   status: TaskStatus;
+  priority: TaskPriority;
+  /** Others it's shared with (lowercase emails): it's on their lists too. */
+  with_emails: string[];
   area: TaskArea;
   engagement_id: string | null;
   deliverable_id: string | null;
