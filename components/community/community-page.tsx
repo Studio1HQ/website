@@ -1,15 +1,11 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
-import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { animate, motion, useInView, useReducedMotion } from "motion/react";
 import {
   ArrowUpRight,
   Broadcast,
-  CalendarDots,
   Code,
-  MapPin,
   MicrophoneStage,
   UsersThree,
   Wrench,
@@ -18,13 +14,12 @@ import {
 import { Container, EASE } from "@/components/home/ui";
 import { PaperPageHeader } from "@/components/paper/paper-page-header";
 import { IndexBar, PaperSection } from "@/components/paper/paper-sections";
-import { HandInHand } from "@/components/community/hands";
+import { DotArt } from "@/components/community/dot-art";
 import { Landmark, Skyline } from "@/components/community/landmarks";
 import { CommunityBento, TogetherSpread, TogetherWeBuild } from "@/components/community/community-sections";
 import { RegistrationBar, UpcomingEvents } from "@/components/community/upcoming";
 import { PartnerWall } from "@/components/community/partner-wall";
 import { DISCORD_URL, JoinCommunity } from "@/components/community/join";
-import { DitherField } from "@/components/home/dither-field";
 import type { CommunityData, CommunityKind } from "@/lib/community";
 import { GRAIN, PAPER_SCOPE, PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
@@ -87,53 +82,6 @@ function Count({ to }: { to: number }) {
   );
 }
 
-/** A way in, cut like the landing hero cards: ink icon tile, dither, the count. */
-function WayCard({
-  icon: Glyph,
-  count,
-  title,
-  line,
-  foot,
-  actions,
-  index,
-}: {
-  icon: Icon;
-  count: number;
-  title: string;
-  line: string;
-  foot: string;
-  actions: ReactNode;
-  index: number;
-}) {
-  const reduce = !!useReducedMotion();
-  return (
-    <motion.div
-      initial={reduce ? false : { opacity: 0, y: 14 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.9, ease: EASE, delay: index * 0.08 }}
-      className="group relative isolate flex min-h-[360px] flex-col justify-between overflow-hidden rounded-[6px] bg-white/80 p-6 ring-1 ring-inset ring-[#141414]/10 transition-colors duration-300 hover:bg-white md:p-7 [&>*:not(canvas)]:relative"
-    >
-      <DitherField still strength={1.8} seed={1.7 + index} className="absolute inset-y-0 right-0 -z-10 h-full w-[55%] opacity-80 [mask-image:linear-gradient(to_left,black_30%,transparent)]" />
-      <div className="flex items-start justify-between">
-        <span className="flex size-11 items-center justify-center bg-[#141414] text-[#f4efe7]">
-          <Glyph weight="regular" className="size-5" />
-        </span>
-        <span className="text-[12px] font-medium uppercase tracking-[0.16em] text-[#141414]/45">{foot}</span>
-      </div>
-      <div>
-        <p className="flex items-baseline gap-2">
-          <span className="text-[64px] font-medium leading-none tracking-[-0.06em] tabular-nums">{count}</span>
-          <span className="text-[15px] text-[#141414]/50">{title.toLowerCase()} so far</span>
-        </p>
-        <h3 className="mt-5 text-[22px] font-medium tracking-[-0.03em]">{title}</h3>
-        <p className="mt-1.5 max-w-[340px] text-[15px] leading-[1.5] text-[#141414]/60">{line}</p>
-        <div className="mt-5 flex flex-wrap gap-2">{actions}</div>
-      </div>
-    </motion.div>
-  );
-}
-
 const pill =
   "inline-flex h-10 items-center gap-1.5 rounded-full bg-white px-4 text-[13.5px] font-medium ring-1 ring-inset ring-[#141414]/15 transition-colors hover:bg-[#141414] hover:text-white";
 
@@ -180,43 +128,44 @@ function YourCity({ cities }: { cities: string[] }) {
 
 export function CommunityPage({ data }: { data: CommunityData }) {
   const reduce = !!useReducedMotion();
-  const { upcoming, past, cities, totals, hackathonsOpen } = data;
+  const { upcoming, past, cities, totals } = data;
   const all = [...upcoming, ...past];
   const byId = new Map(all.map((e) => [e.id, e]));
   // The soonest event taking registrations, for the pill along the bottom
   const registering = upcoming.find((e) => e.cta === "Register" && e.href) ?? upcoming.find((e) => e.href) ?? null;
-  const stats: [number, string, Icon][] = [
-    [totals.events, "Events", CalendarDots],
-    [totals.cities, "Cities", MapPin],
-    [totals.meetups, "Meetups", UsersThree],
-    [totals.hackathons, "Hackathons", Code],
+  const stats: [number, string, string][] = [
+    [totals.events, "Events", "Run, spoken at or joined"],
+    [totals.cities, "Cities", "Where we've shown up in person"],
+    [totals.meetups, "Meetups", "Evening talks and demos"],
+    [totals.hackathons, "Hackathons", "Build weekends with tool teams"],
   ];
+  const hackathons = upcoming.filter((e) => e.kind === "hackathon").slice(0, 4);
+  const meetups = upcoming.filter((e) => e.kind !== "hackathon").slice(0, 4);
 
   return (
     <div style={PAPER_SCOPE}>
-      {/* Hero */}
-      <PaperPageHeader className="pb-10 pt-32 md:pb-14 md:pt-40">
+      {/* Hero: the community, in dots */}
+      <PaperPageHeader className="pb-12 pt-28 md:pb-16 md:pt-36">
         <Container>
-          <h1 className="sr-only">Studio1 Community</h1>
-          <HandInHand className="mx-auto block h-auto w-full max-w-[860px]" />
-          <div className="mt-8 flex flex-col items-center text-center md:mt-10">
-            <motion.p
-              aria-hidden
-              className="text-[56px] font-medium leading-[0.95] tracking-[-0.06em] sm:text-[88px] lg:text-[112px]"
+          <DotArt src="/assets/community/hand-in-hand.png" alt="Five people walking hand in hand" className="mx-auto max-w-[1100px]" />
+
+          <div className="mt-12 flex flex-col items-center text-center md:mt-14">
+            <motion.h1
+              className="max-w-[760px] text-balance text-[36px] font-medium leading-[1.05] tracking-[-0.045em] sm:text-[48px] lg:text-[56px]"
               initial={reduce ? false : { opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, ease: EASE, delay: 0.7 }}
+              transition={{ duration: 0.9, ease: EASE, delay: 0.45 }}
             >
-              Community
-            </motion.p>
+              Developers who show up, together
+            </motion.h1>
             <motion.div
               className="mt-5 flex flex-col items-center"
               initial={reduce ? false : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, ease: EASE, delay: 0.9 }}
+              transition={{ duration: 0.9, ease: EASE, delay: 0.6 }}
             >
-              <p className="max-w-[520px] text-[17px] leading-[1.55] text-[#141414]/60 md:text-[18px]">
-                Meetups, hackathons and the developers who show up. Find one near you, or bring one to your city.
+              <p className="max-w-[500px] text-balance text-[16px] leading-[1.6] text-[#141414]/60 md:text-[18px]">
+                Meetups, hackathons and the people who build at them. Find one near you, or bring one to your city.
               </p>
               <div className="mt-7 flex flex-wrap justify-center gap-2">
                 <a href={DISCORD_URL} target="_blank" rel="noopener noreferrer" className="inline-flex h-12 items-center gap-2 rounded-full bg-[#141414] px-6 text-[14.5px] font-medium text-white transition-colors hover:bg-[#f97316]">
@@ -229,112 +178,55 @@ export function CommunityPage({ data }: { data: CommunityData }) {
             </motion.div>
           </div>
 
-          <dl className="mt-10 grid grid-cols-2 gap-3 md:mt-14 md:grid-cols-4 md:gap-4">
-            {stats.map(([value, label, StatIcon], i) => (
+        </Container>
+      </PaperPageHeader>
+
+      {/* 01 Impact: the numbers */}
+      <PaperSection tone="paper">
+        <Container>
+          <IndexBar index={1} name="Impact" />
+          <motion.h2 {...rise(reduce)} className="mt-6 max-w-[680px] text-[34px] font-medium leading-[1.05] tracking-[-0.045em] md:text-[48px]">
+            Where ideas meet <span style={{ color: PRINT }}>the people who build them</span>
+          </motion.h2>
+          <dl className="mt-10 grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
+            {stats.map(([value, label, line], i) => (
               <motion.div
                 key={label}
-                initial={reduce ? false : { opacity: 0, y: 18 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.9, ease: EASE, delay: 1.1 + i * 0.1 }}
-                className="group flex min-w-0 flex-col gap-5 rounded-[6px] bg-white/80 p-4 ring-1 ring-inset ring-[#141414]/10 transition-[background-color,box-shadow,transform] duration-500 ease-out hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_18px_34px_-26px_rgba(20,20,20,0.45)] sm:p-5 md:p-6"
+                {...rise(reduce, 0.06 + i * 0.08)}
+                className="flex min-w-0 flex-col justify-between gap-10 rounded-[6px] bg-white/80 p-5 ring-1 ring-inset ring-[#141414]/10 transition-[background-color,box-shadow] duration-500 hover:bg-white hover:shadow-[0_18px_34px_-26px_rgba(20,20,20,0.45)] md:p-7"
               >
-                <div className="flex items-center justify-between">
-                  <dt className="text-[12.5px] font-medium uppercase tracking-[0.14em] text-[#141414]/50">{label}</dt>
-                  <span className="flex size-9 shrink-0 items-center justify-center bg-[#141414] text-[#f4efe7] transition-colors duration-500 group-hover:bg-[#f97316] sm:size-10">
-                    <StatIcon weight="regular" className="size-[18px]" />
+                <dt className="text-[12px] font-medium uppercase tracking-[0.16em] text-[#141414]/45">{label}</dt>
+                <dd>
+                  <span className="block text-[48px] font-medium leading-none tracking-[-0.06em] md:text-[64px]">
+                    <Count to={value} />
+                    <span style={{ color: PRINT }}>+</span>
                   </span>
-                </div>
-                <dd className="text-[36px] font-medium leading-none tracking-[-0.05em] sm:text-[44px] md:text-[52px]">
-                  <Count to={value} />
+                  <span className="mt-3 block text-[14px] leading-[1.5] text-[#141414]/55">{line}</span>
                 </dd>
               </motion.div>
             ))}
           </dl>
         </Container>
-      </PaperPageHeader>
-
-      {/* 01 Up next */}
-      <PaperSection id="up-next" tone="paper" className="scroll-mt-24">
-        <Container>
-          <IndexBar index={1} name="Up next" aside={<Link href="/calendar" className="underline decoration-[#141414]/25 underline-offset-4 hover:decoration-[#f97316]">Open the calendar</Link>} />
-          {upcoming.length ? (
-            <div className="mt-6">
-              <UpcomingEvents
-                items={upcoming.slice(0, 6)}
-                heading={
-                  <motion.h2 {...rise(reduce)} className="max-w-[640px] text-[34px] font-medium leading-[1.05] tracking-[-0.045em] md:text-[48px]">
-                    Where to find us <span style={{ color: PRINT }}>next</span>
-                  </motion.h2>
-                }
-              />
-            </div>
-          ) : (
-            <>
-              <motion.h2 {...rise(reduce)} className="mt-6 max-w-[640px] text-[34px] font-medium leading-[1.05] tracking-[-0.045em] md:text-[48px]">
-                Where to find us <span style={{ color: PRINT }}>next</span>
-              </motion.h2>
-              <p className="mt-10 rounded-[6px] bg-white p-8 text-[16px] text-[#141414]/60 ring-1 ring-inset ring-[#141414]/10">
-                New dates go up here first. Meanwhile, see everything we have done on the{" "}
-                <Link href="/events" className="underline underline-offset-4">events page</Link>.
-              </p>
-            </>
-          )}
-        </Container>
       </PaperSection>
 
-      <TogetherSpread byId={byId} index={2} />
-
-      {/* 03 Two ways in */}
-      <PaperSection tone="paper">
+      {/* 02 Hackathons */}
+      <PaperSection id="up-next" tone="paper" className="scroll-mt-24">
         <Container>
-          <IndexBar index={3} name="Two ways in" />
-          <motion.h2 {...rise(reduce)} className="mt-6 max-w-[640px] text-[34px] font-medium leading-[1.05] tracking-[-0.045em] md:text-[48px]">
-            Come for a talk, <span style={{ color: PRINT }}>stay to build</span>
-          </motion.h2>
-          <div className="mt-10 grid gap-4 md:grid-cols-3">
-            <WayCard
-              index={0}
-              icon={UsersThree}
-              count={totals.meetups}
-              title="Meetups"
-              line="Evening talks and demos in a city near you: real projects, honest questions."
-              foot={`${cities.length} cities`}
-              actions={
-                <a href={HOST} className={pill}>
-                  Host a meetup <ArrowUpRight weight="bold" className="size-3.5" />
-                </a>
+          <IndexBar index={2} name="Hackathons" />
+          <div className="mt-6">
+            <UpcomingEvents
+              items={hackathons}
+              href="/hackathons"
+              label="Check out all hackathons"
+              heading={
+                <motion.h2 {...rise(reduce)} className="max-w-[640px] text-[34px] font-medium leading-[1.05] tracking-[-0.045em] md:text-[48px]">
+                  Explore upcoming <span style={{ color: PRINT }}>hackathons</span>
+                </motion.h2>
               }
-            />
-            {/* Middle: a room full of builders */}
-            <motion.div initial={reduce ? false : { opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-80px" }} transition={{ duration: 0.9, ease: EASE, delay: 0.08 }} className="group relative min-h-[360px] overflow-hidden rounded-[6px]">
-              <Image src="/assets/events/aki-hacks/03.webp" alt="Developers at a Studio1 hackathon" fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover transition-transform duration-[1.4s] ease-out group-hover:scale-[1.05]" />
-              <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
-              <div className="absolute inset-x-0 bottom-0 p-6 text-white md:p-7">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-[12.5px] font-medium backdrop-blur-sm">
-                  <span aria-hidden className="size-1.5 rounded-full" style={{ background: PRINT }} />
-                  {totals.events}+ events so far
-                </span>
-                <p className="mt-3 text-[56px] font-medium leading-none tracking-[-0.06em]">
-                  {totals.cities}
-                </p>
-                <p className="mt-1 text-[14px] text-white/80">Cities where we&apos;ve shown up</p>
-              </div>
-            </motion.div>
-            <WayCard
-              index={2}
-              icon={Code}
-              count={totals.hackathons}
-              title="Hackathons"
-              line="Build weekends with the teams behind the tools. Ship something, demo it, win."
-              foot="Build weekends"
-              actions={
+              empty={
                 <>
-                  {hackathonsOpen ? (
-                    <Link href="/hackathons" className={pill}>See hackathons</Link>
-                  ) : (
-                    <span className={cn(pill, "pointer-events-none text-[#141414]/60")}>Opening soon</span>
-                  )}
-                  <a href={PARTNER} className={pill}>Partner with us</a>
+                  <p className="text-[16px] text-[#141414]/60">No hackathon is open right now. Get an email the day the next one opens.</p>
+                  <a href="#join" className={pill}>Get notified</a>
                 </>
               }
             />
@@ -342,11 +234,38 @@ export function CommunityPage({ data }: { data: CommunityData }) {
         </Container>
       </PaperSection>
 
+      {/* 03 Meetups */}
+      <PaperSection tone="paper">
+        <Container>
+          <IndexBar index={3} name="Meetups" />
+          <div className="mt-6">
+            <UpcomingEvents
+              items={meetups}
+              href="/events"
+              label="Check out all events"
+              heading={
+                <motion.h2 {...rise(reduce)} className="max-w-[640px] text-[34px] font-medium leading-[1.05] tracking-[-0.045em] md:text-[48px]">
+                  Find a <span style={{ color: PRINT }}>local meetup</span>
+                </motion.h2>
+              }
+              empty={
+                <>
+                  <p className="text-[16px] text-[#141414]/60">Nothing on the calendar this week. Want one in your city?</p>
+                  <a href={HOST} className={pill}>Host a meetup</a>
+                </>
+              }
+            />
+          </div>
+        </Container>
+      </PaperSection>
+
+      <TogetherSpread byId={byId} index={4} />
+
       {/* 04 On the map */}
       {cities.length ? (
         <PaperSection tone="paper">
           <Container>
-            <IndexBar index={4} name="On the map" aside={`${cities.length} cities`} />
+            <IndexBar index={5} name="On the map" aside={`${cities.length} cities`} />
             <motion.h2 {...rise(reduce)} className="mt-6 max-w-[640px] text-[34px] font-medium leading-[1.05] tracking-[-0.045em] md:text-[48px]">
               City by city, <span style={{ color: PRINT }}>in person</span>
             </motion.h2>
@@ -372,11 +291,11 @@ export function CommunityPage({ data }: { data: CommunityData }) {
 
       <TogetherWeBuild />
 
-      <CommunityBento data={data} index={cities.length ? 5 : 4} />
+      <CommunityBento data={data} index={cities.length ? 6 : 5} />
 
-      <PartnerWall index={cities.length ? 6 : 5} />
+      <PartnerWall index={cities.length ? 7 : 6} />
 
-      <JoinCommunity index={cities.length ? 7 : 6} />
+      <JoinCommunity index={cities.length ? 8 : 7} />
 
       <YourCity cities={cities.map((c) => c.city)} />
 

@@ -90,30 +90,48 @@ function ListRow({ item }: { item: CommunityItem }) {
 }
 
 /** Upcoming events, one after another, each linking to its page. */
-export function UpcomingEvents({ items, heading }: { items: CommunityItem[]; heading: ReactNode }) {
+export function UpcomingEvents({
+  items,
+  heading,
+  href,
+  label,
+  empty,
+}: {
+  items: CommunityItem[];
+  heading: ReactNode;
+  href: string;
+  label: string;
+  empty: ReactNode;
+}) {
   const reduce = !!useReducedMotion();
   return (
     <>
       <div className="flex flex-wrap items-end justify-between gap-6">
         {heading}
-        <Link href="/events" className="inline-flex h-11 items-center gap-2 rounded-full px-5 text-[14px] font-medium ring-1 ring-inset ring-[#141414] transition-colors hover:bg-[#141414] hover:text-white">
-          Check out all events <ArrowUpRight weight="bold" className="size-4" />
+        <Link href={href} className="inline-flex h-11 items-center gap-2 rounded-full px-5 text-[14px] font-medium ring-1 ring-inset ring-[#141414] transition-colors hover:bg-[#141414] hover:text-white">
+          {label} <ArrowUpRight weight="bold" className="size-4" />
         </Link>
       </div>
-      <ul className="mt-10 flex flex-col gap-3">
-        {items.map((item, i) => (
-          <motion.li
-            key={item.id}
-            className="min-w-0"
-            initial={reduce ? false : { opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-60px" }}
-            transition={{ duration: 1, ease: EASE, delay: Math.min(i, 5) * 0.1 }}
-          >
-            <ListRow item={item} />
-          </motion.li>
-        ))}
-      </ul>
+      {items.length ? (
+        <ul className="mt-10 flex flex-col gap-3">
+          {items.map((item, i) => (
+            <motion.li
+              key={item.id}
+              className="min-w-0"
+              initial={reduce ? false : { opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 1, ease: EASE, delay: Math.min(i, 5) * 0.1 }}
+            >
+              <ListRow item={item} />
+            </motion.li>
+          ))}
+        </ul>
+      ) : (
+        <div className="mt-10 flex flex-col items-start justify-between gap-4 rounded-[6px] bg-white/80 p-6 ring-1 ring-inset ring-[#141414]/10 sm:flex-row sm:items-center md:p-8">
+          {empty}
+        </div>
+      )}
     </>
   );
 }
