@@ -1463,3 +1463,32 @@ html::-webkit-scrollbar-thumb:hover {
 .s1-glass-btn-light:hover {
   background: rgba(255, 255, 255, 0.16);
 }
+
+/* Community page closing banner: each city's landmark draws itself in,
+   one after another, when the banner scrolls into view. */
+.s1-skyline svg * {
+  stroke-dasharray: 420;
+  stroke-dashoffset: 420;
+  transition: stroke-dashoffset 2.6s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--d, 0s);
+}
+.s1-skyline > div {
+  opacity: 0.35;
+  transition: opacity 1.2s ease;
+  transition-delay: var(--d, 0s);
+}
+.s1-skyline.is-drawn svg * {
+  stroke-dashoffset: 0;
+}
+.s1-skyline.is-drawn > div {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .s1-skyline svg * {
+    stroke-dashoffset: 0;
+    transition: none;
+  }
+  .s1-skyline > div {
+    opacity: 1;
+  }
+}

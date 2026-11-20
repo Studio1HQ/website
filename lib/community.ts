@@ -34,6 +34,8 @@ export type CommunityItem = {
   external: boolean;
   cta: string;
   image?: string;
+  /** One line on what happened or what to expect. */
+  summary?: string;
   /** Run by Studio1 (from the dashboard) rather than one we spoke at. */
   ours: boolean;
 };
@@ -106,6 +108,7 @@ function fromStatic(e: StudioEvent, now: number): CommunityItem {
     external: false,
     cta: "Details",
     image: e.image,
+    summary: e.summary,
     ours: false,
   };
 }
