@@ -199,30 +199,30 @@ export function CommunityPage({ data }: { data: CommunityData }) {
         <Container>
           <h1 className="sr-only">Studio1 Community</h1>
           <HandInHand className="mx-auto block h-auto w-full max-w-[860px]" />
-          <div className="mt-6 flex flex-wrap items-end justify-between gap-6 md:mt-8">
+          <div className="mt-8 flex flex-col items-center text-center md:mt-10">
             <motion.p
               aria-hidden
-              className="text-[52px] font-medium leading-[0.9] tracking-[-0.06em] sm:text-[96px] lg:text-[128px]"
+              className="text-[56px] font-medium leading-[0.95] tracking-[-0.06em] sm:text-[88px] lg:text-[112px]"
               initial={reduce ? false : { opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, ease: EASE, delay: 0.8 }}
+              transition={{ duration: 0.9, ease: EASE, delay: 0.7 }}
             >
               Community
             </motion.p>
             <motion.div
-              className="max-w-[400px] pb-2"
+              className="mt-5 flex flex-col items-center"
               initial={reduce ? false : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, ease: EASE, delay: 1 }}
+              transition={{ duration: 0.9, ease: EASE, delay: 0.9 }}
             >
-              <p className="text-[17px] leading-[1.55] text-[#141414]/65">
+              <p className="max-w-[520px] text-[17px] leading-[1.55] text-[#141414]/60 md:text-[18px]">
                 Meetups, hackathons and the developers who show up. Find one near you, or bring one to your city.
               </p>
-              <div className="mt-5 flex flex-wrap gap-2">
-                <a href={DISCORD_URL} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-2 rounded-full bg-[#141414] px-5 text-[14px] font-medium text-white transition-colors hover:bg-[#2a2522]">
+              <div className="mt-7 flex flex-wrap justify-center gap-2">
+                <a href={DISCORD_URL} target="_blank" rel="noopener noreferrer" className="inline-flex h-12 items-center gap-2 rounded-full bg-[#141414] px-6 text-[14.5px] font-medium text-white transition-colors hover:bg-[#f97316]">
                   <DiscordIcon className="size-4" /> Join the Discord
                 </a>
-                <a href="#up-next" className="inline-flex h-11 items-center gap-2 rounded-full px-5 text-[14px] font-medium ring-1 ring-inset ring-[#141414] transition-colors hover:bg-[#141414] hover:text-white">
+                <a href="#up-next" className="inline-flex h-12 items-center gap-2 rounded-full bg-white/70 px-6 text-[14.5px] font-medium ring-1 ring-inset ring-[#141414]/15 transition-colors hover:bg-white">
                   See what&apos;s next
                 </a>
               </div>
