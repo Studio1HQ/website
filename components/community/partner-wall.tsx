@@ -56,7 +56,7 @@ function Mark({ p, active }: { p: Partner; active: boolean }) {
       aria-hidden
       className={cn(
         "block w-full transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]",
-        active ? "scale-[1.04] opacity-100" : "opacity-45 group-hover/cell:opacity-80",
+        active ? "opacity-100" : "opacity-35 group-hover/cell:opacity-100",
       )}
       style={{
         height: p.height,
@@ -81,7 +81,7 @@ export function PartnerWall({ index }: { index: number }) {
   const current = ENTRIES[active];
   if (!current) return null;
   const words = current.quote.content.replace(/\s+/g, " ").trim();
-  const quote = words.length > 260 ? `${words.slice(0, words.lastIndexOf(" ", 255))}…` : words;
+  const quote = words.length > 170 ? `${words.slice(0, words.lastIndexOf(" ", 165))}…` : words;
 
   return (
     <PaperSection tone="paper">
@@ -101,12 +101,12 @@ export function PartnerWall({ index }: { index: number }) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 1.1, ease: EASE, delay: 0.1 }}
-          className="mt-10 grid overflow-hidden rounded-[6px] bg-white/80 ring-1 ring-inset ring-[#141414]/10 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]"
+          className="mt-10 grid grid-cols-1 overflow-hidden rounded-[6px] bg-white/80 ring-1 ring-inset ring-[#141414]/10 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]"
           onMouseLeave={() => setHover(false)}
         >
-          <ul className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-5">
+          <ul className="grid grid-cols-3 gap-px bg-[#141414]/[0.08] sm:grid-cols-5">
             {ENTRIES.map((e, i) => (
-              <li key={e.company} className="border-b border-r border-[#141414]/[0.08]">
+              <li key={e.company} className="bg-[#fbfaf8]">
                 <button
                   type="button"
                   aria-label={`${e.company}: what they said`}
@@ -114,7 +114,7 @@ export function PartnerWall({ index }: { index: number }) {
                   onMouseEnter={() => {
                     setHover(true);
                     window.clearTimeout(rest.current);
-                    rest.current = window.setTimeout(() => setActive(i), 90);
+                    rest.current = window.setTimeout(() => setActive(i), 60);
                   }}
                   onFocus={() => {
                     setHover(true);
@@ -122,19 +122,16 @@ export function PartnerWall({ index }: { index: number }) {
                   }}
                   onClick={() => setActive(i)}
                   className={cn(
-                    "group/cell relative flex h-[92px] w-full items-center justify-center px-4 outline-none transition-colors duration-700 md:h-[110px] md:px-6",
-                    i === active ? "bg-[#141414]/[0.035]" : "",
+                    "group/cell relative flex h-[92px] w-full items-center justify-center px-4 outline-none transition-colors duration-500 md:h-[110px] md:px-6",
+                    i === active ? "bg-white" : "",
                   )}
                 >
-                  {i === active ? (
-                    <motion.span layoutId="partner-active" aria-hidden className="absolute inset-x-0 bottom-0 h-[3px]" style={{ background: PRINT }} transition={{ type: "spring", bounce: 0, duration: 0.7 }} />
-                  ) : null}
                   <Mark p={e} active={i === active} />
                 </button>
               </li>
             ))}
           </ul>
-          <div className="flex min-h-[300px] flex-col justify-between gap-8 border-t border-[#141414]/[0.08] p-7 md:p-9 lg:border-l lg:border-t-0">
+          <div className="flex h-[320px] flex-col justify-between gap-6 overflow-hidden border-t lg:h-auto border-[#141414]/[0.08] p-7 md:p-9 lg:border-l lg:border-t-0">
             <div>
               <p className="text-[13px] font-medium tabular-nums" style={{ color: PRINT }}>
                 {String(active + 1).padStart(2, "0")} / {String(ENTRIES.length).padStart(2, "0")}
@@ -143,7 +140,7 @@ export function PartnerWall({ index }: { index: number }) {
                 <AnimatePresence mode="wait" initial={false}>
                   <motion.blockquote
                     key={current.company}
-                    className="text-[19px] font-medium leading-[1.45] tracking-[-0.02em] md:text-[21px]"
+                    className="line-clamp-6 text-[18px] font-medium leading-[1.45] tracking-[-0.02em] md:text-[19px]"
                     initial={reduce ? false : { opacity: 0, y: 10, filter: "blur(4px)" }}
                     animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                     exit={{ opacity: 0, y: -8, filter: "blur(4px)" }}

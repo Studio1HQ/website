@@ -40,7 +40,7 @@ const DOTS = Array.from({ length: COLS * ROWS }, (_, i) => {
   return inSilhouette(x, y) ? [x, y] : null;
 }).filter(Boolean) as [number, number][];
 
-function DotSilhouette({
+export function DotSilhouette({
   coarse = false,
   fill = "#141414",
   opacity = 0.32,

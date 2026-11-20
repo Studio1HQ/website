@@ -22,15 +22,16 @@ import {
   Code,
   Lightbulb,
   MicrophoneStage,
-  Rocket,
+    Rocket,
   Trophy,
   UsersThree,
   type Icon,
 } from "@phosphor-icons/react";
 import { Container, EASE } from "@/components/home/ui";
-import { PixelPortrait } from "@/components/about-us/pixel-portrait";
 import { IndexBar, PaperSection } from "@/components/paper/paper-sections";
 import type { CommunityData, CommunityItem } from "@/lib/community";
+import { TEAM } from "@/data/team";
+import { DotSilhouette } from "@/components/team/team-page";
 import { PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 
@@ -329,16 +330,10 @@ export function TogetherWeBuild() {
 }
 
 /** Bento: the people, what the events were, and the communities we work with. */
-const FACES: [string, string][] = [
-  ["arindam-majumder", "Arindam Majumder"],
-  ["amitesh-anand", "Amitesh Anand"],
-  ["shivay-lamba", "Shivay Lamba"],
-  ["kathank-raithatha", "Kathank Raithatha"],
-  ["nancy-garg", "Nancy Garg"],
-  ["shivam-katare", "Shivam Katare"],
-  ["indrajit-ari", "Indrajit Ari"],
-  ["piuli-biswas", "Piuli Biswas"],
-];
+/** The team, in the same order and portraits as the team page. */
+const FACES = TEAM.flatMap((tier) => tier.members).filter(
+  (m): m is typeof m & { portrait: string; name: string } => Boolean(m.portrait && m.name && !m.open),
+);
 
 /** Each community's real mark: SVGs tinted in their brand colour, PNGs as they are. */
 const PARTNERS: { name: string; file: string; brand?: string }[] = [
@@ -388,79 +383,116 @@ export function CommunityBento({ data, index }: { data: CommunityData; index: nu
         <motion.h2 {...rise(reduce)} className="mt-6 text-[34px] font-medium leading-[1.05] tracking-[-0.045em] md:text-[48px]">
           Built by people who <span style={{ color: PRINT }}>show up</span>
         </motion.h2>
-        <div className="mt-10 grid gap-3 lg:grid-cols-3">
-          {/* Faces, in the same dot print as the team page */}
-          <motion.div {...rise(reduce)} className={cn(card, "flex flex-col justify-between gap-6 p-6")}>
-            <div className="grid grid-cols-4 gap-2">
-              {FACES.map(([file, name], i) => (
+        <div className="mt-10 grid gap-3 lg:grid-cols-[1.15fr_1fr]">
+          {/* The team, in grayscale photos */}
+          <motion.div {...rise(reduce)} className={cn(card, "flex flex-col gap-6 p-5 md:p-6")}>
+            <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
+              {FACES.map((m, i) => (
                 <motion.div
-                  key={file}
-                  className="relative aspect-[4/4.4] overflow-hidden rounded-[6px]"
-                  style={{ background: "linear-gradient(180deg, #e6e3de 0%, #d8d4ce 100%)" }}
-                  initial={reduce ? false : { opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
+                  key={m.name}
+                  title={m.name}
+                  className="relative aspect-[3/4] overflow-hidden rounded-[6px] bg-[#e6e3de]"
+                  initial={reduce ? false : { opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.8, ease: EASE, delay: 0.15 + i * 0.07 }}
+                  transition={{ duration: 0.8, ease: EASE, delay: 0.1 + i * 0.05 }}
                 >
-                  <PixelPortrait src={`/assets/team/${file}.webp?v=13`} alt={name} />
+                  <Image
+                    src={m.portrait}
+                    alt={m.name}
+                    fill
+                    sizes="(min-width: 1024px) 110px, 25vw"
+                    className="object-cover object-top contrast-[1.05] grayscale"
+                  />
+                  <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[6px] ring-1 ring-inset ring-[#141414]/[0.07]" />
                 </motion.div>
               ))}
+              {/* The seat still open */}
+              <motion.div
+                className="col-span-2"
+                initial={reduce ? false : { opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, ease: EASE, delay: 0.1 + FACES.length * 0.05 }}
+              >
+                <Link
+                  href="/careers"
+                  className="relative flex h-full min-h-[96px] items-end overflow-hidden rounded-[6px] p-3 sm:p-4"
+                  style={{ background: "linear-gradient(180deg, #e6e3de 0%, #d8d4ce 100%)" }}
+                >
+                  {/* The open seat, as on the team page, in our orange */}
+                  <span aria-hidden className="absolute inset-y-0 right-0 w-1/2 [&>svg]:!inset-x-[6%] [&>svg]:!w-[88%]">
+                    <DotSilhouette coarse fill={PRINT} opacity={0.9} />
+                  </span>
+                  <span className="relative text-[17px] font-medium tracking-[-0.03em]">And you?</span>
+                  <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[6px] ring-1 ring-inset ring-[#141414]/[0.07]" />
+                </Link>
+              </motion.div>
             </div>
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="text-[16px] font-medium tracking-[-0.02em]">The team behind the events</p>
-              <Link href="/team" className="inline-flex h-10 items-center gap-2 rounded-full bg-[#141414] px-4 text-[13.5px] font-medium text-white transition-colors hover:bg-[#f97316]">
-                Meet the team <ArrowUpRight weight="bold" className="size-3.5" />
-              </Link>
+            <div className="mt-auto flex flex-wrap items-center justify-between gap-3">
+              <p className="text-[17px] font-medium tracking-[-0.02em]">The team behind the events</p>
+              <div className="flex flex-wrap gap-2">
+                <Link href="/team" className="inline-flex h-10 items-center gap-2 rounded-full bg-[#141414] px-4 text-[13.5px] font-medium text-white transition-colors hover:bg-[#f97316]">
+                  Meet the team <ArrowUpRight weight="bold" className="size-3.5" />
+                </Link>
+              </div>
             </div>
           </motion.div>
 
-          {/* The count, on a faint grid */}
-          <motion.div {...rise(reduce, 0.08)} className={cn(card, "relative isolate flex min-h-[300px] flex-col justify-between overflow-hidden p-7")}>
-            <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 [background-image:linear-gradient(to_right,rgba(20,20,20,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(20,20,20,0.06)_1px,transparent_1px)] [background-size:56px_56px] [mask-image:radial-gradient(ellipse_80%_70%_at_70%_30%,black,transparent)]" />
-            <span aria-hidden className="absolute right-12 top-14 -z-10 size-14 bg-[#f97316]/[0.08]" />
-            <div>
-              <p className="text-[96px] font-medium leading-[0.9] tracking-[-0.07em] tabular-nums md:text-[112px]">
-                <Counter to={data.totals.events} />
-                <span style={{ color: PRINT }}>+</span>
-              </p>
-              <p className="mt-3 text-[17px] text-[#141414]/50">Events run, spoken at or joined</p>
-            </div>
-            <p className="max-w-[340px] text-[15px] leading-[1.6] text-[#141414]/55">
-              Talks, hackathons and meetups across {data.totals.cities} cities, and streams and podcasts online. No slides for the sake of it, just builders in a room.
-            </p>
-          </motion.div>
+          <div className="flex flex-col gap-3">
+            {/* The count, on a faint grid */}
+            <motion.div {...rise(reduce, 0.08)} className={cn(card, "relative isolate flex flex-col gap-4 overflow-hidden p-6 sm:flex-row sm:items-end sm:justify-between md:p-7")}>
+              <div>
+                <p className="text-[72px] font-medium leading-[0.9] tracking-[-0.07em] tabular-nums md:text-[84px]">
+                  <Counter to={data.totals.events} />
+                  <span style={{ color: PRINT }}>+</span>
+                </p>
+                <p className="mt-2 text-[16px] text-[#141414]/55">Events run, spoken at or joined</p>
+              </div>
+            </motion.div>
 
-          {/* Communities we show up with: still chips with their marks */}
-          <motion.div {...rise(reduce, 0.14)} className={cn(card, "overflow-hidden p-5")}>
-            <p className="text-[13px] font-medium text-[#141414]/45">Communities we show up with</p>
-            <ul className="mt-4 flex flex-wrap gap-2">
-              {PARTNERS.map((p) => (
-                <li key={p.name} className="flex h-10 items-center gap-2 rounded-[8px] bg-white px-3 text-[13.5px] font-medium shadow-[0_6px_14px_-10px_rgba(20,20,20,0.45)] ring-1 ring-inset ring-[#141414]/[0.07]">
-                  <PartnerMark p={p} small />
-                  {p.name}
-                </li>
-              ))}
-            </ul>
-          </motion.div>
+            {/* Communities we show up with: their marks */}
+            <motion.div {...rise(reduce, 0.14)} className={cn(card, "flex flex-1 flex-col p-5 md:p-6")}>
+              <p className="text-[13px] font-medium text-[#141414]/45">Communities we show up with</p>
+              <ul className="mt-4 grid flex-1 auto-rows-fr grid-cols-4 gap-2 sm:grid-cols-6">
+                {PARTNERS.map((p) => (
+                  <li
+                    key={p.name}
+                    title={p.name}
+                    className="flex min-h-[52px] items-center justify-center"
+                  >
+                    <PartnerMark p={p} />
+                    <span className="sr-only">{p.name}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          </div>
 
-          {/* What we run, as a row of tiles */}
-          <motion.div {...rise(reduce, 0.26)} className={cn(card, "flex flex-col gap-5 p-6 sm:flex-row sm:items-center lg:col-span-3")}>
-            <p className="shrink-0 text-[16px] font-medium tracking-[-0.02em] sm:w-[150px]">What we run</p>
-            <ul className="grid flex-1 grid-cols-2 gap-2 sm:grid-cols-4">
+          {/* What we run: one strip, four numbers */}
+          <motion.div {...rise(reduce, 0.2)} className={cn(card, "overflow-hidden lg:col-span-2")}>
+            <ul className="grid grid-cols-2 md:grid-cols-4">
               {formats.filter(([, v]) => v > 0).map(([label, value, KindIcon], i) => (
                 <motion.li
                   key={label}
-                  className="flex flex-col items-center gap-2 rounded-[8px] bg-[#faf8f4] px-2 py-3 ring-1 ring-inset ring-[#141414]/[0.05]"
-                  initial={reduce ? false : { opacity: 0, y: 14 }}
-                  whileInView={{ opacity: 1, y: 0 }}
+                  className={cn(
+                    "group flex items-center justify-between gap-4 p-5 md:p-7",
+                    i % 2 === 1 && "border-l border-[#141414]/[0.07]",
+                    i > 1 && "max-md:border-t max-md:border-[#141414]/[0.07]",
+                    i === 2 && "md:border-l md:border-[#141414]/[0.07]",
+                  )}
+                  initial={reduce ? false : { opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.8, ease: EASE, delay: 0.3 + i * 0.08 }}
+                  transition={{ duration: 0.9, ease: EASE, delay: 0.2 + i * 0.1 }}
                 >
-                  <span className="flex size-10 items-center justify-center rounded-[8px] bg-white shadow-[0_6px_14px_-10px_rgba(20,20,20,0.5)] ring-1 ring-inset ring-[#141414]/[0.06]">
-                    <KindIcon weight="duotone" className="size-5" style={{ color: PRINT }} />
+                  <div>
+                    <p className="text-[40px] font-medium leading-none tracking-[-0.05em] tabular-nums md:text-[48px]"><Counter to={value} /></p>
+                    <p className="mt-2 text-[14px] text-[#141414]/55">{label}</p>
+                  </div>
+                  <span className="flex size-10 shrink-0 items-center justify-center bg-[#141414] text-[#f4efe7] transition-colors duration-500 group-hover:bg-[#f97316]">
+                    <KindIcon weight="regular" className="size-5" />
                   </span>
-                  <span className="text-[18px] font-medium leading-none tabular-nums"><Counter to={value} /></span>
-                  <span className="text-[12px] text-[#141414]/55">{label}</span>
                 </motion.li>
               ))}
             </ul>

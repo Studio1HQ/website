@@ -7,7 +7,6 @@ import { animate, motion, useInView, useReducedMotion } from "motion/react";
 import {
   ArrowUpRight,
   Broadcast,
-  DiscordLogo,
   CalendarDots,
   Code,
   MapPin,
@@ -20,7 +19,7 @@ import { Container, EASE } from "@/components/home/ui";
 import { PaperPageHeader } from "@/components/paper/paper-page-header";
 import { IndexBar, PaperSection } from "@/components/paper/paper-sections";
 import { DotWord } from "@/components/team/dot-word";
-import { Landmark } from "@/components/community/landmarks";
+import { Landmark, Skyline } from "@/components/community/landmarks";
 import { CommunityBento, TogetherSpread, TogetherWeBuild } from "@/components/community/community-sections";
 import { RegistrationBar, UpcomingEvents } from "@/components/community/upcoming";
 import { PartnerWall } from "@/components/community/partner-wall";
@@ -29,6 +28,7 @@ import { DitherField } from "@/components/home/dither-field";
 import type { CommunityData, CommunityKind } from "@/lib/community";
 import { GRAIN, PAPER_SCOPE, PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
+import { DiscordIcon } from "@/components/community/discord-icon";
 
 const KIND: Record<CommunityKind, { label: string; icon: Icon }> = {
   meetup: { label: "Meetup", icon: UsersThree },
@@ -108,7 +108,10 @@ function WayCard({
   const reduce = !!useReducedMotion();
   return (
     <motion.div
-      {...rise(reduce, index * 0.14)}
+      initial={reduce ? false : { opacity: 0, y: 14 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.9, ease: EASE, delay: index * 0.08 }}
       className="group relative isolate flex min-h-[360px] flex-col justify-between overflow-hidden rounded-[6px] bg-white/80 p-6 ring-1 ring-inset ring-[#141414]/10 transition-colors duration-300 hover:bg-white md:p-7 [&>*:not(canvas)]:relative"
     >
       <DitherField still strength={1.8} seed={1.7 + index} className="absolute inset-y-0 right-0 -z-10 h-full w-[55%] opacity-80 [mask-image:linear-gradient(to_left,black_30%,transparent)]" />
@@ -120,7 +123,7 @@ function WayCard({
       </div>
       <div>
         <p className="flex items-baseline gap-2">
-          <span className="text-[64px] font-medium leading-none tracking-[-0.06em]"><Count to={count} /></span>
+          <span className="text-[64px] font-medium leading-none tracking-[-0.06em] tabular-nums">{count}</span>
           <span className="text-[15px] text-[#141414]/50">{title.toLowerCase()} so far</span>
         </p>
         <h3 className="mt-5 text-[22px] font-medium tracking-[-0.03em]">{title}</h3>
@@ -166,12 +169,8 @@ function YourCity({ cities }: { cities: string[] }) {
           </div>
           {/* Skyline: every city we have been to, drawn in, standing on the bottom edge */}
           <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-56 [background:radial-gradient(ellipse_60%_100%_at_50%_100%,rgba(249,115,22,0.35),transparent_70%)]" />
-          <div className={cn("s1-skyline relative flex items-end justify-between gap-1 px-2 md:gap-2 md:px-8", (drawn || reduce) && "is-drawn")} style={{ color: "#fbd2b0" }}>
-            {cities.slice(0, 9).map((city, i) => (
-              <div key={city} className="min-w-0 flex-1" style={{ ["--d" as string]: `${i * 0.18}s` }}>
-                <Landmark city={city} className="mx-auto -mb-px h-16 w-full max-w-[160px] md:h-32" />
-              </div>
-            ))}
+          <div className={cn("s1-skyline relative px-3 md:px-6", (drawn || reduce) && "is-drawn")} style={{ color: "#fbd2b0" }}>
+            <Skyline cities={cities.slice(0, 9)} />
           </div>
         </motion.div>
       </Container>
@@ -185,7 +184,7 @@ export function CommunityPage({ data }: { data: CommunityData }) {
   const all = [...upcoming, ...past];
   const byId = new Map(all.map((e) => [e.id, e]));
   // The soonest event taking registrations, for the pill along the bottom
-  const registering = upcoming.find((e) => e.cta === "Register" && e.href) ?? null;
+  const registering = upcoming.find((e) => e.cta === "Register" && e.href) ?? upcoming.find((e) => e.href) ?? null;
   const stats: [number, string, Icon][] = [
     [totals.events, "Events", CalendarDots],
     [totals.cities, "Cities", MapPin],
@@ -221,7 +220,7 @@ export function CommunityPage({ data }: { data: CommunityData }) {
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
                 <a href={DISCORD_URL} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-2 rounded-full bg-[#141414] px-5 text-[14px] font-medium text-white transition-colors hover:bg-[#2a2522]">
-                  <DiscordLogo weight="fill" className="size-4" /> Join the Discord
+                  <DiscordIcon className="size-4" /> Join the Discord
                 </a>
                 <a href="#up-next" className="inline-flex h-11 items-center gap-2 rounded-full px-5 text-[14px] font-medium ring-1 ring-inset ring-[#141414] transition-colors hover:bg-[#141414] hover:text-white">
                   See what&apos;s next
@@ -230,32 +229,27 @@ export function CommunityPage({ data }: { data: CommunityData }) {
             </motion.div>
           </div>
 
-          <motion.dl
-            initial={reduce ? false : { opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: EASE, delay: 1.2 }}
-            className="mt-10 grid grid-cols-2 overflow-hidden rounded-[6px] bg-[#ebe6de] shadow-[inset_0_2px_6px_rgba(20,20,20,0.10),inset_0_1px_2px_rgba(20,20,20,0.08),inset_0_-1px_0_rgba(255,255,255,0.85)] md:mt-14 md:grid-cols-4"
-          >
+          <dl className="mt-10 grid grid-cols-2 gap-3 md:mt-14 md:grid-cols-4 md:gap-4">
             {stats.map(([value, label, StatIcon], i) => (
-              <div
+              <motion.div
                 key={label}
-                className={cn(
-                  "flex min-w-0 items-center gap-2.5 px-3.5 py-4 sm:gap-4 sm:px-5 sm:py-5 md:px-6 md:py-6",
-                  i % 2 === 1 && "border-l border-[#141414]/[0.08]",
-                  i > 1 && "max-md:border-t max-md:border-[#141414]/[0.08]",
-                  i === 2 && "md:border-l md:border-[#141414]/[0.08]",
-                )}
+                initial={reduce ? false : { opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.9, ease: EASE, delay: 1.1 + i * 0.1 }}
+                className="group flex min-w-0 flex-col gap-5 rounded-[6px] bg-white/80 p-4 ring-1 ring-inset ring-[#141414]/10 transition-[background-color,box-shadow,transform] duration-500 ease-out hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_18px_34px_-26px_rgba(20,20,20,0.45)] sm:p-5 md:p-6"
               >
-                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#f4efe7] text-[#f97316] sm:size-10">
-                  <StatIcon weight="bold" className="size-[18px]" />
-                </span>
-                <dd className="text-[26px] font-medium leading-none tracking-[-0.05em] text-[#141414]/85 sm:text-[32px] md:text-[40px]">
+                <div className="flex items-center justify-between">
+                  <dt className="text-[12.5px] font-medium uppercase tracking-[0.14em] text-[#141414]/50">{label}</dt>
+                  <span className="flex size-9 shrink-0 items-center justify-center bg-[#141414] text-[#f4efe7] transition-colors duration-500 group-hover:bg-[#f97316] sm:size-10">
+                    <StatIcon weight="regular" className="size-[18px]" />
+                  </span>
+                </div>
+                <dd className="text-[36px] font-medium leading-none tracking-[-0.05em] sm:text-[44px] md:text-[52px]">
                   <Count to={value} />
                 </dd>
-                <dt className="min-w-0 text-[12px] leading-tight text-[#141414]/55 sm:text-[13px]">{label}</dt>
-              </div>
+              </motion.div>
             ))}
-          </motion.dl>
+          </dl>
         </Container>
       </PaperPageHeader>
 
@@ -312,7 +306,7 @@ export function CommunityPage({ data }: { data: CommunityData }) {
               }
             />
             {/* Middle: a room full of builders */}
-            <motion.div {...rise(reduce, 0.14)} className="group relative min-h-[360px] overflow-hidden rounded-[6px]">
+            <motion.div initial={reduce ? false : { opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-80px" }} transition={{ duration: 0.9, ease: EASE, delay: 0.08 }} className="group relative min-h-[360px] overflow-hidden rounded-[6px]">
               <Image src="/assets/events/aki-hacks/03.webp" alt="Developers at a Studio1 hackathon" fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover transition-transform duration-[1.4s] ease-out group-hover:scale-[1.05]" />
               <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
               <div className="absolute inset-x-0 bottom-0 p-6 text-white md:p-7">
@@ -321,7 +315,7 @@ export function CommunityPage({ data }: { data: CommunityData }) {
                   {totals.events}+ events so far
                 </span>
                 <p className="mt-3 text-[56px] font-medium leading-none tracking-[-0.06em]">
-                  <Count to={totals.cities} />
+                  {totals.cities}
                 </p>
                 <p className="mt-1 text-[14px] text-white/80">Cities where we&apos;ve shown up</p>
               </div>

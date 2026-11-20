@@ -1,4 +1,6 @@
-import type { ReactNode } from "react";
+"use client";
+
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 
 /*
  * Detailed line drawings of each city's landmark, on a 120 x 80 grid, drawn
@@ -158,18 +160,58 @@ export function Landmark({ city, className }: { city: string; className?: string
   const drawing = DRAWINGS[city];
   if (!drawing) return null;
   return (
-    <svg
-      aria-hidden
-      viewBox="0 0 120 80"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.3"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
+    <svg aria-hidden viewBox="0 0 120 80" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" className={className}>
       {drawing}
     </svg>
+  );
+}
+
+type Box = { x: number; y: number; w: number; h: number };
+const FULL: Box = { x: 0, y: 0, w: 120, h: 80 };
+
+/**
+ * The cities' landmarks side by side as one skyline: each drawing cropped to
+ * its own outline, all at one scale, filling the width and standing on the
+ * bottom edge.
+ */
+export function Skyline({ cities, className }: { cities: string[]; className?: string }) {
+  const list = cities.filter((c) => c in DRAWINGS);
+  const key = list.join("|");
+  const refs = useRef<(SVGSVGElement | null)[]>([]);
+  const [boxes, setBoxes] = useState<Box[] | null>(null);
+  useLayoutEffect(() => {
+    setBoxes(
+      refs.current.slice(0, key.split("|").length).map((el) => {
+        const b = el?.getBBox();
+        return b && b.width ? { x: b.x - 1, y: b.y - 1, w: b.width + 2, h: b.height + 2 } : FULL;
+      }),
+    );
+  }, [key]);
+  const total = boxes ? boxes.reduce((n, b) => n + b.w, 0) : list.length * 120;
+  return (
+    <div className={className} style={{ display: "flex", alignItems: "flex-end" }}>
+      {list.map((city, i) => {
+        const b = boxes?.[i] ?? FULL;
+        return (
+          <svg
+            key={city}
+            ref={(el) => {
+              refs.current[i] = el;
+            }}
+            aria-hidden
+            viewBox={`${b.x} ${b.y} ${b.w} ${b.h}`}
+            style={{ width: `${(b.w / total) * 100}%`, height: "auto", display: "block", flex: "none" }}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.1"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            {DRAWINGS[city]}
+          </svg>
+        );
+      })}
+    </div>
   );
 }
 

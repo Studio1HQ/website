@@ -2,12 +2,13 @@
 
 import { useRef, useState, type FormEvent } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { ArrowUpRight, CheckCircle, DiscordLogo, EnvelopeSimple } from "@phosphor-icons/react";
+import { ArrowUpRight, CheckCircle, EnvelopeSimple } from "@phosphor-icons/react";
 import { Container, EASE } from "@/components/home/ui";
 import { DitherField } from "@/components/home/dither-field";
 import { IndexBar, PaperSection } from "@/components/paper/paper-sections";
 import { GRAIN, PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
+import { DiscordIcon } from "@/components/community/discord-icon";
 
 export const DISCORD_URL = "https://discord.gg/cCbjnxVhzx";
 
@@ -109,7 +110,7 @@ export function JoinCommunity({ index }: { index: number }) {
             <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 opacity-[0.07]" style={{ backgroundImage: GRAIN }} />
             <DitherField still strength={1.8} seed={7.4} className="absolute inset-y-0 right-0 -z-10 h-full w-[55%] opacity-60 [mask-image:linear-gradient(to_left,black_30%,transparent)]" />
             <span className="flex size-14 items-center justify-center rounded-[6px] transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-105" style={{ background: "#5865F2" }}>
-              <DiscordLogo weight="fill" className="size-8" />
+              <DiscordIcon className="size-8" />
             </span>
             <div>
               <h3 className="text-[30px] font-medium leading-[1.05] tracking-[-0.04em] md:text-[36px]">Hang out on Discord</h3>
