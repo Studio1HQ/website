@@ -138,9 +138,14 @@ const ICONS: ReactNode[] = [
 
 /** A small seeded random, so the scatter is the same on every render. */
 function rand(n: number) {
-  const v = Math.sin(n * 127.1 + 311.7) * 43758.5453;
-  return v - Math.floor(v);
+  // integer hash: exact on the server and in the browser, unlike Math.sin
+  let h = Math.imul(n ^ 0x9e3779b9, 0x85ebca6b);
+  h = Math.imul(h ^ (h >>> 13), 0xc2b2ae35);
+  h ^= h >>> 16;
+  return (h >>> 0) / 4294967296;
 }
+
+const round = (v: number) => Math.round(v * 10) / 10;
 
 const COLS = 13;
 const ROWS = 8;
@@ -157,7 +162,7 @@ const SPOTS = range(COLS * ROWS).map((k) => {
   const y = r * CELL_H + (rand(k + 2) - 0.5) * 30;
   const turn = (rand(k + 3) - 0.5) * 40;
   const size = 0.62 + rand(k + 4) * 0.3;
-  return { k, icon, x, y, turn, size };
+  return { k, icon, x: round(x), y: round(y), turn: round(turn), size: Math.round(size * 100) / 100 };
 });
 
 function Scatter() {
