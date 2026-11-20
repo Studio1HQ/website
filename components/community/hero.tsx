@@ -47,7 +47,7 @@ export function CommunityHero({ totals }: { totals: Totals }) {
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 opacity-30 mix-blend-multiply" style={{ backgroundImage: GRAIN }} />
 
       {/* the sketched desk, clear behind the words and fading out at the bottom */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-[8] opacity-[0.5] [mask-image:radial-gradient(ellipse_40%_42%_at_50%_40%,rgba(0,0,0,0.25)_30%,black_90%)]">
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-[8] opacity-[0.5] [mask-image:radial-gradient(ellipse_40%_42%_at_50%_40%,rgba(0,0,0,0.6)_30%,black_90%)]">
         <SketchDesk className="absolute inset-0 size-full" />
       </div>
 

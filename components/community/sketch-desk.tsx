@@ -106,6 +106,44 @@ function Desk() {
       <path d="M1290 780 h120 a18 18 0 0 1 18 18 v44 a18 18 0 0 1 -18 18 h-16 v24 l-24 -24 h-80 a18 18 0 0 1 -18 -18 v-44 a18 18 0 0 1 18 -18 z" />
       <path d="M1330 812 h50" />
 
+      {/* hackathon trophy */}
+      <path d="M0 820 h100 v30 a50 50 0 0 1 -100 0 z M0 836 h-22 a22 22 0 0 0 22 30 M100 836 h22 a22 22 0 0 1 -22 30 M50 900 v30 M20 930 h60 v20 h-60 z" />
+
+      {/* headphones */}
+      <path d="M1500 120 v-30 a70 70 0 0 1 140 0 v30" />
+      <rect x="1486" y="104" width="30" height="56" rx="10" />
+      <rect x="1624" y="104" width="30" height="56" rx="10" />
+
+      {/* coffee, from above */}
+      <circle cx="460" cy="850" r="44" />
+      <circle cx="460" cy="850" r="32" />
+      <path d="M504 840 h20 a16 16 0 0 1 0 32 h-20" />
+      <path d="M440 846 c6 -8 16 -8 22 0 s16 8 22 0" />
+
+      {/* a </> sticker */}
+      <circle cx="465" cy="385" r="42" />
+      <path d="M448 370 l-14 15 14 15 M482 370 l14 15 -14 15 M470 364 l-10 42" />
+
+      {/* pizza slice: hackathon night */}
+      <path d="M1500 860 l120 -30 -40 120 z M1520 868 a90 90 0 0 0 76 -24" />
+      <circle cx="1556" cy="880" r="8" />
+      <circle cx="1580" cy="908" r="6" />
+
+      {/* a video player */}
+      <rect x="-190" y="250" width="240" height="150" rx="10" />
+      <path d="M-90 300 l40 25 -40 25 z M-170 380 h200" />
+      <circle cx="-110" cy="380" r="6" />
+
+      {/* a chat window */}
+      <rect x="1560" y="440" width="220" height="230" rx="12" />
+      <path d="M1560 476 h220" />
+      {[0, 1, 2].map((i) => (
+        <g key={`ch${i}`}>
+          <circle cx="1592" cy={512 + i * 52} r="12" />
+          <path d={`M1614 ${506 + i * 52} h${100 - i * 20} M1614 ${522 + i * 52} h${60 + i * 10}`} />
+        </g>
+      ))}
+
       {/* circuit traces between things */}
       <path d="M410 280 h60 v-150 h50" />
       <path d="M1000 180 h60 v-60 h50" />
