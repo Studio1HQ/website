@@ -1,9 +1,15 @@
 import { DevRelJobsPage } from "@/components/devrel-jobs/devrel-jobs-page";
-import { getDevRelJobs } from "@/lib/devrel-jobs";
+import { getDevRelJobs } from "@/lib/devrel-jobs-data";
 import { baseUrl } from "@/lib/seo";
 
-export default function DevRelJobs() {
-  const jobs = getDevRelJobs();
+/**
+ * Built once an hour at most; a save on the dashboard's DevRel jobs page
+ * rebuilds it on the next visit (devRelJobsChanged).
+ */
+export const revalidate = 3600;
+
+export default async function DevRelJobs() {
+  const jobs = await getDevRelJobs();
 
   // Plain list entries, not JobPosting: Google only accepts JobPosting on a
   // job's own detail page, and these jobs live on other companies' sites.

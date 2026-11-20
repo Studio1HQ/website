@@ -32,6 +32,8 @@
  *   outreach_manager    the outreach pipeline: organisations, deals, follow-ups
  *   influencer_manager  the influencer roster, rates and results
  *   socials_manager     Social growth: the accounts and their numbers
+ *   job_board_editor the public DevRel jobs board (studio1hq.com/devrel-jobs):
+ *                    add, change, hide and remove listings
  *
  * Those last three are given one by one (GRANTED_ONLY): Admin doesn't open
  * them. The founders always have them (OWNER_ROLES); anyone else, admins
@@ -72,6 +74,7 @@ export const ROLE_KEYS = [
   "outreach_manager",
   "influencer_manager",
   "socials_manager",
+  "job_board_editor",
 ] as const;
 export type RoleKey = (typeof ROLE_KEYS)[number];
 
@@ -79,7 +82,7 @@ export const ROLE_INFO: Record<
   RoleKey,
   {
     label: string;
-    area: "All" | "Hiring" | "Blog" | "Community" | "Clients" | "Team tasks" | "Outreach" | "Influencers" | "Social growth";
+    area: "All" | "Hiring" | "Blog" | "Community" | "Clients" | "Team tasks" | "Outreach" | "Influencers" | "Social growth" | "DevRel jobs";
     description: string;
   }
 > = {
@@ -87,7 +90,7 @@ export const ROLE_INFO: Record<
     label: "Admin",
     area: "All",
     description:
-      "Everything except Money, Outreach, Influencers and Social growth: the team list, exports, subscriber lists, every pipeline, the blog, community and client work. Payroll and payments stay with the founders; the other three are given one by one.",
+      "Everything except Money, Outreach, Influencers and Social growth: the team list, exports, subscriber lists, every pipeline, the blog, community, client work and the DevRel jobs board. Payroll and payments stay with the founders; the other three are given one by one.",
   },
   hiring_reviewer: {
     label: "Hiring reviewer",
@@ -154,6 +157,11 @@ export const ROLE_INFO: Record<
     area: "Social growth",
     description: "Track Studio1's social accounts: add accounts and log their numbers.",
   },
+  job_board_editor: {
+    label: "DevRel jobs",
+    area: "DevRel jobs",
+    description: "Edit the public DevRel jobs board: add, change, hide and remove listings.",
+  },
 };
 
 /**
@@ -195,8 +203,20 @@ export function atLeast(role: Role | null | undefined, minimum: Role) {
  *              Manage = outreach_manager / influencer_manager /
  *              socials_manager (one level each; GRANTED_ONLY: Admin
  *              doesn't open them)
+ *   jobboard   Manage = job_board_editor (one level: whoever has it edits
+ *              the public DevRel jobs board; Admin counts)
  */
-export const AREA_KEYS = ["hiring", "blog", "community", "clients", "tasks", "outreach", "influencers", "socials"] as const;
+export const AREA_KEYS = [
+  "hiring",
+  "blog",
+  "community",
+  "clients",
+  "tasks",
+  "outreach",
+  "influencers",
+  "socials",
+  "jobboard",
+] as const;
 export type AreaKey = (typeof AREA_KEYS)[number];
 
 /** The levels each area really has, lowest first. */
@@ -209,6 +229,7 @@ export type AreaLevels = {
   outreach: "manage";
   influencers: "manage";
   socials: "manage";
+  jobboard: "manage";
 };
 export type AreaLevel<A extends AreaKey = AreaKey> = AreaLevels[A];
 
@@ -280,6 +301,11 @@ export const AREAS: { [A in AreaKey]: AreaInfo<A> } = {
     label: "Social growth",
     levels: [level<"socials">("manage", "socials_manager")],
   },
+  jobboard: {
+    key: "jobboard",
+    label: "DevRel jobs",
+    levels: [level<"jobboard">("manage", "job_board_editor")],
+  },
 };
 
 /**
@@ -306,6 +332,7 @@ export const EMPTY_GRID: AccessGrid = {
   outreach: null,
   influencers: null,
   socials: null,
+  jobboard: null,
 };
 
 /** The highest level of this area whose role is in the list, ignoring Admin. */
@@ -332,6 +359,7 @@ export function gridFromRoles(roles: readonly RoleKey[]): AccessGrid {
     outreach: heldLevel(roles, "outreach"),
     influencers: heldLevel(roles, "influencers"),
     socials: heldLevel(roles, "socials"),
+    jobboard: heldLevel(roles, "jobboard"),
   };
 }
 
