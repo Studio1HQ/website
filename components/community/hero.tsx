@@ -5,7 +5,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { ArrowUpRight } from "@phosphor-icons/react";
 import Logo from "@/components/ui/svgs/logo";
 import { Container, EASE } from "@/components/home/ui";
-import { Cursor, PrintBlock, SelectionFrame, SWATCHES } from "@/components/paper/paper-hero";
+import { Cursor, PrintBlock, SelectionFrame } from "@/components/paper/paper-hero";
 import type { CommunityItem } from "@/lib/community";
 import { DiscordIcon } from "@/components/community/discord-icon";
 import { DISCORD_URL, LUMA_URL, Subscribe } from "@/components/community/join";
@@ -54,7 +54,7 @@ export function CommunityHero({ totals, next = [] }: { totals: Totals; next?: Co
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 opacity-30 mix-blend-multiply" style={{ backgroundImage: GRAIN }} />
 
       {/* the sketched desk, clear behind the words and fading out at the bottom */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-[8] opacity-[0.5] [mask-image:radial-gradient(ellipse_40%_42%_at_50%_40%,rgba(0,0,0,0.6)_30%,black_90%)]">
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-[8] opacity-[0.3] [mask-image:radial-gradient(ellipse_40%_42%_at_50%_40%,rgba(0,0,0,0.35)_30%,black_90%)]">
         <SketchDesk className="absolute inset-0 size-full" />
       </div>
 
@@ -106,17 +106,6 @@ export function CommunityHero({ totals, next = [] }: { totals: Totals; next?: Co
           <Cursor className="absolute -bottom-7 left-[22%]" />
         </motion.div>
 
-        {/* Palette strip, top left, as a swatch layer */}
-        <motion.div {...float(0.45)} className="absolute left-[13%] top-[11%]">
-          <SelectionFrame label="palette" labelPosition="top-left" className="p-1">
-            <div className="flex">
-              {SWATCHES.map((c) => (
-                <span key={c} className="h-5 w-5 2xl:h-6 2xl:w-6" style={{ background: c }} />
-              ))}
-            </div>
-          </SelectionFrame>
-        </motion.div>
-
         {/* Up next card, lower left: the real calendar */}
         {next.length ? (
           <motion.div {...float(0.75)} className="absolute left-[2.5%] top-[54%] w-[19%] max-w-[290px]">
@@ -151,12 +140,6 @@ export function CommunityHero({ totals, next = [] }: { totals: Totals; next?: Co
           </motion.div>
         ) : null}
 
-        {/* Block print: the reaching hand, lower right */}
-        <motion.div {...float(0.8)} className="absolute -right-[1%] top-[44%] h-[130px] w-[170px] 2xl:w-[200px]">
-          <PrintBlock className="size-full">
-            <Image src="/assets/site/hand-right.png" alt="" fill sizes="20vw" className="object-contain object-left p-[8%] [filter:brightness(0)_invert(96%)_sepia(8%)]" />
-          </PrintBlock>
-        </motion.div>
       </div>
 
       {/* a soft paper wash behind the words, so the artefacts blur into the sheet */}
