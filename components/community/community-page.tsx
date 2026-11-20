@@ -13,12 +13,11 @@ import {
 } from "@phosphor-icons/react";
 import { Container, EASE } from "@/components/home/ui";
 import { IndexBar, PaperSection } from "@/components/paper/paper-sections";
-import { FaceWall } from "@/components/community/face-wall";
 import { Landmark, Skyline } from "@/components/community/landmarks";
 import { CommunityBento, TogetherSpread, TogetherWeBuild } from "@/components/community/community-sections";
 import { RegistrationBar, UpcomingEvents } from "@/components/community/upcoming";
-import { PartnerWall } from "@/components/community/partner-wall";
 import { JoinCommunity } from "@/components/community/join";
+import { BeenHere } from "@/components/community/been-here";
 import { CommunityHero } from "@/components/community/hero";
 import { WaysIn } from "@/components/community/ways-in";
 import type { CommunityData, CommunityKind } from "@/lib/community";
@@ -194,9 +193,7 @@ export function CommunityPage({ data }: { data: CommunityData }) {
 
       <CommunityBento data={data} index={cities.length ? 6 : 5} />
 
-      <PartnerWall index={cities.length ? 7 : 6} />
-
-      <FaceWall events={totals.events} />
+      <BeenHere items={past} />
 
       <JoinCommunity />
 
