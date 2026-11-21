@@ -122,21 +122,44 @@ function EventCard({ item }: { item: CommunityItem }) {
 
 /** One or two events: a compact row each. */
 function ListRow({ item }: { item: CommunityItem }) {
+  const [, m, d] = item.date.split("-").map(Number);
+  const KindIcon = KIND_ICON[item.kind];
+  const line =
+    item.summary ??
+    (item.kind === "hackathon"
+      ? "A build weekend with the teams behind the tools."
+      : item.kind === "meetup"
+        ? "Talks, demos and the people building in your city."
+        : `Find the Studio1 team at ${item.name.replace(/ \d{4}.*$/, "")}.`);
   return (
-    <Wrap item={item} className="group flex items-center gap-4 rounded-[6px] bg-white/80 p-3 ring-1 ring-inset ring-[#141414]/10 transition-[background-color,box-shadow] duration-300 hover:bg-white hover:shadow-[0_18px_34px_-26px_rgba(20,20,20,0.45)] sm:gap-6 sm:p-4">
-      <Cover item={item} className="aspect-[4/3] w-[104px] shrink-0 rounded-[4px] sm:w-[210px] [&>span:last-child]:hidden sm:[&>span:last-child]:block sm:[&>span:last-child]:text-[17px]" />
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-[11.5px] font-medium uppercase tracking-[0.16em] text-[#141414]/50">
-          {where(item)} <span style={{ color: PRINT }}>//</span> {when(item)}
-        </p>
-        <h3 className="mt-1.5 line-clamp-2 text-[18px] font-medium leading-[1.2] tracking-[-0.03em] sm:text-[22px]">{item.name}</h3>
-        <p className="mt-1.5 hidden truncate text-[14.5px] text-[#141414]/55 md:block">{item.summary ?? ""}</p>
-      </div>
-      <span className="hidden shrink-0 items-center gap-2 text-[14px] font-medium sm:flex">
-        {item.cta}
-        <span className="flex size-8 items-center justify-center rounded-full bg-[#141414] text-white transition-[transform,background-color] duration-300 group-hover:rotate-45 group-hover:bg-[#f97316]">
-          <ArrowUpRight weight="bold" className="size-3.5" />
+    <Wrap
+      item={item}
+      className="group flex items-center gap-5 rounded-[10px] bg-white/85 p-3 pr-5 ring-1 ring-inset ring-[#141414]/[0.09] transition-[background-color,box-shadow] duration-300 hover:bg-white hover:ring-[#141414]/20 sm:gap-7 sm:p-4 sm:pr-7"
+    >
+      {item.image ? (
+        <Cover item={item} className="aspect-[4/3] w-[96px] shrink-0 rounded-[6px] sm:w-[168px]" />
+      ) : (
+        /* no photo yet: a calendar tile */
+        <span className="flex w-[76px] shrink-0 flex-col items-center overflow-hidden rounded-[8px] bg-white ring-1 ring-inset ring-[#141414]/[0.1] sm:w-[92px]">
+          <span className="w-full py-1.5 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-white" style={{ background: PRINT }}>
+            {MONTHS[m - 1]}
+          </span>
+          <span className="py-2.5 text-[30px] font-medium leading-none tracking-[-0.04em] sm:text-[36px]">{String(d).padStart(2, "0")}</span>
         </span>
+      )}
+      <div className="min-w-0 flex-1">
+        <p className="flex items-center gap-2 text-[12px] font-medium uppercase tracking-[0.14em] text-[#141414]/50">
+          <KindIcon weight="regular" className="size-3.5" style={{ color: PRINT }} />
+          {KIND_LABEL[item.kind]}
+          <span className="text-[#141414]/25">·</span>
+          <span className="truncate normal-case tracking-normal">{where(item)}</span>
+        </p>
+        <h3 className="mt-1.5 line-clamp-2 text-[19px] font-medium leading-[1.2] tracking-[-0.025em] sm:text-[23px]">{item.name}</h3>
+        <p className="mt-1.5 hidden truncate text-[14.5px] text-[#141414]/55 sm:block">{line}</p>
+      </div>
+      <span className="hidden h-11 shrink-0 items-center gap-2 rounded-full bg-[#141414] px-5 text-[14px] font-medium text-white transition-colors duration-300 group-hover:bg-[#f97316] sm:inline-flex">
+        {item.cta}
+        <ArrowUpRight weight="bold" className="size-4 transition-transform duration-300 group-hover:rotate-45" />
       </span>
     </Wrap>
   );
