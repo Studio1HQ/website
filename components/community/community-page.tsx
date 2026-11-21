@@ -21,7 +21,7 @@ import { BeenHere } from "@/components/community/been-here";
 import { CommunityHero } from "@/components/community/hero";
 import { WaysIn } from "@/components/community/ways-in";
 import type { CommunityData, CommunityKind } from "@/lib/community";
-import { GRAIN, PAPER_SCOPE, PRINT } from "@/lib/paper";
+import { PAPER_SCOPE, PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 
 const KIND: Record<CommunityKind, { label: string; icon: Icon }> = {
@@ -65,9 +65,8 @@ function YourCity({ cities }: { cities: string[] }) {
     <PaperSection tone="paper">
       <Container>
         <motion.div {...rise(reduce)} ref={ref} className="relative isolate overflow-hidden rounded-[8px] bg-white/80 ring-1 ring-inset ring-[#141414]/10">
-          {/* a warm orange glow from below and the corners, paper grain */}
+          {/* a warm orange glow from below and the corners */}
           <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 [background:radial-gradient(ellipse_70%_60%_at_50%_110%,rgba(249,115,22,0.26),transparent_70%),radial-gradient(ellipse_40%_40%_at_0%_0%,rgba(249,115,22,0.14),transparent_70%),radial-gradient(ellipse_40%_40%_at_100%_0%,rgba(249,115,22,0.14),transparent_70%)]" />
-          <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 opacity-[0.22] mix-blend-multiply" style={{ backgroundImage: GRAIN }} />
           <div className="relative flex flex-col items-center px-6 pb-12 pt-14 text-center md:pb-14 md:pt-20">
             <h2 className="max-w-[720px] text-balance text-[36px] font-medium leading-[1.04] tracking-[-0.045em] md:text-[56px]">
               Bring Studio1 to <span style={{ color: PRINT }}>your city</span>
