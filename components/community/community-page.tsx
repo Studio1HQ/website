@@ -89,8 +89,8 @@ function YourCity({ cities }: { cities: string[] }) {
           <div className={cn("s1-skyline relative", (drawn || reduce) && "is-drawn")}>
             <span
               aria-hidden
-              className="absolute inset-x-0 bottom-0 h-[30%]"
-              style={{ background: "linear-gradient(to bottom, rgba(249,115,22,0.08), rgba(249,115,22,0.24))" }}
+              className="absolute inset-x-0 bottom-0 h-[70%]"
+              style={{ background: "linear-gradient(to bottom, rgba(249,115,22,0) 0%, rgba(249,115,22,0.05) 35%, rgba(249,115,22,0.14) 65%, rgba(249,115,22,0.26) 100%)" }}
             />
             <Image
               src="/assets/community/skyline.webp"
