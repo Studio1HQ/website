@@ -136,10 +136,23 @@ function ListRow({ item }: { item: CommunityItem }) {
       item={item}
       className="group flex items-center gap-5 rounded-[10px] bg-white/85 p-3 pr-5 ring-1 ring-inset ring-[#141414]/[0.09] transition-[background-color,box-shadow] duration-300 hover:bg-white hover:ring-[#141414]/20 sm:gap-7 sm:p-4 sm:pr-7"
     >
-      {item.image ? (
+      {item.logo ? (
+        /* the event's own mark */
+        <span className="flex size-[76px] shrink-0 items-center justify-center rounded-[8px] bg-white ring-1 ring-inset ring-[#141414]/[0.1] sm:size-[92px]">
+          <span
+            aria-hidden
+            className="block size-[46px] sm:size-[54px]"
+            style={{
+              backgroundColor: item.brand ?? "#141414",
+              WebkitMask: `url(${item.logo}) center / contain no-repeat`,
+              mask: `url(${item.logo}) center / contain no-repeat`,
+            }}
+          />
+        </span>
+      ) : item.image ? (
         <Cover item={item} className="aspect-[4/3] w-[96px] shrink-0 rounded-[6px] sm:w-[168px]" />
       ) : (
-        /* no photo yet: a calendar tile */
+        /* no mark or photo: a calendar tile */
         <span className="flex w-[76px] shrink-0 flex-col items-center overflow-hidden rounded-[8px] bg-white ring-1 ring-inset ring-[#141414]/[0.1] sm:w-[92px]">
           <span className="w-full py-1.5 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-white" style={{ background: PRINT }}>
             {MONTHS[m - 1]}
@@ -153,6 +166,8 @@ function ListRow({ item }: { item: CommunityItem }) {
           {KIND_LABEL[item.kind]}
           <span className="text-[#141414]/25">·</span>
           <span className="truncate normal-case tracking-normal">{where(item)}</span>
+          <span className="text-[#141414]/25">·</span>
+          <span className="shrink-0 normal-case tracking-normal">{when(item)}</span>
         </p>
         <h3 className="mt-1.5 line-clamp-2 text-[19px] font-medium leading-[1.2] tracking-[-0.025em] sm:text-[23px]">{item.name}</h3>
         <p className="mt-1.5 hidden truncate text-[14.5px] text-[#141414]/55 sm:block">{line}</p>

@@ -36,6 +36,8 @@ export type CommunityItem = {
   image?: string;
   /** The event's own mark, when it has one. */
   logo?: string;
+  /** The mark's brand colour. */
+  brand?: string;
   /** One line on what happened or what to expect. */
   summary?: string;
   /** Run by Studio1 (from the dashboard) rather than one we spoke at. */
@@ -111,6 +113,7 @@ function fromStatic(e: StudioEvent, now: number): CommunityItem {
     cta: "Details",
     image: e.image,
     logo: e.logo,
+    brand: e.brand,
     summary: e.summary,
     ours: false,
   };

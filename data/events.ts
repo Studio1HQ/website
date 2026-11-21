@@ -70,6 +70,8 @@ export const EVENTS: StudioEvent[] = [
     logo: "/assets/logos/events/cncf.svg",
     brand: "#0086FF",
     link: "https://events.linuxfoundation.org/kubecon-cloudnativecon-north-america/",
+    summary:
+      "The Studio1 team at KubeCon + CloudNativeCon North America and its co-located events.",
   },
   {
     slug: "cityjs-athens",
