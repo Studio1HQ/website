@@ -205,12 +205,38 @@ const DRAWINGS: Record<string, ReactNode> = {
   ),
 };
 
+/** Shrubs at the foot of a landmark: a clump of rounded leaves, shaded. */
+function Shrub({ x, s = 1 }: { x: number; s?: number }) {
+  return (
+    <g transform={`translate(${x} 72) scale(${s})`}>
+      <path
+        d="M-9 0a4 4 0 0 1 1-6a4.5 4.5 0 0 1 7-3a5 5 0 0 1 8 1a4 4 0 0 1 3 8z"
+        fill="#d9d6d1"
+        stroke="currentColor"
+        strokeWidth="1.3"
+      />
+      <path d="M-4-4a2 2 0 0 1 3-1M3-5a2 2 0 0 1 3 1" strokeWidth="1" opacity=".6" />
+    </g>
+  );
+}
+
+/**
+ * A city's landmark, drawn like the skyline illustration: bold ink outline,
+ * soft grey shading behind it, shrubs at its foot and a double ground line.
+ */
 export function Landmark({ city, className }: { city: string; className?: string }) {
   const drawing = DRAWINGS[city];
   if (!drawing) return null;
   return (
-    <svg aria-hidden viewBox="0 0 120 80" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <svg aria-hidden viewBox="0 6 120 74" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      {/* soft grey wash behind the building */}
+      <ellipse cx="60" cy="66" rx="46" ry="9" fill="#141414" opacity=".05" stroke="none" />
       {drawing}
+      <Shrub x={14} s={0.9} />
+      <Shrub x={106} s={1} />
+      {/* double ground line */}
+      <path d="M2 72.5h116" strokeWidth="2" />
+      <path d="M14 77h34M66 77h40" strokeWidth="1.2" opacity=".55" />
     </svg>
   );
 }
