@@ -161,15 +161,19 @@ function ListRow({ item }: { item: CommunityItem }) {
         </span>
       )}
       <div className="min-w-0 flex-1">
-        <p className="flex items-center gap-2 text-[12px] font-medium uppercase tracking-[0.14em] text-[#141414]/50">
-          <KindIcon weight="regular" className="size-3.5" style={{ color: PRINT }} />
-          {KIND_LABEL[item.kind]}
-          <span className="text-[#141414]/25">·</span>
-          <span className="truncate normal-case tracking-normal">{where(item)}</span>
-          <span className="text-[#141414]/25">·</span>
-          <span className="shrink-0 normal-case tracking-normal">{when(item)}</span>
+        <p className="flex flex-wrap items-center gap-1.5">
+          <span className="inline-flex h-7 items-center gap-1.5 rounded-full bg-[#141414] px-3 text-[12px] font-medium text-white">
+            <KindIcon weight="regular" className="size-3.5" style={{ color: PRINT }} />
+            {KIND_LABEL[item.kind]}
+          </span>
+          <span className="inline-flex h-7 items-center rounded-full bg-[#f97316]/10 px-3 text-[12.5px] font-medium text-[#c2410c] ring-1 ring-inset ring-[#f97316]/25">
+            {when(item)}
+          </span>
+          <span className="inline-flex h-7 items-center rounded-full bg-white px-3 text-[12.5px] font-medium text-[#141414]/70 ring-1 ring-inset ring-[#141414]/[0.12]">
+            {where(item)}
+          </span>
         </p>
-        <h3 className="mt-1.5 line-clamp-2 text-[19px] font-medium leading-[1.2] tracking-[-0.025em] sm:text-[23px]">{item.name}</h3>
+        <h3 className="mt-2.5 line-clamp-2 text-[19px] font-medium leading-[1.2] tracking-[-0.025em] sm:text-[23px]">{item.name}</h3>
         <p className="mt-1.5 hidden truncate text-[14.5px] text-[#141414]/55 sm:block">{line}</p>
       </div>
       <span className="hidden h-11 shrink-0 items-center gap-2 rounded-full bg-[#141414] px-5 text-[14px] font-medium text-white transition-colors duration-300 group-hover:bg-[#f97316] sm:inline-flex">
