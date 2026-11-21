@@ -6,6 +6,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { ArrowUpRight, CheckCircle } from "@phosphor-icons/react";
 import { EASE } from "@/components/home/ui";
 import { PaperSection } from "@/components/paper/paper-sections";
+import Logo from "@/components/ui/svgs/logo";
 import { PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 import { DiscordIcon } from "@/components/community/discord-icon";
@@ -180,10 +181,10 @@ export function JoinCommunity() {
               whileInView={{ opacity: 1, scale: 1, rotate: -6 }}
               viewport={{ once: true }}
               transition={{ type: "spring", bounce: 0.35, duration: 0.9, delay: 0.9 }}
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-[6px] px-4 py-2 text-[18px] font-semibold tracking-[-0.02em] text-white shadow-[0_14px_30px_-12px_rgba(0,0,0,0.6)] md:text-[24px]"
+              className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-2 whitespace-nowrap rounded-[6px] px-4 py-2 text-[18px] font-semibold tracking-[-0.02em] text-white shadow-[0_14px_30px_-12px_rgba(0,0,0,0.6)] md:text-[24px]"
               style={{ background: PRINT }}
             >
-              welcome to Studio1
+              welcome to <Logo className="size-6 rounded-[5px] ring-1 ring-white/60 md:size-7" /> Studio1
             </motion.span>
           </div>
 

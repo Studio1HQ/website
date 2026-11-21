@@ -21,7 +21,7 @@ import { BeenHere } from "@/components/community/been-here";
 import { CommunityHero } from "@/components/community/hero";
 import { WaysIn } from "@/components/community/ways-in";
 import type { CommunityData, CommunityKind } from "@/lib/community";
-import { PAPER_SCOPE, PRINT } from "@/lib/paper";
+import { GRAIN, PAPER_SCOPE, PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 
 const KIND: Record<CommunityKind, { label: string; icon: Icon }> = {
@@ -62,10 +62,13 @@ function YourCity({ cities }: { cities: string[] }) {
   const ref = useRef<HTMLDivElement>(null);
   const drawn = useInView(ref, { once: true, margin: "-120px" });
   return (
-    <PaperSection tone="paper" className="!pt-4">
+    <PaperSection tone="paper">
       <Container>
         <motion.div {...rise(reduce)} ref={ref} className="relative isolate overflow-hidden rounded-[8px] bg-white/80 ring-1 ring-inset ring-[#141414]/10">
-          <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 [background-image:radial-gradient(rgba(20,20,20,0.12)_1px,transparent_1.2px)] [background-size:22px_22px] [mask-image:radial-gradient(ellipse_60%_70%_at_50%_40%,transparent_30%,black_90%)]" />
+          {/* an orange print texture: a warm glow from below, orange halftone dots at the edges, paper grain */}
+          <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 [background:radial-gradient(ellipse_70%_60%_at_50%_110%,rgba(249,115,22,0.26),transparent_70%),radial-gradient(ellipse_40%_40%_at_0%_0%,rgba(249,115,22,0.14),transparent_70%),radial-gradient(ellipse_40%_40%_at_100%_0%,rgba(249,115,22,0.14),transparent_70%)]" />
+          <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 [background-image:radial-gradient(rgba(249,115,22,0.5)_1.1px,transparent_1.4px)] [background-size:14px_14px] [mask-image:radial-gradient(ellipse_55%_65%_at_50%_40%,transparent_35%,black_95%)]" />
+          <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 opacity-[0.22] mix-blend-multiply" style={{ backgroundImage: GRAIN }} />
           <div className="relative flex flex-col items-center px-6 pb-12 pt-14 text-center md:pb-14 md:pt-20">
             <h2 className="max-w-[720px] text-balance text-[36px] font-medium leading-[1.04] tracking-[-0.045em] md:text-[56px]">
               Bring Studio1 to <span style={{ color: PRINT }}>your city</span>

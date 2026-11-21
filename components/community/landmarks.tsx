@@ -11,73 +11,103 @@ import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 const range = (n: number) => Array.from({ length: n }, (_, i) => i);
 
 const DRAWINGS: Record<string, ReactNode> = {
-  // Howrah Bridge: two steel cantilever towers, the suspended span, the Hooghly
+  // Howrah Bridge: a steel cantilever truss, two towers, the deck, the Hooghly
   Kolkata: (
     <>
-      <path d="M6 58h108" />
-      {/* towers */}
-      <path d="M34 58V18M42 58V18M78 58V18M86 58V18M33 18h10M77 18h10" />
-      {range(5).map((i) => (
-        <path key={`t${i}`} d={`M34 ${22 + i * 7}l8 7M42 ${22 + i * 7}l-8 7M78 ${22 + i * 7}l8 7M86 ${22 + i * 7}l-8 7`} />
+      {/* deck */}
+      <path d="M4 56h112M4 59h112" />
+      {/* the two towers, braced */}
+      <path d="M34 56V14M42 56V14M78 56V14M86 56V14M32 14h12M76 14h12" />
+      {range(6).map((i) => (
+        <path key={`tw${i}`} d={`M34 ${16 + i * 7}l8 7M42 ${16 + i * 7}l-8 7M78 ${16 + i * 7}l8 7M86 ${16 + i * 7}l-8 7`} />
       ))}
-      {/* cantilever arms and the suspended span */}
-      <path d="M42 18 Q60 34 78 18M42 24 Q60 40 78 24" />
-      <path d="M34 18 Q20 34 6 46M86 18 Q100 34 114 46" />
-      {range(7).map((i) => (
-        <path key={`h${i}`} d={`M${46 + i * 4.7} ${22 + Math.sin((i + 1) / 8 * Math.PI) * 9}V50`} />
-      ))}
-      {range(5).map((i) => (
-        <path key={`l${i}`} d={`M${12 + i * 4.5} ${42 - i * 3.2}V50M${108 - i * 4.5} ${42 - i * 3.2}V50`} />
-      ))}
-      <path d="M6 50h108M6 53h108" />
-      {/* water */}
-      <path d="M10 64c6-2 10 2 16 0s10 2 16 0 10 2 16 0 10 2 16 0 10 2 16 0 10 2 16 0" />
-      <path d="M24 70c6-2 10 2 16 0s10 2 16 0 10 2 16 0 10 2 16 0" />
+      {/* top chord: anchor arms down to the banks, a shallow sag between the towers */}
+      <path d={`M4 52L34 16M42 16${range(19).map((i) => `L${42 + i * 2} ${(16 + 14 * Math.sin((Math.PI * i * 2) / 36)).toFixed(1)}`).join("")}M86 16L116 52`} />
+      {/* truss web */}
+      <path
+        d={[
+          ...range(4).map((i) => {
+            const x = 10 + i * 6;
+            const y = 52 - ((x - 4) / 30) * 36;
+            return `M${x} ${y.toFixed(1)}L${x + 3} 56L${x + 6} ${(52 - ((x + 6 - 4) / 30) * 36).toFixed(1)}`;
+          }),
+          ...range(6).map((i) => {
+            const x = 42 + i * 6;
+            const top = (v: number) => (16 + 14 * Math.sin((Math.PI * (v - 42)) / 36)).toFixed(1);
+            return `M${x} ${top(x)}L${x + 3} 56L${x + 6} ${top(x + 6)}`;
+          }),
+          ...range(4).map((i) => {
+            const x = 110 - i * 6;
+            const y = 52 - ((116 - x) / 30) * 36;
+            return `M${x} ${y.toFixed(1)}L${x - 3} 56L${x - 6} ${(52 - ((116 - (x - 6)) / 30) * 36).toFixed(1)}`;
+          }),
+        ].join("")}
+        opacity=".55"
+      />
+      {/* the river */}
+      <path d="M8 66c5-2 9 2 14 0s9 2 14 0 9 2 14 0 9 2 14 0 9 2 14 0 9 2 14 0 9 2 14 0" />
+      <path d="M22 71c5-2 9 2 14 0s9 2 14 0 9 2 14 0 9 2 14 0 9 2 14 0" opacity=".55" />
     </>
   ),
-  // Vidhana Soudha: wide colonnaded front, steps, central dome and corner domes
+  // Vidhana Soudha: long wings, a pillared portico under a pediment, the central dome
   Bengaluru: (
     <>
-      <path d="M6 70h108M10 70V44h100v26M8 44h104" />
-      <path d="M46 70v-4h28v4M44 66h32M42 62h36" />
+      <path d="M4 72h112" />
+      {/* grand steps */}
+      <path d="M34 72v-2h52v2M38 70v-2h44v2M42 68v-2h36v2" />
+      {/* wings */}
+      <path d="M8 66V44h104v22M8 44h104M8 41h104v3" />
+      {range(4).map((i) => (
+        <path key={`wl${i}`} d={`M${13 + i * 6} 50h3v10h-3zM${89 + i * 6} 50h3v10h-3z`} />
+      ))}
+      {/* corner domes */}
+      <path d="M12 41v-4h10v4M13 37a4 4 0 0 1 8 0M17 33v-3M98 41v-4h10v4M99 37a4 4 0 0 1 8 0M103 33v-3" />
+      {/* portico: pediment, entablature, twelve columns */}
+      <path d="M38 41l22-9 22 9M38 41h44" />
       {range(12).map((i) => (
-        <path key={`c${i}`} d={`M${15 + i * 8.2} 70V48`} />
+        <path key={`pc${i}`} d={`M${40 + i * 3.6} 44v22`} />
       ))}
-      <path d="M10 48h100" />
-      <path d="M42 44l18-9 18 9" />
-      <path d="M48 35V28h24v7M46 28h28" />
-      <path d="M50 28c0-14 20-14 20 0M58 14V9M60 14V8M62 14V9M60 8V5" />
-      <path d="M12 44v-6h12v6M96 44v-6h12v6M12 38c0-6 12-6 12 0M96 38c0-6 12-6 12 0M18 32v-3M102 32v-3" />
-      {range(6).map((i) => (
-        <path key={`w${i}`} d={`M${30 + i * 2} 41h0M${84 + i * 2} 41h0`} />
-      ))}
+      {/* the central dome on its drum, lantern and finial */}
+      <path d="M46 32v-5h28v5M47 27h26" />
+      <path d="M48 27a12 11 0 0 1 24 0" />
+      <path d="M57 16h6v-4h-6zM60 12V8" />
     </>
   ),
   // Taipei 101: eight flared segments on a stepped podium, the pinnacle
   Taipei: (
     <>
-      <path d="M6 76h108" />
-      <path d="M40 76V66h40v10M44 66v-5h32v5" />
+      <path d="M4 72h112" />
+      {/* neighbours */}
+      <path d="M12 72V58h12v14M24 72V52h9v20M88 72V55h9v17M97 72V60h11v12" opacity=".55" />
+      {/* podium */}
+      <path d="M40 72V62h40v10M44 62v-3h32v3" />
+      {/* eight segments, each flaring outward as it rises */}
       {range(8).map((i) => {
-        const top = 61 - (i + 1) * 6;
-        return <path key={`s${i}`} d={`M48 ${top + 6}l-3-6h30l-3 6M50 ${top + 3}h20`} />;
+        const yb = 59 - i * 5.6;
+        const yt = yb - 5.6;
+        return <path key={`sg${i}`} d={`M51 ${yb.toFixed(1)}L49 ${yt.toFixed(1)}H71L69 ${yb.toFixed(1)}M52 ${(yb - 2.8).toFixed(1)}h16`} />;
       })}
-      <path d="M48 13v-3h24v3M52 10V6h16v4M56 6V3h8v3M60 3V0" />
-      <path d="M46 61V13M74 61V13" opacity=".35" />
-      {/* lower city */}
-      <path d="M10 76V62h10v14M22 76V56h8v14M88 76V60h10v16M100 76V66h12v10" />
+      {/* top and pinnacle */}
+      <path d="M53 14.2V10h14v4.2M56 10V7h8v3M60 7V1" />
     </>
   ),
-  // Castle of Santa Bárbara on Mount Benacantil above the bay
+  // Castle of Santa Bárbara on Mount Benacantil above the bay, palms on the shore
   Alicante: (
     <>
-      <path d="M6 64c8-3 14 3 22 0s14 3 22 0 14 3 22 0 14 3 22 0 14 3 20 0" />
-      <path d="M6 70c8-3 14 3 22 0s14 3 22 0 14 3 22 0 14 3 22 0 14 3 20 0" />
-      <path d="M8 60l18-14 10 4 12-14 14 6 12-10 16 12 22 16" />
-      <path d="M36 50l4 4M52 42l6 6M86 40l8 8" opacity=".5" />
-      <path d="M50 36V22h30v14M50 22v-4h4v4h4v-4h4v4h4v-4h4v4h4v-4h4v4h2" />
-      <path d="M62 22V10h8v12M62 10V7h2v3h4V7h2v3" />
-      <path d="M56 36v-6a3 3 0 0 1 6 0v6M72 30h4M54 26h2M74 26h2" />
+      {/* the hill */}
+      <path d="M6 66L24 54L32 56L46 38L54 33L60 34L70 40L86 54L114 66" />
+      <path d="M30 58l6-2M74 46l6 4M44 44l4-4" opacity=".45" />
+      {/* castle walls and keep */}
+      <path d="M44 38v-8h26v10" />
+      <path d={`M44 30${range(6).map((i) => `h2v-2h2v2`).join("")}h2`} />
+      <path d="M53 30V18h10v12M53 18v-2h2v2h2v-2h2v2h2v-2h2v2" />
+      <path d="M57 30v-4a2 2 0 0 1 2 0v4M47 34h3M64 34h3" />
+      {/* shore and sea */}
+      <path d="M4 66h112" />
+      <path d="M6 71c5-2 9 2 14 0s9 2 14 0 9 2 14 0 9 2 14 0 9 2 14 0 9 2 14 0 9 2 14 0" opacity=".55" />
+      {/* palms */}
+      <path d="M14 66c1-5 0-10 2-15M16 51c-3-2-7-1-9 2M16 51c-2-3-6-4-9-2M16 51c2-3 6-4 9-2M16 51c3 0 6 2 7 5" />
+      <path d="M104 66c-1-5 0-10-2-15M102 51c3-2 7-1 9 2M102 51c2-3 6-4 9-2M102 51c-2-3-6-4-9-2M102 51c-3 0-6 2-7 5" />
     </>
   ),
   // The Parthenon: three steps, eight Doric columns, frieze and pediment
@@ -123,18 +153,23 @@ const DRAWINGS: Record<string, ReactNode> = {
       <path d="M14 72V58M11 58h6M12 55h4l-2-3zM106 72V58M103 58h6M104 55h4l-2-3z" />
     </>
   ),
-  // Blue Mosque: cascade of domes over the prayer hall, six slim minarets
+  // Blue Mosque: a cascade of domes over the prayer hall, slender minarets
   Istanbul: (
     <>
-      <path d="M6 74h108M24 74V52h72v22" />
-      <path d="M34 52c0-12 52-12 52 0" />
-      <path d="M42 46c0-18 36-18 36 0M60 28v-5M58 23h4" />
-      <path d="M26 52c0-6 10-6 10 0M84 52c0-6 10-6 10 0M38 46c0-5 8-5 8 0M74 46c0-5 8-5 8 0" />
+      <path d="M4 72h112" />
+      {/* prayer hall and its arcade */}
+      <path d="M26 72V56h68v16" />
       {range(7).map((i) => (
-        <path key={`a${i}`} d={`M${30 + i * 9} 74v-8a3 3 0 0 1 6 0v8`} />
+        <path key={`ar${i}`} d={`M${30 + i * 9} 72v-7a3 3 0 0 1 6 0v7`} />
       ))}
-      {[10, 18, 102, 110].map((x) => (
-        <path key={`m${x}`} d={`M${x - 1.5} 74V26h3v48M${x - 1.5} 26l1.5-12 1.5 12M${x - 3} 40h6M${x - 3} 54h6`} />
+      {/* corner domes, semi-domes, then the main dome on its drum */}
+      <path d="M28 56a5 5 0 0 1 10 0M82 56a5 5 0 0 1 10 0" />
+      <path d="M36 56v-4h48v4M38 52a7 5 0 0 1 14 0M68 52a7 5 0 0 1 14 0" />
+      <path d="M44 48h32v4M44 48a16 14 0 0 1 32 0" />
+      <path d="M60 34v-5M58.5 27a2 2 0 1 0 3 0" />
+      {/* minarets with balconies and pointed caps */}
+      {[12, 20, 100, 108].map((x) => (
+        <path key={`mn${x}`} d={`M${x - 1.5} 72V22h3v50M${x - 3} 36h6M${x - 3} 50h6M${x - 1.5} 22l1.5-12 1.5 12`} />
       ))}
     </>
   ),
@@ -155,29 +190,27 @@ const DRAWINGS: Record<string, ReactNode> = {
       <path d="M8 78c8-2 14 2 22 0s14 2 22 0 14 2 22 0 14 2 22 0 14 2 16 0" />
     </>
   ),
-  // Sigiriya: the lion rock rising from the forest, the lion's paw gate
+  // Sigiriya: the flat-topped lion rock, the lion's paw terrace, palms and water gardens
   "Sri Lanka": (
     <>
-      <path d="M6 72h108" />
-      {/* the rock: a flat-topped column of stone with steep, bulging sides */}
-      <path d="M24 72C28 62 30 52 31 40C32 30 34 22 39 16H81C86 22 88 30 89 40C90 52 92 62 96 72" />
-      {/* the stone's layers */}
-      <path d="M33 28c10 2 18-1 28 1s16 1 26-1M31 42c12 2 22-1 32 1s16 1 26-1M30 56c12 2 24-1 34 1s18 1 26-1" opacity=".45" />
-      {/* palace ruins on the summit */}
-      <path d="M41 16v-3h9v3M54 16v-5h12v5M70 16v-3h9v3M57 11v-2h6v2" />
-      {/* the path climbing the face */}
-      <path d="M60 60l-7-6 7-6-7-6 7-6" opacity=".45" />
-      {/* the lion's paws and the stair between them */}
-      <path d="M46 72v-7c0-3 2-5 5-5h3v12M74 72v-7c0-3-2-5-5-5h-3v12" />
-      <path d="M46 72h2v-2M50 72v-2M70 72v-2M74 72h-2v-2" />
-      <path d="M56 72h8M57 69h6M58 66h4M59 63h2" />
-      {/* forest at the foot of the rock */}
-      {[12, 22, 98, 108].map((x, i) => (
-        <g key={`tr${i}`}>
-          <path d={`M${x} 72v-6`} />
-          <path d={`M${x - 6} 66a4 4 0 0 1 2-7a5 5 0 0 1 8-2a4 4 0 0 1 2 9z`} />
-        </g>
-      ))}
+      <path d="M4 72h112" />
+      {/* the rock: sheer sides, a flat crown */}
+      <path d="M28 72C30 62 31 50 32 40C33 30 35 22 40 18L44 16H80L85 19C89 24 91 32 91 42C92 52 93 62 95 72" />
+      {/* trees and ruins on the summit */}
+      <path d="M46 16c1-3 5-3 6 0c1-3 5-3 6 0M66 16c1-3 5-3 6 0c1-3 5-3 6 0M58 16v-3h6v3" />
+      {/* fissures and the mirror-wall gallery */}
+      <path d="M40 28v12M50 22v8M76 24v14M84 32v16M36 46v8" opacity=".45" />
+      <path d="M33 54L60 46L91 52M33 57L60 49L91 55" opacity=".45" />
+      {/* the lion terrace: two great paws, the stair rising between them */}
+      <path d="M46 72v-6h32v6" />
+      <path d="M48 66v-6c0-2 1-3 3-3h5v9M76 66v-6c0-2-1-3-3-3h-5v9" />
+      <path d="M50 66v-2M52 66v-2M54 66v-2M70 66v-2M72 66v-2M74 66v-2" />
+      <path d="M58 66h8M59 63h6M60 60h4M61 57h2" />
+      {/* water gardens */}
+      <path d="M8 72v-3h14v3M98 72v-3h14v3" opacity=".55" />
+      {/* palms */}
+      <path d="M22 72c1-6 0-11 2-17M24 55c-3-2-7-1-9 2M24 55c-2-3-6-4-9-2M24 55c2-3 6-4 9-2M24 55c3 0 6 2 7 5" />
+      <path d="M100 72c-1-6 0-11-2-17M98 55c3-2 7-1 9 2M98 55c2-3 6-4 9-2M98 55c-2-3-6-4-9-2M98 55c-3 0-6 2-7 5" />
     </>
   ),
 };
