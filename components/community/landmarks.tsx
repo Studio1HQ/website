@@ -42,11 +42,11 @@ const DRAWINGS: Record<string, ReactNode> = {
             return `M${x} ${y.toFixed(1)}L${x - 3} 56L${x - 6} ${(52 - ((116 - (x - 6)) / 30) * 36).toFixed(1)}`;
           }),
         ].join("")}
-        opacity=".55"
+       
       />
       {/* the river */}
       <path d="M8 66c5-2 9 2 14 0s9 2 14 0 9 2 14 0 9 2 14 0 9 2 14 0 9 2 14 0 9 2 14 0" />
-      <path d="M22 71c5-2 9 2 14 0s9 2 14 0 9 2 14 0 9 2 14 0 9 2 14 0" opacity=".55" />
+      <path d="M22 71c5-2 9 2 14 0s9 2 14 0 9 2 14 0 9 2 14 0 9 2 14 0" />
     </>
   ),
   // Vidhana Soudha: long wings, a pillared portico under a pediment, the central dome
@@ -78,7 +78,7 @@ const DRAWINGS: Record<string, ReactNode> = {
     <>
       <path d="M4 72h112" />
       {/* neighbours */}
-      <path d="M12 72V58h12v14M24 72V52h9v20M88 72V55h9v17M97 72V60h11v12" opacity=".55" />
+      <path d="M12 72V58h12v14M24 72V52h9v20M88 72V55h9v17M97 72V60h11v12" />
       {/* podium */}
       <path d="M40 72V62h40v10M44 62v-3h32v3" />
       {/* eight segments, each flaring outward as it rises */}
@@ -96,7 +96,7 @@ const DRAWINGS: Record<string, ReactNode> = {
     <>
       {/* the hill */}
       <path d="M6 66L24 54L32 56L46 38L54 33L60 34L70 40L86 54L114 66" />
-      <path d="M30 58l6-2M74 46l6 4M44 44l4-4" opacity=".45" />
+      <path d="M30 58l6-2M74 46l6 4M44 44l4-4" />
       {/* castle walls and keep */}
       <path d="M44 38v-8h26v10" />
       <path d={`M44 30${range(6).map((i) => `h2v-2h2v2`).join("")}h2`} />
@@ -104,7 +104,7 @@ const DRAWINGS: Record<string, ReactNode> = {
       <path d="M57 30v-4a2 2 0 0 1 2 0v4M47 34h3M64 34h3" />
       {/* shore and sea */}
       <path d="M4 66h112" />
-      <path d="M6 71c5-2 9 2 14 0s9 2 14 0 9 2 14 0 9 2 14 0 9 2 14 0 9 2 14 0 9 2 14 0" opacity=".55" />
+      <path d="M6 71c5-2 9 2 14 0s9 2 14 0 9 2 14 0 9 2 14 0 9 2 14 0 9 2 14 0 9 2 14 0" />
       {/* palms */}
       <path d="M14 66c1-5 0-10 2-15M16 51c-3-2-7-1-9 2M16 51c-2-3-6-4-9-2M16 51c2-3 6-4 9-2M16 51c3 0 6 2 7 5" />
       <path d="M104 66c-1-5 0-10-2-15M102 51c3-2 7-1 9 2M102 51c2-3 6-4 9-2M102 51c-2-3-6-4-9-2M102 51c-3 0-6 2-7 5" />
@@ -132,16 +132,16 @@ const DRAWINGS: Record<string, ReactNode> = {
       <path d="M30 66V24h60v42" />
       {/* the great arch, with its inner moulding and imposts */}
       <path d="M46 66V40a14 14 0 0 1 28 0v26" />
-      <path d="M50 66V41a10 10 0 0 1 20 0v25" opacity=".45" />
+      <path d="M50 66V41a10 10 0 0 1 20 0v25" />
       <path d="M43 40h3M74 40h3" />
       {/* pier panels and niches */}
       <path d="M34 62V46h8v16M78 62V46h8v16M34 42h8M78 42h8" />
-      <path d="M38 46v16M82 46v16" opacity=".45" />
+      <path d="M38 46v16M82 46v16" />
       {/* cornice and the inscribed attic */}
       <path d="M28 33h64M28 30h64v3" />
       <path d="M28 24h64v6" />
       {range(9).map((i) => (
-        <path key={`ig${i}`} d={`M${38 + i * 5} 27h3`} opacity=".45" />
+        <path key={`ig${i}`} d={`M${38 + i * 5} 27h3`} />
       ))}
       {/* stepped crown and the shallow dome */}
       <path d="M34 24v-4h52v4M40 20v-4h40v4M46 16v-3h28v3" />
@@ -193,10 +193,10 @@ const DRAWINGS: Record<string, ReactNode> = {
       <path d="M4 72h112" />
       {/* the rock: sheer west face, flat crown, a sloping shoulder to the north */}
       <path d="M32 72C33 60 34 46 36 34C37 26 40 20 46 17L70 15C76 15 80 17 82 22C84 28 84 36 86 44C91 50 99 58 104 72" />
-      <path d="M44 24c10-2 22-3 34-2" opacity=".45" />
+      <path d="M44 24c10-2 22-3 34-2" />
       {/* the lion terrace on the shoulder, two paws and the stair between */}
       <path d="M72 58h16M74 58v-4h3v4M83 58v-4h3v4" />
-      <path d="M80 54l-3-6 3-6-3-6 3-6" opacity=".6" />
+      <path d="M80 54l-3-6 3-6-3-6 3-6" />
       {/* jungle clumps */}
       <path d="M6 72a6 6 0 0 1 2-9a6 6 0 0 1 10-2a5 5 0 0 1 6 11z" />
       <path d="M38 72a5 5 0 0 1 2-8a5 5 0 0 1 9-1a4 4 0 0 1 5 9z" />
@@ -205,38 +205,19 @@ const DRAWINGS: Record<string, ReactNode> = {
   ),
 };
 
-/** Shrubs at the foot of a landmark: a clump of rounded leaves, shaded. */
-function Shrub({ x, s = 1 }: { x: number; s?: number }) {
-  return (
-    <g transform={`translate(${x} 72) scale(${s})`}>
-      <path
-        d="M-9 0a4 4 0 0 1 1-6a4.5 4.5 0 0 1 7-3a5 5 0 0 1 8 1a4 4 0 0 1 3 8z"
-        fill="#d9d6d1"
-        stroke="currentColor"
-        strokeWidth="1.3"
-      />
-      <path d="M-4-4a2 2 0 0 1 3-1M3-5a2 2 0 0 1 3 1" strokeWidth="1" opacity=".6" />
-    </g>
-  );
-}
-
 /**
- * A city's landmark, drawn like the skyline illustration: bold ink outline,
- * soft grey shading behind it, shrubs at its foot and a double ground line.
+ * A city's landmark, drawn like the skyline illustration: one bold ink line,
+ * standing on a ground line, with a small shadow beneath.
  */
 export function Landmark({ city, className }: { city: string; className?: string }) {
   const drawing = DRAWINGS[city];
   if (!drawing) return null;
   return (
-    <svg aria-hidden viewBox="0 6 120 74" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      {/* soft grey wash behind the building */}
-      <ellipse cx="60" cy="66" rx="46" ry="9" fill="#141414" opacity=".05" stroke="none" />
+    <svg aria-hidden viewBox="0 6 120 76" fill="none" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" strokeLinejoin="round" className={className}>
       {drawing}
-      <Shrub x={14} s={0.9} />
-      <Shrub x={106} s={1} />
-      {/* double ground line */}
-      <path d="M2 72.5h116" strokeWidth="2" />
-      <path d="M14 77h34M66 77h40" strokeWidth="1.2" opacity=".55" />
+      {/* the ground, and a soft shadow under it */}
+      <path d="M4 72.5h112" strokeWidth="1.6" />
+      <ellipse cx="60" cy="77.5" rx="28" ry="1.2" fill="currentColor" opacity=".55" stroke="none" />
     </svg>
   );
 }
