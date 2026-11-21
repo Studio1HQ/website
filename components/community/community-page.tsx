@@ -84,7 +84,7 @@ function YourCity({ cities }: { cities: string[] }) {
             </div>
           </div>
           {/* the cities we've been to, in ink, standing on the bottom edge */}
-          <div className={cn("s1-skyline relative px-4 md:px-10", (drawn || reduce) && "is-drawn")} style={{ color: "rgba(20,20,20,0.55)" }}>
+          <div className={cn("s1-skyline relative px-6 pb-8 md:px-14 md:pb-10", (drawn || reduce) && "is-drawn")} style={{ color: "rgba(20,20,20,0.7)" }}>
             <Skyline cities={cities.slice(0, 9)} />
           </div>
           <span aria-hidden className="block h-px bg-[#141414]/20" />

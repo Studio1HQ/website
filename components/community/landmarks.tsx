@@ -219,9 +219,9 @@ type Box = { x: number; y: number; w: number; h: number };
 const FULL: Box = { x: 0, y: 0, w: 120, h: 80 };
 
 /**
- * The cities' landmarks side by side as one skyline: each drawing cropped to
- * its own outline, all at one scale, filling the width and standing on the
- * bottom edge.
+ * The cities' landmarks as one skyline: every drawing at the same height,
+ * the same line weight, evenly spaced, on one shared ground line. Each
+ * drawing's own ground line is hidden so only the shared one shows.
  */
 export function Skyline({ cities, className }: { cities: string[]; className?: string }) {
   const list = cities.filter((c) => c in DRAWINGS);
@@ -231,35 +231,46 @@ export function Skyline({ cities, className }: { cities: string[]; className?: s
   useLayoutEffect(() => {
     setBoxes(
       refs.current.slice(0, key.split("|").length).map((el) => {
-        const b = el?.getBBox();
-        return b && b.width ? { x: b.x - 1, y: b.y - 1, w: b.width + 2, h: b.height + 2 } : FULL;
+        if (!el) return FULL;
+        // hide the long flat ground lines, then measure what's left
+        el.querySelectorAll("path").forEach((p) => {
+          const b = p.getBBox();
+          if (b.height < 0.5 && b.width > 60) p.style.display = "none";
+        });
+        const b = el.getBBox();
+        return b.width ? { x: b.x - 1, y: b.y - 1, w: b.width + 2, h: b.height + 2 } : FULL;
       }),
     );
   }, [key]);
-  const total = boxes ? boxes.reduce((n, b) => n + b.w, 0) : list.length * 120;
   return (
-    <div className={className} style={{ display: "flex", alignItems: "flex-end" }}>
-      {list.map((city, i) => {
-        const b = boxes?.[i] ?? FULL;
-        return (
-          <svg
-            key={city}
-            ref={(el) => {
-              refs.current[i] = el;
-            }}
-            aria-hidden
-            viewBox={`${b.x} ${b.y} ${b.w} ${b.h}`}
-            style={{ width: `${(b.w / total) * 100}%`, height: "auto", display: "block", flex: "none" }}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.1"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            {DRAWINGS[city]}
-          </svg>
-        );
-      })}
+    <div className={className}>
+      <div className="flex h-[64px] items-end justify-between gap-4 md:h-[104px]">
+        {list.map((city, i) => {
+          const b = boxes?.[i] ?? FULL;
+          return (
+            <svg
+              key={city}
+              ref={(el) => {
+                refs.current[i] = el;
+              }}
+              aria-hidden
+              viewBox={`${b.x} ${b.y} ${b.w} ${b.h}`}
+              preserveAspectRatio="xMidYMax meet"
+              style={{ height: "100%", aspectRatio: `${b.w} / ${b.h}`, maxWidth: "12%" }}
+              className="block shrink [&_*]:[vector-effect:non-scaling-stroke]"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              {DRAWINGS[city]}
+            </svg>
+          );
+        })}
+      </div>
+      {/* the one ground line they all stand on */}
+      <span aria-hidden className="block h-px bg-current opacity-70" />
     </div>
   );
 }
