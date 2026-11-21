@@ -110,24 +110,16 @@ const DRAWINGS: Record<string, ReactNode> = {
       <path d="M104 66c-1-5 0-10-2-15M102 51c3-2 7-1 9 2M102 51c2-3 6-4 9-2M102 51c-2-3-6-4-9-2M102 51c-3 0-6 2-7 5" />
     </>
   ),
-  // The Parthenon: three steps, eight Doric columns, architrave, frieze, pediment
+  // The Parthenon: three steps, eight columns, architrave, frieze, pediment
   Athens: (
     <>
-      <path d="M4 72h112" />
-      {/* three steps */}
-      <path d="M14 72v-3h92v3M18 69v-3h84v3M22 66v-3h76v3" />
-      {/* eight columns, each with a capital */}
-      {range(8).map((i) => {
-        const x = 27 + i * 9.4;
-        return <path key={`c${i}`} d={`M${x} 63V36M${x + 4} 63V36M${x - 1} 36h6`} />;
-      })}
-      {/* architrave and frieze */}
-      <path d="M22 36h76M22 32h76v4M22 32V27h76v5" />
-      {range(9).map((i) => (
-        <path key={`t${i}`} d={`M${26 + i * 8.6} 27v5`} opacity=".45" />
+      <path d="M8 72h104" />
+      <path d="M16 72v-3h88v3M20 69v-3h80v3M24 66v-3h72v3" />
+      {range(8).map((i) => (
+        <path key={`c${i}`} d={`M${30 + i * 8.6} 63V37M${28 + i * 8.6} 37h4`} />
       ))}
-      {/* pediment */}
-      <path d="M20 27L60 13L100 27Z" />
+      <path d="M24 37h72M24 33h72v4M24 33v-5h72v5" />
+      <path d="M22 28L60 14L98 28Z" />
     </>
   ),
   // India Gate: the great arch, inscribed attic, stepped crown and dome
@@ -195,27 +187,20 @@ const DRAWINGS: Record<string, ReactNode> = {
       <path d="M8 78c8-2 14 2 22 0s14 2 22 0 14 2 22 0 14 2 22 0 14 2 16 0" />
     </>
   ),
-  // Sigiriya: the flat-topped lion rock, the lion's paw terrace, palms and water gardens
+  // Sigiriya: the lion rock, sheer on one side, the lion terrace on its shoulder, jungle at its foot
   "Sri Lanka": (
     <>
       <path d="M4 72h112" />
-      {/* the rock: sheer sides, a flat crown */}
-      <path d="M28 72C30 62 31 50 32 40C33 30 35 22 40 18L44 16H80L85 19C89 24 91 32 91 42C92 52 93 62 95 72" />
-      {/* trees and ruins on the summit */}
-      <path d="M46 16c1-3 5-3 6 0c1-3 5-3 6 0M66 16c1-3 5-3 6 0c1-3 5-3 6 0M58 16v-3h6v3" />
-      {/* fissures and the mirror-wall gallery */}
-      <path d="M40 28v12M50 22v8M76 24v14M84 32v16M36 46v8" opacity=".45" />
-      <path d="M33 54L60 46L91 52M33 57L60 49L91 55" opacity=".45" />
-      {/* the lion terrace: two great paws, the stair rising between them */}
-      <path d="M46 72v-6h32v6" />
-      <path d="M48 66v-6c0-2 1-3 3-3h5v9M76 66v-6c0-2-1-3-3-3h-5v9" />
-      <path d="M50 66v-2M52 66v-2M54 66v-2M70 66v-2M72 66v-2M74 66v-2" />
-      <path d="M58 66h8M59 63h6M60 60h4M61 57h2" />
-      {/* water gardens */}
-      <path d="M8 72v-3h14v3M98 72v-3h14v3" opacity=".55" />
-      {/* palms */}
-      <path d="M22 72c1-6 0-11 2-17M24 55c-3-2-7-1-9 2M24 55c-2-3-6-4-9-2M24 55c2-3 6-4 9-2M24 55c3 0 6 2 7 5" />
-      <path d="M100 72c-1-6 0-11-2-17M98 55c3-2 7-1 9 2M98 55c2-3 6-4 9-2M98 55c-2-3-6-4-9-2M98 55c-3 0-6 2-7 5" />
+      {/* the rock: sheer west face, flat crown, a sloping shoulder to the north */}
+      <path d="M32 72C33 60 34 46 36 34C37 26 40 20 46 17L70 15C76 15 80 17 82 22C84 28 84 36 86 44C91 50 99 58 104 72" />
+      <path d="M44 24c10-2 22-3 34-2" opacity=".45" />
+      {/* the lion terrace on the shoulder, two paws and the stair between */}
+      <path d="M72 58h16M74 58v-4h3v4M83 58v-4h3v4" />
+      <path d="M80 54l-3-6 3-6-3-6 3-6" opacity=".6" />
+      {/* jungle clumps */}
+      <path d="M6 72a6 6 0 0 1 2-9a6 6 0 0 1 10-2a5 5 0 0 1 6 11z" />
+      <path d="M38 72a5 5 0 0 1 2-8a5 5 0 0 1 9-1a4 4 0 0 1 5 9z" />
+      <path d="M104 72a4 4 0 0 1 1-7a4 4 0 0 1 8-1a4 4 0 0 1 4 8z" />
     </>
   ),
 };
