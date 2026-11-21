@@ -110,19 +110,24 @@ const DRAWINGS: Record<string, ReactNode> = {
       <path d="M104 66c-1-5 0-10-2-15M102 51c3-2 7-1 9 2M102 51c2-3 6-4 9-2M102 51c-2-3-6-4-9-2M102 51c-3 0-6 2-7 5" />
     </>
   ),
-  // The Parthenon: three steps, eight Doric columns, frieze and pediment
+  // The Parthenon: three steps, eight Doric columns, architrave, frieze, pediment
   Athens: (
     <>
-      <path d="M6 72h108M10 68h100v4M14 64h92v4M18 60h84v4" />
-      {range(8).map((i) => (
-        <path key={`c${i}`} d={`M${23 + i * 10.6} 60V32M${27 + i * 10.6} 60V32M${22 + i * 10.6} 32h6`} />
+      <path d="M4 72h112" />
+      {/* three steps */}
+      <path d="M14 72v-3h92v3M18 69v-3h84v3M22 66v-3h76v3" />
+      {/* eight columns, each with a capital */}
+      {range(8).map((i) => {
+        const x = 27 + i * 9.4;
+        return <path key={`c${i}`} d={`M${x} 63V36M${x + 4} 63V36M${x - 1} 36h6`} />;
+      })}
+      {/* architrave and frieze */}
+      <path d="M22 36h76M22 32h76v4M22 32V27h76v5" />
+      {range(9).map((i) => (
+        <path key={`t${i}`} d={`M${26 + i * 8.6} 27v5`} opacity=".45" />
       ))}
-      <path d="M18 32h84M18 28h84v4M18 24h84v4" />
-      {range(14).map((i) => (
-        <path key={`f${i}`} d={`M${21 + i * 6} 24v4`} />
-      ))}
-      <path d="M16 24l44-14 44 14" />
-      <path d="M26 21l34-9.5 34 9.5" opacity=".45" />
+      {/* pediment */}
+      <path d="M20 27L60 13L100 27Z" />
     </>
   ),
   // India Gate: the great arch, inscribed attic, stepped crown and dome
