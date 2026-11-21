@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRef } from "react";
 import { motion, useInView, useReducedMotion } from "motion/react";
 import {
@@ -13,7 +14,7 @@ import {
 } from "@phosphor-icons/react";
 import { Container, EASE } from "@/components/home/ui";
 import { IndexBar, PaperSection } from "@/components/paper/paper-sections";
-import { Landmark, SkyDoodles, Skyline } from "@/components/community/landmarks";
+import { Landmark } from "@/components/community/landmarks";
 import { CommunityBento, TogetherSpread, TogetherWeBuild } from "@/components/community/community-sections";
 import { RegistrationBar, UpcomingEvents } from "@/components/community/upcoming";
 import { JoinCommunity } from "@/components/community/join";
@@ -84,22 +85,22 @@ function YourCity({ cities }: { cities: string[] }) {
             </div>
           </div>
           {/* the cities we've been to, in ink, standing on the bottom edge */}
-          {/* sky, skyline, and the warm ground it stands on */}
-          <div className={cn("s1-skyline relative", (drawn || reduce) && "is-drawn")} style={{ color: "rgba(20,20,20,0.75)" }}>
-            <SkyDoodles className="mx-auto -mb-6 block h-[56px] w-full max-w-[1100px] opacity-60 md:-mb-10 md:h-[90px]" />
-            <div className="px-4 md:px-10">
-              <Skyline cities={cities.slice(0, 9)} />
-            </div>
-            <div aria-hidden className="relative h-[64px] md:h-[90px]" style={{ background: "linear-gradient(to bottom, rgba(249,115,22,0.10), rgba(249,115,22,0.26))" }}>
-              <span className="absolute inset-x-6 top-0 h-px bg-current opacity-60 md:inset-x-10" />
-              <span className="absolute left-[8%] top-[34%] h-px w-[18%] bg-current opacity-30" />
-              <span className="absolute left-[34%] top-[58%] h-px w-[22%] bg-current opacity-25" />
-              <span className="absolute left-[64%] top-[30%] h-px w-[14%] bg-current opacity-30" />
-              <span className="absolute left-[78%] top-[66%] h-px w-[16%] bg-current opacity-25" />
-              <span className="absolute left-[18%] top-[78%] h-px w-[12%] bg-current opacity-20" />
-            </div>
+          {/* the skyline illustration, standing on a warm orange ground */}
+          <div className={cn("s1-skyline relative", (drawn || reduce) && "is-drawn")}>
+            <span
+              aria-hidden
+              className="absolute inset-x-0 bottom-0 h-[30%]"
+              style={{ background: "linear-gradient(to bottom, rgba(249,115,22,0.08), rgba(249,115,22,0.24))" }}
+            />
+            <Image
+              src="/assets/community/skyline.webp"
+              alt="Kolkata, Bengaluru, Taipei, Alicante, Athens, Delhi, Istanbul, Singapore and Sri Lanka, drawn as one skyline"
+              width={1970}
+              height={335}
+              sizes="(min-width: 1280px) 1240px, 100vw"
+              className="relative mx-auto block h-auto w-full max-w-[1200px] px-4 md:px-8"
+            />
           </div>
-          <span aria-hidden className="block h-px bg-[#141414]/20" />
         </motion.div>
       </Container>
     </PaperSection>

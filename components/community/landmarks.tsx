@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 /*
  * Detailed line drawings of each city's landmark, on a 120 x 80 grid, drawn
@@ -211,90 +211,6 @@ export function Landmark({ city, className }: { city: string; className?: string
   return (
     <svg aria-hidden viewBox="0 0 120 80" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" className={className}>
       {drawing}
-    </svg>
-  );
-}
-
-type Box = { x: number; y: number; w: number; h: number };
-const FULL: Box = { x: 0, y: 0, w: 120, h: 80 };
-
-/**
- * The cities' landmarks as one skyline: every drawing at the same height,
- * the same line weight, evenly spaced, on one shared ground line. Each
- * drawing's own ground line is hidden so only the shared one shows.
- */
-export function Skyline({ cities, className }: { cities: string[]; className?: string }) {
-  const list = cities.filter((c) => c in DRAWINGS);
-  const key = list.join("|");
-  const refs = useRef<(SVGSVGElement | null)[]>([]);
-  const [boxes, setBoxes] = useState<Box[] | null>(null);
-  useLayoutEffect(() => {
-    setBoxes(
-      refs.current.slice(0, key.split("|").length).map((el) => {
-        if (!el) return FULL;
-        // hide the ground lines and anything at or below ground (water), then measure
-        el.querySelectorAll("path, circle, rect, ellipse").forEach((p) => {
-          const b = (p as SVGGraphicsElement).getBBox();
-          const flatGround = b.height < 0.5 && b.width > 60 && b.y >= 70;
-          const belowGround = b.y >= 70.5;
-          if (flatGround || belowGround) (p as SVGElement).style.display = "none";
-        });
-        const b = el.getBBox();
-        if (!b.width) return FULL;
-        const bottom = Math.min(b.y + b.height, 72.6);
-        return { x: b.x - 1, y: b.y - 1, w: b.width + 2, h: bottom - b.y + 1 };
-      }),
-    );
-  }, [key]);
-  return (
-    <div className={className}>
-      <div className="flex h-[78px] items-end justify-center md:h-[140px]">
-        {list.map((city, i) => {
-          const b = boxes?.[i] ?? FULL;
-          return (
-            <svg
-              key={city}
-              ref={(el) => {
-                refs.current[i] = el;
-              }}
-              aria-hidden
-              viewBox={`${b.x} ${b.y} ${b.w} ${b.h}`}
-              preserveAspectRatio="xMidYMax meet"
-              style={{ height: `${Math.round((b.h / 62) * 100)}%`, aspectRatio: `${b.w} / ${b.h}`, maxWidth: "13%" }}
-              className="-mx-[0.6%] block shrink [&_*]:[vector-effect:non-scaling-stroke]"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              {DRAWINGS[city]}
-            </svg>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-/** Small sketched clouds and a plane for the sky above the skyline. */
-export function SkyDoodles({ className }: { className?: string }) {
-  const cloud = (x: number, y: number, s: number) => (
-    <path
-      key={`${x}-${y}`}
-      transform={`translate(${x} ${y}) scale(${s})`}
-      d="M0 10a5 5 0 0 1 4-6a7 7 0 0 1 13-1a5 5 0 0 1 7 4a4 4 0 0 1-1 8H2a3 3 0 0 1-2-5z"
-    />
-  );
-  return (
-    <svg aria-hidden viewBox="0 0 1200 120" preserveAspectRatio="xMidYMid meet" className={className} fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
-      {cloud(90, 70, 1.3)}
-      {cloud(330, 40, 1)}
-      {cloud(820, 62, 1.2)}
-      {cloud(1060, 30, 1)}
-      {/* a plane climbing */}
-      <path transform="translate(600 50) rotate(-14)" d="M0 6h34l8-4h4l-4 6 4 6h-4l-8-4H24l-8 10h-5l4-10H6l-3 4H0l2-6z" />
-      <path d="M560 70c10-2 20-3 30-6" strokeDasharray="2 4" opacity=".6" />
     </svg>
   );
 }
