@@ -33,6 +33,19 @@ const KIND: Record<CommunityKind, { label: string; icon: Icon }> = {
   online: { label: "Online", icon: Broadcast },
 };
 
+/** Each city's building, taken from the skyline illustration. */
+const LANDMARK_ART: Record<string, string> = {
+  Kolkata: "kolkata",
+  Bengaluru: "bengaluru",
+  Taipei: "taipei",
+  Alicante: "alicante",
+  Athens: "athens",
+  "Delhi NCR": "delhi-ncr",
+  Istanbul: "istanbul",
+  Singapore: "singapore",
+  "Sri Lanka": "sri-lanka",
+};
+
 const CONTACT = "mailto:contact@studio1hq.com";
 const HOST = `${CONTACT}?subject=${encodeURIComponent("Host a Studio1 meetup")}`;
 const PARTNER = `${CONTACT}?subject=${encodeURIComponent("Partner on a Studio1 hackathon")}`;
@@ -187,7 +200,18 @@ export function CommunityPage({ data }: { data: CommunityData }) {
               {cities.map((c, i) => (
                 <motion.li key={c.city} {...rise(reduce, Math.min(i, 8) * 0.07)} className="group flex flex-col justify-between gap-5 rounded-[6px] bg-white/80 p-5 ring-1 ring-inset ring-[#141414]/10 transition-shadow duration-300 hover:shadow-[0_18px_34px_-24px_rgba(20,20,20,0.45)] md:p-6">
                   <div className="flex h-[72px] items-end md:h-[88px]">
-                    <Landmark city={c.city} className="h-full w-auto text-[#141414]/85 transition-transform duration-500 ease-out group-hover:-translate-y-0.5" />
+                    {LANDMARK_ART[c.city] ? (
+                      <Image
+                        src={`/assets/community/landmarks/${LANDMARK_ART[c.city]}.webp`}
+                        alt={`${c.city} landmark`}
+                        width={320}
+                        height={220}
+                        sizes="160px"
+                        className="h-full w-auto max-w-full object-contain object-left-bottom transition-transform duration-500 ease-out group-hover:-translate-y-0.5"
+                      />
+                    ) : (
+                      <Landmark city={c.city} className="h-full w-auto text-[#141414]/85" />
+                    )}
                   </div>
                   <div>
                     <p className="text-[18px] font-medium tracking-[-0.02em] md:text-[20px]">{c.city}</p>
