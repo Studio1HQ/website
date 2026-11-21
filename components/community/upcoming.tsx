@@ -162,7 +162,7 @@ function ListRow({ item }: { item: CommunityItem }) {
       )}
       <div className="min-w-0 flex-1">
         <p className="flex flex-wrap items-center gap-1.5">
-          <span className="inline-flex h-7 items-center gap-1.5 rounded-full bg-[#141414] px-3 text-[12px] font-medium text-white">
+          <span className="inline-flex h-7 items-center gap-1.5 rounded-full bg-white px-3 text-[12.5px] font-medium text-[#141414]/80 ring-1 ring-inset ring-[#141414]/[0.12]">
             <KindIcon weight="regular" className="size-3.5" style={{ color: PRINT }} />
             {KIND_LABEL[item.kind]}
           </span>

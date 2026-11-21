@@ -106,7 +106,7 @@ function YourCity({ cities }: { cities: string[] }) {
               style={{ background: "linear-gradient(to bottom, rgba(249,115,22,0) 0%, rgba(249,115,22,0.05) 35%, rgba(249,115,22,0.14) 65%, rgba(249,115,22,0.26) 100%)" }}
             />
             <Image
-              src="/assets/community/skyline.webp"
+              src="/assets/community/skyline-gap.webp"
               alt="Kolkata, Bengaluru, Taipei, Alicante, Athens, Delhi, Istanbul, Singapore and Sri Lanka, drawn as one skyline"
               width={2145}
               height={337}
@@ -202,12 +202,12 @@ export function CommunityPage({ data }: { data: CommunityData }) {
                   <div className="flex h-[72px] items-end md:h-[88px]">
                     {LANDMARK_ART[c.city] ? (
                       <Image
-                        src={`/assets/community/landmarks/${LANDMARK_ART[c.city]}.webp`}
+                        src={`/assets/community/cities/${LANDMARK_ART[c.city]}.webp`}
                         alt={`${c.city} landmark`}
                         width={320}
                         height={220}
                         sizes="160px"
-                        className="h-full w-auto max-w-full object-contain object-left-bottom transition-transform duration-500 ease-out group-hover:-translate-y-0.5"
+                        className="h-full w-[130px] object-contain object-left-bottom transition-transform duration-500 ease-out group-hover:-translate-y-0.5 md:w-[150px]"
                       />
                     ) : (
                       <Landmark city={c.city} className="h-full w-auto text-[#141414]/85" />
