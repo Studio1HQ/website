@@ -109,15 +109,11 @@ Depending on where you're strongest, this can lead to running operations for the
 
 ## Salary
 
-[Salary range to be added: ₹XX,000 to ₹XX,000 per month, depending on experience.]
-
-The application form asks for the monthly salary you expect, in INR. Tell us your real number.
+Salary depends on experience. The application form asks for the monthly salary you expect, in INR, so tell us your real number.
 
 ## Role details
 
 This is a full-time remote role for India-based candidates. You will report to the founders.
-
-[Start date to be added.]
 
 ## How to apply
 
