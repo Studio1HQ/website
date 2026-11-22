@@ -1,14 +1,15 @@
 "use client";
 
 import Image from "next/image";
-import { useRef } from "react";
-import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { useEffect, useRef } from "react";
+import { animate, motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { EASE } from "@/components/home/ui";
 import type { CommunityItem } from "@/lib/community";
 import { DiscordIcon } from "@/components/community/discord-icon";
 import { DISCORD_URL, LUMA_URL } from "@/components/community/join";
 import { LumaLogo } from "@/components/community/luma-logo";
 import { PRINT } from "@/lib/paper";
+import { cn } from "@/lib/utils";
 
 /*
  * The community hero, cinematic: the KubeCon India main hall edge to edge in
@@ -18,6 +19,34 @@ import { PRINT } from "@/lib/paper";
  */
 
 type Totals = { events: number; cities: number; meetups: number; hackathons: number };
+
+/** Counts up to a number once, on load; "41+" keeps its "+". */
+function Tick({ value, delay }: { value: string; delay: number }) {
+  const reduce = !!useReducedMotion();
+  const target = parseInt(value, 10);
+  const suffix = value.replace(/^\d+/, "");
+  const ref = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    if (reduce || !ref.current || Number.isNaN(target)) return;
+    const el = ref.current;
+    el.textContent = "0";
+    const controls = animate(0, target, {
+      duration: 1.4,
+      delay,
+      ease: EASE,
+      onUpdate: (n) => {
+        el.textContent = String(Math.round(n));
+      },
+    });
+    return () => controls.stop();
+  }, [reduce, target, delay]);
+  return (
+    <>
+      <span ref={ref}>{Number.isNaN(target) ? value : target}</span>
+      {suffix ? <span style={{ color: PRINT }}>{suffix}</span> : null}
+    </>
+  );
+}
 
 export function CommunityHero({ totals }: { totals: Totals; next?: CommunityItem[] }) {
   const reduce = !!useReducedMotion();
@@ -113,19 +142,25 @@ export function CommunityHero({ totals }: { totals: Totals; next?: CommunityItem
           </motion.div>
         </div>
 
-        {/* the numbers, along the bottom edge */}
-        <motion.div {...enter(0.85)} className="border-t border-white/15 px-6 py-5 md:px-9">
-          <div className="flex justify-center md:justify-start">
-            <dl className="grid grid-cols-4 gap-4 md:flex md:gap-10">
-              {stats.map(([v, l]) => (
-                <div key={l} className="flex flex-col md:flex-row md:items-baseline md:gap-2">
-                  <dd className="text-[26px] font-medium leading-none tracking-[-0.04em] md:text-[28px]">{v}</dd>
-                  <dt className="mt-1 text-[12.5px] text-white/60 md:mt-0 md:text-[13.5px]">{l}</dt>
-                </div>
-              ))}
-            </dl>
-          </div>
-        </motion.div>
+        {/* the numbers, along the bottom edge: four even columns */}
+        <motion.dl {...enter(0.85)} className="grid grid-cols-2 border-t border-white/15 bg-black/20 backdrop-blur-sm md:grid-cols-4">
+          {stats.map(([v, l], i) => (
+            <div
+              key={l}
+              className={cn(
+                "flex flex-col gap-1.5 px-6 py-5 md:px-9 md:py-6",
+                i % 2 === 1 && "border-l border-white/15",
+                i > 1 && "border-t border-white/15 md:border-t-0",
+                i === 2 && "md:border-l",
+              )}
+            >
+              <dd className="text-[30px] font-medium leading-none tracking-[-0.045em] tabular-nums md:text-[40px]">
+                <Tick value={v} delay={1 + i * 0.12} />
+              </dd>
+              <dt className="text-[11.5px] font-medium uppercase tracking-[0.18em] text-white/55">{l}</dt>
+            </div>
+          ))}
+        </motion.dl>
       </div>
     </section>
   );

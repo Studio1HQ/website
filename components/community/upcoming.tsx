@@ -261,19 +261,12 @@ export function RegistrationBar({ item }: { item: CommunityItem | null }) {
   const [open, setOpen] = useState(false);
   useEffect(() => {
     if (!item) return;
-    try {
-      if (sessionStorage.getItem(`s1-reg-${item.id}`)) return;
-    } catch {}
     const t = window.setTimeout(() => setOpen(true), 1600);
     return () => window.clearTimeout(t);
   }, [item]);
   if (!item?.href) return null;
-  const close = () => {
-    setOpen(false);
-    try {
-      sessionStorage.setItem(`s1-reg-${item.id}`, "1");
-    } catch {}
-  };
+  // closing hides it until the next page load
+  const close = () => setOpen(false);
   const live = item.cta === "Register";
   const action = "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-[6px] bg-white px-4 text-[13.5px] font-semibold text-[#141414] transition-colors duration-300 hover:bg-[#141414] hover:text-white";
   const label = (
