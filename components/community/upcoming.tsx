@@ -6,6 +6,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowUpRight, Broadcast, Code, MicrophoneStage, UsersThree, Wrench, type Icon } from "@phosphor-icons/react";
 import Logo from "@/components/ui/svgs/logo";
+import { SketchDesk } from "@/components/community/sketch-desk";
 import { EASE } from "@/components/home/ui";
 import type { CommunityItem, CommunityKind } from "@/lib/community";
 import { GRAIN, PRINT } from "@/lib/paper";
@@ -76,44 +77,55 @@ const KIND_ICON: Record<CommunityKind, Icon> = {
 /** A tall card: badge, title, tags, when and where, the photo, then the action. */
 function EventCard({ item }: { item: CommunityItem }) {
   const KindIcon = KIND_ICON[item.kind];
-  const tags = [KIND_LABEL[item.kind], item.online ? "online" : item.city, item.ours ? "studio1" : "with-the-team"].filter(Boolean) as string[];
+  const [, m, d] = item.date.split("-").map(Number);
   return (
     <Wrap
       item={item}
       className="group flex h-full flex-col rounded-[14px] bg-white/85 p-4 ring-1 ring-inset ring-[#141414]/[0.09] transition-[background-color,box-shadow] duration-300 hover:bg-white hover:ring-[#141414]/20"
     >
-      <div className="flex items-center gap-2">
-        <span className="flex size-10 items-center justify-center rounded-full bg-[#141414] text-[#f4efe7] ring-2 ring-white">
-          <KindIcon weight="regular" className="size-[18px]" />
+      {/* the event's mark, or its type, beside the date */}
+      <div className="flex items-start justify-between gap-3">
+        <span className="flex size-11 items-center justify-center rounded-[10px] bg-white ring-1 ring-inset ring-[#141414]/[0.1]">
+          <KindIcon weight="regular" className="size-5" style={{ color: PRINT }} />
         </span>
-        <span className="-ml-4 flex size-10 items-center justify-center rounded-full ring-2 ring-white" style={{ background: PRINT }}>
-          <span className="text-[12px] font-semibold text-white">S1</span>
+        <span className="flex w-11 flex-col items-center overflow-hidden rounded-[8px] ring-1 ring-inset ring-[#141414]/[0.1]">
+          <span className="w-full py-0.5 text-center text-[9.5px] font-semibold uppercase tracking-[0.12em] text-white" style={{ background: PRINT }}>{MONTHS[m - 1]}</span>
+          <span className="py-1 text-[16px] font-medium leading-none">{String(d).padStart(2, "0")}</span>
         </span>
       </div>
 
       <h3 className="mt-4 line-clamp-3 min-h-[3.6em] text-[19px] font-semibold leading-[1.2] tracking-[-0.02em]">{item.name}</h3>
 
       <div className="mt-3 flex flex-wrap gap-1.5">
-        {tags.slice(0, 2).map((t) => (
-          <span key={t} className="rounded-[8px] px-2.5 py-1 text-[12.5px] text-[#141414]/60 ring-1 ring-inset ring-[#141414]/[0.12]">
-            #{t.toLowerCase().replace(/\s+/g, "-")}
-          </span>
-        ))}
-        {tags.length > 2 ? (
-          <span className="rounded-[8px] px-2.5 py-1 text-[12.5px] text-[#141414]/60 ring-1 ring-inset ring-[#141414]/[0.12]">+{tags.length - 2}</span>
-        ) : null}
+        <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] text-[#141414]/70 ring-1 ring-inset ring-[#141414]/[0.12]">
+          <KindIcon weight="regular" className="size-3.5" style={{ color: PRINT }} />
+          {KIND_LABEL[item.kind]}
+        </span>
+        <span className="rounded-full px-2.5 py-1 text-[12px] text-[#141414]/70 ring-1 ring-inset ring-[#141414]/[0.12]">{where(item)}</span>
       </div>
 
-      <p className="mt-3 text-[13.5px] text-[#141414]/55">
-        {when(item)} <span className="mx-1">·</span> {where(item)}
-      </p>
+      {item.image ? (
+        <Cover item={item} className="mt-4 aspect-[16/10] w-full rounded-[10px]" />
+      ) : (
+        /* no photo yet: a cover in the event's colour, sketch behind, its mark in white */
+        <div
+          className="relative isolate mt-4 flex aspect-[16/10] w-full items-center justify-center overflow-hidden rounded-[10px]"
+          style={{ background: `radial-gradient(120% 90% at 20% 10%, ${item.brand ?? PRINT}, color-mix(in oklab, ${item.brand ?? PRINT} 70%, #0b1020))` }}
+        >
+          <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 opacity-[0.22] [filter:brightness(0)_invert(1)]">
+            <SketchDesk className="absolute inset-0 size-full" />
+          </span>
+          <span aria-hidden className="absolute -right-10 -top-10 size-36 rounded-full border-[14px] border-white/10" />
+          <span className="absolute bottom-2.5 left-3 text-[10.5px] font-semibold uppercase tracking-[0.16em] text-white/80">{KIND_LABEL[item.kind]}</span>
+        </div>
+      )}
 
-      <Cover item={item} className="mt-3 aspect-[16/10] w-full rounded-[10px] [&>span:last-child]:text-[18px]" />
+      {item.summary ? <p className="mt-3 line-clamp-2 text-[13.5px] leading-[1.5] text-[#141414]/55">{item.summary}</p> : null}
 
-      <div className="mt-auto flex items-center justify-between pt-4 text-[13.5px]">
+      <div className="mt-auto flex items-center justify-between pt-4 text-[14px]">
         <span className="font-medium">{item.cta}</span>
-        <span className="flex size-8 items-center justify-center rounded-full bg-[#141414] text-white transition-[transform,background-color] duration-300 group-hover:rotate-45 group-hover:bg-[#f97316]">
-          <ArrowUpRight weight="bold" className="size-3.5" />
+        <span className="flex size-9 items-center justify-center rounded-full bg-white text-[#141414] ring-1 ring-inset ring-[#141414]/[0.15] transition-[transform,background-color,color] duration-300 group-hover:rotate-45 group-hover:bg-[#f97316] group-hover:text-white group-hover:ring-[#f97316]">
+          <ArrowUpRight weight="bold" className="size-4" />
         </span>
       </div>
     </Wrap>
@@ -176,7 +188,7 @@ function ListRow({ item }: { item: CommunityItem }) {
         <h3 className="mt-2.5 line-clamp-2 text-[19px] font-medium leading-[1.2] tracking-[-0.025em] sm:text-[23px]">{item.name}</h3>
         <p className="mt-1.5 hidden truncate text-[14.5px] text-[#141414]/55 sm:block">{line}</p>
       </div>
-      <span className="hidden h-11 shrink-0 items-center gap-2 rounded-full bg-[#141414] px-5 text-[14px] font-medium text-white transition-colors duration-300 group-hover:bg-[#f97316] sm:inline-flex">
+      <span className="hidden h-11 shrink-0 items-center gap-2 rounded-full bg-white px-5 text-[14px] font-medium text-[#141414] ring-1 ring-inset ring-[#141414]/[0.15] transition-colors duration-300 group-hover:bg-[#f97316] group-hover:text-white group-hover:ring-[#f97316] sm:inline-flex">
         {item.cta}
         <ArrowUpRight weight="bold" className="size-4 transition-transform duration-300 group-hover:rotate-45" />
       </span>
@@ -199,7 +211,7 @@ export function UpcomingEvents({
 }) {
   const reduce = !!useReducedMotion();
   // one or two events read better as wide cards; more go into the grid
-  const wide = items.length <= 2;
+  const wide = false;
   return (
     <>
       <div className="flex flex-wrap items-end justify-between gap-6">
