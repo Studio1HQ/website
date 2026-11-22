@@ -28,6 +28,8 @@ type Panel = {
   /** The event's own mark; Studio1's when it has none. */
   logo?: string;
   brand?: string;
+  /** The event's own full-colour logo. */
+  wordmark?: string;
 };
 
 /** Meetups being planned: strips that say "soon", never a date until announced. */
@@ -78,6 +80,7 @@ export function EventTicket({ item }: { item: CommunityItem }) {
       external: item.external,
       logo: item.logo,
       brand: item.brand,
+      wordmark: item.wordmark,
     },
     ...SOON.map((s, i) => ({ ...s, key: `soon-${i}` })),
   ];
@@ -123,16 +126,18 @@ export function EventTicket({ item }: { item: CommunityItem }) {
                   exit={{ opacity: 0, transition: { duration: 0.15 } }}
                   className="absolute inset-0 flex flex-col justify-between p-6 md:p-9"
                 >
-                  {/* the mark, large and faint, printed into the ticket */}
-                  <Mark p={p} className="pointer-events-none absolute bottom-7 right-8 -z-10 size-28 opacity-[0.12] md:bottom-9 md:right-10 md:size-36" />
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start justify-between gap-6">
                     <div className="min-w-0">
                       <h3 className="max-w-[560px] text-[30px] font-extrabold leading-[0.98] tracking-[-0.035em] sm:text-[38px] md:text-[46px]">{p.title}</h3>
                       <p className="mt-3 flex items-center gap-2 text-[15px] font-medium opacity-75">
-                        <Mark p={p} className="size-5" />
+                        {p.wordmark ? null : <Mark p={p} className="size-5" />}
                         {p.line}
                       </p>
                     </div>
+                    {p.wordmark ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={p.wordmark} alt="" className="hidden h-[88px] w-auto shrink-0 sm:block md:h-[104px]" />
+                    ) : null}
                   </div>
                   <Go
                     p={p}
