@@ -1,0 +1,193 @@
+---
+title: "Gemini 4 Neon Review: Pricing, Benchmarks, and Coding Tests"
+seoTitle: "gemini-neon-4"
+slug: "gemini-neon-4"
+description: "Gemini 4 Neon review for developers: pricing, benchmarks, cost per task, real coding tests, and what breaks when you migrate from Carbon or Opus 5.5."
+tldrSummary: "If you want the quick take, Neon is the Gemini 4 model most developers will actually end up using. It's close to Carbon at about half the price, and the catch is how much it likes to talk."
+tldrBullets:
+  - "It matches Carbon for roughly half the money. At the default \"high\" setting, Artificial Analysis scores both at 60. Neon costs $3.74 per task, and Carbon costs $7.76."
+  - "The $3 in and $15 out price is only half the story. Neon writes a lot of tokens, so run it on high. The xhigh setting adds 1.8 points for $2.70 more per task."
+  - "In a six-app coding test, it came second out of 18 models, behind only Claude Fable 5.2, and cost a fraction of what Fable did."
+  - "It trusts old training data and tests like a developer, not an attacker. Review anything touching security or a recently changed API."
+date: 2026-11-20
+updatedDate: 2026-11-20
+draft: false
+unlisted: true
+authors:
+  - "Nancy"
+tags:
+  - "gemini"
+  - "ai-agents"
+  - "software"
+  - "new-launch"
+bannerImage: "/blog/uploads/gemini-neon-4/gemini-4-neon-benchmark-review-d8706d.webp"
+bannerImageAlt: "banner-image"
+---
+Google released Gemini 4 Neon on November 18, 2026. It's a mid-tier model that costs $3 per million input tokens and $15 per million output tokens, has a 1M-token context window, and scores 61 on the Artificial Analysis Intelligence Index at top effort. At default effort, it roughly matches Gemini 4 Carbon for half the cost per task.
+
+It's also the fourth Gemini 4 model in about seven weeks, so yes, people had jokes. One Hacker News commenter is already [waiting for Oganesson](https://news.ycombinator.com/item?id=50552763). Google is speedrunning the periodic table.
+
+## What is Gemini 4 Neon?
+
+Google's Gemini 4 family now has three tiers that matter. Hydrogen is the fast, cheap one. Carbon is the slow, deep one. Neon sits in the middle, and the [model card](https://deepmind.google/models/model-cards/gemini-4-neon/) says it's adapted from Carbon.
+
+Neon is built for long coding jobs, analysis, and agents that need to finish fast. It has a 1M-token context window and four thinking levels: low, medium, high (the API default), and xhigh. It takes in text, images, audio, video, and PDFs, and it writes text only. Output is 64K tokens per response by default, and up to 1M through a background long-decode mode. The knowledge cutoff is March 2026.
+
+You can get it on the paid Gemini API tier, in Google AI Studio and Android Studio, in Antigravity, in Gemini for business, and in the Gemini app for Pro and Ultra subscribers. Day-one integrations included [Cursor, GitHub Copilot, and LangChain](https://latent.space/p/ainews-gemini-4-neon-gdm-s-opus-sol-contender/). Argon quietly left the Gemini app the same day.
+
+![Release gaps keep shrinking. Source: Arena counts via Latent Space.](/blog/uploads/gemini-neon-4/image-17-458bcc.webp)
+
+## How it differs from the other models
+
+|                                      | Gemini 4 Neon                       | Gemini 4 Carbon                   | Gemini 4 Hydrogen    | Claude Opus 5.5                 |
+| ------------------------------------ | ----------------------------------- | --------------------------------- | -------------------- | ------------------------------- |
+| API name                             | gemini-4-neon                       | gemini-4-carbon                   | gemini-4-hydrogen    | claude-opus-5-5                 |
+| Input / output price (per 1M tokens) | $3 / $15                            | $2 / $10 now, $4 / $20 from Dec 1 | $1.50 / $7.50        | $4 / $20                        |
+| Cache reads (per 1M tokens)          | $0.15                               | $0.10 now, $0.20 from Dec 1       | $0.075               | $0.20                           |
+| AA Intelligence Index                | 61 at xhigh, 59.6 at high           | 60 at high                        | 54 at xhigh          | 59 at max                       |
+| Output speed                         | About 110 tokens/sec                | About 57 tokens/sec               | About 170 tokens/sec | Not listed                      |
+| Context / max output                 | 1M / 64K (1M via background decode) | 1M                                | 1M                   | 1M / 128K                       |
+| Best for                             | Complex work you run often          | Hardest long projects             | Everyday speed       | Long coding jobs, big refactors |
+
+Sources: [VentureBeat](https://venturebeat.com/technology/google-launches-gemini-4-neon-with-opus-5-5-level-coding-performance-at-25-lower-api-token-prices) for prices and speeds, [Artificial Analysis](https://artificialanalysis.ai/articles/gemini-4-neon-intelligence-gain), [Studio1's Opus 5.5 review](https://www.studio1hq.com/blog/claude-opus-5-5-review-motion-videos).
+
+**Compared with Carbon,** Neon matches the index score at high effort for roughly half the cost per task and about 60% less time. Carbon is still Google's pick for the hardest long-horizon projects, and it still leads Arena's Text Arena. It's also cheaper per token until November 30.
+
+**Against Opus 5.5,** Neon at high (59.6) is level with Opus at max (59.1) at about a third of the per-task cost. That compares different effort settings, so treat it as direction, not a verdict. In Google's own table, Opus is ahead by about a point on Terminal-Bench 4.1 and FrontierCode 2.0.
+
+**Compared to GPT-6.2 Sol and Astra,** Neon wins on long context and the Vals Index, and loses on cost per task. Sol scores 57.3 for $1.01 a task. Astra scores 60.1 for $2.07.
+
+**Compared to Hydrogen,** Neon is about 8.8 index points smarter at high and costs about twice as much per task, per [eesel's read of the data](https://www.eesel.ai/blog/gemini-4-neon-review). Antigravity now lets you [pair them](https://antigravity.google/blog/gemini-4-neon-in-google-antigravity/): Neon plans, Hydrogen does the work.
+
+## What breaks when you switch
+
+Google's [developer guide](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/guides/gemini-4-neon) calls Neon the upgrade target for Gemini 3.1 Pro, and for complex coding work moving off Argon or Gemini 3.8 Flash. Nothing here ruins your day, but you can't flip the switch and forget about it. These are the four you'll actually hit:
+
+* **One shared token budget.** Input, thinking, tool calls, and the final answer all draw from the same 1,048,576 tokens. Gemini 3 had separate limits. A long reasoning run now eats your window.
+* **The default effort changes by surface.** The API defaults to high. The Gemini app defaults to low, and only offers low, medium, and high. The 61 headline score was measured at xhigh, which app users can't pick.
+* **Sampling is locked on Google Cloud.** The enterprise platform lists temperature at 1.0, topP at 0.95, and topK at 64, with custom values ignored. Tuning and the RAG Engine aren't supported there, and access is limited to verified enterprise customers in select regions.
+* **Capacity and access are rough.** In 13 early Antigravity sessions, one tester logged [57 capacity errors and four stalled runs](https://latent.space/p/ainews-gemini-4-neon-gdm-s-opus-sol-contender/). There's also no free API tier, and Auto mode in the Gemini app doesn't route to Neon.
+
+One more thing. Google says the full safety report is still on the way, so if you work in a regulated space, wait for it before you go to production.
+
+## What it will really cost you
+
+Google says Neon cuts cost per task by 32% against Carbon at the default high setting. Artificial Analysis frames it more modestly, at about 17% lower when it compares Neon at xhigh with Carbon at high, using Carbon's standard price. The gap between those numbers is mostly about which settings you compare.
+
+First, the sticker price. Here's where Neon sits among the models people compare it with:
+
+![list-price-per-million-tokens](/blog/uploads/gemini-neon-4/image-18-ba717d.webp "List price per million tokens. Source: VentureBeat price table.")
+
+Then the number that hits your invoice, which is cost per task![gemini-cost](/blog/uploads/gemini-neon-4/image-19-989374.webp "Cost per task at each effort level. Data: Artificial Analysis, compiled by eesel.ai.")
+
+Here's how that plays out by setting, from [eesel's compilation of Artificial Analysis data](https://www.eesel.ai/blog/gemini-4-neon-review):
+
+| Neon setting   | Index score | Cost per task | Minutes per task |
+| -------------- | ----------- | ------------- | ---------------- |
+| Low            | 44.1        | $0.75         | 3.7              |
+| Medium         | 54.9        | $1.90         | 8.3              |
+| High (default) | 59.6        | $3.74         | 14.8             |
+| Extra high     | 61.4        | $6.44         | 21.5             |
+
+High is the sweet spot. Medium to high buys 4.7 points for $1.84 more. High to xhigh buys 1.8 points for $2.70 more and nearly seven extra minutes. xhigh is the "one more episode" of reasoning settings.
+
+![neon-effort-level](/blog/uploads/gemini-neon-4/image-20-489846.webp "The curve flattens after high. Source: Artificial Analysis, compiled by eesel.ai.")
+
+It also gets wordy there. At xhigh, Neon wrote 283 million output tokens across the index, against 60.9 million for Sol, and the first answer token takes about 56 seconds. Fine for a background agent. Bad for a chat box.
+
+Coding is a different story. In MindStudio's [KingBench 4 test](https://www.mindstudio.ai/blog/gemini-4-neon-vs-claude-opus-gpt-6-2), a full six-app run cost $20.36 on Neon at list prices, against $222 for Fable 5.2 and $234 for Carbon on its intro pricing. Neon used about 27 million tokens, and Carbon used roughly three times as many. So on code, Neon is lean. On general reasoning tasks, it's chatty. Both are true, which is the whole point of measuring cost per finished task and not price per token.
+
+A few more prices, if you're budgeting:
+
+* **Cached input:** $0.15 per million, a 95% discount.
+* **Batch and Flex:** half price, $1.50 in and $7.50 out, per [Fello AI](https://felloai.com/gemini-4-neon/).
+* **The December 1 flip:** Carbon doubles to $4 and $20. Until then, Neon costs 50% more per token than Carbon. After, it's 25% cheaper. Fun.
+* **OpenAI:** Sol is $2 and $10, and Astra is $8 and $40. Astra writes about 17,800 tokens per task, while Neon writes about 90,000, so it still comes out cheaper per task on Artificial Analysis.
+
+## The test scores
+
+Benchmarks are standard exams for models. These are the ones that matter for dev work, from Google's own comparison table (best score in bold):
+
+| Test                   | What it checks                          | Neon  | Opus 5.5 | Sol   |
+| ---------------------- | --------------------------------------- | ----- | -------- | ----- |
+| Vals Index             | Finance, legal, tax, and software tasks | 70.9% | 70.1%    | 66.1% |
+| Terminal-Bench 4.1     | Multi-step tasks in a command line      | 65.2% | 65.8%    | 61.5% |
+| FrontierCode 2.0       | Would a reviewer merge the change       | 46.2% | 47.3%    | 43.8% |
+| AutomationBench        | Business tasks across many apps         | 56.3% | 42.5%    | 41.3% |
+| HLE-Diamond            | Very hard expert questions              | 71.3% | 67.9%    | 64.0% |
+| Terminal-Bench Science | Science research tasks                  | 70.5% | 63.3%    | 68.0% |
+| Chartography           | Reading dense professional charts       | 73.5% | 66.3%    | 75.1% |
+| GraphWalks, 256K to 1M | Recall across a huge context            | 95.2% | 66.8%    | 80.1% |
+
+![google-own-comparison-table](/blog/uploads/gemini-neon-4/image-21-df53f3.webp)
+
+*Google's published comparison. Vendor-reported. Sources: Google DeepMind model card via Fello AI and VentureBeat.*
+
+These are best-case scores from Google's own runs, and the table leaves out Fable 5.2 and Astra, which both beat Neon on the Artificial Analysis index. So here are the independent numbers:
+
+* **Artificial Analysis Intelligence Index:** 61 at xhigh, third overall behind Astra and Fable 5.2, and one point ahead of Carbon.
+* **Artificial Analysis Coding Agent Index:** 59 using the Antigravity CLI, against 55 for Carbon. That's [in line with Claude Code running Fable 5.2 and Opus 5.5 at 58](https://x.com/ArtificialAnlys/status/2123170648772288540), at $6.86 per task versus $12.61 for Opus and $15.47 for Fable.
+* **Vals Index:** second place at 70.9%, [about 0.4 points behind Fable 5.2](https://latent.space/p/ainews-gemini-4-neon-gdm-s-opus-sol-contender/) at less than half the cost per task. Sonnet 5.5 sits at 70.85%, which is basically a tie.
+* **Agent Arena:** second place with 1,336 points over about 4,200 real sessions and a $2.82 median task cost.
+* **KingBench 4:** 37.9 out of 60, second of 18 models. Fable 5.2 scored 42, Opus 5.5 scored 34.7, and GPT-6.2 Astra scored about 33.9. Neon got 70 to 95% of each project right on the first try, with three full file rewrites across six builds against 31 for Fable. The harnesses differed between models, so read it as a signal, not a verdict.
+
+![kingbench-4-score](/blog/uploads/gemini-neon-4/image-22-3573e9.webp)
+
+*KingBench 4 score and cost. Source: MindStudio. Models ran in different harnesses, so read it as a signal, not a verdict.*
+
+One number from Google's own post deserves a second look. On SWE-sweep, Neon scores 12.8% in the shared mini-SWE harness and 39.0% inside Antigravity. Same model, three times the score. The tooling around the model matters as much as the model.
+
+## What have people built with it?
+
+These are some of the things people have shown in the first two days. They're demos people chose to post, so treat them as best cases.
+
+* **A 12-hour Turing study.** Google showed a swarm of Neon agents in Antigravity [recreating Alan Turing's 1936 Cambridge study](https://x.com/GoogleAI/status/2123168242797809944) from archival photos, complete with a working universal Turing machine you can run.
+* **A path-traced showcase.** Google for Developers shared [a build with 1,000 Hz physics, 1,728 path-traced frames, and a custom synth score](https://x.com/googledevs/status/2123176874818084938), all driven from one swarm.
+* **17 demos in a day.** Early-access tester [Kimmonismus](https://x.com/kimmonismus/status/2123168299890704735) had Neon build shooters and 3D worlds in Antigravity. One build died on a server error and needed a second pass. In a bug-fix test, a booking checker went from 1 of 5 tests passing to 5 of 5.
+* **A 3D room designer and a playable Pokémon Red.** In the KingBench tests, Neon built a room editor with 15 furniture types and no WebGL memory leaks, then a first-chapter Pokémon game with 18 connected maps running at 60 frames per second.
+* **An ops agent on Cloud Run.** In [one hands-on writeup](https://www.geeky-gadgets.com/gemini-4-neon-features/), Neon built an agent called Pager that watches an app, finds a fault, and applies a fix after human approval. It was deployed to Cloud Run in about 65 minutes.
+* **Copy duty.** Theo of T3 Code [now uses Neon as his exclusive copywriter](https://x.com/theo/status/2123273253850628260), with Fable on implementation and Astra on playtesting. In October, he'd called Argon [unusable for real code work](https://x.com/theo/status/2110461582237188207), so that's a turn.
+
+## Where it still loses
+
+Not everything's better. A few real gaps before you switch:
+
+* **Stale knowledge.** In the [KingBench run](https://www.mindstudio.ai/blog/gemini-4-neon-vs-claude-opus-gpt-6-2), Neon coded a Fitbit app against an API Google had shut down on November 2. It also sent a wrong hex code that put a keyboard into bootloader mode. It trusts what it remembers instead of checking live docs.
+* **Security testing.** Its [Docker alternative](https://www.mindstudio.ai/blog/gemini-4-neon-vs-claude-opus-gpt-6-2) was clean Go code, but a hostile container image could escape to the host through seven symlink paths. Opus 5.5 and the GPT-6.2 models avoided that flaw. Neon tests the happy path.
+* **Overclaiming.** In the [Pokémon build](https://www.mindstudio.ai/blog/gemini-4-neon-vs-claude-opus-gpt-6-2), its own test suite quietly rigged the game to guarantee a win. Check its summaries before you trust them.
+* **The hardest builds.** Fable 5.2 still [beat it, 42 to 37.9](https://www.mindstudio.ai/blog/gemini-4-neon-vs-claude-opus-gpt-6-2). If your evals fail at high effort, that's your next step up.
+* **Cost per task against OpenAI.** Sol and Astra are cheaper per finished task on Artificial Analysis, per [eesel's compilation](https://www.eesel.ai/blog/gemini-4-neon-review).
+* **Coding by a hair, and charts.** Opus leads Neon on [two coding rows](https://deepmind.google/models/model-cards/gemini-4-neon/) by about a point, and Sol leads on chart reading.
+* **Day one.** [Capacity errors](https://latent.space/p/ainews-gemini-4-neon-gdm-s-opus-sol-contender/) showed up, and almost every number in this post is a launch-day number. One reviewer reports Neon guessing wrong on only 14% of questions it can't answer, against 50% or more for rivals, but it also answers fewer questions correctly. That's [one reading of one benchmark](https://www.eesel.ai/blog/gemini-4-neon-review), so verify it on [Artificial Analysis](https://artificialanalysis.ai/models/gemini-4-neon).
+
+And then there's the naming. Nobody could work out the ordering. Simon Willison wrote that Neon made the Gemini 4 pricing [even more confusing](https://simonwillison.net/2026/Nov/18/llm-gemini/), and the [Hacker News thread](https://news.ycombinator.com/item?id=50552424) is mostly people trying to guess the logic. Google's Logan Kilpatrick admitted the team is having a little too much fun with it.
+
+## Wrapping up
+
+Neon is the Gemini model we'd test first this month. It's faster than Carbon, cheaper than the model it came from, and it holds up against Opus 5.5 on most of the numbers we can check.
+
+It's not for everything. Security work, anything touching recently changed APIs, and the very hardest builds still need a second look, and the December 1 price flip means your math changes in under two weeks.
+
+Test it on your own tasks before you switch, and run it on high. If you're weighing it against the others, our [Opus 5.5 review](https://www.studio1hq.com/blog/claude-opus-5-5-review-motion-videos) covers the other side of that comparison, and our [guide to getting your tool recommended by AI search](https://www.studio1hq.com/blog/how-to-get-your-tool-recommended-by-chatgpt-perplexity-google) covers what to do if you're the one building the tool.
+
+## Frequently asked questions
+
+### What is Gemini 4 Neon?
+
+Gemini 4 Neon is Google's mid-tier frontier model, released November 18, 2026. It sits between Gemini 4 Hydrogen and Gemini 4 Carbon, has a 1M-token context window, and is built for coding, analysis, and long agent workflows.
+
+### How much does Gemini 4 Neon cost?
+
+It costs $3 per million input tokens and $15 per million output tokens, with cached input at $0.15. Batch requests are half price. On Artificial Analysis tasks, it averages $3.74 at high effort and $6.44 at xhigh.
+
+### Is Gemini 4 Neon better than Claude Opus 5.5?
+
+On the Artificial Analysis index, it's roughly level at a lower price, and it wins most rows in Google's own table. Opus 5.5 is about a point ahead on Terminal-Bench 4.1 and FrontierCode 2.0, and it handled container security better in one coding test. Try both on your own tasks.
+
+### Is Gemini 4 Neon free?
+
+No. The API has no free tier, and the Gemini app needs a Google AI Pro or Ultra plan. Hydrogen is the Gemini 4 model with free API access.
+
+### Which thinking level should I use?
+
+High, which is also the API default. It scores 59.6 on the Artificial Analysis index at $3.74 per task. xhigh adds about 1.8 points for $2.70 more per task and a longer wait.&#x20;

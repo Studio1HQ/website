@@ -108,18 +108,19 @@ export const EVENTS: StudioEvent[] = [
     summary:
       'Shivay Lamba and Vikash Tiwary ran the workshop "Building AI-Powered React Apps with TanStack AI".',
   },
-  {
-    slug: "nebius-podcast-dylan-bristot",
-    name: "Podcast with Dylan Bristot of Nebius",
-    kind: "Podcast",
-    year: 2026,
-    month: 8,
-    day: 24,
-    approx: "Week of August 24",
-    place: "Online",
-    logo: "/assets/logos/nebius.webp",
-    logoFill: true,
-  },
+  // need-review
+  // {
+  //   slug: "nebius-podcast-dylan-bristot",
+  //   name: "Podcast with Dylan Bristot of Nebius",
+  //   kind: "Podcast",
+  //   year: 2026,
+  //   month: 8,
+  //   day: 24,
+  //   approx: "Week of August 24",
+  //   place: "Online",
+  //   logo: "/assets/logos/nebius.webp",
+  //   logoFill: true,
+  // },
   {
     slug: "hackathon-session",
     name: "Hackathon session",
@@ -218,7 +219,9 @@ export const EVENTS: StudioEvent[] = [
       "/assets/events/ai-engineer-singapore/05.webp",
     ],
     summary:
-      "Met an engineer from Z.ai, the team behind the GLM models, Tejas, and the Nebius, Vercel and Cursor teams.",
+      // need-review
+      // "Met an engineer from Z.ai, the team behind the GLM models, Tejas, and the Nebius, Vercel and Cursor teams.",
+      "Met an engineer from Z.ai, the team behind the GLM models, Tejas, and the Vercel and Cursor teams.",
   },
   {
     slug: "kubecon-india-2026",
@@ -434,16 +437,17 @@ export const EVENTS: StudioEvent[] = [
     summary:
       "A walkthrough of KitOps, the CNCF-hosted open-source project for packaging models, data and code into one versioned, reproducible artifact.",
   },
-  {
-    slug: "nebius-webinar",
-    name: "Nebius webinar",
-    kind: "Webinar",
-    year: 2025,
-    month: 1,
-    place: "Online",
-    logo: "/assets/logos/nebius.webp",
-    logoFill: true,
-  },
+  // need-review
+  // {
+  //   slug: "nebius-webinar",
+  //   name: "Nebius webinar",
+  //   kind: "Webinar",
+  //   year: 2025,
+  //   month: 1,
+  //   place: "Online",
+  //   logo: "/assets/logos/nebius.webp",
+  //   logoFill: true,
+  // },
   {
     slug: "kubecon-na-2025",
     name: "KubeCon + CloudNativeCon North America 2025",

@@ -4,7 +4,7 @@
 
 Studio1 (studio1hq.com) is a DevRel and developer marketing agency. It helps developer-focused companies grow adoption through technical content marketing, GitHub and open-source growth, developer documentation and DX audits, developer video production, and developer relations campaigns. The team builds README and onboarding fixes, demo projects, tutorials, docs, videos, launches, community programs, and distribution across Reddit, daily.dev, X, LinkedIn, Dev.to, and live events.
 
-Selected results: Memori grew from launch to 12,000+ GitHub stars. Corsair went from about 300 to 2,000 GitHub stars in five weeks. OpenLore grew from ~135 to 1,700+ GitHub stars in one month. Nebius's open-source examples library reached 16K+ GitHub stars. Every number, with sources, is on the Results page.
+Selected results: Memori grew from launch to 12,000+ GitHub stars. Corsair went from about 300 to 2,000 GitHub stars in five weeks. OpenLore grew from ~135 to 1,700+ GitHub stars in one month. Every number, with sources, is on the Results page.
 
 ## Services
 
