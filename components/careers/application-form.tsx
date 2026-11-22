@@ -230,9 +230,7 @@ export function ApplicationForm({
   const payHint = typedPay?.ok
     ? `${describePay(typedPay.amount, pay)}${pay === "month" ? ", before tax" : ""}.`
     : [
-        pay === "month"
-          ? "Before tax. 40000 or 40k both work."
-          : "8000 or 8k both work.",
+        pay === "month" ? "Before tax, per month." : "8000 or 8k both work.",
         openAbroad ? "Outside India? Convert from your currency." : "",
       ]
         .filter(Boolean)
@@ -397,7 +395,7 @@ export function ApplicationForm({
               type="text"
               autoComplete="off"
               maxLength={60}
-              placeholder={pay === "article" ? "8,000" : "40,000"}
+              placeholder={pay === "article" ? "8,000" : undefined}
               onChange={(event) => set("expectedPay", event.target.value)}
               className={cn(CONTROL, "h-12 pl-9 tabular-nums")}
             />
