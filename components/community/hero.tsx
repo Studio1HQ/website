@@ -1,109 +1,132 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useReducedMotion } from "motion/react";
-import { Container, EASE } from "@/components/home/ui";
+import { useRef } from "react";
+import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { EASE } from "@/components/home/ui";
 import type { CommunityItem } from "@/lib/community";
 import { DiscordIcon } from "@/components/community/discord-icon";
 import { DISCORD_URL, LUMA_URL } from "@/components/community/join";
 import { LumaLogo } from "@/components/community/luma-logo";
-import { SketchDesk } from "@/components/community/sketch-desk";
-import { GRAIN, INK, PAPER, PRINT } from "@/lib/paper";
-import { cn } from "@/lib/utils";
+import { PRINT } from "@/lib/paper";
 
 /*
- * The community hero, set like an editorial cover: the line in huge
- * staggered capitals, with small photos from our events tucked into the
- * gaps between the words. Photos here are ones used nowhere else on the page.
+ * The community hero, cinematic: the KubeCon India main hall edge to edge in
+ * a rounded frame, the line centred in white over it, and the numbers along
+ * the bottom edge. The photo settles in with a slow zoom, then drifts as the
+ * page scrolls.
  */
-
-const P = (slug: string) => `/assets/events/${slug}/01.webp`;
 
 type Totals = { events: number; cities: number; meetups: number; hackathons: number };
 
-/** A small photo set into a line of the headline. */
-function Shot({ src, alt, className, delay, reduce }: { src: string; alt: string; className?: string; delay: number; reduce: boolean }) {
-  return (
-    <motion.span
-      className={cn("relative block shrink-0 overflow-hidden bg-[#e6e1d9]", className)}
-      initial={reduce ? false : { opacity: 0, scale: 0.9, filter: "blur(8px)" }}
-      animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-      transition={{ duration: 1, ease: EASE, delay }}
-    >
-      <Image src={src} alt={alt} fill sizes="(min-width: 1024px) 160px, 22vw" className="object-cover" priority={delay < 0.6} />
-    </motion.span>
-  );
-}
-
-/** One line of the headline, rising in. */
-function Line({ children, className, delay, reduce }: { children: React.ReactNode; className?: string; delay: number; reduce: boolean }) {
-  return (
-    <motion.div
-      className={cn("flex items-center", className)}
-      initial={reduce ? false : { opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 1, ease: EASE, delay }}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
 export function CommunityHero({ totals }: { totals: Totals; next?: CommunityItem[] }) {
   const reduce = !!useReducedMotion();
-  const word = "font-semibold uppercase leading-[0.86] tracking-[-0.055em] text-[min(13.5vw,8.5svh)] sm:text-[min(11.5vw,10svh)] lg:text-[min(9.4vw,11.5svh)] 2xl:text-[min(148px,11.5svh)]";
-  const shot = "h-[min(11vw,7svh)] w-[min(8.4vw,5.4svh)] sm:h-[min(9.5vw,8.2svh)] sm:w-[min(7.2vw,6.3svh)] lg:h-[min(7.6vw,9.4svh)] lg:w-[min(5.8vw,7.2svh)] 2xl:h-[min(118px,9.4svh)] 2xl:w-[min(92px,7.2svh)]";
+  const frame = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: frame, offset: ["start start", "end start"] });
+  const drift = useTransform(scrollYProgress, [0, 1], ["0%", "12%"]);
+  const enter = (delay: number) =>
+    ({
+      initial: reduce ? false : { opacity: 0, y: 18, filter: "blur(8px)" },
+      animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+      transition: { duration: 1, ease: EASE, delay },
+    }) as const;
+
+  const stats: [string, string][] = [
+    [`${totals.events}+`, "events"],
+    [String(totals.cities), "cities"],
+    [String(totals.hackathons), "hackathons"],
+    [String(totals.meetups), "meetups"],
+  ];
 
   return (
-    <section className="relative isolate overflow-hidden" style={{ background: PAPER, color: INK }}>
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 opacity-30 mix-blend-multiply" style={{ backgroundImage: GRAIN }} />
-      {/* the pencil sketch, faint behind everything */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-[8] opacity-[0.14]">
-        <SketchDesk className="absolute inset-0 size-full" />
-      </div>
+    <section className="px-3 pb-6 pt-[76px] md:px-4 md:pt-[84px]">
+      <div
+        ref={frame}
+        className="relative isolate flex min-h-[calc(100svh-96px)] flex-col overflow-hidden rounded-[18px] bg-[#141414] text-white md:min-h-[calc(100svh-104px)] md:rounded-[22px]"
+      >
+        {/* the photo: a slow zoom in, then a drift with the scroll */}
+        <motion.div style={reduce ? undefined : { y: drift }} className="absolute inset-[-6%] -z-20">
+          <motion.div
+            className="absolute inset-0"
+            initial={reduce ? false : { scale: 1.14 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 2.8, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <Image
+              src="/assets/events/kubecon-india-2026/01.webp"
+              alt="The main hall at KubeCon India 2026"
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover"
+            />
+            {/* a blurred copy over the middle, so the stage screen softens behind the words */}
+            <Image
+              src="/assets/events/kubecon-india-2026/01.webp"
+              alt=""
+              aria-hidden
+              fill
+              sizes="100vw"
+              className="object-cover blur-[18px] [mask-image:linear-gradient(to_bottom,transparent_8%,black_30%,black_68%,transparent_88%)]"
+            />
+          </motion.div>
+        </motion.div>
+        {/* shade, so the words read: darker at the top and the foot, soft in the middle */}
+        <span aria-hidden className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(10,10,10,0.72)_0%,rgba(10,10,10,0.38)_40%,rgba(10,10,10,0.45)_65%,rgba(10,10,10,0.85)_100%)]" />
+        
+        <div className="flex flex-1 flex-col items-center justify-center px-5 py-16 text-center md:py-20">
 
-      <Container className="relative flex min-h-[100svh] flex-col justify-center pb-10 pt-24 md:pb-12 md:pt-28">
-        <h1 className="sr-only">Where developers show up and build: the Studio1 community</h1>
-        <div aria-hidden className="flex flex-col gap-[1.2vw] 2xl:gap-4">
-          <Line delay={0.15} reduce={reduce} className="gap-[2vw]">
-            <span className={word}>Where</span>
-            <Shot src={P("blr-tech-week")} alt="" className={shot} delay={0.5} reduce={reduce} />
-            <span className="flex-1" />
-            <Shot src={P("hacktropica")} alt="" className={cn(shot, "hidden sm:block")} delay={0.6} reduce={reduce} />
-          </Line>
-          <Line delay={0.25} reduce={reduce} className="gap-[2vw]">
-            <Shot src={P("agentsnexus")} alt="" className={shot} delay={0.7} reduce={reduce} />
-            <span className={cn(word, "ml-auto sm:ml-[6vw]")}>Developers</span>
-          </Line>
-          <Line delay={0.35} reduce={reduce} className="gap-[2vw] sm:pl-[10vw]">
-            <span className={word} style={{ color: PRINT }}>Show up</span>
-            <Shot src={P("kubernetes-india-red-hat")} alt="" className={shot} delay={0.8} reduce={reduce} />
-          </Line>
-          <Line delay={0.45} reduce={reduce} className="gap-[2vw]">
-            <Shot src={P("rejekts-na-2024")} alt="" className={cn(shot, "hidden sm:block")} delay={0.9} reduce={reduce} />
-            <span className={cn(word, "ml-auto")}>And build.</span>
-          </Line>
-        </div>
+          <motion.h1 {...enter(0.35)} className="text-[clamp(28px,8.6vw,34px)] font-medium leading-[1.06] tracking-[-0.045em] sm:text-[52px] lg:text-[68px]">
+            <span className="block whitespace-nowrap">Where developers</span>
+            <span className="block whitespace-nowrap">
+            <span className="relative inline-block" style={{ color: PRINT }}>
+              show up
+              {/* a hand-drawn underline */}
+              <svg aria-hidden viewBox="0 0 300 20" preserveAspectRatio="none" className="absolute -bottom-[0.12em] left-0 h-[0.16em] w-full">
+                <motion.path
+                  d="M3 13 C 60 5, 130 4, 200 9 S 280 14, 297 7"
+                  fill="none"
+                  stroke={PRINT}
+                  strokeWidth="5"
+                  strokeLinecap="round"
+                  initial={reduce ? false : { pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ duration: 1, ease: EASE, delay: 1.1 }}
+                />
+              </svg>
+            </span>{" "}
+            and build.
+            </span>
+          </motion.h1>
 
-        <motion.div
-          className="mt-[4svh] flex flex-col gap-5 md:flex-row md:items-end md:justify-between"
-          initial={reduce ? false : { opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, ease: EASE, delay: 0.7 }}
-        >
-          <p className="max-w-[460px] text-[17px] leading-[1.55] text-[#141414]/65 md:text-[18px]">
-            The Studio1 community: meetups, hackathons and the people who build at them, in {totals.cities} cities and online.
-          </p>
-          <div className="flex flex-wrap items-center gap-2.5">
-            <a href={DISCORD_URL} target="_blank" rel="noopener noreferrer" className="inline-flex h-12 items-center gap-2 rounded-full bg-[#141414] px-6 text-[14.5px] font-medium text-white transition-colors duration-300 hover:bg-[#f97316]">
-              <DiscordIcon className="size-4" /> Join the Discord
+          <motion.p {...enter(0.5)} className="mt-6 max-w-[440px] text-[16px] leading-[1.6] text-white/75 md:text-[18px]">
+            Meetups, hackathons and the people who build at them, in {totals.cities} cities and online.
+          </motion.p>
+
+          <motion.div {...enter(0.65)} className="mt-8 flex flex-wrap items-center justify-center gap-2.5">
+            <a href={DISCORD_URL} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-2 rounded-full bg-white px-5 text-[14px] sm:h-12 sm:px-6 sm:text-[14.5px] font-medium text-[#141414] transition-colors duration-300 hover:bg-[#f4efe7]">
+              <DiscordIcon className="size-4 text-[#5865F2]" /> Join the Discord
             </a>
-            <a href={LUMA_URL} target="_blank" rel="noopener noreferrer" className="inline-flex h-12 items-center gap-1.5 rounded-full bg-white px-6 text-[14.5px] font-medium ring-1 ring-inset ring-[#141414]/[0.12] transition-colors duration-300 hover:bg-[#f6f3ee]">
+            <a href={LUMA_URL} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-1.5 rounded-full bg-white/10 px-5 text-[14px] sm:h-12 sm:px-6 sm:text-[14.5px] font-medium ring-1 ring-inset ring-white/30 backdrop-blur-md transition-colors duration-300 hover:bg-white/20">
               Follow on <LumaLogo className="h-[14px] w-auto -translate-y-px" />
             </a>
+          </motion.div>
+        </div>
+
+        {/* the numbers, along the bottom edge */}
+        <motion.div {...enter(0.85)} className="border-t border-white/15 px-6 py-5 md:px-9">
+          <div className="flex justify-center md:justify-start">
+            <dl className="grid grid-cols-4 gap-4 md:flex md:gap-10">
+              {stats.map(([v, l]) => (
+                <div key={l} className="flex flex-col md:flex-row md:items-baseline md:gap-2">
+                  <dd className="text-[26px] font-medium leading-none tracking-[-0.04em] md:text-[28px]">{v}</dd>
+                  <dt className="mt-1 text-[12.5px] text-white/60 md:mt-0 md:text-[13.5px]">{l}</dt>
+                </div>
+              ))}
+            </dl>
           </div>
         </motion.div>
-      </Container>
+      </div>
     </section>
   );
 }
