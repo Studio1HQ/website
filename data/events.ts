@@ -70,7 +70,7 @@ export const EVENTS: StudioEvent[] = [
     month: 11,
     place: "North America",
     logo: "/assets/logos/events/cncf.svg",
-    wordmark: "/assets/logos/events/kubecon-na-2026.svg",
+    wordmark: "/assets/logos/events/kubecon-na-2026-clean.svg",
     brand: "#0086FF",
     link: "https://events.linuxfoundation.org/kubecon-cloudnativecon-north-america/",
     summary:

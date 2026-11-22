@@ -8,7 +8,7 @@ import type { CommunityItem } from "@/lib/community";
 import { DiscordIcon } from "@/components/community/discord-icon";
 import { DISCORD_URL, LUMA_URL } from "@/components/community/join";
 import { LumaLogo } from "@/components/community/luma-logo";
-import { PRINT } from "@/lib/paper";
+import { GRAIN, PAPER, PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 
 /*
@@ -68,7 +68,8 @@ export function CommunityHero({ totals }: { totals: Totals; next?: CommunityItem
   ];
 
   return (
-    <section className="px-3 pb-6 pt-[76px] md:px-4 md:pt-[84px]">
+    <section className="relative isolate px-3 pb-2 pt-[76px] md:px-4 md:pt-[84px]" style={{ background: PAPER }}>
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 opacity-30 mix-blend-multiply" style={{ backgroundImage: GRAIN }} />
       <div
         ref={frame}
         className="relative isolate flex min-h-[calc(100svh-96px)] flex-col overflow-hidden rounded-[18px] bg-[#141414] text-white md:min-h-[calc(100svh-104px)] md:rounded-[22px]"
@@ -143,14 +144,14 @@ export function CommunityHero({ totals }: { totals: Totals; next?: CommunityItem
         </div>
 
         {/* the numbers, along the bottom edge: four even columns */}
-        <motion.dl {...enter(0.85)} className="grid grid-cols-2 border-t border-white/15 bg-black/20 backdrop-blur-sm md:grid-cols-4">
+        <motion.dl {...enter(0.85)} className="grid grid-cols-2 border-t border-white/10 md:grid-cols-4">
           {stats.map(([v, l], i) => (
             <div
               key={l}
               className={cn(
                 "flex flex-col gap-1.5 px-6 py-5 md:px-9 md:py-6",
-                i % 2 === 1 && "border-l border-white/15",
-                i > 1 && "border-t border-white/15 md:border-t-0",
+                i % 2 === 1 && "border-l border-white/10",
+                i > 1 && "border-t border-white/10 md:border-t-0",
                 i === 2 && "md:border-l",
               )}
             >
