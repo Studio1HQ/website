@@ -481,7 +481,7 @@ export function CommunityBento({ data, index }: { data: CommunityData; index: nu
                       />
                     </span>
                     <span className="text-right text-[14px] font-medium tabular-nums">
-                      <Counter to={value} />
+                      {value}
                     </span>
                   </li>
                 ))}

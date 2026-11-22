@@ -93,7 +93,7 @@ export function EventTicket({ item }: { item: CommunityItem }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 0.9, ease: EASE }}
-      className="flex h-[620px] w-full flex-col gap-0 sm:h-[340px] sm:flex-row md:h-[360px]"
+      className="flex h-[460px] w-full flex-col gap-0 sm:h-[340px] sm:flex-row md:h-[360px]"
       onMouseLeave={() => setOpen(0)}
     >
       {panels.map((p, i) => {

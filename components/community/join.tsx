@@ -180,7 +180,7 @@ export function JoinCommunity() {
               whileInView={{ opacity: 1, scale: 1, rotate: -6 }}
               viewport={{ once: true }}
               transition={{ type: "spring", bounce: 0.35, duration: 0.9, delay: 0.9 }}
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-[6px] px-4 py-2 text-[18px] font-semibold tracking-[-0.02em] text-white shadow-[0_14px_30px_-12px_rgba(0,0,0,0.6)] md:text-[24px]"
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-[6px] px-3 py-1.5 text-[15px] font-semibold sm:px-4 sm:py-2 sm:text-[18px] tracking-[-0.02em] text-white shadow-[0_14px_30px_-12px_rgba(0,0,0,0.6)] md:text-[24px]"
               style={{ background: PRINT }}
             >
               welcome to Studio1

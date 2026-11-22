@@ -58,18 +58,18 @@ function Way({
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 1.1, ease: EASE }}
-      className="group relative isolate min-h-[420px] rounded-[10px] bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.08] md:min-h-[380px]"
+      className="group relative isolate rounded-[10px] bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.08] md:min-h-[380px]"
     >
       <div className="absolute inset-0 -z-10 overflow-hidden rounded-[10px]">
         {/* the photos, moving with the scroll, filling the right of the card */}
-        <div className="absolute inset-y-0 right-0 w-full md:w-[66%]">
+        <div className="absolute inset-x-0 top-0 h-[200px] md:inset-y-0 md:left-auto md:right-0 md:h-auto md:w-[66%]">
           <Turning photos={photos} className="size-full rounded-none" />
         </div>
         {/* paper over the left of the photo, so the words sit on paper and the photo melts in */}
-        <span aria-hidden className="absolute inset-0 bg-[linear-gradient(180deg,rgba(251,249,245,0)_25%,rgba(251,249,245,0.92)_55%,#fbf9f5_70%)] md:bg-[linear-gradient(90deg,#fbf9f5_32%,rgba(251,249,245,0.88)_48%,rgba(251,249,245,0)_72%)]" />
+        <span aria-hidden className="absolute inset-0 bg-[linear-gradient(180deg,rgba(251,249,245,0)_0px,rgba(251,249,245,0)_150px,#fbf9f5_210px)] md:bg-[linear-gradient(90deg,#fbf9f5_32%,rgba(251,249,245,0.88)_48%,rgba(251,249,245,0)_72%)]" />
       </div>
 
-      <div className="relative flex min-h-[420px] flex-col justify-end gap-8 p-6 md:min-h-[380px] md:flex-row md:items-end md:justify-between md:p-10">
+      <div className="relative flex flex-col justify-end gap-8 p-6 pt-[200px] md:min-h-[380px] md:pt-10 md:flex-row md:items-end md:justify-between md:p-10">
         <div className="max-w-[460px]">
           <motion.p
             initial={reduce ? false : { opacity: 0, x: -12 }}
