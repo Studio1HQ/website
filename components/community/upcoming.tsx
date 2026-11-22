@@ -7,6 +7,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowUpRight, Broadcast, Code, MicrophoneStage, UsersThree, Wrench, type Icon } from "@phosphor-icons/react";
 import Logo from "@/components/ui/svgs/logo";
 import { SketchDesk } from "@/components/community/sketch-desk";
+import { EventTicket } from "@/components/community/ticket";
 import { EASE } from "@/components/home/ui";
 import type { CommunityItem, CommunityKind } from "@/lib/community";
 import { GRAIN, PRINT } from "@/lib/paper";
@@ -202,12 +203,15 @@ export function UpcomingEvents({
   href,
   label,
   empty,
+  ticket = false,
 }: {
   items: CommunityItem[];
   heading: ReactNode;
   href: string;
   label: string;
   empty: ReactNode;
+  /** Show the first event as a ticket with tear-off stubs. */
+  ticket?: boolean;
 }) {
   const reduce = !!useReducedMotion();
   // one or two events read better as wide cards; more go into the grid
@@ -220,7 +224,11 @@ export function UpcomingEvents({
           {label} <ArrowUpRight weight="bold" className="size-4" />
         </Link>
       </div>
-      {items.length ? (
+      {ticket && items.length ? (
+        <div className="mt-10">
+          <EventTicket item={items[0]} />
+        </div>
+      ) : items.length ? (
         <ul className={wide ? "mt-10 flex flex-col gap-3" : "mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"}>
           {items.map((item, i) => (
             <motion.li

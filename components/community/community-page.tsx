@@ -168,6 +168,7 @@ export function CommunityPage({ data }: { data: CommunityData }) {
           <div className="mt-6">
             <UpcomingEvents
               items={meetups}
+              ticket
               href="/events"
               label="Check out all events"
               heading={

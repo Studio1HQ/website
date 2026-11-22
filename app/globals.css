@@ -1481,3 +1481,33 @@ html::-webkit-scrollbar-thumb:hover {
     transition: none;
   }
 }
+
+/* Ticket pieces: half-circle bites cut out where one piece tears from the next */
+.s1-bite-r,
+.s1-bite-l,
+.s1-bite-lr {
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+@media (min-width: 640px) {
+  .s1-bite-r {
+    -webkit-mask: radial-gradient(circle 10px at 100% 0, #0000 96%, #000), radial-gradient(circle 10px at 100% 100%, #0000 96%, #000);
+    mask: radial-gradient(circle 10px at 100% 0, #0000 96%, #000), radial-gradient(circle 10px at 100% 100%, #0000 96%, #000);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+  }
+  .s1-bite-l {
+    -webkit-mask: radial-gradient(circle 10px at 0 0, #0000 96%, #000), radial-gradient(circle 10px at 0 100%, #0000 96%, #000);
+    mask: radial-gradient(circle 10px at 0 0, #0000 96%, #000), radial-gradient(circle 10px at 0 100%, #0000 96%, #000);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+  }
+  .s1-bite-lr {
+    -webkit-mask: radial-gradient(circle 10px at 0 0, #0000 96%, #000), radial-gradient(circle 10px at 0 100%, #0000 96%, #000),
+      radial-gradient(circle 10px at 100% 0, #0000 96%, #000), radial-gradient(circle 10px at 100% 100%, #0000 96%, #000);
+    mask: radial-gradient(circle 10px at 0 0, #0000 96%, #000), radial-gradient(circle 10px at 0 100%, #0000 96%, #000),
+      radial-gradient(circle 10px at 100% 0, #0000 96%, #000), radial-gradient(circle 10px at 100% 100%, #0000 96%, #000);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+  }
+}
