@@ -30,6 +30,8 @@ type Panel = {
   brand?: string;
   /** The event's own full-colour logo. */
   wordmark?: string;
+  /** A meetup being planned: no date yet, stamped "Coming soon". */
+  soon?: boolean;
 };
 
 /** Meetups being planned: strips that say "soon", never a date until announced. */
@@ -53,36 +55,43 @@ function Mark({ p, className }: { p: Panel; className: string }) {
       style={{ backgroundColor: p.brand ?? "#141414", WebkitMask: `url(${p.logo}) center / contain no-repeat`, mask: `url(${p.logo}) center / contain no-repeat` }}
     />
   ) : (
-    <Logo className={cn("rounded-[6px]", className)} />
+    // on a coloured coming-soon strip, Studio1's mark is printed in the strip's ink
+    <Logo knockout={p.soon} className={cn("rounded-[6px]", p.soon && "brightness-0", className)} />
   );
 }
 
-/**
- * The next event as a ticket, with tear-off strips for the meetups coming
- * up. Hovering (or tapping) a strip opens it into the full ticket while the
- * others fold into strips, like an accordion.
- */
-export function EventTicket({ item }: { item: CommunityItem }) {
-  const reduce = !!useReducedMotion();
+/** The announced meetup as the ticket's first, paper-coloured panel. */
+function eventPanel(item: CommunityItem): Panel {
   const [, m, d] = item.date.split("-").map(Number);
   const y = Number(item.date.slice(0, 4));
+  return {
+    key: item.id,
+    title: item.name,
+    short: item.name.replace(/ \d{4}.*$/, ""),
+    line: `${MONTHS[m - 1]} ${d}, ${y} · ${item.online ? "Online" : item.city}`,
+    stamp: `${String(m).padStart(2, "0")}/${String(d).padStart(2, "0")}`,
+    bg: "#fbf9f5",
+    ink: "#16213a",
+    cta: item.cta === "Register" ? "Get your tickets here" : "See the details",
+    href: item.href ?? "/events",
+    external: item.external,
+    logo: item.logo,
+    brand: item.brand,
+    wordmark: item.wordmark,
+  };
+}
+
+/**
+ * The next meetup as a ticket, with tear-off strips for the meetups coming
+ * up. Hovering (or tapping) a strip opens it into the full ticket while the
+ * others fold into strips, like an accordion. With no meetup announced, the
+ * coming-soon strips are the whole ticket, the first one open.
+ */
+export function EventTicket({ item }: { item: CommunityItem | null }) {
+  const reduce = !!useReducedMotion();
   const panels: Panel[] = [
-    {
-      key: item.id,
-      title: item.name,
-      short: item.name.replace(/ \d{4}.*$/, ""),
-      line: `${MONTHS[m - 1]} ${d}, ${y} · ${item.online ? "Online" : item.city}`,
-      stamp: `${String(m).padStart(2, "0")}/${String(d).padStart(2, "0")}`,
-      bg: "#fbf9f5",
-      ink: "#16213a",
-      cta: item.cta === "Register" ? "Get your tickets here" : "See the details",
-      href: item.href ?? "/events",
-      external: item.external,
-      logo: item.logo,
-      brand: item.brand,
-      wordmark: item.wordmark,
-    },
-    ...SOON.map((s, i) => ({ ...s, key: `soon-${i}` })),
+    ...(item ? [eventPanel(item)] : []),
+    ...SOON.map((s, i) => ({ ...s, key: `soon-${i}`, soon: true })),
   ];
   const [open, setOpen] = useState(0);
   const spring = reduce ? { duration: 0 } : { type: "spring" as const, stiffness: 170, damping: 26, mass: 0.9 };
@@ -111,7 +120,7 @@ export function EventTicket({ item }: { item: CommunityItem }) {
               "relative isolate min-h-[64px] min-w-0 shrink-0 basis-[64px] overflow-hidden sm:min-h-0 sm:basis-[64px] md:basis-[72px]",
               i === 0 ? "rounded-t-[18px] sm:rounded-l-[18px] sm:rounded-tr-none" : "",
               i === panels.length - 1 ? "rounded-b-[18px] sm:rounded-r-[18px] sm:rounded-bl-none" : "",
-              i === 0 && "ring-1 ring-inset ring-[#141414]/15",
+              i === 0 && item && "ring-1 ring-inset ring-[#141414]/15",
               i === 0 ? "s1-bite-r" : i === panels.length - 1 ? "s1-bite-l" : "s1-bite-lr",
             )}
             style={{ background: p.bg, color: p.ink }}
@@ -146,6 +155,14 @@ export function EventTicket({ item }: { item: CommunityItem }) {
                     {p.cta}
                     <ArrowUpRight weight="bold" className="size-4 transition-transform duration-300 group-hover/cta:rotate-45" />
                   </Go>
+                  {p.soon ? (
+                    <span
+                      aria-hidden
+                      className="absolute bottom-6 right-6 rotate-[-6deg] rounded-[6px] border-2 border-current px-3 py-1.5 text-[12px] font-extrabold uppercase tracking-[0.2em] opacity-70 md:bottom-9 md:right-9 md:px-4 md:py-2 md:text-[14px]"
+                    >
+                      Coming soon
+                    </span>
+                  ) : null}
                 </motion.div>
               ) : (
                 <motion.div

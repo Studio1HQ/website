@@ -210,7 +210,7 @@ export function UpcomingEvents({
   href: string;
   label: string;
   empty: ReactNode;
-  /** Show the first event as a ticket with tear-off stubs. */
+  /** Show the first event as a ticket with coming-soon stubs (just the stubs when there is none). */
   ticket?: boolean;
 }) {
   const reduce = !!useReducedMotion();
@@ -224,9 +224,9 @@ export function UpcomingEvents({
           {label} <ArrowUpRight weight="bold" className="size-4" />
         </Link>
       </div>
-      {ticket && items.length ? (
+      {ticket ? (
         <div className="mt-10">
-          <EventTicket item={items[0]} />
+          <EventTicket item={items[0] ?? null} />
         </div>
       ) : items.length ? (
         <ul className={wide ? "mt-10 flex flex-col gap-3" : "mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"}>

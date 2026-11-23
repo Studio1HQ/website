@@ -128,7 +128,9 @@ export function CommunityPage({ data }: { data: CommunityData }) {
   // The soonest event taking registrations, for the pill along the bottom
   const registering = upcoming.find((e) => e.cta === "Register" && e.href) ?? upcoming.find((e) => e.href) ?? null;
   const hackathons = upcoming.filter((e) => e.kind === "hackathon").slice(0, 8);
-  const meetups = upcoming.filter((e) => e.kind !== "hackathon").slice(0, 8);
+  // Only real meetups here: conferences like KubeCon live on /events, and
+  // with none announced the section is the coming-soon tickets alone.
+  const meetups = upcoming.filter((e) => e.kind === "meetup").slice(0, 8);
 
   return (
     <div style={PAPER_SCOPE}>
