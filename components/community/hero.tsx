@@ -85,8 +85,38 @@ export function CommunityHero({
                   ),
                 )}
               </div>
-              <span className="text-base font-medium tracking-tight text-white/85">
-                Studio1 community
+              <span className="inline-flex items-center gap-1.5 text-base font-medium tracking-tight text-white/85">
+                <span>Studio1 community</span>
+                <span
+                  className="inline-flex items-center gap-1 pl-0.5"
+                  aria-hidden="true"
+                >
+                  {[0, 1, 2].map((dot) => (
+                    <motion.span
+                      key={dot}
+                      className="size-1 rounded-full bg-white/70"
+                      animate={
+                        reduce
+                          ? undefined
+                          : {
+                              opacity: [0.25, 1, 0.25],
+                              y: [0, -2.5, 0],
+                              scale: [0.85, 1.2, 0.85],
+                            }
+                      }
+                      transition={
+                        reduce
+                          ? undefined
+                          : {
+                              duration: 1.3,
+                              repeat: Infinity,
+                              delay: dot * 0.2,
+                              ease: "easeInOut",
+                            }
+                      }
+                    />
+                  ))}
+                </span>
               </span>
             </div>
             <h1 className="w-full max-w-[540px] text-balance text-[clamp(2.25rem,3.8vw,3.75rem)] font-medium leading-[1.1] tracking-[-0.045em]">
