@@ -125,8 +125,9 @@ export function CommunityPage({ data }: { data: CommunityData }) {
   const { upcoming, past, cities, totals } = data;
   const all = [...upcoming, ...past];
   const byId = new Map(all.map((e) => [e.id, e]));
-  // The soonest event taking registrations, for the pill along the bottom
-  const registering = upcoming.find((e) => e.cta === "Register" && e.href) ?? upcoming.find((e) => e.href) ?? null;
+  // The soonest event taking registrations, for the pill along the bottom.
+  // None open, no pill: an event we're only attending (KubeCon) isn't "up next".
+  const registering = upcoming.find((e) => e.cta === "Register" && e.href) ?? null;
   const hackathons = upcoming.filter((e) => e.kind === "hackathon").slice(0, 8);
   // Only real meetups here: conferences like KubeCon live on /events, and
   // with none announced the section is the coming-soon tickets alone.
