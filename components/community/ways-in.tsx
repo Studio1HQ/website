@@ -166,7 +166,7 @@ export function WaysIn({ data, index }: { data: CommunityData; index: number }) 
           />
           <Way
             index={2}
-            photos={[P("aki-hacks/04"), P("hackspire-2/03"), P("scee-hackathon/02")]}
+            photos={[P("aki-hacks/01"), P("hackspire-2/03"), P("scee-hackathon/02")]}
             icon={<Code weight="bold" className="size-4" />}
             label="Build weekends"
             title={<>Hackathons with <span style={{ color: PRINT }}>the tool teams</span></>}
