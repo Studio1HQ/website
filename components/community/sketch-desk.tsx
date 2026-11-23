@@ -69,7 +69,7 @@ const ICONS: ReactNode[] = [
     <path d="M28 27 v46 M74 73 v-30 a14 14 0 0 0 -14 -14 h-16 M50 20 l-8 9 8 9" />
   </>,
   // star
-  <path d="M50 12 l11 23 25 4 -18 18 4 25 -22 -12 -22 12 4 -25 -18 -18 25 -4 z" />,
+  <path key="star" d="M50 12 l11 23 25 4 -18 18 4 25 -22 -12 -22 12 4 -25 -18 -18 25 -4 z" />,
   // laptop
   <>
     <rect x="18" y="20" width="64" height="44" rx="4" />
@@ -82,7 +82,7 @@ const ICONS: ReactNode[] = [
     <path d="M72 44 h8 a8 8 0 0 1 0 16 h-8 M36 48 c4 -5 10 -5 14 0 s10 5 14 0" />
   </>,
   // trophy
-  <path d="M30 14 h40 v18 a20 20 0 0 1 -40 0 z M30 20 h-10 a10 10 0 0 0 10 14 M70 20 h10 a10 10 0 0 1 -10 14 M50 52 v16 M36 68 h28 v12 h-28 z" />,
+  <path key="trophy" d="M30 14 h40 v18 a20 20 0 0 1 -40 0 z M30 20 h-10 a10 10 0 0 0 10 14 M70 20 h10 a10 10 0 0 1 -10 14 M50 52 v16 M36 68 h28 v12 h-28 z" />,
   // headphones
   <>
     <path d="M18 60 v-12 a32 32 0 0 1 64 0 v12" />
@@ -128,7 +128,7 @@ const ICONS: ReactNode[] = [
     <circle cx="50" cy="34" r="7" />
   </>,
   // light bulb: an idea
-  <path d="M50 10 a24 24 0 0 0 -14 44 v12 h28 v-12 a24 24 0 0 0 -14 -44 z M38 74 h24 M42 84 h16 M44 40 l6 8 6 -8" />,
+  <path key="bulb" d="M50 10 a24 24 0 0 0 -14 44 v12 h28 v-12 a24 24 0 0 0 -14 -44 z M38 74 h24 M42 84 h16 M44 40 l6 8 6 -8" />,
   // github mark, as an outline
   <>
     <circle cx="50" cy="50" r="36" />
