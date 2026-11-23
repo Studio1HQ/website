@@ -39,7 +39,7 @@ export function BeenHere({ items }: { items: CommunityItem[] }) {
   const cards = [...items.filter((e) => e.image && e.summary && e.logo), ...items.filter((e) => e.image && e.summary && !e.logo)].slice(0, 4);
   if (!cards.length) return null;
   return (
-    <PaperSection tone="paper" className="relative isolate overflow-hidden">
+    <PaperSection id="past-events" tone="paper" className="relative isolate scroll-mt-24 overflow-hidden">
       <Container>
         <motion.div
           initial={reduce ? false : { opacity: 0, y: 30 }}

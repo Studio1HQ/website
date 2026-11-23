@@ -1,167 +1,180 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef } from "react";
-import { animate, motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { PixelPortrait } from "@/components/about-us/pixel-portrait";
+import { motion, useReducedMotion } from "motion/react";
 import { EASE } from "@/components/home/ui";
 import type { CommunityItem } from "@/lib/community";
 import { DiscordIcon } from "@/components/community/discord-icon";
 import { DISCORD_URL, LUMA_URL } from "@/components/community/join";
 import { LumaLogo } from "@/components/community/luma-logo";
-import { GRAIN, PAPER, PRINT } from "@/lib/paper";
-import { cn } from "@/lib/utils";
+import { PAPER, PRINT } from "@/lib/paper";
 
-/*
- * The community hero, cinematic: the KubeCon India main hall edge to edge in
- * a rounded frame, the line centred in white over it, and the numbers along
- * the bottom edge. The photo settles in with a slow zoom, then drifts as the
- * page scrolls.
- */
+type Totals = {
+  events: number;
+  cities: number;
+  meetups: number;
+  hackathons: number;
+};
 
-type Totals = { events: number; cities: number; meetups: number; hackathons: number };
-
-/** Counts up to a number once, on load; "41+" keeps its "+". */
-function Tick({ value, delay }: { value: string; delay: number }) {
-  const reduce = !!useReducedMotion();
-  const target = parseInt(value, 10);
-  const suffix = value.replace(/^\d+/, "");
-  const ref = useRef<HTMLSpanElement>(null);
-  useEffect(() => {
-    if (reduce || !ref.current || Number.isNaN(target)) return;
-    const el = ref.current;
-    el.textContent = "0";
-    const controls = animate(0, target, {
-      duration: 1.4,
-      delay,
-      ease: EASE,
-      onUpdate: (n) => {
-        el.textContent = String(Math.round(n));
-      },
-    });
-    return () => controls.stop();
-  }, [reduce, target, delay]);
-  return (
-    <>
-      <span ref={ref}>{Number.isNaN(target) ? value : target}</span>
-      {suffix ? <span style={{ color: PRINT }}>{suffix}</span> : null}
-    </>
-  );
-}
-
-export function CommunityHero({ totals }: { totals: Totals; next?: CommunityItem[] }) {
-  const reduce = !!useReducedMotion();
-  const frame = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: frame, offset: ["start start", "end start"] });
-  const drift = useTransform(scrollYProgress, [0, 1], ["0%", "12%"]);
-  const enter = (delay: number) =>
-    ({
-      initial: reduce ? false : { opacity: 0, y: 18, filter: "blur(8px)" },
-      animate: { opacity: 1, y: 0, filter: "blur(0px)" },
-      transition: { duration: 1, ease: EASE, delay },
-    }) as const;
-
-  const stats: [string, string][] = [
-    [`${totals.events}+`, "events"],
-    [String(totals.cities), "cities"],
-    [String(totals.hackathons), "hackathons"],
-    [String(totals.meetups), "meetups"],
+export function CommunityHero({
+  totals,
+}: {
+  totals: Totals;
+  next?: CommunityItem[];
+}) {
+  const reduce = useReducedMotion();
+  const stats = [
+    {
+      value: `${totals.events}+`,
+      label: "Events hosted",
+      href: "#past-events",
+      artwork: "events",
+    },
+    {
+      value: totals.cities,
+      label: "Cities connected",
+      href: "#cities",
+      artwork: "cities",
+    },
+    {
+      value: totals.hackathons,
+      label: "Hackathons",
+      href: "#up-next",
+      artwork: "hackathons",
+    },
+    {
+      value: totals.meetups,
+      label: "Meetups",
+      href: "#meetups",
+      artwork: "meetups",
+    },
   ];
-
   return (
-    <section className="relative isolate px-3 pb-2 pt-[76px] md:px-4 md:pt-[84px]" style={{ background: PAPER }}>
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 opacity-30 mix-blend-multiply" style={{ backgroundImage: GRAIN }} />
-      <div
-        ref={frame}
-        className="relative isolate flex min-h-[calc(100svh-96px)] flex-col overflow-hidden rounded-[18px] bg-[#141414] text-white md:min-h-[calc(100svh-104px)] md:rounded-[22px]"
-      >
-        {/* the photo: a slow zoom in, then a drift with the scroll */}
-        <motion.div style={reduce ? undefined : { y: drift }} className="absolute inset-[-6%] -z-20">
+    <section
+      className="px-4 pb-4 pt-24 sm:px-6 lg:pt-28"
+      style={{ background: PAPER }}
+    >
+      <div className="mx-auto max-w-[1440px] overflow-hidden rounded-3xl bg-[#171918] text-white">
+        <div className="grid lg:min-h-[560px] lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
           <motion.div
-            className="absolute inset-0"
-            initial={reduce ? false : { scale: 1.14 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 2.8, ease: [0.16, 1, 0.3, 1] }}
+            initial={reduce ? false : { opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.65, ease: EASE }}
+            className="flex min-w-0 flex-col items-start justify-center px-6 py-12 sm:px-10 sm:py-16 lg:px-10 lg:py-16 xl:px-14"
           >
-            <Image
-              src="/assets/events/kubecon-india-2026/01.webp"
-              alt="The main hall at KubeCon India 2026"
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover"
-            />
-            {/* a blurred copy over the middle, so the stage screen softens behind the words */}
-            <Image
-              src="/assets/events/kubecon-india-2026/01.webp"
-              alt=""
-              aria-hidden
-              fill
-              sizes="100vw"
-              className="object-cover blur-[18px] [mask-image:linear-gradient(to_bottom,transparent_8%,black_30%,black_68%,transparent_88%)]"
-            />
-          </motion.div>
-        </motion.div>
-        {/* shade, so the words read: darker at the top and the foot, soft in the middle */}
-        <span aria-hidden className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(10,10,10,0.72)_0%,rgba(10,10,10,0.38)_40%,rgba(10,10,10,0.45)_65%,rgba(10,10,10,0.85)_100%)]" />
-        
-        <div className="flex flex-1 flex-col items-center justify-center px-5 py-16 text-center md:py-20">
-
-          <motion.h1 {...enter(0.35)} className="text-[clamp(28px,8.6vw,34px)] font-medium leading-[1.06] tracking-[-0.045em] sm:text-[52px] lg:text-[68px]">
-            <span className="block whitespace-nowrap">Where developers</span>
-            <span className="block whitespace-nowrap">
-            <span className="relative inline-block" style={{ color: PRINT }}>
-              show up
-              {/* a hand-drawn underline */}
-              <svg aria-hidden viewBox="0 0 300 20" preserveAspectRatio="none" className="absolute -bottom-[0.12em] left-0 h-[0.16em] w-full">
-                <motion.path
-                  d="M3 13 C 60 5, 130 4, 200 9 S 280 14, 297 7"
-                  fill="none"
-                  stroke={PRINT}
-                  strokeWidth="5"
-                  strokeLinecap="round"
-                  initial={reduce ? false : { pathLength: 0 }}
-                  animate={{ pathLength: 1 }}
-                  transition={{ duration: 1, ease: EASE, delay: 1.1 }}
-                />
-              </svg>
-            </span>{" "}
-            and build.
-            </span>
-          </motion.h1>
-
-          <motion.p {...enter(0.5)} className="mt-6 max-w-[440px] text-[16px] leading-[1.6] text-white/75 md:text-[18px]">
-            Meetups, hackathons and the people who build at them, in {totals.cities} cities and online.
-          </motion.p>
-
-          <motion.div {...enter(0.65)} className="mt-8 flex flex-wrap items-center justify-center gap-2.5">
-            <a href={DISCORD_URL} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-2 rounded-full bg-white px-5 text-[14px] sm:h-12 sm:px-6 sm:text-[14.5px] font-medium text-[#141414] transition-colors duration-300 hover:bg-[#f4efe7]">
-              <DiscordIcon className="size-4 text-[#5865F2]" /> Join the Discord
-            </a>
-            <a href={LUMA_URL} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-1.5 rounded-full bg-white/10 px-5 text-[14px] sm:h-12 sm:px-6 sm:text-[14.5px] font-medium ring-1 ring-inset ring-white/30 backdrop-blur-md transition-colors duration-300 hover:bg-white/20">
-              Follow on <LumaLogo className="h-[14px] w-auto -translate-y-px" />
-            </a>
-          </motion.div>
-        </div>
-
-        {/* the numbers, along the bottom edge: four even columns */}
-        <motion.dl {...enter(0.85)} className="grid grid-cols-2 border-t border-white/10 md:grid-cols-4">
-          {stats.map(([v, l], i) => (
-            <div
-              key={l}
-              className={cn(
-                "flex flex-col gap-1.5 px-6 py-5 md:px-9 md:py-6",
-                i % 2 === 1 && "border-l border-white/10",
-                i > 1 && "border-t border-white/10 md:border-t-0",
-                i === 2 && "md:border-l",
-              )}
-            >
-              <dd className="text-[30px] font-medium leading-none tracking-[-0.045em] tabular-nums md:text-[40px]">
-                <Tick value={v} delay={1 + i * 0.12} />
-              </dd>
-              <dt className="text-[11.5px] font-medium uppercase tracking-[0.18em] text-white/55">{l}</dt>
+            <div className="mb-7 flex flex-wrap items-center gap-x-4 gap-y-3">
+              <div className="flex shrink-0 -space-x-2">
+                {["shivay-lamba", "piuli-biswas", "souradeep-pradhan"].map(
+                  (person, index) => (
+                    <span
+                      key={person}
+                      className="relative flex size-12 items-center justify-center rounded-full border-[3px] bg-white p-0.5 shadow-[0_0_0_2px_#171918]"
+                      style={{
+                        borderColor: ["#38bdf8", "#fbbf24", "#f45d48"][index],
+                      }}
+                    >
+                      <Image
+                        src={`/assets/team/${person}.webp`}
+                        alt=""
+                        width={40}
+                        height={40}
+                        className="size-full rounded-full object-cover grayscale"
+                      />
+                    </span>
+                  ),
+                )}
+              </div>
+              <span className="text-base font-medium tracking-tight text-white/85">
+                Studio1 community
+              </span>
             </div>
+            <h1 className="w-full max-w-[540px] text-balance text-[clamp(2.25rem,3.8vw,3.75rem)] font-medium leading-[1.1] tracking-[-0.045em]">
+              Where developers
+              <span className="block">
+                <span style={{ color: PRINT }}>show up</span> and build.
+              </span>
+            </h1>
+            <p className="mt-5 w-full max-w-[420px] text-pretty text-base leading-[1.7] text-white/65 sm:text-[17px]">
+              Meetups, hackathons and the people who build at them. Find your
+              community in {totals.cities} cities and online.
+            </p>
+            <div className="mt-7 flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap">
+              <a
+                href={DISCORD_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-12 items-center justify-center gap-2.5 rounded-xl bg-white px-5 text-sm font-semibold text-[#171918] transition hover:bg-orange-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange-400"
+              >
+                <DiscordIcon className="size-5 text-[#5865F2]" /> Join the
+                Discord
+              </a>
+              <a
+                href={LUMA_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Follow on Luma"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/25 px-5 text-sm font-medium transition hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange-400"
+              >
+                Follow on <LumaLogo className="h-4 w-auto" />
+              </a>
+            </div>
+          </motion.div>
+          <figure className="relative m-3 mt-0 min-h-[280px] overflow-hidden rounded-2xl sm:min-h-[380px] lg:m-4 lg:ml-0">
+            <Image
+              src="/assets/events/kubecon-india-2026/01.webp"
+              alt="Speakers and attendees in the main hall at KubeCon India 2026"
+              fill
+              preload
+              sizes="(min-width: 1536px) 680px, (min-width: 1024px) 48vw, 100vw"
+              className="object-cover object-center"
+            />
+            <div
+              aria-hidden
+              className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/10"
+            />
+            <figcaption className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
+              <span className="mb-2 block text-sm font-medium text-white/70">
+                Out in the community
+              </span>
+              <span className="block text-xl font-medium tracking-tight sm:text-2xl">
+                KubeCon India 2026
+              </span>
+              <span className="mt-1 block text-sm text-white/70">
+                Real conversations. Shared ideas.
+              </span>
+            </figcaption>
+          </figure>
+        </div>
+        <nav
+          aria-label="Explore the community"
+          className="grid grid-cols-2 gap-3 p-4 sm:gap-4 sm:p-6 md:grid-cols-4"
+        >
+          {stats.map(({ value, label, href, artwork }) => (
+            <a
+              key={label}
+              href={href}
+              className="group relative isolate flex flex-col overflow-hidden rounded-2xl border border-white/[0.07] bg-[linear-gradient(145deg,#202321,#252826)] px-5 py-5 text-left shadow-[inset_0_2px_5px_rgba(0,0,0,0.5),inset_0_-1px_0_rgba(255,255,255,0.08)] transition-colors duration-200 hover:border-white/[0.18] focus-visible:border-white/[0.18] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70 sm:px-6"
+            >
+              <div
+                aria-hidden
+                className="absolute bottom-2 right-2 size-16 opacity-35 transition-opacity duration-300 group-hover:opacity-60 group-focus-visible:opacity-60 sm:size-20"
+              >
+                <PixelPortrait
+                  src={`/assets/community/stats-${artwork}.svg`}
+                  alt=""
+                  trackCardPointer
+                />
+              </div>
+              <span className="relative text-sm text-white/65 transition-colors group-hover:text-white">
+                {label}
+              </span>
+              <span className="relative mt-3 text-3xl font-medium leading-none tracking-tight tabular-nums sm:text-4xl">
+                {value}
+              </span>
+            </a>
           ))}
-        </motion.dl>
+        </nav>
       </div>
     </section>
   );

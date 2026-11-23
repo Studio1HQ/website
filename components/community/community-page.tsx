@@ -162,7 +162,7 @@ export function CommunityPage({ data }: { data: CommunityData }) {
       </PaperSection>
 
       {/* 03 Meetups */}
-      <PaperSection tone="paper">
+      <PaperSection id="meetups" tone="paper" className="scroll-mt-24">
         <Container>
           <IndexBar index={3} name="Meetups" />
           <div className="mt-6">
@@ -191,7 +191,7 @@ export function CommunityPage({ data }: { data: CommunityData }) {
 
       {/* 04 On the map */}
       {cities.length ? (
-        <PaperSection tone="paper">
+        <PaperSection id="cities" tone="paper" className="scroll-mt-24">
           <Container>
             <IndexBar index={5} name="On the map" aside={`${cities.length} cities`} />
             <motion.h2 {...rise(reduce)} className="mt-6 max-w-[640px] text-[34px] font-medium leading-[1.05] tracking-[-0.045em] md:text-[48px]">

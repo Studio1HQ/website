@@ -27,10 +27,12 @@ export function PixelPortrait({
   src,
   alt,
   className,
+  trackCardPointer = false,
 }: {
   src: string;
   alt: string;
   className?: string;
+  trackCardPointer?: boolean;
 }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -57,10 +59,11 @@ export function PixelPortrait({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     const s = state.current;
+    let disposed = false;
 
     const draw = () => {
       const { img, w, h } = s;
-      if (!img) return;
+      if (disposed || !img || w <= 0 || h <= 0) return;
       // The whole portrait in one call; only tiles near the cursor move.
       ctx.clearRect(0, 0, w, h);
       ctx.drawImage(img, 0, 0, w, h);
@@ -113,6 +116,7 @@ export function PixelPortrait({
     };
 
     const tick = () => {
+      if (disposed) return;
       // Ease toward the cursor and the target strength, so it glides.
       s.strength += (s.target - s.strength) * 0.045;
       s.px += (s.mx - s.px) * 0.09;
@@ -131,6 +135,7 @@ export function PixelPortrait({
     };
 
     const resize = () => {
+      if (disposed) return;
       const rect = wrap.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       s.w = rect.width;
@@ -143,12 +148,13 @@ export function PixelPortrait({
     };
 
     const img = new window.Image();
-    img.src = src;
     img.onload = () => {
+      if (disposed) return;
       s.img = img;
       resize();
       setReady(true);
     };
+    img.src = src;
 
     const move = (event: PointerEvent) => {
       const rect = wrap.getBoundingClientRect();
@@ -168,16 +174,19 @@ export function PixelPortrait({
 
     const observer = new ResizeObserver(resize);
     observer.observe(wrap);
-    wrap.addEventListener("pointermove", move);
-    wrap.addEventListener("pointerleave", leave);
+    const pointerTarget = trackCardPointer ? (wrap.closest("a") ?? wrap) : wrap;
+    pointerTarget.addEventListener("pointermove", move as EventListener);
+    pointerTarget.addEventListener("pointerleave", leave);
     return () => {
+      disposed = true;
+      img.onload = null;
       observer.disconnect();
-      wrap.removeEventListener("pointermove", move);
-      wrap.removeEventListener("pointerleave", leave);
+      pointerTarget.removeEventListener("pointermove", move as EventListener);
+      pointerTarget.removeEventListener("pointerleave", leave);
       if (s.raf) cancelAnimationFrame(s.raf);
       s.raf = 0;
     };
-  }, [src, reduceMotion]);
+  }, [src, reduceMotion, trackCardPointer]);
 
   return (
     <div ref={wrapRef} className={cn("absolute inset-0", className)}>
