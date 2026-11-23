@@ -150,12 +150,33 @@ export function CommunityHero({
           aria-label="Explore the community"
           className="grid grid-cols-2 gap-3 p-4 sm:gap-4 sm:p-6 md:grid-cols-4"
         >
-          {stats.map(({ value, label, href, artwork }) => (
-            <a
+          {stats.map(({ value, label, href, artwork }, index) => (
+            <motion.a
               key={label}
               href={href}
-              className="group relative isolate flex flex-col overflow-hidden rounded-2xl border border-white/[0.07] bg-[linear-gradient(145deg,#202321,#252826)] px-5 py-5 text-left shadow-[inset_0_2px_5px_rgba(0,0,0,0.5),inset_0_-1px_0_rgba(255,255,255,0.08)] transition-colors duration-200 hover:border-white/[0.18] focus-visible:border-white/[0.18] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70 sm:px-6"
+              initial={reduce ? false : { opacity: 0, y: 20, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{
+                duration: 0.55,
+                delay: 0.15 + index * 0.08,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+              whileHover={{
+                y: -3,
+                scale: 1.015,
+                transition: { duration: 0.25, ease: "easeOut" },
+              }}
+              className="group relative isolate flex flex-col overflow-hidden rounded-2xl border border-white/[0.07] bg-[linear-gradient(145deg,#202321,#252826)] px-5 py-5 text-left shadow-[inset_0_2px_5px_rgba(0,0,0,0.5),inset_0_-1px_0_rgba(255,255,255,0.08)] transition-[border-color,box-shadow] duration-200 hover:border-white/[0.18] hover:shadow-[inset_0_2px_5px_rgba(0,0,0,0.5),inset_0_-1px_0_rgba(255,255,255,0.08),0_8px_24px_-6px_rgba(0,0,0,0.5)] focus-visible:border-white/[0.18] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70 sm:px-6"
             >
+              {/* Film grain overlay */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 z-[1] opacity-[0.035] mix-blend-overlay"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E")`,
+                  backgroundRepeat: "repeat",
+                }}
+              />
               <div
                 aria-hidden
                 className="absolute bottom-2 right-2 size-16 opacity-35 transition-opacity duration-300 group-hover:opacity-60 group-focus-visible:opacity-60 sm:size-20"
@@ -166,13 +187,13 @@ export function CommunityHero({
                   trackCardPointer
                 />
               </div>
-              <span className="relative text-sm text-white/65 transition-colors group-hover:text-white">
+              <span className="relative z-[2] text-sm text-white/65 transition-colors group-hover:text-white">
                 {label}
               </span>
-              <span className="relative mt-3 text-3xl font-medium leading-none tracking-tight tabular-nums sm:text-4xl">
+              <span className="relative z-[2] mt-3 text-3xl font-medium leading-none tracking-tight tabular-nums sm:text-4xl">
                 {value}
               </span>
-            </a>
+            </motion.a>
           ))}
         </nav>
       </div>
