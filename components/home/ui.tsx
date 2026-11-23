@@ -77,7 +77,7 @@ const LAUREL = (() => {
 })();
 
 /** Half of an award laurel. */
-function LaurelBranch({ className }: { className?: string }) {
+export function LaurelBranch({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 34 60" fill="currentColor" aria-hidden className={className}>
       <path d={LAUREL.stem} fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />

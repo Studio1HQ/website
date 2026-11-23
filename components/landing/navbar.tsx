@@ -115,6 +115,7 @@ function MenuLink({
   return (
     <Link
       href={child.path}
+      {...(child.path.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       aria-current={current ? "page" : undefined}
       className={cn(
         "group/item flex w-full items-start gap-2.5 px-3 py-2.5 transition-colors duration-200",
@@ -365,6 +366,7 @@ function MobileNavLink({
   return (
     <Link
       href={child.path}
+      {...(child.path.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       onClick={onNavigate}
       className="flex items-start px-3 py-2.5 group gap-2.5 text-muted-foreground transition-colors duration-200 hover:text-foreground"
     >

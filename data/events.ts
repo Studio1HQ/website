@@ -35,6 +35,8 @@ export type StudioEvent = {
   gallery?: string[];
   /** The event's or organiser's logo, shown until a photo is added. */
   logo?: string;
+  /** The event's own full-colour logo, for featured cards. */
+  wordmark?: string;
   /** The logo is a full square tile with its own background. */
   logoFill?: boolean;
   /** Brand colour for a single-colour SVG logo. */
@@ -68,8 +70,11 @@ export const EVENTS: StudioEvent[] = [
     month: 11,
     place: "North America",
     logo: "/assets/logos/events/cncf.svg",
+    wordmark: "/assets/logos/events/kubecon-na-2026-clean.svg",
     brand: "#0086FF",
     link: "https://events.linuxfoundation.org/kubecon-cloudnativecon-north-america/",
+    summary:
+      "The Studio1 team at KubeCon + CloudNativeCon North America and its co-located events.",
   },
   {
     slug: "cityjs-athens",

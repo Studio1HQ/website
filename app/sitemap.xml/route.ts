@@ -44,6 +44,7 @@ const PAGE_LAST_MODIFIED: Record<string, string> = {
   "/devrel-jobs": "2026-11-10",
   "/team": "2026-11-08",
   "/events": "2026-11-07",
+  "/community": "2026-11-20",
   "/calendar": "2026-11-07",
   "/brand": "2026-11-07",
 };
@@ -180,6 +181,7 @@ export async function GET() {
     { path: "/brand", lastModified: lastModified("/brand"), priority: 0.6 },
     { path: "/team", lastModified: lastModified("/team"), priority: 0.7 },
     { path: "/events", lastModified: lastModified("/events"), priority: 0.7 },
+    { path: "/community", lastModified: lastModified("/community"), priority: 0.7 },
     {
       path: "/calendar",
       lastModified: lastModified("/calendar"),

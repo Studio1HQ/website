@@ -1463,3 +1463,51 @@ html::-webkit-scrollbar-thumb:hover {
 .s1-glass-btn-light:hover {
   background: rgba(255, 255, 255, 0.16);
 }
+
+/* Community page closing banner: each city's landmark draws itself in,
+   one after another, when the banner scrolls into view. */
+.s1-skyline {
+  opacity: 0;
+  transition: opacity 1.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.s1-skyline.is-drawn {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .s1-skyline {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* Ticket pieces: half-circle bites cut out where one piece tears from the next */
+.s1-bite-r,
+.s1-bite-l,
+.s1-bite-lr {
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+@media (min-width: 640px) {
+  .s1-bite-r {
+    -webkit-mask: radial-gradient(circle 10px at 100% 0, #0000 96%, #000), radial-gradient(circle 10px at 100% 100%, #0000 96%, #000);
+    mask: radial-gradient(circle 10px at 100% 0, #0000 96%, #000), radial-gradient(circle 10px at 100% 100%, #0000 96%, #000);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+  }
+  .s1-bite-l {
+    -webkit-mask: radial-gradient(circle 10px at 0 0, #0000 96%, #000), radial-gradient(circle 10px at 0 100%, #0000 96%, #000);
+    mask: radial-gradient(circle 10px at 0 0, #0000 96%, #000), radial-gradient(circle 10px at 0 100%, #0000 96%, #000);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+  }
+  .s1-bite-lr {
+    -webkit-mask: radial-gradient(circle 10px at 0 0, #0000 96%, #000), radial-gradient(circle 10px at 0 100%, #0000 96%, #000),
+      radial-gradient(circle 10px at 100% 0, #0000 96%, #000), radial-gradient(circle 10px at 100% 100%, #0000 96%, #000);
+    mask: radial-gradient(circle 10px at 0 0, #0000 96%, #000), radial-gradient(circle 10px at 0 100%, #0000 96%, #000),
+      radial-gradient(circle 10px at 100% 0, #0000 96%, #000), radial-gradient(circle 10px at 100% 100%, #0000 96%, #000);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+  }
+}

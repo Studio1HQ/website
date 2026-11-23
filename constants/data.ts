@@ -45,6 +45,7 @@ import {
   Books,
   Briefcase,
   CheckCircle,
+  Code,
   Files,
   GithubLogo,
   Lightbulb,
@@ -180,7 +181,30 @@ export const navItems: NavItem[] = [
       icon: SquaresFour,
     },
   },
-  { title: "Product", path: "/product" },
+  {
+    title: "Community",
+    path: "/community",
+    children: [
+      {
+        title: "Community",
+        path: "/community",
+        icon: UsersThree,
+        description: "Meetups, hackathons and the people behind them",
+      },
+      {
+        title: "Hackathons",
+        path: "/hackathons",
+        icon: Code,
+        description: "Build weekends with the teams behind the tools",
+      },
+      {
+        title: "Meetups",
+        path: "/events",
+        icon: CalendarDots,
+        description: "Talks and meetups in a city near you",
+      },
+    ],
+  },
   {
     title: "Content",
     path: "#",
@@ -196,12 +220,6 @@ export const navItems: NavItem[] = [
         path: "/blog",
         icon: Newspaper,
         description: "Articles and insights from the Studio1 team",
-      },
-      {
-        title: "Events",
-        path: "/events",
-        icon: CalendarDots,
-        description: "Talks, hackathons and meetups we've been part of",
       },
     ],
   },

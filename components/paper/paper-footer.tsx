@@ -141,7 +141,8 @@ const LINK_GROUPS: { title: string; links: GroupLink[] }[][] = [
       title: "Resources",
       links: [
         { key: "blog", scope: "nav", href: "/blog" },
-        { label: "Events", href: "/events", badge: "New" },
+        { label: "Community", href: "/community", badge: "New" },
+        { label: "Events", href: "/events" },
         { label: "Calendar", href: "/calendar", badge: "New" },
         { key: "openSource", scope: "footer", href: "/oss", badge: "New" },
         { key: "brandAssets", scope: "footer", href: "/brand", native: true, badge: "New" },
