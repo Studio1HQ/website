@@ -377,6 +377,16 @@ html.dark:has(.internal-ui) {
   }
 }
 
+/* Big screens: globals.css zooms the page (1.15 from 1800px, more above),
+   and the zoom scales dvh with it, so a dialog's 92dvh grew past the screen
+   and its title and buttons fell off the top and bottom. Dividing by the
+   zoom gives back 92% of the real screen. */
+@media (min-width: 1800px) {
+  .internal-pop.internal-dialog {
+    max-height: calc(92dvh / var(--s1-zoom, 1));
+  }
+}
+
 @keyframes internal-rise {
   from {
     opacity: 0;

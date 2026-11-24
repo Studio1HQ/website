@@ -50,6 +50,8 @@ import {
 } from "@/lib/internal/sections";
 import { cn } from "@/lib/utils";
 import { BulkEmailDialog } from "@/components/internal/bulk-email-dialog";
+import { EmailComposer } from "@/components/internal/email-composer";
+import { firstName } from "@/lib/first-name";
 import { FilterMenu } from "@/components/internal/filter-menu";
 import { EMAIL_TEMPLATES } from "@/lib/internal/email-templates";
 import { mailtoHref } from "@/lib/form-checks";
@@ -131,6 +133,8 @@ export function ListView({
   const [navigating, startNavigation] = useTransition();
   const [, startAction] = useTransition();
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  /** The entry whose row menu chose "Send email": the composer opens for them. */
+  const [emailing, setEmailing] = useState<(Row & { _id: string }) | null>(null);
   const [overrides, setOverrides] = useState<Record<string, Override>>({});
   const [search, setSearch] = useState(filters.q ?? "");
   const searchRef = useRef<HTMLInputElement>(null);
@@ -529,6 +533,7 @@ export function ListView({
             void navigator.clipboard.writeText(text(row.email));
             toast("success", "Email copied");
           }}
+          onEmail={listTemplates.length ? () => setEmailing(row) : undefined}
         />
       </>
     );
@@ -1051,6 +1056,22 @@ export function ListView({
           </button>
         </div>
       ) : null}
+
+      {emailing ? (
+        <EmailComposer
+          key={emailing._id}
+          open
+          onOpenChange={(next) => {
+            if (!next) setEmailing(null);
+          }}
+          sectionKey={section.key}
+          id={emailing._id}
+          to={text(emailing.email)}
+          currentStatus={String(emailing.review_status ?? "") || "new"}
+          mailerReady={mailerReady}
+          vars={{ first_name: firstName(text(emailing.name)), program: programOf(section, emailing), sender }}
+        />
+      ) : null}
     </>
   );
 }
@@ -1062,6 +1083,7 @@ function RowMenu({
   onStatus,
   onTag,
   onCopy,
+  onEmail,
   size = "sm",
 }: {
   size?: "sm" | "md";
@@ -1071,6 +1093,8 @@ function RowMenu({
   onStatus: (status: string) => void;
   onTag: (tag: string, add: boolean) => void;
   onCopy: () => void;
+  /** Opens the dashboard composer; without it, "Send email" opens the mail app. */
+  onEmail?: () => void;
 }) {
   const own = rowTags(row).map((tag) => tag.toLowerCase());
   const email = text(row.email);
@@ -1148,11 +1172,17 @@ function RowMenu({
               <Menu.Item className={menuItemClass} onSelect={onCopy}>
                 <Copy size={15} className="text-[var(--i-muted)]" /> Copy email
               </Menu.Item>
-              <Menu.Item className={menuItemClass} asChild>
-                <a href={mailtoHref(email)}>
+              {onEmail ? (
+                <Menu.Item className={menuItemClass} onSelect={onEmail}>
                   <EnvelopeSimple size={15} className="text-[var(--i-muted)]" /> Send email
-                </a>
-              </Menu.Item>
+                </Menu.Item>
+              ) : (
+                <Menu.Item className={menuItemClass} asChild>
+                  <a href={mailtoHref(email)}>
+                    <EnvelopeSimple size={15} className="text-[var(--i-muted)]" /> Send email
+                  </a>
+                </Menu.Item>
+              )}
             </>
           ) : null}
         </Menu.Content>
