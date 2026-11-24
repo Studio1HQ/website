@@ -130,5 +130,10 @@ export async function unsubscribe(email: string) {
   // that error (PostgREST PGRST205, Postgres 42P01) is let through. Anything
   // else, like a missing grant, means the contact may still be there.
   else if (!/"code":\s*"(PGRST205|42P01)"/.test(kept.message)) return { ok: false as const, message: kept.message };
+  // /community signups have no email_updates flag: being on the table is the
+  // opt-in, so unsubscribing removes the row. (Saved lowercased by the route.)
+  const community = await deleteRows("community_subscribers", new URLSearchParams({ email: `eq.${address}` }));
+  if (community.ok) changed += community.count;
+  else if (!/"code":\s*"(PGRST205|42P01)"/.test(community.message)) return { ok: false as const, message: community.message };
   return { ok: true as const, changed };
 }
