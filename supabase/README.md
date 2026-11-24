@@ -135,3 +135,31 @@ Code: `lib/internal/blog/devto.ts` (conversion, tested) and `devto-api.ts`.
    be a member.
 
 The article list is kept for 10 minutes and refreshed after every send.
+
+### Blog → Stats → DEV
+
+`/blog/stats/dev` (blog reviewers; the DEV tab on Stats) shows the Studio1
+organization on DEV (dev.to/studio1hq) from DEV's own analytics: views,
+reactions, comments and new followers over the range against the stretch
+before, all-time totals, views and reactions a day, every post with its
+views (in the range and all time), reactions and comments, writers, the
+sites readers come from and the readers who engage most. A post's own stats
+page shows its DEV copy's numbers from here too. Code:
+`lib/internal/blog/devto-stats.ts` (reading DEV's answers, tested) and
+`devto-stats-api.ts` (GET requests only).
+
+It reads with its own key, `DEV_STATS_API_KEY`, separate from
+`DEV_API_KEY`: DEV keys can't be limited to reading, so the stats key is
+never used by anything that publishes, and it can belong to a personal
+account. Its account must be a member of the organization.
+
+1. Signed in to DEV as a member of dev.to/studio1hq, open Settings →
+   Extensions → "DEV Community API Keys" and generate a key (name it
+   something like "Studio1 dashboard stats").
+2. In Vercel, add it as `DEV_STATS_API_KEY` (Production, Sensitive) and
+   redeploy. For local dev, put it in `.env.local`.
+
+Numbers are kept for an hour (a page makes at most five requests; DEV allows
+about 40 a minute per key). Per-post views come from DEV's organization
+article analytics, which DEV turns on per organization; without it the posts
+show reactions and comments only and the page says so.

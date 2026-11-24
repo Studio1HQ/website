@@ -10,6 +10,7 @@ import { FilterDropdown } from "@/components/internal/influencers/filter-dropdow
 import {
   Change,
   DayChart,
+  StatsTabs,
   TopPosts,
   shortDay,
 } from "@/components/internal/blog/stats";
@@ -141,6 +142,8 @@ export function BlogStatsView({
           />
         }
       />
+
+      <StatsTabs active="site" range={range.key} />
 
       <div className="mb-4 space-y-2 empty:hidden">
         {!reads && !search ? (
