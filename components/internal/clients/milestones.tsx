@@ -9,7 +9,7 @@ import {
   type FormEvent,
   type ReactNode,
 } from "react";
-import { PencilSimple, Plus, Trash, Trophy } from "@phosphor-icons/react";
+import { PencilSimple, Plus, Trash, Trophy } from "@/components/internal/icons";
 import {
   removeMilestone,
   saveMilestone,

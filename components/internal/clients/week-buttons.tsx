@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { Check, Copy, SlackLogo } from "@phosphor-icons/react";
+import { Check, Copy, SlackLogo } from "@/components/internal/icons";
 import { postClientWeek } from "@/app/internal/(dashboard)/clients/workspace-actions";
 import { useToast } from "@/components/internal/toast";
 import { buttonClass, textareaClass } from "@/components/internal/ui";

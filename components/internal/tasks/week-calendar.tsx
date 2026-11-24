@@ -3,7 +3,7 @@
 import { startTransition, useMemo, useOptimistic, useRef, useState, type ClipboardEvent, type KeyboardEvent, type ReactNode } from "react";
 import Link from "next/link";
 import { DndContext, DragOverlay, useDraggable, useDroppable, type DragEndEvent } from "@dnd-kit/core";
-import { CheckCircle, Plus, Prohibit, Sparkle, UsersThree } from "@phosphor-icons/react";
+import { CheckCircle, Plus, Prohibit, Sparkle, UsersThree } from "@/components/internal/icons";
 import { addTasks, editTask, leaveTask, removeTask, setDeliverableDay } from "@/app/internal/(dashboard)/tasks/actions";
 import { cn } from "@/lib/utils";
 import { buttonClass, inputClass, textareaClass } from "@/components/internal/ui";

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Paperclip, Receipt, Wallet, WarningCircle } from "@phosphor-icons/react/dist/ssr";
+import { ArrowRight, Paperclip, Receipt, Wallet, WarningCircle } from "@/components/internal/icons";
 import { Avatar, Card, CardTitle, Notice, PageHeader } from "@/components/internal/ui";
 import { Chip } from "@/components/internal/team/chips";
 import { requireOwner } from "@/lib/internal/session";

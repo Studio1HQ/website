@@ -7,7 +7,7 @@ import {
   type KeyboardEvent,
   type PointerEvent,
 } from "react";
-import { ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
+import { ArrowUpRight } from "@/components/internal/icons";
 import { monthLabel } from "@/lib/internal/clients/schema";
 import {
   axisMonth,
@@ -121,9 +121,9 @@ export function SocialsOverview({ series }: { series: OverviewSeries[] }) {
                 aria-pressed={mode === value}
                 onClick={() => setMode(value)}
                 className={cn(
-                  "h-7 rounded-md px-2.5 text-[12px] transition-colors",
+                  "h-8 rounded-full px-3.5 text-[13px] transition-colors",
                   mode === value
-                    ? "bg-[var(--i-panel)] font-medium text-[var(--i-ink)] shadow-[var(--i-shadow-sm)] ring-1 ring-[var(--i-line)]"
+                    ? "bg-[var(--i-panel)] font-medium text-[var(--i-ink)] shadow-[var(--i-shadow-sm)] dark:bg-white/[0.14] dark:shadow-none"
                     : "text-[var(--i-muted)] hover:text-[var(--i-ink)]",
                 )}
               >

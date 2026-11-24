@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { ArrowClockwise, Warning } from "@phosphor-icons/react";
+import { ArrowClockwise, Warning } from "@/components/internal/icons";
 import { buttonClass } from "@/components/internal/ui";
 
 /**

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ChartBar, PencilSimple } from "@phosphor-icons/react/dist/ssr";
+import { ArrowLeft, ChartBar, PencilSimple } from "@/components/internal/icons";
 import { requireCommunity } from "@/lib/internal/session";
 import {
   getRecord,

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowDown, ArrowUp } from "@phosphor-icons/react/dist/ssr";
+import { ArrowDown, ArrowUp } from "@/components/internal/icons";
 import {
   Sparkline,
   TableView,

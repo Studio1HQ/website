@@ -1,58 +1,30 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { createContext, useContext, useSyncExternalStore } from "react";
 import {
-  ArrowLeft,
-  Bank,
-  Binoculars,
-  Briefcase,
-  Buildings,
-  CalendarBlank,
-  CalendarCheck,
-  ChartLineUp,
-  CheckSquare,
-  Coins,
-  Compass,
-  Megaphone,
-  EnvelopeOpen,
-  EnvelopeSimple,
-  FileText,
-  Files,
-  Folders,
-  Gauge,
-  Handshake,
-  IdentificationCard,
-  Kanban,
-  NotePencil,
-  Receipt,
-  ShareNetwork,
-  SlidersHorizontal,
-  SquaresFour,
-  SuitcaseSimple,
-  Trophy,
-  UserSound,
-  UsersThree,
-  VideoCamera,
-  Wallet,
+  CaretRight,
   type Icon,
-} from "@phosphor-icons/react";
+  Nav,
+} from "@/components/internal/icons";
+import { useSidebarCollapsed } from "@/components/internal/mobile-nav";
+import { useHiddenSections } from "@/components/internal/sidebar-prefs";
 import { atLeast, type BlogAccess, type Role } from "@/lib/internal/roles";
 import {
   SECTIONS,
   SECTION_ORDER,
   type SectionKey,
 } from "@/lib/internal/sections";
-import { HoverLink, LinkPending } from "@/components/internal/nav-progress";
+import { HoverLink } from "@/components/internal/nav-progress";
 import { SIDEBAR_EASE, SIDEBAR_FADE } from "@/lib/internal/sidebar";
 import { cn } from "@/lib/utils";
 
 const ICONS: Record<SectionKey, Icon> = {
-  jobs: Briefcase,
-  hackathons: Trophy,
-  cohort: UsersThree,
-  subscribers: EnvelopeSimple,
-  "partner-pool": Handshake,
+  jobs: Nav.UserSearch,
+  hackathons: Nav.Trophy,
+  cohort: Nav.GraduationCap,
+  subscribers: Nav.Mail,
+  "partner-pool": Nav.Handshake,
 };
 
 /*
@@ -61,7 +33,32 @@ const ICONS: Record<SectionKey, Icon> = {
  * counts fade (still read by screen readers; names show as tooltips via
  * data-tip), a count turns into a dot and group titles fold into a rule.
  */
-const FOLDED_SHOW = cn("opacity-0 transition-opacity", SIDEBAR_EASE, "md:group-data-[collapsed=true]/sidebar:opacity-100");
+const FOLDED_SHOW = cn(
+  "opacity-0 transition-opacity",
+  SIDEBAR_EASE,
+  "md:group-data-[collapsed=true]/sidebar:opacity-100",
+);
+
+/** True inside a section's opened pages: rows render as quiet sub-rows. */
+const InSubNav = createContext(false);
+
+/**
+ * A row's count: a small solid circle with the number (wider for 10+),
+ * the same orange as the bell's unread dot. Still, no glow.
+ */
+function Count({ children, title, className }: { children: number; title: string | null; className?: string }) {
+  return (
+    <span
+      title={title ?? undefined}
+      className={cn(
+        "inline-flex h-[18px] min-w-[18px] shrink-0 items-center justify-center rounded-full bg-[var(--i-accent)] px-[5px] text-[10.5px] font-semibold leading-none tabular-nums text-white",
+        className,
+      )}
+    >
+      {children > 99 ? "99+" : children}
+    </span>
+  );
+}
 
 function NavLink({
   href,
@@ -70,6 +67,7 @@ function NavLink({
   badge,
   badgeTitle,
   active,
+  open = false,
 }: {
   href: string;
   label: string;
@@ -77,27 +75,73 @@ function NavLink({
   badge?: number;
   badgeTitle?: string;
   active: boolean;
+  /** This section is open (one of its pages is showing): bold, no pill. */
+  open?: boolean;
 }) {
-  const count = badge ? (badgeTitle || `${badge} new`) : null;
+  const count = badge ? badgeTitle || `${badge} new` : null;
+  const sub = useContext(InSubNav);
+  if (sub) {
+    return (
+      <HoverLink
+        href={href}
+        data-tip={label}
+        aria-current={active ? "page" : undefined}
+        className={cn(
+          "group/sub relative ml-[14px] flex h-9 shrink-0 items-center gap-2.5 whitespace-nowrap rounded-lg pl-2 pr-2 text-[14px] transition-colors",
+          active
+            ? "bg-black/[0.06] font-medium text-[var(--i-ink)] dark:bg-white/[0.09]"
+            : "text-[var(--i-muted)] hover:bg-black/[0.03] hover:text-[var(--i-ink)] dark:hover:bg-white/[0.04]",
+        )}
+      >
+        {/* the tree: a curved branch off the section's line, and the line
+            carrying on down to the next page (hidden after the last one) */}
+        <span
+          aria-hidden
+          data-elbow
+          className="pointer-events-none absolute -left-[14px] top-0 h-1/2 w-[10px] rounded-bl-[7px] border-b border-l border-[var(--i-line-strong,var(--i-line))]"
+        />
+        <span
+          aria-hidden
+          data-trunk
+          className="pointer-events-none absolute -left-[14px] bottom-0 top-1/2 border-l border-[var(--i-line-strong,var(--i-line))]"
+        />
+        <IconComponent
+          size={16}
+          weight="regular"
+          aria-hidden
+          className={cn(
+            "shrink-0 transition-colors",
+            active ? "text-[var(--i-ink)]" : "text-[var(--i-faint)] group-hover/sub:text-[var(--i-muted)]",
+          )}
+        />
+        <span className="min-w-0 flex-1 truncate">{label}</span>
+        {badge ? (
+          <Count title={count}>{badge}</Count>
+        ) : null}
+      </HoverLink>
+    );
+  }
   return (
     <HoverLink
       href={href}
       aria-current={active ? "page" : undefined}
       data-tip={count ? `${label} · ${count}` : label}
       className={cn(
-        "group flex h-10 shrink-0 items-center gap-2.5 overflow-hidden whitespace-nowrap rounded-lg px-2.5 text-[14px] transition-colors md:h-8 md:text-[13.5px]",
-        active
-          ? "bg-[var(--i-panel)] font-medium text-[var(--i-ink)] shadow-[var(--i-shadow)] ring-1 ring-[var(--i-line)]"
-          : "text-[var(--i-ink-2)] hover:bg-black/[0.035] hover:text-[var(--i-ink)] dark:hover:bg-white/[0.05]",
+        "group flex h-10 shrink-0 items-center gap-3 overflow-hidden whitespace-nowrap rounded-lg px-[9px] text-[15px] transition-colors md:h-9 md:text-[14.5px]",
+        open
+          ? "font-medium text-[var(--i-ink)] hover:bg-black/[0.035] dark:hover:bg-white/[0.05]"
+          : active
+            ? "bg-black/[0.06] font-medium text-[var(--i-ink)] dark:bg-white/[0.09]"
+            : "text-[var(--i-ink-2)] hover:bg-black/[0.035] hover:text-[var(--i-ink)] dark:hover:bg-white/[0.05]",
       )}
     >
       <span className="relative flex shrink-0">
         <IconComponent
-          size={16}
-          weight={active ? "fill" : "regular"}
+          size={18}
+          weight="regular"
           className={
-            active
-              ? "text-[var(--i-accent)]"
+            active || open
+              ? "text-[var(--i-ink)]"
               : "text-[var(--i-muted)] group-hover:text-[var(--i-ink-2)]"
           }
           aria-hidden
@@ -107,34 +151,39 @@ function NavLink({
             aria-hidden
             className={cn(
               "absolute -right-1 -top-1 size-2 rounded-full bg-[var(--i-accent)] ring-2",
-              active ? "ring-[var(--i-panel)]" : "ring-[var(--i-sidebar)]",
+              "ring-[var(--i-sidebar)]",
               FOLDED_SHOW,
             )}
           />
         ) : null}
       </span>
       <span className={cn("flex-1", SIDEBAR_FADE)}>{label}</span>
-      <LinkPending />
       {badge ? (
-        <span
-          className={cn(
-            "ml-2 rounded-full bg-[var(--i-accent-soft)] px-1.5 text-[11px] font-medium leading-[18px] tabular-nums text-[var(--i-accent-text)]",
-            SIDEBAR_FADE,
-          )}
-          title={count ?? undefined}
-        >
+        <Count title={count} className={cn("ml-2", SIDEBAR_FADE)}>
           {badge}
-        </span>
+        </Count>
       ) : null}
     </HoverLink>
   );
 }
 
 /**
- * A group title. Folded, it shrinks to nothing (rows 1fr → 0fr, so the
- * links below glide up instead of jumping) while it fades.
+ * A group title, and the switch for its section: click it to fold the
+ * section's links away or bring them back (a chevron shows which). Folded to
+ * icons, the title shrinks to nothing (rows 1fr → 0fr, so the links below
+ * glide up instead of jumping) while it fades.
  */
-function GroupTitle({ children, className }: { children: React.ReactNode; className?: string }) {
+function GroupTitle({
+  children,
+  icon: GroupIcon,
+  open,
+  onToggle,
+}: {
+  children: React.ReactNode;
+  icon?: Icon;
+  open: boolean;
+  onToggle: () => void;
+}) {
   return (
     <div
       className={cn(
@@ -144,14 +193,23 @@ function GroupTitle({ children, className }: { children: React.ReactNode; classN
       )}
     >
       <div className="min-h-0 overflow-hidden">
-        <p
-          className={cn(
-            "whitespace-nowrap px-2.5 pb-1.5 text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--i-faint)]",
-            className,
-          )}
+        {/* A row of its own: the section's icon, its name, and an arrow that
+            turns down while it's open, so a closed sidebar still reads as a
+            menu rather than a list of labels. */}
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={open}
+          className="group/title mb-1 flex h-7 w-full items-center gap-2.5 whitespace-nowrap rounded-md px-[10px] text-left text-[12px] font-medium tracking-[0.01em] text-[var(--i-faint)] transition-colors hover:text-[var(--i-muted)]"
         >
-          {children}
-        </p>
+          {GroupIcon ? <GroupIcon size={14} aria-hidden className="shrink-0" /> : null}
+          <span className="flex-1">{children}</span>
+          <CaretRight
+            size={13}
+            aria-hidden
+            className={cn("shrink-0 transition-transform duration-200", open && "rotate-90")}
+          />
+        </button>
       </div>
     </div>
   );
@@ -164,17 +222,128 @@ function GroupTitle({ children, className }: { children: React.ReactNode; classN
 function FoldedRule({ className }: { className: string }) {
   return (
     <span aria-hidden className="relative mx-2.5 block h-0">
-      <span className={cn("absolute inset-x-0 h-px bg-[var(--i-line)]", FOLDED_SHOW, className)} />
+      <span
+        className={cn(
+          "absolute inset-x-0 h-px bg-[var(--i-line)]",
+          FOLDED_SHOW,
+          className,
+        )}
+      />
     </span>
   );
 }
 
-function NavGroup({ title, children }: { title: string; children: React.ReactNode }) {
+/** Each section's icon, on its heading row. */
+const GROUP_ICONS: Record<string, Icon> = {
+  Workspaces: Nav.Layers,
+  Pipelines: Nav.Workflow,
+  Audiences: Nav.Radio,
+  Team: Nav.Network,
+  Settings: Nav.Cog,
+};
+
+/** The sections someone has closed, kept in this browser ("|"-separated titles). */
+const CLOSED_KEY = "studio1-sidebar-closed";
+const closedListeners = new Set<() => void>();
+
+function subscribeClosed(listener: () => void) {
+  closedListeners.add(listener);
+  window.addEventListener("storage", listener);
+  return () => {
+    closedListeners.delete(listener);
+    window.removeEventListener("storage", listener);
+  };
+}
+
+function readClosed() {
+  try {
+    return localStorage.getItem(CLOSED_KEY) ?? "";
+  } catch {
+    return "";
+  }
+}
+
+function setClosed(title: string, closed: boolean) {
+  const titles = new Set(readClosed().split("|").filter(Boolean));
+  if (closed) titles.add(title);
+  else titles.delete(title);
+  try {
+    localStorage.setItem(CLOSED_KEY, [...titles].join("|"));
+  } catch {
+    // private window or blocked storage: the section still toggles until reload
+  }
+  closedListeners.forEach((listener) => listener());
+}
+
+function NavGroup({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  // Open on the server and on first paint; a closed one folds once the browser says so.
+  const closed = useSyncExternalStore(subscribeClosed, readClosed, () => "").split("|").includes(title);
+  const folded = useSidebarCollapsed();
+  // Switched off in Customise sidebar: kept in the page (hidden), so the
+  // dialog can still list it to switch back on.
+  const off = useHiddenSections().includes(title);
   return (
-    <div className="mt-5">
+    <div className="mt-5" data-group={title} hidden={off}>
       <FoldedRule className="-top-2.5" />
-      <GroupTitle>{title}</GroupTitle>
-      <div className="flex flex-col gap-0.5">{children}</div>
+      <GroupTitle icon={GROUP_ICONS[title]} open={!closed} onToggle={() => setClosed(title, !closed)}>
+        {title}
+      </GroupTitle>
+      {/* Folded to icons, every section shows: there are no titles to reopen them by. */}
+      <div
+        className={cn(
+          "grid transition-[grid-template-rows,opacity]",
+          SIDEBAR_EASE,
+          closed
+            ? "grid-rows-[0fr] opacity-0 md:group-data-[collapsed=true]/sidebar:grid-rows-[1fr] md:group-data-[collapsed=true]/sidebar:opacity-100"
+            : "grid-rows-[1fr] opacity-100",
+        )}
+        inert={closed && !folded}
+      >
+        <div className="min-h-0 overflow-hidden">
+          <div className="flex flex-col gap-0.5">{children}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * A section's own pages, opened in place under its link while you're in
+ * it: the rows ease open (grid 0fr → 1fr) and sit on a thin guide line.
+ */
+function SubNav({
+  open,
+  children,
+}: {
+  open: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      data-subnav
+      className={cn(
+        "grid transition-[grid-template-rows,opacity]",
+        SIDEBAR_EASE,
+        open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+        // Folded to icons, a section's pages stay out of the way.
+        "md:group-data-[collapsed=true]/sidebar:hidden",
+      )}
+      aria-hidden={!open}
+      inert={!open}
+    >
+      <div className="min-h-0 overflow-hidden">
+        {/* The tree hangs from the section icon's centre (10px in + 8px). The
+            first branch reaches up to meet the icon; the last has no trunk. */}
+        <div className="mb-1.5 ml-[17.5px] mt-0.5 flex flex-col [&>*:first-child_[data-elbow]]:-top-1.5 [&>*:first-child_[data-elbow]]:h-[calc(50%+6px)] [&>*:last-child_[data-trunk]]:hidden">
+          <InSubNav.Provider value>{children}</InSubNav.Provider>
+        </div>
+      </div>
     </div>
   );
 }
@@ -238,7 +407,7 @@ export function InternalNav({
   influencers = false,
   socials = false,
   jobBoard = false,
-  home,
+  home: _home,
   overview,
 }: {
   awaiting: Partial<Record<SectionKey, number>>;
@@ -273,9 +442,9 @@ export function InternalNav({
       : pathname === href || pathname.startsWith(`${href}/`);
   const groups = ["Pipelines", "Audiences"] as const;
 
-  // Community, Clients, Money and Blog are sections of their own: inside
-  // one, the sidebar shows only that section's pages, so the main sidebar
-  // stays short. Hackathon registrations belong to Community.
+  // Community, Clients, Money and Blog open their pages in place, under
+  // their link, while you're inside them. Hackathon registrations belong
+  // to Community.
   const section =
     (isActive("/community") || isActive(SECTIONS.hackathons.path)) && community
       ? "community"
@@ -286,247 +455,101 @@ export function InternalNav({
           : isActive("/blog") && blog
             ? "blog"
             : null;
-  const sectionName =
-    section === "money"
-      ? "Money"
-      : section === "clients"
-        ? "Clients"
-        : section === "blog"
-          ? "Blog"
-          : "Community";
-  if (section) {
-    const back = !home.startsWith(`/${section}`);
-    return (
-      <nav
-        aria-label={sectionName}
-        className="flex flex-col"
-      >
-        {back ? (
-          <>
-            <Link
-              href={home}
-              data-tip="Back to the dashboard"
-              className="mb-3 flex h-10 shrink-0 items-center gap-2 overflow-hidden whitespace-nowrap rounded-lg px-2.5 text-[13px] text-[var(--i-muted)] transition-colors hover:bg-black/[0.035] hover:text-[var(--i-ink)] dark:hover:bg-white/[0.05] md:h-8"
-            >
-              {/* 1px in, so the 14px arrow centres on the 16px icons below. */}
-              <ArrowLeft size={14} aria-hidden className="ml-px shrink-0" />
-              <span className={SIDEBAR_FADE}>Dashboard</span>
-            </Link>
-            <FoldedRule className="-top-1.5" />
-          </>
-        ) : null}
-        <GroupTitle className={back ? "pt-1" : "pt-3"}>{sectionName}</GroupTitle>
-        <div className="flex flex-col gap-0.5">
-          {section === "clients" && clients ? (
-            <>
-              <NavLink
-                href="/clients"
-                label="Overview"
-                icon={Folders}
-                badge={clients.late}
-                badgeTitle={`${clients.late} of your deliverables late`}
-                active={pathname === "/clients" || (isActive("/clients") && !CLIENT_PAGES.some((page) => isActive(page)))}
-              />
-              <NavLink
-                href="/clients/board"
-                label="This week"
-                icon={CalendarBlank}
-                active={isActive("/clients/board")}
-              />
-              <NavLink
-                href="/clients/load"
-                label="Owner load"
-                icon={Gauge}
-                badge={clients.toReview}
-                badgeTitle={`${clients.toReview} waiting for your review`}
-                active={isActive("/clients/load")}
-              />
-              <NavLink
-                href="/clients/reports"
-                label="Monthly report"
-                icon={FileText}
-                active={isActive("/clients/reports")}
-              />
-              {clients.access === "manager" ? (
-                <NavLink
-                  href="/clients/templates"
-                  label="Templates & capacity"
-                  icon={SlidersHorizontal}
-                  active={isActive("/clients/templates")}
-                />
-              ) : null}
-            </>
-          ) : section === "blog" && blog ? (
-            <>
-              {/* Writers have no Google numbers: Posts is their whole section. */}
-              {blog === "reviewer" ? (
-                <NavLink href="/blog" label="Overview" icon={NotePencil} active={pathname === "/blog"} />
-              ) : null}
-              <NavLink
-                href="/blog/posts"
-                label="Posts"
-                icon={Files}
-                badge={blogBadge}
-                badgeTitle={
-                  blog === "reviewer"
-                    ? `${blogBadge} waiting for review`
-                    : `${blogBadge} with feedback`
-                }
-                active={
-                  pathname !== "/blog" &&
-                  !BLOG_PAGES.some((page) => isActive(page))
-                }
-              />
-              {blog === "reviewer" ? (
-                <>
-                  <NavLink href="/blog/stats" label="Stats" icon={ChartLineUp} active={isActive("/blog/stats")} />
-                  <NavLink
-                    href="/blog/external"
-                    label="External"
-                    icon={ShareNetwork}
-                    active={isActive("/blog/external")}
-                  />
-                </>
-              ) : null}
-            </>
-          ) : section === "money" ? (
-            <>
-              <NavLink href="/money" label="Overview" icon={Bank} active={pathname === "/money"} />
-              <NavLink
-                href="/money/payroll"
-                label="Payroll"
-                icon={Receipt}
-                badge={team.payrollBadge}
-                badgeTitle={`${team.payrollBadge} expense ${team.payrollBadge === 1 ? "claim" : "claims"} waiting`}
-                active={isActive("/money/payroll")}
-              />
-              <NavLink
-                href="/money/payments"
-                label="Payments"
-                icon={Wallet}
-                badge={team.paymentsBadge}
-                badgeTitle={`${team.paymentsBadge} to pay`}
-                active={isActive("/money/payments")}
-              />
-            </>
-          ) : community ? (
-            <>
-              <NavLink
-                href="/community"
-                label="Overview"
-                icon={Compass}
-                active={pathname === "/community"}
-              />
-              <NavLink
-                href="/community/events"
-                label="Events"
-                icon={CalendarBlank}
-                active={isActive("/community/events")}
-              />
-              <NavLink
-                href={SECTIONS.hackathons.path}
-                label="Hackathon sign-ups"
-                icon={Trophy}
-                badge={awaiting.hackathons}
-                badgeTitle={`${awaiting.hackathons ?? 0} new ${awaiting.hackathons === 1 ? "registration" : "registrations"} to review`}
-                active={isActive(SECTIONS.hackathons.path)}
-              />
-              <NavLink
-                href="/community/sponsors"
-                label="Sponsors"
-                icon={Megaphone}
-                badge={community.sponsors}
-                badgeTitle={`${community.sponsors} ${community.sponsors === 1 ? "follow-up" : "follow-ups"} due`}
-                active={isActive("/community/sponsors")}
-              />
-              <NavLink
-                href="/community/campus"
-                label="Campus partners"
-                icon={Buildings}
-                badge={community.partners}
-                badgeTitle={`${community.partners} ${community.partners === 1 ? "follow-up" : "follow-ups"} due`}
-                active={isActive("/community/campus")}
-              />
-              {/* Money stays with the manager: interns have no Budget page. */}
-              {community.access === "manager" ? (
-                <NavLink
-                  href="/community/budget"
-                  label="Budget"
-                  icon={Coins}
-                  active={isActive("/community/budget")}
-                />
-              ) : null}
-              <NavLink
-                href="/community/tasks"
-                label="Tasks"
-                icon={CheckSquare}
-                badge={community.tasks}
-                badgeTitle={`${community.tasks} of your tasks due or late`}
-                active={isActive("/community/tasks")}
-              />
-              <NavLink
-                href="/community/analytics"
-                label="Analytics"
-                icon={ChartLineUp}
-                active={isActive("/community/analytics")}
-              />
-              {/* Managers email hackathon registrants; without a hiring
-                  role they have no Settings group to find this under. */}
-              {community.access === "manager" ? (
-                <NavLink
-                  href="/templates"
-                  label="Email templates"
-                  icon={EnvelopeOpen}
-                  active={isActive("/templates")}
-                />
-              ) : null}
-            </>
-          ) : null}
-        </div>
-      </nav>
-    );
-  }
-
   const moneyBadge = team.payrollBadge + team.paymentsBadge;
   const clientsBadge = clients ? clients.late + clients.toReview : 0;
   const hackathonsNew = community ? (awaiting.hackathons ?? 0) : 0;
-  const communityBadge = community ? community.tasks + community.sponsors + community.partners + hackathonsNew : 0;
+  const communityBadge = community
+    ? community.tasks + community.sponsors + community.partners + hackathonsNew
+    : 0;
 
   return (
-    <nav
-      aria-label="Dashboard"
-      className="flex flex-col"
-    >
+    <nav aria-label="Dashboard" className="flex flex-col">
       {overview ? (
         <NavLink
           href="/"
           label="Overview"
-          icon={SquaresFour}
+          icon={Nav.LayoutDashboard}
           active={isActive("/")}
         />
       ) : null}
-      {clients || blog || community || team.money || outreach || influencers || socials || jobBoard ? (
+      {clients ||
+      blog ||
+      community ||
+      team.money ||
+      outreach ||
+      influencers ||
+      socials ||
+      jobBoard ? (
         <NavGroup title="Workspaces">
           {clients ? (
-            <NavLink
-              href="/clients"
-              label="Clients"
-              icon={Folders}
-              badge={clientsBadge}
-              badgeTitle={[
-                clients.late ? `${clients.late} of your deliverables late` : null,
-                clients.toReview ? `${clients.toReview} waiting for your review` : null,
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-              active={false}
-            />
+            <>
+              <NavLink
+                href="/clients"
+                label="Clients"
+                icon={Nav.Building2}
+                badge={clientsBadge}
+                badgeTitle={[
+                  clients.late
+                    ? `${clients.late} of your deliverables late`
+                    : null,
+                  clients.toReview
+                    ? `${clients.toReview} waiting for your review`
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+                active={false}
+                open={section === "clients"}
+              />
+              <SubNav open={section === "clients"}>
+                <NavLink
+                  href="/clients"
+                  label="Overview"
+                  icon={Nav.LayoutList}
+                  badge={clients.late}
+                  badgeTitle={`${clients.late} of your deliverables late`}
+                  active={
+                    pathname === "/clients" ||
+                    (isActive("/clients") &&
+                      !CLIENT_PAGES.some((page) => isActive(page)))
+                  }
+                />
+                <NavLink
+                  href="/clients/board"
+                  label="This week"
+                  icon={Nav.CalendarRange}
+                  active={isActive("/clients/board")}
+                />
+                <NavLink
+                  href="/clients/load"
+                  label="Owner load"
+                  icon={Nav.Scale}
+                  badge={clients.toReview}
+                  badgeTitle={`${clients.toReview} waiting for your review`}
+                  active={isActive("/clients/load")}
+                />
+                <NavLink
+                  href="/clients/reports"
+                  label="Monthly report"
+                  icon={Nav.FileChartColumn}
+                  active={isActive("/clients/reports")}
+                />
+                {clients.access === "manager" ? (
+                  <NavLink
+                    href="/clients/templates"
+                    label="Templates & capacity"
+                    icon={Nav.LayoutTemplate}
+                    active={isActive("/clients/templates")}
+                  />
+                ) : null}
+              </SubNav>
+            </>
           ) : null}
           {outreach ? (
             <NavLink
               href="/outreach"
               label="Outreach"
-              icon={Binoculars}
+              icon={Nav.Target}
               badge={outreach.due}
               badgeTitle={`${outreach.due} of your follow-ups due`}
               active={isActive("/outreach")}
@@ -536,7 +559,7 @@ export function InternalNav({
             <NavLink
               href="/influencers"
               label="Influencers"
-              icon={UserSound}
+              icon={Nav.Megaphone}
               active={isActive("/influencers")}
             />
           ) : null}
@@ -544,7 +567,7 @@ export function InternalNav({
             <NavLink
               href="/socials"
               label="Social growth"
-              icon={ChartLineUp}
+              icon={Nav.TrendingUp}
               active={isActive("/socials")}
             />
           ) : null}
@@ -552,58 +575,208 @@ export function InternalNav({
             <NavLink
               href="/job-board"
               label="DevRel jobs"
-              icon={SuitcaseSimple}
+              icon={Nav.BriefcaseBusiness}
               active={isActive("/job-board")}
             />
           ) : null}
           {blog ? (
-            <NavLink
-              href="/blog"
-              label="Blog"
-              icon={NotePencil}
-              badge={blogBadge}
-              badgeTitle={
-                blog === "reviewer"
-                  ? `${blogBadge} waiting for review`
-                  : `${blogBadge} with feedback`
-              }
-              active={isActive("/blog")}
-            />
+            <>
+              <NavLink
+                href="/blog"
+                label="Blog"
+                icon={Nav.Newspaper}
+                badge={blogBadge}
+                badgeTitle={
+                  blog === "reviewer"
+                    ? `${blogBadge} waiting for review`
+                    : `${blogBadge} with feedback`
+                }
+                active={false}
+                open={section === "blog"}
+              />
+              <SubNav open={section === "blog"}>
+                {/* Writers have no Google numbers: Posts is their whole section. */}
+                {blog === "reviewer" ? (
+                  <NavLink
+                    href="/blog"
+                    label="Overview"
+                    icon={Nav.LayoutList}
+                    active={pathname === "/blog"}
+                  />
+                ) : null}
+                <NavLink
+                  href="/blog/posts"
+                  label="Posts"
+                  icon={Nav.FileText}
+                  badge={blogBadge}
+                  badgeTitle={
+                    blog === "reviewer"
+                      ? `${blogBadge} waiting for review`
+                      : `${blogBadge} with feedback`
+                  }
+                  active={
+                    pathname !== "/blog" &&
+                    !BLOG_PAGES.some((page) => isActive(page))
+                  }
+                />
+                {blog === "reviewer" ? (
+                  <>
+                    <NavLink
+                      href="/blog/stats"
+                      label="Stats"
+                      icon={Nav.ChartColumn}
+                      active={isActive("/blog/stats")}
+                    />
+                    <NavLink
+                      href="/blog/external"
+                      label="External"
+                      icon={Nav.Globe}
+                      active={isActive("/blog/external")}
+                    />
+                  </>
+                ) : null}
+              </SubNav>
+            </>
           ) : null}
           {community ? (
-            <NavLink
-              href="/community"
-              label="Community"
-              icon={Compass}
-              badge={communityBadge}
-              badgeTitle={[
-                community.tasks ? `${community.tasks} of your tasks due or late` : null,
-                community.sponsors + community.partners
-                  ? `${community.sponsors + community.partners} follow-ups due`
-                  : null,
-                hackathonsNew
-                  ? `${hackathonsNew} new hackathon ${hackathonsNew === 1 ? "registration" : "registrations"}`
-                  : null,
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-              active={false}
-            />
+            <>
+              <NavLink
+                href="/community"
+                label="Community"
+                icon={Nav.UsersRound}
+                badge={communityBadge}
+                badgeTitle={[
+                  community.tasks
+                    ? `${community.tasks} of your tasks due or late`
+                    : null,
+                  community.sponsors + community.partners
+                    ? `${community.sponsors + community.partners} follow-ups due`
+                    : null,
+                  hackathonsNew
+                    ? `${hackathonsNew} new hackathon ${hackathonsNew === 1 ? "registration" : "registrations"}`
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+                active={false}
+                open={section === "community"}
+              />
+              <SubNav open={section === "community"}>
+                <NavLink
+                  href="/community"
+                  label="Overview"
+                  icon={Nav.LayoutList}
+                  active={pathname === "/community"}
+                />
+                <NavLink
+                  href="/community/events"
+                  label="Events"
+                  icon={Nav.CalendarDays}
+                  active={isActive("/community/events")}
+                />
+                <NavLink
+                  href={SECTIONS.hackathons.path}
+                  label="Hackathon sign-ups"
+                  icon={Nav.Trophy}
+                  badge={awaiting.hackathons}
+                  badgeTitle={`${awaiting.hackathons ?? 0} new ${awaiting.hackathons === 1 ? "registration" : "registrations"} to review`}
+                  active={isActive(SECTIONS.hackathons.path)}
+                />
+                <NavLink
+                  href="/community/sponsors"
+                  label="Sponsors"
+                  icon={Nav.HandCoins}
+                  badge={community.sponsors}
+                  badgeTitle={`${community.sponsors} ${community.sponsors === 1 ? "follow-up" : "follow-ups"} due`}
+                  active={isActive("/community/sponsors")}
+                />
+                <NavLink
+                  href="/community/campus"
+                  label="Campus partners"
+                  icon={Nav.School}
+                  badge={community.partners}
+                  badgeTitle={`${community.partners} ${community.partners === 1 ? "follow-up" : "follow-ups"} due`}
+                  active={isActive("/community/campus")}
+                />
+                {/* Money stays with the manager: interns have no Budget page. */}
+                {community.access === "manager" ? (
+                  <NavLink
+                    href="/community/budget"
+                    label="Budget"
+                    icon={Nav.PiggyBank}
+                    active={isActive("/community/budget")}
+                  />
+                ) : null}
+                <NavLink
+                  href="/community/tasks"
+                  label="Tasks"
+                  icon={Nav.ListChecks}
+                  badge={community.tasks}
+                  badgeTitle={`${community.tasks} of your tasks due or late`}
+                  active={isActive("/community/tasks")}
+                />
+                <NavLink
+                  href="/community/analytics"
+                  label="Analytics"
+                  icon={Nav.ChartColumn}
+                  active={isActive("/community/analytics")}
+                />
+                {/* Managers email hackathon registrants; without a hiring
+                  role they have no Settings group to find this under. */}
+                {community.access === "manager" ? (
+                  <NavLink
+                    href="/templates"
+                    label="Email templates"
+                    icon={Nav.MailOpen}
+                    active={isActive("/templates")}
+                  />
+                ) : null}
+              </SubNav>
+            </>
           ) : null}
           {team.money ? (
-            <NavLink
-              href="/money"
-              label="Money"
-              icon={Bank}
-              badge={moneyBadge}
-              badgeTitle={[
-                team.payrollBadge ? `${team.payrollBadge} expense ${team.payrollBadge === 1 ? "claim" : "claims"} waiting` : null,
-                team.paymentsBadge ? `${team.paymentsBadge} to pay` : null,
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-              active={false}
-            />
+            <>
+              <NavLink
+                href="/money"
+                label="Money"
+                icon={Nav.Banknote}
+                badge={moneyBadge}
+                badgeTitle={[
+                  team.payrollBadge
+                    ? `${team.payrollBadge} expense ${team.payrollBadge === 1 ? "claim" : "claims"} waiting`
+                    : null,
+                  team.paymentsBadge ? `${team.paymentsBadge} to pay` : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+                active={false}
+                open={section === "money"}
+              />
+              <SubNav open={section === "money"}>
+                <NavLink
+                  href="/money"
+                  label="Overview"
+                  icon={Nav.LayoutList}
+                  active={pathname === "/money"}
+                />
+                <NavLink
+                  href="/money/payroll"
+                  label="Payroll"
+                  icon={Nav.ReceiptText}
+                  badge={team.payrollBadge}
+                  badgeTitle={`${team.payrollBadge} expense ${team.payrollBadge === 1 ? "claim" : "claims"} waiting`}
+                  active={isActive("/money/payroll")}
+                />
+                <NavLink
+                  href="/money/payments"
+                  label="Payments"
+                  icon={Nav.CreditCard}
+                  badge={team.paymentsBadge}
+                  badgeTitle={`${team.paymentsBadge} to pay`}
+                  active={isActive("/money/payments")}
+                />
+              </SubNav>
+            </>
           ) : null}
         </NavGroup>
       ) : null}
@@ -636,26 +809,36 @@ export function InternalNav({
       {team.me || team.people || team.tasks || team.calls ? (
         <NavGroup title="Team">
           {team.me ? (
-            <NavLink href="/me" label="My day" icon={CalendarCheck} active={isActive("/me")} />
+            <NavLink
+              href="/me"
+              label="My day"
+              icon={Nav.Sun}
+              active={isActive("/me")}
+            />
           ) : null}
           {team.tasks ? (
             <NavLink
               href="/tasks"
               label="Tasks"
-              icon={Kanban}
+              icon={Nav.SquareCheckBig}
               badge={team.tasksBadge}
               badgeTitle={`${team.tasksBadge} late task${team.tasksBadge === 1 ? "" : "s"} or report${team.tasksBadge === 1 ? "" : "s"} to see to`}
               active={isActive("/tasks")}
             />
           ) : null}
           {team.calls ? (
-            <NavLink href="/calls" label="Calls" icon={VideoCamera} active={isActive("/calls")} />
+            <NavLink
+              href="/calls"
+              label="Calls"
+              icon={Nav.Phone}
+              active={isActive("/calls")}
+            />
           ) : null}
           {team.people ? (
             <NavLink
               href="/people"
               label="People"
-              icon={IdentificationCard}
+              icon={Nav.Contact}
               badge={admin ? requests : undefined}
               badgeTitle={`${requests} waiting for access`}
               active={isActive("/people")}
@@ -668,7 +851,7 @@ export function InternalNav({
           <NavLink
             href="/templates"
             label="Email templates"
-            icon={EnvelopeOpen}
+            icon={Nav.MailOpen}
             active={isActive("/templates")}
           />
         </NavGroup>

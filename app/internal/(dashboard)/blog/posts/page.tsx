@@ -6,7 +6,7 @@ import {
   NotePencil,
   PencilSimple,
   Plus,
-} from "@phosphor-icons/react/dist/ssr";
+} from "@/components/internal/icons";
 import { BlogStatusBadge } from "@/components/internal/blog/status";
 import { DeleteDraftButton } from "@/components/internal/blog/delete-draft";
 import {

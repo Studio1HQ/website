@@ -2,7 +2,7 @@
 
 import { useAfterSave } from "@/components/internal/clients/use-after-save";
 import { useState, useTransition, type FormEvent } from "react";
-import { Plus } from "@phosphor-icons/react";
+import { Plus } from "@/components/internal/icons";
 import { addClientTask } from "@/app/internal/(dashboard)/clients/workspace-actions";
 import { useToast } from "@/components/internal/toast";
 import { DateField } from "@/components/internal/pickers";

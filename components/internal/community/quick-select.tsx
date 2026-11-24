@@ -3,7 +3,7 @@
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import * as Menu from "@radix-ui/react-dropdown-menu";
-import { CaretDown, Check } from "@phosphor-icons/react";
+import { CaretDown, Check } from "@/components/internal/icons";
 import { setQuickField } from "@/app/internal/(dashboard)/community/actions";
 import {
   labelOf,

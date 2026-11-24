@@ -1,11 +1,11 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { CaretLeft, CaretRight } from "@phosphor-icons/react/dist/ssr";
+import { CaretLeft, CaretRight } from "@/components/internal/icons";
 import { cn } from "@/lib/utils";
 import { dayLabel } from "@/lib/internal/team/shared";
 import { statusLabel, type SnapshotItem } from "@/lib/internal/tasks/shared";
 import { barShares, share } from "@/lib/internal/tasks/views";
-import { Card, CardTitle, ExternalLink, buttonClass } from "@/components/internal/ui";
+import { Card, CardTitle, ExternalLink, buttonClass, iconButtonClass } from "@/components/internal/ui";
 import { Pill } from "@/components/internal/community/ui";
 
 /*
@@ -36,25 +36,25 @@ export function PeriodSwitcher({
   noun: string;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-1">
-      <Link href={previous} aria-label={`Previous ${noun}`} className={buttonClass("secondary", "sm")}>
-        <CaretLeft size={13} />
+    <div className="flex flex-wrap items-center gap-2">
+      <Link href={previous} aria-label={`Previous ${noun}`} className={iconButtonClass()}>
+        <CaretLeft size={15} />
       </Link>
-      <span className="min-w-[8.5rem] text-center text-[13px] leading-tight">
-        <span className="block font-medium tabular-nums">{label}</span>
-        {sub ? <span className="block text-[11.5px] text-[var(--i-muted)]">{sub}</span> : null}
-      </span>
       {next ? (
-        <Link href={next} aria-label={`Next ${noun}`} className={buttonClass("secondary", "sm")}>
-          <CaretRight size={13} />
+        <Link href={next} aria-label={`Next ${noun}`} className={iconButtonClass()}>
+          <CaretRight size={15} />
         </Link>
       ) : (
-        <span aria-hidden className={cn(buttonClass("secondary", "sm"), "pointer-events-none opacity-40")}>
-          <CaretRight size={13} />
+        <span aria-hidden className={cn(iconButtonClass(), "pointer-events-none opacity-40")}>
+          <CaretRight size={15} />
         </span>
       )}
+      <span className="ml-1.5 min-w-[8.5rem] leading-tight">
+        <span className="block text-[15px] font-medium tabular-nums">{label}</span>
+        {sub ? <span className="mt-0.5 block text-[12px] text-[var(--i-muted)]">{sub}</span> : null}
+      </span>
       {current ? (
-        <Link href={current} className={cn(buttonClass("ghost", "sm"), "ml-1")}>
+        <Link href={current} className={buttonClass("secondary", "sm")}>
           {currentLabel}
         </Link>
       ) : null}

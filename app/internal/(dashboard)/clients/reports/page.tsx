@@ -5,7 +5,7 @@ import {
   ArrowSquareOut,
   DownloadSimple,
   FileText,
-} from "@phosphor-icons/react/dist/ssr";
+} from "@/components/internal/icons";
 import { scopeWork } from "@/lib/internal/clients/scope";
 import { requireClients } from "@/lib/internal/session";
 import {

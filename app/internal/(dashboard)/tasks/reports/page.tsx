@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CheckSquare, Tray } from "@phosphor-icons/react/dist/ssr";
+import { CheckSquare, Tray } from "@/components/internal/icons";
 import { requireMember } from "@/lib/internal/session";
 import { listPeople } from "@/lib/internal/team/people";
 import { displayName, istNow, photoUrl, type TeamPerson } from "@/lib/internal/team/shared";

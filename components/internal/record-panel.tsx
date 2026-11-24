@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
-import { Check, Plus, X } from "@phosphor-icons/react";
+import { Check, Plus, X } from "@/components/internal/icons";
 import { changeEntries } from "@/app/internal/(dashboard)/actions";
 import {
   SECTIONS,

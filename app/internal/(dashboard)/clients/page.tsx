@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import Link from "next/link";
-import { Briefcase, Kanban, Plus, Rows } from "@phosphor-icons/react/dist/ssr";
+import { Briefcase, Kanban, Plus, Rows } from "@/components/internal/icons";
 import { scopeWork } from "@/lib/internal/clients/scope";
 import { requireClients } from "@/lib/internal/session";
 import { cleanMonth } from "@/lib/internal/clients/clean";

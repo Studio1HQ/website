@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Tag } from "@phosphor-icons/react/dist/ssr";
+import { Tag } from "@/components/internal/icons";
 import {
   formatDay,
   formatMoney,

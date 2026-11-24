@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { EnvelopeSimple, PaperPlaneTilt, X } from "@phosphor-icons/react";
+import { EnvelopeSimple, PaperPlaneTilt, X } from "@/components/internal/icons";
 import { sendEntryEmail } from "@/app/internal/(dashboard)/email-actions";
 import { mailtoHref } from "@/lib/form-checks";
 import {

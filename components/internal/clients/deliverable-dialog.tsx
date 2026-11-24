@@ -10,7 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { ArrowRight, LockSimple, Trash, X } from "@phosphor-icons/react";
+import { ArrowRight, LockSimple, Trash, X } from "@/components/internal/icons";
 import {
   moveToNextMonth,
   removeDeliverable,

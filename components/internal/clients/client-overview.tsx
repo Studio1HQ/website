@@ -12,7 +12,7 @@ import {
   Sparkle,
   Trophy,
   WarningCircle,
-} from "@phosphor-icons/react/dist/ssr";
+} from "@/components/internal/icons";
 import {
   cycleProgress,
   isLate,

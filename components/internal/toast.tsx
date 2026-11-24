@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
-import { CheckCircle, WarningCircle } from "@phosphor-icons/react";
+import { CheckCircle, WarningCircle } from "@/components/internal/icons";
 import { cn } from "@/lib/utils";
 
 type Toast = { id: number; tone: "success" | "error"; message: string };

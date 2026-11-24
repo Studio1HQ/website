@@ -1,4 +1,4 @@
-import { Plus } from "@phosphor-icons/react/dist/ssr";
+import { Plus } from "@/components/internal/icons";
 import { monthLabel } from "@/lib/internal/clients/schema";
 import {
   platformInfo,

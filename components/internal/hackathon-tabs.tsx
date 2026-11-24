@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, CalendarBlank, Plus } from "@phosphor-icons/react/dist/ssr";
+import { ArrowRight, CalendarBlank, Plus } from "@/components/internal/icons";
 import type { HackathonStats } from "@/lib/internal/data";
 import { formatDay, formatEventDate, todayKey } from "@/lib/internal/community/schema";
 import { SECTIONS, statusLabel } from "@/lib/internal/sections";

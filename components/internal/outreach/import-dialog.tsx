@@ -3,7 +3,7 @@
 import { useState, useTransition, type ChangeEvent, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import * as Dialog from "@radix-ui/react-dialog";
-import { X } from "@phosphor-icons/react";
+import { X } from "@/components/internal/icons";
 import { importOrgs } from "@/app/internal/(dashboard)/outreach/actions";
 import { useToast } from "@/components/internal/toast";
 import { buttonClass } from "@/components/internal/ui";

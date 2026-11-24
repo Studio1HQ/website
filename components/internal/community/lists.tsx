@@ -17,7 +17,7 @@ import {
   Phone,
   Plus,
   Star,
-} from "@phosphor-icons/react";
+} from "@/components/internal/icons";
 import { setQuickField } from "@/app/internal/(dashboard)/community/actions";
 import {
   COST_TYPES,

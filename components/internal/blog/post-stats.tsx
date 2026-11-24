@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowSquareOut, PencilSimple } from "@phosphor-icons/react/dist/ssr";
+import { ArrowSquareOut, PencilSimple } from "@/components/internal/icons";
 import {
   Card,
   CardTitle,

@@ -16,7 +16,7 @@ import {
   Plus,
   Prohibit,
   X,
-} from "@phosphor-icons/react";
+} from "@/components/internal/icons";
 import { saveDeliverable } from "@/app/internal/(dashboard)/clients/actions";
 import {
   canChangeDeliverable,
@@ -344,9 +344,9 @@ export function MonthWork({
                 aria-selected={only === chip.key}
                 onClick={() => setOnly(chip.key)}
                 className={cn(
-                  "shrink-0 rounded-md px-2 py-1 text-[12.5px] transition-colors",
+                  "inline-flex h-8 shrink-0 items-center rounded-full px-3.5 text-[13px] transition-colors",
                   only === chip.key
-                    ? "bg-[var(--i-panel)] font-medium text-[var(--i-ink)] shadow-[var(--i-shadow-sm)] ring-1 ring-inset ring-[var(--i-line)]"
+                    ? "bg-[var(--i-panel)] font-medium text-[var(--i-ink)] shadow-[var(--i-shadow-sm)] dark:bg-white/[0.14] dark:shadow-none"
                     : "text-[var(--i-muted)] hover:text-[var(--i-ink)]",
                 )}
               >

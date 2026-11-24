@@ -8,7 +8,7 @@ import {
   type DragEvent,
 } from "react";
 import Link from "next/link";
-import { Prohibit } from "@phosphor-icons/react";
+import { Prohibit } from "@/components/internal/icons";
 import { saveClient } from "@/app/internal/(dashboard)/clients/actions";
 import { cn } from "@/lib/utils";
 import {

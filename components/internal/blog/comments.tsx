@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
-import { ArrowBendUpLeft, ChatCircle, CheckCircle, CircleNotch, Quotes, X } from "@phosphor-icons/react";
+import { ArrowBendUpLeft, ChatCircle, CheckCircle, CircleNotch, Quotes, X } from "@/components/internal/icons";
 import { cleanQuote, locateQuote, nameFromEmail, type CommentThread } from "@/lib/internal/blog/shared";
 import { cn } from "@/lib/utils";
 import { Card, buttonClass, formatDate, relativeDate, textareaClass } from "@/components/internal/ui";

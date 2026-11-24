@@ -1,30 +1,24 @@
 import type { Metadata } from "next";
+import { AREAS, type CardKey } from "@/components/internal/overview-areas";
+import { NeedsYou } from "@/components/internal/needs-you";
+import { CountUp } from "@/components/internal/count-up";
+import { Facts } from "@/components/internal/facts";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
   ArrowRight,
-  Bank,
-  Briefcase,
   CalendarBlank,
   CheckCircle,
-  Compass,
-  EnvelopeSimple,
-  Binoculars,
-  Folders,
-  IdentificationCard,
   Kanban,
-  NotePencil,
-  Trophy,
-  UserGear,
-} from "@phosphor-icons/react/dist/ssr";
-import type { Icon } from "@phosphor-icons/react";
+  WarningCircle,
+} from "@/components/internal/icons";
 import { CommunitySummaryCard } from "@/components/internal/community/summary-card";
-import { Avatar, Card, CardTitle, Notice } from "@/components/internal/ui";
+import { Avatar, buttonClass, Card, CardTitle, Notice } from "@/components/internal/ui";
 import { Meter } from "@/components/internal/community/ui";
 import { Sparkline, Trend } from "@/components/internal/sparkline";
 import { timeRange } from "@/lib/internal/calls/shared";
 import { change } from "@/lib/internal/trend";
-import { dashboardOverview, type AreaKey, type Attention } from "@/lib/internal/overview";
+import { dashboardOverview } from "@/lib/internal/overview";
 import { SECTIONS } from "@/lib/internal/sections";
 import { homeFor, requireMember } from "@/lib/internal/session";
 import {
@@ -39,21 +33,6 @@ import {
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Overview" };
-
-type CardKey = AreaKey | "audiences";
-
-const AREAS: Record<CardKey, { name: string; icon: Icon }> = {
-  hiring: { name: "Hiring", icon: Briefcase },
-  hackathons: { name: "Hackathons", icon: Trophy },
-  blog: { name: "Blog", icon: NotePencil },
-  team: { name: "Team", icon: IdentificationCard },
-  money: { name: "Money", icon: Bank },
-  community: { name: "Community", icon: Compass },
-  clients: { name: "Clients", icon: Folders },
-  outreach: { name: "Outreach", icon: Binoculars },
-  access: { name: "Team access", icon: UserGear },
-  audiences: { name: "Audiences", icon: EnvelopeSimple },
-};
 
 function greeting(time: string) {
   const hour = Number(time.slice(0, 2));
@@ -70,37 +49,6 @@ function money(byCurrency: Record<string, number>) {
 }
 
 /** One to-do in "Needs you": the area, what's waiting, and where to act. */
-function TodoRow({ item }: { item: Attention }) {
-  const area = AREAS[item.area];
-  const IconComponent = area.icon;
-  return (
-    <li className="border-b border-[var(--i-line)] last:border-b-0">
-      <Link href={item.href} className="group flex items-center gap-3 px-5 py-2.5 hover:bg-[var(--i-hover)]">
-        <span
-          className={cn(
-            "flex size-8 shrink-0 items-center justify-center rounded-lg ring-1 ring-inset",
-            item.urgent
-              ? "bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:ring-amber-500/25"
-              : "bg-[var(--i-sunken)] text-[var(--i-ink-2)] ring-[var(--i-line)]",
-          )}
-        >
-          <IconComponent size={15} />
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-[13px] font-medium leading-snug">{item.label}</span>
-          <span className="block truncate text-[12px] text-[var(--i-muted)]">
-            {area.name}
-            {item.detail ? (
-              <span className={item.urgent ? "text-amber-700 dark:text-amber-300" : undefined}> · {item.detail}</span>
-            ) : null}
-          </span>
-        </span>
-        <ArrowRight size={14} className="shrink-0 text-[var(--i-faint)] group-hover:text-[var(--i-ink)]" />
-      </Link>
-    </li>
-  );
-}
-
 /**
  * An area at a glance, kept short: its headline number, a small chart or
  * faces beside it when there's one, and a line of notes (an up or down
@@ -131,28 +79,32 @@ function AreaCard({
   const shown = notes.filter(Boolean);
   return (
     <Link href={href} className="group block">
-      <Card className="flex h-full flex-col px-4 py-3.5 transition-colors group-hover:bg-[var(--i-hover)]">
+      <Card className="flex h-full flex-col px-5 py-4 transition-colors group-hover:bg-[var(--i-hover)]">
         <div className="flex items-center gap-2">
-          <IconComponent size={15} className="text-[var(--i-muted)]" />
-          <h2 className="flex-1 text-[12.5px] font-medium text-[var(--i-ink-2)]">{AREAS[area].name}</h2>
-          <ArrowRight size={12} className="text-[var(--i-faint)] group-hover:text-[var(--i-ink)]" />
+          <IconComponent size={15} className="shrink-0 text-[var(--i-muted)]" />
+          <h2 className="flex-1 text-[14.5px] font-medium">{AREAS[area].name}</h2>
+          <ArrowRight size={14} className="text-[var(--i-faint)] transition-colors group-hover:text-[var(--i-ink)]" />
         </div>
-        <div className="mt-2.5 flex items-end justify-between gap-3">
+        <div className="mt-4">
           <p className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">
-            <span className="text-[22px] font-medium leading-none tracking-[-0.015em]">{value}</span>
-            <span className="text-[12.5px] text-[var(--i-muted)]">{unit}</span>
+            <span
+              className={cn(
+                "text-[28px] font-medium leading-none tracking-[-0.02em]",
+                value === "—" ? "text-[var(--i-faint)]" : null,
+              )}
+            >
+              {typeof value === "number" ? <CountUp value={value} /> : value}
+            </span>
+            <span className="text-[13.5px] text-[var(--i-muted)]">{unit}</span>
           </p>
-          {chart}
         </div>
         {extra}
-        {trend || shown.length ? (
-          <p className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[12px] leading-snug text-[var(--i-muted)]">
-            {trend}
-            {shown.map((note, index) => (
-              <span key={index}>{note}</span>
-            ))}
-          </p>
-        ) : null}
+        {/* The facts, one a line and three at most, so each reads whole;
+            the rest is a click away on the area's page. */}
+        {trend ? <p className="mt-2 text-[13px] text-[var(--i-muted)]">{trend}</p> : null}
+        <Facts notes={shown} />
+        {/* the trend, across the foot of the card */}
+        {chart ? <div className="mt-auto pt-5">{chart}</div> : null}
       </Card>
     </Link>
   );
@@ -160,7 +112,7 @@ function AreaCard({
 
 /** "2 at risk": a count that stands out, for the notes line. */
 function Flag({ children }: { children: React.ReactNode }) {
-  return <span className="font-medium text-[var(--i-accent-text)]">{children}</span>;
+  return <span className="text-[var(--i-ink-2)]">{children}</span>;
 }
 
 function Faces({ people }: { people: TeamPerson[] }) {
@@ -194,11 +146,11 @@ function TodayCard({
   children: React.ReactNode;
 }) {
   return (
-    <Card className="flex h-full flex-col">
+    <Card className="flex flex-col">
       <CardTitle
         action={
-          <Link href={href} className="inline-flex items-center gap-1 text-[12.5px] text-[var(--i-muted)] hover:text-[var(--i-ink)]">
-            {linkLabel} <ArrowRight size={12} />
+          <Link href={href} className={buttonClass("secondary", "sm")}>
+            {linkLabel} <ArrowRight size={13} />
           </Link>
         }
       >
@@ -211,8 +163,9 @@ function TodayCard({
 
 function TodayEmpty({ icon, children }: { icon?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-2 px-5 py-6 text-center text-[13px] text-[var(--i-muted)]">
-      {icon ? <span className="text-[var(--i-faint)]">{icon}</span> : null}
+    // Lined up under the card's title (same 20px in), not floating centred.
+    <div className="flex items-center gap-2.5 px-5 pb-5 pt-2 text-[13.5px] text-[var(--i-muted)]">
+      {icon ? <span className="flex shrink-0 text-[var(--i-faint)] [&>svg]:size-[18px]">{icon}</span> : null}
       <p>{children}</p>
     </div>
   );
@@ -251,16 +204,29 @@ export default async function OverviewPage({
 
   return (
     <>
-      <header className="mb-6">
-        <p className="mb-1.5 text-[12.5px] text-[var(--i-muted)]">{dayLabel(now.date, true)}</p>
-        <h1 className="text-[24px] font-medium leading-tight tracking-[-0.015em]">
-          {greeting(now.time)}, {firstName}
-        </h1>
-        <p className="mt-1.5 text-[13.5px] text-[var(--i-muted)]">
-          {todo.length
-            ? `${todo.length} ${todo.length === 1 ? "thing needs" : "things need"} you. Everything else is below.`
-            : "Nothing needs you right now. Here's where everything stands."}
-        </p>
+      {/* The same greeting as My day. The avatar is as tall as the two lines
+          beside it (28 + 4 + 16 = 48px), so their tops and bottoms line up. */}
+      <header className="mb-6 flex min-w-0 items-center gap-3.5 md:pr-24">
+        <Avatar
+          name={staff.person ? displayName(staff.person) : firstName}
+          email={staff.email}
+          size={48}
+          src={staff.person ? photoUrl(staff.person) : undefined}
+        />
+        <div className="min-w-0">
+          <h1 className="truncate text-[22px] font-medium leading-[28px] tracking-[-0.02em] md:text-[26px]">
+            {greeting(now.time)}, {firstName}
+          </h1>
+          <p className="mt-1 flex flex-col text-[14px] leading-[16px] text-[var(--i-ink-2)] opacity-80 max-sm:gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-1.5">
+            <span>{dayLabel(now.date, true)}</span>
+            <span aria-hidden className="hidden sm:inline">·</span>
+            <span>
+              {todo.length
+                ? `${todo.length} ${todo.length === 1 ? "thing needs" : "things need"} you. Everything else is below.`
+                : "Nothing needs you right now. Here's where everything stands."}
+            </span>
+          </p>
+        </div>
       </header>
 
       {!pipelinesOk ? (
@@ -272,30 +238,17 @@ export default async function OverviewPage({
       {/* The top row: what needs you, and your own day beside it */}
       <div
         className={cn(
-          "mb-4 grid gap-4",
+          "mb-4 grid items-start gap-4",
           today === 2 ? "lg:grid-cols-2 xl:grid-cols-3" : today === 1 ? "lg:grid-cols-2" : null,
         )}
       >
-      <Card className={cn("flex h-full flex-col", today === 2 ? "lg:col-span-2 xl:col-span-1" : null)}>
-        <CardTitle>Needs you</CardTitle>
-        {todo.length ? (
-          <ul>
-            {todo.map((item) => (
-              <TodoRow key={`${item.area}-${item.label}`} item={item} />
-            ))}
-          </ul>
-        ) : (
-          <TodayEmpty icon={<CheckCircle size={22} weight="fill" className="text-emerald-600 dark:text-emerald-400" />}>
-            All clear: nothing is waiting on you.
-          </TodayEmpty>
-        )}
-      </Card>
+      <NeedsYou items={todo} className={today === 2 ? "lg:col-span-2 xl:col-span-1" : undefined} />
 
           {data.myTasks ? (
             <TodayCard
               title={
                 <>
-                  <Kanban size={14} className="mr-2 inline align-[-2px] text-[var(--i-muted)]" />
+                  <Kanban size={15} />
                   Your tasks today
                 </>
               }
@@ -303,7 +256,7 @@ export default async function OverviewPage({
               linkLabel="All tasks"
             >
               {!data.myTasks.ok ? (
-                <TodayEmpty>Couldn&apos;t load your tasks.</TodayEmpty>
+                <TodayEmpty icon={<WarningCircle size={18} />}>Couldn&apos;t load your tasks.</TodayEmpty>
               ) : data.myTasks.items.length === 0 ? (
                 <TodayEmpty icon={<CheckCircle size={22} />}>Nothing due today, and nothing late.</TodayEmpty>
               ) : (
@@ -344,7 +297,7 @@ export default async function OverviewPage({
             <TodayCard
               title={
                 <>
-                  <CalendarBlank size={14} className="mr-2 inline align-[-2px] text-[var(--i-muted)]" />
+                  <CalendarBlank size={15} />
                   Your calls today
                 </>
               }
@@ -352,7 +305,7 @@ export default async function OverviewPage({
               linkLabel="Calendar"
             >
               {!data.myCalls.ok ? (
-                <TodayEmpty>Couldn&apos;t load your calls.</TodayEmpty>
+                <TodayEmpty icon={<WarningCircle size={18} />}>Couldn&apos;t load your calls.</TodayEmpty>
               ) : data.myCalls.items.length === 0 ? (
                 <TodayEmpty icon={<CalendarBlank size={22} />}>No calls today.</TodayEmpty>
               ) : (
@@ -388,7 +341,7 @@ export default async function OverviewPage({
       </div>
 
       {/* Every area at a glance */}
-      <div className="mb-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+      <div className="mb-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {hiring ? (
           <AreaCard
             area="hiring"
@@ -432,6 +385,11 @@ export default async function OverviewPage({
             href="/people"
             value={team.working.length}
             unit={`of ${team.people} in today`}
+            extra={
+              <div className="mt-4">
+                <Meter value={team.working.length} max={team.people} label={`${team.working.length} of ${team.people} in today`} />
+              </div>
+            }
             chart={<Faces people={team.working} />}
             notes={[
               team.leave.length ? `${team.leave.length} on leave` : null,
@@ -486,7 +444,7 @@ export default async function OverviewPage({
             value={number(data.clients.active)}
             unit={data.clients.active === 1 ? "active engagement" : "active engagements"}
             extra={
-              <div className="mt-2.5">
+              <div className="mt-4">
                 <Meter
                   value={data.clients.done}
                   max={data.clients.planned}

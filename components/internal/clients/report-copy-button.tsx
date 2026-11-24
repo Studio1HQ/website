@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Copy } from "@phosphor-icons/react";
+import { Check, Copy } from "@/components/internal/icons";
 import { useToast } from "@/components/internal/toast";
 import { buttonClass, textareaClass } from "@/components/internal/ui";
 

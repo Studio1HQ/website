@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { AirplaneTilt, IdentificationCard } from "@phosphor-icons/react";
+import { AirplaneTilt, IdentificationCard } from "@/components/internal/icons";
 import { addLeaveFor, deleteDayFor, saveDayFor } from "@/app/internal/(dashboard)/people/actions";
 import { HoverLink, LinkPending } from "@/components/internal/nav-progress";
 import { cn } from "@/lib/utils";

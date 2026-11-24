@@ -15,7 +15,7 @@ import {
   Trash,
   WarningCircle,
   Wallet,
-} from "@phosphor-icons/react";
+} from "@/components/internal/icons";
 import { setPaymentStatusAction } from "@/app/internal/(dashboard)/money/payments/actions";
 import {
   INVOICE_SUBJECT,
@@ -336,9 +336,9 @@ export function PaymentsView({
                   remember({ status: key });
                 }}
                 className={cn(
-                  "inline-flex h-7 items-center gap-1.5 rounded-md px-3 text-[12.5px] transition-colors",
+                  "inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-[13px] transition-colors",
                   status === key
-                    ? "bg-[var(--i-panel)] font-medium text-[var(--i-ink)] shadow-[var(--i-shadow-sm)] ring-1 ring-[var(--i-line)]"
+                    ? "bg-[var(--i-panel)] font-medium text-[var(--i-ink)] shadow-[var(--i-shadow-sm)] dark:bg-white/[0.14] dark:shadow-none"
                     : "text-[var(--i-muted)] hover:text-[var(--i-ink)]",
                 )}
               >

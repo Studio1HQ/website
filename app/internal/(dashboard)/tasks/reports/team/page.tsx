@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { CaretLeft, CaretRight } from "@phosphor-icons/react/dist/ssr";
+import { CaretLeft, CaretRight } from "@/components/internal/icons";
 import { requireMember } from "@/lib/internal/session";
 import { isFounder, owesReports } from "@/lib/internal/tasks/access";
 import {

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ArrowsClockwise } from "@phosphor-icons/react";
+import { ArrowsClockwise } from "@/components/internal/icons";
 import Link, { useLinkStatus } from "next/link";
 import type { ComponentProps } from "react";
 import { refreshData } from "@/app/internal/(dashboard)/actions";
@@ -73,7 +73,7 @@ export function LinkPending({ className }: { className?: string }) {
       role="status"
       aria-label="Loading"
       className={cn(
-        "inline-block size-3 shrink-0 animate-spin rounded-full border-[1.5px] border-[var(--i-line-strong,var(--i-muted))] border-t-[var(--i-accent)] motion-reduce:animate-none",
+        "inline-block size-1.5 shrink-0 animate-pulse rounded-full bg-[var(--i-accent)] motion-reduce:animate-none",
         className,
       )}
     />

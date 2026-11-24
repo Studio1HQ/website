@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
-import { Check, Clock } from "@phosphor-icons/react";
+import { Check, Clock } from "@/components/internal/icons";
 import { inputClass, menuContentClass } from "@/components/internal/ui";
 import { cn } from "@/lib/utils";
 

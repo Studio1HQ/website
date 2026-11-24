@@ -4,7 +4,7 @@ import { useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import * as Dialog from "@radix-ui/react-dialog";
 import * as Menu from "@radix-ui/react-dropdown-menu";
-import { CaretDown, Check } from "@phosphor-icons/react";
+import { CaretDown, Check } from "@/components/internal/icons";
 import { setStage } from "@/app/internal/(dashboard)/outreach/actions";
 import { labelOf, toneOf } from "@/lib/internal/community/schema";
 import { ORG_STAGES, type OrgStage } from "@/lib/internal/outreach/schema";

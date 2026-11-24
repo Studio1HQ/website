@@ -9,7 +9,7 @@ import {
   ProhibitInset,
   Star,
   XLogo,
-} from "@phosphor-icons/react";
+} from "@/components/internal/icons";
 import {
   removeContact,
   saveContact,

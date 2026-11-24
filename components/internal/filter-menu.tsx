@@ -10,7 +10,7 @@ import {
   FunnelSimple,
   MagnifyingGlass,
   Tag,
-} from "@phosphor-icons/react";
+} from "@/components/internal/icons";
 import { SINCE, type Filters, type SinceKey } from "@/lib/internal/sections";
 import type { FacetOptions, Option } from "@/lib/internal/query";
 import { cn } from "@/lib/utils";

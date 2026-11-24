@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { CheckCircle, Info } from "@phosphor-icons/react/dist/ssr";
+import { CheckCircle, Info } from "@/components/internal/icons";
 import {
   DELIVERABLE_STATUSES,
   personName,

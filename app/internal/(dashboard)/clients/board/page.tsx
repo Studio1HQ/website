@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Buildings, CheckCircle } from "@phosphor-icons/react/dist/ssr";
+import { Buildings, CheckCircle } from "@/components/internal/icons";
 import { scopeRows } from "@/lib/internal/clients/scope";
 import { requireClients } from "@/lib/internal/session";
 import {

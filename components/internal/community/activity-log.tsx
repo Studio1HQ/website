@@ -11,7 +11,7 @@ import {
   Presentation,
   Trash,
   type Icon,
-} from "@phosphor-icons/react";
+} from "@/components/internal/icons";
 import {
   clearFollowUp,
   logActivity,

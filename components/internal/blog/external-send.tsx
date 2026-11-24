@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormStatus } from "react-dom";
-import { PaperPlaneTilt } from "@phosphor-icons/react";
+import { PaperPlaneTilt } from "@/components/internal/icons";
 import { buttonClass } from "@/components/internal/ui";
 
 /** The submit button in a post's "Send to DEV" form: off while it sends, so one press makes one draft. */

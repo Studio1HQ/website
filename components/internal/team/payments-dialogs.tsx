@@ -3,7 +3,7 @@
 import { useState, useTransition, type FormEvent, type ReactNode } from "react";
 import { DateField, MonthField } from "@/components/internal/pickers";
 import * as Dialog from "@radix-ui/react-dialog";
-import { X } from "@phosphor-icons/react";
+import { X } from "@/components/internal/icons";
 import {
   deletePaymentAction,
   markPaidAction,
@@ -125,7 +125,7 @@ function Segmented<T extends string>({
   label: string;
 }) {
   return (
-    <div role="radiogroup" aria-label={label} className="inline-flex rounded-lg bg-[var(--i-sunken)] p-0.5 ring-1 ring-inset ring-[var(--i-line)]">
+    <div role="radiogroup" aria-label={label} className="inline-flex gap-0.5 rounded-full bg-black/[0.05] p-1 dark:bg-white/[0.06]">
       {options.map(([key, text]) => (
         <button
           key={key}
@@ -134,9 +134,9 @@ function Segmented<T extends string>({
           aria-checked={value === key}
           onClick={() => onChange(key)}
           className={cn(
-            "h-7 rounded-md px-3 text-[12.5px] transition-colors",
+            "h-8 rounded-full px-3.5 text-[13px] transition-colors",
             value === key
-              ? "bg-[var(--i-panel)] font-medium text-[var(--i-ink)] shadow-[var(--i-shadow-sm)] ring-1 ring-[var(--i-line)]"
+              ? "bg-[var(--i-panel)] font-medium text-[var(--i-ink)] shadow-[var(--i-shadow-sm)] dark:bg-white/[0.14] dark:shadow-none"
               : "text-[var(--i-muted)] hover:text-[var(--i-ink)]",
           )}
         >

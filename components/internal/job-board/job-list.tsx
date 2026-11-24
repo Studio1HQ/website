@@ -7,7 +7,7 @@ import {
   EyeSlash,
   PencilSimple,
   PushPin,
-} from "@phosphor-icons/react";
+} from "@/components/internal/icons";
 import { setJobLive } from "@/app/internal/(dashboard)/job-board/actions";
 import { logoSite, type DevRelJobRecord } from "@/lib/devrel-jobs";
 import { SiteLogo } from "@/components/internal/site-logo";

@@ -2,7 +2,7 @@
 
 import { useOptimistic, useState, type ReactNode } from "react";
 import { DndContext, DragOverlay, useDraggable, useDroppable, type DragEndEvent } from "@dnd-kit/core";
-import { Plus, Prohibit, UserCircle, UsersThree } from "@phosphor-icons/react";
+import { Plus, Prohibit, UserCircle, UsersThree } from "@/components/internal/icons";
 import { blockTask, moveTask } from "@/app/internal/(dashboard)/tasks/actions";
 import { setQuickField } from "@/app/internal/(dashboard)/community/actions";
 import { cn } from "@/lib/utils";

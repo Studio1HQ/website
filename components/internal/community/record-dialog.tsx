@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 import { DateField, SuggestInput } from "@/components/internal/pickers";
 import { TimeField } from "@/components/internal/team/time-field";
 import * as Dialog from "@radix-ui/react-dialog";
-import { Trash, X } from "@phosphor-icons/react";
+import { Trash, X } from "@/components/internal/icons";
 import {
   removeRecord,
   saveRecord,

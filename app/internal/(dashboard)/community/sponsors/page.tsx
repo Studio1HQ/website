@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Megaphone, Plus } from "@phosphor-icons/react/dist/ssr";
+import { Megaphone, Plus } from "@/components/internal/icons";
 import { requireCommunity } from "@/lib/internal/session";
 import {
   incomplete,

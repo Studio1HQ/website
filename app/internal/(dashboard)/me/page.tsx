@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { IdentificationCard } from "@phosphor-icons/react/dist/ssr";
+import { IdentificationCard } from "@/components/internal/icons";
 import { Card, EmptyState, Notice, buttonClass } from "@/components/internal/ui";
 import { MyDay } from "@/components/internal/team/my-day";
 import { TodayWork } from "@/components/internal/tasks/today-work";

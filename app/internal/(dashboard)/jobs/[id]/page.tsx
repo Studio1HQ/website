@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { FilePdf } from "@phosphor-icons/react/dist/ssr";
+import { FilePdf } from "@/components/internal/icons";
 import { readStoredAnswers } from "@/lib/form-questions";
 import { isOwner } from "@/lib/internal/roles";
 import { PAY_BASES, describePay, type PayBasis } from "@/lib/job-application";

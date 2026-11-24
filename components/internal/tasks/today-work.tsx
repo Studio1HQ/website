@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
+import { ArrowRight } from "@/components/internal/icons";
 import { Card, CardTitle } from "@/components/internal/ui";
 import { DayList } from "@/components/internal/tasks/week-calendar";
 import type { CalendarCard } from "@/lib/internal/tasks/calendar";

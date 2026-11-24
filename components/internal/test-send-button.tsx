@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { PaperPlaneTilt } from "@phosphor-icons/react";
+import { PaperPlaneTilt } from "@/components/internal/icons";
 import { sendTestEmail } from "@/app/internal/(dashboard)/templates/actions";
 import { useToast } from "@/components/internal/toast";
 import { buttonClass } from "@/components/internal/ui";

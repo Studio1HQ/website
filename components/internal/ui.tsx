@@ -237,14 +237,16 @@ export function buttonClass(
   size: "sm" | "md" = "md",
 ) {
   return cn(
-    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg font-medium transition-[background-color,box-shadow,color,opacity] disabled:pointer-events-none disabled:opacity-50",
-    size === "sm" ? "h-7 px-2.5 text-[12.5px]" : "h-8 px-3 text-[13px]",
+    "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full font-medium transition-[background-color,box-shadow,color,opacity] disabled:pointer-events-none disabled:opacity-50",
+    size === "sm" ? "h-8 px-3.5 text-[13px]" : "h-9 px-4 text-[13.5px]",
     variant === "primary" &&
       "bg-[var(--i-ink)] text-[var(--i-panel)] shadow-[var(--i-shadow-sm)] hover:opacity-90",
+    // "accent" is a page's main action ("Add influencer", "New call"): the
+    // same solid button as "primary", white in the dark theme.
     variant === "accent" &&
-      "bg-[var(--i-accent)] text-white shadow-[var(--i-shadow-sm)] hover:opacity-90",
+      "bg-[var(--i-ink)] text-[var(--i-panel)] shadow-[var(--i-shadow-sm)] hover:opacity-90",
     variant === "secondary" &&
-      "border border-[var(--i-line)] bg-[var(--i-panel)] text-[var(--i-ink)] shadow-[var(--i-shadow-sm)] hover:bg-[var(--i-hover)]",
+      "border border-[var(--i-line)] bg-[var(--i-panel)] text-[var(--i-ink)] shadow-[var(--i-shadow-sm)] hover:bg-[var(--i-hover)] dark:border-transparent dark:bg-white/[0.08] dark:shadow-none dark:hover:bg-white/[0.12]",
     variant === "ghost" &&
       "text-[var(--i-muted)] hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)]",
     variant === "danger" &&
@@ -262,6 +264,27 @@ export const fieldClass =
   "block w-full min-w-0 rounded-lg border border-[var(--i-line)] bg-[var(--i-sunken)] px-3 text-[13px] text-[var(--i-ink)] outline-none transition-colors placeholder:text-[var(--i-faint)] focus:border-[var(--i-line-strong)] focus:bg-[var(--i-panel)] disabled:cursor-not-allowed disabled:opacity-60";
 
 /** md (h-9) in forms and dialogs, sm (h-8) in toolbars, xs (h-7) in table rows. */
+/**
+ * A segmented control: options side by side in one soft pill, the chosen one
+ * lifted out of it (Month / Week / Day, Mine / Everyone's, a page's views).
+ */
+export const segmentedClass =
+  "inline-flex max-w-full shrink-0 items-center gap-0.5 overflow-x-auto rounded-full bg-black/[0.05] p-1 [scrollbar-width:none] dark:bg-white/[0.06]";
+
+export function segmentClass(on: boolean) {
+  return cn(
+    "inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 text-[13.5px] transition-colors",
+    on
+      ? "bg-[var(--i-panel)] font-medium text-[var(--i-ink)] shadow-[var(--i-shadow-sm)] dark:bg-white/[0.14] dark:shadow-none"
+      : "text-[var(--i-muted)] hover:text-[var(--i-ink)]",
+  );
+}
+
+/** A round icon-only button (the arrows either side of a period). */
+export function iconButtonClass() {
+  return "inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-[var(--i-line)] bg-[var(--i-panel)] text-[var(--i-ink-2)] transition-colors hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)] dark:border-transparent dark:bg-white/[0.08] dark:hover:bg-white/[0.12]";
+}
+
 export function inputClass(size: "xs" | "sm" | "md" = "md") {
   return cn(fieldClass, size === "xs" ? "h-7 px-2" : size === "sm" ? "h-8" : "h-9");
 }
@@ -302,14 +325,17 @@ export function PageHeader({
   actionsClassName?: string;
 }) {
   return (
-    <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <header className="mb-6 flex flex-wrap items-end justify-between gap-4 md:pr-24">
       <div className="min-w-0">
-        {eyebrow ? (
-          <div className="mb-1.5 text-[12.5px] text-[var(--i-muted)]">{eyebrow}</div>
+        {/* Only a way back (a link) shows above the title. A plain group name
+            ("Workspaces", "Team") says nothing the sidebar doesn't, so the
+            page's own name stands alone. */}
+        {eyebrow && typeof eyebrow !== "string" ? (
+          <div className="mb-2 text-[13px] text-[var(--i-muted)] [&_a:hover]:text-[var(--i-ink)]">{eyebrow}</div>
         ) : null}
-        <h1 className="text-[22px] font-medium leading-tight tracking-[-0.01em]">{title}</h1>
+        <h1 className="text-[24px] font-medium leading-[1.15] tracking-[-0.02em] md:text-[28px]">{title}</h1>
         {description ? (
-          <p className="mt-1.5 max-w-2xl text-[13.5px] leading-relaxed text-[var(--i-muted)]">
+          <p className="mt-2 max-w-2xl text-[14px] leading-relaxed text-[var(--i-ink-2)] opacity-80">
             {description}
           </p>
         ) : null}
@@ -331,7 +357,7 @@ export function Card({
   return (
     <section
       className={cn(
-        "rounded-xl border border-[var(--i-line)] bg-[var(--i-panel)] shadow-[var(--i-shadow-sm)]",
+        "rounded-2xl border border-[var(--i-line)] bg-[var(--i-panel)] shadow-[var(--i-shadow-sm)] dark:border-transparent dark:shadow-none",
         className,
       )}
     >
@@ -348,8 +374,8 @@ export function CardTitle({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 border-b border-[var(--i-line)] px-5 py-3">
-      <h2 className="text-[13px] font-medium">{children}</h2>
+    <div className="flex min-h-[3.25rem] items-center justify-between gap-3 px-5 pb-1 pt-4">
+      <h2 className="flex min-w-0 items-center gap-2 text-[14.5px] font-medium [&>svg]:shrink-0 [&>svg]:text-[var(--i-muted)]">{children}</h2>
       {action}
     </div>
   );

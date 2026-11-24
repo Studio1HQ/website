@@ -3,7 +3,7 @@ import {
   ArrowSquareOut,
   Plus,
   SuitcaseSimple,
-} from "@phosphor-icons/react/dist/ssr";
+} from "@/components/internal/icons";
 import { loadJobRecords } from "@/lib/devrel-jobs-data";
 import { todayIst } from "@/lib/internal/blog/shared";
 import { requireArea } from "@/lib/internal/session";

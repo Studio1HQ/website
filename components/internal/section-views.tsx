@@ -6,7 +6,7 @@ import {
   CaretLeft,
   CaretRight,
   EnvelopeSimple,
-} from "@phosphor-icons/react/dist/ssr";
+} from "@/components/internal/icons";
 import { ROW_LIMIT, entryEmails, entryExtras, listView, recordView } from "@/lib/internal/data";
 import { AUTOMATIC_SENDER, senderName } from "@/lib/internal/email-templates";
 import { programOf } from "@/lib/internal/program";

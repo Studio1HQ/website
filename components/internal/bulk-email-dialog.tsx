@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { Copy, EnvelopeSimple, PaperPlaneTilt, X } from "@phosphor-icons/react";
+import { Copy, EnvelopeSimple, PaperPlaneTilt, X } from "@/components/internal/icons";
 import { sendBulkEmail } from "@/app/internal/(dashboard)/bulk-email-actions";
 import { firstName } from "@/lib/first-name";
 import { isEmailAddress } from "@/lib/form-checks";

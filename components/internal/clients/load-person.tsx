@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CaretRight, Warning } from "@phosphor-icons/react/dist/ssr";
+import { CaretRight, Warning } from "@/components/internal/icons";
 import { sizePoints, type OwnerLoad } from "@/lib/internal/clients/rules";
 import {
   clientPath,

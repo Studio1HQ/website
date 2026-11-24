@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Prohibit } from "@phosphor-icons/react";
+import { Prohibit } from "@/components/internal/icons";
 import {
   canChangeDeliverable,
   daysStuck,

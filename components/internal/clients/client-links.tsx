@@ -18,7 +18,7 @@ import {
   XLogo,
   YoutubeLogo,
   type Icon,
-} from "@phosphor-icons/react";
+} from "@/components/internal/icons";
 import { saveClientLinks } from "@/app/internal/(dashboard)/clients/workspace-actions";
 import {
   MAX_CLIENT_LINKS,

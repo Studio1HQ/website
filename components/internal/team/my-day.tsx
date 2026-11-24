@@ -14,7 +14,7 @@ import {
   Plus,
   Receipt,
   Stop,
-} from "@phosphor-icons/react";
+} from "@/components/internal/icons";
 import {
   addMyLeave,
   claimExpense,

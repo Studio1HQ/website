@@ -38,23 +38,24 @@
 
 .dark .internal-ui,
 .dark .internal-pop {
-  --i-bg: #0f0e0d;
-  --i-sidebar: #0b0a09;
-  --i-panel: #171615;
-  --i-sunken: #131211;
-  --i-ink: #f5f5f4;
-  --i-ink-2: #d6d3d1;
-  --i-muted: #a8a29e;
-  --i-faint: #78716c;
-  --i-line: #292524;
-  --i-line-strong: #3a3532;
-  --i-hover: #1d1b19;
-  --i-selected: #261a12;
+  /* Neutral greys, no warm cast: the sidebar a shade lighter than the page. */
+  --i-bg: #141414;
+  --i-sidebar: #1c1c1c;
+  --i-panel: #1f1f1f;
+  --i-sunken: #191919;
+  --i-ink: #ededed;
+  --i-ink-2: #d4d4d4;
+  --i-muted: #a1a1a1;
+  --i-faint: #737373;
+  --i-line: #2a2a2a;
+  --i-line-strong: #3a3a3a;
+  --i-hover: #262626;
+  --i-selected: #2a2118;
   --i-accent: #f97316;
   --i-accent-text: #fb923c;
   --i-accent-soft: rgba(249, 115, 22, 0.14);
   --i-bar: #ea580c;
-  --i-track: #24211f;
+  --i-track: #262626;
   --i-ring: rgba(249, 115, 22, 0.45);
   --i-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --i-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
@@ -78,6 +79,225 @@
   :where(.internal-ui, .internal-pop)
     :is(input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"]), textarea, select) {
     font-size: 16px;
+  }
+}
+
+/* Cards rise into place when a page opens: a short fade and lift, each a
+   beat after the one before (the first eight), and none for people who
+   ask for less motion. */
+@keyframes internal-card-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .internal-ui main section.rounded-2xl {
+    animation: internal-card-rise 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .internal-ui main :is(div, a):nth-child(2) > section.rounded-2xl { animation-delay: 40ms; }
+  .internal-ui main :is(div, a):nth-child(3) > section.rounded-2xl { animation-delay: 80ms; }
+  .internal-ui main :is(div, a):nth-child(4) > section.rounded-2xl { animation-delay: 120ms; }
+  .internal-ui main :is(div, a):nth-child(5) > section.rounded-2xl { animation-delay: 160ms; }
+  .internal-ui main :is(div, a):nth-child(6) > section.rounded-2xl { animation-delay: 200ms; }
+  .internal-ui main :is(div, a):nth-child(7) > section.rounded-2xl { animation-delay: 240ms; }
+  .internal-ui main :is(div, a):nth-child(n + 8) > section.rounded-2xl { animation-delay: 280ms; }
+}
+
+/* The dashboard's scrollbars (the page, the sidebar's list, the search
+   results): a quiet track, a rounded thumb, and a small arrow at each end
+   showing where the top and the bottom are. Chrome and Safari draw them from
+   ::-webkit-scrollbar; Firefox gets its thin native bar.
+
+   The public site sets the page's scrollbar on <html> (a thin bar, and
+   scrollbar-color, which is inherited and makes Chrome ignore every rule
+   below), and globals.css hides ::-webkit-scrollbar outright; both are put
+   back here, for the dashboard only. */
+html:has(.internal-ui),
+.internal-scroll {
+  scrollbar-width: auto;
+  scrollbar-color: auto;
+}
+html:has(.internal-ui)::-webkit-scrollbar,
+.internal-scroll::-webkit-scrollbar {
+  display: block;
+  width: 12px;
+  height: 12px;
+}
+html:has(.internal-ui)::-webkit-scrollbar-track,
+.internal-scroll::-webkit-scrollbar-track {
+  background: color-mix(in srgb, var(--i-ink) 5%, transparent);
+}
+html:has(.internal-ui)::-webkit-scrollbar-thumb,
+.internal-scroll::-webkit-scrollbar-thumb {
+  min-height: 40px;
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--i-muted) 70%, transparent) padding-box;
+}
+html:has(.internal-ui)::-webkit-scrollbar-thumb:hover,
+.internal-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--i-muted) padding-box;
+}
+html:has(.internal-ui)::-webkit-scrollbar-button:single-button,
+.internal-scroll::-webkit-scrollbar-button:single-button {
+  display: block;
+  height: 14px;
+  background-color: color-mix(in srgb, var(--i-ink) 5%, transparent);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 8px;
+}
+html:has(.internal-ui)::-webkit-scrollbar-button:vertical:decrement,
+.internal-scroll::-webkit-scrollbar-button:vertical:decrement {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 2.5 9 7.5H1z' fill='%238a8580'/%3E%3C/svg%3E");
+}
+html:has(.internal-ui)::-webkit-scrollbar-button:vertical:increment,
+.internal-scroll::-webkit-scrollbar-button:vertical:increment {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 7.5 1 2.5h8z' fill='%238a8580'/%3E%3C/svg%3E");
+}
+html:has(.internal-ui)::-webkit-scrollbar-button:vertical:decrement:hover,
+.internal-scroll::-webkit-scrollbar-button:vertical:decrement:hover {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 2.5 9 7.5H1z' fill='%23bdbab6'/%3E%3C/svg%3E");
+}
+html:has(.internal-ui)::-webkit-scrollbar-button:vertical:increment:hover,
+.internal-scroll::-webkit-scrollbar-button:vertical:increment:hover {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 7.5 1 2.5h8z' fill='%23bdbab6'/%3E%3C/svg%3E");
+}
+/* only one arrow at each end */
+html:has(.internal-ui)::-webkit-scrollbar-button:vertical:start:increment,
+html:has(.internal-ui)::-webkit-scrollbar-button:vertical:end:decrement,
+.internal-scroll::-webkit-scrollbar-button:vertical:start:increment,
+.internal-scroll::-webkit-scrollbar-button:vertical:end:decrement,
+html:has(.internal-ui)::-webkit-scrollbar-button:horizontal,
+.internal-scroll::-webkit-scrollbar-button:horizontal {
+  display: none;
+}
+@supports not selector(::-webkit-scrollbar) {
+  html:has(.internal-ui),
+  .internal-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--i-muted) 70%, transparent) transparent;
+  }
+}
+/* The html rules above need the page's colours, which live on .internal-ui
+   (inside <html>); give <html> the same light/dark values. */
+html:has(.internal-ui) {
+  --i-ink: #1c1917;
+  --i-muted: #78716c;
+}
+html.dark:has(.internal-ui) {
+  --i-ink: #ededed;
+  --i-muted: #a1a1a1;
+}
+
+/* Soft edges on a scrolling list, saying there's more that way: the list
+   itself fades to clear over its top 28px once you've scrolled down, and
+   over its bottom 28px until you reach the end. A mask, so nothing is laid
+   over the links. The fade lengths follow the scroll position (a scroll
+   timeline); browsers without one keep just the bottom fade. */
+@property --fade-top {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+@property --fade-bottom {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 28px;
+}
+.internal-scroll-fade {
+  --fade-top: 0px;
+  --fade-bottom: 28px;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 var(--fade-top),
+    #000 calc(100% - var(--fade-bottom)),
+    transparent
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 var(--fade-top),
+    #000 calc(100% - var(--fade-bottom)),
+    transparent
+  );
+}
+@supports (animation-timeline: scroll()) {
+  .internal-scroll-fade {
+    animation: internal-scroll-fade linear both;
+    animation-timeline: scroll(self);
+  }
+}
+@keyframes internal-scroll-fade {
+  0% {
+    --fade-top: 0px;
+    --fade-bottom: 28px;
+  }
+  10%,
+  90% {
+    --fade-top: 28px;
+    --fade-bottom: 28px;
+  }
+  100% {
+    --fade-top: 28px;
+    --fade-bottom: 0px;
+  }
+}
+
+/* Every other scrolling box in the dashboard and its dialogs and menus
+   (a dialog's body, a menu, a code block or table in the blog editor): one
+   thin, quiet bar in the dashboard's colours, the same on every page and
+   for every role, instead of the browser's default. */
+:is(.internal-ui, .internal-pop) :where(:not(.internal-scroll, .internal-no-bar)) {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--i-muted) 45%, transparent) transparent;
+}
+
+/* A side column that scrolls on its own (the blog editor's details) shows
+   no bar: it sat as a stray line beside the cards. The wheel, trackpad and
+   keyboard still scroll it. */
+.internal-no-bar {
+  scrollbar-width: none;
+}
+.internal-no-bar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Text boxes grow with what's typed, from the height their rows give, so
+   there's no inner scrollbar and no resize grip; only a very long one
+   scrolls. Browsers without field-sizing keep the fixed box and its grip. */
+@supports (field-sizing: content) {
+  :is(.internal-ui, .internal-pop) textarea {
+    field-sizing: content;
+    resize: none;
+    max-height: 60vh;
+  }
+  :is(.internal-ui, .internal-pop) textarea[rows="2"] { min-height: calc(2lh + 1rem + 2px); }
+  :is(.internal-ui, .internal-pop) textarea[rows="3"] { min-height: calc(3lh + 1rem + 2px); }
+  :is(.internal-ui, .internal-pop) textarea[rows="4"] { min-height: calc(4lh + 1rem + 2px); }
+  :is(.internal-ui, .internal-pop) textarea[rows="5"] { min-height: calc(5lh + 1rem + 2px); }
+  :is(.internal-ui, .internal-pop) textarea[rows="6"] { min-height: calc(6lh + 1rem + 2px); }
+  :is(.internal-ui, .internal-pop) textarea[rows="8"] { min-height: calc(8lh + 1rem + 2px); }
+  :is(.internal-ui, .internal-pop) textarea[rows="10"] { min-height: calc(10lh + 1rem + 2px); }
+  :is(.internal-ui, .internal-pop) textarea[rows="11"] { min-height: calc(11lh + 1rem + 2px); }
+  :is(.internal-ui, .internal-pop) textarea[rows="12"] { min-height: calc(12lh + 1rem + 2px); }
+}
+
+/* Folded to its 60px of icons, the sidebar scrolls with no bar at all: one
+   would squeeze the column and pull the icons off centre. */
+@media (min-width: 768px) {
+  [data-collapsed="true"] .internal-scroll {
+    scrollbar-width: none;
+  }
+  [data-collapsed="true"] .internal-scroll::-webkit-scrollbar,
+  [data-collapsed="true"] .internal-scroll::-webkit-scrollbar-button {
+    display: none;
   }
 }
 
@@ -511,5 +731,59 @@
     animation: none;
     width: 100%;
     opacity: 0.6;
+  }
+}
+
+/* Studio1 Connect's mark, looping (components/internal/connections/brand-logos.tsx;
+   the extension's popup.css has the same keyframes). */
+.connect-anim {
+  overflow: visible;
+}
+.connect-anim :is(.cm-square, .cm-play, .cm-dot, .cm-base) {
+  transform-box: fill-box;
+  animation-duration: 2.4s;
+  animation-iteration-count: infinite;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+}
+.connect-anim .cm-square {
+  transform-origin: center;
+  animation-name: cm-square;
+}
+.connect-anim .cm-play {
+  transform-origin: 40% 50%;
+  animation-name: cm-play;
+}
+.connect-anim .cm-dot {
+  transform-origin: 50% 100%;
+  animation-name: cm-dot;
+}
+.connect-anim .cm-base {
+  transform-origin: 50% 100%;
+  animation-name: cm-base;
+}
+@keyframes cm-square {
+  0%, 100% { transform: scale(1); }
+  25% { transform: scale(0.78); }
+  50% { transform: scale(1); }
+}
+@keyframes cm-play {
+  0%, 15% { transform: rotate(0deg); }
+  60%, 100% { transform: rotate(360deg); }
+}
+@keyframes cm-dot {
+  0%, 45% { transform: translateY(0) scale(1); }
+  62% { transform: translateY(9px) scale(1.12, 0.8); }
+  78% { transform: translateY(-3px) scale(0.96, 1.05); }
+  90%, 100% { transform: none; }
+}
+@keyframes cm-base {
+  0%, 52% { transform: none; }
+  62% { transform: scaleY(0.84); }
+  78% { transform: scaleY(1.04); }
+  90%, 100% { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .connect-anim :is(.cm-square, .cm-play, .cm-dot, .cm-base) {
+    animation: none;
   }
 }

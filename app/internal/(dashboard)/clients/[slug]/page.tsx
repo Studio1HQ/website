@@ -18,7 +18,7 @@ import {
   SquaresFour,
   Target,
   Trophy,
-} from "@phosphor-icons/react/dist/ssr";
+} from "@/components/internal/icons";
 import { inScope } from "@/lib/internal/clients/scope";
 import { canSeeMoney, requireClients } from "@/lib/internal/session";
 import { clientsSlackReady } from "@/lib/internal/clients/slack";

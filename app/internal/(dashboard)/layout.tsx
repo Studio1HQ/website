@@ -3,7 +3,9 @@ import { bellFor } from "@/lib/internal/notifications/data";
 import { Suspense } from "react";
 import { cookies } from "next/headers";
 import Link from "next/link";
-import { SignOut } from "@phosphor-icons/react/dist/ssr";
+import { AccountMenu } from "@/components/internal/account-menu";
+import { CommandSearch } from "@/components/internal/command-search";
+import { CustomiseSidebar } from "@/components/internal/customise-sidebar";
 import Logo from "@/components/ui/svgs/logo";
 import { InternalNav } from "@/components/internal/nav";
 import { MobileNavButton, MobileNavClose, MobileNavPanel, MobileNavProvider } from "@/components/internal/mobile-nav";
@@ -29,7 +31,7 @@ import {
   staffName,
   type Staff,
 } from "@/lib/internal/session";
-import { isSidebarCollapsed, SIDEBAR_COOKIE, SIDEBAR_EASE, SIDEBAR_FADE } from "@/lib/internal/sidebar";
+import { isSidebarCollapsed, SIDEBAR_COOKIE, SIDEBAR_FADE } from "@/lib/internal/sidebar";
 import { cn } from "@/lib/utils";
 import { teamBadges } from "@/lib/internal/team/badges";
 import { canSeeOthers } from "@/lib/internal/tasks/access";
@@ -185,7 +187,7 @@ export default async function DashboardLayout({
             </Link>
           </div>
         </header>
-        <div className="md:flex">
+        <div className="md:flex md:min-h-screen md:bg-[var(--i-sidebar)]">
           {/* Folded (desktop), the md:group-data-[collapsed=true]/sidebar:
               classes leave just the icons: the logo on top, the avatar below.
               The logo and avatar sit 16px in (px-1), centred on the 60px
@@ -194,76 +196,57 @@ export default async function DashboardLayout({
             <div className="mb-4 flex items-center justify-between gap-3 px-1 md:mb-6">
               <Link href={home} className="flex items-center gap-2.5 py-1">
                 <Logo className="size-7 shrink-0" />
-                <span className={cn("whitespace-nowrap leading-tight", SIDEBAR_FADE)}>
-                  <span className="block text-[14px] font-medium">Studio1</span>
-                  <span className="block text-[11.5px] text-[var(--i-muted)]">Internal dashboard</span>
+                <span className={cn("whitespace-nowrap text-[17px] font-medium tracking-[-0.02em]", SIDEBAR_FADE)}>
+                  Studio1
                 </span>
               </Link>
+              {/* Search, left of the fold button (fixed at the header's right). */}
+              <CommandSearch className="ml-auto hidden md:mr-7 md:flex md:group-data-[collapsed=true]/sidebar:hidden" />
+              <CustomiseSidebar />
               <MobileNavClose />
             </div>
             {/* A long sidebar scrolls on its own; the profile stays at the foot.
                 The 4px of top room (pulled back up) keeps the first link's
                 outline and shadow from being clipped by the scroll edge. */}
-            <div className="-mx-3 -mt-1 min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-3 pb-2 pt-1">
+            <div className="-mx-3 -mt-1 min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-3 pb-2 pt-1 internal-scroll internal-scroll-fade">
               {/* The links show at once; their counts arrive when they're read. */}
               <Suspense fallback={<Sidebar staff={staff} counts={NO_COUNTS} />}>
                 <SidebarWithCounts staff={staff} />
               </Suspense>
             </div>
-            {/* Folded, refresh and sign out stack above the avatar (which
-                stays put) and fade in. */}
-            <div className="flex items-center gap-2.5 border-t border-[var(--i-line)] px-1 pt-3 md:border-t-0 md:pt-4 md:group-data-[collapsed=true]/sidebar:flex-col-reverse md:group-data-[collapsed=true]/sidebar:items-start md:group-data-[collapsed=true]/sidebar:gap-1">
-              <Link
-                href="/profile"
-                title="Your profile"
-                className={cn(
-                  "-mx-1 -my-1 flex min-w-0 max-w-[220px] flex-1 items-center gap-2.5 overflow-hidden rounded-lg px-1 py-1 transition-[max-width,background-color] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]",
-                  SIDEBAR_EASE,
-                  // Folded: just the avatar; max-width (not width) so it narrows smoothly.
-                  "md:group-data-[collapsed=true]/sidebar:max-w-9 md:group-data-[collapsed=true]/sidebar:flex-none",
-                )}
-              >
-                <Avatar name={name} email={staff.email} size={28} src={photoUrl(staff.person)} />
-                <div className={cn("min-w-0 flex-1", SIDEBAR_FADE)}>
-                  <p className="truncate text-[12.5px] font-medium">{name}</p>
-                  <p className="truncate text-[11.5px] text-[var(--i-muted)]">
-                    {staff.localPreview
-                      ? "Local preview"
-                      : staff.roles.length
-                        ? rolesLabel(staff.roles)
-                        : staff.person
-                          ? PERSON_KINDS[staff.person.kind]
-                          : "Intern reviewer"}
-                    {staff.status === "owner" ? " · Owner" : ""}
-                  </p>
-                </div>
-              </Link>
-              <RefreshButton className="hidden md:flex md:group-data-[collapsed=true]/sidebar:animate-[internal-fade-in_220ms_ease-out]" />
-              <form action={signOut} className="md:group-data-[collapsed=true]/sidebar:animate-[internal-fade-in_220ms_ease-out]">
-                <button
-                  type="submit"
-                  aria-label="Sign out"
-                  title="Sign out"
-                  className="flex size-10 items-center justify-center rounded-lg text-[var(--i-muted)] hover:bg-black/[0.04] hover:text-[var(--i-ink)] dark:hover:bg-white/[0.06] md:size-7 md:rounded-md"
-                >
-                  <SignOut size={16} />
-                </button>
-              </form>
+            {/* The account: opens a menu upwards (profile, refresh, sign out). */}
+            <div className="border-t border-[var(--i-line)] px-1 pt-3 md:border-t-0 md:pt-3">
+              <AccountMenu
+                name={name}
+                email={staff.email}
+                photo={photoUrl(staff.person)}
+                home={home}
+                me={staff.person !== null}
+                signOut={signOut}
+                detail={
+                  (staff.localPreview
+                    ? "Local preview"
+                    : staff.roles.length
+                      ? rolesLabel(staff.roles)
+                      : staff.person
+                        ? PERSON_KINDS[staff.person.kind]
+                        : "Intern reviewer") + (staff.status === "owner" ? " · Owner" : "")
+                }
+              />
             </div>
           </MobileNavPanel>
-          {/* Desktop: the bell floats in the page's top-right corner, in the
-              gutter main keeps free for it (md:pr-12), so it never sits on a
-              page's own buttons. Phones have it in the top bar. */}
-          <div className="fixed right-2 top-2 z-30 hidden md:block print:hidden">
-            <Suspense fallback={null}>
-              <BellFor
-                email={staff.email}
-                side="bottom"
-                className="size-9 rounded-full bg-[var(--i-panel)] shadow-[var(--i-shadow)] ring-1 ring-[var(--i-line)] hover:bg-[var(--i-panel)]"
-              />
-            </Suspense>
-          </div>
-          <main className="min-w-0 flex-1 px-4 pb-24 pt-5 sm:px-6 sm:pt-6 md:pr-12 lg:pl-10 lg:pt-9 print:p-0">
+          {/* The page: one card with the same gap on both sides at every width
+              (24px, 32px from lg, 40px from 2xl), and its content centred in it
+              (1280px at most). Reload and the bell sit in the card's top-right
+              corner, level with the page title (headers keep clear of them), and
+              scroll away with the page. Phones have both in the top bar. */}
+          <main className="min-w-0 flex-1 px-4 pb-12 pt-5 sm:px-6 sm:pt-6 md:my-2 md:mr-2 md:min-h-[calc(100vh-16px)] md:rounded-[14px] md:border md:border-[var(--i-line)] md:bg-[var(--i-bg)] md:relative md:px-6 md:pt-6 md:shadow-[0_12px_32px_-20px_rgba(28,25,23,0.22)] lg:px-8 lg:pt-7 2xl:px-10 print:m-0 print:border-0 print:p-0 print:shadow-none">
+            <div className="pointer-events-none absolute right-4 top-4 z-30 hidden items-center gap-2 md:flex print:hidden">
+              <RefreshButton className="pointer-events-auto size-9 rounded-full bg-[var(--i-panel)] shadow-[var(--i-shadow-sm)] ring-1 ring-[var(--i-line)] hover:bg-[var(--i-hover)]" />
+              <Suspense fallback={<span className="size-9" />}>
+                <BellFor email={staff.email} side="bottom" className="pointer-events-auto size-9 rounded-full bg-[var(--i-panel)] shadow-[var(--i-shadow-sm)] ring-1 ring-[var(--i-line)] hover:bg-[var(--i-hover)]" />
+              </Suspense>
+            </div>
             <div className="mx-auto max-w-[1280px]">
               <TeamPhotosProvider photos={photos}>{children}</TeamPhotosProvider>
             </div>

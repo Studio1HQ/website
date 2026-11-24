@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CheckSquare } from "@phosphor-icons/react/dist/ssr";
+import { CheckSquare } from "@/components/internal/icons";
 import { requireMember } from "@/lib/internal/session";
 import { istNow } from "@/lib/internal/team/shared";
 import { isDateKey, weekEnd, weekStart } from "@/lib/internal/clients/schema";

@@ -1,0 +1,503 @@
+@font-face {
+  font-family: "Studio1 Sans";
+  src: url("fonts/Studio1Sans-Regular.woff2") format("woff2");
+  font-weight: 400;
+}
+@font-face {
+  font-family: "Studio1 Sans";
+  src: url("fonts/Studio1Sans-Medium.woff2") format("woff2");
+  font-weight: 500;
+}
+
+/* The dashboard's colours: neutral greys, Connect's orange as the one accent. */
+:root {
+  --bg: #1c1c1c;
+  --panel: #232323;
+  --ink: #ededed;
+  --ink-2: #d4d4d4;
+  --muted: #a1a1a1;
+  --faint: #737373;
+  --line: #2e2e2e;
+  --hover: rgba(255, 255, 255, 0.06);
+  --accent: #ff6136;
+  --ok: #34d399;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f7f6f3;
+    --panel: #ffffff;
+    --ink: #1c1917;
+    --ink-2: #44403c;
+    --muted: #78716c;
+    --faint: #a8a29e;
+    --line: #e7e5e4;
+    --hover: rgba(0, 0, 0, 0.04);
+    --ok: #059669;
+    color-scheme: light;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+/* The side panel: as wide as the browser makes it, the full height, with
+   "A Studio1 product" at the bottom. */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
+  padding: 14px 16px 16px;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 13.5px/1.45 "Studio1 Sans", Inter, system-ui, sans-serif;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+}
+/* The toolbar dropdown, when it opens as one: a fixed width, its own height. */
+body.as-popup {
+  width: 360px;
+  min-height: 200px;
+}
+[hidden] {
+  display: none !important;
+}
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+}
+.mark {
+  width: 20px;
+  height: 20px;
+}
+.top-actions {
+  display: inline-flex;
+  gap: 4px;
+}
+.icon-button {
+  display: inline-flex;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+}
+.icon-button:hover {
+  background: var(--hover);
+  color: var(--ink);
+}
+.icon-button svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.view {
+  animation: rise 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* Connect */
+.hero {
+  padding: 8px 4px 4px;
+  text-align: center;
+}
+.hero-mark {
+  width: 52px;
+  height: 52px;
+}
+.loading-mark {
+  display: block;
+  width: 44px;
+  height: 44px;
+  margin: 64px auto;
+}
+h1 {
+  margin: 12px 0 6px;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+.hero p {
+  margin: 0 auto;
+  max-width: 290px;
+  color: var(--muted);
+}
+.hero b {
+  color: var(--ink);
+  font-weight: 500;
+}
+form {
+  margin-top: 16px;
+}
+label,
+summary {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+summary {
+  cursor: pointer;
+  margin: 10px 0 6px;
+}
+input {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--ink);
+  font: 400 13px "Studio1 Sans", Inter, system-ui, sans-serif;
+  outline: none;
+}
+input:focus {
+  border-color: var(--faint);
+}
+.primary,
+.secondary {
+  display: flex;
+  width: 100%;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  font-weight: 500;
+}
+.primary {
+  margin-top: 14px;
+  background: var(--ink);
+  color: var(--bg);
+}
+.primary:disabled {
+  opacity: 0.55;
+}
+.secondary {
+  margin-top: 12px;
+  background: var(--hover);
+  color: var(--ink);
+}
+.secondary:hover {
+  background: var(--line);
+}
+.link {
+  display: block;
+  margin: 12px auto 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+.link:hover {
+  color: var(--ink);
+}
+.link.small {
+  margin: 0;
+}
+.error {
+  margin: 10px 0 0;
+  color: #fb7185;
+  font-size: 12.5px;
+}
+
+/* Main */
+.hello {
+  margin: 0 0 10px;
+  color: var(--muted);
+}
+.hello b {
+  color: var(--ink);
+  font-weight: 500;
+}
+.card {
+  margin-bottom: 10px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--panel);
+}
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px 6px;
+  font-weight: 500;
+}
+.count {
+  min-width: 22px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--hover);
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 20px;
+  text-align: center;
+}
+.day {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+}
+.dot {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 999px;
+  background: var(--faint);
+}
+.dot.on {
+  background: var(--ok);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--ok) 18%, transparent);
+}
+.day-text {
+  min-width: 0;
+  flex: 1;
+}
+.day-text b {
+  display: block;
+  font-weight: 500;
+}
+.day-text span {
+  color: var(--muted);
+  font-size: 12.5px;
+}
+.pill {
+  height: 32px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--bg);
+  font-weight: 500;
+  font-size: 12.5px;
+}
+.pill.stop {
+  background: var(--hover);
+  color: var(--ink);
+}
+.pill:disabled {
+  opacity: 0.55;
+}
+
+.list {
+  max-height: 210px;
+  margin: 0;
+  padding: 0 6px 6px;
+  overflow-y: auto;
+  list-style: none;
+}
+.list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 10px;
+}
+.list li:hover {
+  background: var(--hover);
+}
+.empty {
+  color: var(--muted);
+  font-size: 12.5px;
+}
+.check {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  margin-top: 1px;
+  padding: 0;
+  border: 1.5px solid var(--faint);
+  border-radius: 6px;
+  background: transparent;
+}
+.check:hover {
+  border-color: var(--ink);
+}
+.check.done {
+  border-color: var(--ok);
+  background: var(--ok);
+}
+.item {
+  min-width: 0;
+  flex: 1;
+}
+.item-title {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.item-sub {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+}
+.late {
+  color: #fb923c;
+}
+.unread-dot {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  margin-top: 6px;
+  border-radius: 999px;
+  background: var(--accent);
+}
+.read-dot {
+  width: 7px;
+  height: 7px;
+  flex: none;
+}
+.list a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.spinner {
+  width: 22px;
+  height: 22px;
+  margin: 60px auto;
+  border: 2px solid var(--line);
+  border-top-color: var(--accent);
+  border-radius: 999px;
+  animation: spin 700ms linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Studio1 Connect's mark, looping (the dashboard's internal.css has the same keyframes). */
+.connect-anim {
+  overflow: visible;
+}
+.connect-anim :is(.cm-square, .cm-play, .cm-dot, .cm-base) {
+  transform-box: fill-box;
+  animation-duration: 2.4s;
+  animation-iteration-count: infinite;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+}
+.connect-anim .cm-square {
+  transform-origin: center;
+  animation-name: cm-square;
+}
+.connect-anim .cm-play {
+  transform-origin: 40% 50%;
+  animation-name: cm-play;
+}
+.connect-anim .cm-dot {
+  transform-origin: 50% 100%;
+  animation-name: cm-dot;
+}
+.connect-anim .cm-base {
+  transform-origin: 50% 100%;
+  animation-name: cm-base;
+}
+@keyframes cm-square {
+  0%, 100% { transform: scale(1); }
+  25% { transform: scale(0.78); }
+  50% { transform: scale(1); }
+}
+@keyframes cm-play {
+  0%, 15% { transform: rotate(0deg); }
+  60%, 100% { transform: rotate(360deg); }
+}
+@keyframes cm-dot {
+  0%, 45% { transform: translateY(0) scale(1); }
+  62% { transform: translateY(9px) scale(1.12, 0.8); }
+  78% { transform: translateY(-3px) scale(0.96, 1.05); }
+  90%, 100% { transform: none; }
+}
+@keyframes cm-base {
+  0%, 52% { transform: none; }
+  62% { transform: scaleY(0.84); }
+  78% { transform: scaleY(1.04); }
+  90%, 100% { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .connect-anim :is(.cm-square, .cm-play, .cm-dot, .cm-base) {
+    animation: none;
+  }
+}
+
+/* The code step's "Sent to …" line */
+.note {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+/* The credit under every view: "A product of [mark] Studio1". */
+.made {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 18px;
+  color: var(--faint);
+  font-size: 11.5px;
+  letter-spacing: 0.01em;
+}
+.made-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--ink-2);
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 120ms ease;
+}
+.made-brand:hover {
+  color: var(--ink);
+}
+.made-logo {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+}
+
+/* In the side panel the browser's own bar already shows Connect's mark and
+   name: no second one here. The refresh and sign-out buttons stay (signed
+   in); signed out, the header goes altogether. The dropdown keeps it. */
+body:not(.as-popup) .brand {
+  display: none;
+}
+body:not(.as-popup) .top {
+  justify-content: flex-end;
+}
+body:not(.as-popup) .top:has(.top-actions[hidden]) {
+  display: none;
+}

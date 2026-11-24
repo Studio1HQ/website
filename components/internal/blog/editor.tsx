@@ -27,7 +27,7 @@ import {
   WarningCircle,
   X,
   XCircle,
-} from "@phosphor-icons/react";
+} from "@/components/internal/icons";
 import type { MDXEditorMethods } from "@mdxeditor/editor";
 import {
   comment,
@@ -765,7 +765,7 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
         </div>
 
         {/* Details, cover, checks, activity */}
-        <div className="space-y-4 xl:sticky xl:top-16 xl:max-h-[calc(100vh-5rem)] xl:overflow-y-auto xl:pb-4">
+        <div className="internal-no-bar space-y-4 xl:sticky xl:top-16 xl:max-h-[calc(100vh-5rem)] xl:overflow-y-auto xl:pb-4">
           <Card className="p-4">
             <p className="mb-2 flex items-center gap-1.5 text-[13px] font-medium">
               {errors.length ? (

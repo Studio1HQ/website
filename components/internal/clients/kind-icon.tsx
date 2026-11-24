@@ -26,7 +26,7 @@ import {
   UserCircle,
   UsersThree,
   VideoCamera,
-} from "@phosphor-icons/react/dist/ssr";
+} from "@/components/internal/icons";
 import type {
   DeliverableKind,
   PartnerType,

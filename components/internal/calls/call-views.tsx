@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, PencilSimple, VideoCamera } from "@phosphor-icons/react";
+import { ArrowRight, PencilSimple, VideoCamera } from "@/components/internal/icons";
 import { cn } from "@/lib/utils";
 import { Card, CardTitle, buttonClass } from "@/components/internal/ui";
 import { CallCard, PeopleStack } from "@/components/internal/calls/call-parts";

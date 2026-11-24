@@ -11,7 +11,7 @@ import {
   ThreadsLogo,
   XLogo,
   YoutubeLogo,
-} from "@phosphor-icons/react/dist/ssr";
+} from "@/components/internal/icons";
 import { platformOf } from "@/lib/internal/clients/schema";
 import { cn } from "@/lib/utils";
 

@@ -4,7 +4,7 @@ import {
   ArrowRight,
   CalendarBlank,
   CheckCircle,
-} from "@phosphor-icons/react/dist/ssr";
+} from "@/components/internal/icons";
 import { requireCommunity } from "@/lib/internal/session";
 import { hackathonBreakdown } from "@/lib/internal/data";
 import { hackathonListHref } from "@/components/internal/hackathon-tabs";
