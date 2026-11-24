@@ -75,6 +75,14 @@ import {
   text,
 } from "@/components/internal/ui";
 
+/** Table column widths by kind (the rest share what's left), for table-fixed. */
+const COLUMN_WIDTH: Partial<Record<ColumnSpec["kind"], string>> = {
+  person: "w-[26%]",
+  status: "w-36",
+  date: "w-24",
+  tags: "w-32",
+};
+
 type Override = { status?: string; tags?: string[] };
 
 export function ListView({
@@ -443,7 +451,7 @@ export function ListView({
             href={url.toString()}
             target="_blank"
             rel="noopener noreferrer nofollow"
-            className="block max-w-[12rem] truncate text-[var(--i-ink-2)] underline decoration-[var(--i-line-strong)] underline-offset-[3px] hover:text-[var(--i-accent-text)]"
+            className="block truncate text-[var(--i-ink-2)] underline decoration-[var(--i-line-strong)] underline-offset-[3px] hover:text-[var(--i-accent-text)]"
           >
             {prettyUrl(url)}
           </a>
@@ -462,7 +470,9 @@ export function ListView({
       }
       default:
         return text(value) ? (
-          <span className="block max-w-[16rem] truncate text-[var(--i-ink-2)]">{text(value)}</span>
+          <span title={text(value)} className="block truncate text-[var(--i-ink-2)]">
+            {text(value)}
+          </span>
         ) : (
           <span className="text-[var(--i-faint)]">—</span>
         );
@@ -851,7 +861,7 @@ export function ListView({
                 })}
               </ul>
               <div className="hidden overflow-x-auto lg:block">
-                <table className="w-full border-collapse text-left text-[13.5px]">
+                <table className="w-full table-fixed border-collapse text-left text-[13.5px]">
                   <thead>
                     <tr className="border-b border-[var(--i-line)] bg-black/[0.015] text-[12.5px] text-[var(--i-muted)] dark:bg-white/[0.02]">
                       {reviewable ? (
@@ -876,6 +886,8 @@ export function ListView({
                             "whitespace-nowrap px-4 py-3 font-medium",
                             index === 0 && !reviewable && "pl-5",
                             column.wide && "hidden lg:table-cell",
+                            // Set widths, so long roles or places never push the table wider than its card.
+                            COLUMN_WIDTH[column.kind] ?? "",
                           )}
                         >
                           {column.label}
@@ -915,7 +927,7 @@ export function ListView({
                               className={cn(
                                 "px-4 py-3",
                                 index === 0 && !reviewable && "pl-5",
-                                column.kind === "person" && "min-w-[220px] max-w-[300px]",
+                                "overflow-hidden",
                                 column.wide && "hidden lg:table-cell",
                               )}
                             >

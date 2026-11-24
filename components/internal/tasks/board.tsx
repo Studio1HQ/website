@@ -18,6 +18,7 @@ import { TaskNote } from "@/components/internal/tasks/task-note";
 import { PriorityMark } from "@/components/internal/tasks/priority";
 import { withLabel } from "@/components/internal/tasks/with-picker";
 import { ForChip, type ForOption, type LogTarget } from "@/components/internal/tasks/kit";
+import { StatusMenuItems, StatusPill } from "@/components/internal/tasks/status-pill";
 import { cardAnnouncements, dragHandlers, underPointer, useCardSensors } from "@/components/internal/tasks/drag";
 import { displayName } from "@/lib/internal/team/shared";
 import type { ClientsAccess } from "@/lib/internal/clients/rules";
@@ -321,30 +322,6 @@ export function Board(props: BoardProps) {
   );
 }
 
-/** Notion-style status pills: a tinted fill, a dot, in each status's colour. */
-const STATUS_PILL: Record<Column, { pill: string; dot: string }> = {
-  todo: { pill: "bg-black/[0.06] text-[var(--i-ink-2)] dark:bg-white/[0.1] dark:text-[var(--i-ink)]", dot: "bg-stone-400" },
-  doing: { pill: "bg-sky-500/15 text-sky-800 dark:bg-sky-500/25 dark:text-sky-100", dot: "bg-sky-500" },
-  review: { pill: "bg-violet-500/15 text-violet-800 dark:bg-violet-500/25 dark:text-violet-100", dot: "bg-violet-500" },
-  done: { pill: "bg-emerald-500/15 text-emerald-800 dark:bg-emerald-500/25 dark:text-emerald-100", dot: "bg-emerald-500" },
-};
-
-/** The statuses in Notion's three groups. */
-const STATUS_GROUPS: { label: string; values: Column[] }[] = [
-  { label: "To-do", values: ["todo"] },
-  { label: "In progress", values: ["doing", "review"] },
-  { label: "Complete", values: ["done"] },
-];
-
-function StatusPill({ status, label }: { status: Column; label?: string }) {
-  return (
-    <span className={cn("inline-flex h-6 items-center gap-1.5 rounded-full px-2.5 text-[12.5px] font-medium", STATUS_PILL[status].pill)}>
-      <span aria-hidden className={cn("size-2 rounded-full", STATUS_PILL[status].dot)} />
-      {label ?? TASK_STATUSES.find((option) => option.value === status)?.label}
-    </span>
-  );
-}
-
 /** "24–30 Nov" (or "28 Nov – 4 Dec"): Monday to Sunday of the week `today` is in. */
 function weekRange(today: string) {
   const date = new Date(`${today}T00:00:00`);
@@ -507,24 +484,7 @@ function TaskCard({ item, props, onMove }: { item: BoardTask; props: BoardProps;
             </Menu.Trigger>
             <Menu.Portal>
               <Menu.Content align="end" sideOffset={4} className={menuContentClass}>
-                {/* Like Notion's status menu: the current one on top, then each group. */}
-                <div className="px-2 pb-2 pt-1.5">
-                  <StatusPill status={task.status} />
-                </div>
-                {STATUS_GROUPS.map((group) => (
-                  <Menu.Group key={group.label} className="border-t border-[var(--i-line)] py-1">
-                    <Menu.Label className="px-2 pb-1 pt-1 text-[11.5px] font-medium text-[var(--i-muted)]">{group.label}</Menu.Label>
-                    {group.values.map((value) => (
-                      <Menu.Item
-                        key={value}
-                        onSelect={() => onMove(value)}
-                        className={cn(menuItemClass, "py-1", value === task.status && "bg-[var(--i-hover)]")}
-                      >
-                        <StatusPill status={value} />
-                      </Menu.Item>
-                    ))}
-                  </Menu.Group>
-                ))}
+                <StatusMenuItems status={task.status} onChange={onMove} />
                 <Menu.Separator className="-mx-1 my-1 h-px bg-[var(--i-line)]" />
                 {task.status !== "done" ? (
                   <Menu.Item onSelect={() => setBlocking(true)} className={menuItemClass}>
