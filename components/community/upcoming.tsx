@@ -111,7 +111,7 @@ function EventCard({ item }: { item: CommunityItem }) {
         /* no photo yet: a cover in the event's colour, sketch behind, its mark in white */
         <div
           className="relative isolate mt-4 flex aspect-[16/10] w-full items-center justify-center overflow-hidden rounded-[10px]"
-          style={{ background: `radial-gradient(120% 90% at 20% 10%, ${item.brand ?? PRINT}, color-mix(in oklab, ${item.brand ?? PRINT} 70%, #0b1020))` }}
+          style={{ backgroundColor: item.brand ?? PRINT, backgroundImage: `radial-gradient(120% 90% at 20% 10%, ${item.brand ?? PRINT}, color-mix(in oklab, ${item.brand ?? PRINT} 70%, #0b1020))` }}
         >
           <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 opacity-[0.22] [filter:brightness(0)_invert(1)]">
             <SketchDesk className="absolute inset-0 size-full" />
@@ -279,7 +279,7 @@ export function RegistrationBar({ item }: { item: CommunityItem | null }) {
       {open ? (
         <motion.div
           role="status"
-          className="pointer-events-none fixed inset-x-0 bottom-4 z-[60] flex justify-center px-3 sm:bottom-6"
+          className="pointer-events-none fixed inset-x-0 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-[60] flex justify-center px-3 sm:bottom-[calc(1.5rem+env(safe-area-inset-bottom))]"
           initial={reduce ? false : { opacity: 0, y: 24, scale: 0.96, filter: "blur(10px)" }}
           animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
           exit={{ opacity: 0, y: 16, scale: 0.98, filter: "blur(8px)" }}

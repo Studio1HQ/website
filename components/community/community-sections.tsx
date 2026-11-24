@@ -296,7 +296,7 @@ export function TogetherWeBuild() {
   return (
     <PaperSection tone="paper" className="relative isolate overflow-hidden">
       {/* the pencil sketch behind, stronger at the edges, softer behind the headline */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 opacity-[0.38] [mask-image:radial-gradient(ellipse_30%_32%_at_50%_50%,rgba(0,0,0,0.3)_40%,black_85%),linear-gradient(to_bottom,transparent,black_25%,black_70%,transparent)] [mask-composite:intersect] [-webkit-mask-composite:source-in]">
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 opacity-[0.38] [mask-image:radial-gradient(ellipse_30%_32%_at_50%_50%,rgba(0,0,0,0.3)_40%,black_85%),linear-gradient(to_bottom,transparent,black_25%,black_70%,transparent)] [-webkit-mask-image:radial-gradient(ellipse_30%_32%_at_50%_50%,rgba(0,0,0,0.3)_40%,black_85%),linear-gradient(to_bottom,transparent,black_25%,black_70%,transparent)] [mask-composite:intersect] [-webkit-mask-composite:source-in]">
         <SketchDesk className="absolute inset-0 size-full" />
       </div>
       <Container>

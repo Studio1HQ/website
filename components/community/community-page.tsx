@@ -134,7 +134,7 @@ export function CommunityPage({ data }: { data: CommunityData }) {
   const meetups = upcoming.filter((e) => e.kind === "meetup").slice(0, 8);
 
   return (
-    <div style={PAPER_SCOPE}>
+    <div style={PAPER_SCOPE} className="overflow-x-hidden [overflow-x:clip]">
       <CommunityHero totals={totals} next={upcoming} />
 
       <WaysIn data={data} index={1} />

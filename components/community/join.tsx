@@ -80,7 +80,7 @@ export function Subscribe({ wide = false, light = false }: { wide?: boolean; lig
           placeholder="you@company.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className={cn("h-11 min-w-0 flex-1 bg-transparent px-4 text-[15px] outline-none", light ? "text-[#141414] placeholder:text-[#141414]/35" : "text-white placeholder:text-white/35")}
+          className={cn("h-11 min-w-0 flex-1 bg-transparent px-4 text-[16px] sm:text-[15px] outline-none", light ? "text-[#141414] placeholder:text-[#141414]/35" : "text-white placeholder:text-white/35")}
         />
         <button
           type="submit"
@@ -131,7 +131,7 @@ export function JoinCommunity() {
       {/* The wall, faded into the page at the top and bottom */}
       <div
         aria-hidden
-        className="absolute inset-0 -z-10 grid grid-cols-3 gap-3 px-3 [mask-image:linear-gradient(to_bottom,transparent,black_20%,black_80%,transparent)] md:grid-cols-6"
+        className="absolute inset-0 -z-10 grid grid-cols-3 gap-3 px-3 [mask-image:linear-gradient(to_bottom,transparent,black_20%,black_80%,transparent)] [-webkit-mask-image:linear-gradient(to_bottom,transparent,black_20%,black_80%,transparent)] md:grid-cols-6"
       >
         {cols.map((photos, c) => (
           <div key={c} className={cn("h-full", c > 2 && "hidden md:block")}>
