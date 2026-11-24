@@ -2,12 +2,13 @@
 
 import { useOptimistic, useState, type ReactNode } from "react";
 import { DndContext, DragOverlay, useDraggable, useDroppable, type DragEndEvent } from "@dnd-kit/core";
-import { Plus, Prohibit, UserCircle, UsersThree } from "@/components/internal/icons";
+import { DotsThree, PencilSimple, Plus, Prohibit, UserCircle, UsersThree } from "@/components/internal/icons";
+import * as Menu from "@radix-ui/react-dropdown-menu";
 import { blockTask, moveTask } from "@/app/internal/(dashboard)/tasks/actions";
 import { setQuickField } from "@/app/internal/(dashboard)/community/actions";
 import { cn } from "@/lib/utils";
-import { buttonClass, inputClass } from "@/components/internal/ui";
-import { DueDate, Pill, TONES } from "@/components/internal/community/ui";
+import { buttonClass, inputClass, menuContentClass, menuItemClass } from "@/components/internal/ui";
+import { DueDate, Pill } from "@/components/internal/community/ui";
 import { Select } from "@/components/internal/select";
 import { Label, TeamDialog, useTeamAction } from "@/components/internal/team/kit";
 import { DeliverableCard } from "@/components/internal/clients/deliverable-card";
@@ -190,12 +191,14 @@ export function Board(props: BoardProps) {
 
   return (
     <div className="space-y-4">
-      {/* The week at a glance: progress, what's late or blocked, and Add task. */}
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-3 rounded-xl bg-[var(--i-panel)] px-4 py-3 ring-1 ring-[var(--i-line)]">
-        <div className="min-w-[200px] flex-1 sm:max-w-sm">
-          <div className="flex items-baseline justify-between gap-3 text-[13px]">
-            <span className="font-medium">{person.own ? "Your week" : `${person.name.split(" ")[0]}'s week`}</span>
-            <span className="tabular-nums text-[var(--i-muted)]">
+      {/* The week on one line: progress on the left, the counts as small
+          pills, then Add task. */}
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-3 rounded-2xl border border-[var(--i-line)] bg-[var(--i-panel)] px-5 py-3.5 shadow-[var(--i-shadow-sm)] dark:border-transparent">
+        <div className="min-w-[220px] flex-1">
+          <div className="flex items-baseline gap-2 text-[13px]">
+            <span className="font-medium">{person.own ? "This week" : `${person.name.split(" ")[0]}'s week`}</span>
+            <span className="text-[12px] text-[var(--i-faint)]">{weekRange(today)}</span>
+            <span className="ml-auto text-[12.5px] tabular-nums text-[var(--i-muted)]">
               <span className="font-medium text-[var(--i-ink)]">{doneCount}</span> of {items.length} done
             </span>
           </div>
@@ -205,31 +208,30 @@ export function Board(props: BoardProps) {
             aria-valuenow={progress}
             aria-valuemin={0}
             aria-valuemax={100}
-            className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--i-track)]"
+            className="mt-2 h-1 overflow-hidden rounded-full bg-[var(--i-track)]"
           >
             <div className="h-full rounded-full bg-[var(--i-bar)] transition-[width] duration-300" style={{ width: `${progress}%` }} />
           </div>
         </div>
-        <dl className="flex items-center gap-5 text-[12.5px]">
-          <div>
-            <dt className="text-[var(--i-muted)]">Open</dt>
-            <dd className="text-[15px] font-medium tabular-nums">{open.length}</dd>
-          </div>
-          <div>
-            <dt className="text-[var(--i-muted)]">Late</dt>
-            <dd className={cn("text-[15px] font-medium tabular-nums", lateCount ? "text-rose-600 dark:text-rose-400" : "text-[var(--i-faint)]")}>
-              {lateCount}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-[var(--i-muted)]">Blocked</dt>
-            <dd className={cn("text-[15px] font-medium tabular-nums", blockedCount ? "text-amber-600 dark:text-amber-400" : "text-[var(--i-faint)]")}>
-              {blockedCount}
-            </dd>
-          </div>
-        </dl>
+        <div className="flex items-center gap-1.5">
+          {[
+            { label: "open", value: open.length, tone: "bg-black/[0.05] text-[var(--i-ink-2)] dark:bg-white/[0.08]" },
+            { label: "late", value: lateCount, tone: "bg-rose-500/15 text-rose-700 dark:text-rose-300" },
+            { label: "blocked", value: blockedCount, tone: "bg-amber-500/15 text-amber-700 dark:text-amber-300" },
+          ].map((stat) => (
+            <span
+              key={stat.label}
+              className={cn(
+                "inline-flex h-7 items-center gap-1 rounded-full px-3 text-[12.5px]",
+                stat.value ? stat.tone : "bg-black/[0.04] text-[var(--i-faint)] dark:bg-white/[0.05]",
+              )}
+            >
+              <span className="font-medium tabular-nums">{stat.value}</span> {stat.label}
+            </span>
+          ))}
+        </div>
         {props.canAdd ? (
-          <button type="button" className={cn(buttonClass("primary"), "ml-auto")} onClick={() => setAdding(true)}>
+          <button type="button" className={buttonClass("primary")} onClick={() => setAdding(true)}>
             <Plus size={14} /> {person.own ? "Add task" : `Add a task for ${person.name.split(" ")[0]}`}
           </button>
         ) : null}
@@ -319,6 +321,43 @@ export function Board(props: BoardProps) {
   );
 }
 
+/** Notion-style status pills: a tinted fill, a dot, in each status's colour. */
+const STATUS_PILL: Record<Column, { pill: string; dot: string }> = {
+  todo: { pill: "bg-black/[0.06] text-[var(--i-ink-2)] dark:bg-white/[0.1] dark:text-[var(--i-ink)]", dot: "bg-stone-400" },
+  doing: { pill: "bg-sky-500/15 text-sky-800 dark:bg-sky-500/25 dark:text-sky-100", dot: "bg-sky-500" },
+  review: { pill: "bg-violet-500/15 text-violet-800 dark:bg-violet-500/25 dark:text-violet-100", dot: "bg-violet-500" },
+  done: { pill: "bg-emerald-500/15 text-emerald-800 dark:bg-emerald-500/25 dark:text-emerald-100", dot: "bg-emerald-500" },
+};
+
+/** The statuses in Notion's three groups. */
+const STATUS_GROUPS: { label: string; values: Column[] }[] = [
+  { label: "To-do", values: ["todo"] },
+  { label: "In progress", values: ["doing", "review"] },
+  { label: "Complete", values: ["done"] },
+];
+
+function StatusPill({ status, label }: { status: Column; label?: string }) {
+  return (
+    <span className={cn("inline-flex h-6 items-center gap-1.5 rounded-full px-2.5 text-[12.5px] font-medium", STATUS_PILL[status].pill)}>
+      <span aria-hidden className={cn("size-2 rounded-full", STATUS_PILL[status].dot)} />
+      {label ?? TASK_STATUSES.find((option) => option.value === status)?.label}
+    </span>
+  );
+}
+
+/** "24–30 Nov" (or "28 Nov – 4 Dec"): Monday to Sunday of the week `today` is in. */
+function weekRange(today: string) {
+  const date = new Date(`${today}T00:00:00`);
+  const monday = new Date(date);
+  monday.setDate(date.getDate() - ((date.getDay() + 6) % 7));
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  const month = (value: Date) => value.toLocaleString("en-GB", { month: "short" });
+  return monday.getMonth() === sunday.getMonth()
+    ? `${monday.getDate()}–${sunday.getDate()} ${month(sunday)}`
+    : `${monday.getDate()} ${month(monday)} – ${sunday.getDate()} ${month(sunday)}`;
+}
+
 /** A column of the board, and a place to drop cards while one is dragged. */
 function BoardColumn({
   column,
@@ -346,10 +385,9 @@ function BoardColumn({
         dimmed && "opacity-50",
       )}
     >
-      <h2 className="flex items-center gap-2 px-2 pb-2 pt-1 text-[12.5px] font-medium text-[var(--i-ink-2)]">
-        <span aria-hidden className={cn("size-1.5 rounded-full", TONES[column.tone].dot)} />
-        {column.value === "done" ? "Done this week" : column.label}
-        <span className="ml-auto font-normal tabular-nums text-[var(--i-faint)]">{count}</span>
+      <h2 className="flex items-center gap-2 px-1 pb-2.5 pt-1">
+        <StatusPill status={column.value} label={column.value === "done" ? "Done this week" : column.label} />
+        <span className="ml-auto pr-1 text-[12.5px] tabular-nums text-[var(--i-faint)]">{count}</span>
       </h2>
       {children}
     </section>
@@ -437,7 +475,7 @@ function TaskCard({ item, props, onMove }: { item: BoardTask; props: BoardProps;
       ref={setNodeRef}
       {...dragHandlers(listeners)}
       className={cn(
-        "flex flex-col gap-2 rounded-xl border bg-[var(--i-panel)] p-3 shadow-[var(--i-shadow-sm)] transition-[border-color,opacity] hover:border-[var(--i-line-strong)]",
+        "group/card flex flex-col gap-2 rounded-xl border bg-[var(--i-panel)] p-3 shadow-[var(--i-shadow-sm)] transition-[border-color,opacity] hover:border-[var(--i-line-strong)]",
         // Hold to drag on a phone: no text selection or callout getting in the way.
         changeable && "touch-manipulation select-none [-webkit-touch-callout:none] md:cursor-grab",
         task.blocked ? "border-rose-200 dark:border-rose-500/30" : "border-[var(--i-line)]",
@@ -445,64 +483,89 @@ function TaskCard({ item, props, onMove }: { item: BoardTask; props: BoardProps;
         isDragging && "opacity-40",
       )}
     >
-      <div className="min-w-0 space-y-1">
-        <ForChip label={item.forLabel} client={item.client} />
+      {/* Notion-style: the title, one quiet line of details, and a ⋯ menu.
+          Status changes by dragging to a column, or Move to in the menu. */}
+      <div className="flex items-start gap-2">
+        <div className="min-w-0 flex-1">
+          {changeable ? (
+            <button type="button" onClick={() => setEditing(true)} className="block w-full text-left text-[13.5px] font-medium leading-snug hover:text-[var(--i-accent-text)]">
+              {task.title}
+            </button>
+          ) : (
+            <p className="text-[13.5px] font-medium leading-snug">{task.title}</p>
+          )}
+          {task.notes ? <TaskNote text={task.notes} /> : null}
+        </div>
         {changeable ? (
-          <button type="button" onClick={() => setEditing(true)} className="block w-full text-left text-[13.5px] font-medium leading-snug hover:text-[var(--i-accent-text)]">
-            {task.title}
-          </button>
-        ) : (
-          <p className="text-[13.5px] font-medium leading-snug">{task.title}</p>
-        )}
-        {task.notes ? <TaskNote text={task.notes} /> : null}
-        {task.blocked ? (
-          <p className="text-[12px] text-rose-700 dark:text-rose-300">
-            <Prohibit size={12} className="mr-1 inline" />
-            {task.block_reason}
-          </p>
-        ) : null}
-        {given ? (
-          <p className="flex items-center gap-1 text-[11.5px] text-[var(--i-faint)]">
-            <UserCircle size={12} /> From {props.names[task.created_by.toLowerCase()] ?? displayName({ email: task.created_by })}
-          </p>
-        ) : null}
-        {others.length ? (
-          <p title="Shared: it's on each of their lists" className="flex items-center gap-1 text-[11.5px] text-[var(--i-muted)]">
-            <UsersThree size={12} className="shrink-0" /> With {withLabel(others, props.team)}
-          </p>
+          <Menu.Root>
+            <Menu.Trigger
+              aria-label={`Options for ${task.title}`}
+              onPointerDown={(event) => event.stopPropagation()}
+              className="-mr-1 -mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md text-[var(--i-faint)] opacity-0 outline-none transition-opacity hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)] focus-visible:opacity-100 group-hover/card:opacity-100 data-[state=open]:opacity-100 [@media(hover:none)]:opacity-100"
+            >
+              <DotsThree size={18} weight="bold" />
+            </Menu.Trigger>
+            <Menu.Portal>
+              <Menu.Content align="end" sideOffset={4} className={menuContentClass}>
+                {/* Like Notion's status menu: the current one on top, then each group. */}
+                <div className="px-2 pb-2 pt-1.5">
+                  <StatusPill status={task.status} />
+                </div>
+                {STATUS_GROUPS.map((group) => (
+                  <Menu.Group key={group.label} className="border-t border-[var(--i-line)] py-1">
+                    <Menu.Label className="px-2 pb-1 pt-1 text-[11.5px] font-medium text-[var(--i-muted)]">{group.label}</Menu.Label>
+                    {group.values.map((value) => (
+                      <Menu.Item
+                        key={value}
+                        onSelect={() => onMove(value)}
+                        className={cn(menuItemClass, "py-1", value === task.status && "bg-[var(--i-hover)]")}
+                      >
+                        <StatusPill status={value} />
+                      </Menu.Item>
+                    ))}
+                  </Menu.Group>
+                ))}
+                <Menu.Separator className="-mx-1 my-1 h-px bg-[var(--i-line)]" />
+                {task.status !== "done" ? (
+                  <Menu.Item onSelect={() => setBlocking(true)} className={menuItemClass}>
+                    <Prohibit size={14} /> {task.blocked ? "Change or unblock" : "Mark as blocked"}
+                  </Menu.Item>
+                ) : null}
+                <Menu.Item onSelect={() => setEditing(true)} className={menuItemClass}>
+                  <PencilSimple size={14} /> Edit task
+                </Menu.Item>
+              </Menu.Content>
+            </Menu.Portal>
+          </Menu.Root>
         ) : null}
       </div>
-      <div className="flex flex-wrap items-center gap-2">
-        {changeable ? (
-          <Select
-            aria-label={`Move ${task.title}`}
-            size="xs"
-            value={task.status}
-            onChange={onMove}
-            options={TASK_STATUSES.map((option) => ({ value: option.value, label: option.label }))}
-            className="w-[7.5rem]"
-          />
-        ) : (
+
+      {task.blocked ? (
+        <p className="flex items-center gap-1.5 rounded-md bg-rose-500/10 px-2 py-1 text-[12px] text-rose-700 dark:text-rose-300">
+          <Prohibit size={12} className="shrink-0" />
+          <span className="min-w-0 truncate">{task.block_reason || "Blocked"}</span>
+        </p>
+      ) : null}
+
+      {/* One quiet line: what it's for, priority, due date, who else is on it. */}
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-[var(--i-muted)]">
+        {item.forLabel ? <ForChip label={item.forLabel} client={item.client} /> : null}
+        <PriorityMark priority={task.priority} />
+        {!changeable ? (
           <Pill tone={TASK_STATUSES.find((option) => option.value === task.status)?.tone}>
             {TASK_STATUSES.find((option) => option.value === task.status)?.label}
           </Pill>
-        )}
-        <PriorityMark priority={task.priority} />
-        {task.due_on ? (
-          <span className="text-[12px]">
-            <DueDate day={task.due_on} done={task.status === "done"} today={props.today} />
+        ) : null}
+        {task.due_on ? <DueDate day={task.due_on} done={task.status === "done"} today={props.today} /> : null}
+        {given ? (
+          <span className="inline-flex items-center gap-1 text-[var(--i-faint)]">
+            <UserCircle size={12} /> {props.names[task.created_by.toLowerCase()] ?? displayName({ email: task.created_by })}
           </span>
         ) : null}
-        {changeable && task.status !== "done" ? (
-          <button
-            type="button"
-            onClick={() => setBlocking(true)}
-            aria-label={task.blocked ? "Blocked: change or unblock" : "Mark as blocked"}
-            title={task.blocked ? "Blocked: change or unblock" : "Mark as blocked"}
-            className={cn("ml-auto flex size-7 items-center justify-center rounded-md hover:bg-[var(--i-hover)]", task.blocked ? "text-rose-600 dark:text-rose-300" : "text-[var(--i-faint)]")}
-          >
-            <Prohibit size={14} />
-          </button>
+        {others.length ? (
+          <span title="Shared: it's on each of their lists" className="inline-flex items-center gap-1">
+            <UsersThree size={12} className="shrink-0" /> {withLabel(others, props.team)}
+          </span>
         ) : null}
       </div>
       {changeable ? (
