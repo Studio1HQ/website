@@ -3,7 +3,7 @@
 import * as Menu from "@radix-ui/react-dropdown-menu";
 import type { ReactNode } from "react";
 import { menuContentClass, menuItemClass } from "@/components/internal/ui";
-import { TASK_STATUSES, type Column } from "@/lib/internal/tasks/shared";
+import { TASK_STATUSES, type Column, type Tone } from "@/lib/internal/tasks/shared";
 import { cn } from "@/lib/utils";
 
 /** Notion-style status pills: a tinted fill, a dot, in each status's colour. */
@@ -32,6 +32,32 @@ export function StatusPill({ status, label, small = false }: { status: Column; l
     >
       <span aria-hidden className={cn("size-2 rounded-full", STATUS_PILL[status].dot)} />
       {label ?? TASK_STATUSES.find((option) => option.value === status)?.label}
+    </span>
+  );
+}
+
+/** The same pills in any tone, for statuses that aren't a task's (a client piece's "Client review", a community task's). */
+const TONE_PILL: Record<Tone, { pill: string; dot: string }> = {
+  stone: STATUS_PILL.todo,
+  sky: STATUS_PILL.doing,
+  violet: STATUS_PILL.review,
+  emerald: STATUS_PILL.done,
+  amber: { pill: "bg-amber-500/15 text-amber-800 dark:bg-amber-500/25 dark:text-amber-100", dot: "bg-amber-500" },
+  rose: { pill: "bg-rose-500/15 text-rose-800 dark:bg-rose-500/25 dark:text-rose-100", dot: "bg-rose-500" },
+};
+
+export function TonePill({ tone, label, small = false }: { tone: Tone; label: string; small?: boolean }) {
+  const look = TONE_PILL[tone] ?? TONE_PILL.stone;
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium",
+        small ? "h-5 px-2 text-[11.5px]" : "h-6 px-2.5 text-[12.5px]",
+        look.pill,
+      )}
+    >
+      <span aria-hidden className={cn("size-2 rounded-full", look.dot)} />
+      {label}
     </span>
   );
 }

@@ -20,6 +20,7 @@ import {
   forLabel,
   isOnTask,
   isPastDue,
+  isTaskLate,
   isPeriodStart,
   owedPeriods,
   peopleOn,
@@ -151,6 +152,18 @@ describe("the board", () => {
     expect(communityColumn("todo")).toBe("todo");
     expect(communityColumn("blocked")).toBe("doing");
     expect(communityColumn("done")).toBe("done");
+  });
+
+  it("calls a task late only while it's still owed", () => {
+    const today = "2026-11-24";
+    expect(isTaskLate({ status: "todo", due_on: "2026-11-23" }, today)).toBe(true);
+    expect(isTaskLate({ status: "doing", due_on: "2026-11-23" }, today)).toBe(true);
+    // Handed in for review, or done: never late.
+    expect(isTaskLate({ status: "review", due_on: "2026-11-23" }, today)).toBe(false);
+    expect(isTaskLate({ status: "done", due_on: "2026-11-23" }, today)).toBe(false);
+    // Due today, or no due day: not late yet.
+    expect(isTaskLate({ status: "doing", due_on: today }, today)).toBe(false);
+    expect(isTaskLate({ status: "todo", due_on: null }, today)).toBe(false);
   });
 });
 

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { requireClients } from "@/lib/internal/session";
 import {
   incomplete,
@@ -147,14 +146,7 @@ export default async function ClientsTemplatesPage() {
         </h2>
         <p className="mb-4 mt-1 max-w-2xl text-[13px] leading-relaxed text-[var(--i-muted)]">
           Weekly capacity is in points: each piece counts by its size ({points}
-          ).{" "}
-          <Link
-            href="/clients/load"
-            className="text-[var(--i-ink)] underline decoration-[var(--i-line-strong)] underline-offset-[3px] hover:text-[var(--i-accent-text)]"
-          >
-            See this week&apos;s load
-          </Link>
-          .
+          ).
         </p>
         <CapacityTable people={rows} />
       </section>

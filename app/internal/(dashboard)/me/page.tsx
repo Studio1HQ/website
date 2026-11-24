@@ -10,7 +10,8 @@ import { canPlanCalls, canSeeCalls } from "@/lib/internal/calls/access";
 import { callPeople, listCalls, listChanges } from "@/lib/internal/calls/data";
 import { isIn, occurrences } from "@/lib/internal/calls/shared";
 import { cardChoices, loadWeekCards, teammates } from "@/lib/internal/tasks/load";
-import { weekStart } from "@/lib/internal/clients/schema";
+import { isDateKey, weekStart } from "@/lib/internal/clients/schema";
+import { earliestCardDay } from "@/lib/internal/tasks/calendar";
 import { isAdmin, requireMember } from "@/lib/internal/session";
 import { listDays } from "@/lib/internal/team/attendance";
 import { listPayslips } from "@/lib/internal/team/payroll";
@@ -75,6 +76,10 @@ export default async function MyDayPage({
   const now = istNow();
   const current = monthOf(now.date);
   const month = isMonthKey(params.month) && params.month <= current ? params.month : current;
+  // The day "Today's tasks" shows: today, or one picked in its box (?day=),
+  // no further back than the box lets you pick.
+  const taskDay =
+    isDateKey(params.day) && params.day >= earliestCardDay(now.date) ? params.day : now.date;
   const person = staff.person;
 
   if (!person) {
@@ -104,8 +109,8 @@ export default async function MyDayPage({
     listDays({ from: now.date, to: now.date, emails: [person.email] }),
     listPayslips({ email: person.email, status: "sent" }),
     listReimbursements({ email: person.email }),
-    // Tasks: today's cards (hidden until the tasks migration has run).
-    loadWeekCards(person.email, weekStart(now.date), now.date),
+    // Tasks: the shown day's week of cards (hidden until the tasks migration has run).
+    loadWeekCards(person.email, weekStart(taskDay), now.date),
     cardChoices(staff),
     todaysCalls(staff, now),
     teammates(),
@@ -146,7 +151,8 @@ export default async function MyDayPage({
         tasks={
           work.missing ? null : (
             <TodayWork
-              cards={work.cards.filter((card) => card.day === now.date)}
+              cards={work.cards.filter((card) => card.day === taskDay)}
+              day={taskDay}
               today={now.date}
               ended={Boolean(today && today.kind !== "leave" && today.slots.length && !openSlot(today.slots))}
               options={options}

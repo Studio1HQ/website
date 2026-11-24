@@ -6,7 +6,6 @@ import {
   useTransition,
   type ComponentProps,
   type FormEvent,
-  type ReactNode,
 } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import {
@@ -102,28 +101,6 @@ function kindWord(kind: DeliverableKind) {
 const addButtonClass =
   "inline-flex items-center gap-1.5 rounded-md px-1.5 py-1 text-[12.5px] text-[var(--i-muted)] transition-colors hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)]";
 
-const columnClass = "flex min-w-0 flex-col gap-4 lg:[&>*:last-child]:flex-1";
-
-/**
- * A half-width card's rough height, in title rows: its header, up to five
- * pieces (taller with an owner line or a note), and the "Show all" row.
- * Only used to share the cards between the two columns evenly.
- */
-function cardWeight(items: readonly Deliverable[]) {
-  const rows = items.map(
-    (item) =>
-      1 +
-      (item.owner || item.published_url || item.due_on ? 0.65 : 0) +
-      (item.notes.trim() ? 0.45 : 0),
-  );
-  const average = rows.reduce((sum, row) => sum + row, 0) / (rows.length || 1);
-  return (
-    1.3 +
-    average * Math.min(rows.length, SHORT_LIST) +
-    (rows.length > SHORT_LIST ? 0.9 : 0)
-  );
-}
-
 const byAdded = (a: Deliverable, b: Deliverable) =>
   a.created_at.localeCompare(b.created_at);
 
@@ -169,239 +146,53 @@ export function MonthWork({
     ? Math.max(...ordered.map((line) => line.position)) + 1
     : 0;
   const empty = !ordered.length && !deliverables.length;
-  // One kind of work at a time, or all of it.
-  const [only, setOnly] = useState<string | null>(null);
-  const shows = (key: string) => only === null || only === key;
-  const chips = [
-    ...ordered.map((line) => {
-      const items = deliverables.filter(
-        (item) => item.scope_line_id === line.id,
-      );
-      return {
-        key: line.id,
-        label: line.label || labelOf(DELIVERABLE_KINDS, line.kind),
-        done: items.filter((item) => item.status === "published").length,
-        planned: line.planned,
-        count: items.length,
-      };
-    }),
-    ...(outside.length
-      ? [
-          {
-            key: "outside",
-            label: "Not in the plan",
-            done: outside.filter((item) => item.status === "published").length,
-            planned: 0,
-            count: outside.length,
-          },
-        ]
-      : []),
-  ].filter((chip) => chip.planned > 0 || chip.count > 0);
 
-  const groups = ordered
-    .map((line) => ({
-      line,
-      items: deliverables
-        .filter((item) => item.scope_line_id === line.id)
-        .sort(byAdded),
-    }))
-    .filter((group) => shows(group.line.id));
+  // One column: each part of the plan in its own section, in the plan's
+  // order, then anything outside the plan, then the parts not started yet.
+  const groups = ordered.map((line) => ({
+    line,
+    items: deliverables.filter((item) => item.scope_line_id === line.id).sort(byAdded),
+  }));
   const filled = groups.filter((group) => group.items.length);
-  const quiet =
-    only === null ? groups.filter((group) => !group.items.length) : [];
-  // Written work gets the full width; posts and the rest sit side by side.
-  const wide = (kind: DeliverableKind) =>
-    only !== null || (WRITTEN_KINDS.has(kind) && kind !== "report");
-
-  const outsideWide =
-    only !== null ||
-    outside.some(
-      (item) => WRITTEN_KINDS.has(item.kind) && item.kind !== "report",
-    );
-  // Each card with its width and a rough height (rows + header), so the
-  // half-width ones can be stacked in two even columns.
-  const cards: {
-    key: string;
-    wide: boolean;
-    weight: number;
-    node: ReactNode;
-  }[] = [
-    ...filled.map(({ line, items }) => ({
-      key: line.id,
-      wide: wide(line.kind),
-      weight: cardWeight(items),
-      node: (
-        <PlanGroup
-          key={line.id}
-          line={line}
-          items={items}
-          wide={wide(line.kind)}
-          all={only !== null}
-          canEditPlan={canEditPlan}
-          {...shared}
-        />
-      ),
-    })),
-    ...(outside.length && shows("outside")
-      ? [
-          {
-            key: "outside",
-            wide: outsideWide,
-            weight: cardWeight(outside),
-            node: (
-              <Card key="outside" className="min-w-0">
-                <div className="flex items-center gap-3 border-b border-[var(--i-line)] px-5 py-3">
-                  <h3 className="text-[13.5px] font-medium">Not in the plan</h3>
-                  <span className="text-[12.5px] tabular-nums text-[var(--i-muted)]">
-                    {
-                      outside.filter((item) => item.status === "published")
-                        .length
-                    }{" "}
-                    live
-                  </span>
-                </div>
-                <Pieces
-                  name="Not in the plan"
-                  items={outside}
-                  layout={outsideWide ? "work" : "compact"}
-                  posts={false}
-                  written={outside.every((item) =>
-                    WRITTEN_KINDS.has(item.kind),
-                  )}
-                  all={only !== null}
-                  {...shared}
-                />
-              </Card>
-            ),
-          },
-        ]
-      : []),
-    ...(quiet.length
-      ? [
-          {
-            key: "quiet",
-            wide: false,
-            weight: quiet.length * 0.75 + 1.2,
-            node: (
-              <Card key="quiet" className="min-w-0">
-                <div className="px-5 pb-1 pt-3.5">
-                  <h3 className="text-[13.5px] font-medium">Not started yet</h3>
-                </div>
-                <ul className="pb-1.5">
-                  {quiet.map(({ line }) => (
-                    <QuietLine
-                      key={line.id}
-                      line={line}
-                      canEditPlan={canEditPlan}
-                      {...shared}
-                    />
-                  ))}
-                </ul>
-              </Card>
-            ),
-          },
-        ]
-      : []),
-  ];
-  const left: ReactNode[] = [];
-  const right: ReactNode[] = [];
-  let leftWeight = 0;
-  let rightWeight = 0;
-  for (const card of cards) {
-    if (card.wide) continue;
-    if (leftWeight <= rightWeight) {
-      left.push(card.node);
-      leftWeight += card.weight;
-    } else {
-      right.push(card.node);
-      rightWeight += card.weight;
-    }
-  }
+  const quiet = groups.filter((group) => !group.items.length);
 
   return (
     <section aria-label="The month's work" className="space-y-4">
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        {chips.length > 1 ? (
-          <div
-            role="tablist"
-            aria-label="Show"
-            className="flex min-w-0 flex-1 flex-wrap gap-1"
-          >
-            {[
-              {
-                key: null,
-                label: "All",
-                done: 0,
-                planned: 0,
-                count: deliverables.length,
-              },
-              ...chips,
-            ].map((chip) => (
-              <button
-                key={chip.key ?? "all"}
-                type="button"
-                role="tab"
-                aria-selected={only === chip.key}
-                onClick={() => setOnly(chip.key)}
-                className={cn(
-                  "inline-flex h-8 shrink-0 items-center rounded-full px-3.5 text-[13px] transition-colors",
-                  only === chip.key
-                    ? "bg-[var(--i-panel)] font-medium text-[var(--i-ink)] shadow-[var(--i-shadow-sm)] dark:bg-white/[0.14] dark:shadow-none"
-                    : "text-[var(--i-muted)] hover:text-[var(--i-ink)]",
-                )}
-              >
-                {chip.label}{" "}
-                <span className="tabular-nums text-[var(--i-faint)]">
-                  {chip.key === null
-                    ? chip.count
-                    : chip.planned > 0
-                      ? `${chip.done}/${chip.planned}`
-                      : chip.count}
-                </span>
-              </button>
-            ))}
-          </div>
-        ) : (
-          <span className="flex-1" />
-        )}
-        <span className="flex shrink-0 items-center gap-1">
-          {canEditPlan ? (
-            <ScopeLineDialog
-              cycleId={cycleId}
-              position={nextPosition}
-              trigger={
-                <button type="button" className={buttonClass("ghost", "sm")}>
-                  <Plus size={13} /> Add to the plan
-                </button>
-              }
-            />
-          ) : null}
-          <DeliverableDialog
+      <div className="flex flex-wrap items-center justify-end gap-1">
+        {canEditPlan ? (
+          <ScopeLineDialog
             cycleId={cycleId}
-            scopeLines={ordered}
-            owners={owners}
-            names={names}
-            access={viewer.clients}
-            me={viewer.email}
-            title="Add work"
-            devrel={devrel}
+            position={nextPosition}
             trigger={
-              <button type="button" className={buttonClass("secondary", "sm")}>
-                <Plus size={13} />
-                {ordered.length ? "Add something else" : "Add work"}
+              <button type="button" className={buttonClass("ghost", "sm")}>
+                <Plus size={13} /> Add to the plan
               </button>
             }
           />
-        </span>
+        ) : null}
+        <DeliverableDialog
+          cycleId={cycleId}
+          scopeLines={ordered}
+          owners={owners}
+          names={names}
+          access={viewer.clients}
+          me={viewer.email}
+          title="Add work"
+          devrel={devrel}
+          trigger={
+            <button type="button" className={buttonClass("secondary", "sm")}>
+              <Plus size={13} />
+              {ordered.length ? "Add something else" : "Add work"}
+            </button>
+          }
+        />
       </div>
 
       {empty ? (
         <Card>
           <div className="flex flex-col items-center px-6 py-10 text-center">
             <ListChecks size={20} className="text-[var(--i-muted)]" />
-            <p className="mt-2 text-[13.5px] font-medium">
-              Nothing planned yet
-            </p>
+            <p className="mt-2 text-[13.5px] font-medium">Nothing planned yet</p>
             <p className="mt-1 max-w-sm text-[13px] text-[var(--i-muted)]">
               {canEditPlan
                 ? "Add what the contract covers this month, like 4 blogs. Then add each one here as it starts."
@@ -411,18 +202,40 @@ export function MonthWork({
         </Card>
       ) : (
         <div className="space-y-4">
-          {cards.filter((card) => card.wide).map((card) => card.node)}
-          {right.length ? (
-            // Two columns of the same height: the last card in the shorter
-            // one grows to the bottom, so no hole is left under it.
-            <div className="grid gap-4 lg:grid-cols-2">
-              <div className={columnClass}>{left}</div>
-              <div className={columnClass}>{right}</div>
-            </div>
-          ) : (
-            // One half-width card alone takes the whole row.
-            left
-          )}
+          {filled.map(({ line, items }) => (
+            <PlanGroup key={line.id} line={line} items={items} all={false} canEditPlan={canEditPlan} {...shared} />
+          ))}
+          {outside.length ? (
+            <Card className="min-w-0">
+              <div className="flex items-center gap-3 border-b border-[var(--i-line)] px-5 py-3">
+                <h3 className="text-[13.5px] font-medium">Not in the plan</h3>
+                <span className="text-[12.5px] tabular-nums text-[var(--i-muted)]">
+                  {outside.filter((item) => item.status === "published").length} live
+                </span>
+              </div>
+              <Pieces
+                name="Not in the plan"
+                items={outside}
+                layout={outside.every((item) => WRITTEN_KINDS.has(item.kind)) ? "work" : "compact"}
+                posts={false}
+                written={outside.every((item) => WRITTEN_KINDS.has(item.kind))}
+                all={false}
+                {...shared}
+              />
+            </Card>
+          ) : null}
+          {quiet.length ? (
+            <Card className="min-w-0">
+              <div className="px-5 pb-1 pt-3.5">
+                <h3 className="text-[13.5px] font-medium">Not started yet</h3>
+              </div>
+              <ul className="pb-1.5">
+                {quiet.map(({ line }) => (
+                  <QuietLine key={line.id} line={line} canEditPlan={canEditPlan} {...shared} />
+                ))}
+              </ul>
+            </Card>
+          ) : null}
         </div>
       )}
     </section>
@@ -495,22 +308,20 @@ function QuietLine({
 
 /**
  * One part of the plan as its own card: a header (name, "2 of 4", a small
- * bar, views, the add button) and the pieces. Written work is a table
- * across the page; posts and other small parts are compact two-line rows,
- * half the width, side by side.
+ * bar, views, the add button) and the pieces. Written work is the
+ * tracker's table, posts a table of views, and the rest (PRs, demos,
+ * calls) compact two-line rows.
  */
 function PlanGroup({
   line,
   items,
-  wide,
   all,
   canEditPlan,
   ...shared
 }: Shared & {
   line: ScopeLine;
   items: readonly Deliverable[];
-  wide: boolean;
-  /** Every piece on the card (one kind is picked), not the short list. */
+  /** Every piece on the card, not the short list. */
   all: boolean;
   canEditPlan: boolean;
 }) {
@@ -585,7 +396,8 @@ function PlanGroup({
         <Pieces
           name={name}
           items={items}
-          layout={!wide ? "compact" : posts ? "posts" : "work"}
+          // Posts as a table of views; writing as the tracker's table; the rest (PRs, demos, calls) as a list.
+          layout={posts ? "posts" : WRITTEN_KINDS.has(line.kind) && line.kind !== "report" ? "work" : "compact"}
           posts={posts}
           written={WRITTEN_KINDS.has(line.kind)}
           all={all}

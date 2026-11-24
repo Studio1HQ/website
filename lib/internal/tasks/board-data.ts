@@ -2,6 +2,7 @@ import type { Deliverable } from "@/lib/internal/clients/schema";
 import {
   STUDIO_LINK,
   TASK_AREAS,
+  engagementLabel,
   forKey,
   forLabel,
   isClientKey,
@@ -129,14 +130,14 @@ export function linkOptions(
       value: `d:${row.id}`,
       label: reviewing ? `Review: ${row.title}` : row.title,
       group: "deliverable",
-      hint: engagement ? (engagement.internal ? `Studio1 · ${engagement.name}` : engagement.client) : undefined,
+      hint: engagement ? (engagement.internal ? engagementLabel(engagement) : engagement.client) : undefined,
       client: !engagement?.internal,
     });
   }
   for (const engagement of clients) {
     options.push({
       value: `e:${engagement.id}`,
-      label: engagement.internal ? `Studio1 · ${engagement.name}` : `${engagement.client} · ${engagement.name}`,
+      label: engagementLabel(engagement),
       group: "client",
       hint: engagement.internal ? undefined : engagement.client,
       client: !engagement.internal,

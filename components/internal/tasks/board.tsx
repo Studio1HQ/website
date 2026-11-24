@@ -1,33 +1,39 @@
 "use client";
 
 import { useOptimistic, useState, type ReactNode } from "react";
+import Link from "next/link";
 import { DndContext, DragOverlay, useDraggable, useDroppable, type DragEndEvent } from "@dnd-kit/core";
-import { DotsThree, PencilSimple, Plus, Prohibit, UserCircle, UsersThree } from "@/components/internal/icons";
+import { ArrowUpRight, DotsThree, PencilSimple, Plus, Prohibit, UserCircle, UsersThree } from "@/components/internal/icons";
 import * as Menu from "@radix-ui/react-dropdown-menu";
 import { blockTask, moveTask } from "@/app/internal/(dashboard)/tasks/actions";
 import { setQuickField } from "@/app/internal/(dashboard)/community/actions";
 import { cn } from "@/lib/utils";
-import { buttonClass, inputClass, menuContentClass, menuItemClass } from "@/components/internal/ui";
+import { ExternalLink, buttonClass, inputClass, menuContentClass, menuItemClass } from "@/components/internal/ui";
 import { DueDate, Pill } from "@/components/internal/community/ui";
 import { Select } from "@/components/internal/select";
 import { Label, TeamDialog, useTeamAction } from "@/components/internal/team/kit";
-import { DeliverableCard } from "@/components/internal/clients/deliverable-card";
-import { StatusBadge } from "@/components/internal/clients/ui";
+import { BlockDialog } from "@/components/internal/clients/block-dialog";
+import { DeliverableDialog } from "@/components/internal/clients/deliverable-dialog";
+import { KindIcon } from "@/components/internal/clients/kind-icon";
+import { MoveStatusMenu } from "@/components/internal/clients/move-status-menu";
+import { canChangeDeliverable, isLate as isDeliverableLate, isWaitingOnClient } from "@/lib/internal/clients/rules";
 import { TaskDialog } from "@/components/internal/tasks/task-dialog";
 import { TaskNote } from "@/components/internal/tasks/task-note";
 import { PriorityMark } from "@/components/internal/tasks/priority";
 import { withLabel } from "@/components/internal/tasks/with-picker";
 import { ForChip, type ForOption, type LogTarget } from "@/components/internal/tasks/kit";
-import { StatusMenuItems, StatusPill } from "@/components/internal/tasks/status-pill";
+import { StatusMenuItems, StatusPill, TonePill } from "@/components/internal/tasks/status-pill";
 import { cardAnnouncements, dragHandlers, underPointer, useCardSensors } from "@/components/internal/tasks/drag";
 import { displayName } from "@/lib/internal/team/shared";
 import type { ClientsAccess } from "@/lib/internal/clients/rules";
-import type { Deliverable } from "@/lib/internal/clients/schema";
+import { DELIVERABLE_KINDS, DELIVERABLE_STATUSES, clientPath, labelOf, statusLabel, toneOf, type Deliverable } from "@/lib/internal/clients/schema";
 import {
   TASK_STATUSES,
   communityColumn,
   communityStatusFor,
   deliverableColumn,
+  isOwed,
+  isTaskLate,
   isTaskStatus,
   peopleOn,
   priorityRank,
@@ -35,6 +41,7 @@ import {
   type CommunityCard,
   type Task,
   type Teammate,
+  type Tone,
 } from "@/lib/internal/tasks/shared";
 
 /* The board: one person's work from three places in four columns. Drag a
@@ -178,15 +185,16 @@ export function Board(props: BoardProps) {
 
   const doneCount = items.filter((item) => item.column === "done").length;
   // The bar across the top: how far the week has got, and what needs a look.
+  // Late is what each card says: a task in review is handed in, so it isn't.
   const facts = items.map((item) =>
     item.kind === "task"
-      ? { due: item.data.task.due_on, blocked: item.data.task.blocked }
+      ? { late: isTaskLate(item.data.task, today), blocked: item.data.task.blocked }
       : item.kind === "deliverable"
-        ? { due: item.data.deliverable.due_on, blocked: item.data.deliverable.blocked }
-        : { due: item.data.due_on, blocked: item.data.status === "blocked" },
+        ? { late: isDeliverableLate(item.data.deliverable, today), blocked: item.data.deliverable.blocked }
+        : { late: item.data.status !== "done" && !!item.data.due_on && item.data.due_on < today, blocked: item.data.status === "blocked" },
   );
   const open = items.filter((item) => item.column !== "done");
-  const lateCount = items.filter((item, index) => item.column !== "done" && !!facts[index].due && facts[index].due! < today).length;
+  const lateCount = facts.filter((fact) => fact.late).length;
   const blockedCount = items.filter((item, index) => item.column !== "done" && facts[index].blocked).length;
   const progress = items.length ? Math.round((doneCount / items.length) * 100) : 0;
 
@@ -246,7 +254,7 @@ export function Board(props: BoardProps) {
           <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {props.reviewing.map((item) => (
               <li key={item.deliverable.id}>
-                <ClientCard item={item} viewer={viewer} names={props.names} today={today} />
+                <ClientCard item={item} viewer={viewer} names={props.names} today={today} showOwner />
               </li>
             ))}
           </ul>
@@ -390,44 +398,141 @@ function LiftedCard({ what }: { what: Lifted }) {
   );
 }
 
-/** A client deliverable: the client board's own card when the viewer can open client work. */
+/**
+ * A client piece (from client work, read here, never copied), shaped like a
+ * task card so the board reads as one list: what kind it is and its title,
+ * a blocked line when it's stuck, then one quiet line with the client, its
+ * status (a menu for whoever may move it), the due date and whether it's
+ * waiting on the client. The title opens it; ⋯ has block and the client page.
+ */
 function ClientCard({
   item,
   viewer,
   names,
   today,
+  showOwner = false,
 }: {
   item: BoardDeliverable;
   viewer: BoardProps["viewer"];
   names: Record<string, string>;
   today: string;
+  /** Someone else's piece (waiting on this person's review): say whose. */
+  showOwner?: boolean;
 }) {
-  if (viewer.clients) {
-    return (
-      <DeliverableCard
-        deliverable={item.deliverable}
-        viewer={{ email: viewer.email, clients: viewer.clients }}
-        clientName={item.clientName}
-        clientSlug={item.clientSlug}
-        engagementName={item.engagementName}
-        internal={item.internal}
-        names={names}
-        today={today}
-      />
-    );
-  }
+  const { deliverable } = item;
+  const [opened, setOpened] = useState(false);
+  const [blocking, setBlocking] = useState(false);
+  const access = viewer.clients;
+  const canChange = access ? canChangeDeliverable({ email: viewer.email, clients: access }, deliverable) : false;
+  const published = deliverable.status === "published";
+  const waiting = isWaitingOnClient(deliverable, today);
+  const page = item.clientSlug ? clientPath(item.clientSlug) : null;
+  const owner = deliverable.owner ? (names[deliverable.owner.toLowerCase()] ?? displayName({ email: deliverable.owner })) : null;
+  const heading = (
+    <>
+      <span title={labelOf(DELIVERABLE_KINDS, deliverable.kind)} className="mt-[3px] shrink-0">
+        <KindIcon kind={deliverable.kind} size={13} />
+      </span>
+      <span className="min-w-0">{deliverable.title}</span>
+    </>
+  );
+  const headingClass = "flex w-full items-start gap-1.5 text-left text-[13.5px] font-medium leading-snug";
+
   return (
-    <article className={cn("rounded-xl border bg-[var(--i-panel)] p-3 shadow-[var(--i-shadow-sm)]", item.deliverable.blocked ? "border-rose-200 dark:border-rose-500/30" : "border-[var(--i-line)]")}>
-      <ForChip label={item.forLabel} client={!item.internal} />
-      <p className="mt-1.5 text-[13.5px] font-medium leading-snug">{item.deliverable.title}</p>
-      <div className="mt-2 flex flex-wrap items-center gap-2">
-        <StatusBadge status={item.deliverable.status} />
-        {item.deliverable.due_on ? (
-          <span className="text-[12px]">
-            <DueDate day={item.deliverable.due_on} done={item.deliverable.status === "published"} today={today} />
-          </span>
+    <article
+      className={cn(
+        "group/card flex flex-col gap-2 rounded-xl border bg-[var(--i-panel)] p-3 shadow-[var(--i-shadow-sm)] transition-colors hover:border-[var(--i-line-strong)]",
+        deliverable.blocked ? "border-rose-200 dark:border-rose-500/30" : "border-[var(--i-line)]",
+      )}
+    >
+      <div className="flex items-start gap-2">
+        <div className="min-w-0 flex-1">
+          {access ? (
+            <button type="button" onClick={() => setOpened(true)} className={cn(headingClass, "hover:text-[var(--i-accent-text)]")}>
+              {heading}
+            </button>
+          ) : page ? (
+            <Link href={page} className={cn(headingClass, "hover:text-[var(--i-accent-text)]")}>
+              {heading}
+            </Link>
+          ) : (
+            <p className={headingClass}>{heading}</p>
+          )}
+        </div>
+        {(canChange && !published) || page ? (
+          <Menu.Root>
+            <Menu.Trigger
+              aria-label={`Options for ${deliverable.title}`}
+              className="-mr-1 -mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md text-[var(--i-faint)] opacity-0 outline-none transition-opacity hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)] focus-visible:opacity-100 group-hover/card:opacity-100 data-[state=open]:opacity-100 [@media(hover:none)]:opacity-100"
+            >
+              <DotsThree size={18} weight="bold" />
+            </Menu.Trigger>
+            <Menu.Portal>
+              <Menu.Content align="end" sideOffset={4} className={menuContentClass}>
+                {canChange && !published ? (
+                  <Menu.Item onSelect={() => setBlocking(true)} className={menuItemClass}>
+                    <Prohibit size={14} /> {deliverable.blocked ? "Change or unblock" : "Mark as blocked"}
+                  </Menu.Item>
+                ) : null}
+                {page ? (
+                  <Menu.Item asChild className={menuItemClass}>
+                    <Link href={page}>
+                      <ArrowUpRight size={14} /> Open {item.internal ? "Studio1's" : `${item.clientName}'s`} page
+                    </Link>
+                  </Menu.Item>
+                ) : null}
+              </Menu.Content>
+            </Menu.Portal>
+          </Menu.Root>
         ) : null}
       </div>
+
+      {deliverable.blocked ? (
+        <p className="flex items-center gap-1.5 rounded-md bg-rose-500/10 px-2 py-1 text-[12px] text-rose-700 dark:text-rose-300">
+          <Prohibit size={12} className="shrink-0" />
+          <span className="min-w-0 truncate">
+            {deliverable.waits_on === "client" ? "Waiting on the client" : "Blocked"}
+            {deliverable.block_reason ? `: ${deliverable.block_reason}` : ""}
+          </span>
+        </p>
+      ) : null}
+
+      {/* One quiet line, like a task's: the client, where it stands, when it's due. */}
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-[var(--i-muted)]">
+        <ForChip label={item.forLabel} client={!item.internal} />
+        {access ? (
+          <MoveStatusMenu deliverable={deliverable} internal={item.internal} canChange={canChange} />
+        ) : (
+          <TonePill tone={toneOf(DELIVERABLE_STATUSES, deliverable.status) as Tone} label={statusLabel(deliverable.status, deliverable.kind)} small />
+        )}
+        {deliverable.due_on && !published ? (
+          // In client review the date is the client's to meet: the plain date, never "late".
+          <DueDate day={deliverable.due_on} done={deliverable.status === "client_review"} today={today} />
+        ) : null}
+        {waiting ? <span className="text-amber-700 dark:text-amber-300">Waiting on the client</span> : null}
+        {showOwner && owner ? (
+          <span className="inline-flex items-center gap-1 text-[var(--i-faint)]">
+            <UserCircle size={12} /> {owner}
+          </span>
+        ) : null}
+        {published && deliverable.published_url ? (
+          <ExternalLink href={deliverable.published_url} className="text-[12px]">
+            Live
+          </ExternalLink>
+        ) : null}
+      </div>
+
+      {access ? (
+        <DeliverableDialog
+          deliverable={deliverable}
+          access={access}
+          canChange={canChange}
+          names={names}
+          open={opened}
+          onOpenChange={setOpened}
+        />
+      ) : null}
+      {canChange ? <BlockDialog deliverable={deliverable} open={blocking} onOpenChange={setBlocking} /> : null}
     </article>
   );
 }
@@ -516,7 +621,8 @@ function TaskCard({ item, props, onMove }: { item: BoardTask; props: BoardProps;
             {TASK_STATUSES.find((option) => option.value === task.status)?.label}
           </Pill>
         ) : null}
-        {task.due_on ? <DueDate day={task.due_on} done={task.status === "done"} today={props.today} /> : null}
+        {/* In review is handed in: the plain date, never "late". */}
+        {task.due_on ? <DueDate day={task.due_on} done={!isOwed(task.status)} today={props.today} /> : null}
         {given ? (
           <span className="inline-flex items-center gap-1 text-[var(--i-faint)]">
             <UserCircle size={12} /> {props.names[task.created_by.toLowerCase()] ?? displayName({ email: task.created_by })}
@@ -533,6 +639,7 @@ function TaskCard({ item, props, onMove }: { item: BoardTask; props: BoardProps;
           open={editing}
           onOpenChange={setEditing}
           task={task}
+          forLabel={item.forLabel}
           person={props.person}
           forOptions={props.forOptions}
           deliverables={props.targets.filter((target) => target.kind === "deliverable")}

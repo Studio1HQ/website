@@ -169,8 +169,9 @@ const sharingReady = () => Date.now() >= sharingMissingUntil;
 
 /**
  * How many of this person's open tasks are due today and how many are
- * late, for the sidebar badge, "Needs you" and the morning email. Null when
- * it can't be read.
+ * late, for the sidebar badge, "Needs you" and the morning email. Only
+ * what they still owe (Not started, In progress): one in review is handed
+ * in. Null when it can't be read.
  */
 export async function dueTaskCounts(email: string, today: string): Promise<{ today: number; late: number } | null> {
   const [me] = emailsOk([email]);
@@ -179,7 +180,7 @@ export async function dueTaskCounts(email: string, today: string): Promise<{ tod
     new URLSearchParams({
       select: "due_on",
       ...(shared ? { or: `(${whose([me])})` } : { email: `eq.${me}` }),
-      status: "neq.done",
+      status: "in.(todo,doing)",
       due_on: `lte.${today}`,
       limit: "500",
     });

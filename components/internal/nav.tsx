@@ -348,14 +348,6 @@ function SubNav({
   );
 }
 
-/** The client-work pages with a link of their own (the rest highlight Overview). */
-const CLIENT_PAGES = [
-  "/clients/board",
-  "/clients/load",
-  "/clients/reports",
-  "/clients/templates",
-];
-
 /** The blog pages with a link of their own; Posts covers the list and every post's editor. */
 const BLOG_PAGES = ["/blog/stats", "/blog/external"];
 
@@ -457,6 +449,14 @@ export function InternalNav({
             : null;
   const moneyBadge = team.payrollBadge + team.paymentsBadge;
   const clientsBadge = clients ? clients.late + clients.toReview : 0;
+  // A project's month (/clients/<company>/<YYYY-MM>) is under Projects;
+  // the rest of Clients (each company, Templates) is under Companies.
+  const clientPage = isActive("/clients/stats")
+    ? "stats"
+    : isActive("/clients/projects") ||
+        /^\/clients\/[^/]+\/\d{4}-\d{2}(\/|$)/.test(pathname)
+      ? "projects"
+      : "companies";
   const hackathonsNew = community ? (awaiting.hackathons ?? 0) : 0;
   const communityBadge = community
     ? community.tasks + community.sponsors + community.partners + hackathonsNew
@@ -504,44 +504,33 @@ export function InternalNav({
               <SubNav open={section === "clients"}>
                 <NavLink
                   href="/clients"
-                  label="Overview"
-                  icon={Nav.LayoutList}
-                  badge={clients.late}
-                  badgeTitle={`${clients.late} of your deliverables late`}
-                  active={
-                    pathname === "/clients" ||
-                    (isActive("/clients") &&
-                      !CLIENT_PAGES.some((page) => isActive(page)))
-                  }
+                  label="Companies"
+                  icon={Nav.Building}
+                  active={clientPage === "companies"}
                 />
                 <NavLink
-                  href="/clients/board"
-                  label="This week"
-                  icon={Nav.CalendarRange}
-                  active={isActive("/clients/board")}
+                  href="/clients/projects"
+                  label="Projects"
+                  icon={Nav.FolderKanban}
+                  badge={clientsBadge}
+                  badgeTitle={[
+                    clients.late
+                      ? `${clients.late} of your deliverables late`
+                      : null,
+                    clients.toReview
+                      ? `${clients.toReview} waiting for your review`
+                      : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                  active={clientPage === "projects"}
                 />
                 <NavLink
-                  href="/clients/load"
-                  label="Owner load"
-                  icon={Nav.Scale}
-                  badge={clients.toReview}
-                  badgeTitle={`${clients.toReview} waiting for your review`}
-                  active={isActive("/clients/load")}
+                  href="/clients/stats"
+                  label="Stats"
+                  icon={Nav.ChartColumn}
+                  active={clientPage === "stats"}
                 />
-                <NavLink
-                  href="/clients/reports"
-                  label="Monthly report"
-                  icon={Nav.FileChartColumn}
-                  active={isActive("/clients/reports")}
-                />
-                {clients.access === "manager" ? (
-                  <NavLink
-                    href="/clients/templates"
-                    label="Templates & capacity"
-                    icon={Nav.LayoutTemplate}
-                    active={isActive("/clients/templates")}
-                  />
-                ) : null}
               </SubNav>
             </>
           ) : null}

@@ -231,6 +231,8 @@ export const Nav = {
   Cog: make("NavCog", L.Cog),
   LayoutDashboard: make("NavLayoutDashboard", L.LayoutDashboard),
   Building2: make("NavBuilding2", L.Building2),
+  Building: make("NavBuilding", L.Building),
+  FolderKanban: make("NavFolderKanban", L.FolderKanban),
   LayoutList: make("NavLayoutList", L.LayoutList),
   CalendarRange: make("NavCalendarRange", L.CalendarRange),
   Scale: make("NavScale", L.Scale),

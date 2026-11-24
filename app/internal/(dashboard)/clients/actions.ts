@@ -86,7 +86,9 @@ import {
   type DeliverableStatus,
   statusLabel,
   type DeliverableKind,
+  type TemplateLine,
 } from "@/lib/internal/clients/schema";
+import { firstMonthFor } from "@/lib/internal/clients/plan";
 import {
   blockLine,
   clientsSlackReady,
@@ -286,9 +288,15 @@ export async function archiveClient(
 
 /* ------------------------------------------------------------ engagements */
 
+/**
+ * Adds an engagement (a project) or changes one. A new one can come with
+ * its checklist (`plan`, lines like a template's): its first month starts
+ * at once with those numbers, this month or its start month if later.
+ */
 export async function saveEngagement(
   id: unknown,
   values: unknown,
+  plan?: unknown,
 ): Promise<ActionResult> {
   const staff = await manager();
   if (!staff) return DENIED;
@@ -299,6 +307,13 @@ export async function saveEngagement(
   if (!canSeeMoney(staff)) delete input.contract_url;
   const clean = cleanEngagement(input, key ? "update" : "create");
   if (!clean.ok) return clean;
+  // The checklist is checked before anything is saved.
+  let firstPlan: TemplateLine[] | null = null;
+  if (!key && plan !== undefined) {
+    const lines = cleanTemplateLines(plan);
+    if (!lines.ok) return lines;
+    firstPlan = lines.lines.filter((line) => line.quantity > 0);
+  }
   if (key) {
     // Dates are judged with the saved ones when only one changes.
     const saved = await getEngagement(key);
@@ -328,8 +343,25 @@ export async function saveEngagement(
         staff.email,
       );
   if (!result.ok) return result;
+  let warning: string | undefined;
+  if (!key && result.id && firstPlan && clean.row.status !== "ended") {
+    const current = monthOf(todayKey());
+    const month = firstMonthFor(clean.row.starts_on as string | null | undefined, current);
+    const cycle = await insertRecord(
+      TABLES.cycles,
+      "month",
+      { engagement_id: result.id, month, state: month <= current ? "active" : "planning" },
+      staff.email,
+    );
+    if (!cycle.ok || !cycle.id)
+      warning = "The project was added, but its first month wasn't started. Start it from the company page.";
+    else if (firstPlan.length) {
+      const added = await insertMany(TABLES.lines, "scope line", linesFromTemplate(firstPlan, cycle.id), staff.email);
+      if (!added.ok) warning = "The project and its first month were added, but not its plan. Add the lines on the month's page.";
+    }
+  }
   refresh();
-  return { ...result, message: key ? "Engagement saved" : "Engagement added" };
+  return { ...result, message: key ? "Engagement saved" : "Project added", warning };
 }
 
 /* ----------------------------------------------------------------- cycles */

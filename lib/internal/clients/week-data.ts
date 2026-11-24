@@ -218,6 +218,12 @@ export async function loadClientWeek(input: {
   week: string;
   staff: Pick<Staff, "email" | "status" | "roles">;
   time?: boolean;
+  /**
+   * False leaves people's tasks out: the week is the client's pieces only.
+   * A client's own page does this, so the tracker and the client list stay
+   * two separate things.
+   */
+  tasks?: boolean;
 }): Promise<ClientWeekData> {
   const { week } = input;
   const today = todayKey();
@@ -235,7 +241,9 @@ export async function loadClientWeek(input: {
 
   const [deliverables, tasks, logs, guarded, people] = await Promise.all([
     weekDeliverables(ids, week),
-    weekTasks(ids, week),
+    input.tasks === false
+      ? Promise.resolve<Loaded<WeekTask>>({ ok: true, rows: [] })
+      : weekTasks(ids, week),
     input.time
       ? logsForEngagements(ids, week, weekEnd(week)).catch(() => null)
       : Promise.resolve(null),
