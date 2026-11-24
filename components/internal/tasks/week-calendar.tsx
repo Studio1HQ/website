@@ -1,14 +1,15 @@
 "use client";
 
-import { startTransition, useMemo, useOptimistic, useRef, useState, type ClipboardEvent, type KeyboardEvent, type ReactNode } from "react";
+import { startTransition, useMemo, useOptimistic, useRef, useState, useTransition, type ClipboardEvent, type KeyboardEvent, type ReactNode } from "react";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { DndContext, DragOverlay, useDraggable, useDroppable, type DragEndEvent } from "@dnd-kit/core";
-import { CheckCircle, Plus, Prohibit, Sparkle, UsersThree } from "@phosphor-icons/react";
+import { CaretDown, CheckCircle, Plus, Prohibit, Sparkle, UsersThree } from "@/components/internal/icons";
+import { StatusPicker, StatusPill, TonePill } from "@/components/internal/tasks/status-pill";
 import { addTasks, editTask, leaveTask, removeTask, setDeliverableDay } from "@/app/internal/(dashboard)/tasks/actions";
 import { cn } from "@/lib/utils";
 import { buttonClass, inputClass, textareaClass } from "@/components/internal/ui";
 import { DateField } from "@/components/internal/pickers";
-import { TONES } from "@/components/internal/community/ui";
 import { Select } from "@/components/internal/select";
 import { Label, Segmented, TeamDialog, useTeamAction } from "@/components/internal/team/kit";
 import { forSelectOptions } from "@/components/internal/tasks/for-options";
@@ -40,6 +41,8 @@ import {
 const weekdayFormat = new Intl.DateTimeFormat("en-GB", { weekday: "short", timeZone: "UTC" });
 const dateFormat = new Intl.DateTimeFormat("en-GB", { day: "numeric", timeZone: "UTC" });
 const fullFormat = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" });
+/** "17 Nov" */
+const shortDay = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
 const shortFormat = new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
 
 function at(day: string) {
@@ -87,6 +90,8 @@ export function WeekCalendar({
   const sensors = useCardSensors();
   /** The card being dragged. */
   const [lifted, setLifted] = useState<CalendarCard | null>(null);
+  /** The "No day yet" strip, folded away or open. */
+  const [trayOpen, setTrayOpen] = useState(true);
   /** Cards dropped on another day and still saving: they show there already; a failed save puts them back. */
   const [moved, move] = useOptimistic<Record<string, string>, { key: string; day: string }>({}, (state, next) => ({
     ...state,
@@ -128,18 +133,30 @@ export function WeekCalendar({
     >
       <div className="space-y-3">
         {waiting.length ? (
-          <section aria-label="No day yet" className="rounded-xl bg-[var(--i-sunken)] p-2 ring-1 ring-[var(--i-line)]">
-            <h2 className="px-1.5 pb-2 text-[12.5px] font-medium text-[var(--i-ink-2)]">
-              No day yet, or from earlier <span className="font-normal tabular-nums text-[var(--i-faint)]">{waiting.length}</span>
-              {movable ? <span className="font-normal text-[var(--i-faint)]"> · drag one onto a day</span> : null}
-            </h2>
-            <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-              {waiting.map((card) => (
-                <li key={`${card.kind}:${card.id}`}>
-                  <Card card={card} own={own} who={who} team={team} options={options} today={today} showDay movable />
-                </li>
-              ))}
-            </ul>
+          <section aria-label="No day yet" className="rounded-xl bg-[var(--i-sunken)] ring-1 ring-[var(--i-line)]">
+            <button
+              type="button"
+              aria-expanded={trayOpen}
+              onClick={() => setTrayOpen(!trayOpen)}
+              className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-[12.5px]"
+            >
+              <CaretDown size={14} className={cn("shrink-0 text-[var(--i-muted)] transition-transform", !trayOpen && "-rotate-90")} />
+              <span className="font-medium text-[var(--i-ink-2)]">No day yet, or from earlier</span>
+              <span className="rounded-full bg-[var(--i-hover)] px-1.5 text-[11px] leading-[17px] tabular-nums text-[var(--i-muted)]">
+                {waiting.length}
+              </span>
+              {movable && trayOpen ? <span className="ml-auto text-[12px] text-[var(--i-faint)]">Drag one onto a day</span> : null}
+            </button>
+            {trayOpen ? (
+              // One row that scrolls sideways, so the week stays near the top.
+              <ul className="flex gap-2 overflow-x-auto px-2 pb-2">
+                {waiting.map((card) => (
+                  <li key={`${card.kind}:${card.id}`} className="w-[250px] shrink-0">
+                    <Card card={card} own={own} who={who} team={team} options={options} today={today} showDay movable />
+                  </li>
+                ))}
+              </ul>
+            ) : null}
           </section>
         ) : null}
 
@@ -243,10 +260,16 @@ export function AddCard({
   person,
   who,
   team = [],
+  onDayChange,
 }: {
   day: string;
   today: string;
   options: LinkOption[];
+  /**
+   * Picking a day moves the whole list to it (My day), instead of only
+   * choosing where the new tasks go: `day` is then the day being shown.
+   */
+  onDayChange?: (day: string) => void;
   /** Start with the box open, with a Day to pick at the top (My day). */
   open?: boolean;
   /** With open: one row (what, for, day, save), for a wide card. */
@@ -271,8 +294,12 @@ export function AddCard({
   /** Who the tasks are shared with: on their lists too. */
   const [sharedWith, setSharedWith] = useState<string[]>([]);
   /** The day the tasks go on: the box's own, unless another is picked. */
-  const [on, setOn] = useState(day);
-  const moved = on !== day;
+  const [ownDay, setOwnDay] = useState(day);
+  const on = onDayChange ? day : ownDay;
+  /** Where "Back to …" goes: today when the list follows the picked day. */
+  const home = onDayChange ? today : day;
+  const setOn = (next: string) => (onDayChange ? onDayChange(next) : setOwnDay(next));
+  const moved = on !== home;
   const panel = useRef<HTMLDivElement>(null);
   const box = useRef<HTMLInputElement>(null);
   const noteBox = useRef<HTMLTextAreaElement>(null);
@@ -296,7 +323,7 @@ export function AddCard({
 
   const close = () => {
     reset();
-    setOn(day);
+    if (!onDayChange) setOwnDay(day);
     if (!startOpen) setOpen(false);
   };
 
@@ -352,7 +379,7 @@ export function AddCard({
   const dayPicker = (
     <DateField
       value={on}
-      onChange={(next) => setOn(next || day)}
+      onChange={(next) => setOn(next || home)}
       min={earliestCardDay(today)}
       required
       aria-label="Day these tasks are for"
@@ -367,10 +394,10 @@ export function AddCard({
   const movedNote = moved ? (
     <>
       <span>
-        {shortFormat.format(at(on))}, not {day === today ? "today" : shortFormat.format(at(day))}
+        {shortFormat.format(at(on))}, not {home === today ? "today" : shortFormat.format(at(home))}
       </span>
-      <button type="button" onClick={() => setOn(day)} className="text-[var(--i-faint)] underline hover:text-[var(--i-ink)]">
-        Back to {day === today ? "today" : shortFormat.format(at(day))}
+      <button type="button" onClick={() => setOn(home)} className="text-[var(--i-faint)] underline hover:text-[var(--i-ink)]">
+        Back to {home === today ? "today" : shortFormat.format(at(home))}
       </button>
     </>
   ) : null;
@@ -608,16 +635,6 @@ function canMove(card: CalendarCard, own: boolean) {
   return card.kind === "deliverable" ? card.editable === true : canEdit(card, own);
 }
 
-/** A status as a coloured dot and its name: quieter than a pill on a small card. */
-function StatusText({ tone, label }: { tone?: keyof typeof TONES; label: string }) {
-  return (
-    <span className="flex items-center gap-1.5">
-      <span aria-hidden className={cn("size-1.5 shrink-0 rounded-full", TONES[tone ?? "stone"].dot)} />
-      {label}
-    </span>
-  );
-}
-
 /**
  * The line under a card's title. Done cards keep just the tick by the title;
  * open ones show where they stand (yours: click to change). Top and Low
@@ -637,24 +654,14 @@ function CardMeta({
 }) {
   const taskStatus = card.kind === "task" ? TASK_STATUSES.find((option) => option.value === card.status) : undefined;
   const status = done ? null : card.kind === "task" && editable ? (
-    <Select
-      aria-label={`Status of ${card.title}`}
-      size="xs"
-      value={card.status}
-      onChange={onStatus}
-      options={TASK_STATUSES.map((option) => ({
-        value: option.value,
-        label: <StatusText tone={option.tone} label={option.label} />,
-        textValue: option.label,
-      }))}
-      className="-ml-1.5 h-6 w-auto gap-1 border-0 bg-transparent px-1.5 text-[11.5px] text-[var(--i-muted)] hover:bg-[var(--i-hover)] focus:bg-[var(--i-hover)]"
-    />
+    <StatusPicker status={card.status} onChange={onStatus} label={`Status of ${card.title}`} />
   ) : (
     <span className="text-[11.5px] text-[var(--i-muted)]">
       {card.kind === "task" ? (
-        <StatusText tone={taskStatus?.tone} label={taskStatus?.label ?? card.status} />
+        <StatusPill status={card.status} small label={taskStatus?.label} />
       ) : (
-        <StatusText tone={card.tone} label={card.status} />
+        // A client piece or community task: the same pill as a task's, in its own colour.
+        <TonePill tone={card.tone} label={card.status} small />
       )}
     </span>
   );
@@ -750,6 +757,8 @@ function Card({
     <article
       ref={setNodeRef}
       {...dragHandlers(listeners)}
+      // Search results open the week at this card (FocusCard finds it by this).
+      data-card={keyOf(card)}
       className={cn(
         "group rounded-lg border bg-[var(--i-panel)] px-2.5 py-2 shadow-[var(--i-shadow-sm)] transition-[border-color,opacity]",
         card.kind === "task" && card.blocked ? "border-rose-200 dark:border-rose-500/30" : "border-[var(--i-line)]",
@@ -794,12 +803,21 @@ function Card({
           })
         }
       />
-      {showDay && card.day ? <p className="mt-1 text-[11px] text-[var(--i-faint)]">Was for {card.day}</p> : null}
-      {card.kind === "task" && card.from ? <p className="mt-1 text-[11px] text-[var(--i-faint)]">From {card.from}</p> : null}
-      {card.kind === "task" && card.withNames.length ? (
-        <p title="Shared: it's on each of their lists" className="mt-1 flex items-center gap-1 text-[11px] text-[var(--i-muted)]">
-          <UsersThree size={12} className="shrink-0" />
-          <span className="truncate">With {card.withNames.join(", ")}</span>
+      {/* One quiet line: the day it was for, who gave it, who else is on it. */}
+      {(showDay && card.day) || (card.kind === "task" && (card.from || card.withNames.length)) ? (
+        <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-[var(--i-faint)]">
+          {showDay && card.day ? (
+            <span className={card.day < today && !done && !(card.kind === "task" && card.status === "review") ? "text-rose-600 dark:text-rose-400" : undefined}>
+              {card.day < today ? "Was for" : "For"} {shortDay.format(at(card.day))}
+            </span>
+          ) : null}
+          {card.kind === "task" && card.from ? <span>From {card.from}</span> : null}
+          {card.kind === "task" && card.withNames.length ? (
+            <span title="Shared: it's on each of their lists" className="inline-flex min-w-0 items-center gap-1">
+              <UsersThree size={11} className="shrink-0" />
+              <span className="truncate">{card.withNames.join(", ")}</span>
+            </span>
+          ) : null}
         </p>
       ) : null}
       {editable && card.kind === "task" ? (
@@ -902,8 +920,15 @@ function EditCard({
         </>
       }
     >
-      <Label label="Day" group>
-        <DateField value={form.day} onChange={(day) => setForm({ ...form, day })} min={earliestCardDay(today)} aria-label="Day" />
+      {/* A done card sits on the day it was finished: change it here, even once that week is over. */}
+      <Label label={form.status === "done" ? "Finished on" : "Day"} group>
+        <DateField
+          value={form.day}
+          onChange={(day) => setForm({ ...form, day })}
+          min={earliestCardDay(today)}
+          max={form.status === "done" ? today : undefined}
+          aria-label={form.status === "done" ? "Finished on" : "Day"}
+        />
       </Label>
       <Label label="Task">
         <input
@@ -959,7 +984,9 @@ export function DayList({
   options,
   who,
   team = [],
+  followDay = false,
 }: {
+  /** The day shown, and where new tasks go. */
   day: string;
   today: string;
   cards: CalendarCard[];
@@ -968,15 +995,42 @@ export function DayList({
   who: string;
   /** Everyone active on the team list: who a task can be shared with. */
   team?: Teammate[];
+  /**
+   * Picking a day in the box shows that day's cards: it goes in the page's
+   * URL as ?day= (gone again for today), and the page loads that day.
+   */
+  followDay?: boolean;
 }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [moving, startMoving] = useTransition();
+  const showDay = (next: string) => {
+    const params = new URLSearchParams(window.location.search);
+    if (next === today) params.delete("day");
+    else params.set("day", next);
+    const query = params.toString();
+    startMoving(() => router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false }));
+  };
   // The box on top, the cards under it; in a card with a set height (My day
   // on a wide screen) the cards scroll on their own.
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="shrink-0 border-b border-[var(--i-line)] p-3">
-        <AddCard day={day} today={today} options={options} open inline who={who} team={team} />
+        <AddCard
+          day={day}
+          today={today}
+          options={options}
+          open
+          inline
+          who={who}
+          team={team}
+          onDayChange={followDay ? showDay : undefined}
+        />
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto p-3">
+      <div
+        aria-busy={moving || undefined}
+        className={cn("min-h-0 flex-1 overflow-y-auto p-3 transition-opacity", moving && "opacity-50")}
+      >
         {cards.length ? (
           <ul className="grid gap-1.5 sm:grid-cols-2">
             {cards.map((card) => (
@@ -986,7 +1040,11 @@ export function DayList({
             ))}
           </ul>
         ) : (
-          <p className="px-1 py-2 text-[12.5px] text-[var(--i-faint)]">Nothing here yet. Add what you work on as you go.</p>
+          <p className="px-1 py-2 text-[12.5px] text-[var(--i-faint)]">
+            {day === today
+              ? "Nothing here yet. Add what you work on as you go."
+              : `Nothing on ${shortFormat.format(at(day))}. Add what you worked on.`}
+          </p>
         )}
       </div>
     </div>

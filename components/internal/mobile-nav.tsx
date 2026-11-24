@@ -11,7 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import { usePathname } from "next/navigation";
-import { CaretLeft, List, X } from "@phosphor-icons/react";
+import { List, SidebarSimple, X } from "@/components/internal/icons";
 import { SIDEBAR_COOKIE, SIDEBAR_EASE } from "@/lib/internal/sidebar";
 import { cn } from "@/lib/utils";
 
@@ -114,6 +114,11 @@ export function useSidebarCollapsed() {
   return useContext(DrawerContext).collapsed;
 }
 
+/** Folds or unfolds the desktop sidebar (the search's "Fold sidebar"). */
+export function useSidebarToggle() {
+  return useContext(DrawerContext).toggleCollapsed;
+}
+
 const noSubscribe = () => () => {};
 
 /** "⌘" on a Mac, "Ctrl+" elsewhere (the server guesses a Mac). */
@@ -148,17 +153,19 @@ function CollapseButton() {
       title={`${label} (${mod}\\)`}
       onClick={toggleCollapsed}
       className={cn(
-        "fixed top-[22px] z-30 hidden size-6 items-center justify-center rounded-full bg-[var(--i-panel)] text-[var(--i-muted)] shadow-[var(--i-shadow)] ring-1 ring-[var(--i-line)] transition-[left,color,transform] hover:scale-110 hover:text-[var(--i-ink)] active:scale-95 md:flex print:hidden",
+        "fixed z-30 hidden items-center justify-center text-[var(--i-faint)] transition-[left,top,color,background-color,opacity] hover:text-[var(--i-ink)] focus-visible:opacity-100 md:flex print:hidden",
         MOTION,
-        // The sidebar's width less half the button.
-        collapsed ? "left-12" : "left-56",
+        // Open: a small button in the header, at the sidebar's right.
+        // Folded: takes the logo's place while the pointer is on the
+        // sidebar, solid and a little larger than the logo (36px over its
+        // 28px, both centred on the same point) so none of it shows round
+        // the edge.
+        collapsed
+          ? "left-3 top-4 size-9 rounded-lg bg-[var(--i-sidebar)] opacity-0 ring-1 ring-[var(--i-line)] hover:bg-[var(--i-hover)] hover:opacity-100 peer-hover:opacity-100"
+          : "left-[216px] top-[22px] size-7 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.07]",
       )}
     >
-      <CaretLeft
-        size={12}
-        weight="bold"
-        className={cn("transition-transform", MOTION, collapsed && "rotate-180")}
-      />
+      <SidebarSimple size={17} weight="regular" />
     </button>
   );
 }
@@ -293,14 +300,14 @@ export function MobileNavPanel({ children, className }: { children: ReactNode; c
         {...(open ? { role: "dialog", "aria-modal": true } : {})}
         data-collapsed={collapsed}
         className={cn(
-          "group/sidebar fixed inset-y-0 left-0 z-50 flex w-[min(300px,86vw)] flex-col bg-[var(--i-sidebar)] shadow-[var(--i-shadow-pop)] transition-[transform,visibility]",
+          "peer group/sidebar fixed inset-y-0 left-0 z-50 flex w-[min(300px,86vw)] flex-col bg-[var(--i-sidebar)] shadow-[var(--i-shadow-pop)] transition-[transform,visibility]",
           open ? "visible translate-x-0" : "invisible -translate-x-full",
           // Desktop: a sticky column whose width eases between full and
           // icons; overflow-hidden clips the text as it narrows. 60px puts
           // the icons (12px padding + 10px inset + 16px) dead centre.
-          "md:visible md:sticky md:top-0 md:z-auto md:h-screen md:shrink-0 md:translate-x-0 md:overflow-hidden md:border-r md:border-[var(--i-line)] md:shadow-none md:transition-[width] md:motion-reduce:transition-none",
+          "md:visible md:sticky md:top-0 md:z-auto md:h-screen md:shrink-0 md:translate-x-0 md:overflow-hidden md:bg-transparent md:shadow-none md:transition-[width] md:motion-reduce:transition-none",
           MOTION,
-          collapsed ? "md:w-[60px]" : "md:w-[236px]",
+          collapsed ? "md:w-[60px]" : "md:w-[256px]",
           "print:hidden",
           className,
         )}
@@ -314,7 +321,9 @@ export function MobileNavPanel({ children, className }: { children: ReactNode; c
           style={{ top: tip.top, left: tip.left }}
           className="pointer-events-none fixed z-50 hidden -translate-y-1/2 animate-[internal-tip-in_140ms_ease-out] whitespace-nowrap rounded-md bg-[var(--i-ink)] px-2 py-1 text-[12px] font-medium text-[var(--i-panel)] shadow-[var(--i-shadow-pop)] md:block print:hidden"
         >
-          {tip.label}
+          {/* the pointer, at the icon it names */}
+          <span aria-hidden className="absolute -left-[3px] top-1/2 size-2 -translate-y-1/2 rotate-45 rounded-[1px] bg-[var(--i-ink)]" />
+          <span className="relative">{tip.label}</span>
         </div>
       ) : null}
     </>

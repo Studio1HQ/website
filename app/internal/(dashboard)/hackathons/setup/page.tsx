@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ArrowLeft, ArrowRight, ArrowSquareOut, GithubLogo } from "@phosphor-icons/react/dist/ssr";
+import { ArrowLeft, ArrowRight, ArrowSquareOut, GithubLogo } from "@/components/internal/icons";
 import { HACKATHONS } from "@/data/hackathons";
 import { loadEvents } from "@/lib/internal/community/data";
 import { formatEventDate, todayKey } from "@/lib/internal/community/schema";

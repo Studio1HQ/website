@@ -1,7 +1,7 @@
 "use client";
 
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { Check, Flag } from "@phosphor-icons/react";
+import { Check, Flag } from "@/components/internal/icons";
 import { cn } from "@/lib/utils";
 import { menuContentClass, menuItemClass } from "@/components/internal/ui";
 import { TASK_PRIORITIES, isTaskPriority, type TaskPriority } from "@/lib/internal/tasks/shared";

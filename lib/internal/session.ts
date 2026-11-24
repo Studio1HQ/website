@@ -174,7 +174,16 @@ export const getStaff = cache(async (): Promise<Staff | null> => {
     localPreview = Boolean(email);
   }
   if (!email) return null;
+  return staffForEmail(email, localPreview);
+});
 
+/**
+ * Someone's roles and team access from their (already proven) address: the
+ * same rules for the dashboard and for the Studio1 Connect extension
+ * (lib/internal/extension/http.ts), so the extension never opens more than
+ * its owner could open themselves.
+ */
+export async function staffForEmail(email: string, localPreview = false): Promise<Staff> {
   // Read together: one round trip to the database instead of two in a row.
   const [access, team] = await Promise.all([accessFor(email), teamAccessFor(email)]);
   const base = { email, name: access.kind === "member" ? access.member.name : "", localPreview };
@@ -194,7 +203,7 @@ export const getStaff = cache(async (): Promise<Staff | null> => {
     default:
       return withTeam(withRoles(base, [], "unknown"), team);
   }
-});
+}
 
 /** The dashboard areas someone can open, in sidebar order. */
 export function areasFor(staff: Staff) {

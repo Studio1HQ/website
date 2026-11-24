@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { Hourglass, Prohibit, WarningCircle } from "@phosphor-icons/react/dist/ssr";
+import { Hourglass, Prohibit, WarningCircle } from "@/components/internal/icons";
 import Logo from "@/components/ui/svgs/logo";
 import { buttonClass } from "@/components/internal/ui";
 import { requestAccess } from "@/lib/internal/members";

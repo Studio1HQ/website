@@ -1,7 +1,7 @@
 "use client";
 
 import * as Dialog from "@radix-ui/react-dialog";
-import { ImageSquare, UploadSimple, X } from "@phosphor-icons/react";
+import { ImageSquare, UploadSimple, X } from "@/components/internal/icons";
 import {
   closeImageDialog$,
   imageDialogState$,

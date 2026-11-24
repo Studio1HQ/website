@@ -58,18 +58,18 @@ function Way({
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 1.1, ease: EASE }}
-      className="group relative isolate rounded-[10px] bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.08] md:min-h-[380px]"
+      className="group relative isolate rounded-[10px] bg-[#fbf9f5] ring-1 ring-inset ring-[#141414]/[0.08] lg:min-h-[380px]"
     >
       <div className="absolute inset-0 -z-10 overflow-hidden rounded-[10px]">
         {/* the photos, moving with the scroll, filling the right of the card */}
-        <div className="absolute inset-x-0 top-0 h-[200px] md:inset-y-0 md:left-auto md:right-0 md:h-auto md:w-[66%]">
+        <div className="absolute inset-x-0 top-0 h-[200px] sm:h-[260px] lg:inset-y-0 lg:left-auto lg:right-0 lg:h-auto lg:w-[66%]">
           <Turning photos={photos} className="size-full rounded-none" />
         </div>
         {/* paper over the left of the photo, so the words sit on paper and the photo melts in */}
-        <span aria-hidden className="absolute inset-0 bg-[linear-gradient(180deg,rgba(251,249,245,0)_0px,rgba(251,249,245,0)_150px,#fbf9f5_210px)] md:bg-[linear-gradient(90deg,#fbf9f5_32%,rgba(251,249,245,0.88)_48%,rgba(251,249,245,0)_72%)]" />
+        <span aria-hidden className="absolute inset-0 bg-[linear-gradient(180deg,rgba(251,249,245,0)_0px,rgba(251,249,245,0)_150px,#fbf9f5_210px)] sm:bg-[linear-gradient(180deg,rgba(251,249,245,0)_0px,rgba(251,249,245,0)_200px,#fbf9f5_270px))] lg:bg-[linear-gradient(90deg,#fbf9f5_32%,rgba(251,249,245,0.88)_48%,rgba(251,249,245,0)_72%)]" />
       </div>
 
-      <div className="relative flex flex-col justify-end gap-8 p-6 pt-[200px] md:min-h-[380px] md:pt-10 md:flex-row md:items-end md:justify-between md:p-10">
+      <div className="relative flex flex-col justify-end gap-8 p-6 pt-[200px] sm:p-8 sm:pt-[260px] lg:min-h-[380px] lg:pt-10 lg:flex-row lg:items-end lg:justify-between lg:p-10">
         <div className="max-w-[460px]">
           <motion.p
             initial={reduce ? false : { opacity: 0, x: -12 }}
@@ -86,7 +86,7 @@ function Way({
           <div className="mt-7">{action}</div>
         </div>
         {pills?.length ? (
-          <ul className="flex flex-col items-start gap-2 md:-mr-16 md:items-end lg:-mr-20">
+          <ul className="flex flex-col items-start gap-2 lg:-mr-16 lg:items-end sm:flex-row sm:flex-wrap lg:flex-col">
             {pills.map(([icon, value, text], i) => (
               <motion.li
                 key={text}
@@ -189,7 +189,7 @@ export function WaysIn({ data, index }: { data: CommunityData; index: number }) 
                 whileInView={{ opacity: 1, x: 0, rotate: 2 }}
                 viewport={{ once: true }}
                 transition={{ duration: 1, ease: EASE, delay: 0.3 }}
-                className="hidden w-[300px] shrink-0 rounded-[12px] bg-white p-4 shadow-[0_30px_60px_-30px_rgba(20,20,20,0.55)] ring-1 ring-[#141414]/[0.07] transition-transform duration-500 group-hover:rotate-0 md:-mr-16 md:block lg:-mr-20"
+                className="hidden w-[300px] shrink-0 rounded-[12px] bg-white p-4 shadow-[0_30px_60px_-30px_rgba(20,20,20,0.55)] ring-1 ring-[#141414]/[0.07] transition-transform duration-500 group-hover:rotate-0 lg:-mr-16 lg:block lg:-mr-20"
               >
                 <div className="flex items-center justify-between">
                   <span className="text-[13px] font-semibold">Studio1</span>

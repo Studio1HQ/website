@@ -7,7 +7,7 @@ import {
   Plus,
   Rows,
   UploadSimple,
-} from "@phosphor-icons/react/dist/ssr";
+} from "@/components/internal/icons";
 import { saveOrg } from "@/app/internal/(dashboard)/outreach/actions";
 import {
   formatDay,
@@ -261,9 +261,9 @@ export default async function OutreachPage({
                 href={link({ kind: option.value })}
                 aria-current={on ? "true" : undefined}
                 className={cn(
-                  "inline-flex h-8 items-center rounded-lg px-2.5 text-[12.5px]",
+                  "inline-flex h-8 items-center rounded-full px-3.5 text-[13px] transition-colors",
                   on
-                    ? "bg-[var(--i-panel)] font-medium text-[var(--i-ink)] shadow-[var(--i-shadow-sm)] ring-1 ring-[var(--i-line)]"
+                    ? "bg-[var(--i-panel)] font-medium text-[var(--i-ink)] shadow-[var(--i-shadow-sm)] dark:bg-white/[0.14] dark:shadow-none"
                     : "text-[var(--i-muted)] hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)]",
                 )}
               >
@@ -281,9 +281,9 @@ export default async function OutreachPage({
                 href={link({ priority: option.value })}
                 aria-current={on ? "true" : undefined}
                 className={cn(
-                  "inline-flex h-8 items-center rounded-lg px-2.5 text-[12.5px]",
+                  "inline-flex h-8 items-center rounded-full px-3.5 text-[13px] transition-colors",
                   on
-                    ? "bg-[var(--i-panel)] font-medium text-[var(--i-ink)] shadow-[var(--i-shadow-sm)] ring-1 ring-[var(--i-line)]"
+                    ? "bg-[var(--i-panel)] font-medium text-[var(--i-ink)] shadow-[var(--i-shadow-sm)] dark:bg-white/[0.14] dark:shadow-none"
                     : "text-[var(--i-muted)] hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)]",
                 )}
               >
@@ -307,7 +307,7 @@ export default async function OutreachPage({
                 className={cn(
                   "inline-flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-[12.5px]",
                   (board ? "board" : "table") === item.key
-                    ? "bg-[var(--i-panel)] font-medium text-[var(--i-ink)] shadow-[var(--i-shadow-sm)] ring-1 ring-[var(--i-line)]"
+                    ? "bg-[var(--i-panel)] font-medium text-[var(--i-ink)] shadow-[var(--i-shadow-sm)] dark:bg-white/[0.14] dark:shadow-none"
                     : "text-[var(--i-muted)] hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)]",
                 )}
               >

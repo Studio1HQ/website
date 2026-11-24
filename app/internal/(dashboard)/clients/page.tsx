@@ -1,212 +1,95 @@
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
 import Link from "next/link";
-import { Briefcase, Kanban, Plus, Rows } from "@phosphor-icons/react/dist/ssr";
+import { Briefcase, Plus, Rows, SquaresFour } from "@/components/internal/icons";
 import { scopeWork } from "@/lib/internal/clients/scope";
 import { requireClients } from "@/lib/internal/session";
-import { cleanMonth } from "@/lib/internal/clients/clean";
-import {
-  CLIENTS_VIEW_COOKIE,
-  asClientsView,
-  type ClientsView,
-} from "@/lib/internal/clients/overview-view";
-import {
-  loadClientWork,
-  loadCycles,
-  loadTypeOptions,
-} from "@/lib/internal/clients/data";
+import { loadClientWork, loadCycles, loadTypeOptions } from "@/lib/internal/clients/data";
 import type { EngagementRow } from "@/lib/internal/clients/rules";
+import { companyTerm } from "@/lib/internal/clients/portfolio";
+import { projectName, projectPath } from "@/lib/internal/clients/projects";
 import {
   CLIENT_STATUSES,
-  CYCLE_STATES,
-  ENGAGEMENT_STATUSES,
   clientPath,
+  daysBetween,
+  formatDay,
   labelOf,
   monthLabel,
   plural,
   shiftMonth,
   thisMonth,
   todayKey,
+  toneOf,
   type ClientAccount,
+  type ClientStatus,
   type Engagement,
 } from "@/lib/internal/clients/schema";
 import { one } from "@/lib/internal/community/stats";
-import {
-  Card,
-  CardTitle,
-  EmptyState,
-  Notice,
-  PageHeader,
-  buttonClass,
-  relativeDate,
-} from "@/components/internal/ui";
-import {
-  LinkTabs,
-  Muted,
-  Pill,
-  RowLink,
-  Stat,
-  Table,
-  rowClass,
-} from "@/components/internal/community/ui";
-import {
-  ClientsLoadNotice,
-  ClientsMigrationNotice,
-  HealthBadge,
-  OptionBadge,
-  OwnerName,
-  ProgressMeter,
-} from "@/components/internal/clients/ui";
+import { Card, EmptyState, Notice, PageHeader, buttonClass } from "@/components/internal/ui";
+import { LinkTabs, TONES } from "@/components/internal/community/ui";
+import { ClientsLoadNotice, ClientsMigrationNotice, OwnerName } from "@/components/internal/clients/ui";
 import { ClientDialog } from "@/components/internal/clients/client-dialog";
 import { ClientLogo } from "@/components/internal/clients/client-logo";
-import {
-  ClientBoard,
-  RememberClientsView,
-  type BoardClient,
-} from "@/components/internal/clients/client-board";
+import { ClientsMenu } from "@/components/internal/clients/clients-menu";
+import { ClientStatusMenu } from "@/components/internal/clients/client-status-menu";
 import { CycleStartAllButton } from "@/components/internal/clients/cycle-controls";
-import { CycleMonthNav } from "@/components/internal/clients/cycle-month-nav";
+import { ProgressLine, heldUpText } from "@/components/internal/clients/portfolio";
+import { FilterDropdown } from "@/components/internal/influencers/filter-dropdown";
+import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = { title: "Clients" };
+export const metadata: Metadata = { title: "Companies" };
 
-type View = ClientsView;
-const asView = asClientsView;
+const STATUS_ORDER: readonly ClientStatus[] = ["active", "prospect", "paused", "ended"];
+/** The board reads left to right like a pipeline: talking, working, paused, done. */
+const BOARD_ORDER: readonly ClientStatus[] = ["prospect", "active", "paused", "ended"];
+/** An end date this close shows as a heads-up. */
+const ENDS_SOON_DAYS = 30;
 
-/** The overview: every active engagement this month with its health, then everyone else. */
+/**
+ * The companies: who we work with and who we're talking to. A table (status
+ * you can change in place, the kind of work, since when and until when,
+ * this month's projects, the account owner) or a board by status. A company
+ * opens its page; a project opens its month.
+ */
 export default async function ClientsPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const [staff, params, jar] = await Promise.all([
-    requireClients(),
-    searchParams,
-    cookies(),
-  ]);
+  const [staff, params] = await Promise.all([requireClients(), searchParams]);
   const manager = staff.clients === "manager";
-  // Table or Board: the one asked for, else the one this person last picked.
-  const picked = asView(one(params.view));
-  const view: View =
-    picked ?? asView(jar.get(CLIENTS_VIEW_COOKIE)?.value) ?? "table";
   const current = thisMonth();
-  const month = cleanMonth(one(params.month)) ?? current;
-  const showArchived = one(params.archived) === "1";
   const next = shiftMonth(current, 1);
   const today = todayKey();
+  const showArchived = one(params.archived) === "1";
+  const asked = one(params.status);
+  const view = one(params.view) === "board" ? "board" : "table";
+  // The board shows every status as a column, so it has no status filter.
+  const status = view === "table" ? (STATUS_ORDER.find((item) => item === asked) ?? null) : null;
 
   const [allWork, nextCycles, types] = await Promise.all([
-    loadClientWork(month),
+    loadClientWork(current),
     manager ? loadCycles({ month: next }) : Promise.resolve(null),
     loadTypeOptions(),
   ]);
   // Client team members an admin gave specific clients see only those.
   const work = scopeWork(staff.clientScope, allWork);
 
-  const href = (changes: {
-    month?: string;
-    archived?: boolean;
-    view?: View;
-  }) => {
+  const href = (changes: { status?: ClientStatus | null; archived?: boolean; view?: "table" | "board" }) => {
     const query = new URLSearchParams();
-    const pickedMonth = changes.month ?? month;
-    if (pickedMonth !== current) query.set("month", pickedMonth);
+    const pickedView = changes.view ?? view;
+    const pickedStatus = changes.status === undefined ? status : changes.status;
+    if (pickedView === "board") query.set("view", "board");
+    if (pickedStatus && pickedView === "table") query.set("status", pickedStatus);
     if (changes.archived ?? showArchived) query.set("archived", "1");
-    const pickedView = changes.view ?? (view === "board" ? view : undefined);
-    if (pickedView) query.set("view", pickedView);
     return `/clients${query.size ? `?${query}` : ""}`;
   };
 
   const denied =
     params.denied !== undefined ? (
       <div className="mb-5">
-        <Notice tone="warning">
-          You can see client work but not change that. Ask an admin for the
-          Client manager role.
-        </Notice>
+        <Notice tone="warning">You can see client work but not change that. Ask an admin for the Client manager role.</Notice>
       </div>
     ) : null;
-
-  if (!work.ok) {
-    return (
-      <>
-        <PageHeader
-          title="Clients"
-          description="Every active engagement, its month so far and its health."
-        />
-        {denied}
-        {work.missing ? (
-          <ClientsMigrationNotice message={work.message} />
-        ) : (
-          <Notice tone="error">{work.message}</Notice>
-        )}
-      </>
-    );
-  }
-
-  // Archived clients only ever show in the second group, behind the toggle.
-  const isArchived = (client: ClientAccount | null) =>
-    Boolean(client?.archived_at);
-  const active = work.rows.filter(
-    (row) =>
-      row.engagement.status === "active" &&
-      row.client &&
-      !isArchived(row.client),
-  );
-  const activeClientIds = new Set(
-    active.map((row) => row.engagement.client_id),
-  );
-  const engagementsOf = new Map<string, Engagement[]>();
-  for (const engagement of work.engagements)
-    engagementsOf.set(engagement.client_id, [
-      ...(engagementsOf.get(engagement.client_id) ?? []),
-      engagement,
-    ]);
-  const archivedCount = work.clients.filter(
-    (client) => client.archived_at,
-  ).length;
-  const quiet = work.clients
-    .filter((client) => showArchived || !client.archived_at)
-    .filter(
-      (client) =>
-        client.status !== "active" ||
-        !activeClientIds.has(client.id) ||
-        client.archived_at,
-    )
-    .sort(
-      (a, b) =>
-        Number(Boolean(a.archived_at)) - Number(Boolean(b.archived_at)) ||
-        CLIENT_STATUSES.findIndex((option) => option.value === a.status) -
-          CLIENT_STATUSES.findIndex((option) => option.value === b.status) ||
-        a.name.localeCompare(b.name),
-    );
-
-  // Active engagements still without a month: next month's, and the one in view.
-  const activeEngagements = work.engagements.filter(
-    (engagement) =>
-      engagement.status === "active" &&
-      !work.clients.find((client) => client.id === engagement.client_id)
-        ?.archived_at,
-  );
-  const nextHas = new Set(
-    nextCycles?.ok ? nextCycles.rows.map((cycle) => cycle.engagement_id) : [],
-  );
-  const missingNext = nextCycles?.ok
-    ? activeEngagements.filter((engagement) => !nextHas.has(engagement.id))
-        .length
-    : 0;
-  const missingHere =
-    month >= current ? active.filter((row) => !row.cycle).length : 0;
-  const showStartNext =
-    manager &&
-    nextCycles?.ok &&
-    (Number(today.slice(8)) >= 25 || missingNext > 0);
-
-  const red = active.filter((row) => row.health.level === "red").length;
-  const amber = active.filter((row) => row.health.level === "amber").length;
-  const inReview = active.reduce((sum, row) => sum + row.inClientReview, 0);
-  const waiting = active.reduce((sum, row) => sum + row.waitingOnClient, 0);
-  const blocked = active.reduce((sum, row) => sum + row.blocked, 0);
-  const blockedOn = active.filter((row) => row.blocked > 0).length;
 
   const addClient = manager ? (
     <ClientDialog
@@ -218,42 +101,64 @@ export default async function ClientsPage({
     />
   ) : null;
 
+  if (!work.ok) {
+    return (
+      <>
+        <PageHeader title="Companies" description="The companies we work with and talk to, and their projects." />
+        {denied}
+        {work.missing ? <ClientsMigrationNotice message={work.message} /> : <Notice tone="error">{work.message}</Notice>}
+      </>
+    );
+  }
+
+  // This month's projects, per company (engagements that are running or paused).
+  const projectsOf = new Map<string, EngagementRow[]>();
+  for (const row of work.rows) {
+    if (row.engagement.status === "ended" || row.engagement.status === "planned") continue;
+    projectsOf.set(row.engagement.client_id, [...(projectsOf.get(row.engagement.client_id) ?? []), row]);
+  }
+  const engagementsOf = new Map<string, Engagement[]>();
+  for (const engagement of work.engagements)
+    engagementsOf.set(engagement.client_id, [...(engagementsOf.get(engagement.client_id) ?? []), engagement]);
+
+  const archivedCount = work.clients.filter((client) => client.archived_at).length;
+  const visible = work.clients.filter((client) => showArchived || !client.archived_at);
+  const countOf = (value: ClientStatus) => visible.filter((client) => client.status === value).length;
+  const byName = (a: ClientAccount, b: ClientAccount) =>
+    Number(Boolean(a.archived_at)) - Number(Boolean(b.archived_at)) || a.name.localeCompare(b.name);
+  const companies = visible
+    .filter((client) => !status || client.status === status)
+    .sort((a, b) => STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status) || byName(a, b));
+
+  // Near the month's end: start next month's projects in one go.
+  const running = work.engagements.filter(
+    (engagement) => engagement.status === "active" && !work.clients.find((client) => client.id === engagement.client_id)?.archived_at,
+  );
+  const nextHas = new Set(nextCycles?.ok ? nextCycles.rows.map((cycle) => cycle.engagement_id) : []);
+  const missingNext = nextCycles?.ok ? running.filter((engagement) => !nextHas.has(engagement.id)).length : 0;
+  const showStartNext = manager && missingNext > 0 && Number(today.slice(8)) >= 25;
+
   const header = (
     <PageHeader
-      title="Clients"
-      description={`Every active engagement in ${monthLabel(month)}: how far along it is, what's with the client, what's stuck.`}
-      actionsClassName="max-sm:w-full"
+      title="Companies"
+      description="Who we work with and who we're talking to: their status, the kind of work, how long it runs, and this month's projects."
       actions={
-        // Phones: the month on a row of its own, the buttons sharing the
-        // next one. Wider: all on one line.
-        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
-          <CycleMonthNav
-            month={month}
-            href={(target) => href({ month: target })}
-            className="w-full sm:w-auto"
+        <>
+          {showStartNext ? <CycleStartAllButton month={next} label={`Start ${monthLabel(next, true)}`} /> : null}
+          <ClientsMenu
+            items={[
+              ...(manager ? [{ label: "Templates", href: "/clients/templates" }] : []),
+              ...(archivedCount || showArchived
+                ? [{ label: showArchived ? "Hide archived" : `Show archived (${archivedCount})`, href: href({ archived: !showArchived }) }]
+                : []),
+            ]}
           />
-          {showStartNext || addClient ? (
-            <div className="flex gap-2 *:flex-1 sm:*:flex-none">
-              {showStartNext ? (
-                <CycleStartAllButton
-                  month={next}
-                  label={`Start ${monthLabel(next, true)}`}
-                  variant={
-                    missingNext > 0 && Number(today.slice(8)) >= 25
-                      ? "accent"
-                      : "secondary"
-                  }
-                />
-              ) : null}
-              {addClient}
-            </div>
-          ) : null}
-        </div>
+          {addClient}
+        </>
       }
     />
   );
 
-  // A brand-new area: say what to do first.
   if (!work.clients.length) {
     return (
       <>
@@ -261,90 +166,215 @@ export default async function ClientsPage({
         {denied}
         <ClientsLoadNotice show={work.truncated} />
         <Card>
-          <EmptyState
-            icon={<Briefcase size={20} />}
-            title="No clients yet"
-            action={addClient}
-          >
+          <EmptyState icon={<Briefcase size={20} />} title="No clients yet" action={addClient}>
             {manager
-              ? "Client work runs here: who we work for, what's due each month, and what's stuck."
-              : "Clients a client manager adds show up here, with each engagement's month and health."}
+              ? "Add a company with its status and point of contact. On its page, add a project (like DevRel); each month of it gets a page for its pieces, links and report."
+              : "Companies a client manager adds show up here, with their projects."}
           </EmptyState>
-          {manager ? (
-            <ol className="mx-auto grid max-w-3xl gap-3 px-5 pb-10 sm:grid-cols-3">
-              {[
-                [
-                  "Add a client",
-                  "Name, status, primary contact and the shared Slack channel.",
-                ],
-                [
-                  "Add an engagement",
-                  "On the client's page: the type of work, the account owner, and a link to their tracker.",
-                ],
-                [
-                  "Start the month",
-                  "The engagement's template fills in the scope. Adjust the numbers, add deliverables, then move the month to Active.",
-                ],
-              ].map(([title, body], index) => (
-                <li
-                  key={title}
-                  className="rounded-xl border border-[var(--i-line)] bg-[var(--i-sunken)] px-4 py-3.5"
-                >
-                  <p className="text-[12px] tabular-nums text-[var(--i-faint)]">
-                    {String(index + 1).padStart(2, "0")}
-                  </p>
-                  <p className="mt-1 text-[13.5px] font-medium">{title}</p>
-                  <p className="mt-1 text-[12.5px] leading-relaxed text-[var(--i-muted)]">
-                    {body}
-                  </p>
-                </li>
-              ))}
-            </ol>
-          ) : null}
         </Card>
       </>
     );
   }
 
-  const workspaceHref = (row: EngagementRow) => {
-    if (!row.client) return null;
-    const query = new URLSearchParams({ engagement: row.engagement.id });
-    if (month !== current) query.set("month", month);
-    return `${clientPath(row.client.slug)}?${query}`;
+  const dash = <span className="text-[var(--i-faint)]">—</span>;
+
+  /** Each running project's month on one line: name, a thin bar, done of planned, a dot if held up. */
+  const thisMonthCell = (client: ClientAccount) => {
+    const rows = projectsOf.get(client.id) ?? [];
+    if (!rows.length) return dash;
+    const several = (engagementsOf.get(client.id)?.length ?? 0) > 1;
+    return (
+      <span className="flex flex-col gap-1">
+        {rows.map((row) => (
+          <ProgressLine
+            key={row.engagement.id}
+            href={projectPath(client.slug, current, { engagement: several ? row.engagement.id : null })}
+            label={`${projectName(row.engagement, client.name, types)}${row.engagement.status === "paused" ? " · paused" : ""}`}
+            done={row.progress.done}
+            planned={row.progress.planned}
+            held={heldUpText(row.blocked, row.waitingOnClient, row.late)}
+            note={row.cycle ? undefined : `${monthLabel(current, true)} not started`}
+          />
+        ))}
+      </span>
+    );
   };
 
-  // The board: every client (archived ones behind the toggle) by status,
-  // each with its active engagements this month.
-  const boardClients: BoardClient[] = work.clients
-    .filter((client) => showArchived || !client.archived_at)
-    .map((client) => ({
-      id: client.id,
-      slug: client.slug,
-      name: client.name,
-      website: client.website,
-      status: client.status,
-      archived: Boolean(client.archived_at),
-      contact: client.contact_name,
-      href: clientPath(client.slug),
-      engagements: active
-        .filter((row) => row.engagement.client_id === client.id)
-        .map((row) => ({
-          id: row.engagement.id,
-          name: row.engagement.name,
-          href: workspaceHref(row) ?? clientPath(client.slug),
-          health: { level: row.health.level, reason: row.health.reason },
-          progress: row.cycle
-            ? { done: row.progress.done, planned: row.progress.planned }
-            : null,
-          stage:
-            row.cycle && row.cycle.state !== "active"
-              ? labelOf(CYCLE_STATES, row.cycle.state)
-              : null,
-          blocked: row.blocked,
-          waiting: row.waitingOnClient,
-        })),
-      summary: engagementSummary(engagementsOf.get(client.id) ?? []),
-    }));
+  /** The kind of work: each project not yet ended, by its type ("DevRel retainer"). */
+  const workText = (client: ClientAccount) => {
+    const own = (engagementsOf.get(client.id) ?? []).filter((item) => item.status !== "ended");
+    return [...new Set(own.map((item) => labelOf(types, item.type)))].join(" · ");
+  };
+
+  /** "1 Nov – ongoing", "18 Nov – 25 Nov · today" (an end inside a month is flagged), "Ended 15 Oct". */
+  const termOf = (client: ClientAccount) => {
+    const term = companyTerm(client, engagementsOf.get(client.id) ?? []);
+    const left = term.ends && !term.ended ? daysBetween(today, term.ends) : null;
+    const soon = left !== null && left >= 0 && left <= ENDS_SOON_DAYS;
+    const since = term.since ? formatDay(term.since, today) : null;
+    const text = term.ended
+      ? term.ends
+        ? `Ended ${formatDay(term.ends, today)}`
+        : "Ended"
+      : term.ongoing
+        ? since
+          ? `${since} – ongoing`
+          : "Ongoing"
+        : term.ends
+          ? since
+            ? `${since} – ${formatDay(term.ends, today)}`
+            : `Ends ${formatDay(term.ends, today)}`
+          : since
+            ? `Since ${since}`
+            : "";
+    return { text, soon, when: soon ? (left === 0 ? "today" : `in ${plural(left!, "day")}`) : "" };
+  };
+  const termCell = (client: ClientAccount) => {
+    const term = termOf(client);
+    if (!term.text) return dash;
+    return (
+      <span
+        className={cn("block truncate text-[12.5px]", term.soon ? "font-medium text-amber-700 dark:text-amber-300" : "text-[var(--i-ink-2)]")}
+        title={term.soon ? `Ends ${term.when}` : undefined}
+      >
+        {term.text}
+        {term.soon ? <span className="font-normal"> · {term.when}</span> : null}
+      </span>
+    );
+  };
+  const ownerOf = (client: ClientAccount) => {
+    const owner =
+      (projectsOf.get(client.id) ?? []).find((row) => row.engagement.owner)?.engagement.owner ??
+      (engagementsOf.get(client.id) ?? []).find((item) => item.owner && item.status !== "ended")?.owner;
+    return owner ? <OwnerName email={owner} names={work.names} /> : dash;
+  };
+  /** Logo and name; the point of contact (or "Archived") under it. */
+  const nameOf = (client: ClientAccount) => (
+    <Link href={clientPath(client.slug)} className="group flex min-w-0 items-center gap-2.5">
+      <ClientLogo slug={client.slug} name={client.name} website={client.website} size={24} />
+      <span className="min-w-0">
+        <span className="block truncate font-medium leading-tight group-hover:text-[var(--i-accent-text)]">{client.name}</span>
+        <span className="block truncate text-[12px] leading-tight text-[var(--i-muted)]">
+          {client.archived_at ? "Archived" : client.contact_name || client.contact_email || "No point of contact"}
+        </span>
+      </span>
+    </Link>
+  );
+  const statusOf = (client: ClientAccount) => (
+    <ClientStatusMenu clientId={client.id} name={client.name} status={client.status} canEdit={manager && !client.archived_at} />
+  );
+  /** The kind of work and dates, as one quiet line. */
+  const metaLine = (client: ClientAccount) => {
+    const term = termOf(client);
+    const work = workText(client);
+    if (!work && !term.text) return null;
+    return (
+      <p className="truncate text-[12px] text-[var(--i-muted)]">
+        {work}
+        {work && term.text ? " · " : ""}
+        {term.soon ? (
+          <span className="font-medium text-amber-700 dark:text-amber-300">
+            {term.text} · {term.when}
+          </span>
+        ) : (
+          term.text
+        )}
+      </p>
+    );
+  };
+
+  const table = (
+    <Card>
+      {companies.length ? (
+        <>
+          {/* Phones and tablets: a compact row per company. */}
+          <ul className="divide-y divide-[var(--i-line)] lg:hidden">
+            {companies.map((client) => (
+              <li key={client.id} className="space-y-1.5 px-4 py-2.5">
+                <div className="flex items-center justify-between gap-3">
+                  {nameOf(client)}
+                  {statusOf(client)}
+                </div>
+                {metaLine(client)}
+                {projectsOf.get(client.id)?.length ? thisMonthCell(client) : null}
+              </li>
+            ))}
+          </ul>
+          <div className="hidden lg:block">
+            <table className="w-full table-fixed border-collapse text-left text-[13px]">
+              <thead>
+                <tr className="border-b border-[var(--i-line)] text-[12px] text-[var(--i-muted)] [&>th]:px-3 [&>th]:py-2 [&>th]:font-normal first:[&>th]:pl-5 last:[&>th]:pr-5">
+                  <th scope="col" className="w-[22%]">Company</th>
+                  <th scope="col" className="w-[11%]">Status</th>
+                  <th scope="col" className="w-[15%]">Work</th>
+                  <th scope="col" className="w-[15%]">Dates</th>
+                  <th scope="col" className="w-[23%]">{monthLabel(current)}</th>
+                  <th scope="col" className="w-[14%]">Account owner</th>
+                </tr>
+              </thead>
+              <tbody className="[&>tr]:border-b [&>tr]:border-[var(--i-line)] last:[&>tr]:border-0 [&>tr>td]:px-3 [&>tr>td]:py-2 first:[&>tr>td]:pl-5 last:[&>tr>td]:pr-5">
+                {companies.map((client) => (
+                  <tr key={client.id} className="transition-colors hover:bg-[var(--i-hover)]">
+                    <td>{nameOf(client)}</td>
+                    <td>{statusOf(client)}</td>
+                    <td>
+                      <span className="block truncate text-[12.5px] text-[var(--i-ink-2)]">{workText(client) || dash}</span>
+                    </td>
+                    <td>{termCell(client)}</td>
+                    <td>{thisMonthCell(client)}</td>
+                    <td>
+                      <span className="flex">{ownerOf(client)}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      ) : (
+        <EmptyState icon={<Briefcase size={20} />} title={`No ${status ? labelOf(CLIENT_STATUSES, status).toLowerCase() : ""} companies`}>
+          <Link href={href({ status: null })} className="underline underline-offset-[3px]">
+            Show every company
+          </Link>
+        </EmptyState>
+      )}
+    </Card>
+  );
+
+  const board = (
+    <div className="internal-scroll -mx-1 overflow-x-auto px-1 pb-2">
+      <div className="grid min-w-[880px] grid-cols-4 gap-3">
+        {BOARD_ORDER.map((column) => {
+          const items = visible.filter((client) => client.status === column).sort(byName);
+          return (
+            <section key={column} aria-label={labelOf(CLIENT_STATUSES, column)} className="min-w-0 rounded-xl bg-black/[0.03] p-1.5 dark:bg-white/[0.03]">
+              <h2 className="flex items-center gap-2 px-2 pb-1.5 pt-1 text-[12.5px] font-medium">
+                <span aria-hidden className={cn("size-2 rounded-full", TONES[toneOf(CLIENT_STATUSES, column)].dot)} />
+                {labelOf(CLIENT_STATUSES, column)}
+                <span className="font-normal tabular-nums text-[var(--i-faint)]">{items.length}</span>
+              </h2>
+              <ul className="space-y-1.5">
+                {items.map((client) => (
+                  <li key={client.id} className="space-y-1.5 rounded-lg border border-[var(--i-line)] bg-[var(--i-panel)] px-2.5 py-2 shadow-[var(--i-shadow-sm)]">
+                    <div className="flex items-center justify-between gap-2">
+                      <Link href={clientPath(client.slug)} className="group flex min-w-0 items-center gap-2">
+                        <ClientLogo slug={client.slug} name={client.name} website={client.website} size={20} />
+                        <span className="truncate text-[13px] font-medium group-hover:text-[var(--i-accent-text)]">{client.name}</span>
+                      </Link>
+                      {statusOf(client)}
+                    </div>
+                    {metaLine(client)}
+                    {projectsOf.get(client.id)?.length ? thisMonthCell(client) : null}
+                  </li>
+                ))}
+                {!items.length ? <li className="px-2 py-2 text-[12.5px] text-[var(--i-faint)]">None</li> : null}
+              </ul>
+            </section>
+          );
+        })}
+      </div>
+    </div>
+  );
 
   return (
     <>
@@ -352,460 +382,38 @@ export default async function ClientsPage({
       {denied}
       <ClientsLoadNotice show={work.truncated} />
 
-      <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Stat
-          label="Active engagements"
-          value={active.length}
-          note={plural(activeClientIds.size, "client")}
-        />
-        <Stat
-          label="At risk"
-          value={red}
-          accent={red > 0}
-          note={
-            amber
-              ? `${amber} more ${amber === 1 ? "needs" : "need"} a look`
-              : "Nothing else needs a look"
-          }
-        />
-        <Stat
-          label="With clients for review"
-          value={inReview}
-          note={
-            waiting
-              ? `${waiting} waiting on the client`
-              : "None held up by the client"
-          }
-        />
-        <Stat
-          label="Blocked"
-          value={blocked}
-          accent={blocked > 0}
-          note={
-            blocked
-              ? `on ${plural(blockedOn, "engagement")}`
-              : "Nothing blocked"
-          }
-        />
-      </div>
-
-      {picked ? <RememberClientsView view={picked} /> : null}
-
-      {missingHere > 0 && manager ? (
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[var(--i-line)] bg-[var(--i-panel)] px-4 py-3">
-          <p className="text-[13px] text-[var(--i-muted)]">
-            {plural(missingHere, "active engagement")}{" "}
-            {missingHere === 1 ? "hasn't" : "haven't"} started{" "}
-            {monthLabel(month)} yet.
-          </p>
-          <CycleStartAllButton
-            month={month}
-            label={`Start ${monthLabel(month, true)} for them`}
-            variant="accent"
-          />
-        </div>
-      ) : null}
-
-      <div className="flex flex-wrap items-start justify-between gap-x-3">
+      <div className="mb-3 flex flex-wrap items-center gap-2 [&>nav]:mb-0">
         <LinkTabs
           active={view}
           items={[
-            {
-              key: "table",
-              label: "Table",
-              href: href({ view: "table" }),
-              icon: <Rows size={14} />,
-            },
-            {
-              key: "board",
-              label: "Board",
-              href: href({ view: "board" }),
-              icon: <Kanban size={14} />,
-            },
+            { key: "table", label: "Table", href: href({ view: "table" }), icon: <Rows size={14} /> },
+            { key: "board", label: "Board", href: href({ view: "board" }), icon: <SquaresFour size={14} /> },
           ]}
         />
-        {view === "board" && (archivedCount || showArchived) ? (
-          <Link
-            href={href({ archived: !showArchived })}
-            className="inline-flex h-8 items-center text-[12.5px] text-[var(--i-muted)] hover:text-[var(--i-ink)]"
-          >
-            {showArchived
-              ? "Hide archived"
-              : `Show archived (${archivedCount})`}
-          </Link>
+        {view === "table" ? (
+          <>
+            <span className="mx-1 hidden h-5 w-px bg-[var(--i-line)] sm:block" aria-hidden />
+            <FilterDropdown
+              label="Status"
+              items={[
+                { key: "all", label: "All", href: href({ status: null }), on: !status, note: String(visible.length) },
+                ...STATUS_ORDER.map((value) => ({
+                  key: value,
+                  label: labelOf(CLIENT_STATUSES, value),
+                  href: href({ status: value }),
+                  on: status === value,
+                  note: String(countOf(value)),
+                })),
+              ]}
+            />
+          </>
         ) : null}
+        <span className="text-[12.5px] text-[var(--i-muted)]">
+          {plural(view === "table" ? companies.length : visible.length, "company", "companies")}
+        </span>
       </div>
 
-      {view === "board" ? (
-        <ClientBoard clients={boardClients} canMove={manager} />
-      ) : (
-        <>
-          <Card className="mb-6">
-            <CardTitle>
-              Active engagements{" "}
-              <span className="font-normal text-[var(--i-faint)]">
-                {active.length}
-              </span>
-            </CardTitle>
-            {active.length ? (
-              <>
-                <Table
-                  className="max-lg:hidden"
-                  head={
-                    <>
-                      <th>Client</th>
-                      <th>Type</th>
-                      <th>Account owner</th>
-                      <th>{monthLabel(month, true)}</th>
-                      <th>Client review</th>
-                      <th>Late</th>
-                      <th>Blocked</th>
-                      <th>Last update</th>
-                      <th>Health</th>
-                    </>
-                  }
-                >
-                  {active.map((row) => {
-                    const link = workspaceHref(row);
-                    return (
-                      <tr key={row.engagement.id} className={rowClass}>
-                        <td className="max-w-[16rem]">
-                          {link && row.client ? (
-                            <span className="flex items-center gap-2.5">
-                              <ClientLogo
-                                slug={row.client.slug}
-                                name={row.client.name}
-                                website={row.client.website}
-                                size={28}
-                              />
-                              <RowLink href={link} sub={row.engagement.name}>
-                                {row.client.name}
-                              </RowLink>
-                            </span>
-                          ) : (
-                            <Muted>{row.engagement.name}</Muted>
-                          )}
-                        </td>
-                        <td>
-                          <OptionBadge
-                            list={types}
-                            value={row.engagement.type}
-                          />
-                        </td>
-                        <td className="max-w-[10rem] text-[12.5px]">
-                          <OwnerName
-                            email={row.engagement.owner}
-                            names={work.names}
-                          />
-                        </td>
-                        <td className="w-40 min-w-[9rem]">
-                          <MonthCell row={row} />
-                        </td>
-                        <td className="whitespace-nowrap">
-                          <ReviewCell row={row} />
-                        </td>
-                        <td className="tabular-nums">
-                          {row.late ? (
-                            <span className="font-medium text-amber-700 dark:text-amber-300">
-                              {row.late}
-                            </span>
-                          ) : (
-                            <Muted>0</Muted>
-                          )}
-                        </td>
-                        <td className="tabular-nums">
-                          {row.blocked ? (
-                            <span className="font-medium text-rose-700 dark:text-rose-300">
-                              {row.blocked}
-                            </span>
-                          ) : (
-                            <Muted>0</Muted>
-                          )}
-                        </td>
-                        <td className="whitespace-nowrap text-[12.5px] text-[var(--i-muted)]">
-                          {row.lastUpdate ? relativeDate(row.lastUpdate) : "—"}
-                        </td>
-                        <td className="min-w-[12rem] max-w-[16rem]">
-                          <HealthBadge
-                            level={row.health.level}
-                            reason={row.health.reason}
-                            showReason
-                          />
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </Table>
-                <ul className="divide-y divide-[var(--i-line)] lg:hidden">
-                  {active.map((row) => {
-                    const link = workspaceHref(row);
-                    const body = (
-                      <>
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex min-w-0 items-center gap-2.5">
-                            {row.client ? (
-                              <ClientLogo
-                                slug={row.client.slug}
-                                name={row.client.name}
-                                website={row.client.website}
-                                size={28}
-                              />
-                            ) : null}
-                            <div className="min-w-0">
-                              <p className="truncate text-[13.5px] font-medium">
-                                {row.client?.name}
-                              </p>
-                              <p className="truncate text-[12px] text-[var(--i-muted)]">
-                                {row.engagement.name} ·{" "}
-                                {labelOf(types, row.engagement.type)}
-                              </p>
-                            </div>
-                          </div>
-                          <HealthBadge
-                            level={row.health.level}
-                            reason={row.health.reason}
-                          />
-                        </div>
-                        <p className="mt-1 text-[12px] leading-snug text-[var(--i-muted)]">
-                          {row.health.reason}
-                        </p>
-                        <div className="mt-2.5 grid grid-cols-2 gap-x-4 gap-y-2 text-[12.5px]">
-                          <MonthCell row={row} />
-                          <span className="flex flex-col gap-1">
-                            <ReviewCell row={row} />
-                            {row.late ? (
-                              <span className="text-amber-700 dark:text-amber-300">
-                                {row.late} late
-                              </span>
-                            ) : null}
-                            {row.blocked ? (
-                              <span className="text-rose-700 dark:text-rose-300">
-                                {row.blocked} blocked
-                              </span>
-                            ) : null}
-                          </span>
-                          <OwnerName
-                            email={row.engagement.owner}
-                            names={work.names}
-                          />
-                          <span className="text-right text-[var(--i-muted)]">
-                            {row.lastUpdate
-                              ? `Updated ${relativeDate(row.lastUpdate)}`
-                              : "No updates yet"}
-                          </span>
-                        </div>
-                      </>
-                    );
-                    return (
-                      <li key={row.engagement.id}>
-                        {link ? (
-                          <Link
-                            href={link}
-                            className="block px-4 py-3.5 active:bg-[var(--i-hover)]"
-                          >
-                            {body}
-                          </Link>
-                        ) : (
-                          <div className="px-4 py-3.5">{body}</div>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </>
-            ) : (
-              <EmptyState
-                icon={<Briefcase size={20} />}
-                title="No active engagements"
-              >
-                {manager
-                  ? "Open a client below and add an engagement, or set one to Active. Each one gets a month with its scope from the template."
-                  : "Engagements a client manager sets to Active show up here."}
-              </EmptyState>
-            )}
-          </Card>
-
-          <Card>
-            <CardTitle
-              action={
-                archivedCount || showArchived ? (
-                  <Link
-                    href={href({ archived: !showArchived })}
-                    className="text-[12.5px] text-[var(--i-muted)] hover:text-[var(--i-ink)]"
-                  >
-                    {showArchived
-                      ? "Hide archived"
-                      : `Show archived (${archivedCount})`}
-                  </Link>
-                ) : null
-              }
-            >
-              Pipeline and quiet{" "}
-              <span className="font-normal text-[var(--i-faint)]">
-                {quiet.length}
-              </span>
-            </CardTitle>
-            {quiet.length ? (
-              <>
-                <Table
-                  className="max-lg:hidden"
-                  head={
-                    <>
-                      <th>Client</th>
-                      <th>Status</th>
-                      <th>Engagements</th>
-                      <th>Primary contact</th>
-                      {/* Notes are for client managers, not the Client team. */}
-                      {manager ? <th>Notes</th> : null}
-                    </>
-                  }
-                >
-                  {quiet.map((client) => (
-                    <tr key={client.id} className={rowClass}>
-                      <td className="max-w-[16rem]">
-                        <span className="flex items-center gap-2.5">
-                          <ClientLogo
-                            slug={client.slug}
-                            name={client.name}
-                            website={client.website}
-                          />
-                          <RowLink href={clientPath(client.slug)}>
-                            {client.name}
-                          </RowLink>
-                        </span>
-                      </td>
-                      <td>
-                        <span className="flex flex-wrap items-center gap-1">
-                          <OptionBadge
-                            list={CLIENT_STATUSES}
-                            value={client.status}
-                          />
-                          {client.archived_at ? <Pill>Archived</Pill> : null}
-                        </span>
-                      </td>
-                      <td className="max-w-[14rem] text-[12.5px] text-[var(--i-muted)]">
-                        <span className="line-clamp-2">
-                          {engagementSummary(
-                            engagementsOf.get(client.id) ?? [],
-                          )}
-                        </span>
-                      </td>
-                      <td className="max-w-[10rem] truncate text-[12.5px]">
-                        {client.contact_name || <Muted>—</Muted>}
-                      </td>
-                      {manager ? (
-                        <td className="max-w-[20rem] text-[12.5px] text-[var(--i-muted)]">
-                          <span className="line-clamp-2">
-                            {client.notes || "—"}
-                          </span>
-                        </td>
-                      ) : null}
-                    </tr>
-                  ))}
-                </Table>
-                <ul className="divide-y divide-[var(--i-line)] lg:hidden">
-                  {quiet.map((client) => (
-                    <li key={client.id}>
-                      <Link
-                        href={clientPath(client.slug)}
-                        className="block px-4 py-3 active:bg-[var(--i-hover)]"
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <p className="flex min-w-0 items-center gap-2 text-[13.5px] font-medium">
-                            <ClientLogo
-                              slug={client.slug}
-                              name={client.name}
-                              website={client.website}
-                              size={20}
-                            />
-                            <span className="truncate">{client.name}</span>
-                          </p>
-                          <span className="flex shrink-0 flex-wrap justify-end gap-1">
-                            <OptionBadge
-                              list={CLIENT_STATUSES}
-                              value={client.status}
-                            />
-                            {client.archived_at ? <Pill>Archived</Pill> : null}
-                          </span>
-                        </div>
-                        <p className="mt-0.5 truncate text-[12px] text-[var(--i-muted)]">
-                          {engagementSummary(
-                            engagementsOf.get(client.id) ?? [],
-                          )}
-                        </p>
-                        {manager && client.notes ? (
-                          <p className="mt-1 line-clamp-2 text-[12.5px] text-[var(--i-ink-2)]">
-                            {client.notes}
-                          </p>
-                        ) : null}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            ) : (
-              <p className="px-5 py-6 text-[13px] text-[var(--i-muted)]">
-                Prospects, paused and ended clients show up here, and any client
-                without an active engagement.
-              </p>
-            )}
-          </Card>
-        </>
-      )}
+      {view === "board" ? board : table}
     </>
-  );
-}
-
-/** "2 engagements: Token Factory content (Paused) …" or "No engagements yet". */
-function engagementSummary(engagements: readonly Engagement[]) {
-  if (!engagements.length) return "No engagements yet";
-  return engagements
-    .map(
-      (engagement) =>
-        `${engagement.name} (${labelOf(ENGAGEMENT_STATUSES, engagement.status)})`,
-    )
-    .join(", ");
-}
-
-/** This month's progress, or that the month hasn't started. */
-function MonthCell({ row }: { row: EngagementRow }) {
-  if (!row.cycle)
-    return (
-      <span className="text-[12.5px] text-[var(--i-faint)]">
-        Month not started
-      </span>
-    );
-  return (
-    <span className="flex min-w-0 flex-col gap-1">
-      <ProgressMeter
-        done={row.progress.done}
-        planned={row.progress.planned}
-        compact
-      />
-      {row.cycle.state !== "active" ? (
-        <span className="text-[11.5px] text-[var(--i-muted)]">
-          {labelOf(CYCLE_STATES, row.cycle.state)}
-        </span>
-      ) : null}
-    </span>
-  );
-}
-
-/** Items with the client, and how many are past their reply date. */
-function ReviewCell({ row }: { row: EngagementRow }) {
-  if (!row.inClientReview && !row.waitingOnClient) return <Muted>None</Muted>;
-  return (
-    <span className="flex flex-col gap-0.5 text-[12.5px]">
-      {row.inClientReview ? (
-        <span className="tabular-nums">
-          {plural(row.inClientReview, "item")}
-        </span>
-      ) : null}
-      {row.waitingOnClient ? (
-        <span className="text-sky-800 dark:text-sky-200">
-          {row.waitingOnClient} waiting on client
-        </span>
-      ) : null}
-    </span>
   );
 }

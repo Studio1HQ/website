@@ -4,6 +4,10 @@ import { PostStatsView } from "@/components/internal/blog/post-stats";
 import { listPosts, sitePosts } from "@/lib/internal/blog/data";
 import { devArticles, isDevConfigured } from "@/lib/internal/blog/devto-api";
 import {
+  devOrgPost,
+  isDevStatsConfigured,
+} from "@/lib/internal/blog/devto-stats-api";
+import {
   postSlug,
   statsRange,
   statsWindow,
@@ -40,11 +44,14 @@ export default async function PostStatsPage({ params, searchParams }: Props) {
   const range = statsRange(query.range);
   const window = statsWindow(range.days);
   const site = sitePosts().find((post) => post.slug === slug) ?? null;
-  const [reads, search, listed, dev] = await Promise.all([
+  // Its DEV copy: from the Studio1 organization's analytics when the stats
+  // key is set, else from the publishing account (Blog → External).
+  const [reads, search, listed, orgCopy, dev] = await Promise.all([
     isAnalyticsConfigured() ? analyticsPost(slug, window) : null,
     isSearchConsoleConfigured() ? searchPost(slug, window) : null,
     listPosts(staff),
-    isDevConfigured() ? devArticles() : null,
+    isDevStatsConfigured() ? devOrgPost(slug) : null,
+    !isDevStatsConfigured() && isDevConfigured() ? devArticles() : null,
   ]);
   // Published from the editor: its draft opens there; a post only on the site opens through Edit.
   const tracked = listed.ok
@@ -66,9 +73,11 @@ export default async function PostStatsPage({ params, searchParams }: Props) {
       reads={reads}
       search={search}
       dev={
-        dev?.ok
-          ? (dev.articles.find((article) => article.slug === slug) ?? null)
-          : null
+        orgCopy
+          ? { ...orgCopy, published: true }
+          : dev?.ok
+            ? (dev.articles.find((article) => article.slug === slug) ?? null)
+            : null
       }
     />
   );

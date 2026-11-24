@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { EnvelopeSimple, PaperPlaneTilt, X } from "@phosphor-icons/react";
+import { EnvelopeSimple, PaperPlaneTilt, X } from "@/components/internal/icons";
 import { sendEntryEmail } from "@/app/internal/(dashboard)/email-actions";
 import { mailtoHref } from "@/lib/form-checks";
 import {
@@ -26,7 +26,11 @@ function newNonce() {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
 }
 
-/** Pick a template, edit it, preview the paper email, send. */
+/**
+ * Pick a template, edit it, preview the paper email, send. It opens on the
+ * email for the entry's status (a rejected entry opens on the rejection).
+ * With `open` it has no button of its own: a list's row menu opens it.
+ */
 export function EmailComposer({
   sectionKey,
   id,
@@ -34,6 +38,8 @@ export function EmailComposer({
   vars,
   currentStatus,
   mailerReady,
+  open: openProp,
+  onOpenChange,
 }: {
   sectionKey: SectionKey;
   id: string;
@@ -41,12 +47,22 @@ export function EmailComposer({
   vars: EmailVars;
   currentStatus: string;
   mailerReady: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
   const templates = EMAIL_TEMPLATES[sectionKey] ?? [];
   const toast = useToast();
-  const [open, setOpen] = useState(false);
+  const [ownOpen, setOwnOpen] = useState(false);
+  const controlled = openProp !== undefined;
+  const open = controlled ? openProp : ownOpen;
+  const setOpen = (next: boolean) => {
+    if (!controlled) setOwnOpen(next);
+    onOpenChange?.(next);
+  };
   const [sending, startSending] = useTransition();
-  const [templateKey, setTemplateKey] = useState(templates[0]?.key ?? "custom");
+  const [templateKey, setTemplateKey] = useState(
+    (templates.find((item) => item.status === currentStatus) ?? templates[0])?.key ?? "custom",
+  );
   const template = templates.find((item) => item.key === templateKey) ?? templates[0];
   const [subject, setSubject] = useState(() => fillTemplate(template?.subject ?? "", vars));
   const [body, setBody] = useState(() => fillTemplate(template?.body ?? "", vars));
@@ -116,11 +132,13 @@ export function EmailComposer({
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
-      <Dialog.Trigger asChild>
-        <button type="button" className={buttonClass("secondary")}>
-          <EnvelopeSimple size={15} /> Email
-        </button>
-      </Dialog.Trigger>
+      {controlled ? null : (
+        <Dialog.Trigger asChild>
+          <button type="button" className={buttonClass("secondary")}>
+            <EnvelopeSimple size={15} /> Email
+          </button>
+        </Dialog.Trigger>
+      )}
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px]" />
         <Dialog.Content className="internal-pop internal-dialog fixed left-1/2 top-1/2 z-50 flex max-h-[92dvh] w-[min(1040px,calc(100vw-1.5rem))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border border-[var(--i-line)] bg-[var(--i-panel)] text-[var(--i-ink)] shadow-[var(--i-shadow-pop)]">
@@ -142,8 +160,10 @@ export function EmailComposer({
             </Dialog.Close>
           </div>
 
-          <div className="grid min-h-0 flex-1 overflow-y-auto lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-            <div className="space-y-4 p-5">
+          {/* Wide screens: the form and the preview scroll on their own, so the
+              preview stays in view while the form scrolls. */}
+          <div className="grid min-h-0 flex-1 overflow-y-auto lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)] lg:overflow-hidden">
+            <div className="space-y-4 p-5 lg:overflow-y-auto">
               <div role="radiogroup" aria-label="Template" className="space-y-2.5">
                 {TEMPLATE_GROUPS.map((group) => {
                   const items = templates.filter((item) => item.group === group);
@@ -227,13 +247,13 @@ export function EmailComposer({
                 </Notice>
               ) : null}
             </div>
-            <div className="border-t border-[var(--i-line)] bg-[var(--i-sunken)] p-5 lg:border-l lg:border-t-0">
+            <div className="border-t border-[var(--i-line)] bg-[var(--i-sunken)] p-5 lg:flex lg:flex-col lg:border-l lg:border-t-0">
               <p className="mb-2 text-[12px] text-[var(--i-muted)]">Preview</p>
               <iframe
                 title="Email preview"
                 srcDoc={preview}
                 sandbox=""
-                className="h-[640px] w-full rounded-xl border border-[var(--i-line)] bg-[#f4efe7]"
+                className="h-[640px] w-full rounded-xl border border-[var(--i-line)] bg-[#f4efe7] lg:h-auto lg:min-h-[420px] lg:flex-1"
               />
             </div>
           </div>

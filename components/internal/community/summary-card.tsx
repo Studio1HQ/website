@@ -1,5 +1,3 @@
-import Link from "next/link";
-import { ArrowRight, UsersFour } from "@phosphor-icons/react/dist/ssr";
 import { requireCommunity } from "@/lib/internal/session";
 import {
   incomplete,
@@ -22,7 +20,7 @@ import {
   sponsorshipsIn,
 } from "@/lib/internal/community/stats";
 import { seesMoney } from "@/lib/internal/community/visibility";
-import { Card } from "@/components/internal/ui";
+import { OverviewStat } from "@/components/internal/overview-stat";
 
 /**
  * Community at a glance for the main dashboard overview: events coming up,
@@ -65,40 +63,29 @@ export async function CommunitySummaryCard() {
   );
   const partial = incomplete(events, tasks, sponsors, partners, deals);
 
-  const notes = [
+  // One line under the number: what needs doing first, else the money.
+  const flags = [
     followUps
       ? `${followUps} ${followUps === 1 ? "follow-up" : "follow-ups"} due`
       : null,
     late ? `${late} ${late === 1 ? "task" : "tasks"} late` : null,
-    money && deals.ok
-      ? `${formatTotals(sponsorship)} sponsorship in ${year}`
-      : null,
     // A read that failed counts as nothing above; don't let it pass as zero.
     partial ? "some numbers didn't load" : null,
   ].filter(Boolean);
+  const note = flags.length
+    ? flags.join(" · ")
+    : money && deals.ok
+      ? `${formatTotals(sponsorship)} sponsorship in ${year}`
+      : null;
 
   return (
-    <Link href="/community" className="group block">
-      <Card className="flex h-full flex-col px-4 py-3.5 transition-colors group-hover:bg-[var(--i-hover)]">
-        <div className="flex items-center gap-2">
-          <UsersFour size={15} className="text-[var(--i-muted)]" />
-          <h2 className="flex-1 text-[12.5px] font-medium text-[var(--i-ink-2)]">Community</h2>
-          <ArrowRight
-            size={12}
-            className="text-[var(--i-faint)] group-hover:text-[var(--i-ink)]"
-          />
-        </div>
-        <p className="mt-2.5 text-[22px] font-medium leading-none tracking-[-0.015em]">
-          {soon.length}
-          <span className="text-[12.5px] font-normal text-[var(--i-muted)]">
-            {" "}
-            {soon.length === 1 ? "event" : "events"} in 30 days
-          </span>
-        </p>
-        <div className="mt-2.5 text-[12px] leading-snug text-[var(--i-muted)]">
-          {notes.join(" · ")}
-        </div>
-      </Card>
-    </Link>
+    <OverviewStat
+      area="community"
+      href="/community"
+      value={soon.length}
+      unit={`${soon.length === 1 ? "event" : "events"} in 30 days`}
+      note={note}
+      flag={flags.length > 0}
+    />
   );
 }

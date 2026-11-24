@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Megaphone, Plus } from "@phosphor-icons/react/dist/ssr";
+import { Megaphone, Plus } from "@/components/internal/icons";
 import { saveInfluencer } from "@/app/internal/(dashboard)/influencers/actions";
 import { formatMoney } from "@/lib/internal/community/schema";
 import { matches, one } from "@/lib/internal/community/stats";

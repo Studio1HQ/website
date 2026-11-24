@@ -62,3 +62,6 @@ supabase/OPERATIONS.local.md
 
 # Build-time image sizes (scripts/image-variants.mjs)
 /public/_img/
+
+# Private review notes, kept locally only
+/amitesh-review-notes.md

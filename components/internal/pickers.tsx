@@ -2,7 +2,7 @@
 
 import { useId, useState, type ReactNode } from "react";
 import * as Popover from "@radix-ui/react-popover";
-import { CalendarBlank, CaretLeft, CaretRight, Check } from "@phosphor-icons/react";
+import { CalendarBlank, CaretLeft, CaretRight, Check } from "@/components/internal/icons";
 import { inputClass, menuContentClass } from "@/components/internal/ui";
 import { cn } from "@/lib/utils";
 

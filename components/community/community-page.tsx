@@ -134,7 +134,7 @@ export function CommunityPage({ data }: { data: CommunityData }) {
   const meetups = upcoming.filter((e) => e.kind === "meetup").slice(0, 8);
 
   return (
-    <div style={PAPER_SCOPE}>
+    <div style={PAPER_SCOPE} className="overflow-x-hidden [overflow-x:clip]">
       <CommunityHero totals={totals} next={upcoming} />
 
       <WaysIn data={data} index={1} />
@@ -202,7 +202,7 @@ export function CommunityPage({ data }: { data: CommunityData }) {
             </motion.h2>
             <ul className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3">
               {cities.map((c, i) => (
-                <motion.li key={c.city} {...rise(reduce, Math.min(i, 8) * 0.07)} className="group flex flex-col justify-between gap-5 rounded-[6px] bg-white/80 p-5 ring-1 ring-inset ring-[#141414]/10 transition-shadow duration-300 hover:shadow-[0_18px_34px_-24px_rgba(20,20,20,0.45)] md:p-6">
+                <motion.li key={c.city} {...rise(reduce, Math.min(i, 8) * 0.07)} className="group flex flex-col justify-start gap-5 rounded-[6px] bg-white/80 p-5 ring-1 ring-inset ring-[#141414]/10 transition-shadow duration-300 hover:shadow-[0_18px_34px_-24px_rgba(20,20,20,0.45)] md:p-6">
                   <div className="flex h-[72px] items-end md:h-[88px]">
                     {LANDMARK_ART[c.city] ? (
                       <Image

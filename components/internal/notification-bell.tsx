@@ -3,7 +3,7 @@
 import { useOptimistic, useState, useTransition } from "react";
 import Link from "next/link";
 import * as Popover from "@radix-ui/react-popover";
-import { Bell, CalendarBlank, CheckSquare, FileText, Receipt, UserPlus, type Icon } from "@phosphor-icons/react";
+import * as L from "lucide-react";
 import { readAllNotifications, readNotification } from "@/app/internal/(dashboard)/notification-actions";
 import { badgeText, type NoticeKind, type Notification } from "@/lib/internal/notifications/shared";
 import { cn } from "@/lib/utils";
@@ -16,13 +16,14 @@ import { menuContentClass, relativeDate } from "@/components/internal/ui";
  * dashboard.
  */
 
-const ICONS: Record<NoticeKind, Icon> = {
-  task: CheckSquare,
-  call: CalendarBlank,
-  deliverable: FileText,
-  claim: Receipt,
-  access: UserPlus,
-  other: Bell,
+/** One icon per kind of notice, saying what it's about. */
+const ICONS: Record<NoticeKind, L.LucideIcon> = {
+  task: L.SquareCheckBig,
+  call: L.Phone,
+  deliverable: L.FileCheck2,
+  claim: L.ReceiptText,
+  access: L.UserRoundPlus,
+  other: L.Bell,
 };
 
 export function NotificationBell({
@@ -76,11 +77,14 @@ export function NotificationBell({
             className,
           )}
         >
-          <Bell size={17} weight={count ? "fill" : "regular"} />
+          <L.Bell strokeWidth={2} className="size-[18px]" />
+          {/* Unread: one small still orange dot (the number is in the label and the list). */}
           {count ? (
-            <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--i-accent)] px-1 text-[10px] font-medium leading-none text-white">
-              {badgeText(count)}
-            </span>
+            <span
+              aria-hidden
+              title={`${badgeText(count)} unread`}
+              className="absolute right-[7px] top-[7px] size-2 rounded-full bg-[var(--i-accent)] ring-2 ring-[var(--i-panel)]"
+            />
           ) : null}
         </button>
       </Popover.Trigger>
@@ -90,18 +94,26 @@ export function NotificationBell({
           align={side === "right" ? "start" : "end"}
           sideOffset={8}
           collisionPadding={12}
-          className={cn(menuContentClass, "flex max-h-[min(30rem,80dvh)] w-[min(22rem,calc(100vw-1.5rem))] flex-col p-0")}
+          className={cn(
+            menuContentClass,
+            "flex max-h-[min(32rem,80dvh)] w-[min(24rem,calc(100vw-1.5rem))] flex-col rounded-2xl p-0",
+          )}
         >
-          <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--i-line)] px-3.5 py-2.5">
-            <p className="text-[13px] font-medium">Notifications</p>
+          <div className="flex shrink-0 items-center justify-between gap-3 px-4 pb-2 pt-3.5">
+            <p className="text-[14.5px] font-medium">Notifications</p>
             {count || listedUnread > nowRead ? (
-              <button type="button" onClick={readAll} className="text-[12px] text-[var(--i-muted)] hover:text-[var(--i-ink)]">
+              <button
+                type="button"
+                onClick={readAll}
+                className="inline-flex h-7 items-center gap-1.5 rounded-full px-2.5 text-[12.5px] font-medium text-[var(--i-muted)] hover:bg-black/[0.05] hover:text-[var(--i-ink)] dark:hover:bg-white/[0.07]"
+              >
+                <L.CheckCheck strokeWidth={2} className="size-3.5" />
                 Mark all read
               </button>
             ) : null}
           </div>
           {items.length ? (
-            <ul className="min-h-0 flex-1 divide-y divide-[var(--i-line)] overflow-y-auto">
+            <ul className="internal-scroll min-h-0 flex-1 overflow-y-auto px-1.5 pb-1.5">
               {items.map((item) => {
                 const IconComponent = ICONS[item.kind];
                 const read = isRead(item);
@@ -110,20 +122,18 @@ export function NotificationBell({
                     <Link
                       href={item.href}
                       onClick={() => openOne(item)}
-                      className="flex gap-3 px-3.5 py-3 hover:bg-[var(--i-hover)]"
+                      className="flex gap-3 rounded-xl px-2.5 py-2.5 hover:bg-black/[0.04] dark:hover:bg-white/[0.05]"
                     >
                       <span
                         className={cn(
-                          "mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg ring-1 ring-inset",
-                          read
-                            ? "bg-[var(--i-sunken)] text-[var(--i-faint)] ring-[var(--i-line)]"
-                            : "bg-[var(--i-accent-soft)] text-[var(--i-accent-text)] ring-transparent",
+                          "flex size-9 shrink-0 items-center justify-center rounded-full bg-black/[0.05] dark:bg-white/[0.07]",
+                          read ? "text-[var(--i-faint)]" : "text-[var(--i-ink)]",
                         )}
                       >
-                        <IconComponent size={14} />
+                        <IconComponent strokeWidth={2} className="size-[17px]" />
                       </span>
-                      <span className="min-w-0 flex-1">
-                        <span className={cn("block text-[13px] leading-snug", read ? "text-[var(--i-ink-2)]" : "font-medium")}>
+                      <span className="min-w-0 flex-1 pt-0.5">
+                        <span className={cn("block text-[13.5px] leading-snug", read ? "text-[var(--i-ink-2)]" : "font-medium")}>
                           {item.title}
                         </span>
                         {item.body ? (
@@ -131,16 +141,21 @@ export function NotificationBell({
                         ) : null}
                         <span className="mt-0.5 block text-[11.5px] text-[var(--i-faint)]">{relativeDate(item.created_at)}</span>
                       </span>
-                      {read ? null : <span aria-hidden className="mt-2 size-2 shrink-0 rounded-full bg-[var(--i-accent)]" />}
+                      {read ? null : <span aria-hidden className="mt-3 size-2 shrink-0 rounded-full bg-[var(--i-accent)]" />}
                     </Link>
                   </li>
                 );
               })}
             </ul>
           ) : (
-            <p className="px-3.5 py-8 text-center text-[13px] text-[var(--i-muted)]">
-              Nothing yet. When someone gives you a task, a review or a call, it shows here.
-            </p>
+            <div className="flex flex-col items-center gap-3 px-6 pb-8 pt-6 text-center">
+              <span className="flex size-11 items-center justify-center rounded-full bg-black/[0.05] text-[var(--i-muted)] dark:bg-white/[0.07]">
+                <L.BellOff strokeWidth={2} className="size-5" />
+              </span>
+              <p className="text-[13px] leading-relaxed text-[var(--i-muted)]">
+                Nothing yet. When someone gives you a task, a review or a call, it shows here.
+              </p>
+            </div>
           )}
         </Popover.Content>
       </Popover.Portal>

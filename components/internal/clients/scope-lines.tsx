@@ -9,7 +9,7 @@ import {
   type FormEvent,
   type ReactNode,
 } from "react";
-import { Trash } from "@phosphor-icons/react";
+import { Trash } from "@/components/internal/icons";
 import {
   removeScopeLine,
   saveScopeLine,

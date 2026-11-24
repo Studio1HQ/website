@@ -16,6 +16,7 @@ import {
 import {
   ArrowLeft,
   ArrowSquareOut,
+  CaretDown,
   CheckCircle,
   CircleNotch,
   Eye,
@@ -27,7 +28,7 @@ import {
   WarningCircle,
   X,
   XCircle,
-} from "@phosphor-icons/react";
+} from "@/components/internal/icons";
 import type { MDXEditorMethods } from "@mdxeditor/editor";
 import {
   comment,
@@ -132,6 +133,59 @@ function Label({ children, hint, extra }: { children: ReactNode; hint?: ReactNod
   );
 }
 
+/** One group of the editor's side panel: a small heading, then its fields. */
+function PanelSection({
+  title,
+  note,
+  defaultOpen = true,
+  children,
+}: {
+  title: string;
+  note?: string;
+  defaultOpen?: boolean;
+  children: ReactNode;
+}) {
+  // Click the heading to fold a group away, or open it again.
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <section>
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen(!open)}
+        className="flex w-full items-start gap-2 px-4 py-3.5 text-left transition-colors hover:bg-[var(--i-hover)]"
+      >
+        <span className="min-w-0 flex-1">
+          <span className="block text-[13px] font-medium">{title}</span>
+          {note ? <span className="mt-0.5 block text-[12px] text-[var(--i-faint)]">{note}</span> : null}
+        </span>
+        <CaretDown
+          size={15}
+          className={cn("mt-0.5 shrink-0 text-[var(--i-muted)] transition-transform duration-150", open ? "rotate-0" : "-rotate-90")}
+        />
+      </button>
+      {open ? <div className="space-y-3.5 px-4 pb-4">{children}</div> : null}
+    </section>
+  );
+}
+
+/** Roughly how the post shows as a Google result, updating as the fields change. */
+function SearchPreview({ title, path, description }: { title: string; path: string; description: string }) {
+  return (
+    <div className="rounded-lg bg-[var(--i-sunken)] px-3 py-2.5 ring-1 ring-[var(--i-line)]">
+      <p className="truncate text-[11.5px] text-[var(--i-muted)]">
+        studio1hq.com › {path.split("/").filter(Boolean).join(" › ")}
+      </p>
+      <p className="mt-0.5 line-clamp-1 text-[14px] leading-snug text-[#1a0dab] dark:text-[#8ab4f8]">
+        {title || <span className="text-[var(--i-faint)]">Add a title</span>}
+      </p>
+      <p className="mt-0.5 line-clamp-2 text-[12px] leading-snug text-[var(--i-ink-2)]">
+        {description || <span className="text-[var(--i-faint)]">Add an SEO description to control this text.</span>}
+      </p>
+    </div>
+  );
+}
+
 /** Chips with an input: Enter or comma adds, Backspace on empty removes the last. */
 function ChipInput({
   values,
@@ -219,6 +273,14 @@ function eventLine(event: BlogEvent) {
   }
 }
 
+type PanelTab = "details" | "cover" | "checks" | "comments";
+const PANEL_TABS: { key: PanelTab; label: string }[] = [
+  { key: "details", label: "Details" },
+  { key: "cover", label: "Cover" },
+  { key: "checks", label: "Checks" },
+  { key: "comments", label: "Comments" },
+];
+
 export type EditorProps = {
   post: BlogPostRow;
   events: BlogEvent[];
@@ -249,6 +311,7 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
   const [pendingQuote, setPendingQuote] = useState("");
   const [activeThread, setActiveThread] = useState<string | null>(null);
   const [showArt, setShowArt] = useState(false);
+  const [tab, setTab] = useState<PanelTab>("details");
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmForce, setConfirmForce] = useState<string | null>(null);
   const [published, setPublished] = useState<{ url: string; commitUrl: string } | null>(null);
@@ -472,8 +535,12 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
   const commentOnSelection = (quote: string) => {
     setPendingQuote(quote);
     setActiveThread(null);
-    composerRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
-    composerRef.current?.focus({ preventScroll: true });
+    setTab("comments");
+    // After the Comments tab has rendered its box.
+    setTimeout(() => {
+      composerRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+      composerRef.current?.focus({ preventScroll: true });
+    }, 0);
   };
 
 
@@ -764,269 +831,343 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
           </p>
         </div>
 
-        {/* Details, cover, checks, activity */}
-        <div className="space-y-4 xl:sticky xl:top-16 xl:max-h-[calc(100vh-5rem)] xl:overflow-y-auto xl:pb-4">
-          <Card className="p-4">
-            <p className="mb-2 flex items-center gap-1.5 text-[13px] font-medium">
-              {errors.length ? (
-                <><WarningCircle size={15} className="text-rose-600" /> {errors.length} to fix before publishing</>
-              ) : (
-                <><CheckCircle size={15} className="text-emerald-600" /> Ready to publish</>
-              )}
-            </p>
-            {checks.length ? (
-              <ul className="space-y-1.5">
-                {[...errors, ...warnings].map((check) => (
-                  <li key={check.id} className="flex gap-2 text-[12.5px] leading-snug">
-                    <span
-                      aria-hidden
-                      className={cn("mt-1.5 size-1.5 shrink-0 rounded-full", check.level === "error" ? "bg-rose-500" : "bg-amber-400")}
-                    />
-                    <span className={check.level === "error" ? "text-[var(--i-ink)]" : "text-[var(--i-muted)]"}>{check.message}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-[12.5px] text-[var(--i-muted)]">Everything looks good.</p>
-            )}
-          </Card>
-
-          <Card className="space-y-3.5 p-4">
-            <p className="text-[13px] font-medium">Post details</p>
-            <div>
-              <Label hint="for Google and social cards" extra={<Counter value={fields.seo_title.trim().length} max={60} />}>
-                SEO title
-              </Label>
-              <input
-                value={fields.seo_title}
-                onChange={(event) => update("seo_title", event.target.value)}
-                placeholder={fields.title.length > 60 ? "Required: the title is over 60 characters" : "Optional when the title is short"}
-                className={inputClass()}
-              />
-            </div>
-            <div>
-              <Label hint={liveSlug ? "a live post's URL can't change" : undefined}>URL</Label>
-              <div className="flex h-9 items-center rounded-lg border border-[var(--i-line)] bg-[var(--i-sunken)] pl-3 text-[13px] text-[var(--i-muted)] transition-colors focus-within:border-[var(--i-line-strong)] focus-within:bg-[var(--i-panel)]">
-                /blog/
-                <input
-                  value={fields.slug}
-                  disabled={Boolean(liveSlug)}
-                  onChange={(event) => update("slug", event.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""))}
-                  className="h-full min-w-0 flex-1 rounded-r-lg bg-transparent pl-0.5 pr-3 text-[var(--i-ink)] outline-none disabled:cursor-not-allowed disabled:opacity-60"
-                />
-              </div>
-            </div>
-            <div>
-              <Label extra={<Counter value={fields.description.trim().length} min={50} max={160} />}>SEO description</Label>
-              <textarea
-                value={fields.description}
-                onChange={(event) => update("description", event.target.value.replace(/\n/g, " "))}
-                rows={3}
-                placeholder="140 to 160 characters, main keyword early. Shown in Google and on blog cards."
-                className={textareaClass}
-              />
-            </div>
-            <div>
-              <Label hint="3 to 6; the first is the topic label">Tags</Label>
-              <ChipInput
-                values={fields.tags}
-                onChange={(tags) => update("tags", tags)}
-                normalize={normalizeTag}
-                placeholder="Add a tag, then Enter"
-                max={12}
-              />
-            </div>
-            <div>
-              <Label>Authors</Label>
-              <ChipInput
-                values={fields.authors}
-                onChange={(authors) => update("authors", authors)}
-                placeholder="Full name, then Enter"
-                max={6}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label hint="blank = publish day">Date</Label>
-                <DateField
-                  value={fields.publish_date ?? ""}
-                  onChange={(next) => update("publish_date", next || null)}
-                  placeholder="Publish day"
-                  aria-label="Date"
-                />
-              </div>
-              <label className="flex cursor-pointer items-end gap-2 pb-1.5 text-[12.5px] text-[var(--i-ink-2)]">
-                <input
-                  type="checkbox"
-                  checked={fields.unlisted}
-                  onChange={(event) => update("unlisted", event.target.checked)}
-                  className="size-4 accent-[var(--i-accent)]"
-                />
-                Hide from /blog
-              </label>
-            </div>
-            <div>
-              <Label hint="optional; the SEO description is used if empty">TL;DR</Label>
-              <textarea
-                value={fields.tldr_summary}
-                onChange={(event) => update("tldr_summary", event.target.value)}
-                rows={2}
-                className={textareaClass}
-              />
-            </div>
-            <div>
-              <Label hint="3 or 4, one per line">TL;DR bullets</Label>
-              <textarea
-                value={fields.tldr_bullets.join("\n")}
-                onChange={(event) => update("tldr_bullets", event.target.value.split("\n").slice(0, 4))}
-                rows={4}
-                className={textareaClass}
-              />
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="mb-2 flex items-center justify-between">
-              <p className="text-[13px] font-medium">Cover</p>
-              {fields.banner_image ? (
-                <button type="button" onClick={() => update("banner_image", null)} className={buttonClass("ghost", "sm")}>
-                  Use the generated cover
-                </button>
-              ) : (
-                <button type="button" onClick={() => setShowArt(!showArt)} className={buttonClass("ghost", "sm")}>
-                  {showArt ? "Done" : "Change illustration"}
-                </button>
-              )}
-            </div>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              key={`${fields.banner_image}-${base}`}
-              src={fields.banner_image ?? `/blog-cover/${post.id}?w=480&v=${encodeURIComponent(base)}`}
-              alt={fields.banner_image ? fields.banner_image_alt ?? "" : "Generated cover"}
-              className="aspect-[16/9] w-full rounded-lg bg-[#f4efe7] object-cover ring-1 ring-[var(--i-line)]"
-            />
-            {fields.banner_image ? (
-              <input
-                value={fields.banner_image_alt ?? ""}
-                onChange={(event) => update("banner_image_alt", event.target.value)}
-                placeholder="Describe the image (alt text)"
-                className={cn(inputClass(), "mt-2")}
-              />
-            ) : (
-              <p className="mt-2 text-[12px] text-[var(--i-muted)]">
-                {coverArtName(art)} · {isCoverArt(fields.cover_art) ? "chosen" : "picked from the title"}. Made automatically; no
-                upload needed.
-              </p>
-            )}
-            {showArt && !fields.banner_image ? (
-              <div className="mt-3 grid max-h-[360px] grid-cols-2 gap-2 overflow-y-auto pr-1">
+        {/* The side panel: one fixed card beside the writing, its own scroll,
+            and four tabs so only one group shows at a time. */}
+        <aside className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-[var(--i-line)] bg-[var(--i-panel)] shadow-[var(--i-shadow-sm)] dark:border-transparent xl:sticky xl:top-[4.5rem] xl:h-[calc(100dvh-6rem)]">
+          <div role="tablist" aria-label="Post panel" className="flex shrink-0 gap-1 border-b border-[var(--i-line)] p-1.5">
+            {PANEL_TABS.map((item) => {
+              const count =
+                item.key === "checks" ? errors.length || warnings.length : item.key === "comments" ? threads.filter((thread) => !thread.root.resolved_at).length : 0;
+              return (
                 <button
+                  key={item.key}
                   type="button"
-                  onClick={() => update("cover_art", null)}
+                  role="tab"
+                  aria-selected={tab === item.key}
+                  onClick={() => setTab(item.key)}
                   className={cn(
-                    "rounded-lg p-1 text-left text-[11.5px] ring-1",
-                    !isCoverArt(fields.cover_art) ? "ring-2 ring-[var(--i-accent)]" : "ring-[var(--i-line)] hover:ring-[var(--i-line-strong)]",
+                    "inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-lg text-[12.5px] transition-colors",
+                    tab === item.key
+                      ? "bg-[var(--i-sunken)] font-medium text-[var(--i-ink)] ring-1 ring-[var(--i-line)]"
+                      : "text-[var(--i-muted)] hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)]",
                   )}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={`/blog-cover/${post.id}?w=480&art=${autoArt}&v=${encodeURIComponent(base)}`}
-                    alt=""
-                    loading="lazy"
-                    className="aspect-[16/9] w-full rounded-md bg-[#f4efe7] object-cover"
-                  />
-                  <span className="mt-1 block truncate px-0.5">Automatic ({coverArtName(autoArt)})</span>
+                  {item.label}
+                  {count ? (
+                    <span
+                      className={cn(
+                        "rounded-full px-1.5 text-[11px] leading-[17px] tabular-nums",
+                        item.key === "checks" && errors.length
+                          ? "bg-rose-500/15 text-rose-700 dark:text-rose-300"
+                          : "bg-[var(--i-hover)] text-[var(--i-muted)]",
+                      )}
+                    >
+                      {count}
+                    </span>
+                  ) : null}
                 </button>
-                {COVER_ARTS.map((option) => (
-                  <button
-                    key={option.key}
-                    type="button"
-                    onClick={() => update("cover_art", option.key)}
-                    className={cn(
-                      "rounded-lg p-1 text-left text-[11.5px] ring-1",
-                      fields.cover_art === option.key ? "ring-2 ring-[var(--i-accent)]" : "ring-[var(--i-line)] hover:ring-[var(--i-line-strong)]",
-                    )}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={`/blog-cover/${post.id}?w=480&art=${option.key}&v=${encodeURIComponent(base)}`}
-                      alt=""
-                      loading="lazy"
-                      className="aspect-[16/9] w-full rounded-md bg-[#f4efe7] object-cover"
+              );
+            })}
+          </div>
+
+          <div role="tabpanel" className="min-h-0 flex-1 overflow-y-auto">
+            {tab === "details" ? (
+              <>
+              {/* Post details in three groups: how it shows on Google and in shared
+                  links, who wrote it and when, and the TL;DR box at the top of the post. */}
+              <div className="divide-y divide-[var(--i-line)]">
+                <PanelSection title="Search & social" note="On Google and in shared links">
+                  <SearchPreview
+                    title={fields.seo_title.trim() || fields.title.trim()}
+                    path={`blog/${liveSlug ?? fields.slug}`}
+                    description={fields.description.trim()}
+                  />
+                  <div>
+                    <Label extra={<Counter value={fields.seo_title.trim().length} max={60} />}>
+                      SEO title
+                    </Label>
+                    <input
+                      value={fields.seo_title}
+                      onChange={(event) => update("seo_title", event.target.value)}
+                      placeholder={fields.title.length > 60 ? "Required: the title is over 60 characters" : "Optional when the title is short"}
+                      className={inputClass()}
                     />
-                    <span className="mt-1 block truncate px-0.5">{option.name}</span>
+                  </div>
+                  <div>
+                    <Label hint={liveSlug ? "a live post's URL can't change" : undefined}>URL</Label>
+                    <div className="flex h-9 items-center rounded-lg border border-[var(--i-line)] bg-[var(--i-sunken)] pl-3 text-[13px] text-[var(--i-muted)] transition-colors focus-within:border-[var(--i-line-strong)] focus-within:bg-[var(--i-panel)]">
+                      /blog/
+                      <input
+                        value={fields.slug}
+                        disabled={Boolean(liveSlug)}
+                        onChange={(event) => update("slug", event.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""))}
+                        className="h-full min-w-0 flex-1 rounded-r-lg bg-transparent pl-0.5 pr-3 text-[var(--i-ink)] outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label extra={<Counter value={fields.description.trim().length} min={50} max={160} />}>SEO description</Label>
+                    <textarea
+                      value={fields.description}
+                      onChange={(event) => update("description", event.target.value.replace(/\n/g, " "))}
+                      rows={3}
+                      placeholder="140 to 160 characters, main keyword early. Shown in Google and on blog cards."
+                      className={textareaClass}
+                    />
+                  </div>
+                </PanelSection>
+                <PanelSection title="Byline">
+                  <div>
+                    <Label>Authors</Label>
+                    <ChipInput
+                      values={fields.authors}
+                      onChange={(authors) => update("authors", authors)}
+                      placeholder="Full name, then Enter"
+                      max={6}
+                    />
+                  </div>
+                  <div>
+                    <Label hint="3 to 6; the first is the topic label">Tags</Label>
+                    <ChipInput
+                      values={fields.tags}
+                      onChange={(tags) => update("tags", tags)}
+                      normalize={normalizeTag}
+                      placeholder="Add a tag, then Enter"
+                      max={12}
+                    />
+                  </div>
+                  <div>
+                    <Label hint="leave blank to use the publish day">Date</Label>
+                    <DateField
+                      value={fields.publish_date ?? ""}
+                      onChange={(next) => update("publish_date", next || null)}
+                      placeholder="Publish day"
+                      aria-label="Date"
+                    />
+                  </div>
+                  {/* A switch, with what it does under it. */}
+                  <label className="flex cursor-pointer items-start gap-3 rounded-lg bg-[var(--i-sunken)] px-3 py-2.5 ring-1 ring-[var(--i-line)]">
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[13px] font-medium text-[var(--i-ink-2)]">Hide from /blog</span>
+                      <span className="mt-0.5 block text-[12px] text-[var(--i-muted)]">Still live at its URL, just not listed.</span>
+                    </span>
+                    <input
+                      type="checkbox"
+                      role="switch"
+                      checked={fields.unlisted}
+                      onChange={(event) => update("unlisted", event.target.checked)}
+                      className="peer sr-only"
+                    />
+                    <span
+                      aria-hidden
+                      className="relative mt-0.5 h-5 w-9 shrink-0 rounded-full bg-[var(--i-line-strong)] transition-colors after:absolute after:left-0.5 after:top-0.5 after:size-4 after:rounded-full after:bg-white after:shadow-sm after:transition-transform peer-checked:bg-[var(--i-accent)] peer-checked:after:translate-x-4 peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--i-ring)]"
+                    />
+                  </label>
+                </PanelSection>
+                <PanelSection title="TL;DR" note="Optional; the SEO description is used if empty" defaultOpen={false}>
+                  <div>
+                    <Label>Summary</Label>
+                    <textarea
+                      value={fields.tldr_summary}
+                      onChange={(event) => update("tldr_summary", event.target.value)}
+                      rows={2}
+                      className={textareaClass}
+                    />
+                  </div>
+                  <div>
+                    <Label hint="3 or 4, one per line">Bullets</Label>
+                    <textarea
+                      value={fields.tldr_bullets.join("\n")}
+                      onChange={(event) => update("tldr_bullets", event.target.value.split("\n").slice(0, 4))}
+                      rows={4}
+                      className={textareaClass}
+                    />
+                  </div>
+                </PanelSection>
+              </div>
+              </>
+            ) : null}
+
+            {tab === "cover" ? (
+              <>
+              <div className="p-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-[13px] font-medium">Cover</p>
+                  {fields.banner_image ? (
+                    <button type="button" onClick={() => update("banner_image", null)} className={buttonClass("ghost", "sm")}>
+                      Use the generated cover
+                    </button>
+                  ) : (
+                    <button type="button" onClick={() => setShowArt(!showArt)} className={buttonClass("ghost", "sm")}>
+                      {showArt ? "Done" : "Change illustration"}
+                    </button>
+                  )}
+                </div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  key={`${fields.banner_image}-${base}`}
+                  src={fields.banner_image ?? `/blog-cover/${post.id}?w=480&v=${encodeURIComponent(base)}`}
+                  alt={fields.banner_image ? fields.banner_image_alt ?? "" : "Generated cover"}
+                  className="aspect-[16/9] w-full rounded-lg bg-[#f4efe7] object-cover ring-1 ring-[var(--i-line)]"
+                />
+                {fields.banner_image ? (
+                  <input
+                    value={fields.banner_image_alt ?? ""}
+                    onChange={(event) => update("banner_image_alt", event.target.value)}
+                    placeholder="Describe the image (alt text)"
+                    className={cn(inputClass(), "mt-2")}
+                  />
+                ) : (
+                  <p className="mt-2 text-[12px] text-[var(--i-muted)]">
+                    {coverArtName(art)} · {isCoverArt(fields.cover_art) ? "chosen" : "picked from the title"}. Made automatically; no
+                    upload needed.
+                  </p>
+                )}
+                {showArt && !fields.banner_image ? (
+                  <div className="mt-3 grid max-h-[360px] grid-cols-2 gap-2 overflow-y-auto pr-1">
+                    <button
+                      type="button"
+                      onClick={() => update("cover_art", null)}
+                      className={cn(
+                        "rounded-lg p-1 text-left text-[11.5px] ring-1",
+                        !isCoverArt(fields.cover_art) ? "ring-2 ring-[var(--i-accent)]" : "ring-[var(--i-line)] hover:ring-[var(--i-line-strong)]",
+                      )}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={`/blog-cover/${post.id}?w=480&art=${autoArt}&v=${encodeURIComponent(base)}`}
+                        alt=""
+                        loading="lazy"
+                        className="aspect-[16/9] w-full rounded-md bg-[#f4efe7] object-cover"
+                      />
+                      <span className="mt-1 block truncate px-0.5">Automatic ({coverArtName(autoArt)})</span>
+                    </button>
+                    {COVER_ARTS.map((option) => (
+                      <button
+                        key={option.key}
+                        type="button"
+                        onClick={() => update("cover_art", option.key)}
+                        className={cn(
+                          "rounded-lg p-1 text-left text-[11.5px] ring-1",
+                          fields.cover_art === option.key ? "ring-2 ring-[var(--i-accent)]" : "ring-[var(--i-line)] hover:ring-[var(--i-line-strong)]",
+                        )}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={`/blog-cover/${post.id}?w=480&art=${option.key}&v=${encodeURIComponent(base)}`}
+                          alt=""
+                          loading="lazy"
+                          className="aspect-[16/9] w-full rounded-md bg-[#f4efe7] object-cover"
+                        />
+                        <span className="mt-1 block truncate px-0.5">{option.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+                {!fields.banner_image ? (
+                  <button type="button" disabled={busy === "banner"} onClick={pickBanner} className={cn(buttonClass("ghost", "sm"), "mt-2")}>
+                    {busy === "banner" ? <CircleNotch size={14} className="animate-spin" /> : <ImageSquare size={14} />} Upload your own
+                    image instead
                   </button>
-                ))}
+                ) : null}
+              </div>
+              </>
+            ) : null}
+
+            {tab === "checks" ? (
+              <div className="p-4">
+                <p className="mb-2 flex items-center gap-1.5 text-[13px] font-medium">
+                  {errors.length ? (
+                    <><WarningCircle size={15} className="text-rose-600" /> {errors.length} to fix before publishing</>
+                  ) : (
+                    <><CheckCircle size={15} className="text-emerald-600" /> Ready to publish</>
+                  )}
+                </p>
+                {checks.length ? (
+                  <ul className="space-y-1.5">
+                    {[...errors, ...warnings].map((check) => (
+                      <li key={check.id} className="flex gap-2 text-[12.5px] leading-snug">
+                        <span
+                          aria-hidden
+                          className={cn("mt-1.5 size-1.5 shrink-0 rounded-full", check.level === "error" ? "bg-rose-500" : "bg-amber-400")}
+                        />
+                        <span className={check.level === "error" ? "text-[var(--i-ink)]" : "text-[var(--i-muted)]"}>{check.message}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-[12.5px] text-[var(--i-muted)]">Everything looks good.</p>
+                )}
               </div>
             ) : null}
-            {!fields.banner_image ? (
-              <button type="button" disabled={busy === "banner"} onClick={pickBanner} className={cn(buttonClass("ghost", "sm"), "mt-2")}>
-                {busy === "banner" ? <CircleNotch size={14} className="animate-spin" /> : <ImageSquare size={14} />} Upload your own
-                image instead
-              </button>
-            ) : null}
-          </Card>
 
-          <CommentsPanel
-            threads={threads}
-            missing={missing}
-            activeId={activeThread}
-            onActivate={(thread) => {
-              setActiveThread(thread.root.id);
-              if (thread.root.quote && !reveal(thread.root.quote)) toast("error", "That text isn't in the post anymore.");
-            }}
-            pendingQuote={pendingQuote}
-            clearQuote={() => setPendingQuote("")}
-            composerRef={composerRef}
-            busy={busy === "comment"}
-            onSend={sendComment}
-            onResolve={resolveThread}
-          />
-
-          <Card className="p-4">
-            <p className="mb-3 text-[13px] font-medium">Activity</p>
-            <ol className="space-y-3">
-              <li className="flex gap-2 text-[12.5px] text-[var(--i-muted)]">
-                <TeamAvatar name={nameFromEmail(post.created_by)} email={post.created_by} size={24} />
-                <span className="pt-0.5">
-                  {nameFromEmail(post.created_by)} started this post ·{" "}
-                  <span title={formatDate(post.created_at)} suppressHydrationWarning>
-                    {relativeDate(post.created_at)}
-                  </span>
-                </span>
-              </li>
-              {timeline.map((event) => {
-                const line = eventLine(event);
-                return (
-                  <li key={event.id} className="flex gap-2 text-[12.5px]">
-                    <TeamAvatar name={nameFromEmail(event.actor)} email={event.actor} size={24} />
-                    <div className="min-w-0 flex-1 pt-0.5">
-                      <p className="flex flex-wrap items-center gap-1 text-[var(--i-muted)]">
-                        {line.icon}
-                        <span className="font-medium text-[var(--i-ink-2)]">{line.text}</span>·
-                        <span title={formatDate(event.created_at)} suppressHydrationWarning>
-                          {relativeDate(event.created_at)}
-                        </span>
-                        {"link" in line && line.link ? (
-                          <a href={line.link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-0.5 underline">
-                            commit <ArrowSquareOut size={11} />
-                          </a>
-                        ) : null}
-                      </p>
-                      {line.note ? (
-                        <p className="mt-1 whitespace-pre-wrap rounded-lg bg-[var(--i-sunken)] px-2.5 py-1.5 text-[var(--i-ink-2)] ring-1 ring-inset ring-[var(--i-line)]">
-                          {line.note}
-                        </p>
-                      ) : null}
-                    </div>
+            {tab === "comments" ? (
+              <>
+                {/* The comments card sits flat inside the panel. */}
+                <div className="[&>section]:rounded-none [&>section]:border-0 [&>section]:bg-transparent [&>section]:shadow-none">
+                <CommentsPanel
+                  threads={threads}
+                  missing={missing}
+                  activeId={activeThread}
+                  onActivate={(thread) => {
+                    setActiveThread(thread.root.id);
+                    if (thread.root.quote && !reveal(thread.root.quote)) toast("error", "That text isn't in the post anymore.");
+                  }}
+                  pendingQuote={pendingQuote}
+                  clearQuote={() => setPendingQuote("")}
+                  composerRef={composerRef}
+                  busy={busy === "comment"}
+                  onSend={sendComment}
+                  onResolve={resolveThread}
+                />
+                </div>
+              <div className="border-t border-[var(--i-line)] p-4">
+                <p className="mb-3 text-[13px] font-medium">History</p>
+                <ol className="space-y-3">
+                  <li className="flex gap-2 text-[12.5px] text-[var(--i-muted)]">
+                    <TeamAvatar name={nameFromEmail(post.created_by)} email={post.created_by} size={24} />
+                    <span className="pt-0.5">
+                      {nameFromEmail(post.created_by)} started this post ·{" "}
+                      <span title={formatDate(post.created_at)} suppressHydrationWarning>
+                        {relativeDate(post.created_at)}
+                      </span>
+                    </span>
                   </li>
-                );
-              })}
-            </ol>
-          </Card>
+                  {timeline.map((event) => {
+                    const line = eventLine(event);
+                    return (
+                      <li key={event.id} className="flex gap-2 text-[12.5px]">
+                        <TeamAvatar name={nameFromEmail(event.actor)} email={event.actor} size={24} />
+                        <div className="min-w-0 flex-1 pt-0.5">
+                          <p className="flex flex-wrap items-center gap-1 text-[var(--i-muted)]">
+                            {line.icon}
+                            <span className="font-medium text-[var(--i-ink-2)]">{line.text}</span>·
+                            <span title={formatDate(event.created_at)} suppressHydrationWarning>
+                              {relativeDate(event.created_at)}
+                            </span>
+                            {"link" in line && line.link ? (
+                              <a href={line.link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-0.5 underline">
+                                commit <ArrowSquareOut size={11} />
+                              </a>
+                            ) : null}
+                          </p>
+                          {line.note ? (
+                            <p className="mt-1 whitespace-pre-wrap rounded-lg bg-[var(--i-sunken)] px-2.5 py-1.5 text-[var(--i-ink-2)] ring-1 ring-inset ring-[var(--i-line)]">
+                              {line.note}
+                            </p>
+                          ) : null}
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ol>
+              </div>
+              </>
+            ) : null}
+          </div>
 
           {!isLive && (isOwner || isReviewer) ? (
-            <div className="flex items-center gap-2 px-1">
+            <div className="flex shrink-0 items-center gap-2 border-t border-[var(--i-line)] px-3 py-2">
               {confirmDelete ? (
                 <>
                   <span className="text-[12.5px] text-[var(--i-muted)]">Delete this draft for good?</span>
@@ -1044,7 +1185,7 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
               )}
             </div>
           ) : null}
-        </div>
+        </aside>
       </div>
     </div>
   );

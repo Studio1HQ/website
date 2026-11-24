@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent, type ReactNode } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { X } from "@phosphor-icons/react";
+import { X } from "@/components/internal/icons";
 import { cn } from "@/lib/utils";
 import { buttonClass } from "@/components/internal/ui";
 

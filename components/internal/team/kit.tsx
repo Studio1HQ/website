@@ -3,7 +3,7 @@
 import { useTransition, type ReactNode } from "react";
 import Link from "next/link";
 import * as Dialog from "@radix-ui/react-dialog";
-import { CaretLeft, CaretRight, X } from "@phosphor-icons/react";
+import { CaretLeft, CaretRight, X } from "@/components/internal/icons";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/internal/toast";
 import { buttonClass } from "@/components/internal/ui";

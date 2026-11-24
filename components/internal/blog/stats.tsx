@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { ArrowDown, ArrowUp } from "@phosphor-icons/react/dist/ssr";
+import { ArrowDown, ArrowUp } from "@/components/internal/icons";
 import {
   Sparkline,
   TableView,
   compact,
 } from "@/components/internal/community/charts";
+import { LinkTabs } from "@/components/internal/community/ui";
 import { readTime, type PostStat } from "@/lib/internal/blog/stats";
 import { cn } from "@/lib/utils";
 
@@ -21,6 +22,26 @@ export function shortDay(day: string) {
     month: "short",
     timeZone: "UTC",
   });
+}
+
+/** The site's numbers or the DEV organization's, keeping the range. */
+export function StatsTabs({
+  active,
+  range,
+}: {
+  active: "site" | "dev";
+  range: string;
+}) {
+  const query = range === "28" ? "" : `?range=${range}`;
+  return (
+    <LinkTabs
+      active={active}
+      items={[
+        { key: "site", label: "studio1hq.com", href: `/blog/stats${query}` },
+        { key: "dev", label: "DEV", href: `/blog/stats/dev${query}` },
+      ]}
+    />
+  );
 }
 
 /** Up or down against the stretch before, as a share: "▲ 12% vs previous 28 days". */

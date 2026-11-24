@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, DownloadSimple } from "@phosphor-icons/react/dist/ssr";
+import { ArrowLeft, DownloadSimple } from "@/components/internal/icons";
 import { getHackathon } from "@/data/hackathons";
 import Logo from "@/components/ui/svgs/logo";
 import { hackathonRegistrationsFor } from "@/lib/internal/data";

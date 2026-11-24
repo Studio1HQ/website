@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp } from "@phosphor-icons/react/dist/ssr";
+import { ArrowDown, ArrowUp } from "@/components/internal/icons";
 import { signed } from "@/lib/internal/socials/schema";
 import { cn } from "@/lib/utils";
 

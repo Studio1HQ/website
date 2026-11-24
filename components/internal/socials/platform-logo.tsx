@@ -8,7 +8,7 @@ import {
   UsersThree,
   XLogo,
   YoutubeLogo,
-} from "@phosphor-icons/react/dist/ssr";
+} from "@/components/internal/icons";
 import type { Platform } from "@/lib/internal/socials/schema";
 import { cn } from "@/lib/utils";
 

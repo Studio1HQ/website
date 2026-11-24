@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight } from "@phosphor-icons/react";
+import { ArrowRight } from "@/components/internal/icons";
 import { convertToClient } from "@/app/internal/(dashboard)/outreach/actions";
 import { useToast } from "@/components/internal/toast";
 import { buttonClass } from "@/components/internal/ui";

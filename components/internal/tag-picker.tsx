@@ -2,7 +2,7 @@
 
 import { useMemo, useState, type ReactNode } from "react";
 import * as Popover from "@radix-ui/react-popover";
-import { Check, Minus, Plus } from "@phosphor-icons/react";
+import { Check, Minus, Plus } from "@/components/internal/icons";
 import { cleanTag } from "@/lib/internal/sections";
 import type { Option } from "@/lib/internal/query";
 import { cn } from "@/lib/utils";

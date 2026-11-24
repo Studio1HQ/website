@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { hoursLabel } from "@/lib/internal/tasks/shared";
+import { engagementLabel, hoursLabel } from "@/lib/internal/tasks/shared";
 
 /* Small client pieces the Tasks board, Today list and My day share. */
 
@@ -18,7 +18,7 @@ export type ForOption = {
 };
 
 export function forOptionLabel(option: ForOption) {
-  return option.internal ? `Studio1 · ${option.name}` : `${option.client} · ${option.name}`;
+  return engagementLabel(option);
 }
 
 /** A card on the board (for a task's "Part of": the person's open deliverables). */

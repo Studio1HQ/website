@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Camera } from "@phosphor-icons/react";
+import { Camera } from "@/components/internal/icons";
 import { removeMyPhoto, updateMyEmployeeId, uploadMyPhoto } from "@/app/internal/(dashboard)/me/actions";
 import { saveMyProfile } from "@/app/internal/(dashboard)/profile/actions";
 import { Label, shrinkImage, useTeamAction } from "@/components/internal/team/kit";

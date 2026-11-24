@@ -9,7 +9,7 @@ import {
   type FormEvent,
   type ReactNode,
 } from "react";
-import { Handshake, Plus, Trash } from "@phosphor-icons/react";
+import { Handshake, Plus, Trash } from "@/components/internal/icons";
 import {
   removePartner,
   savePartner,

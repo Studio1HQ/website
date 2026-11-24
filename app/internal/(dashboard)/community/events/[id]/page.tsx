@@ -7,7 +7,7 @@ import {
   ChartBar,
   PencilSimple,
   Trophy,
-} from "@phosphor-icons/react/dist/ssr";
+} from "@/components/internal/icons";
 import { requireCommunity } from "@/lib/internal/session";
 import { hackathonBreakdown, hackathonRegistrationsFor } from "@/lib/internal/data";
 import { doorCounts, doorRows, type SiteRegistration } from "@/lib/internal/community/door";

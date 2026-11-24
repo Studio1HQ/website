@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { CaretDown, Check } from "@phosphor-icons/react";
+import { CaretDown, Check } from "@/components/internal/icons";
 import { cn } from "@/lib/utils";
 import { menuContentClass, menuItemClass } from "@/components/internal/ui";
 

@@ -1,31 +1,39 @@
 "use client";
 
 import { useOptimistic, useState, type ReactNode } from "react";
+import Link from "next/link";
 import { DndContext, DragOverlay, useDraggable, useDroppable, type DragEndEvent } from "@dnd-kit/core";
-import { Plus, Prohibit, UserCircle, UsersThree } from "@phosphor-icons/react";
+import { ArrowUpRight, DotsThree, PencilSimple, Plus, Prohibit, UserCircle, UsersThree } from "@/components/internal/icons";
+import * as Menu from "@radix-ui/react-dropdown-menu";
 import { blockTask, moveTask } from "@/app/internal/(dashboard)/tasks/actions";
 import { setQuickField } from "@/app/internal/(dashboard)/community/actions";
 import { cn } from "@/lib/utils";
-import { buttonClass, inputClass } from "@/components/internal/ui";
-import { DueDate, Pill, TONES } from "@/components/internal/community/ui";
+import { ExternalLink, buttonClass, inputClass, menuContentClass, menuItemClass } from "@/components/internal/ui";
+import { DueDate, Pill } from "@/components/internal/community/ui";
 import { Select } from "@/components/internal/select";
 import { Label, TeamDialog, useTeamAction } from "@/components/internal/team/kit";
-import { DeliverableCard } from "@/components/internal/clients/deliverable-card";
-import { StatusBadge } from "@/components/internal/clients/ui";
+import { BlockDialog } from "@/components/internal/clients/block-dialog";
+import { DeliverableDialog } from "@/components/internal/clients/deliverable-dialog";
+import { KindIcon } from "@/components/internal/clients/kind-icon";
+import { MoveStatusMenu } from "@/components/internal/clients/move-status-menu";
+import { canChangeDeliverable, isLate as isDeliverableLate, isWaitingOnClient } from "@/lib/internal/clients/rules";
 import { TaskDialog } from "@/components/internal/tasks/task-dialog";
 import { TaskNote } from "@/components/internal/tasks/task-note";
 import { PriorityMark } from "@/components/internal/tasks/priority";
 import { withLabel } from "@/components/internal/tasks/with-picker";
 import { ForChip, type ForOption, type LogTarget } from "@/components/internal/tasks/kit";
+import { StatusMenuItems, StatusPill, TonePill } from "@/components/internal/tasks/status-pill";
 import { cardAnnouncements, dragHandlers, underPointer, useCardSensors } from "@/components/internal/tasks/drag";
 import { displayName } from "@/lib/internal/team/shared";
 import type { ClientsAccess } from "@/lib/internal/clients/rules";
-import type { Deliverable } from "@/lib/internal/clients/schema";
+import { DELIVERABLE_KINDS, DELIVERABLE_STATUSES, clientPath, labelOf, statusLabel, toneOf, type Deliverable } from "@/lib/internal/clients/schema";
 import {
   TASK_STATUSES,
   communityColumn,
   communityStatusFor,
   deliverableColumn,
+  isOwed,
+  isTaskLate,
   isTaskStatus,
   peopleOn,
   priorityRank,
@@ -33,6 +41,7 @@ import {
   type CommunityCard,
   type Task,
   type Teammate,
+  type Tone,
 } from "@/lib/internal/tasks/shared";
 
 /* The board: one person's work from three places in four columns. Drag a
@@ -175,13 +184,61 @@ export function Board(props: BoardProps) {
   const announcements = cardAnnouncements(titleOf, (id) => TASK_STATUSES.find((column) => column.value === id)?.label);
 
   const doneCount = items.filter((item) => item.column === "done").length;
+  // The bar across the top: how far the week has got, and what needs a look.
+  // Late is what each card says: a task in review is handed in, so it isn't.
+  const facts = items.map((item) =>
+    item.kind === "task"
+      ? { late: isTaskLate(item.data.task, today), blocked: item.data.task.blocked }
+      : item.kind === "deliverable"
+        ? { late: isDeliverableLate(item.data.deliverable, today), blocked: item.data.deliverable.blocked }
+        : { late: item.data.status !== "done" && !!item.data.due_on && item.data.due_on < today, blocked: item.data.status === "blocked" },
+  );
+  const open = items.filter((item) => item.column !== "done");
+  const lateCount = facts.filter((fact) => fact.late).length;
+  const blockedCount = items.filter((item, index) => item.column !== "done" && facts[index].blocked).length;
+  const progress = items.length ? Math.round((doneCount / items.length) * 100) : 0;
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <p className="mr-auto text-[13px] text-[var(--i-muted)]">
-          This week: <span className="font-medium text-[var(--i-ink)] tabular-nums">{doneCount}</span> done
-        </p>
+      {/* The week on one line: progress on the left, the counts as small
+          pills, then Add task. */}
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-3 rounded-2xl border border-[var(--i-line)] bg-[var(--i-panel)] px-5 py-3.5 shadow-[var(--i-shadow-sm)] dark:border-transparent">
+        <div className="min-w-[220px] flex-1">
+          <div className="flex items-baseline gap-2 text-[13px]">
+            <span className="font-medium">{person.own ? "This week" : `${person.name.split(" ")[0]}'s week`}</span>
+            <span className="text-[12px] text-[var(--i-faint)]">{weekRange(today)}</span>
+            <span className="ml-auto text-[12.5px] tabular-nums text-[var(--i-muted)]">
+              <span className="font-medium text-[var(--i-ink)]">{doneCount}</span> of {items.length} done
+            </span>
+          </div>
+          <div
+            role="progressbar"
+            aria-label="Done this week"
+            aria-valuenow={progress}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            className="mt-2 h-1 overflow-hidden rounded-full bg-[var(--i-track)]"
+          >
+            <div className="h-full rounded-full bg-[var(--i-bar)] transition-[width] duration-300" style={{ width: `${progress}%` }} />
+          </div>
+        </div>
+        <div className="flex items-center gap-1.5">
+          {[
+            { label: "open", value: open.length, tone: "bg-black/[0.05] text-[var(--i-ink-2)] dark:bg-white/[0.08]" },
+            { label: "late", value: lateCount, tone: "bg-rose-500/15 text-rose-700 dark:text-rose-300" },
+            { label: "blocked", value: blockedCount, tone: "bg-amber-500/15 text-amber-700 dark:text-amber-300" },
+          ].map((stat) => (
+            <span
+              key={stat.label}
+              className={cn(
+                "inline-flex h-7 items-center gap-1 rounded-full px-3 text-[12.5px]",
+                stat.value ? stat.tone : "bg-black/[0.04] text-[var(--i-faint)] dark:bg-white/[0.05]",
+              )}
+            >
+              <span className="font-medium tabular-nums">{stat.value}</span> {stat.label}
+            </span>
+          ))}
+        </div>
         {props.canAdd ? (
           <button type="button" className={buttonClass("primary")} onClick={() => setAdding(true)}>
             <Plus size={14} /> {person.own ? "Add task" : `Add a task for ${person.name.split(" ")[0]}`}
@@ -197,7 +254,7 @@ export function Board(props: BoardProps) {
           <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {props.reviewing.map((item) => (
               <li key={item.deliverable.id}>
-                <ClientCard item={item} viewer={viewer} names={props.names} today={today} />
+                <ClientCard item={item} viewer={viewer} names={props.names} today={today} showOwner />
               </li>
             ))}
           </ul>
@@ -273,6 +330,19 @@ export function Board(props: BoardProps) {
   );
 }
 
+/** "24–30 Nov" (or "28 Nov – 4 Dec"): Monday to Sunday of the week `today` is in. */
+function weekRange(today: string) {
+  const date = new Date(`${today}T00:00:00`);
+  const monday = new Date(date);
+  monday.setDate(date.getDate() - ((date.getDay() + 6) % 7));
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  const month = (value: Date) => value.toLocaleString("en-GB", { month: "short" });
+  return monday.getMonth() === sunday.getMonth()
+    ? `${monday.getDate()}–${sunday.getDate()} ${month(sunday)}`
+    : `${monday.getDate()} ${month(monday)} – ${sunday.getDate()} ${month(sunday)}`;
+}
+
 /** A column of the board, and a place to drop cards while one is dragged. */
 function BoardColumn({
   column,
@@ -300,10 +370,9 @@ function BoardColumn({
         dimmed && "opacity-50",
       )}
     >
-      <h2 className="flex items-center gap-2 px-2 pb-2 pt-1 text-[12.5px] font-medium text-[var(--i-ink-2)]">
-        <span aria-hidden className={cn("size-1.5 rounded-full", TONES[column.tone].dot)} />
-        {column.value === "done" ? "Done this week" : column.label}
-        <span className="ml-auto font-normal tabular-nums text-[var(--i-faint)]">{count}</span>
+      <h2 className="flex items-center gap-2 px-1 pb-2.5 pt-1">
+        <StatusPill status={column.value} label={column.value === "done" ? "Done this week" : column.label} />
+        <span className="ml-auto pr-1 text-[12.5px] tabular-nums text-[var(--i-faint)]">{count}</span>
       </h2>
       {children}
     </section>
@@ -329,44 +398,141 @@ function LiftedCard({ what }: { what: Lifted }) {
   );
 }
 
-/** A client deliverable: the client board's own card when the viewer can open client work. */
+/**
+ * A client piece (from client work, read here, never copied), shaped like a
+ * task card so the board reads as one list: what kind it is and its title,
+ * a blocked line when it's stuck, then one quiet line with the client, its
+ * status (a menu for whoever may move it), the due date and whether it's
+ * waiting on the client. The title opens it; ⋯ has block and the client page.
+ */
 function ClientCard({
   item,
   viewer,
   names,
   today,
+  showOwner = false,
 }: {
   item: BoardDeliverable;
   viewer: BoardProps["viewer"];
   names: Record<string, string>;
   today: string;
+  /** Someone else's piece (waiting on this person's review): say whose. */
+  showOwner?: boolean;
 }) {
-  if (viewer.clients) {
-    return (
-      <DeliverableCard
-        deliverable={item.deliverable}
-        viewer={{ email: viewer.email, clients: viewer.clients }}
-        clientName={item.clientName}
-        clientSlug={item.clientSlug}
-        engagementName={item.engagementName}
-        internal={item.internal}
-        names={names}
-        today={today}
-      />
-    );
-  }
+  const { deliverable } = item;
+  const [opened, setOpened] = useState(false);
+  const [blocking, setBlocking] = useState(false);
+  const access = viewer.clients;
+  const canChange = access ? canChangeDeliverable({ email: viewer.email, clients: access }, deliverable) : false;
+  const published = deliverable.status === "published";
+  const waiting = isWaitingOnClient(deliverable, today);
+  const page = item.clientSlug ? clientPath(item.clientSlug) : null;
+  const owner = deliverable.owner ? (names[deliverable.owner.toLowerCase()] ?? displayName({ email: deliverable.owner })) : null;
+  const heading = (
+    <>
+      <span title={labelOf(DELIVERABLE_KINDS, deliverable.kind)} className="mt-[3px] shrink-0">
+        <KindIcon kind={deliverable.kind} size={13} />
+      </span>
+      <span className="min-w-0">{deliverable.title}</span>
+    </>
+  );
+  const headingClass = "flex w-full items-start gap-1.5 text-left text-[13.5px] font-medium leading-snug";
+
   return (
-    <article className={cn("rounded-xl border bg-[var(--i-panel)] p-3 shadow-[var(--i-shadow-sm)]", item.deliverable.blocked ? "border-rose-200 dark:border-rose-500/30" : "border-[var(--i-line)]")}>
-      <ForChip label={item.forLabel} client={!item.internal} />
-      <p className="mt-1.5 text-[13.5px] font-medium leading-snug">{item.deliverable.title}</p>
-      <div className="mt-2 flex flex-wrap items-center gap-2">
-        <StatusBadge status={item.deliverable.status} />
-        {item.deliverable.due_on ? (
-          <span className="text-[12px]">
-            <DueDate day={item.deliverable.due_on} done={item.deliverable.status === "published"} today={today} />
-          </span>
+    <article
+      className={cn(
+        "group/card flex flex-col gap-2 rounded-xl border bg-[var(--i-panel)] p-3 shadow-[var(--i-shadow-sm)] transition-colors hover:border-[var(--i-line-strong)]",
+        deliverable.blocked ? "border-rose-200 dark:border-rose-500/30" : "border-[var(--i-line)]",
+      )}
+    >
+      <div className="flex items-start gap-2">
+        <div className="min-w-0 flex-1">
+          {access ? (
+            <button type="button" onClick={() => setOpened(true)} className={cn(headingClass, "hover:text-[var(--i-accent-text)]")}>
+              {heading}
+            </button>
+          ) : page ? (
+            <Link href={page} className={cn(headingClass, "hover:text-[var(--i-accent-text)]")}>
+              {heading}
+            </Link>
+          ) : (
+            <p className={headingClass}>{heading}</p>
+          )}
+        </div>
+        {(canChange && !published) || page ? (
+          <Menu.Root>
+            <Menu.Trigger
+              aria-label={`Options for ${deliverable.title}`}
+              className="-mr-1 -mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md text-[var(--i-faint)] opacity-0 outline-none transition-opacity hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)] focus-visible:opacity-100 group-hover/card:opacity-100 data-[state=open]:opacity-100 [@media(hover:none)]:opacity-100"
+            >
+              <DotsThree size={18} weight="bold" />
+            </Menu.Trigger>
+            <Menu.Portal>
+              <Menu.Content align="end" sideOffset={4} className={menuContentClass}>
+                {canChange && !published ? (
+                  <Menu.Item onSelect={() => setBlocking(true)} className={menuItemClass}>
+                    <Prohibit size={14} /> {deliverable.blocked ? "Change or unblock" : "Mark as blocked"}
+                  </Menu.Item>
+                ) : null}
+                {page ? (
+                  <Menu.Item asChild className={menuItemClass}>
+                    <Link href={page}>
+                      <ArrowUpRight size={14} /> Open {item.internal ? "Studio1's" : `${item.clientName}'s`} page
+                    </Link>
+                  </Menu.Item>
+                ) : null}
+              </Menu.Content>
+            </Menu.Portal>
+          </Menu.Root>
         ) : null}
       </div>
+
+      {deliverable.blocked ? (
+        <p className="flex items-center gap-1.5 rounded-md bg-rose-500/10 px-2 py-1 text-[12px] text-rose-700 dark:text-rose-300">
+          <Prohibit size={12} className="shrink-0" />
+          <span className="min-w-0 truncate">
+            {deliverable.waits_on === "client" ? "Waiting on the client" : "Blocked"}
+            {deliverable.block_reason ? `: ${deliverable.block_reason}` : ""}
+          </span>
+        </p>
+      ) : null}
+
+      {/* One quiet line, like a task's: the client, where it stands, when it's due. */}
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-[var(--i-muted)]">
+        <ForChip label={item.forLabel} client={!item.internal} />
+        {access ? (
+          <MoveStatusMenu deliverable={deliverable} internal={item.internal} canChange={canChange} />
+        ) : (
+          <TonePill tone={toneOf(DELIVERABLE_STATUSES, deliverable.status) as Tone} label={statusLabel(deliverable.status, deliverable.kind)} small />
+        )}
+        {deliverable.due_on && !published ? (
+          // In client review the date is the client's to meet: the plain date, never "late".
+          <DueDate day={deliverable.due_on} done={deliverable.status === "client_review"} today={today} />
+        ) : null}
+        {waiting ? <span className="text-amber-700 dark:text-amber-300">Waiting on the client</span> : null}
+        {showOwner && owner ? (
+          <span className="inline-flex items-center gap-1 text-[var(--i-faint)]">
+            <UserCircle size={12} /> {owner}
+          </span>
+        ) : null}
+        {published && deliverable.published_url ? (
+          <ExternalLink href={deliverable.published_url} className="text-[12px]">
+            Live
+          </ExternalLink>
+        ) : null}
+      </div>
+
+      {access ? (
+        <DeliverableDialog
+          deliverable={deliverable}
+          access={access}
+          canChange={canChange}
+          names={names}
+          open={opened}
+          onOpenChange={setOpened}
+        />
+      ) : null}
+      {canChange ? <BlockDialog deliverable={deliverable} open={blocking} onOpenChange={setBlocking} /> : null}
     </article>
   );
 }
@@ -391,7 +557,7 @@ function TaskCard({ item, props, onMove }: { item: BoardTask; props: BoardProps;
       ref={setNodeRef}
       {...dragHandlers(listeners)}
       className={cn(
-        "flex flex-col gap-2 rounded-xl border bg-[var(--i-panel)] p-3 shadow-[var(--i-shadow-sm)] transition-[border-color,opacity] hover:border-[var(--i-line-strong)]",
+        "group/card flex flex-col gap-2 rounded-xl border bg-[var(--i-panel)] p-3 shadow-[var(--i-shadow-sm)] transition-[border-color,opacity] hover:border-[var(--i-line-strong)]",
         // Hold to drag on a phone: no text selection or callout getting in the way.
         changeable && "touch-manipulation select-none [-webkit-touch-callout:none] md:cursor-grab",
         task.blocked ? "border-rose-200 dark:border-rose-500/30" : "border-[var(--i-line)]",
@@ -399,64 +565,73 @@ function TaskCard({ item, props, onMove }: { item: BoardTask; props: BoardProps;
         isDragging && "opacity-40",
       )}
     >
-      <div className="min-w-0 space-y-1">
-        <ForChip label={item.forLabel} client={item.client} />
+      {/* Notion-style: the title, one quiet line of details, and a ⋯ menu.
+          Status changes by dragging to a column, or Move to in the menu. */}
+      <div className="flex items-start gap-2">
+        <div className="min-w-0 flex-1">
+          {changeable ? (
+            <button type="button" onClick={() => setEditing(true)} className="block w-full text-left text-[13.5px] font-medium leading-snug hover:text-[var(--i-accent-text)]">
+              {task.title}
+            </button>
+          ) : (
+            <p className="text-[13.5px] font-medium leading-snug">{task.title}</p>
+          )}
+          {task.notes ? <TaskNote text={task.notes} /> : null}
+        </div>
         {changeable ? (
-          <button type="button" onClick={() => setEditing(true)} className="block w-full text-left text-[13.5px] font-medium leading-snug hover:text-[var(--i-accent-text)]">
-            {task.title}
-          </button>
-        ) : (
-          <p className="text-[13.5px] font-medium leading-snug">{task.title}</p>
-        )}
-        {task.notes ? <TaskNote text={task.notes} /> : null}
-        {task.blocked ? (
-          <p className="text-[12px] text-rose-700 dark:text-rose-300">
-            <Prohibit size={12} className="mr-1 inline" />
-            {task.block_reason}
-          </p>
-        ) : null}
-        {given ? (
-          <p className="flex items-center gap-1 text-[11.5px] text-[var(--i-faint)]">
-            <UserCircle size={12} /> From {props.names[task.created_by.toLowerCase()] ?? displayName({ email: task.created_by })}
-          </p>
-        ) : null}
-        {others.length ? (
-          <p title="Shared: it's on each of their lists" className="flex items-center gap-1 text-[11.5px] text-[var(--i-muted)]">
-            <UsersThree size={12} className="shrink-0" /> With {withLabel(others, props.team)}
-          </p>
+          <Menu.Root>
+            <Menu.Trigger
+              aria-label={`Options for ${task.title}`}
+              onPointerDown={(event) => event.stopPropagation()}
+              className="-mr-1 -mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md text-[var(--i-faint)] opacity-0 outline-none transition-opacity hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)] focus-visible:opacity-100 group-hover/card:opacity-100 data-[state=open]:opacity-100 [@media(hover:none)]:opacity-100"
+            >
+              <DotsThree size={18} weight="bold" />
+            </Menu.Trigger>
+            <Menu.Portal>
+              <Menu.Content align="end" sideOffset={4} className={menuContentClass}>
+                <StatusMenuItems status={task.status} onChange={onMove} />
+                <Menu.Separator className="-mx-1 my-1 h-px bg-[var(--i-line)]" />
+                {task.status !== "done" ? (
+                  <Menu.Item onSelect={() => setBlocking(true)} className={menuItemClass}>
+                    <Prohibit size={14} /> {task.blocked ? "Change or unblock" : "Mark as blocked"}
+                  </Menu.Item>
+                ) : null}
+                <Menu.Item onSelect={() => setEditing(true)} className={menuItemClass}>
+                  <PencilSimple size={14} /> Edit task
+                </Menu.Item>
+              </Menu.Content>
+            </Menu.Portal>
+          </Menu.Root>
         ) : null}
       </div>
-      <div className="flex flex-wrap items-center gap-2">
-        {changeable ? (
-          <Select
-            aria-label={`Move ${task.title}`}
-            size="xs"
-            value={task.status}
-            onChange={onMove}
-            options={TASK_STATUSES.map((option) => ({ value: option.value, label: option.label }))}
-            className="w-[7.5rem]"
-          />
-        ) : (
+
+      {task.blocked ? (
+        <p className="flex items-center gap-1.5 rounded-md bg-rose-500/10 px-2 py-1 text-[12px] text-rose-700 dark:text-rose-300">
+          <Prohibit size={12} className="shrink-0" />
+          <span className="min-w-0 truncate">{task.block_reason || "Blocked"}</span>
+        </p>
+      ) : null}
+
+      {/* One quiet line: what it's for, priority, due date, who else is on it. */}
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-[var(--i-muted)]">
+        {item.forLabel ? <ForChip label={item.forLabel} client={item.client} /> : null}
+        <PriorityMark priority={task.priority} />
+        {!changeable ? (
           <Pill tone={TASK_STATUSES.find((option) => option.value === task.status)?.tone}>
             {TASK_STATUSES.find((option) => option.value === task.status)?.label}
           </Pill>
-        )}
-        <PriorityMark priority={task.priority} />
-        {task.due_on ? (
-          <span className="text-[12px]">
-            <DueDate day={task.due_on} done={task.status === "done"} today={props.today} />
+        ) : null}
+        {/* In review is handed in: the plain date, never "late". */}
+        {task.due_on ? <DueDate day={task.due_on} done={!isOwed(task.status)} today={props.today} /> : null}
+        {given ? (
+          <span className="inline-flex items-center gap-1 text-[var(--i-faint)]">
+            <UserCircle size={12} /> {props.names[task.created_by.toLowerCase()] ?? displayName({ email: task.created_by })}
           </span>
         ) : null}
-        {changeable && task.status !== "done" ? (
-          <button
-            type="button"
-            onClick={() => setBlocking(true)}
-            aria-label={task.blocked ? "Blocked: change or unblock" : "Mark as blocked"}
-            title={task.blocked ? "Blocked: change or unblock" : "Mark as blocked"}
-            className={cn("ml-auto flex size-7 items-center justify-center rounded-md hover:bg-[var(--i-hover)]", task.blocked ? "text-rose-600 dark:text-rose-300" : "text-[var(--i-faint)]")}
-          >
-            <Prohibit size={14} />
-          </button>
+        {others.length ? (
+          <span title="Shared: it's on each of their lists" className="inline-flex items-center gap-1">
+            <UsersThree size={12} className="shrink-0" /> {withLabel(others, props.team)}
+          </span>
         ) : null}
       </div>
       {changeable ? (
@@ -464,6 +639,7 @@ function TaskCard({ item, props, onMove }: { item: BoardTask; props: BoardProps;
           open={editing}
           onOpenChange={setEditing}
           task={task}
+          forLabel={item.forLabel}
           person={props.person}
           forOptions={props.forOptions}
           deliverables={props.targets.filter((target) => target.kind === "deliverable")}

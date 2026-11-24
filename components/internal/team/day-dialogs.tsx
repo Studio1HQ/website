@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, X } from "@phosphor-icons/react";
+import { Plus, X } from "@/components/internal/icons";
 import { DateField } from "@/components/internal/pickers";
 import { TimeField } from "@/components/internal/team/time-field";
 import { cn } from "@/lib/utils";

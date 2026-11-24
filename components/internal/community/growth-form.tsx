@@ -4,7 +4,7 @@ import { useState, useTransition, type FormEvent } from "react";
 import { DateField, SuggestInput } from "@/components/internal/pickers";
 import { useRouter } from "next/navigation";
 import * as Dialog from "@radix-ui/react-dialog";
-import { Plus, X } from "@phosphor-icons/react";
+import { Plus, X } from "@/components/internal/icons";
 import { logGrowth } from "@/app/internal/(dashboard)/community/actions";
 import {
   CHANNELS,

@@ -42,7 +42,7 @@ import {
   type StatusEvent,
 } from "@/lib/internal/clients/schema";
 import { isDueInWeek, isLate, waitsOnClient } from "@/lib/internal/clients/rules";
-import type { Task } from "@/lib/internal/tasks/shared";
+import { isTaskLate, type Task } from "@/lib/internal/tasks/shared";
 
 /* ----------------------------------------------------------------- types */
 
@@ -256,7 +256,8 @@ export function weekLines(input: {
       group: task.blocked ? "blocked" : task.status === "todo" ? "next" : "doing",
       day: task.due_on,
       dayKind: task.due_on ? "due" : null,
-      late: Boolean(task.due_on) && (task.due_on as string) < today,
+      // In review is handed in: not late.
+      late: isTaskLate(task, today),
       blocked: task.blocked,
       reason: task.blocked ? task.block_reason : "",
       waitingOnClient: false,

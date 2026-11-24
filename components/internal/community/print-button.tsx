@@ -1,6 +1,6 @@
 "use client";
 
-import { Printer } from "@phosphor-icons/react";
+import { Printer } from "@/components/internal/icons";
 import { buttonClass } from "@/components/internal/ui";
 
 /** Opens the browser's print dialog, where "Save as PDF" makes the file. */

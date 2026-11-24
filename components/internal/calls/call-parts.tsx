@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { ArrowSquareOut, CalendarPlus, Crown, PencilSimple, VideoCamera } from "@phosphor-icons/react";
+import { ArrowSquareOut, CalendarPlus, Crown, PencilSimple, VideoCamera } from "@/components/internal/icons";
 import { cn } from "@/lib/utils";
 import { buttonClass, inputClass } from "@/components/internal/ui";
 import { DateField } from "@/components/internal/pickers";

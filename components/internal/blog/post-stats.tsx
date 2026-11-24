@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowSquareOut, PencilSimple } from "@phosphor-icons/react/dist/ssr";
+import { ArrowSquareOut, PencilSimple } from "@/components/internal/icons";
 import {
   Card,
   CardTitle,
@@ -21,6 +21,12 @@ import {
   type StatsWindow,
 } from "@/lib/internal/blog/stats";
 import type { DevArticle } from "@/lib/internal/blog/devto";
+
+/** What the page shows of a post's DEV copy; views are null when DEV gives none. */
+export type DevCopy = Pick<
+  DevArticle,
+  "url" | "published" | "reactions" | "comments"
+> & { views: number | null };
 import {
   ANALYTICS_SINCE,
   type AnalyticsPost,
@@ -80,8 +86,8 @@ export function PostStatsView({
   window: StatsWindow;
   reads: AnalyticsPost | null;
   search: SearchPost | null;
-  /** Its copy on DEV (Blog → External), if there is one. */
-  dev: DevArticle | null;
+  /** Its copy on DEV: the Studio1 organization's, else the publishing account's. */
+  dev: DevCopy | null;
 }) {
   const ga = reads?.ok ? reads : null;
   const gsc = search?.ok ? search : null;
@@ -282,11 +288,16 @@ export function PostStatsView({
             {dev.published ? (
               <>
                 :{" "}
-                <span className="font-medium tabular-nums text-[var(--i-ink-2)]">
-                  {compact(dev.views)}
-                </span>{" "}
-                views, {compact(dev.reactions)} reactions,{" "}
-                {compact(dev.comments)} comments
+                {dev.views !== null ? (
+                  <>
+                    <span className="font-medium tabular-nums text-[var(--i-ink-2)]">
+                      {compact(dev.views)}
+                    </span>{" "}
+                    views,{" "}
+                  </>
+                ) : null}
+                {compact(dev.reactions)} reactions, {compact(dev.comments)}{" "}
+                comments
               </>
             ) : (
               " as a draft"

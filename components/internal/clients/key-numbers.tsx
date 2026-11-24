@@ -9,7 +9,7 @@ import {
   Minus,
   PencilSimple,
   Plus,
-} from "@phosphor-icons/react";
+} from "@/components/internal/icons";
 import { saveMilestone } from "@/app/internal/(dashboard)/clients/actions";
 import { parseCount } from "@/lib/internal/clients/clean";
 import {

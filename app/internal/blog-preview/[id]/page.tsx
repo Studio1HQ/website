@@ -5,7 +5,7 @@ import { compileMDX } from "next-mdx-remote/rsc";
 import { NextIntlClientProvider } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import remarkGfm from "remark-gfm";
-import { ArrowLeft, Eye } from "@phosphor-icons/react/dist/ssr";
+import { ArrowLeft, Eye } from "@/components/internal/icons";
 import { PostLayout } from "@/components/blog/post-layout";
 import {
   blogMdxComponents,

@@ -11,7 +11,7 @@ import {
   UserCheck,
   Users,
   X,
-} from "@phosphor-icons/react";
+} from "@/components/internal/icons";
 import { changeEntries } from "@/app/internal/(dashboard)/actions";
 import {
   importGuestList,
@@ -480,7 +480,7 @@ export function GuestList({
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search guests"
               aria-label="Search guests"
-              className={cn(inputClass("xs"), "sm:w-48")}
+              className={cn(inputClass("xs"), "rounded-full px-3.5 sm:w-48")}
             />
             <button
               type="button"

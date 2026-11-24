@@ -6,7 +6,7 @@ import {
   Megaphone,
   Buildings,
   Plus,
-} from "@phosphor-icons/react";
+} from "@/components/internal/icons";
 import {
   TASK_PRIORITIES,
   TASK_STATUSES,

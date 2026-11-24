@@ -285,7 +285,7 @@ export const SECTIONS: Record<SectionKey, Section> = {
         column: "forms",
         label: "Signed up on",
         type: "array",
-        labels: { job: "Careers", hackathon: "Hackathons", devrel_cohort: "DevRel Cohort" },
+        labels: { job: "Careers", hackathon: "Hackathons", devrel_cohort: "DevRel Cohort", community: "Community" },
       },
     ],
     columns: [
@@ -294,7 +294,7 @@ export const SECTIONS: Record<SectionKey, Section> = {
         key: "forms",
         label: "Signed up on",
         kind: "list",
-        labels: { job: "Careers", hackathon: "Hackathons", devrel_cohort: "DevRel Cohort" },
+        labels: { job: "Careers", hackathon: "Hackathons", devrel_cohort: "DevRel Cohort", community: "Community" },
       },
       { key: "first_opted_in", label: "First opted in", kind: "date", wide: true },
       { key: "last_seen", label: "Last seen", kind: "date" },

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowsClockwise, CalendarBlank, Lightning } from "@phosphor-icons/react/dist/ssr";
+import { ArrowsClockwise, CalendarBlank, Lightning } from "@/components/internal/icons";
 import {
   DEFAULT_CALL_URL,
   SAMPLE_VARS,

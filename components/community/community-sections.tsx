@@ -164,8 +164,8 @@ export function TogetherSpread({ byId, index }: { byId: Map<string, CommunityIte
           onMouseEnter={() => setPaused(true)}
           onMouseLeave={() => setPaused(false)}
         >
-          <div className="grid gap-x-6 gap-y-8 md:grid-cols-12">
-            <div className="flex flex-col md:col-span-5">
+          <div className="grid gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-12">
+            <div className="flex flex-col sm:col-span-2 lg:col-span-5">
               <h2 className="text-[34px] font-medium leading-[1.05] tracking-[-0.045em] md:text-[44px]">
                 Where the community <span style={{ color: PRINT }}>comes together</span>
               </h2>
@@ -207,17 +207,17 @@ export function TogetherSpread({ byId, index }: { byId: Map<string, CommunityIte
                 ))}
               </div>
             </div>
-            <div className="md:col-span-3">
+            <div className="lg:col-span-3">
               <SpreadSlot s={small} className="aspect-[3/2]" captionClass="mt-2.5" sizes="(min-width: 768px) 24vw, 100vw" delay={0} reduce={reduce} />
             </div>
-            <div className="md:col-span-4">
+            <div className="lg:col-span-4">
               <SpreadSlot s={right} className="aspect-[3/2]" captionClass="mt-2.5" sizes="(min-width: 768px) 32vw, 100vw" delay={0.1} reduce={reduce} />
             </div>
-            <div className="md:col-span-8 md:flex md:items-end md:gap-4">
-              <SpreadSlot s={big} className="aspect-[3/2] md:w-[78%] md:shrink-0" captionClass="mt-2.5 md:mt-0" sizes="(min-width: 768px) 52vw, 100vw" delay={0.2} reduce={reduce} />
+            <div className="lg:col-span-8 lg:flex lg:items-end lg:gap-4">
+              <SpreadSlot s={big} className="aspect-[3/2] lg:w-[78%] lg:shrink-0" captionClass="mt-2.5 lg:mt-0" sizes="(min-width: 768px) 52vw, 100vw" delay={0.2} reduce={reduce} />
             </div>
-            <div className="md:col-span-4 md:flex md:items-end md:gap-3 md:self-end">
-              <SpreadSlot s={corner} className="aspect-[4/3] md:w-[70%] md:shrink-0" captionClass="mt-2.5 md:mt-0 md:self-start" sizes="(min-width: 768px) 24vw, 100vw" delay={0.3} reduce={reduce} />
+            <div className="lg:col-span-4 lg:flex lg:items-end lg:gap-3 lg:self-end">
+              <SpreadSlot s={corner} className="aspect-[3/2] lg:aspect-[4/3] lg:w-[70%] lg:shrink-0" captionClass="mt-2.5 lg:mt-0 lg:self-start" sizes="(min-width: 768px) 24vw, 100vw" delay={0.3} reduce={reduce} />
             </div>
           </div>
         </motion.div>
@@ -296,7 +296,7 @@ export function TogetherWeBuild() {
   return (
     <PaperSection tone="paper" className="relative isolate overflow-hidden">
       {/* the pencil sketch behind, stronger at the edges, softer behind the headline */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 opacity-[0.38] [mask-image:radial-gradient(ellipse_30%_32%_at_50%_50%,rgba(0,0,0,0.3)_40%,black_85%),linear-gradient(to_bottom,transparent,black_25%,black_70%,transparent)] [mask-composite:intersect] [-webkit-mask-composite:source-in]">
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 opacity-[0.38] [mask-image:radial-gradient(ellipse_30%_32%_at_50%_50%,rgba(0,0,0,0.3)_40%,black_85%),linear-gradient(to_bottom,transparent,black_25%,black_70%,transparent)] [-webkit-mask-image:radial-gradient(ellipse_30%_32%_at_50%_50%,rgba(0,0,0,0.3)_40%,black_85%),linear-gradient(to_bottom,transparent,black_25%,black_70%,transparent)] [mask-composite:intersect] [-webkit-mask-composite:source-in]">
         <SketchDesk className="absolute inset-0 size-full" />
       </div>
       <Container>

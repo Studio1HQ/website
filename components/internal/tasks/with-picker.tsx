@@ -1,7 +1,7 @@
 "use client";
 
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { CaretDown, Check, Plus, UsersThree } from "@phosphor-icons/react";
+import { CaretDown, Check, Plus, UsersThree } from "@/components/internal/icons";
 import { cn } from "@/lib/utils";
 import { inputClass, menuContentClass, menuItemClass } from "@/components/internal/ui";
 import { displayName } from "@/lib/internal/team/shared";

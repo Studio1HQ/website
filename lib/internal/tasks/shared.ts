@@ -47,6 +47,20 @@ export function statusLabel(status: TaskStatus) {
 }
 
 /**
+ * Whether the person still owes it: Not started or In progress. In review
+ * is handed in (it waits on the reviewer), so like Done it is never late
+ * and isn't "due today".
+ */
+export function isOwed(status: TaskStatus) {
+  return status === "todo" || status === "doing";
+}
+
+/** Late: still owed and its due day has gone by. */
+export function isTaskLate(task: { status: TaskStatus; due_on: string | null }, today: string) {
+  return isOwed(task.status) && task.due_on !== null && task.due_on < today;
+}
+
+/**
  * How much a task matters today. Medium is the default and stays quiet on
  * cards; Top and Low show. Lists put Top first.
  */
@@ -333,11 +347,26 @@ export type EngagementLabel = {
   clientId?: string;
 };
 
+/**
+ * An engagement as words, without saying the client twice: "Nebius Token
+ * Factory DevRel" for Nebius Token Factory reads "Nebius Token Factory ·
+ * DevRel", "Trina-Launch" reads "Trina · Launch", and one named just like
+ * its client is the client alone. Studio1's own: "Studio1 · Blog & socials".
+ */
+export function engagementLabel(engagement: Pick<EngagementLabel, "client" | "name" | "internal">) {
+  const client = engagement.internal ? "Studio1" : engagement.client.trim();
+  const name = engagement.name.trim();
+  const rest = name.toLowerCase().startsWith(client.toLowerCase())
+    ? name.slice(client.length).replace(/^[\s\-–—:·|/]+/, "").trim()
+    : name;
+  return rest ? `${client} · ${rest}` : client;
+}
+
 export function forLabel(key: string, engagements: ReadonlyMap<string, EngagementLabel>) {
   if (key.startsWith("e:")) {
     const engagement = engagements.get(key.slice(2));
     if (!engagement) return "A client";
-    return engagement.internal ? `Studio1 · ${engagement.name}` : `${engagement.client} · ${engagement.name}`;
+    return engagementLabel(engagement);
   }
   const area = key.slice(2);
   // Studio1 work with no particular area is just "Studio1".

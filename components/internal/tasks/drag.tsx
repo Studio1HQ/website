@@ -36,8 +36,8 @@ export const underPointer: CollisionDetection = (args) => {
 
 /**
  * The card's drag listeners, minus presses that belong to something else:
- * a field, or a dialog opened from the card (it portals out of the card,
- * but React still bubbles its events through it).
+ * a field, a link in a note, or a dialog opened from the card (it portals
+ * out of the card, but React still bubbles its events through it).
  */
 export function dragHandlers(listeners: DraggableSyntheticListeners) {
   if (!listeners) return {};
@@ -47,7 +47,7 @@ export function dragHandlers(listeners: DraggableSyntheticListeners) {
       (event: SyntheticEvent<HTMLElement>) => {
         const target = event.target as Element;
         if (!event.currentTarget.contains(target)) return;
-        if (target.closest("input, textarea, select, [role=combobox], [contenteditable=true]")) return;
+        if (target.closest("input, textarea, select, [data-note-link], [role=combobox], [contenteditable=true]")) return;
         handler(event);
       },
     ]),

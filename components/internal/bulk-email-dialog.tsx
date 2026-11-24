@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { Copy, EnvelopeSimple, PaperPlaneTilt, X } from "@phosphor-icons/react";
+import { Copy, EnvelopeSimple, PaperPlaneTilt, X } from "@/components/internal/icons";
 import { sendBulkEmail } from "@/app/internal/(dashboard)/bulk-email-actions";
 import { firstName } from "@/lib/first-name";
 import { isEmailAddress } from "@/lib/form-checks";
@@ -250,8 +250,10 @@ export function BulkEmailDialog({
             </Dialog.Close>
           </div>
 
-          <div className="grid min-h-0 flex-1 overflow-y-auto lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-            <div className="space-y-4 p-5">
+          {/* Wide screens: the form and the preview scroll on their own, so the
+              preview stays in view while the form scrolls. */}
+          <div className="grid min-h-0 flex-1 overflow-y-auto lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)] lg:overflow-hidden">
+            <div className="space-y-4 p-5 lg:overflow-y-auto">
               <div role="radiogroup" aria-label="Template" className="space-y-2.5">
                 {TEMPLATE_GROUPS.map((group) => {
                   const items = templates.filter((item) => item.group === group);
@@ -396,7 +398,7 @@ export function BulkEmailDialog({
                 </Notice>
               ) : null}
             </div>
-            <div className="border-t border-[var(--i-line)] bg-[var(--i-sunken)] p-5 lg:border-l lg:border-t-0">
+            <div className="border-t border-[var(--i-line)] bg-[var(--i-sunken)] p-5 lg:flex lg:flex-col lg:border-l lg:border-t-0">
               <p className="mb-2 text-[12px] text-[var(--i-muted)]">
                 Preview for <span className="font-medium text-[var(--i-ink)]">{previewPerson?.name || previewPerson?.email}</span>
                 {reachable.length > 1 ? " · click a recipient to see their copy" : ""}
@@ -405,7 +407,7 @@ export function BulkEmailDialog({
                 title="Email preview"
                 srcDoc={preview}
                 sandbox=""
-                className="h-[640px] w-full rounded-xl border border-[var(--i-line)] bg-[#f4efe7]"
+                className="h-[640px] w-full rounded-xl border border-[var(--i-line)] bg-[#f4efe7] lg:h-auto lg:min-h-[420px] lg:flex-1"
               />
             </div>
           </div>

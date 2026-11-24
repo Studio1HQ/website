@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { Crown, UserPlus } from "@phosphor-icons/react";
+import { Crown, UserPlus } from "@/components/internal/icons";
 import { addTeammateAction, saveTeammateAction, setTeammateAccess } from "@/app/internal/(dashboard)/people/actions";
 import { DateField, SuggestInput } from "@/components/internal/pickers";
 import { Avatar, Card, buttonClass, inputClass, relativeDate } from "@/components/internal/ui";
@@ -164,8 +164,8 @@ function typeOf(teammate: Teammate) {
 function AccessChips({ teammate, clients }: { teammate: Teammate; clients: ClientChoice[] }) {
   if (teammate.status === "owner") {
     return (
-      <span className="inline-flex items-center gap-1 text-[12px] font-medium text-[var(--i-accent-text)]">
-        <Crown size={12} weight="fill" /> Everything, Money included
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--i-line)] px-2.5 py-0.5 text-[12px] font-medium text-[var(--i-ink)]">
+        <Crown size={12} className="text-[var(--i-accent)]" /> Everything, Money included
       </span>
     );
   }

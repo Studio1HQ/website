@@ -10,7 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
-import { Archive, ArrowCounterClockwise } from "@phosphor-icons/react";
+import { Archive, ArrowCounterClockwise } from "@/components/internal/icons";
 import {
   archiveClient,
   saveClient,

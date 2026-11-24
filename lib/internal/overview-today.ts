@@ -1,7 +1,7 @@
 import { isIn, occurrences, toMinutes, type Call, type CallChange } from "@/lib/internal/calls/shared";
 import { followUpDue, isOpen } from "@/lib/internal/outreach/rules";
 import type { Org } from "@/lib/internal/outreach/schema";
-import type { Task } from "@/lib/internal/tasks/shared";
+import { isOwed, type Task } from "@/lib/internal/tasks/shared";
 import { rollingCounts } from "@/lib/internal/trend";
 
 /**
@@ -14,7 +14,8 @@ export type TodayTask = { id: string; title: string; due_on: string; late: boole
 /** Someone's open tasks due today or earlier: the longest overdue first, then today's. */
 export function todayTasks(tasks: readonly Task[], today: string, limit = 6): { items: TodayTask[]; more: number } {
   const due = tasks
-    .filter((task) => task.status !== "done" && task.due_on !== null && task.due_on <= today)
+    // What they still owe: one in review is handed in, so it isn't due or late.
+    .filter((task) => isOwed(task.status) && task.due_on !== null && task.due_on <= today)
     .sort((a, b) => (a.due_on ?? "").localeCompare(b.due_on ?? "") || a.created_at.localeCompare(b.created_at));
   return {
     items: due.slice(0, limit).map((task) => ({

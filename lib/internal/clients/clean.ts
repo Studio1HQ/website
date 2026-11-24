@@ -143,13 +143,20 @@ export function slugify(value: unknown) {
     .replace(/-+$/, "");
 }
 
-/** The slug, with "-2", "-3"… when it's taken. */
+/**
+ * Pages of their own under /clients: a company with one of these as its
+ * slug would be hidden behind the page, so they count as taken.
+ */
+export const RESERVED_SLUGS: ReadonlySet<string> = new Set(["projects", "stats", "templates", "board", "load", "reports"]);
+
+/** The slug, with "-2", "-3"… when it's taken (or names one of Clients' own pages). */
 export function uniqueSlug(base: string, taken: ReadonlySet<string>) {
   const root = base || "client";
-  if (!taken.has(root)) return root;
+  const free = (slug: string) => !taken.has(slug) && !RESERVED_SLUGS.has(slug);
+  if (free(root)) return root;
   for (let n = 2; n < 1000; n++) {
     const next = `${root}-${n}`;
-    if (!taken.has(next)) return next;
+    if (free(next)) return next;
   }
   return `${root}-${Date.now().toString(36)}`;
 }
@@ -409,6 +416,10 @@ export function cleanClient(
     row.slug = slug;
   }
   if (mode === "update" && "slug" in row && !row.slug) delete row.slug;
+  // A new client's taken or reserved slug gets a number (uniqueSlug); a
+  // renamed one can't take a Clients page's name.
+  if (mode === "update" && typeof row.slug === "string" && RESERVED_SLUGS.has(row.slug))
+    return { ok: false, message: `"${row.slug}" is the name of a Clients page. Pick another short name.` };
   return { ok: true, row };
 }
 

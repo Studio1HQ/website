@@ -11,7 +11,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import * as Dialog from "@radix-ui/react-dialog";
-import { Trash, X } from "@phosphor-icons/react";
+import { Trash, X } from "@/components/internal/icons";
 import {
   CURRENCIES,
   ownerName,

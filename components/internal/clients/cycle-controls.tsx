@@ -2,7 +2,7 @@
 
 import { useAfterSave } from "@/components/internal/clients/use-after-save";
 import { useState, useTransition, type FormEvent } from "react";
-import { CalendarPlus, PencilSimple, Receipt } from "@phosphor-icons/react";
+import { CalendarPlus, PencilSimple, Receipt } from "@/components/internal/icons";
 import {
   createCycle,
   saveCycleNotes,
@@ -98,9 +98,9 @@ export function CycleStateControl({
               )
             }
             className={cn(
-              "inline-flex h-7 shrink-0 items-center gap-1.5 rounded-md px-2.5 text-[12.5px] transition-colors",
+              "inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[13px] transition-colors",
               on
-                ? "bg-[var(--i-panel)] font-medium text-[var(--i-ink)] shadow-[var(--i-shadow-sm)]"
+                ? "bg-[var(--i-panel)] font-medium text-[var(--i-ink)] shadow-[var(--i-shadow-sm)] dark:bg-white/[0.14] dark:shadow-none"
                 : "text-[var(--i-muted)] hover:text-[var(--i-ink)]",
             )}
           >

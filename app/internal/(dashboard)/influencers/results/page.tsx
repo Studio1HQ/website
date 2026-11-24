@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChartBar } from "@phosphor-icons/react/dist/ssr";
+import { ChartBar } from "@/components/internal/icons";
 import {
   formatMoney,
   formatTotals,

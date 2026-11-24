@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { CheckCircle, Eye, Heart } from "@phosphor-icons/react/dist/ssr";
+import { CheckCircle, Eye, Heart } from "@/components/internal/icons";
 import {
   Card,
   CardTitle,

@@ -4,7 +4,7 @@ import {
   ArrowRight,
   CalendarBlank,
   CheckCircle,
-} from "@phosphor-icons/react/dist/ssr";
+} from "@/components/internal/icons";
 import { requireCommunity } from "@/lib/internal/session";
 import { hackathonBreakdown } from "@/lib/internal/data";
 import { hackathonListHref } from "@/components/internal/hackathon-tabs";
@@ -369,8 +369,9 @@ export default async function CommunityOverview({
         />
       </div>
 
+      {/* Two columns that end level: the last card in each grows to fill. */}
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_380px]">
-        <div className="min-w-0 space-y-5">
+        <div className="flex min-w-0 flex-col gap-5">
           <Card>
             <CardTitle
               action={
@@ -490,7 +491,7 @@ export default async function CommunityOverview({
             )}
           </Card>
 
-          <Card>
+          <Card className="lg:flex-1">
             <CardTitle>
               Needs attention{" "}
               <span className="font-normal text-[var(--i-faint)]">
@@ -529,7 +530,7 @@ export default async function CommunityOverview({
           </Card>
         </div>
 
-        <div className="min-w-0 space-y-5">
+        <div className="flex min-w-0 flex-col gap-5">
           <TaskList
             tasks={myTasks}
             me={staff.email}
@@ -540,7 +541,7 @@ export default async function CommunityOverview({
             owners={owners}
             defaults={{ owner: staff.email }}
           />
-          <Card>
+          <Card className="flex flex-col lg:flex-1">
             <CardTitle>Latest outreach and notes</CardTitle>
             {recent.ok && recent.rows.length ? (
               <ul className="divide-y divide-[var(--i-line)]">
@@ -576,18 +577,19 @@ export default async function CommunityOverview({
                 partner&apos;s page and they show up here.
               </p>
             )}
+            {upcoming[0]?.starts_on ? (
+              <p className="mt-auto border-t border-[var(--i-line)] px-5 py-3 text-[12.5px] text-[var(--i-muted)]">
+                Next event:{" "}
+                <span className="text-[var(--i-ink-2)]">
+                  {formatEventDate(
+                    upcoming[0].starts_on,
+                    upcoming[0].ends_on,
+                    today,
+                  )}
+                </span>
+              </p>
+            ) : null}
           </Card>
-          {upcoming[0]?.starts_on ? (
-            <p className="px-1 text-[12px] text-[var(--i-faint)]">
-              Next event:{" "}
-              {formatEventDate(
-                upcoming[0].starts_on,
-                upcoming[0].ends_on,
-                today,
-              )}
-              .
-            </p>
-          ) : null}
         </div>
       </div>
     </>

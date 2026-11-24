@@ -1,6 +1,11 @@
 -- Email signups from the public /community page ("tell me about the next
--- hackathon or meetup"). One row per address; signing up again only refreshes
--- updated_at. Written by the site's service role, never read by the browser.
+-- hackathon or meetup"). One row per address; signing up again is turned
+-- away by the unique index and the route treats that as success. Written by
+-- the site's service role, never read by the browser. Unsubscribing deletes
+-- the row (lib/unsubscribe.ts).
+--
+-- Run after 20261115110000_retention.sql: the mailing list view below keeps
+-- its kept_contacts branch. Safe to run again.
 
 create table if not exists public.community_subscribers (
   id uuid primary key default gen_random_uuid(),
@@ -14,9 +19,13 @@ create unique index if not exists community_subscribers_email_key
   on public.community_subscribers (lower(email));
 
 alter table public.community_subscribers enable row level security;
+-- New tables get no grants on this project: without this the signup route
+-- and the security_invoker view below both fail with "permission denied".
+grant select, insert, update, delete on public.community_subscribers to service_role;
 revoke all on public.community_subscribers from anon, authenticated;
 
--- Community signups join everyone else who opted in to email updates.
+-- Community signups join everyone else who opted in to email updates
+-- (the list as 20261115110000_retention.sql left it, plus community).
 create or replace view public.email_subscribers
 with (security_invoker = true) as
   with opted_in as (
@@ -28,6 +37,9 @@ with (security_invoker = true) as
     union all
     select 'devrel_cohort', lower(email), name, created_at
     from public.devrel_cohort_applications where email_updates
+    union all
+    select form, email, name, first_seen
+    from public.kept_contacts where email_updates
     union all
     select 'community', lower(email), null::text, created_at
     from public.community_subscribers

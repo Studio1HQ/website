@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { leaveTask, removeTask, saveTask } from "@/app/internal/(dashboard)/tasks/actions";
-import { saveDeliverable } from "@/app/internal/(dashboard)/clients/actions";
 import { saveRecord } from "@/app/internal/(dashboard)/community/actions";
 import { buttonClass, inputClass, textareaClass } from "@/components/internal/ui";
 import { DateField } from "@/components/internal/pickers";
@@ -10,7 +9,7 @@ import { Select } from "@/components/internal/select";
 import { Label, Segmented, TeamDialog, useTeamAction } from "@/components/internal/team/kit";
 import { forOptionLabel, type ForOption, type LogTarget } from "@/components/internal/tasks/kit";
 import { WithPicker } from "@/components/internal/tasks/with-picker";
-import { DELIVERABLE_KINDS, weekStart, type DeliverableKind } from "@/lib/internal/clients/schema";
+import { earliestCardDay } from "@/lib/internal/tasks/calendar";
 import {
   DEFAULT_PRIORITY,
   TASK_AREAS,
@@ -28,9 +27,9 @@ const COMMUNITY = "__community__";
  * Add or edit a task. Where it lives depends on who it's for, so nothing is
  * entered twice:
  *   Studio1                 a task on the board (with an area)
- *   a client (or Studio1's  a new deliverable in that client's month, so it
- *   own engagement)         shows in client work at once; or, unticked, a
- *                           task that counts toward the client
+ *   a client                a task with the client as a label: it shows
+ *                           under the client's Tasks tab, for our record,
+ *                           and never changes the client's plan
  *   the community list      a community task (community managers)
  */
 export function TaskDialog({
@@ -40,10 +39,10 @@ export function TaskDialog({
   person,
   forOptions,
   deliverables,
-  canClients,
   canCommunity,
   today,
   team,
+  forLabel,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -61,6 +60,8 @@ export function TaskDialog({
   today: string;
   /** Everyone active on the team list: who a task can be shared with. */
   team: readonly Teammate[];
+  /** What the task is for now ("Nebius · DevRel retainer"): names its client when forOptions doesn't have it. */
+  forLabel?: string;
 }) {
   const { pending, run } = useTeamAction();
   const start = () => ({
@@ -72,22 +73,43 @@ export function TaskDialog({
     due: task?.due_on ?? "",
     priority: (task?.priority ?? DEFAULT_PRIORITY) as TaskPriority,
     people: task?.with_emails ?? [],
-    asDeliverable: !task,
-    kind: "blog" as DeliverableKind,
+    finished: task?.done_on ?? today,
   });
   const [form, setForm] = useState(start);
   const [confirming, setConfirming] = useState(false);
   const set = (patch: Partial<ReturnType<typeof start>>) => setForm((current) => ({ ...current, ...patch }));
+  // Each time it opens, it starts from the task as it is now. A card keeps
+  // this dialog mounted, so before, a second edit showed the task as it was
+  // before the first save (its old client too) and saved that back.
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) {
+      setForm(start());
+      setConfirming(false);
+    }
+  }
 
-  const engagement = forOptions.find((option) => option.id === form.target);
+  // Its client when the list doesn't have it (that work has ended, or it
+  // isn't one the viewer can pick): still a choice, so a save keeps it.
+  const kept: ForOption | null =
+    task?.engagement_id && !forOptions.some((option) => option.id === task.engagement_id)
+      ? {
+          id: task.engagement_id,
+          client: forLabel || "Its client",
+          clientSlug: "",
+          name: "",
+          internal: task.area !== "client",
+          cycleId: null,
+        }
+      : null;
+  const options = kept ? [...forOptions, kept] : forOptions;
+  const engagement = options.find((option) => option.id === form.target);
   const community = form.target === COMMUNITY;
-  const deliverableOk = Boolean(!task && engagement && engagement.cycleId && canClients);
-  const asDeliverable = deliverableOk && form.asDeliverable;
-  const studio = !community && (!engagement || engagement.internal) && !asDeliverable;
+  const studio = !community && (!engagement || engagement.internal);
   const partOfOptions = engagement ? deliverables.filter((item) => item.engagementId === engagement.id) : [];
 
   const close = () => {
-    setForm(start());
     setConfirming(false);
     onOpenChange(false);
   };
@@ -111,22 +133,6 @@ export function TaskDialog({
       );
       return;
     }
-    if (asDeliverable && engagement?.cycleId) {
-      run(
-        () =>
-          saveDeliverable(null, {
-            cycle_id: engagement.cycleId,
-            title,
-            kind: form.kind,
-            owner: person.email,
-            due_on: form.due || null,
-            week: weekStart(form.due || today),
-            notes: form.notes,
-          }),
-        close,
-      );
-      return;
-    }
     run(
       () =>
         saveTask(task?.id ?? null, {
@@ -139,6 +145,7 @@ export function TaskDialog({
           due_on: form.due || null,
           priority: form.priority,
           with: form.people,
+          ...(task?.status === "done" && form.finished && form.finished !== task.done_on ? { done_on: form.finished } : {}),
         }),
       close,
     );
@@ -147,7 +154,10 @@ export function TaskDialog({
   const forChoices = [
     { value: "", label: "Studio1", textValue: "Studio1" },
     ...(canCommunity && !task ? [{ value: COMMUNITY, label: "Community task list", textValue: "Community task list" }] : []),
-    ...forOptions.map((option) => ({ value: option.id, label: forOptionLabel(option), textValue: forOptionLabel(option) })),
+    ...options.map((option) => {
+      const label = option === kept ? option.client : forOptionLabel(option);
+      return { value: option.id, label, textValue: label };
+    }),
   ];
 
   return (
@@ -158,9 +168,7 @@ export function TaskDialog({
       description={
         community
           ? "Goes on the community task list, assigned to them. It shows on their board too."
-          : asDeliverable
-            ? `Goes into ${engagement?.client}'s month in client work, owned by ${person.own ? "you" : person.name}. It shows on the board too.`
-            : undefined
+          : undefined
       }
       footer={
         <>
@@ -190,7 +198,7 @@ export function TaskDialog({
             Cancel
           </button>
           <button type="button" className={buttonClass("primary")} disabled={pending || !form.title.trim()} onClick={submit}>
-            {pending ? "Saving…" : task ? "Save" : asDeliverable ? "Add deliverable" : "Add task"}
+            {pending ? "Saving…" : task ? "Save" : "Add task"}
           </button>
         </>
       }
@@ -216,40 +224,10 @@ export function TaskDialog({
           />
         </Label>
       ) : null}
-      {engagement && !task ? (
-        deliverableOk ? (
-          <label className="flex items-start gap-2 text-[13px]">
-            <input
-              type="checkbox"
-              checked={form.asDeliverable}
-              onChange={(event) => set({ asDeliverable: event.target.checked })}
-              className="mt-0.5 size-4"
-            />
-            <span>
-              Add it as a deliverable in client work
-              <span className="block text-[12px] text-[var(--i-muted)]">
-                Untick for work that isn&apos;t a deliverable (a call, research): it still counts toward {engagement.client}.
-              </span>
-            </span>
-          </label>
-        ) : (
-          <p className="text-[12.5px] text-[var(--i-muted)]">
-            {!canClients
-              ? `It counts toward ${engagement.client}. Ask a client manager to add deliverables.`
-              : `${engagement.client} has no plan for this month yet, so this is added as a task that counts toward them. A client manager starts the month in Clients.`}
-          </p>
-        )
-      ) : null}
-      {asDeliverable ? (
-        <Label label="Kind" group>
-          <Select
-            aria-label="Kind"
-            value={form.kind}
-            onChange={(kind) => set({ kind })}
-            options={DELIVERABLE_KINDS.map((option) => ({ value: option.value, label: option.label }))}
-            className="w-full"
-          />
-        </Label>
+      {engagement && !engagement.internal && !task ? (
+        <p className="text-[12.5px] text-[var(--i-muted)]">
+          A label for our own record: it shows under {engagement.client}&apos;s Tasks tab and changes nothing in their plan.
+        </p>
       ) : null}
       {studio && !community ? (
         <Label label="Area" group>
@@ -261,7 +239,7 @@ export function TaskDialog({
           />
         </Label>
       ) : null}
-      {engagement && !asDeliverable && partOfOptions.length ? (
+      {engagement && partOfOptions.length ? (
         <Label label="Part of" hint="optional: its time counts toward that deliverable" group>
           <Select
             aria-label="Part of"
@@ -280,7 +258,7 @@ export function TaskDialog({
           options={TASK_PRIORITIES.map((option) => ({ value: option.value, label: option.label }))}
         />
       </Label>
-      {!community && !asDeliverable && !(task && person.own && task.email.toLowerCase() !== person.email.toLowerCase()) ? (
+      {!community && !(task && person.own && task.email.toLowerCase() !== person.email.toLowerCase()) ? (
         <Label label="With" hint="shared: on their lists too" group>
           <WithPicker
             team={team}
@@ -294,6 +272,19 @@ export function TaskDialog({
       <Label label="Due" hint="optional" group>
         <DateField value={form.due} onChange={(due) => set({ due })} aria-label="Due" />
       </Label>
+      {task?.status === "done" ? (
+        // Marking it Done stamps that day; set the real one here, even after its week is over.
+        <Label label="Finished on" hint="the week it counts in" group>
+          <DateField
+            value={form.finished}
+            onChange={(finished) => set({ finished })}
+            min={earliestCardDay(today)}
+            max={today}
+            required
+            aria-label="Finished on"
+          />
+        </Label>
+      ) : null}
       <Label label="Notes" hint="optional">
         <textarea
           value={form.notes}

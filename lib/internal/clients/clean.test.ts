@@ -168,6 +168,14 @@ describe("slugs", () => {
     expect(uniqueSlug("acme", new Set(["acme", "acme-2"]))).toBe("acme-3");
     expect(uniqueSlug("", new Set())).toBe("client");
   });
+  it("never takes the name of one of Clients' own pages", () => {
+    expect(uniqueSlug("stats", new Set())).toBe("stats-2");
+    expect(uniqueSlug("projects", new Set(["projects-2"]))).toBe("projects-3");
+  });
+  it("won't rename a client to one of Clients' own pages", () => {
+    expect(cleanClient({ slug: "stats" }, "update").ok).toBe(false);
+    expect(cleanClient({ slug: "stats-co" }, "update").ok).toBe(true);
+  });
 });
 
 describe("clients and engagements", () => {

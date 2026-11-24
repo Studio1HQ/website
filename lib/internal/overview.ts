@@ -230,8 +230,8 @@ export async function dashboardOverview(staff: Staff) {
   }
 
   if (clientsMine) {
-    // Owner load lists each person's own deliverables: due, late and to review.
-    const board = "/clients/load";
+    // Your own client pieces are on your Tasks week: due, late and to review.
+    const board = "/tasks";
     if (clientsMine.late) {
       todo.push({ area: "clients", label: `${plural(clientsMine.late, "client deliverable")} of yours late`, href: board, urgent: true });
     }

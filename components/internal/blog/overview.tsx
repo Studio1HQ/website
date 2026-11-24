@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowDown, ArrowUp, Plus } from "@phosphor-icons/react/dist/ssr";
+import { ArrowDown, ArrowUp, Plus } from "@/components/internal/icons";
 import {
   Card,
   CardTitle,

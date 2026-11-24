@@ -3,7 +3,7 @@
 import { useAfterSave } from "@/components/internal/clients/use-after-save";
 import { useState, useTransition, type FormEvent } from "react";
 import * as Popover from "@radix-ui/react-popover";
-import { ArrowLeft, CaretDown } from "@phosphor-icons/react";
+import { ArrowLeft, CaretDown } from "@/components/internal/icons";
 import { moveDeliverable } from "@/app/internal/(dashboard)/clients/actions";
 import { moveNeeds, nextStatuses } from "@/lib/internal/clients/rules";
 import {

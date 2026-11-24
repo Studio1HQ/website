@@ -9,6 +9,7 @@ import { SIZE_POINTS, type Size } from "@/lib/internal/clients/schema";
 import {
   forKey,
   isClientKey,
+  isTaskLate,
   type EngagementLabel,
   type Task,
   type WorkLog,
@@ -140,8 +141,7 @@ export function teamRows(input: TeamInput): TeamRow[] {
           (task) => task.status === "done" && inside(task.done_on, from, to),
         ).length,
         tasksOpen: open.length,
-        tasksLate: open.filter((task) => task.due_on && task.due_on < today)
-          .length,
+        tasksLate: open.filter((task) => isTaskLate(task, today)).length,
         tasksBlocked: open.filter((task) => task.blocked).length,
         pieces,
         published: pieces.S + pieces.M + pieces.L,

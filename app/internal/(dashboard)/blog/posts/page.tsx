@@ -6,7 +6,7 @@ import {
   NotePencil,
   PencilSimple,
   Plus,
-} from "@phosphor-icons/react/dist/ssr";
+} from "@/components/internal/icons";
 import { BlogStatusBadge } from "@/components/internal/blog/status";
 import { DeleteDraftButton } from "@/components/internal/blog/delete-draft";
 import {
@@ -404,13 +404,6 @@ export default async function BlogPostsPage({ searchParams }: Props) {
             ? "Every post in progress, what's waiting for review, and what's live. Publishing puts a post on studio1hq.com/blog a few minutes later."
             : "Write your posts here. When one is ready, ask for a review; a Studio1 reviewer publishes it."
         }
-        actions={
-          <form action={newPost}>
-            <button type="submit" className={buttonClass("accent")}>
-              <Plus size={15} /> New post
-            </button>
-          </form>
-        }
       />
 
       <div className="mb-4 space-y-2 empty:hidden">
@@ -457,14 +450,22 @@ export default async function BlogPostsPage({ searchParams }: Props) {
             </Link>
           ))}
         </nav>
-        <SearchBox
-          action="/blog/posts"
-          value={q}
-          placeholder={
-            reviewer ? "Search posts, URLs, authors" : "Search your posts"
-          }
-          keep={{ tab: asked || undefined, sort: one(params.sort) }}
-        />
+        {/* Search and New post on the stages' row, right-aligned together. */}
+        <div className="flex min-w-0 flex-1 items-center justify-end gap-2 max-sm:basis-full">
+          <SearchBox
+            action="/blog/posts"
+            value={q}
+            placeholder={
+              reviewer ? "Search posts, URLs, authors" : "Search your posts"
+            }
+            keep={{ tab: asked || undefined, sort: one(params.sort) }}
+          />
+          <form action={newPost} className="shrink-0">
+            <button type="submit" className={buttonClass("accent")}>
+              <Plus size={15} /> New post
+            </button>
+          </form>
+        </div>
       </div>
 
       {tab === "live" &&

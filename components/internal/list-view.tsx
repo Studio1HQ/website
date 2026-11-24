@@ -26,7 +26,7 @@ import {
   Tray,
   X,
   XCircle,
-} from "@phosphor-icons/react";
+} from "@/components/internal/icons";
 import { changeEntries } from "@/app/internal/(dashboard)/actions";
 import { daysWaiting, rowTags, type FacetOptions, type Option, type Row } from "@/lib/internal/query";
 import {
@@ -50,6 +50,8 @@ import {
 } from "@/lib/internal/sections";
 import { cn } from "@/lib/utils";
 import { BulkEmailDialog } from "@/components/internal/bulk-email-dialog";
+import { EmailComposer } from "@/components/internal/email-composer";
+import { firstName } from "@/lib/first-name";
 import { FilterMenu } from "@/components/internal/filter-menu";
 import { EMAIL_TEMPLATES } from "@/lib/internal/email-templates";
 import { mailtoHref } from "@/lib/form-checks";
@@ -74,6 +76,14 @@ import {
   safeUrl,
   text,
 } from "@/components/internal/ui";
+
+/** Table column widths by kind (the rest share what's left), for table-fixed. */
+const COLUMN_WIDTH: Partial<Record<ColumnSpec["kind"], string>> = {
+  person: "w-[26%]",
+  status: "w-36",
+  date: "w-24",
+  tags: "w-32",
+};
 
 type Override = { status?: string; tags?: string[] };
 
@@ -123,6 +133,8 @@ export function ListView({
   const [navigating, startNavigation] = useTransition();
   const [, startAction] = useTransition();
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  /** The entry whose row menu chose "Send email": the composer opens for them. */
+  const [emailing, setEmailing] = useState<(Row & { _id: string }) | null>(null);
   const [overrides, setOverrides] = useState<Record<string, Override>>({});
   const [search, setSearch] = useState(filters.q ?? "");
   const searchRef = useRef<HTMLInputElement>(null);
@@ -373,25 +385,28 @@ export function ListView({
           <div className="flex min-w-0 items-center gap-3">
             <Avatar name={text(row.name)} email={text(row.email)} size={32} />
             <div className="min-w-0">
-              {href ? (
-                <Link
-                  href={href}
-                  className="block truncate font-medium text-[var(--i-ink)] hover:underline hover:underline-offset-2"
-                >
-                  {name}
-                </Link>
-              ) : (
-                <span className="block truncate font-medium">{name}</span>
-              )}
+              {/* Name and how many times they applied on one line, email under it: two lines a row. */}
+              <div className="flex min-w-0 items-center gap-1.5">
+                {href ? (
+                  <Link
+                    href={href}
+                    className="truncate font-medium text-[var(--i-ink)] hover:underline hover:underline-offset-2"
+                  >
+                    {name}
+                  </Link>
+                ) : (
+                  <span className="truncate font-medium">{name}</span>
+                )}
+                {Array.isArray(row._also) && row._also.length ? (
+                  <span
+                    title={`${row._also.length + 1} ${section.key === "hackathons" ? "registrations" : "applications"}. Also: ${row._also.join(", ")}`}
+                    className="inline-flex shrink-0 items-center rounded-full bg-sky-50 px-1.5 text-[11px] font-medium leading-[18px] tabular-nums text-sky-800 ring-1 ring-inset ring-sky-200 dark:bg-sky-500/10 dark:text-sky-200 dark:ring-sky-500/25"
+                  >
+                    ×{row._also.length + 1}
+                  </span>
+                ) : null}
+              </div>
               <span className="block truncate text-[12.5px] text-[var(--i-muted)]">{text(row.email)}</span>
-              {Array.isArray(row._also) && row._also.length ? (
-                <span
-                  title={`Also: ${row._also.join(", ")}`}
-                  className="mt-1 inline-flex items-center rounded-md bg-sky-50 px-1.5 py-px text-[11.5px] font-medium text-sky-800 ring-1 ring-inset ring-sky-200 dark:bg-sky-500/10 dark:text-sky-200 dark:ring-sky-500/25"
-                >
-                  {row._also.length + 1} {section.key === "hackathons" ? "registrations" : "applications"}
-                </span>
-              ) : null}
             </div>
           </div>
         );
@@ -440,7 +455,7 @@ export function ListView({
             href={url.toString()}
             target="_blank"
             rel="noopener noreferrer nofollow"
-            className="block max-w-[12rem] truncate text-[var(--i-ink-2)] underline decoration-[var(--i-line-strong)] underline-offset-[3px] hover:text-[var(--i-accent-text)]"
+            className="block truncate text-[var(--i-ink-2)] underline decoration-[var(--i-line-strong)] underline-offset-[3px] hover:text-[var(--i-accent-text)]"
           >
             {prettyUrl(url)}
           </a>
@@ -459,7 +474,9 @@ export function ListView({
       }
       default:
         return text(value) ? (
-          <span className="block max-w-[16rem] truncate text-[var(--i-ink-2)]">{text(value)}</span>
+          <span title={text(value)} className="block truncate text-[var(--i-ink-2)]">
+            {text(value)}
+          </span>
         ) : (
           <span className="text-[var(--i-faint)]">—</span>
         );
@@ -516,6 +533,7 @@ export function ListView({
             void navigator.clipboard.writeText(text(row.email));
             toast("success", "Email copied");
           }}
+          onEmail={listTemplates.length ? () => setEmailing(row) : undefined}
         />
       </>
     );
@@ -551,10 +569,10 @@ export function ListView({
                 onClick={() => navigate((params) => (value ? params.set("status", value) : params.delete("status")))}
                 aria-pressed={current}
                 className={cn(
-                  "inline-flex h-8 shrink-0 items-center gap-2 rounded-lg px-3 text-[13px] transition-colors",
+                  "inline-flex h-8 shrink-0 items-center gap-2 rounded-full px-3.5 text-[13px] transition-colors",
                   current
-                    ? "bg-[var(--i-panel)] font-medium text-[var(--i-ink)] shadow-[var(--i-shadow)] ring-1 ring-[var(--i-line)]"
-                    : "text-[var(--i-muted)] hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)]",
+                    ? "bg-[var(--i-panel)] font-medium text-[var(--i-ink)] shadow-[var(--i-shadow-sm)] ring-1 ring-[var(--i-line)] dark:bg-white/[0.12] dark:shadow-none dark:ring-0"
+                    : "text-[var(--i-muted)] hover:bg-black/[0.04] hover:text-[var(--i-ink)] dark:hover:bg-white/[0.06]",
                 )}
               >
                 {value ? <StatusDot status={value} /> : null}
@@ -574,10 +592,10 @@ export function ListView({
               aria-pressed={Boolean(filters.overdue)}
               title={`New entries waiting over ${OVERDUE_DAYS} days`}
               className={cn(
-                "ml-1 inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-3 text-[13px] transition-colors",
+                "ml-1 inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[13px] text-rose-700 transition-colors dark:text-rose-300",
                 filters.overdue
-                  ? "bg-rose-50 font-medium text-rose-800 ring-1 ring-rose-200 dark:bg-rose-500/10 dark:text-rose-200 dark:ring-rose-500/30"
-                  : "text-rose-700 hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-500/10",
+                  ? "bg-[var(--i-panel)] font-medium shadow-[var(--i-shadow-sm)] ring-1 ring-[var(--i-line)] dark:bg-white/[0.12] dark:shadow-none dark:ring-0"
+                  : "hover:bg-black/[0.04] dark:hover:bg-white/[0.06]",
               )}
             >
               <Clock size={14} weight="bold" />
@@ -611,7 +629,7 @@ export function ListView({
           <div className="relative min-w-0 flex-1 basis-full sm:min-w-[200px] sm:basis-auto sm:max-w-xs">
             <MagnifyingGlass
               size={15}
-              className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--i-faint)]"
+              className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--i-faint)]"
             />
             <input
               ref={searchRef}
@@ -620,9 +638,9 @@ export function ListView({
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search name, email, tags…"
               aria-label="Search"
-              className={cn(inputClass("sm"), "pl-8 pr-8 [&::-webkit-search-cancel-button]:hidden")}
+              className={cn(inputClass("sm"), "h-9 rounded-full pl-9 pr-9 [&::-webkit-search-cancel-button]:hidden")}
             />
-            <span className="pointer-events-none absolute right-2 top-1/2 hidden -translate-y-1/2 sm:block">
+            <span className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 sm:block">
               {search ? null : <Kbd>/</Kbd>}
             </span>
           </div>
@@ -707,7 +725,7 @@ export function ListView({
             )
           ) : null}
           {canExport ? (
-            <a href={exportHref()} className={cn(buttonClass("ghost"), "ml-auto")}>
+            <a href={exportHref()} className={cn(buttonClass("primary"), "ml-auto")}>
               <DownloadSimple size={15} />
               <span className="hidden sm:inline">Export CSV</span>
             </a>
@@ -715,18 +733,18 @@ export function ListView({
         </div>
 
         {chips.length ? (
-          <div className="flex flex-wrap items-center gap-1.5 border-b border-[var(--i-line)] px-3 py-2">
+          <div className="flex flex-wrap items-center gap-2 border-b border-[var(--i-line)] px-4 py-2.5">
             {chips.map((chip) => (
               <span
                 key={chip.key}
-                className="inline-flex max-w-full items-center gap-1 rounded-md border border-[var(--i-line)] bg-[var(--i-sunken)] py-0.5 pl-2 pr-0.5 text-[12.5px]"
+                className="inline-flex h-8 max-w-full animate-[internal-fade-in_160ms_ease-out] items-center gap-1 rounded-full bg-black/[0.05] pl-3.5 pr-1 text-[12.5px] dark:bg-white/[0.08]"
               >
                 <span className="truncate">{chip.label}</span>
                 <button
                   type="button"
                   onClick={chip.remove}
                   aria-label={`Remove filter ${chip.label}`}
-                  className="flex size-5 items-center justify-center rounded text-[var(--i-muted)] hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)]"
+                  className="flex size-6 items-center justify-center rounded-full text-[var(--i-muted)] transition-colors hover:bg-black/[0.06] hover:text-[var(--i-ink)] dark:hover:bg-white/[0.1]"
                 >
                   <X size={11} />
                 </button>
@@ -735,14 +753,19 @@ export function ListView({
             <button
               type="button"
               onClick={() => startNavigation(() => router.replace(pathname, { scroll: false }))}
-              className="px-1.5 text-[12.5px] text-[var(--i-muted)] hover:text-[var(--i-ink)]"
+              className="inline-flex h-8 items-center rounded-full px-3 text-[12.5px] text-[var(--i-muted)] transition-colors hover:bg-black/[0.05] hover:text-[var(--i-ink)] dark:hover:bg-white/[0.07]"
             >
               Clear all
             </button>
           </div>
         ) : null}
 
-        <div className={cn("transition-opacity", navigating && "pointer-events-none opacity-60")}>
+        <div className={cn("relative transition-opacity duration-200", navigating && "pointer-events-none opacity-60")}>
+          {navigating ? (
+            <span aria-hidden className="absolute inset-x-0 top-0 z-10 h-0.5 overflow-hidden">
+              <span className="block h-full w-1/3 animate-[internal-nav-progress_1.1s_ease-in-out_infinite] bg-[var(--i-accent)]" />
+            </span>
+          ) : null}
           {view.length === 0 ? (
             <EmptyState
               icon={<Tray size={20} />}
@@ -843,11 +866,11 @@ export function ListView({
                 })}
               </ul>
               <div className="hidden overflow-x-auto lg:block">
-                <table className="w-full border-collapse text-left text-[13px]">
+                <table className="w-full table-fixed border-collapse text-left text-[13.5px]">
                   <thead>
-                    <tr className="border-b border-[var(--i-line)] text-[12px] text-[var(--i-muted)]">
+                    <tr className="border-b border-[var(--i-line)] bg-black/[0.015] text-[12.5px] text-[var(--i-muted)] dark:bg-white/[0.02]">
                       {reviewable ? (
-                        <th scope="col" className="w-10 py-2.5 pl-4 pr-1">
+                        <th scope="col" className="w-12 py-3 pl-5 pr-1">
                           <input
                             type="checkbox"
                             aria-label="Select all on this page"
@@ -865,9 +888,11 @@ export function ListView({
                           key={column.key}
                           scope="col"
                           className={cn(
-                            "whitespace-nowrap px-3 py-2.5 font-medium",
-                            index === 0 && !reviewable && "pl-4",
+                            "whitespace-nowrap px-4 py-3 font-medium",
+                            index === 0 && !reviewable && "pl-5",
                             column.wide && "hidden lg:table-cell",
+                            // Set widths, so long roles or places never push the table wider than its card.
+                            COLUMN_WIDTH[column.kind] ?? "",
                           )}
                         >
                           {column.label}
@@ -885,13 +910,13 @@ export function ListView({
                           key={row._id}
                           onClick={(event) => onRowClick(event, href)}
                           className={cn(
-                            "group border-b border-[var(--i-line)] align-middle transition-colors last:border-b-0",
+                            "group border-b border-[var(--i-line)] align-middle transition-colors duration-150 last:border-b-0",
                             href && "cursor-pointer",
                             isSelected ? "bg-[var(--i-selected)]" : "hover:bg-[var(--i-hover)]",
                           )}
                         >
                           {reviewable ? (
-                            <td className="py-3 pl-4 pr-1">
+                            <td className="py-3 pl-5 pr-1">
                               <input
                                 type="checkbox"
                                 aria-label={`Select ${text(row.name) || "entry"}`}
@@ -905,9 +930,9 @@ export function ListView({
                             <td
                               key={column.key}
                               className={cn(
-                                "px-3 py-3",
-                                index === 0 && !reviewable && "pl-4",
-                                column.kind === "person" && "min-w-[220px] max-w-[300px]",
+                                "px-4 py-3",
+                                index === 0 && !reviewable && "pl-5",
+                                "overflow-hidden",
                                 column.wide && "hidden lg:table-cell",
                               )}
                             >
@@ -922,7 +947,7 @@ export function ListView({
                             </td>
                           ))}
                           {reviewable && section.quick ? (
-                            <td className="py-2 pr-3">
+                            <td className="py-2 pr-4">
                               <div className="flex items-center justify-end gap-0.5 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100">
                                 {quickActions(row)}
                               </div>
@@ -1031,6 +1056,22 @@ export function ListView({
           </button>
         </div>
       ) : null}
+
+      {emailing ? (
+        <EmailComposer
+          key={emailing._id}
+          open
+          onOpenChange={(next) => {
+            if (!next) setEmailing(null);
+          }}
+          sectionKey={section.key}
+          id={emailing._id}
+          to={text(emailing.email)}
+          currentStatus={String(emailing.review_status ?? "") || "new"}
+          mailerReady={mailerReady}
+          vars={{ first_name: firstName(text(emailing.name)), program: programOf(section, emailing), sender }}
+        />
+      ) : null}
     </>
   );
 }
@@ -1042,6 +1083,7 @@ function RowMenu({
   onStatus,
   onTag,
   onCopy,
+  onEmail,
   size = "sm",
 }: {
   size?: "sm" | "md";
@@ -1051,6 +1093,8 @@ function RowMenu({
   onStatus: (status: string) => void;
   onTag: (tag: string, add: boolean) => void;
   onCopy: () => void;
+  /** Opens the dashboard composer; without it, "Send email" opens the mail app. */
+  onEmail?: () => void;
 }) {
   const own = rowTags(row).map((tag) => tag.toLowerCase());
   const email = text(row.email);
@@ -1128,11 +1172,17 @@ function RowMenu({
               <Menu.Item className={menuItemClass} onSelect={onCopy}>
                 <Copy size={15} className="text-[var(--i-muted)]" /> Copy email
               </Menu.Item>
-              <Menu.Item className={menuItemClass} asChild>
-                <a href={mailtoHref(email)}>
+              {onEmail ? (
+                <Menu.Item className={menuItemClass} onSelect={onEmail}>
                   <EnvelopeSimple size={15} className="text-[var(--i-muted)]" /> Send email
-                </a>
-              </Menu.Item>
+                </Menu.Item>
+              ) : (
+                <Menu.Item className={menuItemClass} asChild>
+                  <a href={mailtoHref(email)}>
+                    <EnvelopeSimple size={15} className="text-[var(--i-muted)]" /> Send email
+                  </a>
+                </Menu.Item>
+              )}
             </>
           ) : null}
         </Menu.Content>

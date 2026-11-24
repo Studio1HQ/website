@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CheckSquare } from "@phosphor-icons/react/dist/ssr";
+import { CheckSquare } from "@/components/internal/icons";
 import { requireMember } from "@/lib/internal/session";
 import { istNow } from "@/lib/internal/team/shared";
 import { isDateKey, weekEnd, weekStart } from "@/lib/internal/clients/schema";
@@ -11,10 +11,13 @@ import { tasksHref } from "@/lib/internal/tasks/shared";
 import { Card, EmptyState, Notice, PageHeader, buttonClass } from "@/components/internal/ui";
 import { LinkTabs } from "@/components/internal/community/ui";
 import { PersonPicker } from "@/components/internal/tasks/person-picker";
+import { FocusCard, TaskSearch } from "@/components/internal/tasks/task-search";
+import { MIN_SEARCH } from "@/lib/internal/tasks/search";
 import { BoardView } from "./_views/board-view";
 import { WeekView } from "./_views/week-view";
 import { MonthView } from "./_views/month-view";
 import { TeamView } from "./_views/team-view";
+import { SearchView } from "./_views/search-view";
 import { VIEWS, isViewKey, type ViewKey, type ViewProps } from "./_views/types";
 
 export const metadata: Metadata = { title: "Tasks" };
@@ -34,7 +37,8 @@ function flat(params: Record<string, string | string[] | undefined>) {
  * looked; the board shows the same tasks by status; Month adds them up;
  * Team (founders, the associate, intern reviewers) shows everyone's week
  * at once. Client deliverables and community tasks are read where they
- * live, never copied. Reports live at /tasks/reports.
+ * live, never copied. Reports live at /tasks/reports. Search (?q=) shows
+ * matching tasks in place of the view; clearing it goes back.
  */
 export default async function TasksPage({
   searchParams,
@@ -73,6 +77,17 @@ export default async function TasksPage({
     view === "week" && !own && canGiveTask(viewer, person.email, person.guarded) && weekEnd(shownWeek) >= earliestCardDay(today);
 
   const props: ViewProps = { staff, viewer, person, own, people, params, today };
+  const query = (params.q ?? "").slice(0, 80).trim();
+  const searching = query.length >= MIN_SEARCH;
+  /** What the search box keeps when it searches or clears: the view, the person, the week. */
+  const searchBase = Object.fromEntries(
+    Object.entries({
+      view: view === "week" ? undefined : view,
+      person: own ? undefined : person.email,
+      week: params.week,
+      who: params.who,
+    }).filter((entry): entry is [string, string] => typeof entry[1] === "string"),
+  );
   const keep = (extra: Record<string, string | null>) =>
     tasksHref({ person: own ? null : person.email, ...extra });
 
@@ -97,6 +112,8 @@ export default async function TasksPage({
         }
         actions={
           <>
+            {/* Search, whose tasks, and Reports: one row. */}
+            <TaskSearch query={searching ? query : ""} base={searchBase} />
             {others && view !== "team" ? (
               <PersonPicker
                 people={people.map((item) => ({ email: item.email, name: item.name }))}
@@ -121,11 +138,22 @@ export default async function TasksPage({
           <Notice tone="warning">That needs more access than you have.</Notice>
         </div>
       ) : null}
-      <LinkTabs items={tabs} active={view} />
-      {view === "board" ? <BoardView {...props} /> : null}
-      {view === "week" ? <WeekView {...props} /> : null}
-      {view === "month" ? <MonthView {...props} /> : null}
-      {view === "team" ? <TeamView {...props} /> : null}
+      {/* The views. While searching no tab is on: picking one leaves the search. */}
+      <div className="mb-5 [&>nav]:mb-0">
+        <LinkTabs items={tabs} active={searching ? "" : view} />
+      </div>
+      {searching ? (
+        <SearchView {...props} query={query} />
+      ) : (
+        <>
+          {view === "board" ? <BoardView {...props} /> : null}
+          {view === "week" ? <WeekView {...props} /> : null}
+          {view === "month" ? <MonthView {...props} /> : null}
+          {view === "team" ? <TeamView {...props} /> : null}
+          {/* Opened from a search result: ring that card. */}
+          {view === "week" && params.focus ? <FocusCard card={params.focus} /> : null}
+        </>
+      )}
     </>
   );
 }

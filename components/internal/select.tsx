@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import * as RadixSelect from "@radix-ui/react-select";
-import { CaretDown, Check } from "@phosphor-icons/react";
+import { CaretDown, Check } from "@/components/internal/icons";
 import { cn } from "@/lib/utils";
 import {
   inputClass,

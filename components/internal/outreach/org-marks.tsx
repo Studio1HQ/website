@@ -1,4 +1,4 @@
-import { Warning } from "@phosphor-icons/react/dist/ssr";
+import { Warning } from "@/components/internal/icons";
 import { ORG_PRIORITIES, type Org } from "@/lib/internal/outreach/schema";
 import { Muted, Pill } from "@/components/internal/community/ui";
 import { SiteLogo } from "@/components/internal/site-logo";

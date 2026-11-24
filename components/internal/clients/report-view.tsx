@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { CaretLeft, CaretRight } from "@phosphor-icons/react/dist/ssr";
+import { CaretLeft, CaretRight } from "@/components/internal/icons";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/ui/svgs/logo";
 import { Card, CardTitle, ExternalLink } from "@/components/internal/ui";

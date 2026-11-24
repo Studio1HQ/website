@@ -3,7 +3,7 @@
 import { useAfterSave } from "@/components/internal/clients/use-after-save";
 import { useState, useTransition, type FormEvent, type ReactNode } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { X } from "@phosphor-icons/react";
+import { X } from "@/components/internal/icons";
 import {
   clearBlocked,
   setBlocked,

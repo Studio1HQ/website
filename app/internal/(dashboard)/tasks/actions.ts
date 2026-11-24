@@ -10,7 +10,7 @@ import { requireMember, staffName } from "@/lib/internal/session";
 import { findPerson, getPerson, listPeople } from "@/lib/internal/team/people";
 import { dayLabel, displayName, istNow, isDateKey } from "@/lib/internal/team/shared";
 import { isOwnedBy } from "@/lib/internal/clients/schema";
-import { moveDeliverable, saveDeliverable } from "@/app/internal/(dashboard)/clients/actions";
+import { saveDeliverable } from "@/app/internal/(dashboard)/clients/actions";
 import type { Deliverable } from "@/lib/internal/clients/schema";
 import type { ClientScope } from "@/lib/internal/clients/scope";
 import {
@@ -55,6 +55,7 @@ import {
   readyOn,
   tasksHref,
   type ReportPeriod,
+  type Task,
   type TaskArea,
   type TaskPriority,
   type TaskResult,
@@ -201,6 +202,16 @@ async function cleanFor(staff: { clients: unknown; clientScope: ClientScope }, v
   };
 }
 
+/**
+ * Whether values name the client, deliverable and (for Studio1 work) area
+ * the task has now. A client's task has no area of its own ("client").
+ */
+function sameFor(task: Task, values: Record<string, unknown>) {
+  const id = (value: unknown) => (typeof value === "string" && isUuid(value) ? value.toLowerCase() : null);
+  if (id(values.engagement_id) !== task.engagement_id || id(values.deliverable_id) !== task.deliverable_id) return false;
+  return task.area === "client" || values.area === task.area;
+}
+
 /* ---------------------------------------------------------------- tasks */
 
 /**
@@ -218,11 +229,11 @@ export async function saveTask(id: unknown, values: unknown): Promise<TaskResult
   if (looksLikeSecret(title) || looksLikeSecret(notes)) return SECRET;
   const due = typeof data.due_on === "string" && data.due_on ? data.due_on : null;
   if (due && !isDateKey(due)) return { ok: false, message: "Pick a valid due date." };
-  const found = await cleanFor(staff, data);
-  if (!found.ok) return found;
-  const where = { area: found.area, engagement_id: found.engagement_id, deliverable_id: found.deliverable_id };
 
   if (!id) {
+    const found = await cleanFor(staff, data);
+    if (!found.ok) return found;
+    const where = { area: found.area, engagement_id: found.engagement_id, deliverable_id: found.deliverable_id };
     const email = (typeof data.email === "string" && data.email ? data.email : staff.email).trim().toLowerCase();
     // If who's an admin can't be read, treat them as guarded (fails closed).
     const guarded = email === staff.email ? false : ((await guardedEmails().catch(() => null))?.has(email) ?? true);
@@ -276,7 +287,27 @@ export async function saveTask(id: unknown, values: unknown): Promise<TaskResult
   if (!sameList(shared.emails, task.with_emails) && !canShareTask(me, task)) return NOT_SHARER;
   const added = shared.emails.filter((email) => !task.with_emails.includes(email));
   const people = added.length || shared.emails.length !== task.with_emails.length ? { with_emails: shared.emails } : {};
-  const result = await updateTask(task.id, { title, notes, due_on: due, ...priority, ...people, ...where }, staff.email);
+  // The same client (or Studio1 area) as before is left as it is, unchecked:
+  // a client whose work has ended, or one the editor can't pick, isn't
+  // dropped by fixing the title.
+  let where = {};
+  if (!sameFor(task, data)) {
+    const found = await cleanFor(staff, data);
+    if (!found.ok) return found;
+    where = { area: found.area, engagement_id: found.engagement_id, deliverable_id: found.deliverable_id };
+  }
+  // The day a Done task was finished ("Finished on"): Done stamps the day
+  // it was marked, and this sets the real one, even once its week is over.
+  let finished = {};
+  if (task.status === "done" && "done_on" in data && data.done_on !== task.done_on) {
+    const today = istNow().date;
+    if (typeof data.done_on !== "string" || !isDateKey(data.done_on)) return { ok: false, message: "Pick the day you finished it." };
+    if (data.done_on > today) return { ok: false, message: "It can't be finished on a day that's still ahead." };
+    const problem = dayProblem(data.done_on, today);
+    if (problem) return { ok: false, message: problem };
+    finished = { done_on: data.done_on };
+  }
+  const result = await updateTask(task.id, { title, notes, due_on: due, ...priority, ...people, ...where, ...finished }, staff.email);
   if (!result.ok) return result;
   tellShared(added, staff, [title], due);
   refresh();
@@ -420,19 +451,6 @@ async function resolveFor(
 }
 
 /**
- * A card tied to a Planned deliverable you own, once it's under way (In
- * progress or Done): the deliverable starts in client work too, through
- * client work's own move, so its history and Slack line are the same.
- */
-async function startDeliverable(staff: Staffish, deliverable: Deliverable | null, status: TaskStatus) {
-  if (!deliverable || deliverable.status !== "planned" || !staff.clients) return null;
-  if (status !== "doing" && status !== "done") return null;
-  if (!isOwnedBy(deliverable.owner, staff.email)) return null;
-  const moved = await moveDeliverable(deliverable.id, { to: "in_progress", comment: "Started: from Tasks" });
-  return moved.ok ? "started it in client work" : null;
-}
-
-/**
  * Adds cards on a day (the week calendar's "+ New", My day): one or several
  * (a pasted list). items: [{ title, notes?, link?, priority? }]; extra: { email?, status?, with? }.
  * email: whose week (left out = your own); giving someone else a task goes
@@ -474,7 +492,6 @@ export async function addTasks(day: unknown, items: unknown, extra?: unknown): P
   // Check every line first, then save them in one write: all or none, so a
   // failed save can be retried without adding the first ones twice.
   const rows: Record<string, unknown>[] = [];
-  const deliverables = new Map<string, Deliverable>();
   for (const item of clean) {
     const tied = await resolveFor(staff, item.link, email);
     if (!tied.ok) return tied;
@@ -491,14 +508,12 @@ export async function addTasks(day: unknown, items: unknown, extra?: unknown): P
       ...(shared.emails.length ? { with_emails: shared.emails } : {}),
       ...tied.fields,
     });
-    if (tied.deliverable) deliverables.set(tied.deliverable.id, tied.deliverable);
   }
   const saved = await insertTasks(rows);
   if (!saved.ok) return saved;
   const added = rows.length;
-  let also: string | null = null;
-  // Someone else's deliverable isn't started for them: they start it when they pick it up.
-  if (!other) for (const deliverable of deliverables.values()) also = (await startDeliverable(staff, deliverable, state)) ?? also;
+  // The client tag is a label only (the owner's rule, 19 Nov 2026): a task
+  // never moves a client's piece. The client's manager keeps that list.
   // A task from someone else is news: it shows on their bell (never an email),
   // and opens the week it's on.
   if (other) {
@@ -518,12 +533,12 @@ export async function addTasks(day: unknown, items: unknown, extra?: unknown): P
   // Say the day when it isn't today, so a task put on another day isn't "lost".
   const where = date === today ? "" : ` on ${dayLabel(date)}`;
   const what = `${added === 1 ? "Added" : `Added ${added}`}${other ? ` to ${name}'s week` : ""}${where}`;
-  return { ok: true, message: also ? `${what}, and ${also}` : what };
+  return { ok: true, message: what };
 }
 
 /**
  * Changes a card: { title?, notes?, link?, status?, priority?, with?, day? }. Done stamps the card's
- * day (or today, for a day ahead); moving a done card moves its done day.
+ * day (or today, for a day ahead); moving a done card moves its done day and leaves its due day.
  */
 export async function editTask(id: unknown, values: unknown): Promise<TaskResult> {
   const { staff, viewer: me } = await viewer();
@@ -535,7 +550,6 @@ export async function editTask(id: unknown, values: unknown): Promise<TaskResult
   const today = istNow().date;
   const data = input(values);
   const patch: Record<string, unknown> = {};
-  let deliverable: Deliverable | null = null;
 
   if ("title" in data) {
     const title = line(data.title, 200);
@@ -552,7 +566,6 @@ export async function editTask(id: unknown, values: unknown): Promise<TaskResult
     const tied = await resolveFor(staff, data.link, task.email);
     if (!tied.ok) return tied;
     Object.assign(patch, tied.fields);
-    deliverable = tied.deliverable;
   }
   if ("priority" in data) {
     if (!isTaskPriority(data.priority)) return { ok: false, message: "Pick Top, Medium or Low." };
@@ -566,15 +579,17 @@ export async function editTask(id: unknown, values: unknown): Promise<TaskResult
     added = shared.emails.filter((email) => !task.with_emails.includes(email));
     if (added.length || shared.emails.length !== task.with_emails.length) patch.with_emails = shared.emails;
   }
+  const status: TaskStatus = isTaskStatus(data.status) ? data.status : task.status;
   let day = task.due_on;
   if ("day" in data) {
     if (typeof data.day !== "string" || !isDateKey(data.day)) return { ok: false, message: "Pick a valid day." };
     const problem = dayProblem(data.day, today);
     if (problem) return { ok: false, message: problem };
     day = data.day;
-    patch.due_on = day;
+    // A done card's day is the day it was finished: its due day stays, so
+    // moving when it was finished doesn't rewrite when it was due.
+    if (status !== "done") patch.due_on = day;
   }
-  const status: TaskStatus = isTaskStatus(data.status) ? data.status : task.status;
   if (status !== task.status) {
     patch.status = status;
     if (status === "done") Object.assign(patch, { blocked: false, block_reason: "" });
@@ -582,18 +597,11 @@ export async function editTask(id: unknown, values: unknown): Promise<TaskResult
   // Only when the status or the day changes: fixing a typo in a finished
   // task mustn't move the day it was finished on.
   if (status !== task.status || "day" in data) patch.done_on = status === "done" ? doneDay(day, today) : null;
-  // A new "For" replaces the old deliverable: only a status change alone reloads it.
-  if (!deliverable && !("link" in data) && task.deliverable_id && status !== task.status) {
-    const row = await getDeliverableRow(task.deliverable_id);
-    deliverable = row === "error" ? null : row;
-  }
-
   const result = await updateTask(task.id, patch, staff.email, { status: `eq.${task.status}` });
   if (!result.ok) return result;
   tellShared(added, staff, [typeof patch.title === "string" ? patch.title : task.title], day);
-  const also = status !== task.status || "link" in data ? await startDeliverable(staff, deliverable, status) : null;
   refresh();
-  return { ok: true, message: also ? `Saved, and ${also}` : undefined };
+  return { ok: true };
 }
 
 /**

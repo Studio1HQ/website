@@ -7,8 +7,7 @@ import { dayLabel, displayName, istNow, monthLabel, monthOf, shiftMonth } from "
 import { canPlanCalls, canSeeAllCalls, canSeeCalls } from "@/lib/internal/calls/access";
 import { callPeople, changesOf, listCalls, listChanges } from "@/lib/internal/calls/data";
 import { isIn, lengthLabel, monthGridDays, nextOccurrence, occurrences, type Occurrence } from "@/lib/internal/calls/shared";
-import { cn } from "@/lib/utils";
-import { Notice, PageHeader } from "@/components/internal/ui";
+import { Notice, PageHeader, segmentClass, segmentedClass } from "@/components/internal/ui";
 import { LinkTabs } from "@/components/internal/community/ui";
 import { PeriodSwitcher } from "@/components/internal/tasks/week-parts";
 import { CallsProvider } from "@/components/internal/calls/call-parts";
@@ -173,7 +172,7 @@ export default async function CallsPage({
 
   // Mine / Everyone's: the founders and the associate only, Mine first.
   const whoToggle = seesAll ? (
-    <nav aria-label="Whose calls" className="flex rounded-lg bg-[var(--i-sunken)] p-0.5 ring-1 ring-[var(--i-line)]">
+    <nav aria-label="Whose calls" className={segmentedClass}>
       {(
         [
           { key: "mine", label: "Mine" },
@@ -184,12 +183,7 @@ export default async function CallsPage({
           key={option.key}
           href={href({ who: option.key === "all" ? "all" : null })}
           aria-current={whose === option.key ? "page" : undefined}
-          className={cn(
-            "rounded-md px-2.5 py-1 text-[12.5px] transition-colors",
-            whose === option.key
-              ? "bg-[var(--i-panel)] font-medium text-[var(--i-ink)] shadow-[var(--i-shadow-sm)]"
-              : "text-[var(--i-muted)] hover:text-[var(--i-ink)]",
-          )}
+          className={segmentClass(whose === option.key)}
         >
           {option.label}
         </Link>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { EnvelopeSimple, Plus } from "@phosphor-icons/react/dist/ssr";
+import { EnvelopeSimple, Plus } from "@/components/internal/icons";
 import { saveNewsletter } from "@/app/internal/(dashboard)/influencers/actions";
 import { formatMoney, todayKey } from "@/lib/internal/community/schema";
 import { matches, one } from "@/lib/internal/community/stats";

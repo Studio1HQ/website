@@ -13,7 +13,7 @@ import {
   Plus,
   Receipt,
   X,
-} from "@phosphor-icons/react";
+} from "@/components/internal/icons";
 import { decideClaim, emailSlip, saveSlip } from "@/app/internal/(dashboard)/money/payroll/actions";
 import { formatTotals, summarizeClaims } from "@/lib/internal/team/claims-summary";
 import type { PayrollRow } from "@/lib/internal/team/payroll";

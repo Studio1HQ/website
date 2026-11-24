@@ -6,7 +6,7 @@ import {
   LinkedinLogo,
   XLogo,
   YoutubeLogo,
-} from "@phosphor-icons/react/dist/ssr";
+} from "@/components/internal/icons";
 import { formatMoney } from "@/lib/internal/community/schema";
 import {
   nicheLabel,

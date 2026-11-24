@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, type KeyboardEvent } from "react";
-import { Plus, X } from "@phosphor-icons/react";
+import { Plus, X } from "@/components/internal/icons";
 import { cn } from "@/lib/utils";
 import { buttonClass, inputClass, textareaClass } from "@/components/internal/ui";
 import { DateField, SuggestInput } from "@/components/internal/pickers";

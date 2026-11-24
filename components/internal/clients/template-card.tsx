@@ -15,7 +15,7 @@ import {
   PencilSimple,
   Plus,
   Trash,
-} from "@phosphor-icons/react";
+} from "@/components/internal/icons";
 import {
   createTemplate,
   resetTemplate,

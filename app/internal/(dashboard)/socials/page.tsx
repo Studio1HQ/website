@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ChartLineUp, Plus } from "@phosphor-icons/react/dist/ssr";
+import { ChartLineUp, Plus } from "@/components/internal/icons";
 import { thisMonth } from "@/lib/internal/clients/schema";
 import { loadMetrics, requireSocials } from "@/lib/internal/socials/data";
 import {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { CheckCircle, EnvelopeSimple } from "@phosphor-icons/react";
+import { CheckCircle, EnvelopeSimple } from "@/components/internal/icons";
 import type { PlanStepStatus } from "@/lib/internal/data";
 import { formatDay, relativeDay } from "@/lib/internal/community/schema";
 import { cn } from "@/lib/utils";

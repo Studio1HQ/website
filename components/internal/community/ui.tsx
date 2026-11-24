@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { HoverLink } from "@/components/internal/nav-progress";
 import { cn } from "@/lib/utils";
-import { Card, Notice, inputClass } from "@/components/internal/ui";
+import { Card, Notice, inputClass, segmentClass, segmentedClass } from "@/components/internal/ui";
 import { TeamAvatar } from "@/components/internal/team-photos";
 import {
   COMMUNITY_MIGRATION_HINT,
@@ -187,15 +187,11 @@ export function Stat({
         href && "transition-colors hover:border-[var(--i-line-strong)]",
       )}
     >
-      <p className="truncate text-[12px] text-[var(--i-muted)] sm:text-[12.5px]">
+      <p className="flex items-center gap-2 truncate text-[12px] text-[var(--i-muted)] sm:text-[12.5px]">
         {label}
+        {accent ? <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-[var(--i-accent)]" /> : null}
       </p>
-      <p
-        className={cn(
-          "mt-2 truncate text-[22px] font-medium leading-none tabular-nums tracking-[-0.02em] sm:text-[26px]",
-          accent && "text-[var(--i-accent-text)]",
-        )}
-      >
+      <p className="mt-2 truncate text-[22px] font-medium leading-none tabular-nums tracking-[-0.02em] sm:text-[26px]">
         {value}
       </p>
       {note ? (
@@ -227,7 +223,7 @@ export function Meter({
   const ratio = max > 0 ? value / max : 0;
   return (
     <span
-      className="block h-1.5 w-full overflow-hidden rounded-full bg-[var(--i-track)]"
+      className="block h-2 w-full overflow-hidden rounded-full bg-black/[0.07] dark:bg-white/[0.09]"
       role="img"
       aria-label={label ?? `${Math.round(ratio * 100)}%`}
     >
@@ -261,13 +257,7 @@ export function LinkTabs({
   active: string;
 }) {
   return (
-    <nav
-      aria-label="Views"
-      // Sideways scrolling clips everything outside the box, so the padding
-      // (offset by the negative margins) leaves room for the active tab's
-      // ring and shadow on every side.
-      className="-mx-1 -mt-1 mb-4 flex gap-1 overflow-x-auto px-1 pt-1 pb-1"
-    >
+    <nav aria-label="Views" className={cn(segmentedClass, "mb-5")}>
       {items.map((item) => {
         const on = item.key === active;
         return (
@@ -275,12 +265,7 @@ export function LinkTabs({
             key={item.key}
             href={item.href}
             aria-current={on ? "page" : undefined}
-            className={cn(
-              "inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-3 text-[13px] transition-colors",
-              on
-                ? "bg-[var(--i-panel)] font-medium text-[var(--i-ink)] shadow-[var(--i-shadow-sm)] ring-1 ring-[var(--i-line)]"
-                : "text-[var(--i-muted)] hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)]",
-            )}
+            className={segmentClass(on)}
           >
             {item.icon}
             {item.label}
@@ -331,7 +316,7 @@ export function SearchBox({
         defaultValue={value}
         placeholder={placeholder}
         aria-label={placeholder}
-        className={inputClass("sm")}
+        className={cn(inputClass("sm"), "h-9 rounded-full px-4")}
       />
     </form>
   );

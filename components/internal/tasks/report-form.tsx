@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { FloppyDisk, PaperPlaneTilt } from "@phosphor-icons/react";
+import { FloppyDisk, PaperPlaneTilt } from "@/components/internal/icons";
 import { saveReportDraft, submitReport } from "@/app/internal/(dashboard)/tasks/actions";
 import { useToast } from "@/components/internal/toast";
 import { Card, buttonClass, textareaClass } from "@/components/internal/ui";

@@ -1,4 +1,4 @@
-import { PencilSimple, Plus } from "@phosphor-icons/react/dist/ssr";
+import { PencilSimple, Plus } from "@/components/internal/icons";
 import {
   PERSON_ROLES,
   labelOf,

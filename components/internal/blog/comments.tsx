@@ -1,10 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
-import { ArrowBendUpLeft, ChatCircle, CheckCircle, CircleNotch, Quotes, X } from "@phosphor-icons/react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type ReactNode, type RefObject } from "react";
+import {
+  ArrowBendUpLeft,
+  ArrowCounterClockwise,
+  CaretRight,
+  ChatCircle,
+  Check,
+  CheckCircle,
+  CircleNotch,
+  X,
+} from "@/components/internal/icons";
 import { cleanQuote, locateQuote, nameFromEmail, type CommentThread } from "@/lib/internal/blog/shared";
 import { cn } from "@/lib/utils";
-import { Card, buttonClass, formatDate, relativeDate, textareaClass } from "@/components/internal/ui";
+import { Card, buttonClass, formatDate, relativeDate } from "@/components/internal/ui";
 import { TeamAvatar } from "@/components/internal/team-photos";
 
 /*
@@ -173,21 +182,55 @@ export function SelectionCommentButton({
   );
 }
 
-function Message({ actor, at, body }: { actor: string; at: string; body: string }) {
+/** The quoted text a thread points at: a thin bar in the editor's highlight yellow, then the words. */
+function QuoteLine({ quote, faded, struck }: { quote: string; faded?: boolean; struck?: boolean }) {
   return (
-    <div className="flex gap-2 text-[12.5px]">
-      <TeamAvatar name={nameFromEmail(actor)} email={actor} size={24} />
-      <div className="min-w-0 flex-1">
-        <p className="text-[var(--i-muted)]">
-          <span className="font-medium text-[var(--i-ink-2)]">{nameFromEmail(actor)}</span> ·{" "}
-          <span title={formatDate(at)} suppressHydrationWarning>
-            {relativeDate(at)}
-          </span>
-        </p>
-        <p className="mt-0.5 whitespace-pre-wrap break-words text-[var(--i-ink)]">{body}</p>
+    <span className="flex min-w-0 flex-1 gap-2.5">
+      <span aria-hidden className={cn("w-[3px] shrink-0 rounded-full", faded ? "bg-[var(--i-line-strong)]" : "bg-yellow-400")} />
+      <span
+        className={cn(
+          "line-clamp-2 text-[12px] leading-[1.5] text-[var(--i-muted)] group-hover/quote:text-[var(--i-ink-2)]",
+          struck && "line-through decoration-[var(--i-faint)]",
+        )}
+      >
+        {quote}
+      </span>
+    </span>
+  );
+}
+
+/** One comment: avatar, name and time on a line, the words under the name. */
+function Message({ actor, at, body, action }: { actor: string; at: string; body: string; action?: ReactNode }) {
+  const name = nameFromEmail(actor);
+  return (
+    <div>
+      <div className="flex min-h-7 items-center gap-2">
+        <TeamAvatar name={name} email={actor} size={24} />
+        <span className="truncate text-[13px] font-medium text-[var(--i-ink)]">{name}</span>
+        <span title={formatDate(at)} suppressHydrationWarning className="shrink-0 text-[11.5px] text-[var(--i-faint)]">
+          {relativeDate(at)}
+        </span>
+        {action ? <span className="ml-auto flex shrink-0">{action}</span> : null}
       </div>
+      <p className="whitespace-pre-wrap break-words pl-8 text-[13px] leading-[1.55] text-[var(--i-ink-2)]">{body}</p>
     </div>
   );
+}
+
+/**
+ * A text box with no frame of its own, for inside a framed composer: the
+ * frame shows focus, so the dashboard's focus outline would be a second box.
+ */
+const bareTextarea =
+  "block w-full resize-none bg-transparent text-[13px] leading-[1.5] text-[var(--i-ink)] !outline-none placeholder:text-[var(--i-faint)]";
+
+const smallButton = (variant: "primary" | "ghost") => cn(buttonClass(variant, "sm"), "h-7 px-3 text-[12.5px]");
+
+/** "⌘ Enter" on a Mac, "Ctrl Enter" elsewhere. */
+const noSubscribe = () => () => {};
+function SendHint() {
+  const mac = useSyncExternalStore(noSubscribe, () => /Mac|iPhone|iPad/.test(navigator.platform), () => true);
+  return <span className="text-[11px] text-[var(--i-faint)] max-md:hidden">{mac ? "⌘" : "Ctrl"} Enter to send</span>;
 }
 
 type Send = (text: string, options: { quote?: string; threadId?: string }) => Promise<boolean>;
@@ -213,13 +256,22 @@ function Thread({
   const [reply, setReply] = useState("");
   const { root, replies } = thread;
   const resolved = Boolean(root.resolved_at);
+  const sendReply = () => {
+    if (!reply.trim() || busy) return;
+    void onSend(reply, { threadId: root.id }).then((ok) => {
+      if (!ok) return;
+      setReply("");
+      setReplying(false);
+    });
+  };
 
   return (
     <li
       className={cn(
-        "rounded-lg p-2.5 ring-1 ring-inset transition-colors",
-        active ? "bg-[var(--i-accent-soft)]/50 ring-[var(--i-accent)]/40" : "ring-[var(--i-line)]",
-        resolved && "opacity-70",
+        "overflow-hidden rounded-xl border bg-[var(--i-panel)] transition-[border-color,box-shadow]",
+        active
+          ? "border-yellow-400/70 shadow-[0_0_0_3px_rgb(250_204_21/0.14)]"
+          : "border-[var(--i-line)] focus-within:border-[var(--i-line-strong)] hover:border-[var(--i-line-strong)]",
       )}
     >
       {root.quote ? (
@@ -227,65 +279,92 @@ function Thread({
           type="button"
           onClick={onFocus}
           title={missing ? "This text isn't in the post anymore" : "Show it in the post"}
-          className="mb-2 flex w-full gap-1.5 rounded-md border-l-2 border-amber-400 bg-amber-50/70 px-2 py-1 text-left text-[12px] text-[var(--i-ink-2)] hover:bg-amber-50 dark:bg-amber-400/10 dark:hover:bg-amber-400/15"
+          className="group/quote flex w-full flex-col gap-1 px-3 pt-3 text-left"
         >
-          <Quotes size={12} className="mt-0.5 shrink-0 text-amber-600" />
-          <span className={cn("line-clamp-3", missing && "line-through decoration-[var(--i-faint)]")}>{root.quote}</span>
+          <QuoteLine quote={root.quote} faded={resolved || missing} struck={missing} />
+          {missing && !resolved ? (
+            <span className="pl-[13px] text-[11px] text-[var(--i-faint)]">The text has changed since this comment.</span>
+          ) : null}
         </button>
       ) : null}
-      <div className="space-y-2.5">
-        <Message actor={root.actor} at={root.created_at} body={root.body} />
+
+      <div className="space-y-2.5 px-3 pb-3 pt-2">
+        <Message
+          actor={root.actor}
+          at={root.created_at}
+          body={root.body}
+          action={
+            resolved ? null : (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => onResolve(true)}
+                aria-label="Resolve"
+                title="Resolve"
+                className="flex size-7 items-center justify-center rounded-md text-[var(--i-faint)] transition-colors hover:bg-[var(--i-hover)] hover:text-emerald-600 disabled:opacity-50 dark:hover:text-emerald-400"
+              >
+                <Check size={15} weight="bold" />
+              </button>
+            )
+          }
+        />
         {replies.map((item) => (
           <Message key={item.id} actor={item.actor} at={item.created_at} body={item.body} />
         ))}
       </div>
-      {missing && !resolved ? (
-        <p className="mt-2 text-[11.5px] text-[var(--i-faint)]">The quoted text has changed since this comment.</p>
-      ) : null}
+
       {resolved ? (
-        <p className="mt-2 flex items-center gap-1 text-[11.5px] text-[var(--i-muted)]">
-          <CheckCircle size={12} className="text-emerald-600" /> Resolved by {nameFromEmail(root.resolved_by ?? "")}
-        </p>
-      ) : null}
-      {replying ? (
-        <div className="mt-2.5">
+        <div className="flex items-center gap-2 border-t border-[var(--i-line)] bg-[var(--i-sunken)] px-3 py-1.5 text-[12px] text-[var(--i-muted)]">
+          <CheckCircle size={14} weight="fill" className="shrink-0 text-emerald-600 dark:text-emerald-400" />
+          <span className="min-w-0 flex-1 truncate">Resolved by {nameFromEmail(root.resolved_by ?? "")}</span>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => onResolve(false)}
+            className="inline-flex h-7 shrink-0 items-center gap-1 rounded-md px-2 font-medium text-[var(--i-ink-2)] hover:bg-[var(--i-hover)] disabled:opacity-50"
+          >
+            <ArrowCounterClockwise size={13} /> Reopen
+          </button>
+        </div>
+      ) : replying ? (
+        <div className="border-t border-[var(--i-line)] px-3 pb-2 pt-2.5">
           <textarea
             value={reply}
             autoFocus
             onChange={(event) => setReply(event.target.value)}
             onKeyDown={(event) => {
-              if ((event.metaKey || event.ctrlKey) && event.key === "Enter" && reply.trim()) {
+              if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
                 event.preventDefault();
-                void onSend(reply, { threadId: root.id }).then((ok) => ok && (setReply(""), setReplying(false)));
+                sendReply();
               }
+              if (event.key === "Escape" && !reply.trim()) setReplying(false);
             }}
             rows={2}
+            maxLength={5000}
             placeholder="Reply"
-            className={textareaClass}
+            aria-label="Reply"
+            className={bareTextarea}
           />
-          <div className="mt-1.5 flex gap-1.5">
-            <button
-              type="button"
-              disabled={!reply.trim() || busy}
-              onClick={() => void onSend(reply, { threadId: root.id }).then((ok) => ok && (setReply(""), setReplying(false)))}
-              className={buttonClass("secondary", "sm")}
-            >
-              {busy ? <CircleNotch size={13} className="animate-spin" /> : <ArrowBendUpLeft size={13} />} Reply
-            </button>
-            <button type="button" onClick={() => setReplying(false)} className={buttonClass("ghost", "sm")}>
+          <div className="mt-1.5 flex items-center justify-end gap-1">
+            <span className="mr-auto">
+              <SendHint />
+            </span>
+            <button type="button" onClick={() => setReplying(false)} className={smallButton("ghost")}>
               Cancel
+            </button>
+            <button type="button" disabled={!reply.trim() || busy} onClick={sendReply} className={smallButton("primary")}>
+              {busy ? <CircleNotch size={13} className="animate-spin" /> : null} Reply
             </button>
           </div>
         </div>
       ) : (
-        <div className="mt-2 flex gap-1">
-          <button type="button" onClick={() => setReplying(true)} className={buttonClass("ghost", "sm")}>
-            <ArrowBendUpLeft size={13} /> Reply
-          </button>
-          <button type="button" disabled={busy} onClick={() => onResolve(!resolved)} className={buttonClass("ghost", "sm")}>
-            <CheckCircle size={13} /> {resolved ? "Reopen" : "Resolve"}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => setReplying(true)}
+          className="flex h-9 w-full items-center gap-2 border-t border-[var(--i-line)] px-3 text-left text-[12.5px] text-[var(--i-faint)] transition-colors hover:bg-[var(--i-hover)] hover:text-[var(--i-muted)]"
+        >
+          <ArrowBendUpLeft size={13} /> Reply
+        </button>
       )}
     </li>
   );
@@ -332,7 +411,7 @@ export function CommentsPanel({
   };
 
   const list = (items: CommentThread[]) => (
-    <ul className="space-y-2">
+    <ul className="space-y-2.5">
       {items.map((thread) => (
         <Thread
           key={thread.root.id}
@@ -350,29 +429,26 @@ export function CommentsPanel({
 
   return (
     <Card className="p-4">
-      <p className="mb-1 flex items-center justify-between text-[13px] font-medium">
-        Comments
-        {open.length ? <span className="text-[12px] font-normal text-[var(--i-muted)]">{open.length} open</span> : null}
-      </p>
-      <p className="mb-3 text-[12px] text-[var(--i-muted)]">Select text in the post to comment on it.</p>
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 className="text-[13px] font-medium">Comments</h2>
+        {open.length ? (
+          <span className="text-[12px] tabular-nums text-[var(--i-muted)]">{open.length} open</span>
+        ) : null}
+      </div>
+      <p className="mt-0.5 text-[12px] text-[var(--i-muted)]">Select text in the post to comment on it.</p>
 
-      {open.length ? list(open) : <p className="text-[12.5px] text-[var(--i-faint)]">No open comments.</p>}
-
-      {resolved.length ? (
-        <div className="mt-3">
-          <button type="button" onClick={() => setShowResolved(!showResolved)} className="text-[12px] text-[var(--i-muted)] underline-offset-2 hover:underline">
-            {showResolved ? "Hide" : "Show"} {resolved.length} resolved
-          </button>
-          {showResolved ? <div className="mt-2">{list(resolved)}</div> : null}
-        </div>
-      ) : null}
-
-      <div className="mt-3 border-t border-[var(--i-line)] pt-3">
+      {/* New comment first, so text picked in the post lands right under the heading. */}
+      <div className="mt-3 rounded-xl border border-[var(--i-line)] bg-[var(--i-sunken)] transition-colors focus-within:border-[var(--i-line-strong)] focus-within:bg-[var(--i-panel)]">
         {pendingQuote ? (
-          <div className="mb-2 flex gap-1.5 rounded-md border-l-2 border-amber-400 bg-amber-50/70 px-2 py-1 text-[12px] text-[var(--i-ink-2)] dark:bg-amber-400/10">
-            <Quotes size={12} className="mt-0.5 shrink-0 text-amber-600" />
-            <span className="line-clamp-3 flex-1">{pendingQuote}</span>
-            <button type="button" aria-label="Comment on the whole post instead" onClick={clearQuote} className="text-[var(--i-faint)] hover:text-[var(--i-ink)]">
+          <div className="flex items-start gap-2 px-3 pt-3">
+            <QuoteLine quote={pendingQuote} />
+            <button
+              type="button"
+              aria-label="Comment on the whole post instead"
+              title="Comment on the whole post instead"
+              onClick={clearQuote}
+              className="-mr-1 -mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md text-[var(--i-faint)] hover:bg-[var(--i-hover)] hover:text-[var(--i-ink)]"
+            >
               <X size={12} />
             </button>
           </div>
@@ -388,13 +464,40 @@ export function CommentsPanel({
             }
           }}
           rows={2}
+          maxLength={5000}
+          aria-label="New comment"
           placeholder={pendingQuote ? "Comment on the selected text" : "Comment on the whole post"}
-          className={textareaClass}
+          className={cn(bareTextarea, "px-3 pb-1 pt-2.5")}
         />
-        <button type="button" disabled={!text.trim() || busy} onClick={() => void send()} className={cn(buttonClass("secondary", "sm"), "mt-2")}>
-          {busy ? <CircleNotch size={14} className="animate-spin" /> : <ChatCircle size={14} />} Comment
-        </button>
+        <div className="flex items-center justify-end gap-2 px-2 pb-2 pl-3">
+          <span className="mr-auto">
+            <SendHint />
+          </span>
+          <button type="button" disabled={!text.trim() || busy} onClick={() => void send()} className={smallButton("primary")}>
+            {busy ? <CircleNotch size={13} className="animate-spin" /> : null} Comment
+          </button>
+        </div>
       </div>
+
+      <div className="mt-4">
+        {open.length ? list(open) : <p className="py-1 text-[12.5px] text-[var(--i-faint)]">No open comments.</p>}
+      </div>
+
+      {resolved.length ? (
+        <div className="mt-4">
+          <button
+            type="button"
+            onClick={() => setShowResolved(!showResolved)}
+            aria-expanded={showResolved}
+            className="inline-flex items-center gap-1 text-[12px] text-[var(--i-muted)] hover:text-[var(--i-ink)]"
+          >
+            <CaretRight size={12} className={cn("transition-transform", showResolved && "rotate-90")} />
+            Resolved
+            <span className="tabular-nums text-[var(--i-faint)]">{resolved.length}</span>
+          </button>
+          {showResolved ? <div className="mt-2.5">{list(resolved)}</div> : null}
+        </div>
+      ) : null}
     </Card>
   );
 }

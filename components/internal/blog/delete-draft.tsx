@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Trash } from "@phosphor-icons/react";
+import { Trash } from "@/components/internal/icons";
 import { deleteDraft } from "@/app/internal/(dashboard)/blog/actions";
 import { useToast } from "@/components/internal/toast";
 import { buttonClass } from "@/components/internal/ui";
