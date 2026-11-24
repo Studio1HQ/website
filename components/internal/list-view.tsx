@@ -373,25 +373,28 @@ export function ListView({
           <div className="flex min-w-0 items-center gap-3">
             <Avatar name={text(row.name)} email={text(row.email)} size={32} />
             <div className="min-w-0">
-              {href ? (
-                <Link
-                  href={href}
-                  className="block truncate font-medium text-[var(--i-ink)] hover:underline hover:underline-offset-2"
-                >
-                  {name}
-                </Link>
-              ) : (
-                <span className="block truncate font-medium">{name}</span>
-              )}
+              {/* Name and how many times they applied on one line, email under it: two lines a row. */}
+              <div className="flex min-w-0 items-center gap-1.5">
+                {href ? (
+                  <Link
+                    href={href}
+                    className="truncate font-medium text-[var(--i-ink)] hover:underline hover:underline-offset-2"
+                  >
+                    {name}
+                  </Link>
+                ) : (
+                  <span className="truncate font-medium">{name}</span>
+                )}
+                {Array.isArray(row._also) && row._also.length ? (
+                  <span
+                    title={`${row._also.length + 1} ${section.key === "hackathons" ? "registrations" : "applications"}. Also: ${row._also.join(", ")}`}
+                    className="inline-flex shrink-0 items-center rounded-full bg-sky-50 px-1.5 text-[11px] font-medium leading-[18px] tabular-nums text-sky-800 ring-1 ring-inset ring-sky-200 dark:bg-sky-500/10 dark:text-sky-200 dark:ring-sky-500/25"
+                  >
+                    ×{row._also.length + 1}
+                  </span>
+                ) : null}
+              </div>
               <span className="block truncate text-[12.5px] text-[var(--i-muted)]">{text(row.email)}</span>
-              {Array.isArray(row._also) && row._also.length ? (
-                <span
-                  title={`Also: ${row._also.join(", ")}`}
-                  className="mt-1 inline-flex items-center rounded-md bg-sky-50 px-1.5 py-px text-[11.5px] font-medium text-sky-800 ring-1 ring-inset ring-sky-200 dark:bg-sky-500/10 dark:text-sky-200 dark:ring-sky-500/25"
-                >
-                  {row._also.length + 1} {section.key === "hackathons" ? "registrations" : "applications"}
-                </span>
-              ) : null}
             </div>
           </div>
         );
@@ -896,7 +899,7 @@ export function ListView({
                           )}
                         >
                           {reviewable ? (
-                            <td className="py-4 pl-5 pr-1">
+                            <td className="py-3 pl-5 pr-1">
                               <input
                                 type="checkbox"
                                 aria-label={`Select ${text(row.name) || "entry"}`}
@@ -910,7 +913,7 @@ export function ListView({
                             <td
                               key={column.key}
                               className={cn(
-                                "px-4 py-4",
+                                "px-4 py-3",
                                 index === 0 && !reviewable && "pl-5",
                                 column.kind === "person" && "min-w-[220px] max-w-[300px]",
                                 column.wide && "hidden lg:table-cell",

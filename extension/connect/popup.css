@@ -501,3 +501,31 @@ body:not(.as-popup) .top {
 body:not(.as-popup) .top:has(.top-actions[hidden]) {
   display: none;
 }
+
+/* Signed out (and loading) in the side panel: the sign-in sits in the
+   middle of the panel at a comfortable reading width, with the credit at
+   the foot. Signed in, the cards stay at the top. */
+body:not(.as-popup) #connect,
+body:not(.as-popup) #loading {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto;
+  padding-bottom: 6vh;
+}
+body:not(.as-popup) #connect .hero {
+  padding-top: 0;
+}
+body:not(.as-popup) #connect h1 {
+  margin-top: 18px;
+  font-size: 20px;
+}
+body:not(.as-popup) #connect form {
+  margin-top: 24px;
+}
+body:not(.as-popup) .made {
+  margin-top: 0;
+}

@@ -132,6 +132,36 @@ function Label({ children, hint, extra }: { children: ReactNode; hint?: ReactNod
   );
 }
 
+/** One group of the editor's side panel: a small heading, then its fields. */
+function PanelSection({ title, note, children }: { title: string; note?: string; children: ReactNode }) {
+  return (
+    <section className="space-y-3.5 p-4">
+      <div>
+        <h3 className="text-[13px] font-medium">{title}</h3>
+        {note ? <p className="mt-0.5 text-[12px] text-[var(--i-faint)]">{note}</p> : null}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+/** Roughly how the post shows as a Google result, updating as the fields change. */
+function SearchPreview({ title, path, description }: { title: string; path: string; description: string }) {
+  return (
+    <div className="rounded-lg bg-[var(--i-sunken)] px-3 py-2.5 ring-1 ring-[var(--i-line)]">
+      <p className="truncate text-[11.5px] text-[var(--i-muted)]">
+        studio1hq.com › {path.split("/").filter(Boolean).join(" › ")}
+      </p>
+      <p className="mt-0.5 line-clamp-1 text-[14px] leading-snug text-[#1a0dab] dark:text-[#8ab4f8]">
+        {title || <span className="text-[var(--i-faint)]">Add a title</span>}
+      </p>
+      <p className="mt-0.5 line-clamp-2 text-[12px] leading-snug text-[var(--i-ink-2)]">
+        {description || <span className="text-[var(--i-faint)]">Add an SEO description to control this text.</span>}
+      </p>
+    </div>
+  );
+}
+
 /** Chips with an input: Enter or comma adds, Backspace on empty removes the last. */
 function ChipInput({
   values,
@@ -791,98 +821,110 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
             )}
           </Card>
 
-          <Card className="space-y-3.5 p-4">
-            <p className="text-[13px] font-medium">Post details</p>
-            <div>
-              <Label hint="for Google and social cards" extra={<Counter value={fields.seo_title.trim().length} max={60} />}>
-                SEO title
-              </Label>
-              <input
-                value={fields.seo_title}
-                onChange={(event) => update("seo_title", event.target.value)}
-                placeholder={fields.title.length > 60 ? "Required: the title is over 60 characters" : "Optional when the title is short"}
-                className={inputClass()}
+          {/* Post details in three groups: how it shows on Google and in shared
+              links, who wrote it and when, and the TL;DR box at the top of the post. */}
+          <Card className="divide-y divide-[var(--i-line)]">
+            <PanelSection title="Search & social" note="On Google and in shared links">
+              <SearchPreview
+                title={fields.seo_title.trim() || fields.title.trim()}
+                path={`blog/${liveSlug ?? fields.slug}`}
+                description={fields.description.trim()}
               />
-            </div>
-            <div>
-              <Label hint={liveSlug ? "a live post's URL can't change" : undefined}>URL</Label>
-              <div className="flex h-9 items-center rounded-lg border border-[var(--i-line)] bg-[var(--i-sunken)] pl-3 text-[13px] text-[var(--i-muted)] transition-colors focus-within:border-[var(--i-line-strong)] focus-within:bg-[var(--i-panel)]">
-                /blog/
-                <input
-                  value={fields.slug}
-                  disabled={Boolean(liveSlug)}
-                  onChange={(event) => update("slug", event.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""))}
-                  className="h-full min-w-0 flex-1 rounded-r-lg bg-transparent pl-0.5 pr-3 text-[var(--i-ink)] outline-none disabled:cursor-not-allowed disabled:opacity-60"
-                />
-              </div>
-            </div>
-            <div>
-              <Label extra={<Counter value={fields.description.trim().length} min={50} max={160} />}>SEO description</Label>
-              <textarea
-                value={fields.description}
-                onChange={(event) => update("description", event.target.value.replace(/\n/g, " "))}
-                rows={3}
-                placeholder="140 to 160 characters, main keyword early. Shown in Google and on blog cards."
-                className={textareaClass}
-              />
-            </div>
-            <div>
-              <Label hint="3 to 6; the first is the topic label">Tags</Label>
-              <ChipInput
-                values={fields.tags}
-                onChange={(tags) => update("tags", tags)}
-                normalize={normalizeTag}
-                placeholder="Add a tag, then Enter"
-                max={12}
-              />
-            </div>
-            <div>
-              <Label>Authors</Label>
-              <ChipInput
-                values={fields.authors}
-                onChange={(authors) => update("authors", authors)}
-                placeholder="Full name, then Enter"
-                max={6}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label hint="blank = publish day">Date</Label>
-                <DateField
-                  value={fields.publish_date ?? ""}
-                  onChange={(next) => update("publish_date", next || null)}
-                  placeholder="Publish day"
-                  aria-label="Date"
+                <Label extra={<Counter value={fields.seo_title.trim().length} max={60} />}>
+                  SEO title
+                </Label>
+                <input
+                  value={fields.seo_title}
+                  onChange={(event) => update("seo_title", event.target.value)}
+                  placeholder={fields.title.length > 60 ? "Required: the title is over 60 characters" : "Optional when the title is short"}
+                  className={inputClass()}
                 />
               </div>
-              <label className="flex cursor-pointer items-end gap-2 pb-1.5 text-[12.5px] text-[var(--i-ink-2)]">
-                <input
-                  type="checkbox"
-                  checked={fields.unlisted}
-                  onChange={(event) => update("unlisted", event.target.checked)}
-                  className="size-4 accent-[var(--i-accent)]"
+              <div>
+                <Label hint={liveSlug ? "a live post's URL can't change" : undefined}>URL</Label>
+                <div className="flex h-9 items-center rounded-lg border border-[var(--i-line)] bg-[var(--i-sunken)] pl-3 text-[13px] text-[var(--i-muted)] transition-colors focus-within:border-[var(--i-line-strong)] focus-within:bg-[var(--i-panel)]">
+                  /blog/
+                  <input
+                    value={fields.slug}
+                    disabled={Boolean(liveSlug)}
+                    onChange={(event) => update("slug", event.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""))}
+                    className="h-full min-w-0 flex-1 rounded-r-lg bg-transparent pl-0.5 pr-3 text-[var(--i-ink)] outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label extra={<Counter value={fields.description.trim().length} min={50} max={160} />}>SEO description</Label>
+                <textarea
+                  value={fields.description}
+                  onChange={(event) => update("description", event.target.value.replace(/\n/g, " "))}
+                  rows={3}
+                  placeholder="140 to 160 characters, main keyword early. Shown in Google and on blog cards."
+                  className={textareaClass}
                 />
-                Hide from /blog
-              </label>
-            </div>
-            <div>
-              <Label hint="optional; the SEO description is used if empty">TL;DR</Label>
-              <textarea
-                value={fields.tldr_summary}
-                onChange={(event) => update("tldr_summary", event.target.value)}
-                rows={2}
-                className={textareaClass}
-              />
-            </div>
-            <div>
-              <Label hint="3 or 4, one per line">TL;DR bullets</Label>
-              <textarea
-                value={fields.tldr_bullets.join("\n")}
-                onChange={(event) => update("tldr_bullets", event.target.value.split("\n").slice(0, 4))}
-                rows={4}
-                className={textareaClass}
-              />
-            </div>
+              </div>
+            </PanelSection>
+            <PanelSection title="Byline">
+              <div>
+                <Label>Authors</Label>
+                <ChipInput
+                  values={fields.authors}
+                  onChange={(authors) => update("authors", authors)}
+                  placeholder="Full name, then Enter"
+                  max={6}
+                />
+              </div>
+              <div>
+                <Label hint="3 to 6; the first is the topic label">Tags</Label>
+                <ChipInput
+                  values={fields.tags}
+                  onChange={(tags) => update("tags", tags)}
+                  normalize={normalizeTag}
+                  placeholder="Add a tag, then Enter"
+                  max={12}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label hint="blank = publish day">Date</Label>
+                  <DateField
+                    value={fields.publish_date ?? ""}
+                    onChange={(next) => update("publish_date", next || null)}
+                    placeholder="Publish day"
+                    aria-label="Date"
+                  />
+                </div>
+                <label className="flex cursor-pointer items-end gap-2 pb-1.5 text-[12.5px] text-[var(--i-ink-2)]">
+                  <input
+                    type="checkbox"
+                    checked={fields.unlisted}
+                    onChange={(event) => update("unlisted", event.target.checked)}
+                    className="size-4 accent-[var(--i-accent)]"
+                  />
+                  Hide from /blog
+                </label>
+              </div>
+            </PanelSection>
+            <PanelSection title="TL;DR" note="Optional; the SEO description is used if empty">
+              <div>
+                <Label>Summary</Label>
+                <textarea
+                  value={fields.tldr_summary}
+                  onChange={(event) => update("tldr_summary", event.target.value)}
+                  rows={2}
+                  className={textareaClass}
+                />
+              </div>
+              <div>
+                <Label hint="3 or 4, one per line">Bullets</Label>
+                <textarea
+                  value={fields.tldr_bullets.join("\n")}
+                  onChange={(event) => update("tldr_bullets", event.target.value.split("\n").slice(0, 4))}
+                  rows={4}
+                  className={textareaClass}
+                />
+              </div>
+            </PanelSection>
           </Card>
 
           <Card className="p-4">

@@ -175,15 +175,61 @@ export function Board(props: BoardProps) {
   const announcements = cardAnnouncements(titleOf, (id) => TASK_STATUSES.find((column) => column.value === id)?.label);
 
   const doneCount = items.filter((item) => item.column === "done").length;
+  // The bar across the top: how far the week has got, and what needs a look.
+  const facts = items.map((item) =>
+    item.kind === "task"
+      ? { due: item.data.task.due_on, blocked: item.data.task.blocked }
+      : item.kind === "deliverable"
+        ? { due: item.data.deliverable.due_on, blocked: item.data.deliverable.blocked }
+        : { due: item.data.due_on, blocked: item.data.status === "blocked" },
+  );
+  const open = items.filter((item) => item.column !== "done");
+  const lateCount = items.filter((item, index) => item.column !== "done" && !!facts[index].due && facts[index].due! < today).length;
+  const blockedCount = items.filter((item, index) => item.column !== "done" && facts[index].blocked).length;
+  const progress = items.length ? Math.round((doneCount / items.length) * 100) : 0;
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <p className="mr-auto text-[13px] text-[var(--i-muted)]">
-          This week: <span className="font-medium text-[var(--i-ink)] tabular-nums">{doneCount}</span> done
-        </p>
+      {/* The week at a glance: progress, what's late or blocked, and Add task. */}
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-3 rounded-xl bg-[var(--i-panel)] px-4 py-3 ring-1 ring-[var(--i-line)]">
+        <div className="min-w-[200px] flex-1 sm:max-w-sm">
+          <div className="flex items-baseline justify-between gap-3 text-[13px]">
+            <span className="font-medium">{person.own ? "Your week" : `${person.name.split(" ")[0]}'s week`}</span>
+            <span className="tabular-nums text-[var(--i-muted)]">
+              <span className="font-medium text-[var(--i-ink)]">{doneCount}</span> of {items.length} done
+            </span>
+          </div>
+          <div
+            role="progressbar"
+            aria-label="Done this week"
+            aria-valuenow={progress}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--i-track)]"
+          >
+            <div className="h-full rounded-full bg-[var(--i-bar)] transition-[width] duration-300" style={{ width: `${progress}%` }} />
+          </div>
+        </div>
+        <dl className="flex items-center gap-5 text-[12.5px]">
+          <div>
+            <dt className="text-[var(--i-muted)]">Open</dt>
+            <dd className="text-[15px] font-medium tabular-nums">{open.length}</dd>
+          </div>
+          <div>
+            <dt className="text-[var(--i-muted)]">Late</dt>
+            <dd className={cn("text-[15px] font-medium tabular-nums", lateCount ? "text-rose-600 dark:text-rose-400" : "text-[var(--i-faint)]")}>
+              {lateCount}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-[var(--i-muted)]">Blocked</dt>
+            <dd className={cn("text-[15px] font-medium tabular-nums", blockedCount ? "text-amber-600 dark:text-amber-400" : "text-[var(--i-faint)]")}>
+              {blockedCount}
+            </dd>
+          </div>
+        </dl>
         {props.canAdd ? (
-          <button type="button" className={buttonClass("primary")} onClick={() => setAdding(true)}>
+          <button type="button" className={cn(buttonClass("primary"), "ml-auto")} onClick={() => setAdding(true)}>
             <Plus size={14} /> {person.own ? "Add task" : `Add a task for ${person.name.split(" ")[0]}`}
           </button>
         ) : null}
