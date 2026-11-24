@@ -12,10 +12,11 @@ import {
 import * as Dialog from "@radix-ui/react-dialog";
 import { ArrowRight, LockSimple, Trash, X } from "@/components/internal/icons";
 import {
-  moveToNextMonth,
-  removeDeliverable,
-  saveDeliverable,
+  moveToNextMonth as moveToNextMonthAction,
+  removeDeliverable as removeDeliverableAction,
+  saveDeliverable as saveDeliverableAction,
 } from "@/app/internal/(dashboard)/clients/actions";
+import { guarded } from "@/components/internal/guarded";
 import {
   FORM_FIELD_LABELS,
   MEMBER_FIELDS,
@@ -53,6 +54,10 @@ import {
   inputClass,
   textareaClass,
 } from "@/components/internal/ui";
+
+const moveToNextMonth = guarded(moveToNextMonthAction);
+const removeDeliverable = guarded(removeDeliverableAction);
+const saveDeliverable = guarded(saveDeliverableAction);
 
 /**
  * Add or edit a deliverable: every field, with a links section that says

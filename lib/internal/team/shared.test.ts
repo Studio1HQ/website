@@ -20,8 +20,11 @@ import {
   parseAmount,
   parseHours,
   readSlots,
+  runningDay,
+  shiftDay,
   shiftMonth,
   slotsLabel,
+  type WorkSlot,
 } from "@/lib/internal/team/shared";
 
 describe("time helpers", () => {
@@ -175,6 +178,41 @@ describe("attendance", () => {
     // Slots cut shorter than the breaks: back to the slots alone.
     expect(activeAfterBreaks([{ start: "11:00", end: "11:10" }], breaks)).toBeNull();
     expect(breakMinutes({ slots: [morning], active_minutes: null })).toBe(0);
+  });
+
+  it("keeps a slot that runs past midnight on the day it started", () => {
+    type Day = { slots: WorkSlot[] };
+    const late: Day = { slots: [{ start: "22:00", end: null }] };
+    const ended: Day = { slots: [{ start: "09:30", end: "18:00" }] };
+    // Today's own running slot comes first.
+    const now: Day = { slots: [{ start: "00:10", end: null }] };
+    expect(runningDay(now, ended, "00:30")).toBe(now);
+    // Nothing on today yet: yesterday's open slot is still the one running.
+    expect(runningDay(null, late, "00:30")).toBe(late);
+    expect(runningDay({ slots: [] }, late, "00:30")).toBe(late);
+    expect(runningDay(null, ended, "00:30")).toBeNull();
+    expect(runningDay(null, null, "00:30")).toBeNull();
+    // Once today has slots of its own, yesterday's is left alone.
+    expect(runningDay({ slots: [{ start: "00:05", end: "00:20" }] }, late, "00:30")).toBeNull();
+    // A whole day on (the time it started has come round again), it was forgotten.
+    expect(runningDay(null, late, "21:59")).toBeNull();
+    expect(runningDay(null, late, "22:00")).toBeNull();
+    // So was one that would make the day longer than a day can be (16 hours).
+    const morning: Day = { slots: [{ start: "09:30", end: null }] };
+    expect(runningDay(null, morning, "01:30")).toBe(morning);
+    expect(runningDay(null, morning, "01:31")).toBeNull();
+    const split: Day = { slots: [{ start: "09:00", end: "18:00" }, { start: "20:00", end: null }] };
+    expect(runningDay(null, split, "03:00")).toBe(split);
+    expect(runningDay(null, split, "03:01")).toBeNull();
+    // The minutes so far carry over midnight.
+    expect(minutesSoFar({ slots: late.slots, active_minutes: null }, "00:30")).toBe(150);
+  });
+
+  it("moves a date by days, across months and years", () => {
+    expect(shiftDay("2026-11-25", -1)).toBe("2026-11-24");
+    expect(shiftDay("2026-12-01", -1)).toBe("2026-11-30");
+    expect(shiftDay("2026-12-31", 1)).toBe("2027-01-01");
+    expect(shiftDay("2028-03-01", -1)).toBe("2028-02-29");
   });
 
   it("names people without a name from their email", () => {

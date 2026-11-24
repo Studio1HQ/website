@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { inList, insertRow, selectRows, updateRows } from "@/lib/supabase-server";
 import { accessFor, type Member } from "@/lib/internal/members";
 import { OWNERS, isOwner, isStaffEmail } from "@/lib/internal/roles";
@@ -233,6 +234,14 @@ export async function listPeople(options: { activeOnly?: boolean; emails?: strin
   if (!result.ok) return listError(result.message);
   return { ok: true, people: result.rows.map(toPerson).filter((person): person is TeamPerson => person !== null) };
 }
+
+/**
+ * Everyone active on the roster, read once per page however many loaders
+ * ask (who a task can be shared with, the people calls name, whose tasks
+ * someone may see). For pages only: an action that has just changed the
+ * list reads it again with listPeople. Don't change the list it hands back.
+ */
+export const listActivePeople = cache((): Promise<PeopleResult> => listPeople({ activeOnly: true }));
 
 export type PeoplePayResult = { ok: true; people: TeamPersonPay[] } | { ok: false; message: string; missing: boolean };
 

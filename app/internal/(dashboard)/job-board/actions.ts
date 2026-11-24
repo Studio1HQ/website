@@ -20,6 +20,7 @@ import { clientLogo } from "@/lib/internal/clients/logo";
 import { isUuid } from "@/lib/internal/community/clean";
 import {
   cleanJob,
+  cleanJobEdit,
   jobChanges,
   type JobInput,
   type JobResult,
@@ -81,19 +82,21 @@ function warmLogo(job: Pick<JobInput, "website" | "url">) {
   if (site) after(() => clientLogo(site).then(() => undefined));
 }
 
-/** Adds a listing (id null) or saves changes to one. */
+/**
+ * Adds a listing (id null) or saves changes to one. A change sends only the
+ * fields that were changed, and only those are written.
+ */
 export async function saveJob(
   id: unknown,
   values: unknown,
 ): Promise<JobResult> {
   const staff = await allowed();
   if (!staff) return DENIED;
-  const cleaned = cleanJob(values, todayIst());
-  if (!cleaned.ok) return cleaned;
-  const job = cleaned.job;
-  const now = new Date().toISOString();
 
   if (id === null) {
+    const cleaned = cleanJob(values, todayIst());
+    if (!cleaned.ok) return cleaned;
+    const job = cleaned.job;
     const newId = crypto.randomUUID();
     const result = await insertRow(DEVREL_JOBS_TABLE, {
       id: newId,
@@ -122,16 +125,19 @@ export async function saveJob(
   if (before === "error")
     return { ok: false, message: "Couldn't save. Try again in a minute." };
   if (!before) return GONE;
+  const edit = cleanJobEdit(before, values, todayIst());
+  if (!edit.ok) return edit;
+  const { job, patch } = edit;
   const result = await updateRows(
     DEVREL_JOBS_TABLE,
     new URLSearchParams({ id: `eq.${id}` }),
-    { ...job, updated_by: staff.email, updated_at: now },
+    { ...patch, updated_by: staff.email, updated_at: new Date().toISOString() },
   );
   if (!result.ok) return writeError(result.message);
   if (result.count === 0) return GONE;
   const changes = jobChanges(
     before as Partial<Record<keyof JobInput, unknown>>,
-    job,
+    patch,
   );
   if (Object.keys(changes).length) {
     await audit({

@@ -5,9 +5,10 @@ import { useState, useTransition, type FormEvent, type ReactNode } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "@/components/internal/icons";
 import {
-  clearBlocked,
-  setBlocked,
+  clearBlocked as clearBlockedAction,
+  setBlocked as setBlockedAction,
 } from "@/app/internal/(dashboard)/clients/actions";
+import { guarded } from "@/components/internal/guarded";
 import {
   WAITS_ON,
   type Deliverable,
@@ -16,6 +17,9 @@ import {
 import { useToast } from "@/components/internal/toast";
 import { Select } from "@/components/internal/select";
 import { buttonClass, inputClass } from "@/components/internal/ui";
+
+const clearBlocked = guarded(clearBlockedAction);
+const setBlocked = guarded(setBlockedAction);
 
 /**
  * Flag a deliverable as blocked (reason and who it waits on, both needed),

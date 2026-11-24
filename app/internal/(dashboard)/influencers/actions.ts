@@ -74,7 +74,11 @@ function uuid(value: unknown) {
     : null;
 }
 
-/** The row to write from a form: "120k" read as a number, then the usual field checks. */
+/**
+ * The row to write from a form: "120k" read as a number, then the usual
+ * field checks. A change ("update") carries only the fields the form
+ * changed, and only those are written.
+ */
 function clean(
   fields: readonly FieldDef[],
   values: unknown,
@@ -273,8 +277,9 @@ async function saveChild(
   const cleaned = clean(child.fields, values, key ? "update" : "create");
   if (!cleaned.ok) return cleaned;
   const row = cleaned.row;
-  // A rate's or a post's platform follows its format, so the two can't disagree.
-  if (kind !== "channel") {
+  // A rate's or a post's platform follows its format, so the two can't
+  // disagree. A change that left the format alone doesn't send it.
+  if (kind !== "channel" && (!key || "format" in row)) {
     const format = formatInfo(row.format);
     if (!format) return { ok: false, message: "Pick what it's for." };
     row.platform = format.platform;
@@ -283,9 +288,9 @@ async function saveChild(
   const influencer = await getInfluencer(owner);
   if (influencer === "error") return TRY_AGAIN;
   if (!influencer) return UNKNOWN;
-  const subject = `${influencer.name}: ${child.name(row)}`;
 
   if (!key) {
+    const subject = `${influencer.name}: ${child.name(row)}`;
     const result = await insertRecord(
       child.table,
       child.what,
@@ -315,17 +320,19 @@ async function saveChild(
     staff.email,
   );
   if (!result.ok) return result;
+  // The record as it is now: the fields sent, over the ones left alone.
+  const after = { ...before, ...row };
   const diff = changed(before, row);
   if (Object.keys(diff).length) {
     await audit({
       actor: staff.email,
       area: "influencers",
       action: "edited",
-      subject,
+      subject: `${influencer.name}: ${child.name(after)}`,
       detail: { id: key, influencer_id: owner, changed: diff },
     });
   }
-  if ("url" in diff || "platform" in diff) warmNewsletterLogo(kind, row);
+  if ("url" in diff || "platform" in diff) warmNewsletterLogo(kind, after);
   refresh();
   return { ...result, message: "Saved" };
 }

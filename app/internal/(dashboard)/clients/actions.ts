@@ -320,7 +320,9 @@ export async function saveEngagement(
     if (saved === "error") return TRY_AGAIN;
     if (!saved) return UNKNOWN;
     const starts =
-      (clean.row.starts_on as string | null | undefined) ?? saved.starts_on;
+      "starts_on" in clean.row
+        ? (clean.row.starts_on as string | null)
+        : saved.starts_on;
     const ends =
       "ends_on" in clean.row
         ? (clean.row.ends_on as string | null)
@@ -790,8 +792,11 @@ export async function moveToNextMonth(id: unknown): Promise<ActionResult> {
   if (cycle === "error") return TRY_AGAIN;
   if (!cycle) return UNKNOWN;
   const month = shiftMonth(cycle.month, 1);
-  const findNext = () =>
-    loadCycles({ engagementIds: [deliverable.engagement_id], month });
+  const findNext = (fresh = false) =>
+    loadCycles(
+      { engagementIds: [deliverable.engagement_id], month },
+      { fresh },
+    );
   let next = await findNext();
   if (!next.ok) return TRY_AGAIN;
   if (!next.rows.length) {
@@ -801,7 +806,8 @@ export async function moveToNextMonth(id: unknown): Promise<ActionResult> {
       engagementIds: [deliverable.engagement_id],
     });
     if (!made.ok) return TRY_AGAIN;
-    next = await findNext();
+    // Read again, not the copy from before the month was made.
+    next = await findNext(true);
     if (!next.ok) return TRY_AGAIN;
   }
   const target = next.rows[0];

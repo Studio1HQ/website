@@ -2,7 +2,11 @@
 
 import { useState, type ReactNode } from "react";
 import { Crown, UserPlus } from "@/components/internal/icons";
-import { addTeammateAction, saveTeammateAction, setTeammateAccess } from "@/app/internal/(dashboard)/people/actions";
+import {
+  addTeammateAction as addTeammateActionRaw,
+  saveTeammateAction as saveTeammateActionRaw,
+  setTeammateAccess as setTeammateAccessAction,
+} from "@/app/internal/(dashboard)/people/actions";
 import { DateField, SuggestInput } from "@/components/internal/pickers";
 import { Avatar, Card, buttonClass, inputClass, relativeDate } from "@/components/internal/ui";
 import { Chip } from "@/components/internal/team/chips";
@@ -25,6 +29,12 @@ import {
 import { PERSON_KINDS, displayName, photoUrl, type PersonKind } from "@/lib/internal/team/shared";
 import type { Teammate } from "@/lib/internal/team/teammates";
 import { cn } from "@/lib/utils";
+import { guarded } from "@/components/internal/guarded";
+
+// A save that never reached the server answers { ok: false } here, so the open form stays (guarded).
+const addTeammateAction = guarded(addTeammateActionRaw);
+const saveTeammateAction = guarded(saveTeammateActionRaw);
+const setTeammateAccess = guarded(setTeammateAccessAction);
 
 const FOUNDERS = "Arindam or Amitesh";
 /** "Outreach, Influencers and Social growth": the areas Admin doesn't open. */

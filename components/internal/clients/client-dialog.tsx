@@ -12,9 +12,11 @@ import {
 import { useRouter } from "next/navigation";
 import { Archive, ArrowCounterClockwise } from "@/components/internal/icons";
 import {
-  archiveClient,
-  saveClient,
+  archiveClient as archiveClientAction,
+  saveClient as saveClientAction,
 } from "@/app/internal/(dashboard)/clients/actions";
+import { guarded } from "@/components/internal/guarded";
+import { changedFields } from "@/lib/internal/clients/rules";
 import {
   CLIENT_STATUSES,
   NO_SECRETS_HINT,
@@ -36,6 +38,9 @@ import {
   FormSection,
   useDialogOpen,
 } from "@/components/internal/clients/client-dialog-shell";
+
+const archiveClient = guarded(archiveClientAction);
+const saveClient = guarded(saveClientAction);
 
 /**
  * Add or edit a client: name, status, primary contact, Slack channel,
@@ -81,10 +86,15 @@ export function ClientDialog({
   const afterSave = useAfterSave();
   const toast = useToast();
   const [values, setValues] = useState<Values>(() => startValues(client));
+  // What the form showed when it opened: editing sends only the fields
+  // changed since, so it never puts back what someone else changed meanwhile.
+  const [opened, setOpened] = useState<Values>(() => startValues(client));
   const [error, setError] = useState<string | null>(null);
   const [busy, startSaving] = useTransition();
   const [open, setOpen] = useDialogOpen(() => {
-    setValues(startValues(client));
+    const start = startValues(client);
+    setValues(start);
+    setOpened(start);
     setError(null);
   });
   const set = <K extends keyof Values>(key: K, value: Values[K]) =>
@@ -93,10 +103,16 @@ export function ClientDialog({
   const submit = (event: FormEvent) => {
     event.preventDefault();
     setError(null);
+    const payload: Record<string, unknown> = client
+      ? changedFields(values, opened)
+      : { ...values };
+    // A new client's short name comes from its name unless one is typed.
+    if (!client && !values.slug.trim()) delete payload.slug;
+    if (client && !Object.keys(payload).length) {
+      setOpen(false);
+      return;
+    }
     startSaving(async () => {
-      const payload: Record<string, unknown> = { ...values };
-      // A new client's short name comes from its name unless one is typed.
-      if (!client && !values.slug.trim()) delete payload.slug;
       const result = await saveClient(client?.id ?? null, payload);
       if (!result.ok) {
         setError(result.message);

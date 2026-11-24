@@ -30,6 +30,7 @@ import {
   activityEffect,
   domainOf,
   orgsFromCsv,
+  stageEdit,
   stageProblem,
   stageStamps,
 } from "@/lib/internal/outreach/rules";
@@ -95,7 +96,11 @@ async function ownerProblem(owner: unknown) {
 
 /* --------------------------------------------------------- organisations */
 
-/** Adds an organisation (no id) or changes one. */
+/**
+ * Adds an organisation (no id) or changes one. A change writes only the
+ * fields it was sent, so two people editing different fields don't undo
+ * each other.
+ */
 export async function saveOrg(id: unknown, values: unknown): Promise<OutreachResult> {
   const staff = await allowed();
   if (!staff) return DENIED;
@@ -134,17 +139,13 @@ export async function saveOrg(id: unknown, values: unknown): Promise<OutreachRes
     const owner = await ownerProblem(row.owner);
     if (owner) return { ok: false, message: owner };
   }
-  if (isOrgStage(row.stage)) {
-    const reason = typeof row.lost_reason === "string" ? row.lost_reason : before.lost_reason;
-    const problem = stageProblem(row.stage, reason);
-    if (problem) return { ok: false, message: problem };
-    Object.assign(row, stageStamps(before.stage, row.stage, today));
-    // The reason belongs to Lost; anywhere else it would be stale.
-    if (row.stage !== "lost") row.lost_reason = "";
-  }
+  // The closed day and the lost reason follow the stage (see stageEdit).
+  const edit = stageEdit(before, row, today);
+  if (!edit.ok) return edit;
+  Object.assign(row, edit.patch);
   const result = await updateRecord(TABLES.orgs, "an organisation", key, row, staff.email);
   if (!result.ok) return result;
-  if (row.website !== before.website) warmLogos([row.website]);
+  if ("website" in row && row.website !== before.website) warmLogos([row.website]);
   refresh();
   return { ...result, message: "Saved" };
 }
@@ -157,7 +158,11 @@ export async function setStage(id: unknown, to: unknown, reason?: unknown): Prom
   const org = await getOrg(id);
   if (org === "error") return TRY_AGAIN;
   if (!org) return UNKNOWN;
-  if (org.stage === to) return { ok: true, id: org.id, message: "Already there" };
+  if (org.stage === to) {
+    // The page that asked is behind: send it the current one.
+    refresh();
+    return { ok: true, id: org.id, message: "Already there" };
+  }
   const why = oneLine(reason, 300);
   if (looksLikeSecret(why)) return { ok: false, message: SECRET_MESSAGE };
   const problem = stageProblem(to, why);
@@ -327,6 +332,11 @@ export async function removeActivity(id: unknown): Promise<OutreachResult> {
 export async function convertToClient(id: unknown): Promise<OutreachResult> {
   const staff = await allowed();
   if (!staff) return DENIED;
+  // Clients' own save sends anyone who can't manage Clients to their home
+  // page without a word, so say it here first.
+  if (staff.clients !== "manager") {
+    return { ok: false, message: "Only people who manage Clients can add a client. Ask one of them to do this." };
+  }
   if (typeof id !== "string" || !isUuid(id)) return UNKNOWN;
   const org = await getOrg(id);
   if (org === "error") return TRY_AGAIN;
@@ -380,7 +390,11 @@ export async function importOrgs(csv: unknown): Promise<OutreachResult> {
   if (!existing) return TRY_AGAIN;
   const fresh = parsed.orgs.filter((org) => !org.domain || !existing.has(org.domain));
   const skipped = parsed.skipped + (parsed.orgs.length - fresh.length);
-  if (!fresh.length) return { ok: true, message: `Nothing new: all ${skipped} rows are already here or repeat.` };
+  if (!fresh.length) {
+    // Already here, perhaps added since the page loaded: show them.
+    refresh();
+    return { ok: true, message: `Nothing new: all ${skipped} rows are already here or repeat.` };
+  }
 
   const today = todayKey();
   const orgRows: Record<string, unknown>[] = [];

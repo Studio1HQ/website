@@ -2,7 +2,7 @@ import "server-only";
 import { cache } from "react";
 import type { Staff } from "@/lib/internal/session";
 import { listDays } from "@/lib/internal/team/attendance";
-import { listPeople } from "@/lib/internal/team/people";
+import { listActivePeople } from "@/lib/internal/team/people";
 import { displayName, istNow, type TeamPerson } from "@/lib/internal/team/shared";
 import { clientPath, weekStart, type Deliverable } from "@/lib/internal/clients/schema";
 import { canSeeOthers, canSeeTasksOf, isFounder, type TaskViewer } from "@/lib/internal/tasks/access";
@@ -64,7 +64,7 @@ export async function visiblePeople(staff: Staff): Promise<{ people: VisiblePers
     };
   }
   // If who's an admin can't be read, everyone else counts as guarded (fails closed).
-  const [people, guarded] = await Promise.all([listPeople({ activeOnly: true }), guardedEmails().catch(() => null)]);
+  const [people, guarded] = await Promise.all([listActivePeople(), guardedEmails().catch(() => null)]);
   if (!people.ok) return { people: staff.person ? [{ ...pick(staff.person), guarded: false }] : [], failed: true };
   const visible = people.people
     .map((person) => ({ ...pick(person), guarded: guarded ? guarded.has(person.email.toLowerCase()) : true }))
@@ -108,11 +108,27 @@ function problem(...results: Loaded<unknown>[]) {
  * and the names on shared cards. Empty when the list can't be read.
  */
 export const teammates = cache(async (): Promise<Teammate[]> => {
-  const result = await listPeople({ activeOnly: true });
+  const result = await listActivePeople();
   if (!result.ok) return [];
   return result.people
     .map((person) => ({ email: person.email.toLowerCase(), name: displayName(person) }))
     .sort((a, b) => a.name.localeCompare(b.name));
+});
+
+/**
+ * One person's rows for a week, from all three places, read once per page:
+ * the board, the week's cards and the "For" picker all ask for them (React
+ * `cache` keys on the two strings, so pass the email in lowercase).
+ */
+const weekRows = cache(async (email: string, week: string) => {
+  const [tasks, deliverables, reviewing, community, engagements] = await Promise.all([
+    listTasks({ emails: [email], from: week, to: addDaysKey(week, 6) }),
+    ownedDeliverables(email, week),
+    reviewingDeliverables(email),
+    ownedCommunityTasks(email, week),
+    engagementLabels(),
+  ]);
+  return { tasks, deliverables, reviewing, community, engagements };
 });
 
 /**
@@ -122,14 +138,7 @@ export const teammates = cache(async (): Promise<Teammate[]> => {
  */
 export async function loadBoard(email: string, week: string): Promise<BoardData> {
   email = email.toLowerCase();
-  const to = addDaysKey(week, 6);
-  const [tasks, deliverables, reviewing, community, engagements] = await Promise.all([
-    listTasks({ emails: [email], from: week, to }),
-    ownedDeliverables(email, week),
-    reviewingDeliverables(email),
-    ownedCommunityTasks(email, week),
-    engagementLabels(),
-  ]);
+  const { tasks, deliverables, reviewing, community, engagements } = await weekRows(email, week);
   const failed = problem(tasks, deliverables, reviewing, community);
   return {
     email,
@@ -216,12 +225,8 @@ export async function loadWeekCards(
 ) {
   email = email.toLowerCase();
   const end = addDaysKey(week, 6);
-  const [tasks, deliverables, reviewing, community, engagements, team] = await Promise.all([
-    listTasks({ emails: [email], from: week, to: end }),
-    ownedDeliverables(email, week),
-    reviewingDeliverables(email),
-    ownedCommunityTasks(email, week),
-    engagementLabels(),
+  const [{ tasks, deliverables, reviewing, community, engagements }, team] = await Promise.all([
+    weekRows(email, week),
     // Names for shared cards ("With …") when the page didn't pass them.
     names ? Promise.resolve(null) : teammates(),
   ]);
@@ -281,10 +286,14 @@ export async function giveChoices(staff: Staff): Promise<LinkOption[]> {
  * What a card can be for (the "For" picker): Studio1 and its areas, the
  * running clients (for people who can open client work) and their own open
  * client deliverables.
+ *
+ * `week` is the week the page is already showing for them, so its rows are
+ * read once (weekRows). Any week gives the same choices: only deliverables
+ * still open are offered, and those are in every week's rows.
  */
-export async function cardChoices(staff: Staff): Promise<LinkOption[]> {
+export async function cardChoices(staff: Staff, week: string = thisWeek()): Promise<LinkOption[]> {
   const [board, choices] = await Promise.all([
-    loadBoard(staff.email, thisWeek()),
+    loadBoard(staff.email, week),
     staff.clients ? engagementChoices().then((list) => choicesFor(staff.clientScope, list)) : Promise.resolve([]),
   ]);
   // Their own deliverables too: only on clients they may open (People).

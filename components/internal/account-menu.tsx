@@ -119,8 +119,9 @@ export function AccountMenu({
             onSelect={(event) => {
               event.preventDefault();
               start(async () => {
-                await refreshData().catch(() => {});
-                router.refresh();
+                // The answer already carries the fresh page; only reload it
+                // separately when that request itself failed.
+                await refreshData().catch(() => router.refresh());
               });
             }}
           >

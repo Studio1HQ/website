@@ -31,6 +31,7 @@ import {
   cleanTag,
   readableSections,
   sectionAccess,
+  statusLabel,
   type Filters,
   type Section,
   type SectionKey,
@@ -356,6 +357,14 @@ export type EntryChange = {
   notes?: string | null;
   addTags?: string[];
   removeTags?: string[];
+  /**
+   * For a change to one entry: the status, and the notes, the page was
+   * showing when the change was made. A page can be minutes old, so the
+   * change is only saved if they're still that; otherwise a colleague got
+   * there first and nothing of theirs is overwritten.
+   */
+  statusWas?: string;
+  notesWas?: string | null;
 };
 
 /** A Postgres array literal for a list of tags: {"Strong fit","Maybe"}. */
@@ -390,7 +399,16 @@ export async function updateEntries(
 
 type EntriesResult =
   | { ok: true; tags?: Record<string, string[]> }
-  | { ok: false; message: string; /** Part of the change was saved. */ saved?: boolean };
+  | {
+      ok: false;
+      message: string;
+      /** Part of the change was saved. */
+      saved?: boolean;
+      /** Refused because a colleague changed the entry first: the page is out of date. */
+      stale?: boolean;
+    };
+
+const sameNotes = (a: unknown, b: unknown) => String(a ?? "").trim() === String(b ?? "").trim();
 
 async function applyToEntries(section: Section, ids: string[], change: EntryChange): Promise<EntriesResult> {
   const staff = await requireSection(section, "edit");
@@ -419,10 +437,55 @@ async function applyToEntries(section: Section, ids: string[], change: EntryChan
   if (change.notes !== undefined) patch.review_notes = change.notes;
   const patched = Object.keys(patch).length > 0;
   if (patched) {
-    const result = await write({ id: `in.(${unique.join(",")})` }, patch);
+    const filters: Record<string, string> = { id: `in.(${unique.join(",")})` };
+    // One entry, from a page that says what it was showing: only if it's
+    // still that. Changes to many at once say what to make them, whatever
+    // they are now.
+    const one = unique.length === 1;
+    const statusWas =
+      one && change.status !== undefined && change.statusWas !== undefined && section.statuses.includes(change.statusWas)
+        ? change.statusWas
+        : null;
+    const checkNotes = one && change.notes !== undefined && change.notesWas !== undefined;
+    if (statusWas !== null) filters.review_status = `eq.${statusWas}`;
+    const current = async () => {
+      const read = await selectRows(
+        section.table,
+        new URLSearchParams({ select: "review_status,review_notes", id: `eq.${unique[0]}`, limit: "1" }),
+      );
+      // null: the read failed. `row` null: the entry was deleted.
+      return read.ok ? { row: read.rows[0] ?? null } : null;
+    };
+    if (checkNotes) {
+      // Notes are too long to put in the write's own filter: read, then write.
+      const now = await current();
+      if (!now) return { ok: false, message: "Couldn't save. Try again in a minute." };
+      if (!now.row) return { ok: false, stale: true, message: "That entry isn't there any more." };
+      if (!sameNotes(now.row.review_notes, change.notesWas) && !sameNotes(now.row.review_notes, change.notes)) {
+        return {
+          ok: false,
+          stale: true,
+          message: "Someone else changed these notes while you had this open. Copy what you wrote, reload the page, then add it to theirs.",
+        };
+      }
+    }
+    const result = await write(filters, patch);
     if (!result.ok) {
       console.error(`[internal] updating ${section.table} failed: ${result.message}`);
       return { ok: false, message: "Couldn't save. Try again in a minute." };
+    }
+    if (statusWas !== null && result.count === 0) {
+      const now = await current();
+      if (!now) return { ok: false, message: "Couldn't save. Try again in a minute." };
+      if (!now.row) return { ok: false, stale: true, message: "That entry isn't there any more." };
+      // Already what was asked for (a colleague did the same): nothing to say.
+      if (now.row.review_status !== change.status) {
+        return {
+          ok: false,
+          stale: true,
+          message: `Someone else moved this to ${statusLabel(String(now.row.review_status ?? ""))} while you had it open. Change it again if it should still move.`,
+        };
+      }
     }
   }
 

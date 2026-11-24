@@ -46,7 +46,8 @@ export async function WeekView({ staff, viewer, person, own, people, params, tod
       (task) => canChangeTask(viewer, task),
       (deliverable, clientId) => canMoveDeliverableDay(staff, deliverable, clientId),
     ),
-    own ? cardChoices(staff) : canAdd ? giveChoices(staff) : Promise.resolve([]),
+    // The same week as the cards, so its rows are read once.
+    own ? cardChoices(staff, week) : canAdd ? giveChoices(staff) : Promise.resolve([]),
     teammates(),
   ]);
   const tally = weekTally(data.cards);

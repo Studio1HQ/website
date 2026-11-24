@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { Trash } from "@/components/internal/icons";
-import { deleteDraft } from "@/app/internal/(dashboard)/blog/actions";
+import { deleteDraft as deleteDraftAction } from "@/app/internal/(dashboard)/blog/actions";
+import { guarded } from "@/components/internal/guarded";
 import { useToast } from "@/components/internal/toast";
 import { buttonClass } from "@/components/internal/ui";
+
+const deleteDraft = guarded(deleteDraftAction);
 
 /**
  * Delete a draft from the Posts list: a bin, then "Delete for good?" with
@@ -22,7 +24,6 @@ export function DeleteDraftButton({
   const [asking, setAsking] = useState(false);
   const [pending, start] = useTransition();
   const toast = useToast();
-  const router = useRouter();
 
   const remove = () =>
     start(async () => {
@@ -33,7 +34,6 @@ export function DeleteDraftButton({
         return;
       }
       toast("success", "Draft deleted.");
-      router.refresh();
     });
 
   if (!asking) {

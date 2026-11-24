@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, useTransition, type FormEvent, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
 import {
-  deleteMetric,
-  saveMetric,
+  deleteMetric as deleteMetricAction,
+  saveMetric as saveMetricAction,
 } from "@/app/internal/(dashboard)/socials/actions";
 import {
   PLATFORMS,
@@ -13,6 +12,7 @@ import {
   type Platform,
   type SocialMetric,
 } from "@/lib/internal/socials/schema";
+import { guarded } from "@/components/internal/guarded";
 import { useToast } from "@/components/internal/toast";
 import { Select } from "@/components/internal/select";
 import {
@@ -25,6 +25,9 @@ import {
   FormField,
   useDialogOpen,
 } from "@/components/internal/clients/client-dialog-shell";
+
+const deleteMetric = guarded(deleteMetricAction);
+const saveMetric = guarded(saveMetricAction);
 
 /**
  * Log (or correct) one account's numbers for a platform and month. Saving
@@ -63,7 +66,6 @@ export function MetricDialog({
   month: string;
   trigger: ReactNode;
 }) {
-  const router = useRouter();
   const toast = useToast();
   const start = (): Values => ({
     account: metric?.account ?? defaults?.account ?? STUDIO_ACCOUNT,
@@ -95,17 +97,13 @@ export function MetricDialog({
 
   const run = (work: () => ReturnType<typeof saveMetric>) =>
     startSaving(async () => {
-      const result = await work().catch(() => ({
-        ok: false as const,
-        message: "The request failed. Try again in a minute.",
-      }));
+      const result = await work();
       if (!result.ok) {
         setError(result.message);
         return;
       }
       toast("success", result.message ?? "Saved");
       setOpen(false);
-      router.refresh();
     });
 
   const submit = (event: FormEvent) => {

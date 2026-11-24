@@ -8,6 +8,7 @@ import { CommandSearch } from "@/components/internal/command-search";
 import { CustomiseSidebar } from "@/components/internal/customise-sidebar";
 import Logo from "@/components/ui/svgs/logo";
 import { InternalNav } from "@/components/internal/nav";
+import { KeepFresh } from "@/components/internal/keep-fresh";
 import { MobileNavButton, MobileNavClose, MobileNavPanel, MobileNavProvider } from "@/components/internal/mobile-nav";
 import { NavProgress, RefreshButton } from "@/components/internal/nav-progress";
 import { TeamPhotosProvider } from "@/components/internal/team-photos";
@@ -165,6 +166,7 @@ export default async function DashboardLayout({
       <Suspense fallback={null}>
         <NavProgress />
       </Suspense>
+      <KeepFresh />
       <MobileNavProvider collapsed={collapsed}>
         {/* Phones: a top bar; the sidebar opens from its menu button. */}
         <header className="sticky top-0 z-30 flex h-14 items-center gap-1 border-b border-[var(--i-line)] bg-[var(--i-sidebar)] px-2 print:hidden md:hidden">

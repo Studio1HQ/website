@@ -1,20 +1,22 @@
 "use client";
 
 import { useTransition } from "react";
-import { useRouter } from "next/navigation";
 import {
   ArrowSquareOut,
   EyeSlash,
   PencilSimple,
   PushPin,
 } from "@/components/internal/icons";
-import { setJobLive } from "@/app/internal/(dashboard)/job-board/actions";
+import { setJobLive as setJobLiveAction } from "@/app/internal/(dashboard)/job-board/actions";
 import { logoSite, type DevRelJobRecord } from "@/lib/devrel-jobs";
 import { SiteLogo } from "@/components/internal/site-logo";
+import { guarded } from "@/components/internal/guarded";
 import { useToast } from "@/components/internal/toast";
 import { buttonClass } from "@/components/internal/ui";
 import { JobDialog } from "@/components/internal/job-board/job-dialog";
 import { cn } from "@/lib/utils";
+
+const setJobLive = guarded(setJobLiveAction);
 
 const dayFormat = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
@@ -63,18 +65,13 @@ function JobRow({
   today: string;
   used: Used;
 }) {
-  const router = useRouter();
   const toast = useToast();
   const [busy, start] = useTransition();
 
   const toggle = () =>
     start(async () => {
-      const result = await setJobLive(job.id, !job.live).catch(() => ({
-        ok: false as const,
-        message: "The request failed. Try again in a minute.",
-      }));
+      const result = await setJobLive(job.id, !job.live);
       toast(result.ok ? "success" : "error", result.message ?? "Saved");
-      if (result.ok) router.refresh();
     });
 
   return (

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Briefcase, Plus, Rows, SquaresFour } from "@/components/internal/icons";
 import { scopeWork } from "@/lib/internal/clients/scope";
 import { requireClients } from "@/lib/internal/session";
+import { takesNewMonths } from "@/lib/internal/clients/cycles";
 import { loadClientWork, loadCycles, loadTypeOptions } from "@/lib/internal/clients/data";
 import type { EngagementRow } from "@/lib/internal/clients/rules";
 import { companyTerm } from "@/lib/internal/clients/portfolio";
@@ -130,10 +131,10 @@ export default async function ClientsPage({
     .filter((client) => !status || client.status === status)
     .sort((a, b) => STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status) || byName(a, b));
 
-  // Near the month's end: start next month's projects in one go.
-  const running = work.engagements.filter(
-    (engagement) => engagement.status === "active" && !work.clients.find((client) => client.id === engagement.client_id)?.archived_at,
-  );
+  // Near the month's end: start next month's projects in one go. Only the
+  // ones the button would start: not a paused, ended or archived client's.
+  const startable = new Set(work.clients.filter(takesNewMonths).map((client) => client.id));
+  const running = work.engagements.filter((engagement) => engagement.status === "active" && startable.has(engagement.client_id));
   const nextHas = new Set(nextCycles?.ok ? nextCycles.rows.map((cycle) => cycle.engagement_id) : []);
   const missingNext = nextCycles?.ok ? running.filter((engagement) => !nextHas.has(engagement.id)).length : 0;
   const showStartNext = manager && missingNext > 0 && Number(today.slice(8)) >= 25;

@@ -125,11 +125,16 @@ const kept = cache(
     }),
 );
 
+/**
+ * `fresh` skips the request's kept copy: for reading something back after a
+ * write made earlier in the same request (a month a page has just started).
+ */
 function read<T>(
   table: string,
   params: Record<string, string>,
-  { cap = 20_000, tieBreak = "id" as string | null } = {},
+  { cap = 20_000, tieBreak = "id" as string | null, fresh = false } = {},
 ): Promise<Loaded<T>> {
+  if (fresh) return selectAll<T>(table, params, { cap, tieBreak });
   return kept(table, JSON.stringify(params), cap, tieBreak) as Promise<
     Loaded<T>
   >;
@@ -141,7 +146,7 @@ async function readIn<T>(
   column: string,
   ids: readonly string[],
   params: Record<string, string>,
-  options?: { cap?: number },
+  options?: { cap?: number; fresh?: boolean },
 ): Promise<Loaded<T>> {
   const valid = [...new Set(ids.filter(isUuid))].sort();
   if (!valid.length) return { ok: true, rows: [] };
@@ -198,13 +203,18 @@ export const loadEngagements = (
     order: "starts_on.desc.nullslast,name.asc",
   });
 
-/** Cycles for some engagements and/or a month (or months), newest month first. */
+/**
+ * Cycles for some engagements and/or a month (or months), newest month first.
+ * `fresh` reads them again even if this request already has: use it after
+ * starting a month in the same request, or the new month doesn't show.
+ */
 export async function loadCycles(
   filter: {
     engagementIds?: readonly string[];
     month?: string;
     months?: readonly string[];
   } = {},
+  { fresh = false }: { fresh?: boolean } = {},
 ): Promise<Loaded<Cycle>> {
   const months = filter.months ?? (filter.month ? [filter.month] : []);
   const params: Record<string, string> = {
@@ -217,8 +227,9 @@ export async function loadCycles(
         "engagement_id",
         filter.engagementIds,
         params,
+        { fresh },
       )
-    : read<Cycle>(TABLES.cycles, params);
+    : read<Cycle>(TABLES.cycles, params, { fresh });
 }
 
 /** Scope lines of these cycles, in their order. */

@@ -20,10 +20,35 @@ export const SESSION_COOKIE = "s1_internal_session";
 export const PENDING_COOKIE = "s1_internal_pending";
 
 export const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
+/**
+ * A session in use is renewed once it's a day old (proxy.ts), so nobody is
+ * signed out in the middle of their work a week after signing in; one left
+ * unused for a week still runs out.
+ */
+export const SESSION_RENEW_AFTER_SECONDS = 60 * 60 * 24;
+/** However often it's renewed, a session ends this long after the sign-in. */
+export const SESSION_MAX_SECONDS = 60 * 60 * 24 * 30;
 /** Supabase → Authentication → Sign In / Providers → Email OTP Expiration. */
 export const CODE_TTL_SECONDS = 60 * 60;
 
-export type SessionPayload = { email: string; iat: number; exp: number };
+export type SessionPayload = {
+  email: string;
+  iat: number;
+  exp: number;
+  /** When they signed in with a code; absent on a session that was never renewed (it's `iat`). */
+  since?: number;
+};
+
+/** The session cookie's settings; `maxAge` 0 clears it. */
+export function sessionCookieOptions(maxAge: number) {
+  return {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax" as const,
+    path: "/",
+    maxAge,
+  };
+}
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
@@ -199,4 +224,28 @@ export async function readSession(token: string | undefined | null) {
   if (!secret) return null;
   const payload = await verifyToken(token, secret);
   return payload ? emailAddress(payload.email) : null;
+}
+
+/**
+ * A fresh week for a session that's in use, or null when it doesn't need
+ * one yet (renewed within the last day), isn't valid, or has reached
+ * SESSION_MAX_SECONDS since the sign-in (it then runs out on its own and
+ * the person signs in again). Whether they may still open anything is
+ * checked on every request as before (lib/internal/session.ts): renewing
+ * never keeps someone in who was turned off.
+ */
+export async function renewedSession(
+  token: string | undefined | null,
+  now = nowSeconds(),
+): Promise<{ session: string; maxAge: number } | null> {
+  const secret = authSecret();
+  if (!secret) return null;
+  const payload = await verifyToken(token, secret);
+  if (!payload || typeof payload.iat !== "number") return null;
+  if (now - payload.iat < SESSION_RENEW_AFTER_SECONDS) return null;
+  const since = typeof payload.since === "number" ? payload.since : payload.iat;
+  const exp = Math.min(now + SESSION_TTL_SECONDS, since + SESSION_MAX_SECONDS);
+  // Nothing to gain: the cap is already as near as the session's own end.
+  if (exp <= payload.exp) return null;
+  return { session: await signToken({ email: payload.email, iat: now, exp, since }, secret), maxAge: exp - now };
 }

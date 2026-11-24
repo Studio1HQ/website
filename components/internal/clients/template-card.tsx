@@ -17,10 +17,11 @@ import {
   Trash,
 } from "@/components/internal/icons";
 import {
-  createTemplate,
-  resetTemplate,
-  saveTemplate,
+  createTemplate as createTemplateAction,
+  resetTemplate as resetTemplateAction,
+  saveTemplate as saveTemplateAction,
 } from "@/app/internal/(dashboard)/clients/actions";
+import { guarded } from "@/components/internal/guarded";
 import {
   DELIVERABLE_KINDS,
   DUE_RULES,
@@ -47,6 +48,10 @@ import {
   inputClass,
   textareaClass,
 } from "@/components/internal/ui";
+
+const createTemplate = guarded(createTemplateAction);
+const resetTemplate = guarded(resetTemplateAction);
+const saveTemplate = guarded(saveTemplateAction);
 
 /**
  * One engagement type's scope template: its default lines and weekly
@@ -108,10 +113,7 @@ export function NewTemplateButton({
     }
     setError(null);
     start(async () => {
-      const result = await createTemplate({ name, from }).catch(() => ({
-        ok: false as const,
-        message: "The request failed. Try again in a minute.",
-      }));
+      const result = await createTemplate({ name, from });
       if (!result.ok) {
         setError(result.message);
         return;

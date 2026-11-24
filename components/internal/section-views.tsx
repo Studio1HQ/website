@@ -217,6 +217,9 @@ export function RecordView({
           <div className="flex flex-wrap gap-2 max-sm:basis-full">
             {email && data.canEdit && section.statuses ? (
               <EmailComposer
+                // Starts again when the status changes, so it opens on the
+                // email for the status the entry has now.
+                key={`${id}:${text(record.review_status) || "new"}`}
                 sectionKey={sectionKey}
                 id={id}
                 to={email}

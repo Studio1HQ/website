@@ -3,7 +3,10 @@
 import { useAfterSave } from "@/components/internal/clients/use-after-save";
 import { useState, useTransition, type FormEvent, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { saveEngagement } from "@/app/internal/(dashboard)/clients/actions";
+import {
+  saveEngagement as saveEngagementAction,
+} from "@/app/internal/(dashboard)/clients/actions";
+import { guarded } from "@/components/internal/guarded";
 import {
   CADENCES,
   DELIVERABLE_KINDS,
@@ -20,6 +23,7 @@ import {
   type EngagementType,
   type TemplateLine,
 } from "@/lib/internal/clients/schema";
+import { changedFields } from "@/lib/internal/clients/rules";
 import { MAX_PLAN_LINES, firstMonthFor, planFrom, planLines, withKind, type PlanItem } from "@/lib/internal/clients/plan";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/internal/toast";
@@ -32,6 +36,8 @@ import {
   FormSection,
   useDialogOpen,
 } from "@/components/internal/clients/client-dialog-shell";
+
+const saveEngagement = guarded(saveEngagementAction);
 
 /**
  * Add or edit an engagement (the unit of monthly scope): name, type,
@@ -106,6 +112,11 @@ export function EngagementDialog({
   const [values, setValues] = useState<Values>(() =>
     startValues(engagement, me),
   );
+  // What the form showed when it opened: editing sends only the fields
+  // changed since, so it never puts back what someone else changed meanwhile.
+  const [opened, setOpened] = useState<Values>(() =>
+    startValues(engagement, me),
+  );
   const [error, setError] = useState<string | null>(null);
   const [busy, startSaving] = useTransition();
   const adding = !engagement;
@@ -114,6 +125,7 @@ export function EngagementDialog({
   const [open, setOpen] = useDialogOpen(() => {
     const start = startValues(engagement, me);
     setValues(start);
+    setOpened(start);
     setPlan(planFor(start.type));
     setError(null);
   });
@@ -132,20 +144,23 @@ export function EngagementDialog({
   const submit = (event: FormEvent) => {
     event.preventDefault();
     setError(null);
-    // Without the contract field, its value never goes: a save here can't blank it.
-    const { contract_url, ...rest } = values;
     if (adding && ticked.length > MAX_PLAN_LINES) {
       setError(`Tick up to ${MAX_PLAN_LINES} kinds of work; add more on the month's page.`);
+      return;
+    }
+    const payload: Record<string, unknown> = adding
+      ? { ...values, client_id: clientId }
+      : changedFields(values, opened);
+    // Without the contract field, its value never goes: a save here can't blank it.
+    if (!money) delete payload.contract_url;
+    if (!adding && !Object.keys(payload).length) {
+      setOpen(false);
       return;
     }
     startSaving(async () => {
       const result = await saveEngagement(
         engagement?.id ?? null,
-        {
-          ...rest,
-          ...(money ? { contract_url } : {}),
-          ...(engagement ? {} : { client_id: clientId }),
-        },
+        payload,
         adding ? ticked : undefined,
       );
       if (!result.ok) {

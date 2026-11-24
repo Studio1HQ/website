@@ -3,7 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { Check, Plus, X } from "@/components/internal/icons";
-import { changeEntries } from "@/app/internal/(dashboard)/actions";
+import { changeEntries as changeEntriesAction } from "@/app/internal/(dashboard)/actions";
+import { guarded } from "@/components/internal/guarded";
 import {
   SECTIONS,
   statusLabel,
@@ -22,6 +23,8 @@ import {
   statusTone,
   textareaClass,
 } from "@/components/internal/ui";
+
+const changeEntries = guarded(changeEntriesAction);
 
 /** Status, tags and notes for one entry, saved as you go. */
 export function RecordPanel({
@@ -59,17 +62,25 @@ export function RecordPanel({
     setCurrentStatus(status);
     setCurrentTags(tagKey ? tagKey.split("\u0000") : []);
   }, [id, status, tagKey]);
-  useEffect(() => {
-    setDraft(notes);
-    setSavedNotes(notes);
-  }, [id, notes]);
+  // Notes typed but not saved yet stay put when fresh data arrives for the
+  // same entry (a colleague's notes, the page refreshing itself): they're
+  // only replaced once saved, or on another entry. Saving then checks
+  // against the notes this box started from, so theirs aren't overwritten.
+  const [shown, setShown] = useState({ id, notes });
+  if (shown.id !== id || shown.notes !== notes) {
+    setShown({ id, notes });
+    if (shown.id !== id || draft.trim() === savedNotes.trim()) {
+      setDraft(notes);
+      setSavedNotes(notes);
+    }
+  }
 
   const setStatus = (next: string) => {
     if (next === currentStatus) return;
     const before = currentStatus;
     setCurrentStatus(next);
     startTransition(async () => {
-      const result = await changeEntries(section.key, [id], { status: next });
+      const result = await changeEntries(section.key, [id], { status: next, statusWas: before });
       if (result.ok) toast("success", `Moved to ${statusLabel(next)}`);
       else {
         setCurrentStatus(before);
@@ -103,7 +114,7 @@ export function RecordPanel({
   const saveNotes = () => {
     setSavingNotes(true);
     startTransition(async () => {
-      const result = await changeEntries(section.key, [id], { notes: draft });
+      const result = await changeEntries(section.key, [id], { notes: draft, notesWas: savedNotes });
       setSavingNotes(false);
       if (result.ok) {
         setSavedNotes(draft);

@@ -56,7 +56,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 }
 
 export default async function OutreachOrgPage({ params }: { params: Promise<{ id: string }> }) {
-  const [, { id }] = await Promise.all([requireOutreach(), params]);
+  const [staff, { id }] = await Promise.all([requireOutreach(), params]);
   const org = await getOrg(id);
   if (org === "error") return <Notice tone="warning">{OUTREACH_MIGRATION_HINT}</Notice>;
   if (!org) notFound();
@@ -107,7 +107,8 @@ export default async function OutreachOrgPage({ params }: { params: Promise<{ id
               <Link href={`/clients/${client.slug}`} className={buttonClass("secondary")}>
                 <ArrowSquareOut size={14} /> Open the client
               </Link>
-            ) : org.stage === "won" && !org.client_id ? (
+            ) : org.stage === "won" && !org.client_id && staff.clients === "manager" ? (
+              // Adding a client needs Clients manager access (see convertToClient).
               <ConvertButton id={org.id} name={org.name} />
             ) : null}
             <FieldDialog

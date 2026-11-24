@@ -5,8 +5,10 @@ import {
   linesFromLastMonth,
   linesFromTemplate,
   monthToPrepare,
+  takesNewMonths,
 } from "@/lib/internal/clients/cycles";
 import {
+  CLIENT_STATUSES,
   DEFAULT_TEMPLATES,
   DELIVERABLE_KINDS,
   DELIVERABLE_STATUSES,
@@ -26,6 +28,7 @@ import {
   weekLabel,
   weekStart,
   weeksOfMonth,
+  type ClientStatus,
 } from "@/lib/internal/clients/schema";
 
 describe("next month's cycles", () => {
@@ -53,6 +56,22 @@ describe("next month's cycles", () => {
         (item) => item.id,
       ),
     ).toEqual(["a", "f"]);
+  });
+
+  it("starts no months for a paused, ended or archived client", () => {
+    const takes = (status: ClientStatus, archived_at: string | null = null) =>
+      takesNewMonths({ status, archived_at });
+    expect(takes("active")).toBe(true);
+    expect(takes("prospect")).toBe(true);
+    expect(takes("paused")).toBe(false);
+    expect(takes("ended")).toBe(false);
+    expect(takes("active", "2026-11-01T00:00:00Z")).toBe(false);
+    // A status added later has to be put on one side or the other.
+    expect(
+      CLIENT_STATUSES.map((option) => option.value).filter((status) =>
+        takes(status),
+      ),
+    ).toEqual(["prospect", "active"]);
   });
 
   it("carries last month's agreed numbers into the new month, in order", () => {

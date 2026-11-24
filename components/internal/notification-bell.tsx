@@ -56,14 +56,15 @@ export function NotificationBell({
     if (isRead(item)) return;
     start(async () => {
       markSeen(item.id);
-      await readNotification(item.id);
+      // A missed "read" isn't worth an error page: it's unread again next time.
+      await readNotification(item.id).catch(() => {});
     });
   };
 
   const readAll = () =>
     start(async () => {
       markSeen("all");
-      await readAllNotifications();
+      await readAllNotifications().catch(() => {});
     });
 
   return (

@@ -2,18 +2,20 @@
 
 import { useState, useTransition, type FormEvent } from "react";
 import { DateField, SuggestInput } from "@/components/internal/pickers";
-import { useRouter } from "next/navigation";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Plus, X } from "@/components/internal/icons";
-import { logGrowth } from "@/app/internal/(dashboard)/community/actions";
+import { logGrowth as logGrowthAction } from "@/app/internal/(dashboard)/community/actions";
 import {
   CHANNELS,
   channelLabel,
   todayKey,
 } from "@/lib/internal/community/schema";
 import { cn } from "@/lib/utils";
+import { guarded } from "@/components/internal/guarded";
 import { useToast } from "@/components/internal/toast";
 import { buttonClass, inputClass } from "@/components/internal/ui";
+
+const logGrowth = guarded(logGrowthAction);
 
 const STARTERS = [
   "discord",
@@ -35,7 +37,6 @@ export function GrowthForm({
   channels: string[];
   latest: Record<string, number>;
 }) {
-  const router = useRouter();
   const toast = useToast();
   const [open, setOpen] = useState(false);
   const [day, setDay] = useState(todayKey());
@@ -60,7 +61,6 @@ export function GrowthForm({
       if (result.ok) {
         toast("success", result.message ?? "Saved");
         setOpen(false);
-        router.refresh();
       } else toast("error", result.message);
     });
   };

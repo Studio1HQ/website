@@ -2,7 +2,6 @@
 
 import { useMemo, useState, useTransition, type ChangeEvent } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import * as Dialog from "@radix-ui/react-dialog";
 import {
   Copy,
@@ -12,11 +11,11 @@ import {
   Users,
   X,
 } from "@/components/internal/icons";
-import { changeEntries } from "@/app/internal/(dashboard)/actions";
+import { changeEntries as changeEntriesAction } from "@/app/internal/(dashboard)/actions";
 import {
-  importGuestList,
-  markRestNoShow,
-  setQuickField,
+  importGuestList as importGuestListAction,
+  markRestNoShow as markRestNoShowAction,
+  setQuickField as setQuickFieldAction,
 } from "@/app/internal/(dashboard)/community/actions";
 import {
   MAX_CSV_BYTES,
@@ -35,6 +34,7 @@ import {
   type Guest,
 } from "@/lib/internal/community/schema";
 import { cn } from "@/lib/utils";
+import { guarded } from "@/components/internal/guarded";
 import { useToast } from "@/components/internal/toast";
 import {
   EmptyState,
@@ -46,6 +46,11 @@ import {
 import { RecordDialog } from "@/components/internal/community/record-dialog";
 import { QuickSelect } from "@/components/internal/community/quick-select";
 import { AddButton } from "@/components/internal/community/lists";
+
+const changeEntries = guarded(changeEntriesAction);
+const importGuestList = guarded(importGuestListAction);
+const markRestNoShow = guarded(markRestNoShowAction);
+const setQuickField = guarded(setQuickFieldAction);
 
 /**
  * An event's guest list: registrations, check-ins at the door, a CSV import
@@ -91,7 +96,6 @@ const VIEWS = [
 const PAGE = 200;
 
 function ImportDialog({ eventId }: { eventId: string }) {
-  const router = useRouter();
   const toast = useToast();
   const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
@@ -128,7 +132,6 @@ function ImportDialog({ eventId }: { eventId: string }) {
         setOpen(false);
         setText("");
         setFileName("");
-        router.refresh();
       } else toast("error", result.message);
     });
   };
@@ -255,6 +258,61 @@ function ImportDialog({ eventId }: { eventId: string }) {
   );
 }
 
+/**
+ * A row's Check in (or Undo) button. Each one has its own saving state, so
+ * the door can keep checking people in while an earlier one is on its way.
+ */
+function CheckInButton({ row, disabled }: { row: DoorRow; disabled: boolean }) {
+  const toast = useToast();
+  const [saving, startTransition] = useTransition();
+  const attended = row.status === "attended";
+
+  // A guest's status, or a site registration's review status (which needs
+  // hackathon access; community managers have it).
+  const click = () =>
+    startTransition(async () => {
+      const result =
+        row.source === "site"
+          ? await changeEntries("hackathons", [row.id], {
+              status: attended ? "confirmed" : "attended",
+            })
+          : await setQuickField(
+              "guest",
+              row.id,
+              attended ? "registered" : "attended",
+            );
+      if (result.ok) {
+        toast(
+          "success",
+          attended
+            ? "Check-in undone"
+            : `${row.name || row.email} checked in`,
+        );
+      } else toast("error", result.message ?? "Couldn't save. Try again.");
+    });
+
+  return (
+    <button
+      type="button"
+      onClick={click}
+      disabled={disabled || saving}
+      className={cn(
+        buttonClass(attended ? "ghost" : "secondary", "sm"),
+        "w-[5.5rem]",
+        saving && "animate-pulse",
+      )}
+    >
+      {attended ? (
+        "Undo"
+      ) : (
+        <>
+          <UserCheck size={13} /> Check in
+        </>
+      )}
+    </button>
+  );
+}
+
 export function GuestList({
   eventId,
   eventName,
@@ -272,7 +330,6 @@ export function GuestList({
   /** The event has happened: offer "mark the rest as no-shows". */
   isOver: boolean;
 }) {
-  const router = useRouter();
   const toast = useToast();
   const [view, setView] = useState<(typeof VIEWS)[number]["key"]>("all");
   const [query, setQuery] = useState("");
@@ -304,31 +361,6 @@ export function GuestList({
   }, [rows, view, query]);
   const going = counts.going ?? 0;
 
-  // A guest's status, or a site registration's review status (which needs
-  // hackathon access; community managers have it).
-  const checkIn = (row: DoorRow, attended: boolean) =>
-    startTransition(async () => {
-      const result =
-        row.source === "site"
-          ? await changeEntries("hackathons", [row.id], {
-              status: attended ? "attended" : "confirmed",
-            })
-          : await setQuickField(
-              "guest",
-              row.id,
-              attended ? "attended" : "registered",
-            );
-      if (result.ok) {
-        toast(
-          "success",
-          attended
-            ? `${row.name || row.email} checked in`
-            : "Check-in undone",
-        );
-        router.refresh();
-      } else toast("error", result.message ?? "Couldn't save. Try again.");
-    });
-
   const noShows = () => {
     if (!confirmNoShow) {
       setConfirmNoShow(true);
@@ -340,7 +372,6 @@ export function GuestList({
       setConfirmNoShow(false);
       if (result.ok) {
         toast("success", result.message ?? "Done");
-        router.refresh();
       } else toast("error", result.message);
     });
   };
@@ -557,27 +588,9 @@ export function GuestList({
                   />
                 )}
                 {canEdit ? (
-                  row.status === "attended" ? (
-                    <button
-                      type="button"
-                      onClick={() => checkIn(row, false)}
-                      disabled={busy}
-                      className={cn(buttonClass("ghost", "sm"), "w-[5.5rem]")}
-                    >
-                      Undo
-                    </button>
-                  ) : row.status !== "cancelled" ? (
-                    <button
-                      type="button"
-                      onClick={() => checkIn(row, true)}
-                      disabled={busy}
-                      className={cn(
-                        buttonClass("secondary", "sm"),
-                        "w-[5.5rem]",
-                      )}
-                    >
-                      <UserCheck size={13} /> Check in
-                    </button>
+                  row.status !== "cancelled" ? (
+                    // Only "mark the rest as no-shows" holds every row back.
+                    <CheckInButton row={row} disabled={busy} />
                   ) : (
                     <span className="w-[5.5rem]" />
                   )

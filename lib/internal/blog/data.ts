@@ -1,4 +1,5 @@
 import fs from "fs";
+import { cache } from "react";
 import path from "path";
 import { randomUUID } from "crypto";
 import matter from "gray-matter";
@@ -64,10 +65,19 @@ export async function listPosts(staff: BlogStaff): Promise<{ ok: true; posts: Bl
   return result.ok ? { ok: true, posts: result.rows } : { ok: false, message: migrationHint(result.message) };
 }
 
+/**
+ * One post's row, read once per page: the editor page asks for it twice
+ * (its title for the tab, then the page itself), and the body can be large.
+ * Actions run outside a page render, so they always get a fresh read.
+ */
+const readPost = cache(async (id: string): Promise<BlogPostRow | undefined> => {
+  const result = await selectRows<BlogPostRow>(POSTS, new URLSearchParams({ select: "*", id: `eq.${id}`, limit: "1" }));
+  return result.ok ? result.rows[0] : undefined;
+});
+
 export async function getPost(staff: BlogStaff, id: string): Promise<BlogPostRow | null> {
   if (!UUID.test(id)) return null;
-  const result = await selectRows<BlogPostRow>(POSTS, new URLSearchParams({ select: "*", id: `eq.${id}`, limit: "1" }));
-  const post = result.ok ? result.rows[0] : undefined;
+  const post = await readPost(id);
   return post && canSee(staff, post) ? post : null;
 }
 
@@ -227,15 +237,43 @@ export type SaveResult =
 const isDuplicate = (message: string) => /23505|duplicate key/i.test(message);
 
 /**
+ * True when the stored post is this person's own last save and holds
+ * exactly what one of their unanswered saves sent. A save can reach the
+ * database while its answer is lost on the way back (a dropped connection,
+ * a timeout): the editor then still has the old version, and without this
+ * every retry would be refused as someone else's change, for good.
+ */
+export function landed(post: BlogPostRow, email: string, unanswered: unknown): boolean {
+  if (post.updated_by !== email || !Array.isArray(unanswered)) return false;
+  return unanswered.slice(-2).some((attempt) => {
+    const sent = Object.entries(cleanFields(post.id, attempt));
+    return (
+      sent.length > 0 &&
+      sent.every(([key, value]) => JSON.stringify(value) === JSON.stringify(post[key as keyof BlogFields] ?? null))
+    );
+  });
+}
+
+/**
  * Autosave. `base` is the updated_at the editor last saw: when someone else
  * saved in between, nothing is written and the editor offers to reload.
  * Edits move a post back for another look: an approved post a writer
  * changes goes back to review, and a live post becomes a draft with
  * unpublished changes.
  */
-export async function savePost(staff: BlogStaff, id: string, input: unknown, base: string): Promise<SaveResult> {
+export async function savePost(
+  staff: BlogStaff,
+  id: string,
+  input: unknown,
+  base: string,
+  /** Earlier saves from this editor that never got an answer (see landed). */
+  unanswered?: unknown,
+): Promise<SaveResult> {
   const post = await getPost(staff, id);
   if (!post) return { ok: false, message: "This post doesn't exist or isn't yours." };
+  // An earlier save that landed without its answer getting back: carry on
+  // from it, instead of calling the writer's own save "someone else".
+  if (Date.parse(post.updated_at) !== Date.parse(base) && landed(post, staff.email, unanswered)) base = post.updated_at;
   const fields = cleanFields(id, input);
   // Raw HTML never gets into a saved post: the editor would run it for the
   // next person who opens the post, and so would the site.

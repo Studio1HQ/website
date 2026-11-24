@@ -3,6 +3,7 @@ import type { Staff } from "@/lib/internal/session";
 import { cantChange } from "@/lib/internal/team/access";
 import { audit } from "@/lib/internal/team/audit";
 import {
+  MAX_ACTIVE_MINUTES,
   MAX_SLOTS,
   TEAM_MIGRATION_HINT,
   cleanTime,
@@ -207,7 +208,7 @@ export function cleanDay(email: string, input: Record<string, unknown>): { ok: t
         : "Active hours can't be more than the time between start and end.",
     };
   }
-  if (active !== null && active > 16 * 60) return { ok: false, message: "That's more than 16 active hours. Check the times." };
+  if (active !== null && active > MAX_ACTIVE_MINUTES) return { ok: false, message: "That's more than 16 active hours. Check the times." };
 
   return {
     ok: true,

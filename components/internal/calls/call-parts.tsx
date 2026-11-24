@@ -9,7 +9,7 @@ import { TeamAvatar } from "@/components/internal/team-photos";
 import { Pill } from "@/components/internal/community/ui";
 import { Label, TeamDialog, useTeamAction } from "@/components/internal/team/kit";
 import { TimeField } from "@/components/internal/team/time-field";
-import { changeOne, restoreOne } from "@/app/internal/(dashboard)/calls/actions";
+import { changeOne as changeOneAction, restoreOne as restoreOneAction } from "@/app/internal/(dashboard)/calls/actions";
 import {
   attendees,
   callState,
@@ -24,6 +24,11 @@ import {
 } from "@/lib/internal/calls/shared";
 import { CallForm } from "@/components/internal/calls/call-form";
 import { Context, nameOf, useCalls, useNow, type CallsData, type Tone } from "@/components/internal/calls/context";
+import { guarded } from "@/components/internal/guarded";
+
+// A save that never reached the server answers { ok: false } here, so the open form stays (guarded).
+const changeOne = guarded(changeOneAction);
+const restoreOne = guarded(restoreOneAction);
 
 /* The calls a page shows, one dialog for whichever call is opened, the
    card a call gets in lists, and each series' colour. Planners edit a

@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, useTransition, type FormEvent, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
 import {
-  deleteJob,
-  saveJob,
+  deleteJob as deleteJobAction,
+  saveJob as saveJobAction,
 } from "@/app/internal/(dashboard)/job-board/actions";
 import {
   JOB_CATEGORIES,
@@ -15,6 +14,7 @@ import {
   type DevRelJobWorkplace,
 } from "@/lib/devrel-jobs";
 import type { JobResult } from "@/lib/internal/job-board/clean";
+import { guarded } from "@/components/internal/guarded";
 import { useToast } from "@/components/internal/toast";
 import { Select } from "@/components/internal/select";
 import { buttonClass, inputClass } from "@/components/internal/ui";
@@ -24,10 +24,15 @@ import {
   useDialogOpen,
 } from "@/components/internal/clients/client-dialog-shell";
 
+const deleteJob = guarded(deleteJobAction);
+const saveJob = guarded(saveJobAction);
+
 /**
  * Add a listing to the DevRel jobs board, or change one. Only the title,
  * company, apply link and location are needed; the logo comes from the
- * company's website on its own.
+ * company's website on its own. A change sends only the fields that were
+ * changed here, so a form that sat open doesn't put back what someone else
+ * changed meanwhile (hiding a listing, say).
  */
 
 type Values = {
@@ -73,7 +78,6 @@ export function JobDialog({
   };
   trigger: ReactNode;
 }) {
-  const router = useRouter();
   const toast = useToast();
   const start = (): Values => ({
     title: job?.title ?? "",
@@ -92,11 +96,14 @@ export function JobDialog({
     live: job?.live ?? true,
   });
   const [values, setValues] = useState<Values>(start);
+  // The listing as it was when the form opened: a change sends what differs.
+  const [opened, setOpened] = useState<Values>(start);
   const [error, setError] = useState<string | null>(null);
   const [confirm, setConfirm] = useState(false);
   const [busy, startSaving] = useTransition();
   const [open, setOpen] = useDialogOpen(() => {
     setValues(start());
+    setOpened(start());
     setError(null);
     setConfirm(false);
   });
@@ -105,17 +112,13 @@ export function JobDialog({
 
   const run = (work: () => Promise<JobResult>) =>
     startSaving(async () => {
-      const result = await work().catch((): JobResult => ({
-        ok: false,
-        message: "The request failed. Try again in a minute.",
-      }));
+      const result = await work();
       if (!result.ok) {
         setError(result.message);
         return;
       }
       toast("success", result.message ?? "Saved");
       setOpen(false);
-      router.refresh();
     });
 
   const submit = (event: FormEvent) => {
@@ -134,7 +137,21 @@ export function JobDialog({
       return;
     }
     setError(null);
-    run(() => saveJob(job?.id ?? null, values));
+    if (!job) {
+      run(() => saveJob(null, values));
+      return;
+    }
+    const changes = Object.fromEntries(
+      Object.entries(values).filter(
+        ([key, value]) => value !== opened[key as keyof Values],
+      ),
+    );
+    if (!Object.keys(changes).length) {
+      toast("success", "Nothing was changed");
+      setOpen(false);
+      return;
+    }
+    run(() => saveJob(job.id, changes));
   };
 
   const id = job?.id ?? "new";

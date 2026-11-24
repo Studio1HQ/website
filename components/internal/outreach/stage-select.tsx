@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useTransition, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import * as Dialog from "@radix-ui/react-dialog";
 import * as Menu from "@radix-ui/react-dropdown-menu";
 import { CaretDown, Check } from "@/components/internal/icons";
-import { setStage } from "@/app/internal/(dashboard)/outreach/actions";
+import { setStage as setStageAction } from "@/app/internal/(dashboard)/outreach/actions";
 import { labelOf, toneOf } from "@/lib/internal/community/schema";
 import { ORG_STAGES, type OrgStage } from "@/lib/internal/outreach/schema";
 import { cn } from "@/lib/utils";
+import { guarded } from "@/components/internal/guarded";
 import { useToast } from "@/components/internal/toast";
 import {
   buttonClass,
@@ -18,12 +18,13 @@ import {
 } from "@/components/internal/ui";
 import { Pill, TONES } from "@/components/internal/community/ui";
 
+const setStage = guarded(setStageAction);
+
 /**
  * The stage pill, which opens a menu to move the organisation along. Lost
  * asks why first: the reason is what the next pitch learns from.
  */
 export function StageSelect({ id, value, name }: { id: string; value: OrgStage; name: string }) {
-  const router = useRouter();
   const toast = useToast();
   const [busy, startTransition] = useTransition();
   const [asking, setAsking] = useState(false);
@@ -38,7 +39,6 @@ export function StageSelect({ id, value, name }: { id: string; value: OrgStage; 
         setAsking(false);
         setReason("");
         setError(null);
-        router.refresh();
       } else if (asking) setError(result.message);
       else toast("error", result.message);
     });

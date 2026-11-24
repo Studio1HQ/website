@@ -2,9 +2,12 @@
 
 import { useTransition } from "react";
 import { PaperPlaneTilt } from "@/components/internal/icons";
-import { sendTestEmail } from "@/app/internal/(dashboard)/templates/actions";
+import { sendTestEmail as sendTestEmailAction } from "@/app/internal/(dashboard)/templates/actions";
+import { guarded } from "@/components/internal/guarded";
 import { useToast } from "@/components/internal/toast";
 import { buttonClass } from "@/components/internal/ui";
+
+const sendTestEmail = guarded(sendTestEmailAction);
 
 /** Sends the template on show to the signed-in person, from its real sender. */
 export function TestSendButton({

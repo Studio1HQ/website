@@ -14,7 +14,11 @@ import {
   Receipt,
   X,
 } from "@/components/internal/icons";
-import { decideClaim, emailSlip, saveSlip } from "@/app/internal/(dashboard)/money/payroll/actions";
+import {
+  decideClaim as decideClaimAction,
+  emailSlip as emailSlipAction,
+  saveSlip as saveSlipAction,
+} from "@/app/internal/(dashboard)/money/payroll/actions";
 import { formatTotals, summarizeClaims } from "@/lib/internal/team/claims-summary";
 import type { PayrollRow } from "@/lib/internal/team/payroll";
 import { LOP_PREFIX, isLopLine, lopAmount, lopLabel } from "@/lib/internal/team/payroll-math";
@@ -52,6 +56,12 @@ import {
   inputClass,
   relativeDate,
 } from "@/components/internal/ui";
+import { guarded } from "@/components/internal/guarded";
+
+// A save that never reached the server answers { ok: false } here, so the open form stays (guarded).
+const decideClaim = guarded(decideClaimAction);
+const emailSlip = guarded(emailSlipAction);
+const saveSlip = guarded(saveSlipAction);
 
 const TONES = {
   emerald: "bg-emerald-50 text-emerald-800 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-200 dark:ring-emerald-500/25",
@@ -162,17 +172,12 @@ export function PayrollView({
     const failed: string[] = [];
     setProgress({ done: 0, total: list.length });
     for (const [index, email] of list.entries()) {
-      try {
-        const result = await emailSlip(email, month, false);
-        if (result.ok && result.status === "sent") ok += 1;
-        else if (!result.ok) failed.push(`${email}: ${result.message}`);
-      } catch {
-        failed.push(`${email}: the request failed`);
-      }
+      const result = await emailSlip(email, month, false);
+      if (result.ok && result.status === "sent") ok += 1;
+      else if (!result.ok) failed.push(`${email}: ${result.message}`);
       setProgress({ done: index + 1, total: list.length });
     }
     setProgress(null);
-    router.refresh();
     if (failed.length === 0) toast("success", `Emailed ${ok} ${ok === 1 ? "payslip" : "payslips"}.`);
     else toast("error", `Emailed ${ok}; ${failed.length} failed. ${failed[0]}`);
   };
@@ -180,9 +185,8 @@ export function PayrollView({
   const resend = async (row: PayrollRow) => {
     confirm.reset();
     setResending(row.person.email);
-    const result = await emailSlip(row.person.email, month, true).catch(() => ({ ok: false as const, message: "The request failed." }));
+    const result = await emailSlip(row.person.email, month, true);
     setResending(null);
-    router.refresh();
     if (result.ok && result.status === "sent") toast("success", `Emailed ${displayName(row.person)}'s payslip again.`);
     else toast("error", "message" in result ? result.message : "Couldn't send it.");
   };
@@ -411,10 +415,7 @@ export function PayrollView({
           row={editing}
           month={month}
           onClose={() => setEditing(null)}
-          onSaved={() => {
-            setEditing(null);
-            router.refresh();
-          }}
+          onSaved={() => setEditing(null)}
         />
       ) : null}
     </>
@@ -561,7 +562,7 @@ function PayslipEditor({
         deductions: toLines(deductions),
         lopDays,
         saveDefaults,
-      }).catch(() => ({ ok: false as const, message: "The request failed. Try again." }));
+      });
       if (result.ok) {
         toast("success", `Saved ${name}'s payslip.`);
         onSaved();
@@ -730,7 +731,6 @@ function ClaimRow({
   person: TeamPerson | undefined;
   month: string;
 }) {
-  const router = useRouter();
   const toast = useToast();
   const [pending, startTransition] = useTransition();
   const [amount, setAmount] = useState(claim.amount === null ? "" : String(claim.amount));
@@ -742,13 +742,9 @@ function ClaimRow({
 
   const decide = (decision: "approved" | "rejected") =>
     startTransition(async () => {
-      const result = await decideClaim(claim.id, decision, payMonth, amount, note).catch(() => ({
-        ok: false as const,
-        message: "The request failed. Try again.",
-      }));
+      const result = await decideClaim(claim.id, decision, payMonth, amount, note);
       if (result.ok) {
         toast("success", decision === "approved" ? `Approved for the ${monthLabel(payMonth)} payslip.` : "Claim rejected.");
-        router.refresh();
       } else {
         toast("error", result.message);
       }

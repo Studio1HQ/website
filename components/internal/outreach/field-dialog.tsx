@@ -19,6 +19,7 @@ import {
 } from "@/lib/internal/community/schema";
 import type { OutreachResult } from "@/lib/internal/outreach/schema";
 import { cn } from "@/lib/utils";
+import { guarded } from "@/components/internal/guarded";
 import { DateField, SuggestInput } from "@/components/internal/pickers";
 import { Select } from "@/components/internal/select";
 import { useToast } from "@/components/internal/toast";
@@ -33,6 +34,9 @@ import {
  * schema.ts): organisations and contacts both use it. The page hands it the
  * save (and delete) to call, so the form knows nothing about what it's
  * editing. Opens from its trigger, or is controlled with open/onOpenChange.
+ *
+ * An edit sends only the fields that were changed here, so saving a form
+ * that sat open doesn't put back what someone else changed meanwhile.
  */
 
 type Values = Record<string, string | boolean>;
@@ -44,6 +48,14 @@ function initialValue(field: FieldDef, value: unknown): string | boolean {
     if (field.type === "select") return field.initial ?? field.options?.[0]?.value ?? "";
     return "";
   }
+  if (Array.isArray(value)) return value.join(", ");
+  return String(value);
+}
+
+/** A saved value as the form holds it, with no default filled in. */
+function savedValue(field: FieldDef, value: unknown): string | boolean {
+  if (field.type === "bool") return value === true;
+  if (value === null || value === undefined) return "";
   if (Array.isArray(value)) return value.join(", ");
   return String(value);
 }
@@ -130,6 +142,15 @@ function FieldForm({
     return values;
   }, [fields, defaults, record]);
   const [values, setValues] = useState<Values>(start);
+  // The record as it was when the form opened: an edit sends what differs
+  // from this. Kept from the first render, so a page refresh behind the
+  // open form doesn't move it.
+  const [opened] = useState<Values | null>(() => {
+    if (!record) return null;
+    const saved: Values = {};
+    for (const field of fields) saved[field.key] = savedValue(field, record[field.key]);
+    return saved;
+  });
 
   useEffect(
     () => () => {
@@ -144,13 +165,20 @@ function FieldForm({
   const submit = (event: FormEvent) => {
     event.preventDefault();
     const payload: Record<string, unknown> = {};
-    // A field hidden by another one's value is cleared.
     for (const field of fields) {
-      payload[field.key] = visible(field, values) ? values[field.key] : field.type === "bool" ? false : "";
+      // A field hidden by another one's value is cleared.
+      const value = visible(field, values) ? values[field.key] : field.type === "bool" ? false : "";
+      // Adding sends every field; an edit only the ones changed here.
+      if (!opened || value !== opened[field.key]) payload[field.key] = value;
     }
     setError(null);
+    if (opened && !Object.keys(payload).length) {
+      toast("success", "Nothing was changed");
+      close();
+      return;
+    }
     startSaving(async () => {
-      const result = await save(payload);
+      const result = await guarded(save)(payload);
       if (!result.ok) {
         setError(result.message);
         return;
@@ -158,7 +186,6 @@ function FieldForm({
       toast("success", result.message ?? "Saved");
       close();
       if (!record && goTo && result.id) router.push(`${goTo}${result.id}`);
-      else router.refresh();
     });
   };
 
@@ -171,7 +198,7 @@ function FieldForm({
       return;
     }
     startSaving(async () => {
-      const result = await remove();
+      const result = await guarded(remove)();
       if (!result.ok) {
         setError(result.message);
         return;
@@ -179,7 +206,6 @@ function FieldForm({
       toast("success", result.message ?? "Deleted");
       close();
       if (deletedHref) router.push(deletedHref);
-      else router.refresh();
     });
   };
 

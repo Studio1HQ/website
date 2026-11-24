@@ -6,6 +6,7 @@ import {
   followUpDue,
   isOpen,
   orgsFromCsv,
+  stageEdit,
   stageProblem,
   stageStamps,
   xHandleFrom,
@@ -52,6 +53,48 @@ describe("stages", () => {
     expect(stageStamps("proposal", "not_now", "2026-11-17")).toEqual({ closed_on: "2026-11-17" });
     expect(stageStamps("lost", "contacted", "2026-11-17")).toEqual({ closed_on: null });
     expect(stageStamps("won", "won", "2026-11-17")).toEqual({});
+  });
+});
+
+describe("stageEdit", () => {
+  const today = "2026-11-25";
+  const won = { stage: "won" as const, lost_reason: "" };
+  const lost = { stage: "lost" as const, lost_reason: "Went in-house" };
+
+  it("leaves the stage's fields alone when neither was sent", () => {
+    // A form that sat open saves a new name: the closed day isn't restamped.
+    expect(stageEdit(won, {}, today)).toEqual({ ok: true, patch: {} });
+    expect(stageEdit(lost, {}, today)).toEqual({ ok: true, patch: {} });
+  });
+
+  it("stamps the closed day only when the stage was sent and moved", () => {
+    expect(stageEdit({ stage: "proposal", lost_reason: "" }, { stage: "won" }, today)).toEqual({
+      ok: true,
+      patch: { closed_on: today, follow_up_on: null, lost_reason: "" },
+    });
+    expect(stageEdit(won, { stage: "contacted" }, today)).toEqual({
+      ok: true,
+      patch: { closed_on: null, lost_reason: "" },
+    });
+    expect(stageEdit(won, { stage: "won" }, today)).toEqual({ ok: true, patch: { lost_reason: "" } });
+  });
+
+  it("needs a reason for Lost, sent or already saved", () => {
+    expect(stageEdit(won, { stage: "lost" }, today)).toMatchObject({ ok: false });
+    expect(stageEdit(won, { stage: "lost", lost_reason: " " }, today)).toMatchObject({ ok: false });
+    expect(stageEdit(won, { stage: "lost", lost_reason: "No budget" }, today)).toEqual({
+      ok: true,
+      patch: { closed_on: today, follow_up_on: null },
+    });
+    // Lost again from a form that still shows the old reason.
+    expect(stageEdit(lost, { stage: "lost" }, today)).toEqual({ ok: true, patch: {} });
+  });
+
+  it("checks a reason sent alone against the saved stage", () => {
+    expect(stageEdit(lost, { lost_reason: "" }, today)).toMatchObject({ ok: false });
+    expect(stageEdit(lost, { lost_reason: "No budget" }, today)).toEqual({ ok: true, patch: {} });
+    // Someone reopened it meanwhile: the reason no longer applies.
+    expect(stageEdit(won, { lost_reason: "No budget" }, today)).toEqual({ ok: true, patch: { lost_reason: "" } });
   });
 });
 

@@ -9,10 +9,13 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { Trash } from "@/components/internal/icons";
-import { deleteDrafts } from "@/app/internal/(dashboard)/blog/actions";
+import { deleteDrafts as deleteDraftsAction } from "@/app/internal/(dashboard)/blog/actions";
+import { guarded } from "@/components/internal/guarded";
 import { useToast } from "@/components/internal/toast";
 import { buttonClass } from "@/components/internal/ui";
 import { cn } from "@/lib/utils";
+
+const deleteDrafts = guarded(deleteDraftsAction);
 
 /*
  * Picking several drafts on the Posts list and deleting them in one go.
@@ -79,8 +82,9 @@ export function DraftSelection({
         );
       } else {
         toast("error", "None of those could be deleted. Reload and try again.");
+        // Nothing was deleted, so nothing brought the list up to date.
+        router.refresh();
       }
-      router.refresh();
     });
 
   return (

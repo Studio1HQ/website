@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Deliverable } from "@/lib/internal/clients/schema";
-import { placeCards } from "@/lib/internal/tasks/calendar";
+import { finishedDay, placeCards } from "@/lib/internal/tasks/calendar";
 import type { Task } from "@/lib/internal/tasks/shared";
 
 const deliverable = (id: string, patch: Partial<Deliverable>) =>
@@ -142,5 +142,31 @@ describe("placeCards: priority", () => {
       "b done",
     ]);
     expect(cards[0].kind === "task" && cards[0].priority).toBe("top");
+  });
+});
+
+describe("finishedDay: marking a card Done without a day", () => {
+  // Wednesday 25 Nov 2026; its week starts Monday 23 Nov.
+  const today = "2026-11-25";
+
+  it("keeps the card's own day when it's this week and not ahead", () => {
+    expect(finishedDay("2026-11-23", today)).toBe("2026-11-23");
+    expect(finishedDay("2026-11-25", today)).toBe("2026-11-25");
+  });
+
+  it("stamps today for an overdue card from an earlier week", () => {
+    expect(finishedDay("2026-11-10", today)).toBe(today);
+    expect(finishedDay("2026-11-22", today)).toBe(today);
+  });
+
+  it("stamps today for a day still ahead, or no day at all", () => {
+    expect(finishedDay("2026-11-26", today)).toBe(today);
+    expect(finishedDay("2026-12-02", today)).toBe(today);
+    expect(finishedDay(null, today)).toBe(today);
+  });
+
+  it("counts Sunday as the end of its own week", () => {
+    expect(finishedDay("2026-11-23", "2026-11-29")).toBe("2026-11-23");
+    expect(finishedDay("2026-11-29", "2026-11-30")).toBe("2026-11-30");
   });
 });

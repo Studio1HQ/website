@@ -11,9 +11,11 @@ import {
 } from "react";
 import { Trash } from "@/components/internal/icons";
 import {
-  removeScopeLine,
-  saveScopeLine,
+  removeScopeLine as removeScopeLineAction,
+  saveScopeLine as saveScopeLineAction,
 } from "@/app/internal/(dashboard)/clients/actions";
+import { guarded } from "@/components/internal/guarded";
+import { changedFields } from "@/lib/internal/clients/rules";
 import {
   DELIVERABLE_KINDS,
   DUE_RULES,
@@ -35,6 +37,9 @@ import {
   FormField,
   useDialogOpen,
 } from "@/components/internal/clients/client-dialog-shell";
+
+const removeScopeLine = guarded(removeScopeLineAction);
+const saveScopeLine = guarded(saveScopeLineAction);
 
 type Values = {
   kind: DeliverableKind;
@@ -71,10 +76,15 @@ export function ScopeLineDialog({
   const afterSave = useAfterSave();
   const toast = useToast();
   const [values, setValues] = useState<Values>(() => startValues(line));
+  // What the form showed when it opened: editing sends only the fields
+  // changed since, so it never puts back what someone else changed meanwhile.
+  const [opened, setOpened] = useState<Values>(() => startValues(line));
   const [error, setError] = useState<string | null>(null);
   const [busy, start] = useTransition();
   const [open, setOpen] = useDialogOpen(() => {
-    setValues(startValues(line));
+    const first = startValues(line);
+    setValues(first);
+    setOpened(first);
     setError(null);
   });
   const set = <K extends keyof Values>(key: K, value: Values[K]) =>
@@ -83,11 +93,15 @@ export function ScopeLineDialog({
   const submit = (event: FormEvent) => {
     event.preventDefault();
     setError(null);
+    const payload: Record<string, unknown> = line
+      ? changedFields(values, opened)
+      : { ...values, cycle_id: cycleId, position: position ?? 0 };
+    if (line && !Object.keys(payload).length) {
+      setOpen(false);
+      return;
+    }
     start(async () => {
-      const result = await saveScopeLine(line?.id ?? null, {
-        ...values,
-        ...(line ? {} : { cycle_id: cycleId, position: position ?? 0 }),
-      });
+      const result = await saveScopeLine(line?.id ?? null, payload);
       if (!result.ok) {
         setError(result.message);
         return;

@@ -1,8 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { leaveTask, removeTask, saveTask } from "@/app/internal/(dashboard)/tasks/actions";
-import { saveRecord } from "@/app/internal/(dashboard)/community/actions";
+import {
+  leaveTask as leaveTaskAction,
+  removeTask as removeTaskAction,
+  saveTask as saveTaskAction,
+} from "@/app/internal/(dashboard)/tasks/actions";
+import { saveRecord as saveRecordAction } from "@/app/internal/(dashboard)/community/actions";
 import { buttonClass, inputClass, textareaClass } from "@/components/internal/ui";
 import { DateField } from "@/components/internal/pickers";
 import { Select } from "@/components/internal/select";
@@ -20,6 +24,13 @@ import {
   type TaskPriority,
   type Teammate,
 } from "@/lib/internal/tasks/shared";
+import { guarded } from "@/components/internal/guarded";
+
+// A save that never reached the server answers { ok: false } here, so the open form stays (guarded).
+const leaveTask = guarded(leaveTaskAction);
+const removeTask = guarded(removeTaskAction);
+const saveTask = guarded(saveTaskAction);
+const saveRecord = guarded(saveRecordAction);
 
 const COMMUNITY = "__community__";
 
@@ -76,6 +87,9 @@ export function TaskDialog({
     finished: task?.done_on ?? today,
   });
   const [form, setForm] = useState(start);
+  // The task as the dialog opened with it: a save sends only what was
+  // changed since, so it can't put back what someone else changed meanwhile.
+  const [opened, setOpened] = useState(start);
   const [confirming, setConfirming] = useState(false);
   const set = (patch: Partial<ReturnType<typeof start>>) => setForm((current) => ({ ...current, ...patch }));
   // Each time it opens, it starts from the task as it is now. A card keeps
@@ -85,7 +99,9 @@ export function TaskDialog({
   if (open !== wasOpen) {
     setWasOpen(open);
     if (open) {
-      setForm(start());
+      const fresh = start();
+      setForm(fresh);
+      setOpened(fresh);
       setConfirming(false);
     }
   }
@@ -133,22 +149,42 @@ export function TaskDialog({
       );
       return;
     }
-    run(
-      () =>
-        saveTask(task?.id ?? null, {
-          email: person.email,
-          title,
-          notes: form.notes,
-          area: form.area,
-          engagement_id: engagement?.id ?? null,
-          deliverable_id: engagement && form.partOf ? form.partOf : null,
-          due_on: form.due || null,
-          priority: form.priority,
-          with: form.people,
-          ...(task?.status === "done" && form.finished && form.finished !== task.done_on ? { done_on: form.finished } : {}),
-        }),
-      close,
-    );
+    const what = {
+      area: form.area,
+      engagement_id: engagement?.id ?? null,
+      deliverable_id: engagement && form.partOf ? form.partOf : null,
+    };
+    if (!task) {
+      run(
+        () =>
+          saveTask(null, {
+            email: person.email,
+            title,
+            notes: form.notes,
+            ...what,
+            due_on: form.due || null,
+            priority: form.priority,
+            with: form.people,
+          }),
+        close,
+      );
+      return;
+    }
+    // Editing: only the fields changed in this dialog (as EditCard does on the Week view).
+    const changed: Record<string, unknown> = {};
+    if (title !== opened.title.trim()) changed.title = title;
+    if (form.notes !== opened.notes) changed.notes = form.notes;
+    if (form.target !== opened.target || form.partOf !== opened.partOf || (studio && form.area !== opened.area)) {
+      Object.assign(changed, what);
+    }
+    if (form.due !== opened.due) changed.due_on = form.due || null;
+    if (form.priority !== opened.priority) changed.priority = form.priority;
+    if ([...form.people].sort().join() !== [...opened.people].sort().join()) changed.with = form.people;
+    if (task.status === "done" && form.finished && (form.finished !== opened.finished || !task.done_on)) {
+      changed.done_on = form.finished;
+    }
+    if (!Object.keys(changed).length) return close();
+    run(() => saveTask(task.id, changed), close);
   };
 
   const forChoices = [

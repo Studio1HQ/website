@@ -10,7 +10,8 @@ import {
   PencilSimple,
   Plus,
 } from "@/components/internal/icons";
-import { saveMilestone } from "@/app/internal/(dashboard)/clients/actions";
+import { saveMilestone as saveMilestoneAction } from "@/app/internal/(dashboard)/clients/actions";
+import { guarded } from "@/components/internal/guarded";
 import { parseCount } from "@/lib/internal/clients/clean";
 import {
   numberRuns,
@@ -32,6 +33,8 @@ import {
   FormDialog,
   FormField,
 } from "@/components/internal/clients/client-dialog-shell";
+
+const saveMilestone = guarded(saveMilestoneAction);
 
 /**
  * The client's key numbers (GitHub stars, Discord members…): the latest

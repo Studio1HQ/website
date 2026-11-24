@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { CheckCircle, EnvelopeSimple } from "@/components/internal/icons";
 import type { PlanStepStatus } from "@/lib/internal/data";
 import { formatDay, relativeDay } from "@/lib/internal/community/schema";
@@ -29,7 +28,6 @@ export function HackathonEmailPlan({
   sender: string;
   mailerReady: boolean;
 }) {
-  const router = useRouter();
   return (
     <section className="rounded-xl border border-[var(--i-line)] bg-[var(--i-panel)] shadow-[var(--i-shadow-sm)]">
       <div className="border-b border-[var(--i-line)] px-5 py-3">
@@ -94,7 +92,8 @@ export function HackathonEmailPlan({
                     mailerReady={mailerReady}
                     initialTemplate={step.template}
                     initialSendAt={step.sendAt}
-                    onSent={() => router.refresh()}
+                    // The send already brings the page up to date.
+                    onSent={() => {}}
                   >
                     <button type="button" className={buttonClass(due ? "primary" : "secondary", "sm")}>
                       <EnvelopeSimple size={13} />

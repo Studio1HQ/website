@@ -65,12 +65,12 @@ export async function editSitePost(slug: unknown) {
   redirect(`/blog/${opened.id}`);
 }
 
-export async function saveDraft(id: unknown, fields: unknown, base: unknown): Promise<SaveResult> {
+export async function saveDraft(id: unknown, fields: unknown, base: unknown, unanswered?: unknown): Promise<SaveResult> {
   const staff = await requireBlog("writer");
   if (typeof id !== "string" || !UUID.test(id) || typeof base !== "string" || base.length > 64) {
     return { ok: false, message: "That save isn't valid." };
   }
-  const result = await savePost(staff, id, fields, base);
+  const result = await savePost(staff, id, fields, base, unanswered);
   if (result.ok) refresh();
   return result;
 }
@@ -107,11 +107,16 @@ export async function requestReview(id: unknown, reviewers: unknown, message: un
 }
 
 /** A reviewer's verdict: send it back with changes, or approve it. */
-export async function review(id: unknown, verdict: unknown, message: unknown): Promise<ActionResult> {
+export async function review(id: unknown, verdict: unknown, message: unknown, base: unknown): Promise<ActionResult> {
   const staff = await requireBlog("reviewer");
   const post = typeof id === "string" ? await getPost(staff, id) : null;
   if (!post) return { ok: false, message: "This post doesn't exist." };
   if (verdict !== "changes" && verdict !== "approve") return { ok: false, message: "That review isn't valid." };
+  // An approval is for the text the reviewer read, like a publish
+  // (lib/internal/blog/publish.ts): not for what the writer saved since.
+  if (verdict === "approve" && (typeof base !== "string" || Date.parse(post.updated_at) !== Date.parse(base))) {
+    return { ok: false, message: "This post changed since you opened it. Reload, read the changes, then approve." };
+  }
   if (post.status === "draft" || post.status === "published") {
     return {
       ok: false,

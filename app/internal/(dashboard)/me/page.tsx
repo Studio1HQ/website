@@ -24,6 +24,8 @@ import {
   minutesSoFar,
   monthOf,
   openSlot,
+  runningDay,
+  shiftDay,
 } from "@/lib/internal/team/shared";
 
 export const metadata: Metadata = { title: "My day" };
@@ -104,20 +106,30 @@ export default async function MyDayPage({
     );
   }
 
-  const [monthDays, todayDays, payslips, claims, work, options, calls, team] = await Promise.all([
+  // Today and yesterday come from the month's read when it holds both; only
+  // a past month, or the 1st, needs a read of its own.
+  const yesterday = shiftDay(now.date, -1);
+  const inMonth = month === current && monthOf(yesterday) === current;
+  const [monthDays, recentDays, payslips, claims, work, options, calls, team] = await Promise.all([
     listDays({ from: `${month}-01`, to: `${month}-${String(daysInMonth(month)).padStart(2, "0")}`, emails: [person.email] }),
-    listDays({ from: now.date, to: now.date, emails: [person.email] }),
+    inMonth ? null : listDays({ from: yesterday, to: now.date, emails: [person.email] }),
     listPayslips({ email: person.email, status: "sent" }),
     listReimbursements({ email: person.email }),
     // Tasks: the shown day's week of cards (hidden until the tasks migration has run).
     loadWeekCards(person.email, weekStart(taskDay), now.date),
-    cardChoices(staff),
+    // The same week as the cards, so its rows are read once.
+    cardChoices(staff, weekStart(taskDay)),
     todaysCalls(staff, now),
     teammates(),
   ]);
 
-  const today = todayDays.ok ? (todayDays.days[0] ?? null) : null;
-  const soFar = today ? minutesSoFar(today, now.time) : null;
+  const recent = recentDays ?? monthDays;
+  const dayOn = (date: string) => (recent.ok ? (recent.days.find((day) => day.day === date) ?? null) : null);
+  const today = dayOn(now.date);
+  // The day on the clock: today, or yesterday while a slot started then is
+  // still running past midnight (so the button reads End, not Start).
+  const working = runningDay(today, dayOn(yesterday), now.time);
+  const soFar = working ? minutesSoFar(working, now.time) : null;
   const failed = [monthDays, payslips, claims].find((result) => !result.ok);
 
   return (
@@ -135,6 +147,7 @@ export default async function MyDayPage({
         month={month}
         current={current}
         today={today}
+        carried={working && working !== today ? working : null}
         soFar={soFar}
         days={monthDays.ok ? monthDays.days : []}
         payslips={payslips.ok ? payslips.slips : []}

@@ -1,12 +1,15 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { ArrowUUpLeft, Check, Copy } from "@/components/internal/icons";
-import { reviewReport } from "@/app/internal/(dashboard)/tasks/actions";
+import { reviewReport as reviewReportAction } from "@/app/internal/(dashboard)/tasks/actions";
 import { useToast } from "@/components/internal/toast";
 import { Card, buttonClass, textareaClass } from "@/components/internal/ui";
 import type { ReportStatus } from "@/lib/internal/tasks/shared";
+import { guarded } from "@/components/internal/guarded";
+
+// A save that never reached the server answers { ok: false } here, so the open form stays (guarded).
+const reviewReport = guarded(reviewReportAction);
 
 /**
  * A founder's read of a submitted report: mark it seen (with an optional
@@ -25,7 +28,6 @@ export function ReportReview({
   /** The founder note already on it (kept when marking seen again). */
   note?: string;
 }) {
-  const router = useRouter();
   const toast = useToast();
   const [note, setNote] = useState(status === "seen" ? saved : "");
   const [mode, setMode] = useState<"idle" | "back">("idle");
@@ -39,7 +41,6 @@ export function ReportReview({
           toast("success", result.message ?? "Saved");
           if (decision === "returned") setNote("");
           setMode("idle");
-          router.refresh();
         } else toast("error", result.message);
       } catch {
         toast("error", "Something went wrong. Try again in a minute.");

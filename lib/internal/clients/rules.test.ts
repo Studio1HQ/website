@@ -26,6 +26,7 @@ import {
   stuckSince,
   waitsOnClient,
   memberMayStartAt,
+  changedFields,
   clashText,
   editClashes,
   formValueOf,
@@ -920,5 +921,15 @@ describe("two people editing one deliverable", () => {
     const now = { ...saved, due_on: "2026-11-22" };
     expect(editClashes(now, { due_on: "2026-11-20" }, { due_on: "2026-11-22" })).toEqual([]);
     expect(editClashes(now, {}, { due_on: "2026-11-24" })).toEqual([]);
+  });
+
+  it("sends only the fields a form changed since it opened", () => {
+    const opened = { name: "Acme", status: "active", notes: "", started_on: "2026-11-01" };
+    expect(changedFields({ ...opened }, opened)).toEqual({});
+    expect(changedFields({ ...opened, notes: "Signs off on Fridays" }, opened)).toEqual({ notes: "Signs off on Fridays" });
+    // Cleared on purpose: the blank goes, so the field is emptied.
+    expect(changedFields({ ...opened, started_on: "", status: "paused" }, opened)).toEqual({ started_on: "", status: "paused" });
+    // Typed and put back: nothing to send.
+    expect(changedFields({ ...opened, name: "Acme" }, opened)).toEqual({});
   });
 });

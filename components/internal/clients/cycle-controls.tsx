@@ -4,12 +4,14 @@ import { useAfterSave } from "@/components/internal/clients/use-after-save";
 import { useState, useTransition, type FormEvent } from "react";
 import { CalendarPlus, PencilSimple, Receipt } from "@/components/internal/icons";
 import {
-  createCycle,
-  saveCycleNotes,
-  setCycleState,
-  setInvoice,
-  startNextMonth,
+  createCycle as createCycleAction,
+  saveCycleNotes as saveCycleNotesAction,
+  setCycleState as setCycleStateAction,
+  setInvoice as setInvoiceAction,
+  startNextMonth as startNextMonthAction,
 } from "@/app/internal/(dashboard)/clients/actions";
+import { guarded } from "@/components/internal/guarded";
+import { changedFields } from "@/lib/internal/clients/rules";
 import {
   CYCLE_STATES,
   INVOICE_STATES,
@@ -34,6 +36,12 @@ import {
   FormField,
   useDialogOpen,
 } from "@/components/internal/clients/client-dialog-shell";
+
+const createCycle = guarded(createCycleAction);
+const saveCycleNotes = guarded(saveCycleNotesAction);
+const setCycleState = guarded(setCycleStateAction);
+const setInvoice = guarded(setInvoiceAction);
+const startNextMonth = guarded(startNextMonthAction);
 
 /**
  * The month (cycle) controls on a client's workspace and the overview:
@@ -137,12 +145,19 @@ export function CycleNotes({
   const [editing, setEditing] = useState(false);
   const [scope, setScope] = useState(scopeNote);
   const [retro, setRetro] = useState(retroNote);
+  // What the form showed when it opened: only a note changed since is sent,
+  // so saving one never puts back an older copy of the other.
+  const [opened, setOpened] = useState({
+    scope_note: scopeNote,
+    retro_note: retroNote,
+  });
   const [error, setError] = useState<string | null>(null);
   const [busy, start] = useTransition();
 
   const open = () => {
     setScope(scopeNote);
     setRetro(retroNote);
+    setOpened({ scope_note: scopeNote, retro_note: retroNote });
     setError(null);
     setEditing(true);
   };
@@ -150,11 +165,16 @@ export function CycleNotes({
   const submit = (event: FormEvent) => {
     event.preventDefault();
     setError(null);
+    const changes = changedFields(
+      { scope_note: scope, retro_note: retro },
+      opened,
+    );
+    if (!Object.keys(changes).length) {
+      setEditing(false);
+      return;
+    }
     start(async () => {
-      const result = await saveCycleNotes(cycleId, {
-        scope_note: scope,
-        retro_note: retro,
-      });
+      const result = await saveCycleNotes(cycleId, changes);
       if (!result.ok) {
         setError(result.message);
         return;
@@ -268,22 +288,33 @@ export function InvoiceControl({
   const done = useResult();
   const [value, setValue] = useState<InvoiceState>(state);
   const [link, setLink] = useState(url ?? "");
+  // What the form showed when it opened: only what was changed since is sent.
+  const [opened, setOpened] = useState<{
+    invoice_state: InvoiceState;
+    invoice_url: string;
+  }>({ invoice_state: state, invoice_url: url ?? "" });
   const [error, setError] = useState<string | null>(null);
   const [busy, start] = useTransition();
   const [open, setOpen] = useDialogOpen(() => {
     setValue(state);
     setLink(url ?? "");
+    setOpened({ invoice_state: state, invoice_url: url ?? "" });
     setError(null);
   });
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
     setError(null);
+    const changes = changedFields(
+      { invoice_state: value, invoice_url: link },
+      opened,
+    );
+    if (!Object.keys(changes).length) {
+      setOpen(false);
+      return;
+    }
     start(async () => {
-      const result = await setInvoice(cycleId, {
-        invoice_state: value,
-        invoice_url: link,
-      });
+      const result = await setInvoice(cycleId, changes);
       if (!result.ok) {
         setError(result.message);
         return;

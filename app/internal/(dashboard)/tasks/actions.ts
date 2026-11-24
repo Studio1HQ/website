@@ -36,6 +36,7 @@ import {
   updateReport,
   updateTask,
 } from "@/lib/internal/tasks/data";
+import { finishedDay } from "@/lib/internal/tasks/calendar";
 import { liveSnapshot, taskViewer } from "@/lib/internal/tasks/load";
 import { reportEmailHtml, reportText } from "@/lib/internal/tasks/report";
 import { reportsSince } from "@/lib/internal/tasks/report-status";
@@ -219,13 +220,18 @@ function sameFor(task: Task, values: Record<string, unknown>) {
  * founder or intern reviewer may give someone a task), title, notes, area,
  * engagement_id?, deliverable_id?, due_on?, status?, priority?, with? (emails
  * it's shared with) }.
+ *
+ * Changing one writes only the fields sent: the dialog sends what was
+ * changed in it, so a save from a form that's been open a while doesn't put
+ * back what someone else changed meanwhile. Adding one takes them all.
  */
 export async function saveTask(id: unknown, values: unknown): Promise<TaskResult> {
   const { staff, viewer: me } = await viewer();
   const data = input(values);
+  const adding = !id;
   const title = line(data.title, 200);
   const notes = block(data.notes, 4000);
-  if (!title) return { ok: false, message: "Give it a title." };
+  if ((adding || "title" in data) && !title) return { ok: false, message: "Give it a title." };
   if (looksLikeSecret(title) || looksLikeSecret(notes)) return SECRET;
   const due = typeof data.due_on === "string" && data.due_on ? data.due_on : null;
   if (due && !isDateKey(due)) return { ok: false, message: "Pick a valid due date." };
@@ -289,12 +295,16 @@ export async function saveTask(id: unknown, values: unknown): Promise<TaskResult
   const people = added.length || shared.emails.length !== task.with_emails.length ? { with_emails: shared.emails } : {};
   // The same client (or Studio1 area) as before is left as it is, unchecked:
   // a client whose work has ended, or one the editor can't pick, isn't
-  // dropped by fixing the title.
+  // dropped by fixing the title. Whatever of the three wasn't sent is the
+  // task's own.
   let where = {};
-  if (!sameFor(task, data)) {
-    const found = await cleanFor(staff, data);
-    if (!found.ok) return found;
-    where = { area: found.area, engagement_id: found.engagement_id, deliverable_id: found.deliverable_id };
+  if ("engagement_id" in data || "deliverable_id" in data || "area" in data) {
+    const wanted = { engagement_id: task.engagement_id, deliverable_id: task.deliverable_id, area: task.area, ...data };
+    if (!sameFor(task, wanted)) {
+      const found = await cleanFor(staff, wanted);
+      if (!found.ok) return found;
+      where = { area: found.area, engagement_id: found.engagement_id, deliverable_id: found.deliverable_id };
+    }
   }
   // The day a Done task was finished ("Finished on"): Done stamps the day
   // it was marked, and this sets the real one, even once its week is over.
@@ -307,9 +317,16 @@ export async function saveTask(id: unknown, values: unknown): Promise<TaskResult
     if (problem) return { ok: false, message: problem };
     finished = { done_on: data.done_on };
   }
-  const result = await updateTask(task.id, { title, notes, due_on: due, ...priority, ...people, ...where, ...finished }, staff.email);
+  const words = {
+    ...("title" in data ? { title } : {}),
+    ...("notes" in data ? { notes } : {}),
+    ...("due_on" in data ? { due_on: due } : {}),
+  };
+  const patch = { ...words, ...priority, ...people, ...where, ...finished };
+  if (!Object.keys(patch).length) return { ok: true, id: task.id, message: "Saved" };
+  const result = await updateTask(task.id, patch, staff.email);
   if (!result.ok) return result;
-  tellShared(added, staff, [title], due);
+  tellShared(added, staff, ["title" in data ? title : task.title], "due_on" in data ? due : task.due_on);
   refresh();
   return { ok: true, id: task.id, message: "Saved" };
 }
@@ -538,7 +555,8 @@ export async function addTasks(day: unknown, items: unknown, extra?: unknown): P
 
 /**
  * Changes a card: { title?, notes?, link?, status?, priority?, with?, day? }. Done stamps the card's
- * day (or today, for a day ahead); moving a done card moves its done day and leaves its due day.
+ * day when that's in this week (else today: finishedDay); moving a done card to a day moves its
+ * done day and leaves its due day.
  */
 export async function editTask(id: unknown, values: unknown): Promise<TaskResult> {
   const { staff, viewer: me } = await viewer();
@@ -596,7 +614,10 @@ export async function editTask(id: unknown, values: unknown): Promise<TaskResult
   }
   // Only when the status or the day changes: fixing a typo in a finished
   // task mustn't move the day it was finished on.
-  if (status !== task.status || "day" in data) patch.done_on = status === "done" ? doneDay(day, today) : null;
+  if (status !== task.status || "day" in data) {
+    // Put on a day: that day. Just marked Done: its own day this week, else today.
+    patch.done_on = status !== "done" ? null : "day" in data ? doneDay(day, today) : finishedDay(day, today);
+  }
   const result = await updateTask(task.id, patch, staff.email, { status: `eq.${task.status}` });
   if (!result.ok) return result;
   tellShared(added, staff, [typeof patch.title === "string" ? patch.title : task.title], day);
