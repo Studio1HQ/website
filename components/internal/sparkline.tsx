@@ -1,4 +1,3 @@
-import { ArrowDown, ArrowUp, Minus } from "@/components/internal/icons";
 import { cn } from "@/lib/utils";
 
 /**
@@ -117,34 +116,5 @@ export function Sparkline({
         vectorEffect="non-scaling-stroke"
       />
     </svg>
-  );
-}
-
-/**
- * Up or down against the stretch before: a green up arrow, a red down
- * arrow, or a dash for no change, with the difference and what it's against
- * ("last week"). The arrow carries the colour; the words stay readable.
- */
-export function Trend({ delta, against }: { delta: number; against: string }) {
-  const IconComponent = delta > 0 ? ArrowUp : delta < 0 ? ArrowDown : Minus;
-  return (
-    <span className="inline-flex items-center gap-1 whitespace-nowrap">
-      <IconComponent
-        size={12}
-        weight="bold"
-        aria-hidden
-        className={
-          delta > 0
-            ? "text-emerald-600 dark:text-emerald-400"
-            : delta < 0
-              ? "text-rose-600 dark:text-rose-400"
-              : "text-[var(--i-faint)]"
-        }
-      />
-      <span className="font-medium tabular-nums text-[var(--i-ink-2)]">
-        {delta > 0 ? `+${delta}` : delta < 0 ? `−${Math.abs(delta)}` : "Same"}
-      </span>
-      <span>{delta === 0 ? `as ${against}` : `vs ${against}`}</span>
-    </span>
   );
 }
