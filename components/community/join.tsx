@@ -175,16 +175,19 @@ export function JoinCommunity() {
                 </motion.span>
               </div>
             ))}
-            <motion.span
-              initial={reduce ? false : { opacity: 0, scale: 0.7, rotate: -14 }}
-              whileInView={{ opacity: 1, scale: 1, rotate: -6 }}
-              viewport={{ once: true }}
-              transition={{ type: "spring", bounce: 0.35, duration: 0.9, delay: 0.9 }}
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-[6px] px-3 py-1.5 text-[15px] font-semibold sm:px-4 sm:py-2 sm:text-[18px] tracking-[-0.02em] text-white shadow-[0_14px_30px_-12px_rgba(0,0,0,0.6)] md:text-[24px]"
-              style={{ background: PRINT }}
-            >
-              welcome to Studio1
-            </motion.span>
+            {/* centred by its wrapper, so the spring's transform can't push it off-centre */}
+            <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <motion.span
+                initial={reduce ? false : { opacity: 0, scale: 0.7, rotate: -14 }}
+                whileInView={{ opacity: 1, scale: 1, rotate: -6 }}
+                viewport={{ once: true }}
+                transition={{ type: "spring", bounce: 0.35, duration: 0.9, delay: 0.9 }}
+                className="whitespace-nowrap rounded-[6px] px-2.5 py-1 text-[13px] font-semibold tracking-[-0.02em] text-white shadow-[0_14px_30px_-12px_rgba(0,0,0,0.6)] sm:px-4 sm:py-2 sm:text-[18px] md:text-[24px]"
+                style={{ background: PRINT }}
+              >
+                welcome to Studio1
+              </motion.span>
+            </span>
           </div>
 
           <div className="mt-9">

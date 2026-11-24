@@ -90,8 +90,8 @@ export function BeenHere({ items }: { items: CommunityItem[] }) {
                     />
                   ) : null}
 
-                  <h3 className="max-w-[90%] pr-24 text-[22px] font-semibold leading-[1.1] tracking-[-0.03em] md:text-[26px]">{e.name}</h3>
-                  <p className="mt-2 line-clamp-1 max-w-[460px] pr-24 text-[14.5px] leading-[1.5] text-white/85">{e.summary}</p>
+                  <h3 className="max-w-[90%] text-[22px] sm:pr-24 font-semibold leading-[1.1] tracking-[-0.03em] md:text-[26px]">{e.name}</h3>
+                  <p className="mt-2 line-clamp-2 max-w-[460px] text-[14.5px] sm:line-clamp-1 sm:pr-24 leading-[1.5] text-white/85">{e.summary}</p>
                   <span className="mt-4 inline-flex h-9 w-fit items-center gap-2 rounded-[8px] bg-white px-4 text-[13.5px] font-semibold text-[#141414]">
                     {e.cta === "Recap" ? "See the recap" : e.cta} <ArrowRight weight="bold" className="size-4" />
                   </span>
