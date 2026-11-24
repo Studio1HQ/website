@@ -16,7 +16,9 @@ import {
   Prohibit,
   X,
 } from "@/components/internal/icons";
-import { saveDeliverable } from "@/app/internal/(dashboard)/clients/actions";
+import { saveDeliverable as saveDeliverableAction } from "@/app/internal/(dashboard)/clients/actions";
+import { guarded } from "@/components/internal/guarded";
+import { parseCount } from "@/lib/internal/clients/clean";
 import {
   canChangeDeliverable,
   scopeLineProgress,
@@ -67,6 +69,8 @@ import {
   RemoveLineButton,
   ScopeLineDialog,
 } from "@/components/internal/clients/scope-lines";
+
+const saveDeliverable = guarded(saveDeliverableAction);
 
 /**
  * A month's work for one engagement, as one list: a group per part of the
@@ -1224,10 +1228,21 @@ function ViewsCell({
   const afterSave = useAfterSave();
   const toast = useToast();
   const saved = deliverable.views ?? null;
-  const [value, setValue] = useState(
-    saved === null ? "" : counts.format(saved),
-  );
+  const shown = (views: number | null) =>
+    views === null ? "" : counts.format(views);
+  const [value, setValue] = useState(shown(saved));
+  // The number the box counts as saved: the page's, or the one just saved
+  // here until the page catches up.
+  const [kept, setKept] = useState(saved);
+  const [seen, setSeen] = useState(saved);
   const [busy, start] = useTransition();
+  // A save elsewhere (the dialog, logging a post) changed it: follow, so the
+  // next blur doesn't write the old number back.
+  if (saved !== seen) {
+    setSeen(saved);
+    setKept(saved);
+    setValue(shown(saved));
+  }
   if (!canChange)
     return (
       <span className="text-[12.5px] tabular-nums">
@@ -1236,14 +1251,24 @@ function ViewsCell({
     );
   const save = () => {
     const typed = value.trim();
-    const before = saved === null ? "" : counts.format(saved);
-    if (typed === before) return;
+    const next = typed ? parseCount(typed) : null;
+    // The same number, however it's typed ("7000", "7,000", "7k"): tidy it.
+    if (typed === shown(kept) || (next !== null && next === kept)) {
+      setValue(shown(kept));
+      return;
+    }
     start(async () => {
       const result = await saveDeliverable(deliverable.id, { views: typed });
       if (!result.ok) {
         toast("error", result.message);
-        setValue(before);
+        setValue(shown(kept));
         return;
+      }
+      // Show what was saved ("7k" → "7,000"), so leaving the box again
+      // doesn't save it a second time.
+      if (!typed || next !== null) {
+        setKept(next);
+        setValue(shown(next));
       }
       afterSave();
     });

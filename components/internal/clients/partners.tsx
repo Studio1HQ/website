@@ -11,9 +11,10 @@ import {
 } from "react";
 import { Handshake, Plus, Trash } from "@/components/internal/icons";
 import {
-  removePartner,
-  savePartner,
+  removePartner as removePartnerAction,
+  savePartner as savePartnerAction,
 } from "@/app/internal/(dashboard)/clients/actions";
+import { guarded } from "@/components/internal/guarded";
 import {
   PARTNER_STATUSES,
   PARTNER_TYPES,
@@ -45,6 +46,9 @@ import {
   FormDialog,
   FormField,
 } from "@/components/internal/clients/client-dialog-shell";
+
+const removePartner = guarded(removePartnerAction);
+const savePartner = guarded(savePartnerAction);
 
 /**
  * Co-GTM and partner outreach for an engagement (the "Co-GTM & Events"

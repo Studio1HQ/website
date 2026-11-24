@@ -7,7 +7,6 @@ import {
   type ReactNode,
 } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   CheckCircle,
   Circle,
@@ -18,7 +17,7 @@ import {
   Plus,
   Star,
 } from "@/components/internal/icons";
-import { setQuickField } from "@/app/internal/(dashboard)/community/actions";
+import { setQuickField as setQuickFieldAction } from "@/app/internal/(dashboard)/community/actions";
 import {
   COST_TYPES,
   EVENT_PARTNER_ROLES,
@@ -37,11 +36,14 @@ import {
   type Task,
 } from "@/lib/internal/community/schema";
 import { cn } from "@/lib/utils";
+import { guarded } from "@/components/internal/guarded";
 import { useToast } from "@/components/internal/toast";
 import { EmptyState, buttonClass, safeUrl } from "@/components/internal/ui";
 import { RecordDialog } from "@/components/internal/community/record-dialog";
 import { QuickSelect } from "@/components/internal/community/quick-select";
 import { DueDate, OptionPill, Owner, Pill } from "@/components/internal/community/ui";
+
+const setQuickField = guarded(setQuickFieldAction);
 
 /* Client lists with an add button and click-to-edit rows. */
 
@@ -535,7 +537,6 @@ export function ContactList({
 /* ----------------------------------------------------------------- tasks */
 
 export function TaskCheck({ task, canMove }: { task: Task; canMove: boolean }) {
-  const router = useRouter();
   const toast = useToast();
   const [busy, startTransition] = useTransition();
   const done = task.status === "done";
@@ -548,7 +549,6 @@ export function TaskCheck({ task, canMove }: { task: Task; canMove: boolean }) {
       );
       if (result.ok) {
         toast("success", done ? "Moved back to To do" : "Done");
-        router.refresh();
       } else toast("error", result.message);
     });
   return (

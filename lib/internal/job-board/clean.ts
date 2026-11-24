@@ -195,6 +195,7 @@ export function cleanJob(values: unknown, today: string): Cleaned {
 export type JobResult =
   { ok: true; message?: string } | { ok: false; message: string };
 
+/** Every field of a listing: what an edit may send, and what the audit trail compares. */
 const AUDITED: (keyof JobInput)[] = [
   "title",
   "company",
@@ -212,13 +213,45 @@ const AUDITED: (keyof JobInput)[] = [
   "live",
 ];
 
-/** The fields a save changed, as { field: [before, after] }, for the audit trail. */
+/**
+ * An edit from the dashboard form, which sends only the fields that were
+ * changed. They're checked together with the rest of the stored listing
+ * (it still needs its title, apply link and so on), and `patch` is what to
+ * write: the fields sent and nothing else, so two people changing different
+ * fields don't undo each other.
+ */
+export function cleanJobEdit(
+  before: Record<string, unknown>,
+  values: unknown,
+  today: string,
+):
+  | { ok: true; job: JobInput; patch: Partial<JobInput> }
+  | { ok: false; message: string } {
+  const sent =
+    values && typeof values === "object"
+      ? (values as Record<string, unknown>)
+      : {};
+  const cleaned = cleanJob({ ...before, ...sent }, today);
+  if (!cleaned.ok) return cleaned;
+  const patch = Object.fromEntries(
+    AUDITED.filter((key) =>
+      Object.prototype.hasOwnProperty.call(sent, key),
+    ).map((key) => [key, cleaned.job[key]]),
+  ) as Partial<JobInput>;
+  return { ok: true, job: cleaned.job, patch };
+}
+
+/**
+ * The fields a save changed, as { field: [before, after] }, for the audit
+ * trail. Only the fields in `after` are compared: an edit writes a few.
+ */
 export function jobChanges(
   before: Partial<Record<keyof JobInput, unknown>>,
-  after: JobInput,
+  after: Partial<JobInput>,
 ) {
   const changes: Record<string, [unknown, unknown]> = {};
   for (const key of AUDITED) {
+    if (!Object.prototype.hasOwnProperty.call(after, key)) continue;
     const was = before[key] ?? null;
     const now = after[key] ?? null;
     if (JSON.stringify(was) !== JSON.stringify(now)) changes[key] = [was, now];

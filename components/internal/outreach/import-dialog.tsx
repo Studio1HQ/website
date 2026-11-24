@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useTransition, type ChangeEvent, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "@/components/internal/icons";
-import { importOrgs } from "@/app/internal/(dashboard)/outreach/actions";
+import { importOrgs as importOrgsAction } from "@/app/internal/(dashboard)/outreach/actions";
+import { guarded } from "@/components/internal/guarded";
 import { useToast } from "@/components/internal/toast";
 import { buttonClass } from "@/components/internal/ui";
+
+const importOrgs = guarded(importOrgsAction);
 
 /**
  * Brings organisations in from a spreadsheet saved as CSV: one company per
@@ -14,7 +16,6 @@ import { buttonClass } from "@/components/internal/ui";
  * skipped, so importing the same sheet twice is safe.
  */
 export function ImportDialog({ trigger }: { trigger: ReactNode }) {
-  const router = useRouter();
   const toast = useToast();
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -42,7 +43,6 @@ export function ImportDialog({ trigger }: { trigger: ReactNode }) {
       else toast("success", result.message ?? "Imported");
       setOpen(false);
       setFile(null);
-      router.refresh();
     });
   };
 

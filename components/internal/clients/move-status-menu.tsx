@@ -4,7 +4,8 @@ import { useAfterSave } from "@/components/internal/clients/use-after-save";
 import { useState, useTransition, type FormEvent } from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { ArrowLeft, CaretDown } from "@/components/internal/icons";
-import { moveDeliverable } from "@/app/internal/(dashboard)/clients/actions";
+import { moveDeliverable as moveDeliverableAction } from "@/app/internal/(dashboard)/clients/actions";
+import { guarded } from "@/components/internal/guarded";
 import { moveNeeds, nextStatuses } from "@/lib/internal/clients/rules";
 import {
   DELIVERABLE_STATUSES,
@@ -29,6 +30,8 @@ import {
 } from "@/components/internal/ui";
 import { TONES } from "@/components/internal/community/ui";
 import { StatusBadge } from "@/components/internal/clients/ui";
+
+const moveDeliverable = guarded(moveDeliverableAction);
 
 /**
  * A deliverable's status pill that opens the moves allowed from where it is
@@ -151,7 +154,9 @@ export function MoveStatusMenu({
       open={open}
       onOpenChange={(next) => {
         setOpen(next);
-        if (!next) reset();
+        // Opening as well as closing: the link and reply date start from
+        // what's saved now, not from when this row was first shown.
+        reset();
       }}
     >
       <Popover.Trigger

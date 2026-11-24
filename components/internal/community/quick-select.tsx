@@ -1,10 +1,9 @@
 "use client";
 
 import { useTransition } from "react";
-import { useRouter } from "next/navigation";
 import * as Menu from "@radix-ui/react-dropdown-menu";
 import { CaretDown, Check } from "@/components/internal/icons";
-import { setQuickField } from "@/app/internal/(dashboard)/community/actions";
+import { setQuickField as setQuickFieldAction } from "@/app/internal/(dashboard)/community/actions";
 import {
   labelOf,
   quickField,
@@ -12,9 +11,12 @@ import {
   type EntityKey,
 } from "@/lib/internal/community/schema";
 import { cn } from "@/lib/utils";
+import { guarded } from "@/components/internal/guarded";
 import { useToast } from "@/components/internal/toast";
 import { menuContentClass, menuItemClass } from "@/components/internal/ui";
 import { Pill, TONES } from "@/components/internal/community/ui";
+
+const setQuickField = guarded(setQuickFieldAction);
 
 /** A status pill that opens a menu to change it (stage, status, column). */
 export function QuickSelect({
@@ -32,7 +34,6 @@ export function QuickSelect({
   label?: string;
 }) {
   const quick = quickField(entity);
-  const router = useRouter();
   const toast = useToast();
   const [busy, startTransition] = useTransition();
   if (!quick) return null;
@@ -52,7 +53,6 @@ export function QuickSelect({
           "success",
           result.message ? `Moved to ${result.message}` : "Saved",
         );
-        router.refresh();
       } else {
         toast("error", result.message);
       }

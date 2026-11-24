@@ -16,18 +16,18 @@ import {
   Stop,
 } from "@/components/internal/icons";
 import {
-  addMyLeave,
-  claimExpense,
-  startReceipt,
-  deleteMyDay,
-  endDay,
-  removeMyPhoto,
-  updateMyEmployeeId,
-  saveMyDay,
-  startDay,
-  updateMyName,
-  uploadMyPhoto,
-  withdrawClaim,
+  addMyLeave as addMyLeaveAction,
+  claimExpense as claimExpenseAction,
+  startReceipt as startReceiptAction,
+  deleteMyDay as deleteMyDayAction,
+  endDay as endDayAction,
+  removeMyPhoto as removeMyPhotoAction,
+  updateMyEmployeeId as updateMyEmployeeIdAction,
+  saveMyDay as saveMyDayAction,
+  startDay as startDayAction,
+  updateMyName as updateMyNameAction,
+  uploadMyPhoto as uploadMyPhotoAction,
+  withdrawClaim as withdrawClaimAction,
 } from "@/app/internal/(dashboard)/me/actions";
 import { cn } from "@/lib/utils";
 import { Select } from "@/components/internal/select";
@@ -67,6 +67,21 @@ import {
   type Reimbursement,
   type TeamPerson,
 } from "@/lib/internal/team/shared";
+import { guarded } from "@/components/internal/guarded";
+
+// A save that never reached the server answers { ok: false } here, so the open form stays (guarded).
+const addMyLeave = guarded(addMyLeaveAction);
+const claimExpense = guarded(claimExpenseAction);
+const startReceipt = guarded(startReceiptAction);
+const deleteMyDay = guarded(deleteMyDayAction);
+const endDay = guarded(endDayAction);
+const removeMyPhoto = guarded(removeMyPhotoAction);
+const updateMyEmployeeId = guarded(updateMyEmployeeIdAction);
+const saveMyDay = guarded(saveMyDayAction);
+const startDay = guarded(startDayAction);
+const updateMyName = guarded(updateMyNameAction);
+const uploadMyPhoto = guarded(uploadMyPhotoAction);
+const withdrawClaim = guarded(withdrawClaimAction);
 
 const MAX_UPLOAD = MAX_UPLOAD_BYTES;
 
@@ -135,6 +150,7 @@ function MonthGrid({
   month,
   today,
   days,
+  liveDate,
   liveMinutes,
   canEdit,
   onPick,
@@ -142,7 +158,9 @@ function MonthGrid({
   month: string;
   today: string;
   days: AttendanceDay[];
-  /** Today's minutes so far while a slot is running, else null. */
+  /** The day with a slot running: today, or yesterday past midnight. */
+  liveDate: string;
+  /** That day's minutes so far while a slot is running, else null. */
   liveMinutes: number | null;
   canEdit: (date: string) => boolean;
   onPick: (date: string, day: AttendanceDay | null) => void;
@@ -174,7 +192,7 @@ function MonthGrid({
               </span>
               {day ? (
                 <span aria-hidden className="truncate text-[10.5px] font-medium leading-none tabular-nums">
-                  {cellText(day, date === today && liveMinutes !== null ? liveMinutes : day.active_minutes)}
+                  {cellText(day, date === liveDate && liveMinutes !== null ? liveMinutes : day.active_minutes)}
                 </span>
               ) : missing ? (
                 <span aria-hidden className="size-1 rounded-full bg-[var(--i-line-strong)]" />
@@ -224,6 +242,7 @@ export function MyDay({
   month,
   current,
   today,
+  carried = null,
   soFar,
   days,
   payslips,
@@ -245,6 +264,9 @@ export function MyDay({
   month: string;
   current: string;
   today: AttendanceDay | null;
+  /** Yesterday's row, while a slot started then is still running past midnight. */
+  carried?: AttendanceDay | null;
+  /** Minutes so far on the day with a slot running, else null. */
   soFar: number | null;
   days: AttendanceDay[];
   payslips: Payslip[];
@@ -261,14 +283,18 @@ export function MyDay({
   const editableFrom = `${shiftMonth(current, -1)}-01`;
   const canEdit = (date: string) => !intern && date >= editableFrom && date <= now.date;
 
-  // Today's slots: one running (no end yet), or all ended and room for another.
-  const slots = today?.slots ?? [];
+  // The day on the clock: today, or yesterday while its last slot is still
+  // running past midnight. Its slots: one running (no end yet), or all ended
+  // and room for another.
+  const onClock = carried ?? today;
+  const clockDate = onClock?.day ?? now.date;
+  const slots = onClock?.slots ?? [];
   const running = openSlot(slots);
 
   const worked = days.filter((day) => day.kind !== "leave");
   const workedDays = worked.reduce((sum, day) => sum + (day.kind === "half_day" ? 0.5 : 1), 0);
   const activeMinutes = worked.reduce(
-    (sum, day) => sum + ((day.day === now.date && running ? soFar : day.active_minutes) ?? 0),
+    (sum, day) => sum + ((day.day === clockDate && running ? soFar : day.active_minutes) ?? 0),
     0,
   );
   const leaveDays = days.reduce((sum, day) => sum + leaveFor(day), 0);
@@ -277,7 +303,7 @@ export function MyDay({
 
   // The clock: where the day stands, in a status line and a figure.
   const idle = "bg-[var(--i-line-strong)]";
-  const clock = !today
+  const clock = !onClock
     ? {
         dot: idle,
         status: "Not started",
@@ -288,20 +314,20 @@ export function MyDay({
             ? "It's the weekend. Log it only if you worked."
             : "Start your day when you sit down to work.",
       }
-    : today.kind === "leave"
-      ? { dot: "bg-sky-500", status: "On leave today", headline: dayText(today), detail: today.note || "Enjoy the day off." }
+    : onClock.kind === "leave"
+      ? { dot: "bg-sky-500", status: "On leave today", headline: dayText(onClock), detail: onClock.note || "Enjoy the day off." }
       : running
         ? {
             dot: "bg-emerald-500",
             status: "Working now",
             headline: formatMinutes(soFar),
-            detail: `active so far · started ${today.start_time ?? running.start}`,
+            detail: `active so far · started ${onClock.start_time ?? running.start}${carried ? " yesterday" : ""}`,
           }
         : {
             dot: idle,
-            status: today.kind === "half_day" ? "Half day logged" : "Day ended",
-            headline: formatMinutes(today.active_minutes),
-            detail: today.start_time ? `active · ${today.start_time}–${today.end_time ?? "…"}` : "No times logged for today.",
+            status: onClock.kind === "half_day" ? "Half day logged" : "Day ended",
+            headline: formatMinutes(onClock.active_minutes),
+            detail: onClock.start_time ? `active · ${onClock.start_time}–${onClock.end_time ?? "…"}` : "No times logged for today.",
           };
 
   return (
@@ -356,7 +382,7 @@ export function MyDay({
               </div>
               {intern ? null : (
                 <div className="flex flex-wrap items-center gap-1.5">
-                  {!today ? (
+                  {!onClock ? (
                     <>
                       <button
                         type="button"
@@ -374,7 +400,7 @@ export function MyDay({
                         Add times by hand
                       </button>
                     </>
-                  ) : today.kind === "leave" ? null : running ? (
+                  ) : onClock.kind === "leave" ? null : running ? (
                     <button
                       type="button"
                       disabled={pending}
@@ -394,20 +420,20 @@ export function MyDay({
                       <Play size={14} weight="fill" /> {slots.length ? "Start another slot" : "Start my day"}
                     </button>
                   ) : null}
-                  {today && canEdit(now.date) ? (
+                  {onClock && canEdit(clockDate) ? (
                     <button
                       type="button"
-                      onClick={() => setEditing({ date: now.date, existing: today })}
+                      onClick={() => setEditing({ date: clockDate, existing: onClock })}
                       className={buttonClass("ghost")}
                     >
-                      <PencilSimple size={14} /> {today.kind === "leave" ? "Change" : "Edit times"}
+                      <PencilSimple size={14} /> {onClock.kind === "leave" ? "Change" : "Edit times"}
                     </button>
                   ) : null}
                 </div>
               )}
             </div>
             {slots.length > 1 ? (
-              <ol aria-label="Today's slots" className="mt-2.5 flex flex-wrap gap-1.5">
+              <ol aria-label={carried ? "Yesterday's slots" : "Today's slots"} className="mt-2.5 flex flex-wrap gap-1.5">
                 {slots.map((slot, index) => (
                   <li
                     key={`${index}-${slot.start}`}
@@ -457,6 +483,7 @@ export function MyDay({
               month={month}
               today={now.date}
               days={days}
+              liveDate={clockDate}
               liveMinutes={running ? soFar : null}
               canEdit={canEdit}
               onPick={(date, existing) => setEditing({ date, existing })}

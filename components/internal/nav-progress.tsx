@@ -97,8 +97,9 @@ export function RefreshButton({ className }: { className?: string }) {
       onClick={() =>
         start(async () => {
           // The server's own short-lived reads go first, then the page.
-          await refreshData().catch(() => {});
-          router.refresh();
+          // The answer already carries the fresh page; only reload it
+          // separately when that request itself failed.
+          await refreshData().catch(() => router.refresh());
         })
       }
       className={cn(

@@ -125,8 +125,9 @@ export function CommandSearch({ className }: { className?: string }) {
         icon: <L.RefreshCw strokeWidth={2} />,
         run: () =>
           start(async () => {
-            await refreshData().catch(() => {});
-            router.refresh();
+            // The answer already carries the fresh page; only reload it
+            // separately when that request itself failed.
+            await refreshData().catch(() => router.refresh());
           }),
       },
       {

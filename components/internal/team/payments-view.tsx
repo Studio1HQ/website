@@ -16,7 +16,7 @@ import {
   WarningCircle,
   Wallet,
 } from "@/components/internal/icons";
-import { setPaymentStatusAction } from "@/app/internal/(dashboard)/money/payments/actions";
+import { setPaymentStatusAction as setPaymentStatusActionRaw } from "@/app/internal/(dashboard)/money/payments/actions";
 import {
   INVOICE_SUBJECT,
   INVOICE_SUBJECT_EXAMPLE,
@@ -48,6 +48,10 @@ import {
   PayeeDialog,
   PaymentDialog,
 } from "@/components/internal/team/payments-dialogs";
+import { guarded } from "@/components/internal/guarded";
+
+// A save that never reached the server answers { ok: false } here, so the open form stays (guarded).
+const setPaymentStatusAction = guarded(setPaymentStatusActionRaw);
 
 type StatusTab = "due" | "paid" | "all";
 

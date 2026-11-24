@@ -11,7 +11,7 @@
  *   community tasks     yours: open → their due day; done → the day done
  */
 
-import { DELIVERABLE_STATUSES, statusLabel, toneOf, type Deliverable } from "@/lib/internal/clients/schema";
+import { DELIVERABLE_STATUSES, statusLabel, toneOf, weekStart, type Deliverable } from "@/lib/internal/clients/schema";
 import { displayName } from "@/lib/internal/team/shared";
 import {
   STUDIO_LINK,
@@ -120,6 +120,16 @@ function inRange(day: string | null | undefined, from: string, to: string): bool
 export function earliestCardDay(today: string) {
   const [year, month] = today.split("-").map(Number);
   return new Date(Date.UTC(year, month - 2, 1)).toISOString().slice(0, 10);
+}
+
+/**
+ * The day a card was finished when it's marked Done without being put on a
+ * day: its own day if that's in this week and not still ahead, else today.
+ * So an overdue card ticked off weeks later isn't back-dated to the day it
+ * was due (the board's Done stamps today too).
+ */
+export function finishedDay(cardDay: string | null | undefined, today: string) {
+  return cardDay && cardDay >= weekStart(today) && cardDay <= today ? cardDay : today;
 }
 
 export function placeCards(input: {

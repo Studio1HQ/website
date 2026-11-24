@@ -17,6 +17,8 @@ import {
   shiftMonth,
   templateFor,
   todayKey,
+  type ClientAccount,
+  type ClientStatus,
   type Cycle,
   type Engagement,
   type ScopeLine,
@@ -31,7 +33,8 @@ import {
  * was no last month; the account owner then adjusts them and moves it to
  * Active. The daily cron (app/api/cron/client-cycles) and the "Start next
  * month" button both call ensureNextCycles. Running it again changes
- * nothing: an engagement that has the month already is skipped.
+ * nothing: an engagement that has the month already is skipped. A client
+ * that is paused, ended or archived gets no new months (takesNewMonths).
  */
 
 /** The day of the month from which next month's cycles are made. */
@@ -42,6 +45,25 @@ export function monthToPrepare(today = todayKey()) {
   return Number(today.slice(8, 10)) >= NEXT_MONTH_FROM_DAY
     ? shiftMonth(monthOf(today), 1)
     : null;
+}
+
+/** Client statuses that mean the work has stopped. */
+export const STOPPED_CLIENT_STATUSES: readonly ClientStatus[] = [
+  "paused",
+  "ended",
+];
+
+/**
+ * True when months may start by themselves for this client: it isn't
+ * archived, and it isn't paused or ended (even if nobody ended its
+ * engagements). A manager can still start a month by hand.
+ */
+export function takesNewMonths(
+  client: Pick<ClientAccount, "status" | "archived_at">,
+) {
+  return (
+    !client.archived_at && !STOPPED_CLIENT_STATUSES.includes(client.status)
+  );
 }
 
 /**
@@ -153,7 +175,8 @@ export type EnsureResult =
 /**
  * Creates the month's cycle (Planning) for every active engagement that
  * lacks one, or only for `engagementIds` when given, with last month's
- * scope lines (the template when there are none).
+ * scope lines (the template when there are none). Engagements of a client
+ * that is paused, ended or archived are left out.
  * A cycle whose lines can't be added is taken back out, so the next run
  * tries again from scratch.
  */
@@ -169,9 +192,11 @@ export async function ensureNextCycles(options: {
   ]);
   if (!engagements.ok) return { ok: false, message: engagements.message };
   if (!clients.ok) return { ok: false, message: clients.message };
-  // An archived client gets no new months, even if nobody ended its
-  // engagements when it was archived.
-  const live = new Set(clients.rows.map((client) => client.id));
+  // An archived, paused or ended client gets no new months, even if nobody
+  // ended its engagements when it stopped.
+  const live = new Set(
+    clients.rows.filter(takesNewMonths).map((client) => client.id),
+  );
   // A failed read must not quietly start every month on the built-in plan
   // (the month then exists, so no later run would put it right).
   if (!templates.ok && !templates.missing)

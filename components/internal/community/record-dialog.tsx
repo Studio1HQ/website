@@ -15,8 +15,8 @@ import { TimeField } from "@/components/internal/team/time-field";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Trash, X } from "@/components/internal/icons";
 import {
-  removeRecord,
-  saveRecord,
+  removeRecord as removeRecordAction,
+  saveRecord as saveRecordAction,
 } from "@/app/internal/(dashboard)/community/actions";
 import {
   CHANNELS,
@@ -30,6 +30,7 @@ import {
 } from "@/lib/internal/community/schema";
 import { visibleFields } from "@/lib/internal/community/visibility";
 import { cn } from "@/lib/utils";
+import { guarded } from "@/components/internal/guarded";
 import { useToast } from "@/components/internal/toast";
 import {
   buttonClass,
@@ -37,6 +38,9 @@ import {
   textareaClass,
 } from "@/components/internal/ui";
 import { Select } from "@/components/internal/select";
+
+const removeRecord = guarded(removeRecordAction);
+const saveRecord = guarded(saveRecordAction);
 
 /**
  * The add and edit form for any community record, built from its field
@@ -250,7 +254,6 @@ function RecordForm({
       toast("success", result.message ?? "Saved");
       close();
       if (!record && goTo && result.id) router.push(`${goTo}${result.id}`);
-      else router.refresh();
     });
   };
 
@@ -278,7 +281,6 @@ function RecordForm({
       close();
       if (onDeleted) onDeleted();
       else if (deletedHref) router.push(deletedHref);
-      else router.refresh();
     });
   };
 

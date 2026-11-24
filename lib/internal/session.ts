@@ -24,7 +24,7 @@ import {
   type RoleKey,
 } from "@/lib/internal/roles";
 import { canExportSection, sectionAccess, type Section } from "@/lib/internal/sections";
-import { SESSION_COOKIE, devBypassEmail, readSession } from "@/lib/internal/token";
+import { SESSION_COOKIE, devBypassEmail, readSession, sessionCookieOptions } from "@/lib/internal/token";
 
 export type Staff = {
   email: string;
@@ -366,15 +366,8 @@ export async function requireClients(
   };
 }
 
-export function sessionCookieOptions(maxAge: number) {
-  return {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax" as const,
-    path: "/",
-    maxAge,
-  };
-}
+// The cookie's settings live with the token (proxy.ts renews it too).
+export { sessionCookieOptions };
 
 /** For the sign-in step's own cookies, which only the login page reads. */
 export function loginCookieOptions(maxAge: number) {

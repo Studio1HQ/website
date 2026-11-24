@@ -6,6 +6,7 @@ import {
   ORG_PRIORITIES,
   ORG_SOURCES,
   ORG_STAGES,
+  isOrgStage,
   priorityRank,
   type ActivityKind,
   type Direction,
@@ -68,6 +69,37 @@ export function stageStamps(from: string | null, to: string, today: string): Par
   if (isOpen(to)) return { closed_on: null };
   // Parked for now keeps its follow-up date: that's when to try again.
   return to === "not_now" ? { closed_on: today } : { closed_on: today, follow_up_on: null };
+}
+
+/**
+ * What an edit means for the stage's own fields. An edit sends only the
+ * fields that were changed (`sent`), so a stage or a lost reason that came
+ * alone is checked against the other one as saved. The closed day follows
+ * the stage: it only moves when the stage itself was sent, so saving a new
+ * name from a form that sat open never restamps it.
+ */
+export function stageEdit(
+  before: Pick<Org, "stage" | "lost_reason">,
+  sent: { stage?: unknown; lost_reason?: unknown },
+  today: string,
+):
+  | { ok: true; patch: Partial<Pick<Org, "closed_on" | "follow_up_on" | "lost_reason">> }
+  | { ok: false; message: string } {
+  const stageSent = isOrgStage(sent.stage);
+  const reasonSent = typeof sent.lost_reason === "string";
+  if (!stageSent && !reasonSent) return { ok: true, patch: {} };
+  const stage = isOrgStage(sent.stage) ? sent.stage : before.stage;
+  const reason = typeof sent.lost_reason === "string" ? sent.lost_reason : before.lost_reason;
+  const problem = stageProblem(stage, reason);
+  if (problem) return { ok: false, message: problem };
+  return {
+    ok: true,
+    patch: {
+      ...(stageSent ? stageStamps(before.stage, stage, today) : {}),
+      // The reason belongs to Lost; anywhere else it would be stale.
+      ...(stage === "lost" ? {} : { lost_reason: "" }),
+    },
+  };
 }
 
 /* -------------------------------------------------------------- activity */

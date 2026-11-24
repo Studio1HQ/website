@@ -6,7 +6,13 @@ import { usePathname, useRouter } from "next/navigation";
 import { DndContext, DragOverlay, useDraggable, useDroppable, type DragEndEvent } from "@dnd-kit/core";
 import { CaretDown, CheckCircle, Plus, Prohibit, Sparkle, UsersThree } from "@/components/internal/icons";
 import { StatusPicker, StatusPill, TonePill } from "@/components/internal/tasks/status-pill";
-import { addTasks, editTask, leaveTask, removeTask, setDeliverableDay } from "@/app/internal/(dashboard)/tasks/actions";
+import {
+  addTasks as addTasksAction,
+  editTask as editTaskAction,
+  leaveTask as leaveTaskAction,
+  removeTask as removeTaskAction,
+  setDeliverableDay as setDeliverableDayAction,
+} from "@/app/internal/(dashboard)/tasks/actions";
 import { cn } from "@/lib/utils";
 import { buttonClass, inputClass, textareaClass } from "@/components/internal/ui";
 import { DateField } from "@/components/internal/pickers";
@@ -29,6 +35,14 @@ import {
   type TaskStatus,
   type Teammate,
 } from "@/lib/internal/tasks/shared";
+import { guarded } from "@/components/internal/guarded";
+
+// A save that never reached the server answers { ok: false } here, so the open form stays (guarded).
+const addTasks = guarded(addTasksAction);
+const editTask = guarded(editTaskAction);
+const leaveTask = guarded(leaveTaskAction);
+const removeTask = guarded(removeTaskAction);
+const setDeliverableDay = guarded(setDeliverableDayAction);
 
 /* The week calendar: a column per day, a card per task, the way the old
    tracker looked. Your own cards: "+ New" on a day, click the pill to

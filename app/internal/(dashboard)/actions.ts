@@ -11,7 +11,14 @@ import { SESSION_COOKIE } from "@/lib/internal/token";
 
 export type ActionResult =
   | { ok: true; tags?: Record<string, string[]> }
-  | { ok: false; message: string; /** Part of the change was saved. */ saved?: boolean };
+  | {
+      ok: false;
+      message: string;
+      /** Part of the change was saved. */
+      saved?: boolean;
+      /** A colleague changed the entry first: what the page shows is out of date. */
+      stale?: boolean;
+    };
 
 function strings(value: unknown, max: number): string[] | null {
   if (!Array.isArray(value) || value.length > max) return null;
@@ -40,6 +47,11 @@ export async function changeEntries(
     const notes = typeof input.notes === "string" ? input.notes.trim().slice(0, 5000) : "";
     next.notes = notes || null;
   }
+  // What the page was showing, for a change to one entry (see EntryChange).
+  if (typeof input.statusWas === "string") next.statusWas = input.statusWas.slice(0, 40);
+  if (typeof input.notesWas === "string" || input.notesWas === null) {
+    next.notesWas = typeof input.notesWas === "string" ? input.notesWas.slice(0, 5000) : null;
+  }
   const add = input.addTags === undefined ? [] : strings(input.addTags, 20);
   const remove = input.removeTags === undefined ? [] : strings(input.removeTags, 20);
   if (!add || !remove) return { ok: false, message: "That change isn't valid." };
@@ -47,8 +59,9 @@ export async function changeEntries(
   next.removeTags = remove.map((tag) => tag.slice(0, 32));
 
   const result = await updateEntries(section, idList, next);
-  // Also when only part of it saved (the status, but not the tags).
-  if (result.ok || result.saved) revalidatePath("/internal", "layout");
+  // Also when only part of it saved (the status, but not the tags), and
+  // when a colleague got there first: the page then shows what they did.
+  if (result.ok || result.saved || result.stale) revalidatePath("/internal", "layout");
   return result;
 }
 

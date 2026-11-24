@@ -3,11 +3,13 @@
 import { useState, useTransition } from "react";
 import { DateField } from "@/components/internal/pickers";
 import { TimeField } from "@/components/internal/team/time-field";
-import { useRouter } from "next/navigation";
-import { cancelScheduledEmail } from "@/app/internal/(dashboard)/email-actions";
+import { cancelScheduledEmail as cancelScheduledEmailAction } from "@/app/internal/(dashboard)/email-actions";
+import { guarded } from "@/components/internal/guarded";
 import type { DeliveryStatus } from "@/lib/email-delivery";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/internal/toast";
+
+const cancelScheduledEmail = guarded(cancelScheduledEmailAction);
 
 const TONES: Record<DeliveryStatus, { label: string; className: string }> = {
   scheduled: { label: "Scheduled", className: "bg-sky-50 text-sky-800 ring-sky-200 dark:bg-sky-500/10 dark:text-sky-200 dark:ring-sky-500/25" },
@@ -116,7 +118,6 @@ export function formatSendLater(iso: string) {
 /** Cancels a scheduled email; asks once more before it does. */
 export function CancelScheduledButton({ logId }: { logId: string }) {
   const toast = useToast();
-  const router = useRouter();
   const [confirming, setConfirming] = useState(false);
   const [pending, startTransition] = useTransition();
 
@@ -127,7 +128,6 @@ export function CancelScheduledButton({ logId }: { logId: string }) {
       if (result.ok) {
         toast("success", "Scheduled email canceled");
         if (result.warning) toast("error", result.warning);
-        router.refresh();
       } else {
         toast("error", result.message);
       }

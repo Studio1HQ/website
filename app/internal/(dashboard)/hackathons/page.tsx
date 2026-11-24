@@ -53,6 +53,9 @@ export default async function HackathonsPage({ searchParams }: Props) {
           ) : plan?.ok ? (
             <div className="mb-5">
               <HackathonEmailPlan
+                // Each hackathon gets its own dialogs: text typed for one
+                // never shows up under another's tab.
+                key={slug}
                 steps={plan.steps}
                 today={todayKey()}
                 canEdit={staff.access === "edit"}

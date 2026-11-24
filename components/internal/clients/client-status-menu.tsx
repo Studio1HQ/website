@@ -3,13 +3,18 @@
 import { useState, useTransition } from "react";
 import * as Menu from "@radix-ui/react-dropdown-menu";
 import { CaretDown, Check } from "@/components/internal/icons";
-import { saveClient } from "@/app/internal/(dashboard)/clients/actions";
+import {
+  saveClient as saveClientAction,
+} from "@/app/internal/(dashboard)/clients/actions";
+import { guarded } from "@/components/internal/guarded";
 import { CLIENT_STATUSES, type ClientStatus } from "@/lib/internal/clients/schema";
 import { OptionBadge } from "@/components/internal/clients/ui";
 import { useAfterSave } from "@/components/internal/clients/use-after-save";
 import { useToast } from "@/components/internal/toast";
 import { menuContentClass, menuItemClass } from "@/components/internal/ui";
 import { cn } from "@/lib/utils";
+
+const saveClient = guarded(saveClientAction);
 
 /**
  * A company's status as a pill that opens a menu (Prospect, Active, Paused,
@@ -45,12 +50,8 @@ export function ClientStatusMenu({
     const before = shown;
     setShown(next);
     startSaving(async () => {
-      // A request that never arrives (offline) throws: the pill goes back
-      // instead of the page falling over.
-      const result = await saveClient(clientId, { status: next }).catch(() => ({
-        ok: false as const,
-        message: "Couldn't save the status. Check your connection and try again.",
-      }));
+      const result = await saveClient(clientId, { status: next });
+      // Not saved, or the request never arrived (offline): the pill goes back.
       if (!result.ok) {
         setShown(before);
         toast("error", result.message);

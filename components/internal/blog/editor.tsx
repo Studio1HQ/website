@@ -331,6 +331,8 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
   const saving = useRef(false);
   const conflict = useRef(false);
   const retry = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** What the last saves without a clear answer sent (see push). */
+  const unanswered = useRef<Partial<BlogFields>[]>([]);
 
   const update = useCallback(<K extends keyof BlogFields>(key: K, value: BlogFields[K]) => {
     setFields((current) => ({ ...current, [key]: value }));
@@ -339,22 +341,41 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
     setVersion((v) => v + 1);
   }, []);
 
-  const flush = useCallback(async () => {
-    if (saving.current || conflict.current || dirty.current.size === 0) return;
+  /**
+   * Sends whatever changed and brings the refs up to date; whoever called
+   * shows the outcome. Only refs here, no state, so it also works on the
+   * way out of the page (below).
+   */
+  const push = useCallback(async () => {
     saving.current = true;
-    setSaveState("saving");
     const keys = [...dirty.current];
     dirty.current.clear();
     const patch = Object.fromEntries(keys.map((key) => [key, fieldsRef.current[key]]));
-    const result = await saveDraft(post.id, patch, baseRef.current).catch(() => ({
-      ok: false as const,
-      message: "Couldn't save. Check your connection.",
-    }));
+    const result = await saveDraft(post.id, patch, baseRef.current, unanswered.current.length ? unanswered.current : undefined).catch(
+      () => ({ ok: false as const, message: "Couldn't save. Check your connection." }),
+    );
     saving.current = false;
+    if (result.ok) {
+      baseRef.current = result.updated_at;
+      unanswered.current = [];
+      return result;
+    }
+    keys.forEach((key) => dirty.current.add(key));
+    if ("conflict" in result && result.conflict) conflict.current = true;
+    // No clear answer: the save may have landed all the same. The next try
+    // says what this one sent, so the server can tell its own earlier save
+    // from someone else's change.
+    else if (!("rejected" in result && result.rejected)) unanswered.current = [...unanswered.current, patch].slice(-2);
+    return result;
+  }, [post.id]);
+
+  const flush = useCallback(async () => {
+    if (saving.current || conflict.current || dirty.current.size === 0) return;
+    setSaveState("saving");
+    const result = await push();
     if (retry.current) clearTimeout(retry.current);
     retry.current = null;
     if (result.ok) {
-      baseRef.current = result.updated_at;
       setBase(result.updated_at);
       setStatus(result.status);
       setRejection(null);
@@ -363,9 +384,7 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
       if (result.slugTaken) toast("error", "Another post already uses that URL. Everything else is saved: pick a different URL.");
       return;
     }
-    keys.forEach((key) => dirty.current.add(key));
     if ("conflict" in result && result.conflict) {
-      conflict.current = true;
       setSaveState("conflict");
     } else if ("rejected" in result && result.rejected) {
       // The text itself was refused: the next edit tries again, a timer wouldn't help.
@@ -376,13 +395,31 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
       toast("error", result.message);
       retry.current = setTimeout(() => setVersion((v) => v + 1), RETRY_MS);
     }
-  }, [post.id, toast]);
+  }, [push, toast]);
 
   useEffect(
     () => () => {
       if (retry.current) clearTimeout(retry.current);
     },
     [],
+  );
+
+  // Going to another dashboard page (the Posts link, the sidebar, Back)
+  // doesn't ask first the way closing the tab does, and the autosave timer
+  // stops with the page: whatever hasn't been saved yet is saved on the way
+  // out, and a save that fails says so on the next page.
+  useEffect(
+    () => () => {
+      void (async () => {
+        while (saving.current) await new Promise((resolve) => setTimeout(resolve, 80));
+        if (conflict.current || dirty.current.size === 0) return;
+        const result = await push();
+        if (!result.ok) {
+          toast("error", `Your last changes to “${fieldsRef.current.title.trim() || "Untitled post"}” weren't saved: ${result.message}`);
+        }
+      })();
+    },
+    [push, toast],
   );
 
   // Autosave a moment after the last change.
@@ -410,11 +447,18 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
     const onLeave = (event: BeforeUnloadEvent) => {
       if (dirty.current.size || saving.current) event.preventDefault();
     };
+    // Switching tabs or apps (on a phone, often the last thing before the
+    // tab is closed): save now rather than when the timer gets to it.
+    const onHide = () => {
+      if (document.visibilityState === "hidden") void saveNow();
+    };
     window.addEventListener("keydown", onKey);
     window.addEventListener("beforeunload", onLeave);
+    document.addEventListener("visibilitychange", onHide);
     return () => {
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("beforeunload", onLeave);
+      document.removeEventListener("visibilitychange", onHide);
     };
   }, [saveNow]);
 
@@ -481,7 +525,6 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
       return false;
     }
     toast("success", done);
-    router.refresh();
     return true;
   };
 
@@ -496,7 +539,7 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
   const sendReview = async (verdict: "changes" | "approve") => {
     const ok = await run(
       verdict,
-      () => review(post.id, verdict, message),
+      () => review(post.id, verdict, message, baseRef.current),
       verdict === "changes" ? "Sent back to the writer with your notes." : "Approved.",
     );
     if (ok) {
@@ -518,7 +561,6 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
       setPublished({ url: result.url, commitUrl: result.commitUrl });
       if (result.warning) toast("error", result.warning);
       else toast("success", "Published. It goes live in a few minutes.");
-      router.refresh();
     } else if ("conflict" in result && result.conflict) {
       setConfirmForce(result.message);
     } else {
@@ -546,7 +588,7 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
 
   const remove = async () => {
     setBusy("delete");
-    const result = await deleteDraft(post.id);
+    const result = await deleteDraft(post.id).catch(() => ({ ok: false as const, message: "Couldn't delete it. Check your connection and try again." }));
     setBusy(null);
     if (!result.ok) {
       toast("error", result.message);

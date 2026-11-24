@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import {
   ChatCircleDots,
   ChatText,
@@ -13,9 +12,9 @@ import {
   type Icon,
 } from "@/components/internal/icons";
 import {
-  clearFollowUp,
-  logActivity,
-  removeActivity,
+  clearFollowUp as clearFollowUpAction,
+  logActivity as logActivityAction,
+  removeActivity as removeActivityAction,
 } from "@/app/internal/(dashboard)/outreach/actions";
 import {
   addDays,
@@ -33,6 +32,7 @@ import {
   type OrgContact,
 } from "@/lib/internal/outreach/schema";
 import { cn } from "@/lib/utils";
+import { guarded } from "@/components/internal/guarded";
 import { DateField } from "@/components/internal/pickers";
 import { Select } from "@/components/internal/select";
 import { useToast } from "@/components/internal/toast";
@@ -42,6 +42,10 @@ import {
   textareaClass,
 } from "@/components/internal/ui";
 import { DueDate } from "@/components/internal/community/ui";
+
+const clearFollowUp = guarded(clearFollowUpAction);
+const logActivity = guarded(logActivityAction);
+const removeActivity = guarded(removeActivityAction);
 
 /**
  * An organisation's log: every email, DM, call, meeting and proposal, sent
@@ -72,7 +76,6 @@ export function ActivityLog({
   /** Still in play: closed ones show their date plainly, never as overdue. */
   open: boolean;
 }) {
-  const router = useRouter();
   const toast = useToast();
   const today = todayKey();
   const [kind, setKind] = useState<ActivityKind>("email");
@@ -107,7 +110,6 @@ export function ActivityLog({
         setNext("");
         setNextStep("");
         setDay(todayKey());
-        router.refresh();
       } else toast("error", result.message);
     });
   };
@@ -121,8 +123,7 @@ export function ActivityLog({
     startTransition(async () => {
       const result = await removeActivity(item.id);
       setDeleting(null);
-      if (result.ok) router.refresh();
-      else toast("error", result.message);
+      if (!result.ok) toast("error", result.message);
     });
   };
 
@@ -131,7 +132,6 @@ export function ActivityLog({
       const result = await clearFollowUp(orgId);
       if (result.ok) {
         toast("success", result.message ?? "Cleared");
-        router.refresh();
       } else toast("error", result.message);
     });
 

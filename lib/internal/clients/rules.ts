@@ -254,6 +254,22 @@ export function editClashes(
   });
 }
 
+/**
+ * The fields of a form that differ from what it opened with. Editing sends
+ * only these, so a field left alone here keeps whatever someone else saved
+ * while the form was open (the actions leave a field that isn't sent as it
+ * is). Empty when nothing was changed.
+ */
+export function changedFields<T extends Record<string, unknown>>(
+  values: T,
+  opened: T,
+): Partial<T> {
+  const changed: Partial<T> = {};
+  for (const key of Object.keys(values) as (keyof T)[])
+    if (values[key] !== opened[key]) changed[key] = values[key];
+  return changed;
+}
+
 /** "the due date", "the owner and the notes", for a clash message. */
 export function clashText(fields: readonly FormField[]) {
   const names = fields.map((field) => `the ${FORM_FIELD_LABELS[field]}`);

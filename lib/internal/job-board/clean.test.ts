@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   cleanJob,
+  cleanJobEdit,
   cleanLink,
   cleanTags,
   isDay,
@@ -165,5 +166,51 @@ describe("what a save changed", () => {
       title: ["Old", "Senior Developer Advocate"],
       tags: [["x"], []],
     });
+  });
+
+  it("compares only the fields an edit wrote", async () => {
+    const { jobChanges } = await import("@/lib/internal/job-board/clean");
+    const saved = cleanJob(base, TODAY);
+    if (!saved.ok) throw new Error("expected a listing");
+    expect(jobChanges({ ...saved.job, title: "Old" }, { live: false })).toEqual({
+      live: [true, false],
+    });
+    expect(jobChanges({ ...saved.job }, {})).toEqual({});
+  });
+});
+
+describe("an edit that sends only what changed", () => {
+  const saved = cleanJob({ ...base, website: "acme.com", tags: "AI" }, TODAY);
+  if (!saved.ok) throw new Error("expected a listing");
+  // As the database hands it back: someone hid it after the form opened.
+  const stored = { ...saved.job, id: "1", live: false, updated_by: "a@studio1hq.com" };
+
+  it("writes the fields sent and leaves the rest alone", () => {
+    const edit = cleanJobEdit(stored, { title: " Staff  Advocate " }, TODAY);
+    expect(edit).toMatchObject({ ok: true, patch: { title: "Staff Advocate" } });
+    if (!edit.ok) throw new Error("expected an edit");
+    // Not put back on the board, and nothing else restated.
+    expect(Object.keys(edit.patch)).toEqual(["title"]);
+    expect(edit.job.live).toBe(false);
+    expect(edit.job.company).toBe("Acme");
+  });
+
+  it("cleans what was sent the same way as a new listing", () => {
+    const edit = cleanJobEdit(stored, { website: "", tags: "AI, ai, Databases", salary: " " }, TODAY);
+    expect(edit).toMatchObject({
+      ok: true,
+      patch: { website: null, tags: ["AI", "Databases"], salary: null },
+    });
+  });
+
+  it("still needs the listing to hold together", () => {
+    expect(cleanJobEdit(stored, { title: " " }, TODAY)).toMatchObject({ ok: false });
+    expect(cleanJobEdit(stored, { url: "not a link" }, TODAY)).toMatchObject({ ok: false });
+  });
+
+  it("writes nothing when nothing was sent, and ignores fields it doesn't know", () => {
+    expect(cleanJobEdit(stored, {}, TODAY)).toMatchObject({ ok: true, patch: {} });
+    expect(cleanJobEdit(stored, { id: "2", created_by: "x" }, TODAY)).toMatchObject({ ok: true, patch: {} });
+    expect(cleanJobEdit(stored, null, TODAY)).toMatchObject({ ok: true, patch: {} });
   });
 });

@@ -8,6 +8,8 @@ import {
   istNow,
   minutesBetween,
   openSlot,
+  runningDay,
+  shiftDay,
   slotMinutes,
   type TeamPerson,
   type TeamResult,
@@ -20,6 +22,10 @@ import {
  * can be logged (cantLog), nothing over a leave day or a month whose
  * payslip is made (changeProblem), one slot running at a time. Callers
  * check who's asking first and pass that person's own row.
+ *
+ * A slot started late can still be running after midnight: it stays on the
+ * day it started (runningDay), so ending it then changes yesterday's row,
+ * and nothing new starts on today until it has ended.
  */
 
 function done(result: TeamResult, message?: string): TeamResult {
@@ -27,17 +33,31 @@ function done(result: TeamResult, message?: string): TeamResult {
   return result.ok && message ? { ok: true, message } : result;
 }
 
+/** Today's and yesterday's rows for one person, in one read. */
+async function recentDays(email: string, date: string) {
+  const before = shiftDay(date, -1);
+  const result = await listDays({ from: before, to: date, emails: [email] });
+  if (!result.ok) return result;
+  const on = (day: string) => result.days.find((row) => row.day === day) ?? null;
+  return { ok: true as const, today: on(date), yesterday: on(before) };
+}
+
 /** A new slot on today, starting now ("Start my day" or "Start another slot"). */
 export async function startDayFor(staff: Staff, person: TeamPerson): Promise<TeamResult> {
   const { date, time } = istNow();
   const blocked = cantLog(staff, person, date, "work");
   if (blocked) return { ok: false, message: blocked };
-  const existing = await listDays({ from: date, to: date, emails: [person.email] });
-  if (!existing.ok) return { ok: false, message: existing.message };
-  const today = existing.days[0] ?? null;
+  const recent = await recentDays(person.email, date);
+  if (!recent.ok) return { ok: false, message: recent.message };
+  const today = recent.today;
   if (today?.kind === "leave") return { ok: false, message: "Today is logged as leave. Edit the day instead." };
-  const running = today ? openSlot(today.slots) : null;
-  if (running) return { ok: false, message: `You're already working, since ${running.start}. End that slot first.` };
+  // Running on today, or since yesterday evening and not ended yet.
+  const working = runningDay(today, recent.yesterday, time);
+  const running = working ? openSlot(working.slots) : null;
+  if (working && running) {
+    const since = working === today ? running.start : `${running.start} yesterday`;
+    return { ok: false, message: `You're already working, since ${since}. End that slot first.` };
+  }
   if (today && today.slots.length >= MAX_SLOTS) {
     return { ok: false, message: `A day takes ${MAX_SLOTS} slots at most. Edit the day instead.` };
   }
@@ -56,48 +76,60 @@ export async function startDayFor(staff: Staff, person: TeamPerson): Promise<Tea
   return done(await saveDay(clean.day, staff.email), today?.slots.length ? `Started again at ${time}` : `Started at ${time}`);
 }
 
-/** Ends the slot that's running: its end time, now, and active hours from the slots. */
+/**
+ * Ends the slot that's running: its end time, now, and active hours from the
+ * slots. After midnight that can be yesterday's last slot, which ends on
+ * yesterday's row (a day's last slot may run past midnight).
+ */
 export async function endDayFor(staff: Staff, person: TeamPerson): Promise<TeamResult> {
   const { date, time } = istNow();
-  const blocked = cantLog(staff, person, date, "work") ?? (await changeProblem(staff, person.email, [date]));
+  const refused = cantLog(staff, person, date, "work");
+  if (refused) return { ok: false, message: refused };
+  const recent = await recentDays(person.email, date);
+  if (!recent.ok) return { ok: false, message: recent.message };
+  // The day being changed: the one with the running slot, else today.
+  const day = runningDay(recent.today, recent.yesterday, time) ?? recent.today;
+  const target = day?.day ?? date;
+  const blocked = cantLog(staff, person, target, "work") ?? (await changeProblem(staff, person.email, [target]));
   if (blocked) return { ok: false, message: blocked };
-  const existing = await listDays({ from: date, to: date, emails: [person.email] });
-  if (!existing.ok) return { ok: false, message: existing.message };
-  const today = existing.days[0];
-  const running = today ? openSlot(today.slots) : null;
-  if (!today || !running) {
-    return { ok: false, message: today?.slots.length ? "Nothing's running. Start another slot first." : "Start your day first." };
+  const running = day ? openSlot(day.slots) : null;
+  if (!day || !running) {
+    return { ok: false, message: day?.slots.length ? "Nothing's running. Start another slot first." : "Start your day first." };
   }
-  const earlier = slotMinutes(today.slots);
+  const earlier = slotMinutes(day.slots);
   const total = earlier + (minutesBetween(running.start, time) ?? 0);
   // Keep active hours someone already typed, unless they'd now be too long.
   // With earlier slots, a figure no longer than them is theirs alone (their
   // breaks taken off), so this slot is added on top.
-  const typed = today.active_minutes;
+  const typed = day.active_minutes;
   const active =
-    typed === null ? total : today.slots.length > 1 && typed <= earlier ? typed + (total - earlier) : typed <= total ? typed : total;
+    typed === null ? total : day.slots.length > 1 && typed <= earlier ? typed + (total - earlier) : typed <= total ? typed : total;
   const clean = cleanDay(person.email, {
-    day: date,
-    kind: today.kind,
-    leave_type: today.leave_type,
-    slots: [...today.slots.slice(0, -1), { start: running.start, end: time }],
+    day: day.day,
+    kind: day.kind,
+    leave_type: day.leave_type,
+    slots: [...day.slots.slice(0, -1), { start: running.start, end: time }],
     active_hours: String(active / 60),
-    note: today.note,
+    note: day.note,
   });
   if (!clean.ok) return clean;
   return done(await saveDay(clean.day, staff.email), `Ended at ${time}`);
 }
 
-/** Today for one person: whether a slot is running (and since when), and minutes so far. */
+/**
+ * Today for one person: whether a slot is running (and since when), and
+ * minutes so far. A slot still going from yesterday evening counts as
+ * running, with that day's minutes.
+ */
 export async function dayStatusFor(person: TeamPerson): Promise<
   { ok: true; running: string | null; minutes: number; leave: boolean } | { ok: false }
 > {
   const { date, time } = istNow();
-  const existing = await listDays({ from: date, to: date, emails: [person.email] });
-  if (!existing.ok) return { ok: false };
-  const today = existing.days[0];
-  if (!today) return { ok: true, running: null, minutes: 0, leave: false };
-  const running = openSlot(today.slots);
-  const minutes = slotMinutes(today.slots) + (running ? minutesBetween(running.start, time) ?? 0 : 0);
-  return { ok: true, running: running?.start ?? null, minutes, leave: today.kind === "leave" };
+  const recent = await recentDays(person.email, date);
+  if (!recent.ok) return { ok: false };
+  const day = runningDay(recent.today, recent.yesterday, time) ?? recent.today;
+  if (!day) return { ok: true, running: null, minutes: 0, leave: false };
+  const running = openSlot(day.slots);
+  const minutes = slotMinutes(day.slots) + (running ? minutesBetween(running.start, time) ?? 0 : 0);
+  return { ok: true, running: running?.start ?? null, minutes, leave: day.kind === "leave" };
 }

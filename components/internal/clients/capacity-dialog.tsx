@@ -4,12 +4,15 @@ import { useAfterSave } from "@/components/internal/clients/use-after-save";
 import { useState, useTransition, type FormEvent, type ReactNode } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "@/components/internal/icons";
-import { savePerson } from "@/app/internal/(dashboard)/clients/actions";
+import { savePerson as savePersonAction } from "@/app/internal/(dashboard)/clients/actions";
+import { guarded } from "@/components/internal/guarded";
 import { PERSON_ROLES, type PersonRole } from "@/lib/internal/clients/schema";
 import { useToast } from "@/components/internal/toast";
 import { SuggestInput } from "@/components/internal/pickers";
 import { Select } from "@/components/internal/select";
 import { buttonClass, inputClass } from "@/components/internal/ui";
+
+const savePerson = guarded(savePersonAction);
 
 /** One person's capacity row, as the table and the dialog use it. */
 export type CapacityPerson = {

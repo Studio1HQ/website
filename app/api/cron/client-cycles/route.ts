@@ -15,8 +15,9 @@ export const maxDuration = 60;
  * midnight IST (vercel.json) with "Authorization: Bearer $CRON_SECRET";
  * without that env var set, or with the wrong secret, nothing runs. From
  * the 25th (IST) it creates next month's cycle, in Planning with scope
- * lines from the templates, for every active engagement that has none;
- * before the 25th it does nothing. Safe to run any number of times.
+ * lines from the templates, for every active engagement that has none
+ * (not for a client that is paused, ended or archived); before the 25th
+ * it does nothing. Safe to run any number of times.
  */
 function allowed(request: NextRequest) {
   const secret = process.env.CRON_SECRET;

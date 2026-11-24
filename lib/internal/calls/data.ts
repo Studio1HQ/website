@@ -2,7 +2,7 @@ import "server-only";
 import { deleteRows, insertRow, selectRows, updateRows, upsertRows } from "@/lib/supabase-server";
 import { listMembers } from "@/lib/internal/members";
 import { OWNERS } from "@/lib/internal/roles";
-import { listPeople } from "@/lib/internal/team/people";
+import { listActivePeople } from "@/lib/internal/team/people";
 import { displayName } from "@/lib/internal/team/shared";
 import { CALLS_MIGRATION_HINT, type Call, type CallChange, type CallInput } from "@/lib/internal/calls/shared";
 
@@ -172,7 +172,7 @@ export type CallPerson = { email: string; name: string };
  * `team` is who "the whole team" means: the active team list.
  */
 export async function callPeople(): Promise<{ people: CallPerson[]; team: string[] }> {
-  const [list, members] = await Promise.all([listPeople({ activeOnly: true }), listMembers()]);
+  const [list, members] = await Promise.all([listActivePeople(), listMembers()]);
   const names = new Map<string, string>();
   for (const email of OWNERS) names.set(email, "");
   for (const member of members ?? []) {

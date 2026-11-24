@@ -2,7 +2,6 @@
 
 import { useState, useTransition, type FormEvent } from "react";
 import { DateField } from "@/components/internal/pickers";
-import { useRouter } from "next/navigation";
 import {
   ChatText,
   EnvelopeSimple,
@@ -13,9 +12,9 @@ import {
   type Icon,
 } from "@/components/internal/icons";
 import {
-  clearFollowUp,
-  logActivity,
-  removeRecord,
+  clearFollowUp as clearFollowUpAction,
+  logActivity as logActivityAction,
+  removeRecord as removeRecordAction,
 } from "@/app/internal/(dashboard)/community/actions";
 import {
   ACTIVITY_KINDS,
@@ -27,12 +26,17 @@ import {
   type Activity,
 } from "@/lib/internal/community/schema";
 import { cn } from "@/lib/utils";
+import { guarded } from "@/components/internal/guarded";
 import { useToast } from "@/components/internal/toast";
 import {
   buttonClass,
   textareaClass,
 } from "@/components/internal/ui";
 import { DueDate } from "@/components/internal/community/ui";
+
+const clearFollowUp = guarded(clearFollowUpAction);
+const logActivity = guarded(logActivityAction);
+const removeRecord = guarded(removeRecordAction);
 
 /**
  * The outreach log on a sponsor, partner or event: notes, emails, calls,
@@ -61,7 +65,6 @@ export function ActivityLog({
   /** Sponsors and partners: the current follow-up date. */
   followUp?: { entity: "sponsor" | "partner"; id: string; on: string | null };
 }) {
-  const router = useRouter();
   const toast = useToast();
   const today = todayKey();
   const [kind, setKind] = useState(followUp ? "email" : "note");
@@ -86,7 +89,6 @@ export function ActivityLog({
         setBody("");
         setNext("");
         setDay(todayKey());
-        router.refresh();
       } else toast("error", result.message);
     });
   };
@@ -103,8 +105,7 @@ export function ActivityLog({
     startTransition(async () => {
       const result = await removeRecord("activity", item.id);
       setDeleting(null);
-      if (result.ok) router.refresh();
-      else toast("error", result.message);
+      if (!result.ok) toast("error", result.message);
     });
   };
 
@@ -114,7 +115,6 @@ export function ActivityLog({
       const result = await clearFollowUp(followUp.entity, followUp.id);
       if (result.ok) {
         toast("success", result.message ?? "Cleared");
-        router.refresh();
       } else toast("error", result.message);
     });
 

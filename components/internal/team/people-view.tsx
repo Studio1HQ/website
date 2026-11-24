@@ -3,7 +3,11 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { AirplaneTilt, IdentificationCard } from "@/components/internal/icons";
-import { addLeaveFor, deleteDayFor, saveDayFor } from "@/app/internal/(dashboard)/people/actions";
+import {
+  addLeaveFor as addLeaveForAction,
+  deleteDayFor as deleteDayForAction,
+  saveDayFor as saveDayForAction,
+} from "@/app/internal/(dashboard)/people/actions";
 import { HoverLink, LinkPending } from "@/components/internal/nav-progress";
 import { cn } from "@/lib/utils";
 import { Avatar, Card, EmptyState, Notice, PageHeader, buttonClass } from "@/components/internal/ui";
@@ -26,6 +30,12 @@ import {
   type AttendanceDay,
   type TeamPerson,
 } from "@/lib/internal/team/shared";
+import { guarded } from "@/components/internal/guarded";
+
+// A save that never reached the server answers { ok: false } here, so the open form stays (guarded).
+const addLeaveFor = guarded(addLeaveForAction);
+const deleteDayFor = guarded(deleteDayForAction);
+const saveDayFor = guarded(saveDayForAction);
 
 const WEEKDAY_LETTERS = ["S", "M", "T", "W", "T", "F", "S"];
 

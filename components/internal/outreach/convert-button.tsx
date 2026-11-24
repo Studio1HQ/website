@@ -3,9 +3,12 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "@/components/internal/icons";
-import { convertToClient } from "@/app/internal/(dashboard)/outreach/actions";
+import { convertToClient as convertToClientAction } from "@/app/internal/(dashboard)/outreach/actions";
+import { guarded } from "@/components/internal/guarded";
 import { useToast } from "@/components/internal/toast";
 import { buttonClass } from "@/components/internal/ui";
+
+const convertToClient = guarded(convertToClientAction);
 
 /**
  * Turns a won organisation into a client and opens its page. Two clicks:
@@ -33,7 +36,6 @@ export function ConvertButton({ id, name }: { id: string; name: string }) {
       if (result.warning) toast("error", result.warning);
       else toast("success", result.message ?? `${name} is now a client`);
       if (result.slug) router.push(`/clients/${result.slug}`);
-      else router.refresh();
     });
   };
 

@@ -3,7 +3,8 @@
 import { useMemo, useState, useTransition } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Copy, EnvelopeSimple, PaperPlaneTilt, X } from "@/components/internal/icons";
-import { sendBulkEmail } from "@/app/internal/(dashboard)/bulk-email-actions";
+import { sendBulkEmail as sendBulkEmailAction } from "@/app/internal/(dashboard)/bulk-email-actions";
+import { guarded } from "@/components/internal/guarded";
 import { firstName } from "@/lib/first-name";
 import { isEmailAddress } from "@/lib/form-checks";
 import { isEmailPipeline } from "@/lib/internal/email-banners";
@@ -27,6 +28,8 @@ import {
   toLocalInput,
 } from "@/components/internal/email-delivery";
 import { Avatar, Notice, buttonClass, inputClass, textareaClass } from "@/components/internal/ui";
+
+const sendBulkEmail = guarded(sendBulkEmailAction);
 
 /** The suggested send time as the picker's value, or null. */
 function initialPickerValue(iso: string | undefined) {
@@ -58,7 +61,8 @@ const MAX_AHEAD_MS = 29 * 24 * 60 * 60 * 1000;
  * One template to everyone selected. The message keeps {first_name},
  * {program} and {sender}, filled in per person when it sends; the preview
  * shows any recipient's copy. Sending takes two clicks. More than BATCH
- * people go in batches, one after another.
+ * people go in batches, one after another. Without `initialTemplate` it
+ * opens on "Write your own", so nothing ready-made goes out by default.
  */
 export function BulkEmailDialog({
   sectionKey,
@@ -85,10 +89,15 @@ export function BulkEmailDialog({
   const toast = useToast();
   const [open, setOpen] = useState(false);
   const [sending, startSending] = useTransition();
+  // Opened for a mixed crowd (the All tab's "Email all", hand-picked rows)
+  // it starts on "Write your own": no ready-made text and no "move everyone
+  // to…" tick until someone picks an email on purpose. It used to start on
+  // the first template, the shortlist email, with the move ticked.
+  const blank = templates.find((item) => !item.status && !item.subject) ?? templates[0];
   const [templateKey, setTemplateKey] = useState(
-    templates.some((item) => item.key === initialTemplate) ? initialTemplate! : (templates[0]?.key ?? "custom"),
+    templates.some((item) => item.key === initialTemplate) ? initialTemplate! : (blank?.key ?? "custom"),
   );
-  const template = templates.find((item) => item.key === templateKey) ?? templates[0];
+  const template = templates.find((item) => item.key === templateKey) ?? blank;
   const [subject, setSubject] = useState(template?.subject ?? "");
   const [body, setBody] = useState(template?.body ?? "");
   const [call, setCall] = useState(template?.call ?? false);
@@ -169,11 +178,11 @@ export function BulkEmailDialog({
       let failure: string | null = null;
       for (let start = 0; start < ids.length; start += BATCH) {
         const batch = ids.slice(start, start + BATCH);
-        // Each batch gets its own key: a retry of the same batch goes out once.
-        const result = await sendBulkEmail(sectionKey, batch, {
-          ...options,
-          nonce: ids.length > BATCH ? `${nonce}-${start / BATCH}` : nonce,
-        });
+        // The server's key for Resend is made from the people in the batch,
+        // the text and this token, so each batch already has its own, and a
+        // retry of a batch that timed out (same people, same token) goes
+        // out once however the batches line up the second time.
+        const result = await sendBulkEmail(sectionKey, batch, { ...options, nonce });
         if (!result.ok) {
           failure = result.message;
           break;
@@ -208,7 +217,9 @@ export function BulkEmailDialog({
             : failure,
         );
       }
-      setNonce(newNonce());
+      // A fresh token only once everything went: after a failure the same
+      // one is kept, so "try again" can't send anyone the email twice.
+      if (!failure) setNonce(newNonce());
       if (!failure) setOpen(false);
       if (sent > 0 || !failure) onSent();
     });

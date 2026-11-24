@@ -3,11 +3,16 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { FloppyDisk, PaperPlaneTilt } from "@/components/internal/icons";
-import { saveReportDraft, submitReport } from "@/app/internal/(dashboard)/tasks/actions";
+import { saveReportDraft as saveReportDraftAction, submitReport as submitReportAction } from "@/app/internal/(dashboard)/tasks/actions";
 import { useToast } from "@/components/internal/toast";
 import { Card, buttonClass, textareaClass } from "@/components/internal/ui";
 import { reportHref } from "@/lib/internal/tasks/report-status";
 import { nextPeriodLabel, type ReportPeriod, type TaskResult } from "@/lib/internal/tasks/shared";
+import { guarded } from "@/components/internal/guarded";
+
+// A save that never reached the server answers { ok: false } here, so the open form stays (guarded).
+const saveReportDraft = guarded(saveReportDraftAction);
+const submitReport = guarded(submitReportAction);
 
 type Words = { highlights: string; blockers: string; next_plan: string };
 
@@ -80,10 +85,7 @@ export function ReportForm({
   const save = () =>
     run(
       () => saveReportDraft(period, start, words),
-      () => {
-        setDirty(false);
-        router.refresh();
-      },
+      () => setDirty(false),
     );
 
   const submit = () =>

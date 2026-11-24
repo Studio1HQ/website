@@ -11,9 +11,10 @@ import {
 } from "react";
 import { PencilSimple, Plus, Trash, Trophy } from "@/components/internal/icons";
 import {
-  removeMilestone,
-  saveMilestone,
+  removeMilestone as removeMilestoneAction,
+  saveMilestone as saveMilestoneAction,
 } from "@/app/internal/(dashboard)/clients/actions";
+import { guarded } from "@/components/internal/guarded";
 import {
   formatDay,
   todayKey,
@@ -33,6 +34,9 @@ import {
   FormDialog,
   FormField,
 } from "@/components/internal/clients/client-dialog-shell";
+
+const removeMilestone = guarded(removeMilestoneAction);
+const saveMilestone = guarded(saveMilestoneAction);
 
 /**
  * An engagement's wins, newest first: "1,000 GitHub stars", "#3 trending in

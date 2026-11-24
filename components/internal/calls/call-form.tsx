@@ -9,7 +9,7 @@ import { Select } from "@/components/internal/select";
 import { TeamAvatar } from "@/components/internal/team-photos";
 import { Label, Segmented, TeamDialog, useTeamAction } from "@/components/internal/team/kit";
 import { TimeField } from "@/components/internal/team/time-field";
-import { removeCall, saveCall } from "@/app/internal/(dashboard)/calls/actions";
+import { removeCall as removeCallAction, saveCall as saveCallAction } from "@/app/internal/(dashboard)/calls/actions";
 import { nameOf, useCalls } from "@/components/internal/calls/context";
 import {
   DAY_PRESETS,
@@ -21,6 +21,11 @@ import {
   type Call,
   type CallRepeat,
 } from "@/lib/internal/calls/shared";
+import { guarded } from "@/components/internal/guarded";
+
+// A save that never reached the server answers { ok: false } here, so the open form stays (guarded).
+const removeCall = guarded(removeCallAction);
+const saveCall = guarded(saveCallAction);
 
 /* Scheduling a call: its name, when (once, or weekly on some days), who's
    in, the link and what it's for. Founders and the founder's associate. */

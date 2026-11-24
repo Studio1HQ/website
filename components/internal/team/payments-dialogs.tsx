@@ -5,10 +5,10 @@ import { DateField, MonthField } from "@/components/internal/pickers";
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "@/components/internal/icons";
 import {
-  deletePaymentAction,
-  markPaidAction,
-  savePayeeAction,
-  savePaymentAction,
+  deletePaymentAction as deletePaymentActionRaw,
+  markPaidAction as markPaidActionRaw,
+  savePayeeAction as savePayeeActionRaw,
+  savePaymentAction as savePaymentActionRaw,
 } from "@/app/internal/(dashboard)/money/payments/actions";
 import {
   CURRENCIES,
@@ -24,6 +24,13 @@ import { cn } from "@/lib/utils";
 import { Select } from "@/components/internal/select";
 import { useToast } from "@/components/internal/toast";
 import { Notice, buttonClass, inputClass, textareaClass } from "@/components/internal/ui";
+import { guarded } from "@/components/internal/guarded";
+
+// A save that never reached the server answers { ok: false } here, so the open form stays (guarded).
+const deletePaymentAction = guarded(deletePaymentActionRaw);
+const markPaidAction = guarded(markPaidActionRaw);
+const savePayeeAction = guarded(savePayeeActionRaw);
+const savePaymentAction = guarded(savePaymentActionRaw);
 
 /* The Payments page's dialogs: add or edit a payment, mark one paid, add or
    edit a payee, and confirm a delete. */

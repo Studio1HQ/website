@@ -173,6 +173,25 @@ export function minutesSoFar(day: Pick<AttendanceDay, "slots" | "active_minutes"
   return carried + (minutesBetween(open.start, now) ?? 0);
 }
 
+/** The most active time one day takes. */
+export const MAX_ACTIVE_MINUTES = 16 * 60;
+
+/**
+ * The day whose slot is running at `now` ("00:30"): today, or yesterday when
+ * a slot started then is still going past midnight. Yesterday's counts only
+ * while nothing has started today, it's still earlier than the time the slot
+ * began, and ending it now would fit in a day (MAX_ACTIVE_MINUTES). Left
+ * open longer than that, it was forgotten, and today starts fresh.
+ */
+export function runningDay<Day extends Pick<AttendanceDay, "slots">>(today: Day | null, yesterday: Day | null, now: string): Day | null {
+  if (today && openSlot(today.slots)) return today;
+  if (today?.slots.length || !yesterday) return null;
+  const open = openSlot(yesterday.slots);
+  if (!open || now >= open.start) return null;
+  const length = slotMinutes(yesterday.slots) + (minutesBetween(open.start, now) ?? 0);
+  return length <= MAX_ACTIVE_MINUTES ? yesterday : null;
+}
+
 /**
  * Minutes a logged day took off its ended slots for breaks: their time less
  * its active hours, or 0 when the active hours are just the slots. The day
@@ -250,6 +269,13 @@ export function isMonthKey(value: unknown): value is string {
 /** "2026-11-13" → "2026-11". */
 export function monthOf(date: string) {
   return date.slice(0, 7);
+}
+
+/** "2026-11-13" moved by n days. */
+export function shiftDay(date: string, n: number) {
+  const value = new Date(`${date}T00:00:00Z`);
+  value.setUTCDate(value.getUTCDate() + n);
+  return value.toISOString().slice(0, 10);
 }
 
 /** "2026-11" → "2026-11-01", the form the tables store months in. */

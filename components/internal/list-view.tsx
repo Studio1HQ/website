@@ -27,7 +27,8 @@ import {
   X,
   XCircle,
 } from "@/components/internal/icons";
-import { changeEntries } from "@/app/internal/(dashboard)/actions";
+import { changeEntries as changeEntriesAction } from "@/app/internal/(dashboard)/actions";
+import { guarded } from "@/components/internal/guarded";
 import { daysWaiting, rowTags, type FacetOptions, type Option, type Row } from "@/lib/internal/query";
 import {
   EMAIL_ALL_LIMIT,
@@ -86,6 +87,8 @@ const COLUMN_WIDTH: Partial<Record<ColumnSpec["kind"], string>> = {
 };
 
 type Override = { status?: string; tags?: string[] };
+
+const changeEntries = guarded(changeEntriesAction);
 
 export function ListView({
   sectionKey,
@@ -243,8 +246,12 @@ export function ListView({
       }
       return next;
     });
+    // One row moved from the list: only if it's still what the list shows,
+    // so a list that's a few minutes old can't undo a colleague's move.
+    const only = ids.length === 1 && change.status ? view.find((item) => item._id === ids[0]) : undefined;
+    const statusWas = only ? String(only.review_status ?? "") : undefined;
     startAction(async () => {
-      const result = await changeEntries(section.key, ids, change);
+      const result = await changeEntries(section.key, ids, statusWas ? { ...change, statusWas } : change);
       if (result.ok) {
         toast("success", done);
       } else {
@@ -685,6 +692,10 @@ export function ListView({
           {reviewable && listTemplates.length ? (
             toEmail?.length ? (
               <BulkEmailDialog
+                // A new dialog for each status tab and filter: it opens on
+                // that tab's email (the rejection on Rejected), never on
+                // the template, text or "move to" tick left from another.
+                key={`${filters.status ?? "all"}:${JSON.stringify(filters.facets)}`}
                 sectionKey={section.key}
                 sender={sender}
                 mailerReady={mailerReady}

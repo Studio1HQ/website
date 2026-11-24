@@ -5,8 +5,8 @@ import Link from "next/link";
 import { DndContext, DragOverlay, useDraggable, useDroppable, type DragEndEvent } from "@dnd-kit/core";
 import { ArrowUpRight, DotsThree, PencilSimple, Plus, Prohibit, UserCircle, UsersThree } from "@/components/internal/icons";
 import * as Menu from "@radix-ui/react-dropdown-menu";
-import { blockTask, moveTask } from "@/app/internal/(dashboard)/tasks/actions";
-import { setQuickField } from "@/app/internal/(dashboard)/community/actions";
+import { blockTask as blockTaskAction, moveTask as moveTaskAction } from "@/app/internal/(dashboard)/tasks/actions";
+import { setQuickField as setQuickFieldAction } from "@/app/internal/(dashboard)/community/actions";
 import { cn } from "@/lib/utils";
 import { ExternalLink, buttonClass, inputClass, menuContentClass, menuItemClass } from "@/components/internal/ui";
 import { DueDate, Pill } from "@/components/internal/community/ui";
@@ -43,6 +43,12 @@ import {
   type Teammate,
   type Tone,
 } from "@/lib/internal/tasks/shared";
+import { guarded } from "@/components/internal/guarded";
+
+// A save that never reached the server answers { ok: false } here, so the open form stays (guarded).
+const blockTask = guarded(blockTaskAction);
+const moveTask = guarded(moveTaskAction);
+const setQuickField = guarded(setQuickFieldAction);
 
 /* The board: one person's work from three places in four columns. Drag a
    task (or a community task) to another column, or pick one on the card:

@@ -15,7 +15,7 @@ import {
   isDashboardHost,
   toInternalPath,
 } from "@/lib/internal/host";
-import { SESSION_COOKIE, devBypassEmail, readSession } from "@/lib/internal/token";
+import { SESSION_COOKIE, devBypassEmail, readSession, renewedSession, sessionCookieOptions } from "@/lib/internal/token";
 
 const legacyRedirects: Record<string, string> = {
   "/blog-as-service": "/technical-content-marketing",
@@ -120,11 +120,9 @@ async function internalGate(request: NextRequest) {
   const file = logo || DASHBOARD_FILE_ROUTES.has(pathname.split("/")[1]);
   const policy = logo ? LOGO_POLICY : dashboardPolicy(nonce);
   let response: NextResponse;
-  if (
-    open ||
-    devBypassEmail(request.headers.get("host")) ||
-    (await readSession(request.cookies.get(SESSION_COOKIE)?.value))
-  ) {
+  const cookie = request.cookies.get(SESSION_COOKIE)?.value;
+  const signedIn = Boolean(await readSession(cookie));
+  if (open || devBypassEmail(request.headers.get("host")) || signedIn) {
     // Next reads the policy from the request to put the nonce on its scripts.
     const headers = new Headers(request.headers);
     headers.set("x-nonce", nonce);
@@ -132,6 +130,10 @@ async function internalGate(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = route;
     response = NextResponse.rewrite(url, { request: { headers } });
+    // Someone using the dashboard stays signed in: a session a day old or
+    // more gets a fresh week, so it never runs out in the middle of work.
+    const renewed = signedIn ? await renewedSession(cookie) : null;
+    if (renewed) response.cookies.set(SESSION_COOKIE, renewed.session, sessionCookieOptions(renewed.maxAge));
   } else {
     const url = dashboardHostUrl(request);
     url.pathname = "/login";

@@ -19,7 +19,8 @@ import {
   YoutubeLogo,
   type Icon,
 } from "@/components/internal/icons";
-import { saveClientLinks } from "@/app/internal/(dashboard)/clients/workspace-actions";
+import { saveClientLinks as saveClientLinksAction } from "@/app/internal/(dashboard)/clients/workspace-actions";
+import { guarded } from "@/components/internal/guarded";
 import {
   MAX_CLIENT_LINKS,
   MAX_LINK_LABEL,
@@ -41,6 +42,8 @@ import {
   FormDialog,
   useDialogOpen,
 } from "@/components/internal/clients/client-dialog-shell";
+
+const saveClientLinks = guarded(saveClientLinksAction);
 
 /**
  * A client's links, in two places. The company's own (site, GitHub,
@@ -209,12 +212,24 @@ function ClientLinksDialog({
     const rows: Row[] = links.map((link, index) => ({ ...link, key: index }));
     return rows.length ? rows : [{ label: "", url: "", group: adding, key: 0 }];
   };
+  /** The list as it's sent. */
+  const sent = (list: readonly Row[]) =>
+    list.map(({ label, url, group }) => ({
+      label,
+      url,
+      group: group ?? guessGroup(url),
+    }));
   const [rows, setRows] = useState<Row[]>(start);
+  // The list is saved whole, so a save replaces whatever anyone else did to
+  // it since the form opened. An untouched list, at least, isn't sent.
+  const [opened, setOpened] = useState(() => JSON.stringify(sent(start())));
   const [nextKey, setNextKey] = useState(1000);
   const [error, setError] = useState<string | null>(null);
   const [busy, startSaving] = useTransition();
   const [open, setOpen] = useDialogOpen(() => {
-    setRows(start());
+    const first = start();
+    setRows(first);
+    setOpened(JSON.stringify(sent(first)));
     setError(null);
   });
 
@@ -243,18 +258,13 @@ function ClientLinksDialog({
   const submit = (event: FormEvent) => {
     event.preventDefault();
     setError(null);
+    const links = sent(rows);
+    if (JSON.stringify(links) === opened) {
+      setOpen(false);
+      return;
+    }
     startSaving(async () => {
-      const result = await saveClientLinks(
-        clientId,
-        rows.map(({ label, url, group }) => ({
-          label,
-          url,
-          group: group ?? guessGroup(url),
-        })),
-      ).catch(() => ({
-        ok: false as const,
-        message: "The request failed. Try again in a minute.",
-      }));
+      const result = await saveClientLinks(clientId, links);
       if (!result.ok) {
         setError(result.message);
         return;

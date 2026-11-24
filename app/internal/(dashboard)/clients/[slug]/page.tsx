@@ -6,7 +6,7 @@ import { inScope } from "@/lib/internal/clients/scope";
 import { canSeeMoney, requireClients } from "@/lib/internal/session";
 import { readLinks } from "@/lib/internal/clients/links";
 import { cleanMonth } from "@/lib/internal/clients/clean";
-import { ensureNextCycles } from "@/lib/internal/clients/cycles";
+import { ensureNextCycles, takesNewMonths } from "@/lib/internal/clients/cycles";
 import {
   devrelReady,
   incomplete,
@@ -131,7 +131,7 @@ export default async function CompanyPage({
   // A new project's checklist opens on its type's template.
   const plans = Object.fromEntries(types.map((type) => [type.value, templateFor(type.value, templates.ok ? templates.rows : []).lines]));
   const running = engagementRows.filter((item) => item.status === "active");
-  // The one partners, milestones and new readings belong to.
+  // The one new partners, milestones and readings are added to.
   const primary = running[0] ?? engagementRows[0] ?? null;
 
   const devrelPromise = Promise.all([
@@ -142,13 +142,17 @@ export default async function CompanyPage({
   let cycles = engagementIds.length ? await loadCycles({ engagementIds }) : null;
   // This month's projects start themselves: a running engagement with no row
   // for the current month gets one (last month's plan carried over) the first
-  // time anyone opens the company. Running it twice changes nothing.
+  // time anyone opens the company. Running it twice changes nothing. Not
+  // for a client that is paused, ended or archived.
   const missingNow = cycles?.ok
     ? running.filter((item) => !cycles!.ok || !cycles!.rows.some((cycle) => cycle.engagement_id === item.id && cycle.month === current))
     : [];
-  if (missingNow.length && !client.archived_at) {
+  if (missingNow.length && takesNewMonths(client)) {
     const started = await ensureNextCycles({ month: current, by: staff.email, engagementIds: missingNow.map((item) => item.id) });
-    if (started.ok && started.created) cycles = await loadCycles({ engagementIds });
+    // Read again, past this request's kept copy (it's from before the months
+    // were made). Also when nothing was made here: someone else opening the
+    // page at the same moment may have started them.
+    if (started.ok) cycles = await loadCycles({ engagementIds }, { fresh: true });
   }
   const allCycles = cycles?.ok ? cycles.rows : [];
   const cycleIds = allCycles.map((cycle) => cycle.id);
@@ -159,9 +163,12 @@ export default async function CompanyPage({
   ]);
   const lineRows = lines.ok ? lines.rows : [];
   const pieces = deliverables.ok ? deliverables.rows : [];
-  const milestoneRows = milestones?.ok ? milestones.rows.filter((item) => item.engagement_id === primary?.id) : [];
-  const partnerRows = partners?.ok ? partners.rows.filter((item) => item.engagement_id === primary?.id) : [];
-  // Partners and milestones: DevRel-style work, or any that already has some.
+  // Every engagement's rows, not only the running one's: what was logged on
+  // an ended or second engagement stays on the company's page.
+  const milestoneRows = milestones?.ok ? milestones.rows : [];
+  const partnerRows = partners?.ok ? partners.rows : [];
+  // Partners and milestones: when new ones would go to DevRel-style work, or
+  // the company already has some on any engagement.
   const devrelWork = Boolean(
     primary && devrel && (!["blogs_only", "internal"].includes(primary.type) || milestoneRows.length || partnerRows.length),
   );

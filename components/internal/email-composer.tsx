@@ -3,7 +3,8 @@
 import { useMemo, useState, useTransition } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { EnvelopeSimple, PaperPlaneTilt, X } from "@/components/internal/icons";
-import { sendEntryEmail } from "@/app/internal/(dashboard)/email-actions";
+import { sendEntryEmail as sendEntryEmailAction } from "@/app/internal/(dashboard)/email-actions";
+import { guarded } from "@/components/internal/guarded";
 import { mailtoHref } from "@/lib/form-checks";
 import {
   DEFAULT_CALL_URL,
@@ -20,6 +21,8 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/components/internal/toast";
 import { SendLaterField, defaultSendLater, formatSendLater, sendLaterIso } from "@/components/internal/email-delivery";
 import { Notice, buttonClass, inputClass, textareaClass } from "@/components/internal/ui";
+
+const sendEntryEmail = guarded(sendEntryEmailAction);
 
 /** A token for one send, for the server's idempotency key. */
 function newNonce() {

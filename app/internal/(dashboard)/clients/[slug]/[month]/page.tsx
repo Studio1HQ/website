@@ -4,7 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, CalendarBlank, DownloadSimple, Eye, FileText, ListChecks } from "@/components/internal/icons";
 import { inScope } from "@/lib/internal/clients/scope";
 import { canSeeMoney, requireClients, type Staff } from "@/lib/internal/session";
-import { ensureNextCycles } from "@/lib/internal/clients/cycles";
+import { ensureNextCycles, takesNewMonths } from "@/lib/internal/clients/cycles";
 import {
   devrelReady,
   incomplete,
@@ -132,10 +132,14 @@ export default async function ProjectPage({ params, searchParams }: { params: Pa
 
   // Months start themselves: a running engagement with no row for the
   // current month gets one (last month's plan carried over) the first time
-  // anyone opens it. Running it twice changes nothing.
-  if (month === current && engagement.status === "active" && !client.archived_at && cycles.ok && !has(engagement.id)) {
+  // anyone opens it. Running it twice changes nothing. Not for a client
+  // that is paused, ended or archived.
+  if (month === current && engagement.status === "active" && takesNewMonths(client) && cycles.ok && !has(engagement.id)) {
     const started = await ensureNextCycles({ month, by: staff.email, engagementIds: [engagement.id] });
-    if (started.ok && started.created) cycles = await loadCycles({ engagementIds: engagementRows.map((item) => item.id), month });
+    // Read again, past this request's kept copy (it's from before the month
+    // was made). Also when nothing was made here: someone else opening the
+    // page at the same moment may have started it.
+    if (started.ok) cycles = await loadCycles({ engagementIds: engagementRows.map((item) => item.id), month }, { fresh: true });
   }
   const cycle = cycles.ok ? (cycles.rows.find((item) => item.engagement_id === engagement.id) ?? null) : null;
 
@@ -230,7 +234,9 @@ export default async function ProjectPage({ params, searchParams }: { params: Pa
                     .map((line) => `${line.quantity} × ${line.label || labelOf(DELIVERABLE_KINDS, line.kind)}`)
                     .join(", ") || "nothing yet"
                 }. Then add each piece as it starts.`
-              : "This month hasn't been started. The current month starts on its own; a client manager can start any other."}
+              : takesNewMonths(client)
+                ? "This month hasn't been started. The current month starts on its own; a client manager can start any other."
+                : "This month hasn't been started. Months don't start on their own while the client is paused, ended or archived; a client manager can start one."}
           </EmptyState>
         </Card>
       ) : (
