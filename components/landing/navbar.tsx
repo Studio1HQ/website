@@ -83,6 +83,16 @@ const triggerClass = cn(
   "after:absolute after:-bottom-0.5 after:left-2 after:right-2 after:h-0.5 after:origin-left after:scale-x-0 after:rounded-full after:bg-gradient-to-r after:from-primary after:to-primary1 after:transition-transform after:duration-300 hover:after:scale-x-100 group-hover/nav:after:scale-x-100",
 );
 
+/**
+ * Desktop dropdowns open on hover and on focus inside the item. A click
+ * leaves focus on the trigger or link, which would keep the menu open after
+ * the mouse leaves or the page changes; drop that focus so it closes.
+ */
+function releaseFocus(e: { currentTarget: HTMLElement }) {
+  const el = document.activeElement;
+  if (el instanceof HTMLElement && e.currentTarget.contains(el)) el.blur();
+}
+
 /** Dropdown shell: opens on hover, and on keyboard focus inside the item. */
 const dropdownClass = cn(
   "absolute top-full pt-4 origin-top",
@@ -199,6 +209,10 @@ function GroupedNavItem({
       className="relative group/nav"
       // Each time the menu opens, start from the current page's group.
       onMouseEnter={() => setHovered(null)}
+      onMouseLeave={releaseFocus}
+      onClick={(e) => {
+        if ((e.target as HTMLElement).closest("a")) releaseFocus(e);
+      }}
     >
       <button type="button" className={triggerClass}>
         {translatedNavTitle(item.title, t)}
@@ -395,6 +409,11 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname() || "/";
   const path = unprefixPath(pathname);
+  // A new page: let go of focus left in a desktop dropdown, so it closes.
+  useEffect(() => {
+    const el = document.activeElement;
+    if (el instanceof HTMLElement && el.closest('[class~="group/nav"]')) el.blur();
+  }, [pathname]);
   const isHome = path === "/";
   const isPaper = useIsPaper();
   const isBlogPost = /^\/blog\/(?!page\/)[^/]+/.test(
@@ -519,7 +538,14 @@ export default function Navbar() {
                   path={path}
                 />
               ) : (
-                <div key={item.title} className="relative group/nav">
+                <div
+                  key={item.title}
+                  className="relative group/nav"
+                  onMouseLeave={releaseFocus}
+                  onClick={(e) => {
+                    if ((e.target as HTMLElement).closest("a")) releaseFocus(e);
+                  }}
+                >
                   {item.children ? (
                     <button type="button" className={triggerClass}>
                       {translatedNavTitle(item.title, t)}
