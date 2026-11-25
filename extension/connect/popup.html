@@ -16,9 +16,6 @@
         <button class="icon-button" id="refresh" title="Refresh" aria-label="Refresh">
           <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-15.5 6.3L3 16" /><path d="M3 21v-5h5" /><path d="M3 12a9 9 0 0 1 15.5-6.3L21 8" /><path d="M21 3v5h-5" /></svg>
         </button>
-        <button class="icon-button" id="disconnect" title="Disconnect this browser" aria-label="Disconnect this browser">
-          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="m16 17 5-5-5-5" /><path d="M21 12H9" /></svg>
-        </button>
       </span>
     </header>
 
@@ -58,43 +55,93 @@
         </span>
       </header>
 
-      <div class="card" id="day-card" hidden>
-        <div class="day">
-          <span class="dot" id="day-dot"></span>
-          <span class="day-text">
-            <b id="day-title"></b>
-            <span id="day-sub"></span>
-          </span>
-          <button class="pill" id="day-button"></button>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-head">
-          <span id="tasks-title">Today</span>
-          <span class="count" id="task-count"></span>
-        </div>
-        <!-- The week ahead, one day at a time, like the dashboard's Tasks -->
-        <div class="days" id="days" role="tablist" aria-label="Day"></div>
-        <ul class="list" id="tasks"></ul>
-        <form class="add" id="add-form">
-          <span class="add-plus" aria-hidden="true">+</span>
-          <input id="add-input" autocomplete="off" maxlength="200" placeholder="Add a task for today" aria-label="New task" />
-          <button type="submit" class="add-button" id="add-button">Add</button>
-        </form>
-      </div>
-
-      <div class="card">
-        <div class="card-head">
-          <span>Notifications <span class="unread-count" id="unread-count" hidden></span></span>
-          <button class="link small" id="read-all" hidden>Mark all read</button>
-        </div>
-        <ul class="list" id="notifications"></ul>
-      </div>
-
       <p class="error" id="main-error" hidden></p>
-      <button class="secondary" id="open-dashboard">Open dashboard ↗</button>
+
+      <!-- Three sections, switched from the dock at the bottom (or by swiping) -->
+      <div class="panes" id="panes">
+        <div class="pane" id="pane-tasks" role="tabpanel" aria-label="Tasks">
+          <div class="card" id="day-card" hidden>
+            <div class="day">
+              <span class="dot" id="day-dot"></span>
+              <span class="day-text">
+                <b id="day-title"></b>
+                <span id="day-sub"></span>
+              </span>
+              <button class="pill" id="day-button"></button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <span id="tasks-title">Today</span>
+              <span class="count" id="task-count"></span>
+            </div>
+            <div class="days" id="days" role="tablist" aria-label="Day"></div>
+            <ul class="list" id="tasks"></ul>
+            <form class="add" id="add-form">
+              <span class="add-plus" aria-hidden="true">+</span>
+              <input id="add-input" autocomplete="off" maxlength="200" placeholder="Add a task for today" aria-label="New task" />
+              <button type="submit" class="add-button" id="add-button">Add</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="pane" id="pane-inbox" role="tabpanel" aria-label="Notifications" hidden>
+          <div class="card">
+            <div class="card-head">
+              <span>Notifications <span class="unread-count" id="unread-count" hidden></span></span>
+              <button class="link small" id="read-all" hidden>Mark all read</button>
+            </div>
+            <ul class="list" id="notifications"></ul>
+          </div>
+        </div>
+
+        <div class="pane" id="pane-me" role="tabpanel" aria-label="Profile" hidden>
+          <div class="card profile">
+            <span class="avatar avatar-lg" id="profile-avatar"></span>
+            <b class="profile-name" id="profile-name"></b>
+            <span class="profile-email" id="profile-email"></span>
+            <span class="profile-role" id="profile-role"></span>
+            <span class="profile-badge"><span class="status-dot"></span> Signed in on this browser</span>
+          </div>
+          <div class="card menu-list">
+            <button type="button" class="menu-row" id="open-dashboard">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5" /><rect x="14" y="3" width="7" height="5" rx="1.5" /><rect x="14" y="12" width="7" height="9" rx="1.5" /><rect x="3" y="16" width="7" height="5" rx="1.5" /></svg>
+              <span>Open dashboard</span><span class="menu-arrow">↗</span>
+            </button>
+            <button type="button" class="menu-row" id="open-tasks">
+              <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" /></svg>
+              <span>Tasks on the dashboard</span><span class="menu-arrow">↗</span>
+            </button>
+            <button type="button" class="menu-row danger" id="disconnect">
+              <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="m16 17 5-5-5-5" /><path d="M21 12H9" /></svg>
+              <span>Sign out</span>
+            </button>
+          </div>
+          <footer class="made made-inline"><span>A product of</span><a class="made-brand" href="https://studio1hq.com" target="_blank" rel="noreferrer"><svg class="made-logo" viewBox="0 0 160 160" aria-hidden="true"><path d="M32 0V141H51.0523C52.4308 137.344 54.7446 133.689 57.9938 130.033C61.1446 126.508 64.6892 123.44 68.6277 120.829C72.5662 118.349 76.3569 116.782 80 116.129V86.7544C75.4708 87.9292 71.3846 89.6919 67.7415 92.0415C64 94.5225 60.7508 97.46 57.9938 100.854C56.5345 102.72 55.2545 104.659 54.1539 106.671V0Z M124 160V18H104.948C103.569 21.6816 101.255 25.3628 98.0062 29.0444C94.8554 32.5942 91.3108 35.6841 87.3723 38.314C83.4338 40.812 79.6431 42.3896 76 43.0474V72.6304C80.5292 71.4473 84.6154 69.6724 88.2585 67.3057C92 64.8076 95.2492 61.8491 98.0062 58.4307C99.4655 56.5513 100.745 54.5986 101.846 52.5723V160Z" fill="#fff" stroke="#fff" stroke-width="2" stroke-linejoin="round" /><path fill-rule="evenodd" clip-rule="evenodd" d="M0 35C0 16.6807 14.0744 1.64844 32 0.126953V141H51.0523C52.4308 137.344 54.7446 133.689 57.9938 130.033C61.1446 126.508 64.6892 123.44 68.6277 120.829C72.5662 118.349 76.3569 116.782 80 116.129V86.7544C75.4708 87.9292 71.3846 89.6919 67.7415 92.0415C64 94.5225 60.7508 97.46 57.9938 100.854C56.5345 102.72 55.2545 104.659 54.1539 106.671V0H125C144.33 0 160 15.6699 160 35V125C160 144.33 144.33 160 125 160H124V18H104.948C103.569 21.6816 101.255 25.3628 98.0062 29.0444C94.8554 32.5942 91.3108 35.6841 87.3723 38.314C83.4338 40.812 79.6431 42.3896 76 43.0474V72.6304C80.5292 71.4473 84.6154 69.6724 88.2585 67.3057C92 64.8076 95.2492 61.8491 98.0062 58.4307C99.4655 56.5513 100.745 54.5986 101.846 52.5723V160H35C15.67 160 0 144.33 0 125V35Z" fill="#f97316" /></svg><span>Studio1</span></a></footer>
+        </div>
+      </div>
+
     </section>
+
+    <!-- The dock: a tap (or a swipe across the panel) switches sections -->
+    <nav class="dock" role="tablist" aria-label="Sections">
+      <button type="button" class="dock-item on" role="tab" aria-selected="true" data-pane="tasks">
+        <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" /></svg>
+        <span>Tasks</span>
+      </button>
+      <button type="button" class="dock-item" role="tab" aria-selected="false" data-pane="inbox">
+        <span class="dock-icon">
+          <svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg>
+          <span class="dock-badge" id="dock-badge" hidden></span>
+        </span>
+        <span>Inbox</span>
+      </button>
+      <button type="button" class="dock-item" role="tab" aria-selected="false" data-pane="me">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></svg>
+        <span>Profile</span>
+      </button>
+    </nav>
 
     <section id="loading" class="view">
       <svg class="loading-mark connect-anim" viewBox="-3 -3 96 96" role="img" aria-label="Loading"><rect class="cm-square" x="0" y="0" width="40" height="40" rx="9" fill="#4886de" /><circle class="cm-dot" cx="69" cy="20" r="20" fill="#ff5a2a" /><path class="cm-play" d="M4 50 L4 84 L38 67 Z" fill="#ffcc00" stroke="#ffcc00" stroke-width="8" stroke-linejoin="round" /><rect class="cm-base" x="49" y="48" width="40" height="40" rx="9" fill="#01796b" /></svg>

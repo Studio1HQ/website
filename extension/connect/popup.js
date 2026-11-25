@@ -11,9 +11,13 @@ let summary = null;
 /** The day whose tasks show ("" = today). */
 let shownDay = "";
 let photoFor = "";
+/** True when the dashboard hasn't the latest update yet (no day view, no adding). */
+let legacy = false;
+let pane = "tasks";
 let ticker = 0;
 
 function show(view) {
+  document.body.dataset.view = view;
   for (const id of ["connect", "main", "loading"]) $(id).hidden = id !== view;
   $("top-actions").hidden = view !== "main";
 }
@@ -277,6 +281,8 @@ function renderNotifications() {
   const { items, unread } = summary.notifications;
   $("read-all").hidden = unread === 0;
   $("unread-count").hidden = unread === 0;
+  $("dock-badge").hidden = unread === 0;
+  $("dock-badge").textContent = unread > 9 ? "9+" : String(unread);
   $("unread-count").textContent = unread > 99 ? "99+" : String(unread);
   if (!items.length) return list.append(el("li", { class: "empty" }, "No notifications yet."));
   for (const item of items) {
@@ -321,6 +327,11 @@ async function renderWelcome() {
   $("welcome-name").textContent = me.name;
   $("welcome-role").textContent = me.role || me.email;
   $("avatar-initials").textContent = initials(me.name);
+  $("profile-name").textContent = me.name;
+  $("profile-email").textContent = me.email;
+  $("profile-role").textContent = me.role || "";
+  $("profile-role").hidden = !me.role;
+  syncProfileAvatar();
   // Their photo, fetched once with the session (the dashboard's photo link needs its cookie).
   if (!me.hasPhoto) {
     $("avatar-img").hidden = true;
@@ -333,10 +344,52 @@ async function renderWelcome() {
     if (!response.ok) return;
     $("avatar-img").src = URL.createObjectURL(await response.blob());
     $("avatar-img").hidden = false;
+    syncProfileAvatar();
   } catch {
     // Initials stay.
   }
 }
+
+/** The Profile section's large avatar: the same photo or initials. */
+function syncProfileAvatar() {
+  const img = $("avatar-img");
+  $("profile-avatar").replaceChildren(img.hidden ? el("span", {}, $("avatar-initials").textContent) : el("img", { src: img.src, alt: "" }));
+}
+
+/* ------------------------------------------------------------ sections */
+
+const PANES = ["tasks", "inbox", "me"];
+
+function setPane(next) {
+  pane = next;
+  for (const name of PANES) $(`pane-${name}`).hidden = name !== next;
+  for (const item of document.querySelectorAll(".dock-item")) {
+    const on = item.dataset.pane === next;
+    item.classList.toggle("on", on);
+    item.setAttribute("aria-selected", String(on));
+  }
+  if (next === "tasks") renderDays();
+}
+
+for (const item of document.querySelectorAll(".dock-item")) item.addEventListener("click", () => setPane(item.dataset.pane));
+
+// A sideways swipe across the panel moves to the next or previous section.
+let swipeX = null;
+let swipeY = 0;
+$("panes").addEventListener("pointerdown", (event) => {
+  if (event.target.closest(".days, input, button, a")) return;
+  swipeX = event.clientX;
+  swipeY = event.clientY;
+});
+$("panes").addEventListener("pointerup", (event) => {
+  if (swipeX === null) return;
+  const dx = event.clientX - swipeX;
+  const dy = event.clientY - swipeY;
+  swipeX = null;
+  if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx)) return;
+  const index = PANES.indexOf(pane) + (dx < 0 ? 1 : -1);
+  if (index >= 0 && index < PANES.length) setPane(PANES[index]);
+});
 
 /* ------------------------------------------------------------ days */
 
@@ -391,7 +444,12 @@ function renderDays() {
   });
   const label = longDay.format(new Date(`${current}T00:00:00Z`));
   $("tasks-title").textContent = current === today ? `Today · ${label}` : label;
-  $("add-input").placeholder = current === today ? "Add a task for today" : `Add a task for ${label}`;
+  $("add-input").placeholder = legacy
+    ? "Adding tasks here comes with the next dashboard update"
+    : current === today
+      ? "Add a task for today"
+      : `Add a task for ${label}`;
+  $("add-input").disabled = legacy;
 }
 
 function render() {
@@ -424,6 +482,7 @@ async function load() {
     summary = await call(`/api/extension/summary${shownDay ? `?day=${shownDay}` : ""}`, settings);
     // An older dashboard sends today's late and undated tasks too, and ignores
     // the day asked for: keep just the tasks dated the day showing.
+    legacy = !summary.shown;
     if (!summary.shown) {
       summary.shown = shownDay || summary.today;
       summary.tasks = summary.tasks.filter((task) => task.due_on === summary.shown);
@@ -486,6 +545,7 @@ $("add-form").addEventListener("submit", async (event) => {
 
 $("refresh").addEventListener("click", load);
 $("open-dashboard").addEventListener("click", () => open(dashboard(summary?.me?.home && summary.me.home !== "/" ? summary.me.home : "")));
+$("open-tasks").addEventListener("click", () => open(dashboard("/tasks")));
 
 /* ------------------------------------------------------------ start */
 

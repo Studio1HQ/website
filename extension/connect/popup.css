@@ -983,3 +983,182 @@ body:not(.as-popup) .made {
   background: var(--hover);
   color: var(--ink);
 }
+
+/* ---- Sections and the dock ---- */
+body[data-view="main"] {
+  padding-bottom: 84px;
+}
+body[data-view="main"] > .made {
+  display: none;
+}
+.pane {
+  animation: rise 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.dock {
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  left: 12px;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  box-shadow: 0 14px 30px -14px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(10px);
+}
+body.as-popup .dock {
+  position: sticky;
+  margin-top: 8px;
+}
+.dock-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 7px 0 6px;
+  border: 0;
+  border-radius: 13px;
+  background: transparent;
+  color: var(--faint);
+  font-size: 10.5px;
+  font-weight: 500;
+  transition: background-color 150ms, color 150ms;
+}
+.dock-item:hover {
+  color: var(--ink-2);
+}
+.dock-item.on {
+  background: var(--hover);
+  color: var(--ink);
+}
+.dock-item svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.dock-icon {
+  position: relative;
+  display: inline-flex;
+}
+.dock-badge {
+  position: absolute;
+  top: -5px;
+  right: -9px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 9.5px;
+  line-height: 15px;
+  text-align: center;
+}
+
+/* ---- Profile ---- */
+.profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 22px 16px 18px;
+  text-align: center;
+}
+.avatar-lg {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 10px;
+  font-size: 22px;
+}
+.profile-name {
+  font-size: 16px;
+  font-weight: 500;
+}
+.profile-email {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+.profile-role {
+  margin-top: 2px;
+  color: var(--faint);
+  font-size: 12px;
+}
+.profile-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.14);
+  color: var(--ok);
+  font-size: 11.5px;
+  font-weight: 500;
+}
+.menu-list {
+  padding: 6px;
+}
+.menu-row,
+#open-dashboard.menu-row {
+  display: flex;
+  width: 100%;
+  height: 42px;
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 13px;
+  text-align: left;
+}
+.menu-row:hover,
+#open-dashboard.menu-row:hover {
+  background: var(--hover);
+  color: var(--ink);
+}
+.menu-row svg {
+  width: 17px;
+  height: 17px;
+  flex: none;
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.menu-row span:first-of-type {
+  flex: 1;
+}
+.menu-arrow {
+  color: var(--faint);
+}
+.menu-row.danger,
+.menu-row.danger svg {
+  color: #fb7185;
+  stroke: #fb7185;
+}
+.made-inline {
+  margin-top: 18px !important;
+  padding-top: 0 !important;
+}
+.add input:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+/* The dock lives outside the sections (their slide-in would pin it to
+   them); it shows only when signed in. */
+body:not([data-view="main"]) .dock {
+  display: none;
+}
