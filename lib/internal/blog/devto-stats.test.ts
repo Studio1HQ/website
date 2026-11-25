@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   devDayValues,
+  devGrowth,
+  devMonths,
   devOrgSort,
   devWriters,
   readDevArticleNumbers,
@@ -76,7 +78,10 @@ describe("readDevDays", () => {
 describe("readDevDashboard", () => {
   const json = {
     historical: { "2026-11-20": day(50, 3, 1, 2, 60) },
-    totals: day(9000, 800, 120, 0, 70),
+    totals: {
+      ...day(9000, 800, 120, 0, 70),
+      reactions: { total: 800, readinglist: 300, unique_reactors: 450 },
+    },
     referrers: {
       domains: [
         { domain: "google.com", count: 40 },
@@ -106,7 +111,17 @@ describe("readDevDashboard", () => {
     const dashboard = readDevDashboard(json);
     expect(dashboard.days["2026-11-20"].follows).toBe(2);
     expect(dashboard.totals.views).toBe(9000);
-    expect(dashboard.referrers).toEqual([{ domain: "google.com", views: 40 }]);
+    expect(dashboard.lifetime).toEqual({
+      readSeconds: 630000,
+      saves: 300,
+      reactors: 450,
+    });
+    expect(dashboard.since).toBe("2024-08-22");
+    // Direct visits ("") stay; a site with no visits doesn't.
+    expect(dashboard.referrers).toEqual([
+      { domain: "google.com", views: 40 },
+      { domain: "", views: 3 },
+    ]);
     expect(dashboard.contributors).toEqual([
       { username: "ada", name: "Ada", reactions: 4, comments: 1 },
     ]);
@@ -123,6 +138,12 @@ describe("readDevDashboard", () => {
     expect(dashboard.referrers).toEqual([]);
     expect(dashboard.contributors).toEqual([]);
     expect(dashboard.engagement).toBeNull();
+    expect(dashboard.lifetime).toEqual({
+      readSeconds: 0,
+      saves: 0,
+      reactors: 0,
+    });
+    expect(dashboard.since).toBeNull();
   });
 });
 
@@ -252,6 +273,45 @@ describe("sumDevDays", () => {
 
   it("gives one number a day", () => {
     expect(devDayValues(days, "reactions")["2026-11-03"]).toBe(99);
+  });
+});
+
+describe("devMonths", () => {
+  // DEV's long-stretch shape: weeks (keyed by Monday) for old numbers, then days.
+  const days = readDevDays({
+    "2025-11-24": day(70, 7, 0, 7),
+    "2026-01-05": day(30, 3, 1, 3),
+    "2026-01-31": day(5, 0, 0, 1),
+    "2026-02-01": day(2, 1),
+  });
+
+  it("adds up each month and keeps empty months between", () => {
+    expect(devMonths(days)).toEqual([
+      { month: "2025-11", views: 70, reactions: 7, comments: 0, follows: 7 },
+      { month: "2025-12", views: 0, reactions: 0, comments: 0, follows: 0 },
+      { month: "2026-01", views: 35, reactions: 3, comments: 1, follows: 4 },
+      { month: "2026-02", views: 2, reactions: 1, comments: 0, follows: 0 },
+    ]);
+  });
+
+  it("is empty with no days", () => {
+    expect(devMonths({})).toEqual([]);
+  });
+
+  it("gives the running totals, views starting from what came before the records", () => {
+    const growth = devGrowth(devMonths(days), readDevDay(day(1107, 0, 0, 11)));
+    expect(growth.viewsBefore).toBe(1000);
+    expect(growth.followsBefore).toBe(0);
+    expect(growth.points.map((point) => point.views)).toEqual([
+      1070, 1070, 1105, 1107,
+    ]);
+    expect(growth.points.map((point) => point.follows)).toEqual([7, 7, 11, 11]);
+  });
+
+  it("never starts below zero when the total lags the days", () => {
+    const growth = devGrowth(devMonths(days), readDevDay(day(50, 0)));
+    expect(growth.viewsBefore).toBe(0);
+    expect(growth.points[0].views).toBe(70);
   });
 });
 

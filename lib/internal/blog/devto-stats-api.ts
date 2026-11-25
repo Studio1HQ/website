@@ -24,7 +24,7 @@ import type { StatsWindow } from "@/lib/internal/blog/stats";
  *                      Publishing to DEV is Blog → External, on DEV_API_KEY.
  *
  * DEV allows about 4 reads a second and 40 a minute per key, so a page
- * makes at most five, one after another, and keeps them for an hour.
+ * makes about six, one after another, and keeps them for an hour.
  * Nothing here throws: callers get `{ ok: false, message }`.
  */
 
@@ -188,9 +188,14 @@ type Loaded = {
   org: Org;
   dashboard: DevDashboard;
   previous: Record<string, DevDay>;
+  /** Every day (older ones a week at a time) since DEV's records begin, to today. */
+  history: Record<string, DevDay>;
   articles: DevOrgArticle[];
   viewsNote: string | null;
 };
+
+/** DEV's floor for the organization when it doesn't say (seen 26 Nov 2026). */
+const RECORDS_FROM = "2024-08-22";
 
 const loadStats = unstable_cache(
   async (
@@ -198,6 +203,7 @@ const loadStats = unstable_cache(
     end: string,
     previousStart: string,
     previousEnd: string,
+    today: string,
   ): Promise<Loaded> => {
     const org = await loadOrg();
     const organization_id = String(org.id);
@@ -212,17 +218,26 @@ const loadStats = unstable_cache(
         end: previousEnd,
       }),
     );
+    // To today, so it lines up with the all-time totals, which count today too.
+    const history = readDevDays(
+      await must("/analytics/historical", {
+        organization_id,
+        start: dashboard.since ?? RECORDS_FROM,
+        end: today,
+      }),
+    );
     const { numbers, note } = await articleNumbers(org.id, { start, end });
     const list = await orgArticleList();
     return {
       org,
       dashboard,
       previous,
+      history,
       articles: readDevOrgArticles(list, numbers ? new Map(numbers) : null),
       viewsNote: note,
     };
   },
-  ["devto-org-stats-v1"],
+  ["devto-org-stats-v2"],
   { revalidate: 60 * 60 },
 );
 
@@ -251,6 +266,7 @@ export async function devOrgStats(window: StatsWindow): Promise<DevOrgStats> {
         window.end,
         window.previousStart,
         window.previousEnd,
+        new Date().toISOString().slice(0, 10),
       )),
     };
   } catch (error) {

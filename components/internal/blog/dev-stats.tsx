@@ -1,10 +1,16 @@
 import Link from "next/link";
+import { ArrowDown, ArrowUp } from "@/components/internal/icons";
 import { Card, CardTitle, Notice, PageHeader } from "@/components/internal/ui";
-import { BarList, compact } from "@/components/internal/community/charts";
+import {
+  BarList,
+  ColumnChart,
+  Sparkline,
+  TableView,
+  compact,
+} from "@/components/internal/community/charts";
 import { Stat } from "@/components/internal/community/ui";
 import { FilterDropdown } from "@/components/internal/influencers/filter-dropdown";
 import {
-  Change,
   DayChart,
   StatsTabs,
   shortDay,
@@ -13,6 +19,8 @@ import {
   DEV_ORG_SORTS,
   DEV_ORG_URL,
   devDayValues,
+  devGrowth,
+  devMonths,
   devWriters,
   sortDevOrgArticles,
   sumDevDays,
@@ -53,6 +61,90 @@ function longDay(value: string | null) {
 
 const plural = (count: number, one: string, many = `${one}s`) =>
   `${compact(count)} ${count === 1 ? one : many}`;
+
+/** "Aug 2024" for a YYYY-MM month. */
+function monthName(month: string) {
+  return new Date(`${month}-01T00:00:00Z`).toLocaleDateString("en-GB", {
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
+/** "Nov", or "Jan 26" every January, under a column. */
+function monthShort(month: string) {
+  return new Date(`${month}-01T00:00:00Z`).toLocaleDateString("en-GB", {
+    month: "short",
+    ...(month.endsWith("-01") ? { year: "2-digit" } : {}),
+    timeZone: "UTC",
+  });
+}
+
+/** "▲ 106%" against the stretch before, short enough for a tile's note. */
+function Delta({ share, against }: { share: number | null; against: string }) {
+  if (share === null) return null;
+  const rounded = Math.round(share * 100);
+  if (rounded === 0)
+    return <span title={`Same as ${against}`}>, same as before</span>;
+  const Icon = rounded > 0 ? ArrowUp : ArrowDown;
+  return (
+    <span
+      title={`${rounded > 0 ? "Up" : "Down"} ${Math.abs(rounded)}% on ${against}`}
+      className="ml-1.5 inline-flex items-center gap-0.5 whitespace-nowrap"
+    >
+      <Icon
+        size={11}
+        weight="bold"
+        aria-hidden
+        className={
+          rounded > 0
+            ? "text-emerald-600 dark:text-emerald-400"
+            : "text-rose-600 dark:text-rose-400"
+        }
+      />
+      <span className="font-medium tabular-nums text-[var(--i-ink-2)]">
+        {Math.abs(rounded).toLocaleString("en-IN")}%
+      </span>
+    </span>
+  );
+}
+
+/** A running total, a point a month, with the first, middle and last months under it. */
+function GrowthChart({
+  points,
+  unit,
+}: {
+  points: { month: string; value: number }[];
+  unit: string;
+}) {
+  const middle = points[Math.floor((points.length - 1) / 2)];
+  return (
+    <div className="px-5 pb-4 pt-5">
+      <Sparkline
+        points={points.map((point) => ({
+          label: monthName(point.month),
+          value: point.value,
+        }))}
+        height={132}
+      />
+      <div className="mt-2 flex justify-between text-[11px] text-[var(--i-faint)]">
+        <span>{points[0] ? monthName(points[0].month) : ""}</span>
+        <span className="max-sm:hidden">
+          {middle ? monthName(middle.month) : ""}
+        </span>
+        <span>
+          {points.length ? monthName(points[points.length - 1].month) : ""}
+        </span>
+      </div>
+      <TableView
+        head={["End of", unit]}
+        rows={[...points]
+          .reverse()
+          .map((point) => [monthName(point.month), point.value])}
+      />
+    </div>
+  );
+}
 
 function query(range: string, sort?: string) {
   const params = new URLSearchParams();
@@ -291,18 +383,34 @@ export function DevStatsView({
   const before = data
     ? sumDevDays(data.previous, window.previousStart, window.previousEnd)
     : null;
-  const change = (key: "views" | "reactions" | "comments") => {
-    const share = now && before ? changeShare(now[key], before[key]) : null;
-    return share === null ? (
-      range.label
+  /** "+2.5K in 28 days ▲ 106%": what the range added to an all-time number. */
+  const added = (key: "views" | "reactions" | "comments" | "follows") =>
+    now ? (
+      <>
+        {now[key]
+          ? `+${compact(now[key])} in ${range.days} days`
+          : `None in ${range.days} days`}
+        <Delta
+          share={before ? changeShare(now[key], before[key]) : null}
+          against={against}
+        />
+      </>
     ) : (
-      <Change share={share} against={against} />
+      "DEV, all time"
     );
-  };
   const totals = data?.dashboard.totals ?? null;
+  const lifetime = data?.dashboard.lifetime ?? null;
   const followers = data
     ? (data.dashboard.engagement?.followers ?? data.dashboard.totals.follows)
     : null;
+
+  // Growth: month by month since DEV's records begin.
+  const months = data ? devMonths(data.history) : [];
+  const growth = data ? devGrowth(months, data.dashboard.totals) : null;
+  const year = months.slice(-12);
+  const thisMonth = new Date().toISOString().slice(0, 7);
+  const recordedSince = data?.dashboard.since ?? months[0]?.month ?? null;
+  const fromMonth = months[0] ? monthName(months[0].month) : "";
 
   const hasViews = Boolean(data && data.viewsNote === null);
   const articles = data ? sortDevOrgArticles(data.articles, sort) : [];
@@ -321,7 +429,7 @@ export function DevStatsView({
           </Link>
         }
         title="Stats"
-        description="How the Studio1 organization on DEV is read: views, reactions, comments and followers from DEV's own analytics."
+        description="The Studio1 organization on DEV: all-time totals, how they've grown month by month, and the last few days, from DEV's own analytics."
         actions={
           <FilterDropdown
             label="Range"
@@ -350,59 +458,46 @@ export function DevStatsView({
           <Notice tone="warning">
             Couldn&apos;t load DEV: {stats.message}
           </Notice>
-        ) : data?.viewsNote ? (
-          <Notice tone="info">{data.viewsNote}</Notice>
         ) : null}
       </div>
 
       <div className="mb-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat
-          label="Views"
-          value={now ? compact(now.views) : "–"}
-          note={now ? change("views") : "DEV"}
-        />
-        <Stat
-          label="Reactions"
-          value={now ? compact(now.reactions) : "–"}
-          note={now ? change("reactions") : "DEV"}
-        />
-        <Stat
-          label="Comments"
-          value={now ? compact(now.comments) : "–"}
-          note={now ? change("comments") : "DEV"}
+          label="Total views"
+          value={totals ? compact(totals.views) : "–"}
+          note={added("views")}
         />
         <Stat
           label="Followers"
           value={followers === null ? "–" : compact(followers)}
-          note={
-            now
-              ? now.follows
-                ? `${compact(now.follows)} new in ${range.days} days`
-                : `None new in ${range.days} days`
-              : "DEV"
-          }
+          note={added("follows")}
+        />
+        <Stat
+          label="Total reactions"
+          value={totals ? compact(totals.reactions) : "–"}
+          note={added("reactions")}
+        />
+        <Stat
+          label="Total comments"
+          value={totals ? compact(totals.comments) : "–"}
+          note={added("comments")}
         />
       </div>
 
       <p className="mb-5 px-1 text-[12.5px] text-[var(--i-muted)]">
-        All time:{" "}
-        <span className="font-medium tabular-nums text-[var(--i-ink-2)]">
-          {totals ? compact(totals.views) : "–"}
-        </span>{" "}
-        views,{" "}
-        <span className="font-medium tabular-nums text-[var(--i-ink-2)]">
-          {totals ? compact(totals.reactions) : "–"}
-        </span>{" "}
-        reactions,{" "}
-        <span className="font-medium tabular-nums text-[var(--i-ink-2)]">
-          {totals ? compact(totals.comments) : "–"}
-        </span>{" "}
-        comments
-        {data ? ` on ${plural(data.articles.length, "post")}` : ""}
-        {totals && totals.readSeconds
-          ? ` · average read ${readTime(totals.readSeconds)}`
+        {data ? `${plural(data.articles.length, "post")} · ` : ""}
+        {lifetime && lifetime.readSeconds
+          ? `${compact(Math.round(lifetime.readSeconds / 3600))} hours read · `
           : ""}
-        {" · "}
+        {lifetime && lifetime.saves
+          ? `${plural(lifetime.saves, "save")} to reading lists · `
+          : ""}
+        {lifetime && lifetime.reactors
+          ? `${plural(lifetime.reactors, "person", "people")} reacted · `
+          : ""}
+        {totals && totals.readSeconds
+          ? `average read ${readTime(totals.readSeconds)} · `
+          : ""}
         <a
           href={DEV_ORG_URL}
           target="_blank"
@@ -412,6 +507,109 @@ export function DevStatsView({
           dev.to/studio1hq
         </a>
       </p>
+
+      <div className="mb-5 grid gap-5 lg:grid-cols-3">
+        <Card>
+          <CardTitle
+            action={
+              growth && months.length ? (
+                <span className="text-[12px] text-[var(--i-muted)]">
+                  +{compact(totals!.views - growth.viewsBefore)} since{" "}
+                  {fromMonth}
+                </span>
+              ) : null
+            }
+          >
+            Total views
+          </CardTitle>
+          {growth && growth.points.length >= 2 ? (
+            <GrowthChart
+              points={growth.points.map((point) => ({
+                month: point.month,
+                value: point.views,
+              }))}
+              unit="Views so far"
+            />
+          ) : (
+            <p className="px-5 py-12 text-center text-[13px] text-[var(--i-muted)]">
+              {data ? "DEV has no months to show yet." : waiting}
+            </p>
+          )}
+        </Card>
+        <Card>
+          <CardTitle
+            action={
+              growth && months.length ? (
+                <span className="text-[12px] text-[var(--i-muted)]">
+                  +{compact(totals!.follows - growth.followsBefore)} since{" "}
+                  {fromMonth}
+                </span>
+              ) : null
+            }
+          >
+            Followers
+          </CardTitle>
+          {growth && growth.points.length >= 2 ? (
+            <GrowthChart
+              points={growth.points.map((point) => ({
+                month: point.month,
+                value: point.follows,
+              }))}
+              unit="Followers"
+            />
+          ) : (
+            <p className="px-5 py-12 text-center text-[13px] text-[var(--i-muted)]">
+              {data ? "DEV has no months to show yet." : waiting}
+            </p>
+          )}
+        </Card>
+        <Card>
+          <CardTitle
+            action={
+              year.length ? (
+                <span className="text-[12px] text-[var(--i-muted)]">
+                  {compact(year.reduce((sum, row) => sum + row.views, 0))} in{" "}
+                  {year.length} months
+                </span>
+              ) : null
+            }
+          >
+            Views a month
+          </CardTitle>
+          {year.length ? (
+            <div className="px-5 pb-4 pt-5">
+              <ColumnChart
+                series={["Views"]}
+                height={132}
+                format={compact}
+                groups={year.map((row) => ({
+                  key: row.month,
+                  label: monthShort(row.month),
+                  values: [row.views],
+                }))}
+              />
+              <TableView
+                head={["Month", "Views", "Reactions", "Comments", "Followers"]}
+                rows={[...months]
+                  .reverse()
+                  .map((row) => [
+                    row.month === thisMonth
+                      ? `${monthName(row.month)}, so far`
+                      : monthName(row.month),
+                    row.views,
+                    row.reactions,
+                    row.comments,
+                    row.follows,
+                  ])}
+              />
+            </div>
+          ) : (
+            <p className="px-5 py-12 text-center text-[13px] text-[var(--i-muted)]">
+              {data ? "DEV has no months to show yet." : waiting}
+            </p>
+          )}
+        </Card>
+      </div>
 
       <div className="mb-5 grid gap-5 xl:grid-cols-2">
         <Card>
@@ -514,8 +712,14 @@ export function DevStatsView({
                 data ? "No visits from other sites in this range." : waiting
               }
               rows={referrers.slice(0, 8).map((row) => ({
-                key: row.domain,
-                label: <span title={row.domain}>{row.domain}</span>,
+                key: row.domain || "direct",
+                label: row.domain ? (
+                  <span title={row.domain}>{row.domain}</span>
+                ) : (
+                  <span title="No referring site: typed in, bookmarks, apps, or a site that hides itself">
+                    Direct or unknown
+                  </span>
+                ),
                 value: row.views,
                 figure: compact(row.views),
                 note: referred
@@ -576,7 +780,10 @@ export function DevStatsView({
                   className="text-[12px] text-[var(--i-muted)]"
                   title={`${compact(engagement.engaged)} of ${compact(engagement.followers)} followers reacted or commented in ${range.days} days`}
                 >
-                  {Math.round(engagement.percent)}% of followers engaged
+                  {engagement.percent > 0 && engagement.percent < 1
+                    ? engagement.percent.toFixed(1)
+                    : Math.round(engagement.percent)}
+                  % of followers engaged
                 </span>
               ) : null
             }
@@ -615,11 +822,15 @@ export function DevStatsView({
       </div>
 
       <p className="px-1 text-[12px] leading-relaxed text-[var(--i-faint)]">
-        {shortDay(window.start)} to {shortDay(window.end)}. Everything here
-        comes from DEV&apos;s analytics for the Studio1 organization, read with
-        a key that never publishes; posts written under a personal account
+        Days: {shortDay(window.start)} to {shortDay(window.end)}. Everything
+        here comes from DEV&apos;s analytics for the Studio1 organization, read
+        with a key that never publishes; posts written under a personal account
         aren&apos;t counted. DEV counts readers who aren&apos;t signed in too;
-        read time is for signed-in readers. Numbers refresh every hour.
+        read time is for signed-in readers.
+        {growth && growth.viewsBefore && recordedSince
+          ? ` DEV keeps day-by-day numbers from ${longDay(recordedSince)}; the total views line starts at ${compact(growth.viewsBefore)}, the part of the all-time total it has no days for (older views).`
+          : ""}{" "}
+        Numbers refresh every hour.
       </p>
     </>
   );

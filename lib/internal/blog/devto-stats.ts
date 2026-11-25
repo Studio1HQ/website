@@ -11,11 +11,15 @@ import { canonicalSlug, devPath } from "@/lib/internal/blog/devto";
  *     { historical: { "YYYY-MM-DD": Day }, totals: Day (all time),
  *       referrers: { domains: [{ domain, count }] },
  *       top_contributors: [{ username, name, reactions_count, comments_count }],
- *       follower_engagement: { total_followers, engaged_followers, ratio } }
+ *       follower_engagement: { total_followers, engaged_followers, ratio },
+ *       start_date_floor: "2024-08-22" }
  *     Day = { comments: { total }, follows: { total },
- *             reactions: { total, like, readinglist, … },
- *             page_views: { total, average_read_time_in_seconds } }
+ *             reactions: { total, like, readinglist, unique_reactors, … },
+ *             page_views: { total, average_read_time_in_seconds,
+ *                           total_read_time_in_seconds } }
  *   GET /api/analytics/historical?organization_id&start&end   { "YYYY-MM-DD": Day }
+ *     (checked 26 Nov 2026: over a long stretch, entries older than about
+ *     six months come one a week, keyed by the Monday, holding the week's sum)
  *   GET /api/organizations/:id/article_analytics?start&end
  *     [{ id, page_views_count, public_reactions_count, comments_count,
  *        daily: [{ date, page_views, comments, reactions: { total } }] }]
@@ -55,9 +59,14 @@ export type DevDashboard = {
   days: Record<string, DevDay>;
   /** All time. */
   totals: DevDay;
+  /** All time too: seconds read, reading-list saves, people who reacted. */
+  lifetime: { readSeconds: number; saves: number; reactors: number };
+  /** Readers who came from a site; `domain` is "" for direct or unknown. */
   referrers: DevReferrer[];
   contributors: DevContributor[];
   engagement: DevEngagement | null;
+  /** The first day DEV keeps day-by-day numbers for, or null. */
+  since: string | null;
 };
 
 /** One published post on the organization. */
@@ -137,16 +146,25 @@ export function readDevDashboard(json: unknown): DevDashboard {
   const row = record(json);
   const domains = record(row.referrers).domains;
   const engagement = record(row.follower_engagement);
+  const totals = record(row.totals);
+  const reactions = record(totals.reactions);
+  const since = row.start_date_floor;
   return {
     days: readDevDays(row.historical),
-    totals: readDevDay(row.totals),
+    totals: readDevDay(totals),
+    lifetime: {
+      readSeconds: count(record(totals.page_views).total_read_time_in_seconds),
+      saves: count(reactions.readinglist),
+      reactors: count(reactions.unique_reactors),
+    },
     referrers: (Array.isArray(domains) ? domains : []).flatMap(
       (item): DevReferrer[] => {
         const domain = oneLine(record(item).domain);
         const views = count(record(item).count);
-        return domain && views ? [{ domain, views }] : [];
+        return views ? [{ domain, views }] : [];
       },
     ),
+    since: typeof since === "string" && DAY.test(since) ? since : null,
     contributors: (Array.isArray(row.top_contributors)
       ? row.top_contributors
       : []
@@ -259,6 +277,80 @@ export function sumDevDays(
   }
   sum.readSeconds = sum.views ? Math.round(weighted / sum.views) : 0;
   return sum;
+}
+
+export type DevMonth = {
+  /** "2026-11" */
+  month: string;
+  views: number;
+  reactions: number;
+  comments: number;
+  follows: number;
+};
+
+/**
+ * DEV's history added up per month, every month from the first to the last
+ * it has (empty ones included), oldest first. Over a long stretch DEV sends
+ * older numbers one entry a week, keyed by its Monday, so a week that runs
+ * past a month's end counts in the month it starts in.
+ */
+export function devMonths(days: Readonly<Record<string, DevDay>>): DevMonth[] {
+  const keys = Object.keys(days)
+    .filter((day) => DAY.test(day))
+    .sort();
+  if (!keys.length) return [];
+  const months = new Map<string, DevMonth>();
+  const [lastYear, lastMonth] = keys[keys.length - 1].split("-").map(Number);
+  for (
+    let [year, month] = keys[0].split("-").map(Number);
+    year < lastYear || (year === lastYear && month <= lastMonth);
+    month === 12 ? ((year += 1), (month = 1)) : (month += 1)
+  ) {
+    const key = `${year}-${String(month).padStart(2, "0")}`;
+    months.set(key, {
+      month: key,
+      views: 0,
+      reactions: 0,
+      comments: 0,
+      follows: 0,
+    });
+  }
+  for (const day of keys) {
+    const row = months.get(day.slice(0, 7))!;
+    row.views += days[day].views;
+    row.reactions += days[day].reactions;
+    row.comments += days[day].comments;
+    row.follows += days[day].follows;
+  }
+  return [...months.values()];
+}
+
+/**
+ * Views and followers so far at the end of each month. DEV's all-time
+ * totals count views from before its day-by-day records begin, so the
+ * views line starts from that difference (`viewsBefore`).
+ */
+export function devGrowth(months: readonly DevMonth[], totals: DevDay) {
+  const recorded = months.reduce(
+    (sum, row) => ({
+      views: sum.views + row.views,
+      follows: sum.follows + row.follows,
+    }),
+    { views: 0, follows: 0 },
+  );
+  const viewsBefore = Math.max(0, totals.views - recorded.views);
+  const followsBefore = Math.max(0, totals.follows - recorded.follows);
+  let views = viewsBefore;
+  let follows = followsBefore;
+  return {
+    viewsBefore,
+    followsBefore,
+    points: months.map((row) => ({
+      month: row.month,
+      views: (views += row.views),
+      follows: (follows += row.follows),
+    })),
+  };
 }
 
 /** One number a day from DEV's days. */

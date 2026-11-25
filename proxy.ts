@@ -65,8 +65,11 @@ const FILE_LIKE = /\.[^/]*$/;
  * keyed by email, draft images end in .webp. They keep their own caching.
  */
 const DASHBOARD_FILE_ROUTES = new Set(["team-file", "blog-media"]);
-/** The public site's files a dashboard page loads (fonts, icons, pictures). */
-const STATIC_FILE = /\.(?:png|jpe?g|webp|avif|gif|svg|ico|woff2?|ttf|otf|css|js|mjs|map|webmanifest)$/i;
+/**
+ * The public site's files a dashboard page loads (fonts, icons, pictures),
+ * and the Connect extension's zip its Connections page offers.
+ */
+const STATIC_FILE = /\.(?:png|jpe?g|webp|avif|gif|svg|ico|woff2?|ttf|otf|css|js|mjs|map|webmanifest|zip)$/i;
 /** Public routes a dashboard page loads: the email header images in previews. */
 const PUBLIC_ROUTES = new Set(["og"]);
 
@@ -77,6 +80,8 @@ const DASHBOARD_ROBOTS = [
 ].join("\n");
 
 const NOINDEX = "noindex, nofollow";
+/** app/internal/extension/privacy, served on the public site (see proxy below). */
+const EXTENSION_PRIVACY_PATH = "/internal/extension/privacy";
 const LOGO_POLICY = "default-src 'none'; style-src 'unsafe-inline'; sandbox";
 
 function dashboardPolicy(nonce: string) {
@@ -230,6 +235,11 @@ export async function proxy(request: NextRequest) {
   const { pathname } = nextUrl;
 
   if (isDashboardHost(request.headers.get("host"))) return dashboardHost(request);
+
+  // The Connect extension's privacy policy is the one /internal page served
+  // here, in the open: its Chrome Web Store listing links to it, while the
+  // dashboard itself stays behind sign-in on its own host.
+  if (pathname === EXTENSION_PRIVACY_PATH) return noindex(NextResponse.next());
 
   if (pathname === "/internal" || pathname.startsWith("/internal/")) {
     return toDashboard(request);
