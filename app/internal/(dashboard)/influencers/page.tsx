@@ -168,7 +168,7 @@ export default async function InfluencersPage({
 
   const header = (
     <PageHeader
-      eyebrow="Workspaces"
+      eyebrow="Marketing"
       title="Influencers"
       description="Every creator and newsletter you can book: their niche and audience, what a typical post gets, what they charge for each format, and how the posts you paid for did."
       actions={

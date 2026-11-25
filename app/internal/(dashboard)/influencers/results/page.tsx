@@ -57,7 +57,7 @@ export default async function InfluencerResultsPage({
 
   const header = (
     <PageHeader
-      eyebrow="Workspaces"
+      eyebrow="Marketing"
       title="Influencers"
       description="What the posts you paid for actually got: which platform, which format and which creator gave the most views for the money."
     />

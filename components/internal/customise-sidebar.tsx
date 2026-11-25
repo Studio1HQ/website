@@ -16,7 +16,7 @@ function readSections() {
 
 /**
  * Customise sidebar: an on/off switch for each section of the sidebar
- * (Workspaces, Pipelines, Team, ...). A switched-off section disappears from
+ * (Work, Clients, Marketing, ...). A switched-off section disappears from
  * the sidebar until it's switched back on; Overview always stays. Opened
  * from the account menu (the "internal:customise-sidebar" event).
  */

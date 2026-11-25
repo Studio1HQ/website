@@ -328,7 +328,7 @@ export function PageHeader({
     <header className="mb-6 flex flex-wrap items-end justify-between gap-4 md:pr-24">
       <div className="min-w-0">
         {/* Only a way back (a link) shows above the title. A plain group name
-            ("Workspaces", "Team") says nothing the sidebar doesn't, so the
+            ("Marketing", "Team") says nothing the sidebar doesn't, so the
             page's own name stands alone. */}
         {eyebrow && typeof eyebrow !== "string" ? (
           <div className="mb-2 text-[13px] text-[var(--i-muted)] [&_a:hover]:text-[var(--i-ink)]">{eyebrow}</div>
