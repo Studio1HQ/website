@@ -4,7 +4,7 @@ import { startTransition, useMemo, useOptimistic, useRef, useState, useTransitio
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { DndContext, DragOverlay, useDraggable, useDroppable, type DragEndEvent } from "@dnd-kit/core";
-import { CaretDown, CheckCircle, Plus, Prohibit, Sparkle, UsersThree } from "@/components/internal/icons";
+import { CalendarRange, CaretDown, CheckCircle, Plus, Prohibit, Sparkle, UsersThree, X } from "@/components/internal/icons";
 import { StatusPicker, StatusPill, TonePill } from "@/components/internal/tasks/status-pill";
 import {
   addTasks as addTasksAction,
@@ -23,9 +23,10 @@ import { TaskNote } from "@/components/internal/tasks/task-note";
 import { PriorityMark, PriorityPicker } from "@/components/internal/tasks/priority";
 import { WithPicker } from "@/components/internal/tasks/with-picker";
 import { cardAnnouncements, dragHandlers, underPointer, useCardSensors } from "@/components/internal/tasks/drag";
-import { earliestCardDay, type CalendarCard } from "@/lib/internal/tasks/calendar";
+import { addDays, earliestCardDay, movedSpan, spanLabel, type CalendarCard, type Span } from "@/lib/internal/tasks/calendar";
 import {
   DEFAULT_PRIORITY,
+  MAX_RANGE_DAYS,
   STUDIO_LINK,
   TASK_PRIORITIES,
   TASK_STATUSES,
@@ -47,10 +48,11 @@ const setDeliverableDay = guarded(setDeliverableDayAction);
 /* The week calendar: a column per day, a card per task, the way the old
    tracker looked. Your own cards: "+ New" on a day, click the pill to
    change the status, click the card to edit, drag it to another day (it
-   lands there at once; the save follows). Your open client deliverables
-   drag too: the day they land on becomes their due date. On someone
-   else's week, the same for whoever may give them tasks and change their
-   cards (lib/internal/tasks/access.ts). */
+   lands there at once; the save follows). A task that runs over several
+   days sits on each of them, and dragging any of its copies moves the
+   whole run. Your open client deliverables drag too: the day they land on
+   becomes their due date. On someone else's week, the same for whoever may
+   give them tasks and change their cards (lib/internal/tasks/access.ts). */
 
 const weekdayFormat = new Intl.DateTimeFormat("en-GB", { weekday: "short", timeZone: "UTC" });
 const dateFormat = new Intl.DateTimeFormat("en-GB", { day: "numeric", timeZone: "UTC" });
@@ -106,34 +108,57 @@ export function WeekCalendar({
   const [lifted, setLifted] = useState<CalendarCard | null>(null);
   /** The "No day yet" strip, folded away or open. */
   const [trayOpen, setTrayOpen] = useState(true);
-  /** Cards dropped on another day and still saving: they show there already; a failed save puts them back. */
-  const [moved, move] = useOptimistic<Record<string, string>, { key: string; day: string }>({}, (state, next) => ({
+  /** Cards dropped on another day and still saving (their new days): they show there already; a failed save puts them back. */
+  const [moved, move] = useOptimistic<Record<string, Moved>, { key: string; to: Moved }>({}, (state, next) => ({
     ...state,
-    [next.key]: next.day,
+    [next.key]: next.to,
   }));
   const earliest = earliestCardDay(today);
-  const movable = [...cards, ...tray].some((card) => canMove(card, own));
+  const all = [...cards, ...tray];
+  const movable = all.some((card) => canMove(card, own));
   const isMoved = (card: CalendarCard) => keyOf(card) in moved;
-  const placed = [...cards, ...tray.filter(isMoved)].map((card) => (isMoved(card) ? { ...card, day: moved[keyOf(card)] } : card));
+  // A moved card goes on each of its new days in this week (one, unless it runs over several).
+  const placed = [
+    ...cards.filter((card) => !isMoved(card)),
+    ...all
+      .filter((card, index) => isMoved(card) && all.findIndex((other) => keyOf(other) === keyOf(card)) === index)
+      .flatMap((card) => {
+        const { from, to } = moved[keyOf(card)];
+        const range = from ? { from, to } : null;
+        return days
+          .filter((day) => day >= (from ?? to) && day <= to)
+          .map((day): CalendarCard => (card.kind === "task" ? { ...card, day, range } : { ...card, day }));
+      }),
+  ];
   const waiting = tray.filter((card) => !isMoved(card));
 
-  /** Whether a card may go on a day: the viewer may move it, the day isn't too far back, and done work can't be finished ahead. */
-  const fits = (card: CalendarCard | null, day: string) =>
-    !!card && canMove(card, own) && card.day !== day && day >= earliest && !(card.kind === "task" && card.status === "done" && day > today);
+  /** Where a card's days go when it's dropped on `day` (a run of days keeps its length). */
+  const landing = (card: CalendarCard, day: string): Moved =>
+    card.kind === "task" ? movedSpan(card.range, card.day, day, !!card.day && days.includes(card.day)) : { from: null, to: day };
+
+  /** Whether a card may go on a day: the viewer may move it, no day is too far back, and done work can't be finished ahead. */
+  const fits = (card: CalendarCard | null, day: string) => {
+    if (!card || !canMove(card, own) || card.day === day) return false;
+    const { from, to } = landing(card, day);
+    return (from ?? to) >= earliest && !(card.kind === "task" && card.status === "done" && to > today);
+  };
 
   const drop = ({ active, over }: DragEndEvent) => {
     setLifted(null);
     const card = active.data.current?.card as CalendarCard | undefined;
     const day = typeof over?.id === "string" ? over.id : null;
     if (!card || !day || !fits(card, day)) return;
+    const to = landing(card, day);
     run(() => {
-      move({ key: keyOf(card), day });
-      // A deliverable's day is its due date; a task's is the day it's on.
-      return card.kind === "deliverable" ? setDeliverableDay(card.id, day, card.day ?? "") : editTask(card.id, { day });
+      move({ key: keyOf(card), to });
+      // A deliverable's day is its due date; a task's is the day it's on (its last, with its first, when it runs over several).
+      return card.kind === "deliverable"
+        ? setDeliverableDay(card.id, day, card.day ?? "")
+        : editTask(card.id, to.from ? { day: to.to, from: to.from } : { day: to.to });
     });
   };
 
-  const titleOf = (id: string | number) => [...cards, ...tray].find((card) => keyOf(card) === id)?.title;
+  const titleOf = (id: string | number) => all.find((card) => dragId(card) === id)?.title;
   const announcements = cardAnnouncements(titleOf, (id) => (typeof id === "string" ? fullFormat.format(at(id)) : undefined));
 
   return (
@@ -166,7 +191,7 @@ export function WeekCalendar({
               <ul className="flex gap-2 overflow-x-auto px-2 pb-2">
                 {waiting.map((card) => (
                   <li key={`${card.kind}:${card.id}`} className="w-[250px] shrink-0">
-                    <Card card={card} own={own} who={who} team={team} options={options} today={today} showDay movable />
+                    <Card card={card} own={own} who={who} team={team} options={options} today={today} showDay movable lifted={lifted} />
                   </li>
                 ))}
               </ul>
@@ -186,8 +211,8 @@ export function WeekCalendar({
                   {list.length ? (
                     <ul className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-1">
                       {list.map((card) => (
-                        <li key={`${card.kind}:${card.id}`}>
-                          <Card card={card} own={own} who={who} team={team} options={options} today={today} movable />
+                        <li key={dragId(card)}>
+                          <Card card={card} own={own} who={who} team={team} options={options} today={today} movable lifted={lifted} />
                         </li>
                       ))}
                     </ul>
@@ -259,7 +284,8 @@ function DayColumn({
 
 /**
  * "+ New" at the bottom of a day: the task, an optional note for whoever
- * checks it, anyone it's shared with, what it's for and its priority, then
+ * checks it, anyone it's shared with, more days for work that runs over
+ * several (the day is the first), what it's for and its priority, then
  * Save, which closes the box. Enter in the task moves to the
  * note; ⌘/Ctrl+Enter saves from either. Pasting a list lines up one task per line. On My day
  * the box has a Day at the top, for work that belongs to another day (last
@@ -307,6 +333,8 @@ export function AddCard({
   const [priority, setPriority] = useState<TaskPriority>(DEFAULT_PRIORITY);
   /** Who the tasks are shared with: on their lists too. */
   const [sharedWith, setSharedWith] = useState<string[]>([]);
+  /** Work that runs over several days: the last of them ("" for just the one). */
+  const [until, setUntil] = useState("");
   /** The day the tasks go on: the box's own, unless another is picked. */
   const [ownDay, setOwnDay] = useState(day);
   const on = onDayChange ? day : ownDay;
@@ -320,6 +348,9 @@ export function AddCard({
   const choices = useMemo(() => forSelectOptions(options), [options]);
   const suggestion = !picked && text.trim().length > 3 ? suggestLink(text, options) : null;
   const ahead = on > today;
+  const spans = until > on;
+  /** What a new card saves as (the action's own rule): ahead or given, Not started; running through today, In progress. */
+  const saveAs = person || ahead ? "Not started" : spans && until >= today ? "In progress" : "Done";
   const firstName = person ? person.name.split(/[\s@]/)[0] : "";
   const several = list.length > 0;
   const empty = !several && !text.trim() && !note.trim();
@@ -333,6 +364,7 @@ export function AddCard({
     setPicked(false);
     setPriority(DEFAULT_PRIORITY);
     setSharedWith([]);
+    setUntil("");
   };
 
   const close = () => {
@@ -347,7 +379,12 @@ export function AddCard({
       : [{ title: text.trim(), notes: note.trim(), link, priority }];
     if (!items.some((item) => item.title)) return;
     run(
-      () => addTasks(on, items, { ...(person ? { email: person.email } : {}), ...(sharedWith.length ? { with: sharedWith } : {}) }),
+      () =>
+        addTasks(on, items, {
+          ...(person ? { email: person.email } : {}),
+          ...(sharedWith.length ? { with: sharedWith } : {}),
+          ...(spans ? { until } : {}),
+        }),
       () => {
         // Saved: the box closes back to "+ New" (My day's box stays, empty, for the next one).
         // In the action's transition, so the box goes as the new card shows up.
@@ -503,6 +540,43 @@ export function AddCard({
 
   const peoplePicker = <WithPicker team={team} value={sharedWith} onChange={setSharedWith} exclude={[who]} disabled={pending} />;
 
+  // Work that runs over several days sits on each of them: nothing to move along day by day.
+  const daysField = until ? (
+    <span className="flex flex-wrap items-center gap-1 text-[11.5px] text-[var(--i-muted)]">
+      <CalendarRange size={11} className="shrink-0 text-[var(--i-faint)]" />
+      Until
+      <DateField
+        value={until}
+        onChange={setUntil}
+        min={addDays(on, 1)}
+        max={addDays(on, MAX_RANGE_DAYS - 1)}
+        disabled={pending}
+        aria-label="Last day"
+        className="h-7 w-auto px-2 text-[12px]"
+      />
+      <button
+        type="button"
+        onMouseDown={(event) => event.preventDefault()}
+        onClick={() => setUntil("")}
+        aria-label="Just this day"
+        title="Just this day"
+        className="rounded p-0.5 text-[var(--i-faint)] hover:text-[var(--i-ink)]"
+      >
+        <X size={12} />
+      </button>
+    </span>
+  ) : (
+    <button
+      type="button"
+      onMouseDown={(event) => event.preventDefault()}
+      onClick={() => setUntil(addDays(on, 1))}
+      title="For work that runs over several days: it shows on each of them"
+      className="flex items-center gap-1 px-0.5 text-[11.5px] text-[var(--i-faint)] hover:text-[var(--i-ink)]"
+    >
+      <Plus size={11} /> More days
+    </button>
+  );
+
   const priorityPicker = <PriorityPicker value={priority} onChange={setPriority} size={inline ? "sm" : "xs"} disabled={pending} />;
 
   const suggestionChip =
@@ -540,7 +614,7 @@ export function AddCard({
         type="button"
         onClick={save}
         disabled={pending || (!several && !text.trim())}
-        title={`Saves as ${person || ahead ? "Not started" : "Done"}`}
+        title={`Saves as ${saveAs}`}
         className={cn(buttonClass("primary", inline ? "md" : "sm"), !startOpen && "flex-1 px-1")}
       >
         {pending ? "Saving…" : several ? `Save ${list.length}` : "Save"}
@@ -564,16 +638,23 @@ export function AddCard({
           <p className="flex flex-wrap items-center gap-x-2 px-0.5 text-[12px] text-[var(--i-muted)]">{movedNote}</p>
         ) : null}
         {several ? (
-          peoplePicker
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            {peoplePicker}
+            {daysField}
+          </div>
         ) : noting ? (
           <>
             {noteField}
-            {peoplePicker}
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              {peoplePicker}
+              {daysField}
+            </div>
           </>
-        ) : text.trim() || sharedWith.length ? (
+        ) : text.trim() || sharedWith.length || until ? (
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             {noteField}
             {peoplePicker}
+            {daysField}
           </div>
         ) : null}
         {suggestionChip}
@@ -606,7 +687,10 @@ export function AddCard({
       {several ? (
         <>
           {pastedList}
-          {peoplePicker}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            {peoplePicker}
+            {daysField}
+          </div>
         </>
       ) : (
         <>
@@ -614,12 +698,16 @@ export function AddCard({
           {noting ? (
             <>
               {noteField}
-              {peoplePicker}
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                {peoplePicker}
+                {daysField}
+              </div>
             </>
           ) : (
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
               {noteField}
               {peoplePicker}
+              {daysField}
             </div>
           )}
         </>
@@ -638,6 +726,14 @@ export function AddCard({
 function keyOf(card: CalendarCard) {
   return `${card.kind}:${card.id}`;
 }
+
+/** One copy of a card: a task over several days has one on each, so the day tells them apart. */
+function dragId(card: CalendarCard) {
+  return `${keyOf(card)}@${card.day ?? "-"}`;
+}
+
+/** A card's days after a move: its last (`to`), and its first when it runs over several. */
+type Moved = { from: string | null; to: string };
 
 /** Whether the viewer may edit, move or delete a card: the page says, else your own week's tasks. */
 function canEdit(card: CalendarCard, own: boolean) {
@@ -742,6 +838,7 @@ function Card({
   today,
   showDay = false,
   movable = false,
+  lifted = null,
 }: {
   card: CalendarCard;
   own: boolean;
@@ -753,6 +850,8 @@ function Card({
   showDay?: boolean;
   /** On the week calendar: the viewer can drag it to another day. */
   movable?: boolean;
+  /** The card being dragged: every copy of a task over several days fades with it. */
+  lifted?: CalendarCard | null;
 }) {
   const { run } = useTeamAction();
   /** A status picked on the card shows at once, while it saves. */
@@ -765,7 +864,10 @@ function Card({
   const editable = canEdit(card, own);
   const draggable = movable && canMove(card, own);
   const done = card.kind === "task" ? card.status === "done" : card.done;
-  const { setNodeRef, listeners, isDragging } = useDraggable({ id: keyOf(card), data: { card }, disabled: !draggable });
+  const { setNodeRef, listeners, isDragging } = useDraggable({ id: dragId(card), data: { card }, disabled: !draggable });
+  const range = card.kind === "task" ? card.range : null;
+  /** In the tray: the day (or days) it was for, red once they're past and it's still owed. */
+  const overdue = !!card.day && card.day < today && !done && !(card.kind === "task" && card.status === "review");
 
   return (
     <article
@@ -779,7 +881,7 @@ function Card({
         (editable || draggable) && "hover:border-[var(--i-line-strong)]",
         // Hold to drag on a phone: no text selection or callout getting in the way.
         draggable && "touch-manipulation select-none [-webkit-touch-callout:none] md:cursor-grab",
-        isDragging && "opacity-40",
+        (isDragging || (lifted && keyOf(lifted) === keyOf(card))) && "opacity-40",
       )}
     >
       {editable ? (
@@ -817,11 +919,19 @@ function Card({
           })
         }
       />
-      {/* One quiet line: the day it was for, who gave it, who else is on it. */}
-      {(showDay && card.day) || (card.kind === "task" && (card.from || card.withNames.length)) ? (
+      {/* One quiet line: the days it runs over, the day it was for, who gave it, who else is on it. */}
+      {range || (showDay && card.day) || (card.kind === "task" && (card.from || card.withNames.length)) ? (
         <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-[var(--i-faint)]">
-          {showDay && card.day ? (
-            <span className={card.day < today && !done && !(card.kind === "task" && card.status === "review") ? "text-rose-600 dark:text-rose-400" : undefined}>
+          {range ? (
+            <span
+              title={`${done ? "Ran" : "Runs"} ${shortFormat.format(at(range.from))} to ${shortFormat.format(at(range.to))}`}
+              className={cn("inline-flex items-center gap-1 tabular-nums", showDay && overdue && "text-rose-600 dark:text-rose-400")}
+            >
+              <CalendarRange size={11} className="shrink-0" />
+              {spanLabel(range)}
+            </span>
+          ) : showDay && card.day ? (
+            <span className={overdue ? "text-rose-600 dark:text-rose-400" : undefined}>
               {card.day < today ? "Was for" : "For"} {shortDay.format(at(card.day))}
             </span>
           ) : null}
@@ -877,7 +987,9 @@ function EditCard({
     status: card.status as TaskStatus,
     priority: card.priority,
     people: card.people,
-    day: card.day ?? "",
+    // The day it's on (the first, for a task over several days) and, for one over several, the last.
+    day: card.range?.from ?? card.day ?? "",
+    until: card.range?.to ?? "",
   });
   const [form, setForm] = useState(start);
   const [confirming, setConfirming] = useState(false);
@@ -896,7 +1008,16 @@ function EditCard({
     if (form.status !== card.status) patch.status = form.status;
     if (form.priority !== card.priority) patch.priority = form.priority;
     if ([...form.people].sort().join() !== [...card.people].sort().join()) patch.with = form.people;
-    if (form.day && form.day !== card.day) patch.day = form.day;
+    // `day` is the last day (the one it's due, or was finished), `from` the first when there are several.
+    const was: Span | null = card.range;
+    const last = was?.to ?? card.day;
+    if (form.day && form.until > form.day) {
+      if (form.until !== last) patch.day = form.until;
+      if (form.day !== was?.from) patch.from = form.day;
+    } else {
+      if (form.day && form.day !== last) patch.day = form.day;
+      if (was) patch.from = null;
+    }
     if (!Object.keys(patch).length) return close();
     run(() => editTask(card.id, patch), close);
   };
@@ -934,16 +1055,69 @@ function EditCard({
         </>
       }
     >
-      {/* A done card sits on the day it was finished: change it here, even once that week is over. */}
-      <Label label={form.status === "done" ? "Finished on" : "Day"} group>
-        <DateField
-          value={form.day}
-          onChange={(day) => setForm({ ...form, day })}
-          min={earliestCardDay(today)}
-          max={form.status === "done" ? today : undefined}
-          aria-label={form.status === "done" ? "Finished on" : "Day"}
-        />
-      </Label>
+      {/* A done card sits on the day it was finished: change it here, even once that week is over.
+          A task over several days has a first and a last (for a done one, the day it was finished). */}
+      {form.until ? (
+        <Label label={form.status === "done" ? "Worked on" : "Days"} hint={form.status === "done" ? "to the day it was finished" : undefined} group>
+          <div className="flex flex-wrap items-center gap-2">
+            <DateField
+              value={form.day}
+              onChange={(day) => setForm({ ...form, day })}
+              min={earliestCardDay(today)}
+              max={addDays(form.until, -1)}
+              required
+              aria-label="First day"
+              className="w-auto"
+            />
+            <span className="text-[12.5px] text-[var(--i-muted)]">to</span>
+            <DateField
+              value={form.until}
+              onChange={(until) => setForm({ ...form, until })}
+              min={form.day ? addDays(form.day, 1) : earliestCardDay(today)}
+              max={form.status === "done" ? today : form.day ? addDays(form.day, MAX_RANGE_DAYS - 1) : undefined}
+              required
+              aria-label={form.status === "done" ? "Finished on" : "Last day"}
+              className="w-auto"
+            />
+            <button
+              type="button"
+              onClick={() => setForm({ ...form, until: "" })}
+              className="text-[12px] text-[var(--i-faint)] underline hover:text-[var(--i-ink)]"
+            >
+              Just one day
+            </button>
+          </div>
+        </Label>
+      ) : (
+        <Label label={form.status === "done" ? "Finished on" : "Day"} group>
+          <div className="flex flex-wrap items-center gap-2">
+            <DateField
+              value={form.day}
+              onChange={(day) => setForm({ ...form, day })}
+              min={earliestCardDay(today)}
+              max={form.status === "done" ? today : undefined}
+              aria-label={form.status === "done" ? "Finished on" : "Day"}
+              className="w-auto"
+            />
+            {form.day ? (
+              <button
+                type="button"
+                // A done one ran up to the day it was finished: it started earlier. An open one runs on from its day.
+                onClick={() =>
+                  setForm(
+                    form.status === "done"
+                      ? { ...form, day: addDays(form.day, -1), until: form.day }
+                      : { ...form, until: addDays(form.day, 1) },
+                  )
+                }
+                className="inline-flex items-center gap-1 text-[12px] text-[var(--i-faint)] hover:text-[var(--i-ink)]"
+              >
+                <Plus size={11} /> More days
+              </button>
+            ) : null}
+          </div>
+        </Label>
+      )}
       <Label label="Task">
         <input
           value={form.title}

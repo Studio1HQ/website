@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Deliverable } from "@/lib/internal/clients/schema";
-import { finishedDay, placeCards } from "@/lib/internal/tasks/calendar";
+import { finishedDay, movedSpan, placeCards, spanLabel, taskSpan, weekTally } from "@/lib/internal/tasks/calendar";
 import type { Task } from "@/lib/internal/tasks/shared";
 
 const deliverable = (id: string, patch: Partial<Deliverable>) =>
@@ -30,6 +30,7 @@ const task = (id: string, patch: Partial<Task>) =>
     area: "content",
     engagement_id: null,
     deliverable_id: null,
+    start_on: null,
     due_on: "2026-11-18",
     done_on: null,
     blocked: false,
@@ -168,5 +169,84 @@ describe("finishedDay: marking a card Done without a day", () => {
   it("counts Sunday as the end of its own week", () => {
     expect(finishedDay("2026-11-23", "2026-11-29")).toBe("2026-11-23");
     expect(finishedDay("2026-11-29", "2026-11-30")).toBe("2026-11-30");
+  });
+});
+
+describe("tasks over several days", () => {
+  const days = (cards: { id: string; day: string | null }[], id: string) => cards.filter((card) => card.id === id).map((card) => card.day);
+
+  it("puts one on each of its days in the week, and counts it once", () => {
+    const { cards, tray } = place({ tasks: [task("launch", { status: "doing", start_on: "2026-11-17", due_on: "2026-11-19" })] });
+    expect(days(cards, "launch")).toEqual(["2026-11-17", "2026-11-18", "2026-11-19"]);
+    expect(cards.every((card) => card.kind === "task" && card.range?.from === "2026-11-17" && card.range.to === "2026-11-19")).toBe(true);
+    expect(tray).toEqual([]);
+    expect(weekTally(cards)).toEqual({ done: 0, doing: 1, todo: 0 });
+  });
+
+  it("shows only this week's part of one that started earlier or ends later", () => {
+    const { cards } = place({
+      tasks: [
+        task("from last week", { start_on: "2026-11-12", due_on: "2026-11-17" }),
+        task("into next week", { start_on: "2026-11-21", due_on: "2026-11-26" }),
+      ],
+    });
+    expect(days(cards, "from last week")).toEqual(["2026-11-16", "2026-11-17"]);
+    expect(days(cards, "into next week")).toEqual(["2026-11-21", "2026-11-22"]);
+  });
+
+  it("runs a done one to the day it was finished, not its last day", () => {
+    const { cards } = place({
+      tasks: [
+        task("early", { status: "done", start_on: "2026-11-16", due_on: "2026-11-20", done_on: "2026-11-18" }),
+        task("late", { status: "done", start_on: "2026-11-20", due_on: "2026-11-21", done_on: "2026-11-24" }),
+      ],
+    });
+    expect(days(cards, "early")).toEqual(["2026-11-16", "2026-11-17", "2026-11-18"]);
+    expect(days(cards, "late")).toEqual(["2026-11-20", "2026-11-21", "2026-11-22"]);
+  });
+
+  it("puts an open one that ended before the week in the tray, once", () => {
+    const { cards, tray } = place({ tasks: [task("overdue", { start_on: "2026-11-09", due_on: "2026-11-12" })] });
+    expect(cards).toEqual([]);
+    expect(tray.map((card) => [card.id, card.day])).toEqual([["overdue", "2026-11-12"]]);
+  });
+
+  it("treats a first day that isn't before the last as one day", () => {
+    expect(taskSpan({ status: "todo", start_on: "2026-11-18", due_on: "2026-11-18", done_on: null })).toEqual({ from: null, to: "2026-11-18" });
+    expect(taskSpan({ status: "done", start_on: "2026-11-20", due_on: "2026-11-22", done_on: "2026-11-17" })).toEqual({
+      from: null,
+      to: "2026-11-17",
+    });
+    const { cards } = place({ tasks: [task("finished first", { status: "done", start_on: "2026-11-20", due_on: "2026-11-22", done_on: "2026-11-17" })] });
+    expect(cards.map((card) => [card.day, card.kind === "task" && card.range])).toEqual([["2026-11-17", null]]);
+  });
+});
+
+describe("movedSpan", () => {
+  const run = { from: "2026-11-17", to: "2026-11-19" };
+
+  it("moves a one-day task to the day it's dropped on", () => {
+    expect(movedSpan(null, "2026-11-18", "2026-11-20", true)).toEqual({ from: null, to: "2026-11-20" });
+  });
+
+  it("moves the whole run by as many days as the dragged copy", () => {
+    // The Wednesday copy dropped on Friday: two days later.
+    expect(movedSpan(run, "2026-11-18", "2026-11-20", true)).toEqual({ from: "2026-11-19", to: "2026-11-21" });
+    // The Tuesday copy dropped on Monday: a day earlier.
+    expect(movedSpan(run, "2026-11-17", "2026-11-16", true)).toEqual({ from: "2026-11-16", to: "2026-11-18" });
+  });
+
+  it("starts the run on the day when it comes from the tray", () => {
+    expect(movedSpan({ from: "2026-11-09", to: "2026-11-12" }, "2026-11-12", "2026-11-18", false)).toEqual({
+      from: "2026-11-18",
+      to: "2026-11-21",
+    });
+  });
+});
+
+describe("spanLabel", () => {
+  it("names the month once inside a month, both across two", () => {
+    expect(spanLabel({ from: "2026-11-24", to: "2026-11-27" })).toBe("24–27 Nov");
+    expect(spanLabel({ from: "2026-11-28", to: "2026-12-02" })).toBe("28 Nov – 2 Dec");
   });
 });

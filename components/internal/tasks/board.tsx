@@ -3,7 +3,7 @@
 import { useOptimistic, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { DndContext, DragOverlay, useDraggable, useDroppable, type DragEndEvent } from "@dnd-kit/core";
-import { ArrowUpRight, DotsThree, PencilSimple, Plus, Prohibit, UserCircle, UsersThree } from "@/components/internal/icons";
+import { ArrowUpRight, CalendarRange, DotsThree, PencilSimple, Plus, Prohibit, UserCircle, UsersThree } from "@/components/internal/icons";
 import * as Menu from "@radix-ui/react-dropdown-menu";
 import { blockTask as blockTaskAction, moveTask as moveTaskAction } from "@/app/internal/(dashboard)/tasks/actions";
 import { setQuickField as setQuickFieldAction } from "@/app/internal/(dashboard)/community/actions";
@@ -44,6 +44,9 @@ import {
   type Tone,
 } from "@/lib/internal/tasks/shared";
 import { guarded } from "@/components/internal/guarded";
+
+/** "24 Nov": the first day of a task over several days. */
+const startLabel = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
 
 // A save that never reached the server answers { ok: false } here, so the open form stays (guarded).
 const blockTask = guarded(blockTaskAction);
@@ -626,6 +629,12 @@ function TaskCard({ item, props, onMove }: { item: BoardTask; props: BoardProps;
           <Pill tone={TASK_STATUSES.find((option) => option.value === task.status)?.tone}>
             {TASK_STATUSES.find((option) => option.value === task.status)?.label}
           </Pill>
+        ) : null}
+        {/* Over several days: its first day, then the due date chip (the last). */}
+        {task.status !== "done" && task.start_on && task.due_on && task.start_on < task.due_on ? (
+          <span title="Runs over several days" className="inline-flex items-center gap-1 whitespace-nowrap tabular-nums text-[var(--i-faint)]">
+            <CalendarRange size={12} className="shrink-0" /> {startLabel.format(new Date(`${task.start_on}T00:00:00Z`))} →
+          </span>
         ) : null}
         {/* In review is handed in: the plain date, never "late". */}
         {task.due_on ? <DueDate day={task.due_on} done={!isOwed(task.status)} today={props.today} /> : null}

@@ -111,6 +111,7 @@ export const Butterfly = make("Butterfly", L.AtSign);
 export const CalendarBlank = make("CalendarBlank", L.Calendar);
 export const CalendarCheck = make("CalendarCheck", L.CalendarCheck);
 export const CalendarPlus = make("CalendarPlus", L.CalendarPlus);
+export const CalendarRange = make("CalendarRange", L.CalendarRange);
 export const CalendarStar = make("CalendarStar", L.CalendarHeart);
 export const Camera = make("Camera", L.Camera);
 export const CaretDown = make("CaretDown", L.ChevronDown);

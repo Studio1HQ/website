@@ -92,6 +92,13 @@ export const MAX_WITH = 10;
 export const PEOPLE_MIGRATION_HINT =
   "Sharing a task needs the latest database update (supabase/migrations/20261121120000_task_priority_and_people.sql).";
 
+/** Giving a task several days before 20261125120000_task_date_range.sql has run. */
+export const RANGE_MIGRATION_HINT =
+  "Several days needs the latest database update (supabase/migrations/20261125120000_task_date_range.sql). One day saves now.";
+
+/** The longest run of days one task can cover, first and last day included. */
+export const MAX_RANGE_DAYS = 62;
+
 /** Someone a task can be shared with: active on the team list. */
 export type Teammate = { email: string; name: string };
 
@@ -158,6 +165,8 @@ export type Task = {
   area: TaskArea;
   engagement_id: string | null;
   deliverable_id: string | null;
+  /** The first day of a task that runs over several days (due_on is its last); null for a one-day task. */
+  start_on: string | null;
   due_on: string | null;
   done_on: string | null;
   blocked: boolean;

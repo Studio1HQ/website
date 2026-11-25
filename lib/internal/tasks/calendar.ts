@@ -5,7 +5,10 @@
  *   your tasks          Done → the day it was done; open → its day (due_on)
  *                       when that's in the week; open with no day, or a day
  *                       before the week → the "No day yet" tray (this week
- *                       and later only); a day after the week → left out
+ *                       and later only); a day after the week → left out.
+ *                       One that runs over several days (start_on) sits on
+ *                       each of them: start_on to due_on, or to the day it
+ *                       was done once it's done (taskSpan)
  *   client deliverables you own: open → their due day in the week;
  *                       published → the day they went live in the week
  *   community tasks     yours: open → their due day; done → the day done
@@ -35,7 +38,13 @@ export type CalendarCard =
       title: string;
       /** Context for whoever checks it; "" when there's none. */
       notes: string;
+      /** The day this copy of the card sits on (one per day for a task that runs over several). */
       day: string | null;
+      /**
+       * A task that runs over several days: its first and last day (the day
+       * it was finished, once it's done). Null for a one-day task.
+       */
+      range: Span | null;
       status: TaskStatus;
       priority: TaskPriority;
       /** "Nebius · DevRel retainer", "Studio1 · Hiring", "Studio1". */
@@ -85,6 +94,56 @@ export type CalendarCard =
       client: false;
       href: string;
     };
+
+/** A run of days, first and last included. */
+export type Span = { from: string; to: string };
+
+/** The day `n` days after (or before) a day. */
+export function addDays(day: string, n: number) {
+  const date = new Date(`${day}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + n);
+  return date.toISOString().slice(0, 10);
+}
+
+/** How many days from one day to another (negative when it's earlier). */
+export function daysApart(from: string, to: string) {
+  return Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86_400_000);
+}
+
+/**
+ * The days a task covers: an open one from start_on to its due day, a done
+ * one from start_on to the day it was finished. A one-day task (no
+ * start_on, or one that isn't before the last day) is just that day:
+ * `from` is null then. `to` is null for an open task with no day yet.
+ */
+export function taskSpan(task: Pick<Task, "status" | "start_on" | "due_on" | "done_on">): { from: string | null; to: string | null } {
+  const to = task.status === "done" ? task.done_on : task.due_on;
+  return { from: task.start_on && to && task.start_on < to ? task.start_on : null, to };
+}
+
+const spanMonth = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
+const spanDay = new Intl.DateTimeFormat("en-GB", { day: "numeric", timeZone: "UTC" });
+
+/** "24–27 Nov"; across months, "28 Nov – 2 Dec". */
+export function spanLabel({ from, to }: Span) {
+  const first = new Date(`${from}T00:00:00Z`);
+  const last = new Date(`${to}T00:00:00Z`);
+  return from.slice(0, 7) === to.slice(0, 7)
+    ? `${spanDay.format(first)}–${spanMonth.format(last)}`
+    : `${spanMonth.format(first)} – ${spanMonth.format(last)}`;
+}
+
+/**
+ * Where a task goes when it's dragged onto `target`: a one-day task to
+ * that day; one with several days keeps its length and moves by as many
+ * days as the copy that was dragged (`day`, on the week shown). From the
+ * tray (`day` isn't on the week) its run starts on `target`.
+ */
+export function movedSpan(range: Span | null, day: string | null, target: string, onWeek: boolean): { from: string | null; to: string } {
+  if (!range) return { from: null, to: target };
+  const shift = onWeek && day ? daysApart(day, target) : daysApart(range.from, target);
+  return { from: addDays(range.from, shift), to: addDays(range.to, shift) };
+}
 
 const COMMUNITY: Record<string, [string, Tone]> = {
   todo: ["Not started", "stone"],
@@ -164,6 +223,7 @@ export function placeCards(input: {
       title: task.title,
       notes: task.notes ?? "",
       day: null,
+      range: null,
       status: task.status,
       priority: task.priority,
       forLabel: forLabel(key, engagements),
@@ -182,11 +242,13 @@ export function placeCards(input: {
         .filter((email) => email !== me)
         .map((email) => firstName(input.names?.[email] || displayName({ email }))),
     };
-    const due = task.due_on;
-    if (task.status === "done") {
-      if (inRange(task.done_on, week, end)) cards.push({ ...card, day: task.done_on });
-    } else if (inRange(due, week, end)) cards.push({ ...card, day: due });
-    else if (current && (due === null || due < week)) tray.push({ ...card, day: due });
+    const { from, to } = taskSpan(task);
+    const range = from && to ? { from, to } : null;
+    const first = from ?? to;
+    if (first && to && first <= end && to >= week) {
+      // On each of its days in this week: one card for a one-day task.
+      for (let day = first < week ? week : first; day <= to && day <= end; day = addDays(day, 1)) cards.push({ ...card, range, day });
+    } else if (task.status !== "done" && current && (to === null || to < week)) tray.push({ ...card, range, day: to });
   }
 
   const owned = new Set(input.deliverables.map((row) => row.id));
@@ -264,12 +326,16 @@ export function placeCards(input: {
   return { cards, tray };
 }
 
-/** Counts for the week's header: done, in progress / in review, not started. */
+/** Counts for the week's header: done, in progress / in review, not started. A task on several days counts once. */
 export function weekTally(cards: readonly CalendarCard[]) {
   let done = 0;
   let doing = 0;
   let todo = 0;
+  const seen = new Set<string>();
   for (const card of cards) {
+    const key = `${card.kind}:${card.id}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
     if (card.kind === "task") {
       if (card.status === "done") done += 1;
       else if (card.status === "todo") todo += 1;
