@@ -1733,3 +1733,38 @@ h1,
 .stat + .stat {
   border-left: 0;
 }
+
+/* The day clock's mark: a timer in a small tile, green while the day runs. */
+.dot,
+.dot.on {
+  display: inline-flex;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background: var(--hover);
+  color: var(--faint);
+  box-shadow: none;
+}
+.dot.on {
+  background: rgba(16, 185, 129, 0.14);
+  color: var(--ok);
+}
+.dot.on::after {
+  content: none;
+}
+.dot svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+#pane-tasks .day {
+  gap: 12px;
+  padding: 10px 10px 10px 12px;
+}
