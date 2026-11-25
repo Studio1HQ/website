@@ -222,7 +222,7 @@ function renderTasks() {
   const list = $("tasks");
   list.replaceChildren();
   const left = summary.tasks.filter((task) => task.status !== "done").length;
-  $("task-count").textContent = summary.tasks.length ? `${summary.tasks.length - left}/${summary.tasks.length}` : "0";
+  $("task-count").textContent = summary.tasks.length ? `${summary.tasks.length - left} of ${summary.tasks.length} done` : "";
   $("task-count").title = "Done of this day's tasks";
   if (!summary.tasksOk) return list.append(el("li", { class: "empty" }, "Couldn't load your tasks."));
   if (!summary.tasks.length) {
@@ -445,7 +445,12 @@ function renderDays() {
     }),
   );
   const label = longDay.format(new Date(`${current}T00:00:00Z`));
-  $("tasks-title").textContent = current === today ? `Today · ${label}` : label;
+  // "Today" with the date beside it in grey; another day: its weekday and date.
+  const date = new Date(`${current}T00:00:00Z`);
+  $("tasks-title").replaceChildren(
+    el("span", { class: "title-main" }, current === today ? "Today" : new Intl.DateTimeFormat("en-GB", { weekday: "long", timeZone: "UTC" }).format(date)),
+    el("span", { class: "title-date" }, current === today ? label : new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "UTC" }).format(date)),
+  );
   $("add-input").placeholder = legacy
     ? "Adding arrives with the next update"
     : current === today
@@ -457,8 +462,19 @@ function renderDays() {
 $("week-prev").addEventListener("click", () => pickDay(addDays(summary.shown || summary.today, -7)));
 $("week-next").addEventListener("click", () => pickDay(addDays(summary.shown || summary.today, 7)));
 
+/** Profile's three numbers for today. */
+function renderStats() {
+  const minutes = summary.day?.minutes ?? 0;
+  $("stat-hours").textContent = minutes ? hours(minutes) : "0m";
+  const onToday = !summary.shown || summary.shown === summary.today;
+  const done = onToday ? summary.tasks.filter((task) => task.status === "done").length : "—";
+  $("stat-done").textContent = summary.tasksOk ? (onToday ? `${done}/${summary.tasks.length}` : "—") : "—";
+  $("stat-unread").textContent = String(summary.notifications.unread);
+}
+
 function render() {
   renderWelcome();
+  renderStats();
   renderDays();
   renderDay();
   renderTasks();
