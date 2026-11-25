@@ -313,8 +313,9 @@ function renderNotifications() {
 /* ------------------------------------------------------------ welcome */
 
 function greeting() {
+  // The viewer's own clock: late night, morning, afternoon, evening.
   const hour = new Date().getHours();
-  return hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  return hour < 5 ? "Good night" : hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : hour < 22 ? "Good evening" : "Good night";
 }
 
 function initials(name) {
@@ -329,19 +330,21 @@ async function renderWelcome() {
   $("avatar-initials").textContent = initials(me.name);
   $("profile-name").textContent = me.name;
   $("profile-email").textContent = me.email;
-  $("profile-role").textContent = me.role || "";
-  $("profile-role").hidden = !me.role;
+  $("profile-role").textContent = me.role ? `${me.role} · ` : "";
   syncProfileAvatar();
-  // Their photo, fetched once with the session (the dashboard's photo link needs its cookie).
-  if (!me.hasPhoto) {
-    $("avatar-img").hidden = true;
+  // Their photo, fetched once: from the extension's photo route with the
+  // session, or, from a dashboard without that route yet, the dashboard's
+  // own photo link (works when they're signed in to it in this browser).
+  if (me.hasPhoto === false || photoFor === me.email) {
+    if (me.hasPhoto === false) $("avatar-img").hidden = true;
     return;
   }
-  if (photoFor === me.email) return;
   photoFor = me.email;
   try {
-    const response = await fetch(`${dashboard("/api/extension/photo")}`, { headers: { authorization: `Bearer ${settings.session}` } });
-    if (!response.ok) return;
+    const response = me.hasPhoto
+      ? await fetch(dashboard("/api/extension/photo"), { headers: { authorization: `Bearer ${settings.session}` } })
+      : await fetch(dashboard(`/team-file/photo/${encodeURIComponent(me.email)}`), { credentials: "include" });
+    if (!response.ok || !(response.headers.get("content-type") || "").startsWith("image/")) return;
     $("avatar-img").src = URL.createObjectURL(await response.blob());
     $("avatar-img").hidden = false;
     syncProfileAvatar();
@@ -362,6 +365,7 @@ const PANES = ["tasks", "inbox", "me"];
 
 function setPane(next) {
   pane = next;
+  document.body.dataset.pane = next;
   for (const name of PANES) $(`pane-${name}`).hidden = name !== next;
   for (const item of document.querySelectorAll(".dock-item")) {
     const on = item.dataset.pane === next;
@@ -445,7 +449,7 @@ function renderDays() {
   const label = longDay.format(new Date(`${current}T00:00:00Z`));
   $("tasks-title").textContent = current === today ? `Today · ${label}` : label;
   $("add-input").placeholder = legacy
-    ? "Adding tasks here comes with the next dashboard update"
+    ? "Adding arrives with the next update"
     : current === today
       ? "Add a task for today"
       : `Add a task for ${label}`;

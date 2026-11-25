@@ -1138,9 +1138,6 @@ body.as-popup .dock {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.menu-row span:first-of-type {
-  flex: 1;
-}
 .menu-arrow {
   color: var(--faint);
 }
@@ -1160,5 +1157,177 @@ body.as-popup .dock {
 /* The dock lives outside the sections (their slide-in would pin it to
    them); it shows only when signed in. */
 body:not([data-view="main"]) .dock {
+  display: none;
+}
+
+/* ---- Profile, in the dashboard's style ---- */
+.profile {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  text-align: left;
+}
+.profile .avatar {
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  font-size: 15px;
+}
+.profile-text {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+.profile-name {
+  overflow: hidden;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.profile-email {
+  overflow: hidden;
+  margin: 1px 0 0;
+  font-size: 12.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.profile-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: -4px 4px 16px;
+  color: var(--faint);
+  font-size: 11.5px;
+}
+.profile-dot {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-radius: 999px;
+  background: var(--ok);
+}
+.group-label {
+  margin: 0 4px 6px;
+  color: var(--faint);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.menu-list {
+  padding: 0;
+}
+.menu-list .menu-row + .menu-row {
+  border-top: 1px solid var(--line);
+}
+.menu-row,
+#open-dashboard.menu-row {
+  height: 46px;
+  gap: 12px;
+  padding: 0 14px 0 12px;
+  border-radius: 0;
+  font-size: 13px;
+}
+.menu-icon {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--hover);
+}
+.menu-icon svg {
+  width: 15px;
+  height: 15px;
+}
+.menu-label {
+  flex: 1;
+}
+.menu-arrow {
+  color: var(--faint);
+  font-size: 17px;
+  line-height: 1;
+}
+.menu-row.signout,
+.menu-row.signout svg {
+  color: var(--ink-2);
+  stroke: var(--muted);
+}
+.menu-row.signout:hover,
+.menu-row.signout:hover svg {
+  color: #fb7185;
+  stroke: #fb7185;
+}
+
+/* ---- Less crowded ---- */
+.card {
+  margin-bottom: 14px;
+}
+/* The day clock: one slim row. */
+.day {
+  padding: 10px 12px 10px 16px;
+}
+.day-text b {
+  font-size: 13px;
+}
+.day-text span {
+  font-size: 12px;
+}
+.pill {
+  height: 30px;
+  padding: 0 14px;
+  font-size: 12.5px;
+}
+/* A task on one line: tick, title, its status on the right; "Late" under. */
+.list li {
+  align-items: center;
+  padding: 9px 8px;
+}
+.item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 10px;
+}
+.item-title {
+  grid-column: 1;
+  grid-row: 1;
+  font-size: 13.5px;
+}
+.item-meta {
+  display: contents;
+}
+.item-meta .status-button {
+  grid-column: 2;
+  grid-row: 1;
+}
+.item-meta .item-sub {
+  grid-column: 1;
+  grid-row: 2;
+  margin-top: 2px;
+  font-size: 11.5px;
+}
+.status-menu {
+  right: 0;
+  left: auto;
+}
+.add {
+  padding-top: 8px;
+}
+
+/* Profile: icon tiles keep their size; the welcome header steps aside
+   there (the profile card says who). */
+.menu-row .menu-icon {
+  flex: none;
+}
+body[data-pane="me"] .welcome {
+  display: none;
+}
+/* Nothing to refresh on Profile; the arrow would sit on its card. */
+body[data-pane="me"] .top {
   display: none;
 }
