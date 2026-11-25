@@ -8,6 +8,9 @@ if (chrome.extension?.getViews?.({ type: "popup" }).includes(window)) document.b
 let settings = { session: "", server: DEFAULT_SERVER };
 let pendingEmail = "";
 let summary = null;
+/** The day whose tasks show ("" = today). */
+let shownDay = "";
+let photoFor = "";
 let ticker = 0;
 
 function show(view) {
@@ -108,7 +111,7 @@ $("code-form").addEventListener("submit", async (event) => {
   try {
     const server = serverValue();
     const signedIn = await call("/api/extension/sign-in", { server }, { method: "POST", body: { email: pendingEmail, code } });
-    settings = { session: signedIn.session, server };
+    settings = { session: signedIn.session, server, email: signedIn.email };
     await saveSettings(settings);
     await load();
   } catch (problem) {
@@ -157,7 +160,10 @@ function renderTasks() {
   list.replaceChildren();
   $("task-count").textContent = String(summary.tasks.length);
   if (!summary.tasksOk) return list.append(el("li", { class: "empty" }, "Couldn't load your tasks."));
-  if (!summary.tasks.length) return list.append(el("li", { class: "empty" }, "Nothing due today. Nice."));
+  if (!summary.tasks.length) {
+    const onToday = !summary.shown || summary.shown === summary.today;
+    return list.append(el("li", { class: "empty" }, onToday ? "Nothing due today. Nice." : "Nothing on this day yet."));
+  }
   for (const task of summary.tasks) {
     const check = el("button", {
       class: "check",
@@ -178,7 +184,7 @@ function renderTasks() {
       },
     });
     const sub = task.late
-      ? el("span", { class: "item-sub late" }, `Late · due ${task.due_on}`)
+      ? el("span", { class: "item-sub late" }, `Late · due ${shortDate.format(new Date(`${task.due_on}T00:00:00Z`))}`)
       : el("span", { class: "item-sub" }, task.blocked ? `${task.statusLabel} · blocked` : task.statusLabel);
     list.append(
       el(
@@ -201,6 +207,8 @@ function renderNotifications() {
   list.replaceChildren();
   const { items, unread } = summary.notifications;
   $("read-all").hidden = unread === 0;
+  $("unread-count").hidden = unread === 0;
+  $("unread-count").textContent = unread > 99 ? "99+" : String(unread);
   if (!items.length) return list.append(el("li", { class: "empty" }, "No notifications yet."));
   for (const item of items) {
     list.append(
@@ -227,9 +235,84 @@ function renderNotifications() {
   }
 }
 
+/* ------------------------------------------------------------ welcome */
+
+function greeting() {
+  const hour = new Date().getHours();
+  return hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+}
+
+function initials(name) {
+  return name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0].toUpperCase()).join("") || "?";
+}
+
+async function renderWelcome() {
+  const { me } = summary;
+  $("welcome-hi").textContent = greeting();
+  $("welcome-name").textContent = me.name;
+  $("welcome-role").textContent = me.role || me.email;
+  $("avatar-initials").textContent = initials(me.name);
+  // Their photo, fetched once with the session (the dashboard's photo link needs its cookie).
+  if (!me.hasPhoto) {
+    $("avatar-img").hidden = true;
+    return;
+  }
+  if (photoFor === me.email) return;
+  photoFor = me.email;
+  try {
+    const response = await fetch(`${dashboard("/api/extension/photo")}`, { headers: { authorization: `Bearer ${settings.session}` } });
+    if (!response.ok) return;
+    $("avatar-img").src = URL.createObjectURL(await response.blob());
+    $("avatar-img").hidden = false;
+  } catch {
+    // Initials stay.
+  }
+}
+
+/* ------------------------------------------------------------ days */
+
+function addDays(day, count) {
+  const date = new Date(`${day}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + count);
+  return date.toISOString().slice(0, 10);
+}
+
+const shortDate = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
+const weekday = new Intl.DateTimeFormat("en-GB", { weekday: "short", timeZone: "UTC" });
+const longDay = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "short", timeZone: "UTC" });
+
+/** Today and the six days after it, as a strip of chips. */
+function renderDays() {
+  const today = summary.today;
+  const current = summary.shown || today;
+  $("days").replaceChildren(
+    ...Array.from({ length: 7 }, (_, index) => {
+      const day = addDays(today, index);
+      const date = new Date(`${day}T00:00:00Z`);
+      return el(
+        "button",
+        {
+          type: "button",
+          role: "tab",
+          "aria-selected": String(day === current),
+          class: day === current ? "day-chip on" : "day-chip",
+          onclick: () => {
+            shownDay = day === today ? "" : day;
+            load();
+          },
+        },
+        el("span", { class: "day-chip-name" }, index === 0 ? "Today" : weekday.format(date)),
+        el("span", { class: "day-chip-date" }, String(date.getUTCDate())),
+      );
+    }),
+  );
+  $("tasks-title").textContent = current === today ? "Today" : longDay.format(new Date(`${current}T00:00:00Z`));
+  $("add-input").placeholder = current === today ? "Add a task for today" : `Add a task for ${longDay.format(new Date(`${current}T00:00:00Z`))}`;
+}
+
 function render() {
-  const first = summary.me.name.split(" ")[0];
-  $("hello").replaceChildren("Hi ", el("b", {}, first), ", here's your day.");
+  renderWelcome();
+  renderDays();
   renderDay();
   renderTasks();
   renderNotifications();
@@ -246,10 +329,11 @@ function render() {
 }
 
 async function load() {
-  show("loading");
+  // The loading screen only the first time; after that the view stays while it refreshes.
+  if (!summary) show("loading");
   error("main-error", "");
   try {
-    summary = await call("/api/extension/summary", settings);
+    summary = await call(`/api/extension/summary${shownDay ? `?day=${shownDay}` : ""}`, settings);
     render();
   } catch (problem) {
     if (problem.status === 401) {
@@ -258,10 +342,7 @@ async function load() {
       return showConnect("You're signed out. Sign in again to carry on.");
     }
     show("main");
-    if (!summary) {
-      $("hello").textContent = "";
-      $("day-card").hidden = true;
-    }
+    if (!summary) $("day-card").hidden = true;
     error("main-error", problem.message);
   }
 }
@@ -282,6 +363,25 @@ $("day-button").addEventListener("click", async () => {
 $("read-all").addEventListener("click", async () => {
   await call("/api/extension/notifications", settings, { method: "POST", body: {} }).catch(() => {});
   await load();
+});
+
+// Add a task on the day that's showing.
+$("add-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const title = $("add-input").value.trim();
+  if (!title) return;
+  $("add-button").disabled = true;
+  error("main-error", "");
+  try {
+    await call("/api/extension/tasks", settings, { method: "POST", body: { title, day: summary?.shown || summary?.today } });
+    $("add-input").value = "";
+    await load();
+    $("add-input").focus();
+  } catch (problem) {
+    error("main-error", problem.message);
+  } finally {
+    $("add-button").disabled = false;
+  }
 });
 
 $("refresh").addEventListener("click", load);

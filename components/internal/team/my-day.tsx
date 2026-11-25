@@ -335,7 +335,7 @@ export function MyDay({
     // that's left (the main area's bottom padding is pulled back up), and
     // long lists scroll inside their own cards. Phones stack it all.
     <div className="xl:-mb-16">
-      <header className="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <header className="mb-4 flex flex-wrap items-center justify-between gap-3 md:pr-24">
         <div className="flex min-w-0 items-center gap-3">
           <button
             type="button"

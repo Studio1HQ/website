@@ -353,6 +353,16 @@ html.dark:has(.internal-ui) {
   }
 }
 
+/* A dialog's frame never scrolls, only its middle does. With overflow:
+   hidden, focusing a field could scroll the whole frame, sliding the title
+   off the top and leaving empty space under the buttons; clip can't be
+   scrolled. 92vh first for browsers without dvh. */
+.internal-pop.internal-dialog {
+  overflow: clip;
+  max-height: 92vh;
+  max-height: 92dvh;
+}
+
 @media (max-width: 639.98px) {
   .internal-pop.internal-dialog {
     top: auto;

@@ -529,3 +529,137 @@ body:not(.as-popup) #connect form {
 body:not(.as-popup) .made {
   margin-top: 0;
 }
+
+/* Signed in: the welcome header */
+.welcome {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 2px 0 14px;
+}
+.avatar {
+  position: relative;
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 18%, var(--panel));
+  color: var(--accent);
+  font-size: 15px;
+  font-weight: 500;
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--line);
+}
+.avatar img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.welcome-text {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+.welcome-hi {
+  color: var(--muted);
+  font-size: 12px;
+}
+.welcome-name {
+  overflow: hidden;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.welcome-role {
+  overflow: hidden;
+  color: var(--faint);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The week ahead, a chip a day */
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  padding: 0 10px 8px;
+}
+.day-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 5px 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+}
+.day-chip:hover {
+  background: var(--hover);
+  color: var(--ink);
+}
+.day-chip.on {
+  background: var(--ink);
+  color: var(--bg);
+}
+.day-chip-name {
+  font-size: 10.5px;
+  letter-spacing: 0.01em;
+}
+.day-chip-date {
+  font-size: 13px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Add a task on the day that's showing */
+.add {
+  display: flex;
+  gap: 6px;
+  margin: 0;
+  padding: 8px 10px 10px;
+  border-top: 1px solid var(--line);
+}
+.add input {
+  height: 34px;
+  font-size: 13px;
+}
+.add-button {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 10px;
+  background: var(--hover);
+  color: var(--ink);
+  font-size: 18px;
+  line-height: 1;
+}
+.add-button:hover {
+  background: var(--line);
+}
+.add-button:disabled {
+  opacity: 0.5;
+}
+
+/* "Notifications 3" */
+.unread-count {
+  margin-left: 4px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: var(--accent);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  line-height: 17px;
+}

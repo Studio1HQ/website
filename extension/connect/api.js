@@ -14,7 +14,7 @@ export async function saveSettings(settings) {
 }
 
 export async function forget() {
-  await chrome.storage.local.remove(["session", "key"]);
+  await chrome.storage.local.remove(["session", "email", "key"]);
   await chrome.action.setBadgeText({ text: "" });
 }
 

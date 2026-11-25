@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Studio1 Connect",
   "short_name": "Connect",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Your Studio1 tasks, day clock and notifications, from the browser toolbar.",
   "icons": {
     "16": "icons/icon-16.png",
@@ -24,6 +24,18 @@
     "service_worker": "background.js",
     "type": "module"
   },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://dashboard.studio1hq.com/*",
+        "http://dashboard.localhost/*"
+      ],
+      "js": [
+        "detect.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
   "permissions": [
     "storage",
     "alarms",

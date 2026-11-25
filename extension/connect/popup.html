@@ -48,7 +48,15 @@
 
     <!-- Connected -->
     <section id="main" class="view" hidden>
-      <p class="hello" id="hello"></p>
+      <!-- Welcome: their photo (or initials), a greeting and what they do -->
+      <header class="welcome">
+        <span class="avatar" id="avatar"><img id="avatar-img" alt="" hidden /><span id="avatar-initials"></span></span>
+        <span class="welcome-text">
+          <span class="welcome-hi" id="welcome-hi"></span>
+          <b class="welcome-name" id="welcome-name"></b>
+          <span class="welcome-role" id="welcome-role"></span>
+        </span>
+      </header>
 
       <div class="card" id="day-card" hidden>
         <div class="day">
@@ -63,15 +71,21 @@
 
       <div class="card">
         <div class="card-head">
-          <span>Today's tasks</span>
+          <span id="tasks-title">Today</span>
           <span class="count" id="task-count"></span>
         </div>
+        <!-- The week ahead, one day at a time, like the dashboard's Tasks -->
+        <div class="days" id="days" role="tablist" aria-label="Day"></div>
         <ul class="list" id="tasks"></ul>
+        <form class="add" id="add-form">
+          <input id="add-input" autocomplete="off" maxlength="200" placeholder="Add a task for today" />
+          <button type="submit" class="add-button" id="add-button" aria-label="Add task">+</button>
+        </form>
       </div>
 
       <div class="card">
         <div class="card-head">
-          <span>Notifications</span>
+          <span>Notifications <span class="unread-count" id="unread-count" hidden></span></span>
           <button class="link small" id="read-all" hidden>Mark all read</button>
         </div>
         <ul class="list" id="notifications"></ul>
