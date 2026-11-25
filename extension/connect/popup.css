@@ -1331,3 +1331,239 @@ body[data-pane="me"] .welcome {
 body[data-pane="me"] .top {
   display: none;
 }
+
+/* ---- Sleek: the Tasks section without boxes ---- */
+#pane-tasks .card {
+  margin-bottom: 0;
+  border-radius: 0;
+  background: transparent;
+}
+#pane-tasks #day-card {
+  margin-bottom: 20px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+#pane-tasks .day {
+  padding: 9px 8px 9px 14px;
+}
+#pane-tasks .pill {
+  height: 28px;
+  padding: 0 12px;
+  background: var(--hover);
+  color: var(--ink);
+}
+#pane-tasks .card-head {
+  padding: 0 2px 10px;
+  font-size: 13px;
+}
+#pane-tasks .days {
+  margin: 0 0 8px;
+}
+#pane-tasks .list {
+  padding: 0;
+}
+#pane-tasks .list li {
+  padding: 11px 2px;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+}
+#pane-tasks .list li:hover {
+  background: transparent;
+}
+#pane-tasks .list li.empty {
+  padding: 14px 2px;
+  border-top: 1px solid var(--line);
+}
+/* Whole titles, up to two lines. */
+#pane-tasks .item-title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  white-space: normal;
+  line-height: 1.35;
+}
+#pane-tasks .add {
+  padding: 12px 0 0;
+  border-top: 1px solid var(--line);
+}
+#pane-tasks .add input {
+  border: 1px dashed var(--line);
+  background: transparent;
+}
+#pane-tasks .add input:focus {
+  border-style: solid;
+  border-color: var(--faint);
+}
+#pane-tasks .add-plus {
+  left: 12px;
+}
+
+/* A small floating dock, centred. */
+.dock {
+  right: auto;
+  left: 50%;
+  width: 240px;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 16px;
+  transform: translateX(-50%);
+}
+.dock-item {
+  gap: 2px;
+  padding: 6px 0 5px;
+  border-radius: 12px;
+  font-size: 10px;
+}
+.dock-item svg {
+  width: 17px;
+  height: 17px;
+}
+body[data-view="main"] {
+  padding-bottom: 76px;
+}
+/* The section you're on: white, like the dashboard's selected tab. */
+.dock-item.on {
+  background: var(--ink);
+  color: var(--bg);
+}
+.dock-item.on:hover {
+  color: var(--bg);
+}
+.days {
+  scroll-snap-type: none;
+}
+
+/* White for what matters: the clock's button and the chosen day. */
+#pane-tasks .pill,
+.pill {
+  background: var(--ink);
+  color: var(--bg);
+}
+#pane-tasks .pill.stop,
+.pill.stop {
+  background: var(--ink);
+  color: var(--bg);
+}
+.pill:hover {
+  opacity: 0.9;
+}
+.day-chip.on {
+  background: var(--ink);
+  color: var(--bg);
+  box-shadow: none;
+}
+.day-chip.on .day-chip-name {
+  color: var(--bg);
+  opacity: 0.75;
+}
+.day-chip.on.today::after {
+  background: var(--accent);
+}
+
+/* One week, no scrolling; ‹ › beside the title. */
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  overflow: visible;
+}
+.day-chip {
+  width: auto;
+}
+.head-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.head-right .count {
+  margin-right: 6px;
+}
+.week-arrow {
+  display: inline-flex;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1;
+}
+.week-arrow:hover {
+  background: var(--hover);
+  color: var(--ink);
+}
+
+/* Profile, flat like Tasks: no boxes, thin lines. */
+.profile {
+  padding: 4px 2px 14px;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+}
+.profile .avatar {
+  width: 48px;
+  height: 48px;
+}
+.profile-name {
+  font-size: 15px;
+}
+.profile-status {
+  margin: 12px 2px 22px;
+}
+.group-label {
+  margin: 0 2px 4px;
+}
+.menu-list {
+  margin-bottom: 20px;
+  background: transparent;
+}
+.menu-row,
+#open-dashboard.menu-row {
+  height: 44px;
+  padding: 0 2px;
+  border-radius: 0;
+}
+.menu-list .menu-row + .menu-row {
+  border-top: 1px solid var(--line);
+}
+.menu-row:hover,
+#open-dashboard.menu-row:hover {
+  background: transparent;
+}
+.menu-row:hover .menu-label {
+  color: var(--ink);
+}
+.menu-icon {
+  width: auto;
+  height: auto;
+  background: transparent;
+}
+.menu-icon svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* Type exactly as the dashboard sets it: Studio1 Sans, regular and medium
+   only (it has no bold), same smoothing. */
+html,
+body,
+button,
+input {
+  font-family: "Studio1 Sans", Inter, Arial, sans-serif;
+}
+b,
+strong,
+h1,
+.welcome-name,
+.profile-name,
+.day-text b {
+  font-weight: 500;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pane {
+    animation: none;
+  }
+}

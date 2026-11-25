@@ -326,7 +326,9 @@ async function renderWelcome() {
   const { me } = summary;
   $("welcome-hi").textContent = greeting();
   $("welcome-name").textContent = me.name;
-  $("welcome-role").textContent = me.role || me.email;
+  // The role only; the email is on Profile.
+  $("welcome-role").textContent = me.role || "";
+  $("welcome-role").hidden = !me.role;
   $("avatar-initials").textContent = initials(me.name);
   $("profile-name").textContent = me.name;
   $("profile-email").textContent = me.email;
@@ -407,45 +409,41 @@ const shortDate = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "sho
 const weekday = new Intl.DateTimeFormat("en-GB", { weekday: "short", timeZone: "UTC" });
 const longDay = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "short", timeZone: "UTC" });
 
-const monthShort = new Intl.DateTimeFormat("en-GB", { month: "short", timeZone: "UTC" });
 
-/** Two weeks back to two weeks ahead, a chip a day, scrolling sideways; the chosen day in view. */
+/** Monday of the week a day is in. */
+function mondayOf(day) {
+  const date = new Date(`${day}T00:00:00Z`);
+  return addDays(day, -((date.getUTCDay() + 6) % 7));
+}
+
+function pickDay(day) {
+  shownDay = day === summary.today ? "" : day;
+  load();
+}
+
+/** The chosen day's week, Monday to Sunday; ‹ › move a week. */
 function renderDays() {
   const today = summary.today;
   const current = summary.shown || today;
-  const strip = $("days");
-  strip.replaceChildren(
-    ...Array.from({ length: 29 }, (_, index) => {
-      const day = addDays(today, index - 14);
+  const monday = mondayOf(current);
+  $("days").replaceChildren(
+    ...Array.from({ length: 7 }, (_, index) => {
+      const day = addDays(monday, index);
       const date = new Date(`${day}T00:00:00Z`);
-      const first = date.getUTCDate() === 1 || index === 0;
       return el(
         "button",
         {
           type: "button",
           role: "tab",
           "aria-selected": String(day === current),
-          "data-day": day,
           class: ["day-chip", day === current ? "on" : "", day === today ? "today" : "", day < today ? "past" : ""].join(" ").trim(),
-          onclick: () => {
-            shownDay = day === today ? "" : day;
-            load();
-          },
+          onclick: () => pickDay(day),
         },
-        el("span", { class: "day-chip-name" }, day === today ? "Today" : first ? monthShort.format(date) : weekday.format(date)),
+        el("span", { class: "day-chip-name" }, day === today ? "Today" : weekday.format(date)),
         el("span", { class: "day-chip-date" }, String(date.getUTCDate())),
       );
     }),
   );
-  // Keep the chosen day in the middle of the strip.
-  // After the view is on screen (a hidden strip has no width to scroll in).
-  requestAnimationFrame(() => {
-    const chosen = strip.querySelector(".day-chip.on");
-    if (!chosen) return;
-    strip.style.scrollBehavior = "auto";
-    strip.scrollLeft = chosen.offsetLeft - strip.offsetLeft - strip.clientWidth / 2 + chosen.offsetWidth / 2;
-    strip.style.scrollBehavior = "";
-  });
   const label = longDay.format(new Date(`${current}T00:00:00Z`));
   $("tasks-title").textContent = current === today ? `Today · ${label}` : label;
   $("add-input").placeholder = legacy
@@ -455,6 +453,9 @@ function renderDays() {
       : `Add a task for ${label}`;
   $("add-input").disabled = legacy;
 }
+
+$("week-prev").addEventListener("click", () => pickDay(addDays(summary.shown || summary.today, -7)));
+$("week-next").addEventListener("click", () => pickDay(addDays(summary.shown || summary.today, 7)));
 
 function render() {
   renderWelcome();
