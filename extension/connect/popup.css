@@ -675,3 +675,28 @@ html {
   scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, var(--muted) 45%, transparent) transparent;
 }
+
+/* Refresh turns while it fetches */
+.icon-button.spinning svg {
+  animation: spin 800ms linear infinite;
+}
+.icon-button:disabled {
+  cursor: default;
+}
+
+/* Side panel, signed in: refresh and sign out sit in the welcome row's
+   top right instead of a row of their own. */
+body:not(.as-popup) {
+  position: relative;
+}
+body:not(.as-popup) .top {
+  position: absolute;
+  top: 18px;
+  right: 14px;
+  z-index: 1;
+  margin: 0;
+}
+body:not(.as-popup) .welcome {
+  margin-top: 4px;
+  padding-right: 72px;
+}

@@ -331,6 +331,10 @@ function render() {
 async function load() {
   // The loading screen only the first time; after that the view stays while it refreshes.
   if (!summary) show("loading");
+  // The refresh arrow turns while it fetches, so a click always shows.
+  $("refresh").classList.add("spinning");
+  $("refresh").disabled = true;
+  const started = Date.now();
   error("main-error", "");
   try {
     summary = await call(`/api/extension/summary${shownDay ? `?day=${shownDay}` : ""}`, settings);
@@ -344,6 +348,12 @@ async function load() {
     show("main");
     if (!summary) $("day-card").hidden = true;
     error("main-error", problem.message);
+  } finally {
+    // At least half a turn, so a quick refresh is still seen.
+    await new Promise((resolve) => setTimeout(resolve, Math.max(0, 500 - (Date.now() - started))));
+    $("refresh").classList.remove("spinning");
+    $("refresh").disabled = false;
+    $("refresh").title = `Refresh · updated ${new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`;
   }
 }
 
