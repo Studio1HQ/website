@@ -663,3 +663,15 @@ body:not(.as-popup) .made {
   font-variant-numeric: tabular-nums;
   line-height: 17px;
 }
+
+/* The side panel scrolls as one page: lists grow instead of scrolling
+   inside it (no second scrollbar), and the panel's own bar is thin and
+   quiet. The small dropdown keeps its capped lists. */
+body:not(.as-popup) .list {
+  max-height: none;
+  overflow: visible;
+}
+html {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--muted) 45%, transparent) transparent;
+}
