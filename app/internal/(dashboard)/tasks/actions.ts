@@ -324,8 +324,16 @@ export async function saveTask(id: unknown, values: unknown): Promise<TaskResult
     ...("due_on" in data ? { due_on: due } : {}),
   };
   // A task over several days whose due day moves to (or before) its first, or
-  // loses it: a one-day task again.
-  const span = "due_on" in data && task.start_on && (!due || task.start_on >= due) ? { start_on: null } : {};
+  // loses it: a one-day task again. One whose due day moves later still has
+  // to fit in the longest run.
+  let span = {};
+  if ("due_on" in data && task.start_on) {
+    if (!due || task.start_on >= due) span = { start_on: null };
+    else {
+      const spanned = spanProblem(task.start_on, due);
+      if (spanned) return { ok: false, message: spanned };
+    }
+  }
   const patch = { ...words, ...span, ...priority, ...people, ...where, ...finished };
   if (!Object.keys(patch).length) return { ok: true, id: task.id, message: "Saved" };
   const result = await updateTask(task.id, patch, staff.email);
@@ -675,7 +683,16 @@ export async function editTask(id: unknown, values: unknown): Promise<TaskResult
     // A done task's run ends on the day it was finished; marking it done early doesn't drop its first day.
     if (start || "from" in data || status !== "done") patch.start_on = start;
   }
-  const result = await updateTask(task.id, patch, staff.email, { status: `eq.${task.status}` });
+  // Only if the status and days checked above are still the task's: someone
+  // else's change in between can't leave its first day after its last.
+  const same = (value: string | null) => (value ? `eq.${value}` : "is.null");
+  const result = await updateTask(task.id, patch, staff.email, {
+    status: `eq.${task.status}`,
+    due_on: same(task.due_on),
+    done_on: same(task.done_on),
+    // Left out when it's empty and stays so, so tasks still save before the date-range migration.
+    ...(task.start_on || "start_on" in patch ? { start_on: same(task.start_on) } : {}),
+  });
   if (!result.ok) return result;
   tellShared(added, staff, [typeof patch.title === "string" ? patch.title : task.title], day);
   refresh();

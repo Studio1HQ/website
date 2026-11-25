@@ -227,13 +227,14 @@ export async function listTasks(options: {
   let shared = sharingReady();
   let spans = Boolean(options.spans);
   let result = await selectRows(TABLES.tasks, query(shared, spans));
-  // Before 20261125120000_task_date_range.sql there's no start_on: no task has several days yet.
-  if (!result.ok && spans && /start_on/.test(result.message)) {
-    spans = false;
-    result = await selectRows(TABLES.tasks, query(shared, spans));
-  }
-  if (!result.ok && shared && beforeSharing(result.message)) {
-    shared = false;
+  // Before their migrations there's no with_emails (sharing) or start_on
+  // (20261125120000_task_date_range.sql: no task has several days yet).
+  // PostgREST names one missing column at a time, so after each retry the
+  // new error is checked again, whichever column it names.
+  for (let retries = 0; !result.ok && retries < 2; retries += 1) {
+    if (spans && /start_on/.test(result.message)) spans = false;
+    else if (shared && beforeSharing(result.message)) shared = false;
+    else break;
     result = await selectRows(TABLES.tasks, query(shared, spans));
   }
   if (!result.ok) return failed(TABLES.tasks, result.message, "tasks");

@@ -23,7 +23,7 @@ import { TaskNote } from "@/components/internal/tasks/task-note";
 import { PriorityMark, PriorityPicker } from "@/components/internal/tasks/priority";
 import { WithPicker } from "@/components/internal/tasks/with-picker";
 import { cardAnnouncements, dragHandlers, underPointer, useCardSensors } from "@/components/internal/tasks/drag";
-import { addDays, earliestCardDay, movedSpan, spanLabel, type CalendarCard, type Span } from "@/lib/internal/tasks/calendar";
+import { addDays, daysApart, earliestCardDay, movedSpan, spanLabel, type CalendarCard, type Span } from "@/lib/internal/tasks/calendar";
 import {
   DEFAULT_PRIORITY,
   MAX_RANGE_DAYS,
@@ -154,7 +154,10 @@ export function WeekCalendar({
       // A deliverable's day is its due date; a task's is the day it's on (its last, with its first, when it runs over several).
       return card.kind === "deliverable"
         ? setDeliverableDay(card.id, day, card.day ?? "")
-        : editTask(card.id, to.from ? { day: to.to, from: to.from } : { day: to.to });
+        : // `from` goes even when it's null: a one-day card stays one day, even if
+          // a first day is kept from before (a run marked done early). The server
+          // writes nothing for it when the task had no first day anyway.
+          editTask(card.id, { day: to.to, from: to.from });
     });
   };
 
@@ -340,7 +343,13 @@ export function AddCard({
   const on = onDayChange ? day : ownDay;
   /** Where "Back to …" goes: today when the list follows the picked day. */
   const home = onDayChange ? today : day;
-  const setOn = (next: string) => (onDayChange ? onDayChange(next) : setOwnDay(next));
+  const setOn = (next: string) => {
+    // Work over several days whose first day moves onto or past its last keeps
+    // its length (the last day moves with it), rather than quietly becoming one day.
+    if (until && until <= next) setUntil(addDays(until, daysApart(on, next)));
+    if (onDayChange) onDayChange(next);
+    else setOwnDay(next);
+  };
   const moved = on !== home;
   const panel = useRef<HTMLDivElement>(null);
   const box = useRef<HTMLInputElement>(null);
@@ -349,6 +358,8 @@ export function AddCard({
   const suggestion = !picked && text.trim().length > 3 ? suggestLink(text, options) : null;
   const ahead = on > today;
   const spans = until > on;
+  /** A last day picked that's no longer after the first (the day changed some other way, e.g. Back): Save waits for a fix. */
+  const stale = until !== "" && !spans;
   /** What a new card saves as (the action's own rule): ahead or given, Not started; running through today, In progress. */
   const saveAs = person || ahead ? "Not started" : spans && until >= today ? "In progress" : "Done";
   const firstName = person ? person.name.split(/[\s@]/)[0] : "";
@@ -377,7 +388,7 @@ export function AddCard({
     const items = several
       ? list.map((title) => ({ title, link, priority }))
       : [{ title: text.trim(), notes: note.trim(), link, priority }];
-    if (!items.some((item) => item.title)) return;
+    if (!items.some((item) => item.title) || stale) return;
     run(
       () =>
         addTasks(on, items, {
@@ -542,7 +553,13 @@ export function AddCard({
 
   // Work that runs over several days sits on each of them: nothing to move along day by day.
   const daysField = until ? (
-    <span className="flex flex-wrap items-center gap-1 text-[11.5px] text-[var(--i-muted)]">
+    <span
+      className={cn(
+        "flex flex-wrap items-center gap-1 text-[11.5px]",
+        stale ? "text-rose-600 dark:text-rose-400" : "text-[var(--i-muted)]",
+      )}
+      title={stale ? "Pick a last day after the first" : undefined}
+    >
       <CalendarRange size={11} className="shrink-0 text-[var(--i-faint)]" />
       Until
       <DateField
@@ -613,8 +630,8 @@ export function AddCard({
       <button
         type="button"
         onClick={save}
-        disabled={pending || (!several && !text.trim())}
-        title={`Saves as ${saveAs}`}
+        disabled={pending || stale || (!several && !text.trim())}
+        title={stale ? "Pick a last day after the first" : `Saves as ${saveAs}`}
         className={cn(buttonClass("primary", inline ? "md" : "sm"), !startOpen && "flex-1 px-1")}
       >
         {pending ? "Saving…" : several ? `Save ${list.length}` : "Save"}
