@@ -3,11 +3,18 @@ import { deleteRows, selectRows, upsertRows } from "@/lib/supabase-server";
 import { isMissingTable } from "@/lib/internal/community/data";
 import { requireArea, type Staff } from "@/lib/internal/session";
 import {
+  INSIGHTS_MIGRATION_HINT,
   SOCIALS_MIGRATION_HINT,
   isPlatform,
+  type Platform,
   type SocialMetric,
   type SocialResult,
 } from "@/lib/internal/socials/schema";
+import {
+  cleanInsights,
+  mergeInsights,
+  type SocialInsights,
+} from "@/lib/internal/socials/insights";
 
 /**
  * Social growth reads and writes. People given Social growth on People (the
@@ -38,8 +45,11 @@ function toMetric(row: Record<string, unknown>): SocialMetric | null {
     month: String(row.month ?? ""),
     followers: number(row.followers) ?? 0,
     impressions: number(row.impressions),
+    // Null until the insights migration has run.
+    engagements: number(row.engagements),
     posts: number(row.posts),
     notes: String(row.notes ?? ""),
+    insights: cleanInsights(row.insights),
     updated_at: String(row.updated_at ?? ""),
     updated_by: typeof row.updated_by === "string" ? row.updated_by : null,
   };
@@ -75,14 +85,28 @@ export async function loadMetrics(): Promise<LoadedMetrics> {
   };
 }
 
-function writeError(message: string): SocialResult {
+/** The insights migration hasn't run: engagements or insights isn't a column yet. */
+function missingInsights(message: string) {
+  return (
+    /engagements|insights/.test(message) &&
+    /42703|PGRST204|does not exist|Could not find/.test(message)
+  );
+}
+
+function writeError(message: string): { ok: false; message: string } {
+  if (missingInsights(message))
+    return { ok: false, message: INSIGHTS_MIGRATION_HINT };
   if (isMissingTable(message))
     return { ok: false, message: SOCIALS_MIGRATION_HINT };
   console.error(`[socials] saving failed: ${message}`);
   return { ok: false, message: "Couldn't save. Try again in a minute." };
 }
 
-/** Saves a month's numbers; the same account, platform and month is replaced. */
+/**
+ * Saves a month's numbers; the same account, platform and month is
+ * replaced (what an import added stays). Before the insights migration,
+ * engagements is left out when there's none to save.
+ */
 export async function saveMetricRow(
   row: Pick<
     SocialMetric,
@@ -91,23 +115,107 @@ export async function saveMetricRow(
     | "month"
     | "followers"
     | "impressions"
+    | "engagements"
     | "posts"
     | "notes"
   >,
   by: string,
 ): Promise<SocialResult> {
-  const result = await upsertRows(
+  const write = (values: Record<string, unknown>) =>
+    upsertRows(
+      TABLE,
+      [
+        {
+          ...values,
+          created_by: by,
+          updated_by: by,
+          updated_at: new Date().toISOString(),
+        },
+      ],
+      { onConflict: "account,platform,month" },
+    );
+  let result = await write(row);
+  if (
+    !result.ok &&
+    row.engagements === null &&
+    missingInsights(result.message)
+  ) {
+    const rest: Record<string, unknown> = { ...row };
+    delete rest.engagements;
+    result = await write(rest);
+  }
+  return result.ok ? { ok: true } : writeError(result.message);
+}
+
+/** One platform's month from an import, checked (see importMonth). */
+export type ImportedRow = {
+  platform: Platform;
+  /** Null keeps what's logged (the action makes sure there's something). */
+  followers: number | null;
+  impressions: number | null;
+  engagements: number | null;
+  posts: number | null;
+  insights: SocialInsights;
+};
+
+/** What's logged for an account's month, by platform. */
+export async function monthRows(
+  account: string,
+  month: string,
+): Promise<
+  | { ok: true; rows: Map<Platform, SocialMetric> }
+  | { ok: false; message: string }
+> {
+  const result = await selectRows(
     TABLE,
-    [
-      {
-        ...row,
-        created_by: by,
-        updated_by: by,
-        updated_at: new Date().toISOString(),
-      },
-    ],
-    { onConflict: "account,platform,month" },
+    new URLSearchParams({
+      select: "*",
+      account: `eq.${account}`,
+      month: `eq.${month}`,
+    }),
   );
+  if (!result.ok) return writeError(result.message);
+  const rows = new Map<Platform, SocialMetric>();
+  for (const raw of result.rows) {
+    const row = toMetric(raw);
+    if (row) rows.set(row.platform, row);
+  }
+  return { ok: true, rows };
+}
+
+/**
+ * Saves an import over what the month had: a number the files gave
+ * replaces the old one, one they didn't keeps it, the notes stay, and the
+ * insights merge (mergeInsights).
+ */
+export async function saveImportedRows(
+  account: string,
+  month: string,
+  imported: ImportedRow[],
+  existing: Map<Platform, SocialMetric>,
+  by: string,
+): Promise<SocialResult> {
+  const now = new Date().toISOString();
+  const rows = imported.map((item) => {
+    const before = existing.get(item.platform);
+    return {
+      account,
+      platform: item.platform,
+      month,
+      followers: item.followers ?? before?.followers ?? 0,
+      impressions: item.impressions ?? before?.impressions ?? null,
+      engagements: item.engagements ?? before?.engagements ?? null,
+      posts: item.posts ?? before?.posts ?? null,
+      notes: before?.notes ?? "",
+      insights: mergeInsights(before?.insights ?? {}, item.insights),
+      created_by: by,
+      updated_by: by,
+      updated_at: now,
+    };
+  });
+  const result = await upsertRows(TABLE, rows, {
+    onConflict: "account,platform,month",
+  });
   return result.ok ? { ok: true } : writeError(result.message);
 }
 

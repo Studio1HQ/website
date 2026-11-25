@@ -7,7 +7,6 @@ import {
   type KeyboardEvent,
   type PointerEvent,
 } from "react";
-import { ArrowUpRight } from "@/components/internal/icons";
 import { monthLabel } from "@/lib/internal/clients/schema";
 import {
   axisMonth,
@@ -15,196 +14,23 @@ import {
   gainTicks,
   lineTicks,
 } from "@/lib/internal/socials/chart";
-import {
-  signed,
-  type ChartPoint,
-  type OverviewSeries,
-} from "@/lib/internal/socials/schema";
+import { signed, type ChartPoint } from "@/lib/internal/socials/schema";
 import { cn } from "@/lib/utils";
-import { Card, buttonClass } from "@/components/internal/ui";
 import { Delta } from "@/components/internal/socials/delta";
-import {
-  AudienceLogo,
-  PlatformLogo,
-} from "@/components/internal/socials/platform-logo";
 
 /**
- * Social growth at a glance: a strip of compact stats (the total audience,
- * then each platform) over one chart. Picking a stat puts it on the chart,
- * as its count month by month or what it gained each month. One series at a
- * time, in the accent, so there's no colour key to learn. The month-by-month
- * table under it is the same numbers in full.
+ * Followers month by month: the count as a line, or what each month gained
+ * as bars from zero. One series, in the accent, so there's no key to learn.
+ * Used by the Growth card on Social growth (social-analytics.tsx).
  */
 
-type Mode = "count" | "gained";
+export type GrowthMode = "count" | "gained";
+type Mode = GrowthMode;
 
 const counts = new Intl.NumberFormat("en-US");
 const capital = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
 
-export function SocialsOverview({ series }: { series: OverviewSeries[] }) {
-  const [active, setActive] = useState(series[0]?.key);
-  const [mode, setMode] = useState<Mode>("count");
-  const current = series.find((item) => item.key === active) ?? series[0];
-  if (!current) return null;
-
-  const first = current.points[0];
-  const last = current.points[current.points.length - 1];
-  const range =
-    first && last && first.month !== last.month
-      ? `${monthLabel(first.month, true)} – ${monthLabel(last.month, true)}`
-      : last
-        ? monthLabel(last.month, true)
-        : "";
-
-  return (
-    <Card className="mb-4 overflow-hidden">
-      <div className="overflow-hidden border-b border-[var(--i-line)]">
-        <div
-          role="group"
-          aria-label="What the chart shows"
-          className="-mb-px -mr-px grid grid-cols-[repeat(auto-fit,minmax(9.5rem,1fr))]"
-        >
-          {series.map((item) => (
-            <Stat
-              key={item.key}
-              item={item}
-              selected={item.key === current.key}
-              onSelect={() => setActive(item.key)}
-            />
-          ))}
-        </div>
-      </div>
-
-      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-5 pb-1 pt-4">
-        <div className="min-w-0">
-          <p className="truncate text-[13px] font-medium">
-            {current.platform ? current.label : "Total audience"}
-            <span className="font-normal text-[var(--i-muted)]">
-              {" "}
-              ·{" "}
-              {mode === "count"
-                ? current.platform
-                  ? current.unit
-                  : "followers and subscribers"
-                : "gained each month"}
-            </span>
-          </p>
-          {range ? (
-            <p className="mt-0.5 text-[12px] text-[var(--i-faint)]">{range}</p>
-          ) : null}
-        </div>
-        <div className="flex items-center gap-2">
-          {current.href ? (
-            <a
-              href={current.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={buttonClass("ghost", "sm")}
-            >
-              Open {current.label} <ArrowUpRight size={12} />
-            </a>
-          ) : null}
-          <div
-            role="group"
-            aria-label="Chart view"
-            className="inline-flex rounded-lg bg-[var(--i-hover)] p-0.5 ring-1 ring-inset ring-[var(--i-line)]"
-          >
-            {(
-              [
-                ["count", capital(current.unit)],
-                ["gained", "Net new"],
-              ] as const
-            ).map(([value, label]) => (
-              <button
-                key={value}
-                type="button"
-                aria-pressed={mode === value}
-                onClick={() => setMode(value)}
-                className={cn(
-                  "h-8 rounded-full px-3.5 text-[13px] transition-colors",
-                  mode === value
-                    ? "bg-[var(--i-panel)] font-medium text-[var(--i-ink)] shadow-[var(--i-shadow-sm)] dark:bg-white/[0.14] dark:shadow-none"
-                    : "text-[var(--i-muted)] hover:text-[var(--i-ink)]",
-                )}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <GrowthChart
-        key={`${current.key}-${mode}`}
-        points={current.points}
-        mode={mode}
-        name={current.platform ? current.label : "Total audience"}
-        unit={current.unit}
-      />
-    </Card>
-  );
-}
-
-/** One stat in the strip; pressing it puts it on the chart. */
-function Stat({
-  item,
-  selected,
-  onSelect,
-}: {
-  item: OverviewSeries;
-  selected: boolean;
-  onSelect: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      aria-pressed={selected}
-      onClick={onSelect}
-      className={cn(
-        "relative min-w-0 border-b border-r border-[var(--i-line)] px-4 py-3.5 text-left transition-colors focus-visible:z-[1]",
-        selected ? "bg-[var(--i-hover)]" : "hover:bg-[var(--i-hover)]",
-      )}
-    >
-      <span className="flex items-center gap-2">
-        {item.platform ? (
-          <PlatformLogo platform={item.platform} size={20} />
-        ) : (
-          <AudienceLogo size={20} />
-        )}
-        <span className="min-w-0 flex-1 truncate text-[12.5px] text-[var(--i-muted)]">
-          {item.label}
-        </span>
-        {item.share !== null ? (
-          <span
-            title="Share of the total audience"
-            className="text-[11.5px] tabular-nums text-[var(--i-faint)]"
-          >
-            {item.share}%
-          </span>
-        ) : null}
-      </span>
-      <span className="mt-2.5 block truncate text-[22px] font-medium leading-none tracking-[-0.02em] text-[var(--i-ink)]">
-        {counts.format(item.value)}
-      </span>
-      <span className="mt-2 block truncate text-[11.5px]">
-        <Delta
-          gained={item.gained}
-          percent={item.percent}
-          since={item.since ? monthLabel(item.since, true) : null}
-          first="First month logged"
-        />
-      </span>
-      {selected ? (
-        <span
-          aria-hidden
-          className="absolute inset-x-0 bottom-0 h-0.5 bg-[var(--i-accent)]"
-        />
-      ) : null}
-    </button>
-  );
-}
-
-const PLOT = 180;
+const PLOT = 160;
 const TOP = 12;
 const AXIS = 28;
 const LEFT = 48;
@@ -216,7 +42,7 @@ const TIP = 176;
  * gain as bars from zero (losses below it, in grey). A crosshair snaps to
  * the nearest month; the arrow keys step through months when it's focused.
  */
-function GrowthChart({
+export function GrowthChart({
   points,
   mode,
   name,

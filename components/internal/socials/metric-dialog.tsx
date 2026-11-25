@@ -40,6 +40,7 @@ type Values = {
   month: string;
   followers: string;
   impressions: string;
+  engagements: string;
   posts: string;
   notes: string;
 };
@@ -76,6 +77,10 @@ export function MetricDialog({
       metric?.impressions === null || metric?.impressions === undefined
         ? ""
         : String(metric.impressions),
+    engagements:
+      metric?.engagements === null || metric?.engagements === undefined
+        ? ""
+        : String(metric.engagements),
     posts:
       metric?.posts === null || metric?.posts === undefined
         ? ""
@@ -123,7 +128,7 @@ export function MetricDialog({
       onOpenChange={setOpen}
       trigger={trigger}
       title={metric ? "Change the numbers" : "Log a month"}
-      description="An account's followers, impressions and posts for one month."
+      description="An account's followers, impressions, engagements and posts for one month."
       onSubmit={submit}
       busy={busy}
       error={error}
@@ -214,6 +219,22 @@ export function MetricDialog({
           value={values.impressions}
           onChange={(event) => set("impressions", event.target.value)}
           placeholder="48k"
+          maxLength={20}
+          className={inputClass()}
+        />
+      </FormField>
+      <FormField
+        id="social-engagements"
+        label="Engagements in the month"
+        help="Optional. Reactions, comments, reposts and clicks."
+      >
+        <input
+          id="social-engagements"
+          type="text"
+          inputMode="numeric"
+          value={values.engagements}
+          onChange={(event) => set("engagements", event.target.value)}
+          placeholder="1.2k"
           maxLength={20}
           className={inputClass()}
         />
