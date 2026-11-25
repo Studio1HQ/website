@@ -1785,3 +1785,19 @@ h1,
   color: var(--ink-2);
   font-size: 12px;
 }
+
+/* The status menu can reach outside the task card. */
+.card,
+#pane-tasks .card,
+.list,
+.list li,
+.item {
+  overflow: visible;
+}
+.status-menu {
+  z-index: 20;
+}
+.status-menu.up {
+  top: auto;
+  bottom: calc(100% + 4px);
+}

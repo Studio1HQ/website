@@ -211,6 +211,9 @@ function openStatusMenu(anchor, task) {
     ),
   );
   anchor.parentElement.append(menu);
+  // Not enough room below (near the foot of the panel, above the dock): open upwards.
+  const room = window.innerHeight - anchor.getBoundingClientRect().bottom - 90;
+  if (menu.offsetHeight > room) menu.classList.add("up");
   setTimeout(() => document.addEventListener("click", closeMenus, { once: true }), 0);
 }
 
