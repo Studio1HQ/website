@@ -155,47 +155,116 @@ function renderDay() {
   $("day-button").classList.toggle("stop", running);
 }
 
+const STATUSES = [
+  { value: "todo", label: "Not started" },
+  { value: "doing", label: "In progress" },
+  { value: "review", label: "In review" },
+  { value: "done", label: "Done" },
+];
+const statusLabel = (value) => STATUSES.find((item) => item.value === value)?.label ?? value;
+
+function statusPill(value) {
+  return el("span", { class: `status status-${value}` }, el("span", { class: "status-dot" }), statusLabel(value));
+}
+
+/** Saves a task's new status; the list shows it at once and goes back if it fails. */
+async function setStatus(task, status) {
+  const before = task.status;
+  if (before === status) return;
+  task.status = status;
+  renderTasks();
+  try {
+    await call("/api/extension/tasks", settings, { method: "POST", body: { id: task.id, status } });
+  } catch (problem) {
+    task.status = before;
+    renderTasks();
+    error("main-error", problem.message);
+  }
+}
+
+/** The small status menu under a task's pill, like the dashboard's. */
+function openStatusMenu(anchor, task) {
+  closeMenus();
+  const menu = el(
+    "div",
+    { class: "status-menu", role: "menu" },
+    ...STATUSES.map((option) =>
+      el(
+        "button",
+        {
+          type: "button",
+          role: "menuitemradio",
+          "aria-checked": String(option.value === task.status),
+          class: option.value === task.status ? "status-option on" : "status-option",
+          onclick: (event) => {
+            event.stopPropagation();
+            closeMenus();
+            setStatus(task, option.value);
+          },
+        },
+        statusPill(option.value),
+      ),
+    ),
+  );
+  anchor.parentElement.append(menu);
+  setTimeout(() => document.addEventListener("click", closeMenus, { once: true }), 0);
+}
+
+function closeMenus() {
+  for (const menu of document.querySelectorAll(".status-menu")) menu.remove();
+}
+
 function renderTasks() {
   const list = $("tasks");
   list.replaceChildren();
-  $("task-count").textContent = String(summary.tasks.length);
+  const left = summary.tasks.filter((task) => task.status !== "done").length;
+  $("task-count").textContent = summary.tasks.length ? `${summary.tasks.length - left}/${summary.tasks.length}` : "0";
+  $("task-count").title = "Done of this day's tasks";
   if (!summary.tasksOk) return list.append(el("li", { class: "empty" }, "Couldn't load your tasks."));
   if (!summary.tasks.length) {
     const onToday = !summary.shown || summary.shown === summary.today;
-    return list.append(el("li", { class: "empty" }, onToday ? "Nothing due today. Nice." : "Nothing on this day yet."));
+    return list.append(el("li", { class: "empty" }, onToday ? "Nothing on today yet. Add one below." : "Nothing on this day yet."));
   }
   for (const task of summary.tasks) {
+    const done = task.status === "done";
+    // The tick: done, or back to where it was.
     const check = el("button", {
-      class: "check",
-      title: "Mark done",
-      "aria-label": `Mark "${task.title}" done`,
-      onclick: async () => {
-        check.classList.add("done");
-        check.disabled = true;
-        try {
-          await call("/api/extension/tasks", settings, { method: "POST", body: { id: task.id, status: "done" } });
-          summary.tasks = summary.tasks.filter((item) => item.id !== task.id);
-          setTimeout(renderTasks, 350);
-        } catch (problem) {
-          check.classList.remove("done");
-          check.disabled = false;
-          error("main-error", problem.message);
-        }
-      },
+      class: done ? "check done" : "check",
+      title: done ? "Mark not done" : "Mark done",
+      "aria-label": `${done ? "Mark not done" : "Mark done"}: ${task.title}`,
+      onclick: () => setStatus(task, done ? "doing" : "done"),
     });
-    const sub = task.late
-      ? el("span", { class: "item-sub late" }, `Late · due ${shortDate.format(new Date(`${task.due_on}T00:00:00Z`))}`)
-      : el("span", { class: "item-sub" }, task.blocked ? `${task.statusLabel} · blocked` : task.statusLabel);
+    const pill = el(
+      "button",
+      {
+        type: "button",
+        class: "status-button",
+        "aria-haspopup": "menu",
+        "aria-label": `Progress: ${statusLabel(task.status)}. Change`,
+        onclick: (event) => {
+          event.stopPropagation();
+          openStatusMenu(pill, task);
+        },
+      },
+      statusPill(task.status),
+    );
+    const meta = el("span", { class: "item-meta" }, pill);
+    if (task.late && !done) meta.append(el("span", { class: "item-sub late" }, `Late · due ${shortDate.format(new Date(`${task.due_on}T00:00:00Z`))}`));
+    if (task.blocked && !done) meta.append(el("span", { class: "item-sub late" }, "Blocked"));
     list.append(
       el(
         "li",
-        {},
+        { class: done ? "is-done" : "" },
         check,
         el(
-          "a",
-          { class: "item", href: "#", onclick: (event) => (event.preventDefault(), open(dashboard("/tasks"))) },
-          el("span", { class: "item-title" }, task.title),
-          sub,
+          "div",
+          { class: "item" },
+          el(
+            "a",
+            { class: "item-title", href: "#", onclick: (event) => (event.preventDefault(), open(dashboard("/tasks"))) },
+            task.title,
+          ),
+          meta,
         ),
       ),
     );

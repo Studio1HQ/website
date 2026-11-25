@@ -6,7 +6,7 @@ import { homeFor, staffName, type Staff } from "@/lib/internal/session";
 import { canChangeTask } from "@/lib/internal/tasks/access";
 import { getTask, insertTasks, listTasks, updateTask } from "@/lib/internal/tasks/data";
 import { taskViewer } from "@/lib/internal/tasks/load";
-import { isTaskStatus, TASK_STATUSES, type TaskStatus } from "@/lib/internal/tasks/shared";
+import { isTaskLate, isTaskStatus, priorityRank, TASK_STATUSES, type Task, type TaskStatus } from "@/lib/internal/tasks/shared";
 import { dayStatusFor, endDayFor, startDayFor } from "@/lib/internal/team/day-clock";
 import { isDateKey, istNow, isUuid } from "@/lib/internal/team/shared";
 
@@ -40,19 +40,28 @@ export async function summaryFor(staff: Staff, dashboard: string, askedDay?: str
     staff.person ? dayStatusFor(staff.person) : Promise.resolve(null),
   ]);
 
+  // Just the chosen day's tasks: each one whose run covers it (start_on to
+  // due_on; a finished one runs to the day it was done), finished ones too,
+  // so its progress can be changed from the panel.
+  const onDay = (task: Task) => {
+    if (!task.due_on) return false;
+    const first = task.start_on ?? task.due_on;
+    const last = task.status === "done" && task.done_on && task.done_on < task.due_on ? task.done_on : task.due_on;
+    return first <= shown && shown <= last;
+  };
   const open: ExtensionTask[] = tasks.ok
     ? tasks.rows
-        .filter((task) => task.status !== "done" && task.email.toLowerCase() === staff.email.toLowerCase())
-        // Today: due by today (late ones too) and undated. Another day: what's on that day.
-        .filter((task) => (shown === today ? !task.due_on || task.due_on <= today : task.due_on === shown))
-        .slice(0, 20)
+        .filter((task) => task.email.toLowerCase() === staff.email.toLowerCase() && onDay(task))
+        // Open ones first (Top priority first), finished ones last.
+        .sort((a, b) => Number(a.status === "done") - Number(b.status === "done") || priorityRank(a.priority) - priorityRank(b.priority))
+        .slice(0, 30)
         .map((task) => ({
           id: task.id,
           title: task.title,
           status: task.status,
           statusLabel: TASK_STATUSES.find((option) => option.value === task.status)?.label ?? task.status,
           due_on: task.due_on,
-          late: Boolean(task.due_on && task.due_on < today),
+          late: isTaskLate(task, today),
           blocked: task.blocked,
         }))
     : [];
