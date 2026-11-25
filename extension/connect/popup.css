@@ -1567,3 +1567,36 @@ h1,
     animation: none;
   }
 }
+
+/* The clock's dot: small and clean; while it runs, a soft ring pulses out. */
+.dot {
+  position: relative;
+  width: 7px;
+  height: 7px;
+}
+.dot.on {
+  box-shadow: none;
+}
+.dot.on::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: var(--ok);
+  animation: live 2s ease-out infinite;
+}
+@keyframes live {
+  from {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2.8);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dot.on::after {
+    animation: none;
+  }
+}
