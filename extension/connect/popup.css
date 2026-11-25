@@ -1695,3 +1695,27 @@ h1,
   color: var(--faint);
   font-size: 11px;
 }
+
+/* Profile rows as grey buttons, like the dashboard's secondary buttons. */
+.menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.menu-list .menu-row + .menu-row {
+  border-top: 0;
+}
+.menu-row,
+#open-dashboard.menu-row {
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  background: var(--hover);
+}
+.menu-row:hover,
+#open-dashboard.menu-row:hover {
+  background: var(--line);
+}
+.menu-row.signout:hover {
+  background: rgba(251, 113, 133, 0.12);
+}
