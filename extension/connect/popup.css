@@ -835,3 +835,50 @@ body:not(.as-popup) .welcome {
   box-shadow: inset 0 0 0 1px var(--line);
   color: var(--ink);
 }
+
+/* One inset for everything inside a card (16px), one gap between cards
+   (12px), so every left edge lines up: headings, the day strip, ticks,
+   the add box and the empty lines. */
+.card {
+  margin-bottom: 12px;
+  border-radius: 16px;
+}
+.card-head {
+  padding: 14px 16px 10px;
+  font-size: 13.5px;
+}
+.day {
+  padding: 14px 16px;
+}
+.list {
+  padding: 0 8px 8px;
+}
+.list li {
+  gap: 12px;
+  padding: 8px;
+}
+.list li.empty {
+  padding: 4px 8px 10px;
+}
+.add {
+  padding: 12px 16px 14px;
+}
+.welcome {
+  margin: 4px 0 16px;
+}
+
+/* Seven whole days in view (no half-cut chips), sliding a day at a time. */
+.days {
+  gap: 4px;
+  padding: 0 16px 12px;
+  scroll-padding: 0 16px;
+  mask-image: none;
+}
+.day-chip {
+  width: auto;
+  flex: 0 0 calc((100% - 24px) / 7);
+  min-width: 0;
+}
+#open-dashboard {
+  margin-top: 4px;
+}
