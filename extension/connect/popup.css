@@ -882,3 +882,10 @@ body:not(.as-popup) .welcome {
 #open-dashboard {
   margin-top: 4px;
 }
+
+/* "A product of Studio1" sits at the foot of the side panel, however
+   little is above it. */
+body:not(.as-popup) .made {
+  margin-top: auto;
+  padding-top: 20px;
+}
