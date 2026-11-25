@@ -36,11 +36,12 @@ import {
   updateReport,
   updateTask,
 } from "@/lib/internal/tasks/data";
-import { finishedDay } from "@/lib/internal/tasks/calendar";
+import { daysApart, finishedDay } from "@/lib/internal/tasks/calendar";
 import { liveSnapshot, taskViewer } from "@/lib/internal/tasks/load";
 import { reportEmailHtml, reportText } from "@/lib/internal/tasks/report";
 import { reportsSince } from "@/lib/internal/tasks/report-status";
 import {
+  MAX_RANGE_DAYS,
   MAX_WITH,
   STUDIO_LINK,
   isOnTask,
@@ -322,7 +323,18 @@ export async function saveTask(id: unknown, values: unknown): Promise<TaskResult
     ...("notes" in data ? { notes } : {}),
     ...("due_on" in data ? { due_on: due } : {}),
   };
-  const patch = { ...words, ...priority, ...people, ...where, ...finished };
+  // A task over several days whose due day moves to (or before) its first, or
+  // loses it: a one-day task again. One whose due day moves later still has
+  // to fit in the longest run.
+  let span = {};
+  if ("due_on" in data && task.start_on) {
+    if (!due || task.start_on >= due) span = { start_on: null };
+    else {
+      const spanned = spanProblem(task.start_on, due);
+      if (spanned) return { ok: false, message: spanned };
+    }
+  }
+  const patch = { ...words, ...span, ...priority, ...people, ...where, ...finished };
   if (!Object.keys(patch).length) return { ok: true, id: task.id, message: "Saved" };
   const result = await updateTask(task.id, patch, staff.email);
   if (!result.ok) return result;
@@ -421,6 +433,13 @@ function doneDay(day: string | null, today: string) {
   return day && day <= today ? day : today;
 }
 
+/** Why a run of days from `from` to `to` won't do, or null when it's fine. */
+function spanProblem(from: string, to: string) {
+  if (to < from) return "The last day can't be before the first.";
+  if (daysApart(from, to) + 1 > MAX_RANGE_DAYS) return `Keep it to ${MAX_RANGE_DAYS} days or fewer.`;
+  return null;
+}
+
 /**
  * What a card is for (the "For" picker, lib/internal/tasks/shared.ts
  * parseLink): Studio1 and an area, a client, or one of the client
@@ -469,11 +488,13 @@ async function resolveFor(
 
 /**
  * Adds cards on a day (the week calendar's "+ New", My day): one or several
- * (a pasted list). items: [{ title, notes?, link?, priority? }]; extra: { email?, status?, with? }.
+ * (a pasted list). items: [{ title, notes?, link?, priority? }]; extra: { email?, status?, with?, until? }.
  * email: whose week (left out = your own); giving someone else a task goes
  * through canGiveTask, like the board. status: left out = Done on today or
- * a past day for your own, Not started on a day ahead or for someone else.
+ * a past day for your own, Not started on a day ahead or for someone else;
+ * running over days that take in today, In progress.
  * with: people to share every one of them with (on their lists too).
+ * until: the last day, for work that runs over several days (`day` is the first).
  */
 export async function addTasks(day: unknown, items: unknown, extra?: unknown): Promise<TaskResult> {
   const { staff, viewer: me } = await viewer();
@@ -496,7 +517,22 @@ export async function addTasks(day: unknown, items: unknown, extra?: unknown): P
   const date = typeof day === "string" && isDateKey(day) ? day : today;
   const problem = dayProblem(date, today);
   if (problem) return { ok: false, message: problem };
-  const state: TaskStatus = isTaskStatus(options.status) ? options.status : other || date > today ? "todo" : "done";
+  // Several days: `date` is the first, `last` the last (the due day).
+  let last = date;
+  if (options.until !== undefined && options.until !== null && options.until !== "") {
+    if (typeof options.until !== "string" || !isDateKey(options.until)) return { ok: false, message: "Pick a valid last day." };
+    const spanned = spanProblem(date, options.until);
+    if (spanned) return { ok: false, message: spanned };
+    last = options.until;
+  }
+  const ranged = last > date;
+  const state: TaskStatus = isTaskStatus(options.status)
+    ? options.status
+    : other || date > today
+      ? "todo"
+      : last >= today && ranged
+        ? "doing"
+        : "done";
   const list = (Array.isArray(items) ? items : [items]).map(input).slice(0, 30);
   const clean = list
     .map((item) => ({ title: line(item.title, 200), notes: block(item.notes, 4000), link: item.link, priority: item.priority }))
@@ -517,8 +553,10 @@ export async function addTasks(day: unknown, items: unknown, extra?: unknown): P
       title: item.title,
       notes: item.notes,
       status: state,
-      due_on: date,
-      done_on: state === "done" ? doneDay(date, today) : null,
+      due_on: last,
+      // Left out for one day, so tasks still save before the date-range migration.
+      ...(ranged ? { start_on: date } : {}),
+      done_on: state === "done" ? doneDay(last, today) : null,
       created_by: staff.email,
       updated_by: staff.email,
       ...priorityField(item.priority),
@@ -540,23 +578,24 @@ export async function addTasks(day: unknown, items: unknown, extra?: unknown): P
       notify([email], staff.email, {
         kind: "task",
         title: added === 1 ? `${by} gave you a task` : `${by} gave you ${added} tasks`,
-        body: `${titles.slice(0, 3).join(" · ")}${titles.length > 3 ? " …" : ""} · ${dayLabel(date)}`,
+        body: `${titles.slice(0, 3).join(" · ")}${titles.length > 3 ? " …" : ""} · ${ranged ? `${dayLabel(date)} to ${dayLabel(last)}` : dayLabel(date)}`,
         href: tasksHref({ week: date }),
       }),
     );
   }
-  tellShared(shared.emails, staff, clean.map((item) => item.title), date);
+  tellShared(shared.emails, staff, clean.map((item) => item.title), last);
   refresh();
   // Say the day when it isn't today, so a task put on another day isn't "lost".
-  const where = date === today ? "" : ` on ${dayLabel(date)}`;
+  const where = ranged ? `, ${dayLabel(date)} to ${dayLabel(last)}` : date === today ? "" : ` on ${dayLabel(date)}`;
   const what = `${added === 1 ? "Added" : `Added ${added}`}${other ? ` to ${name}'s week` : ""}${where}`;
   return { ok: true, message: what };
 }
 
 /**
- * Changes a card: { title?, notes?, link?, status?, priority?, with?, day? }. Done stamps the card's
+ * Changes a card: { title?, notes?, link?, status?, priority?, with?, day?, from? }. Done stamps the card's
  * day when that's in this week (else today: finishedDay); moving a done card to a day moves its
- * done day and leaves its due day.
+ * done day and leaves its due day. from: the first day of a task that runs over several (`day`
+ * is the last: due, or finished once done); null or "" makes it a one-day task again.
  */
 export async function editTask(id: unknown, values: unknown): Promise<TaskResult> {
   const { staff, viewer: me } = await viewer();
@@ -618,7 +657,42 @@ export async function editTask(id: unknown, values: unknown): Promise<TaskResult
     // Put on a day: that day. Just marked Done: its own day this week, else today.
     patch.done_on = status !== "done" ? null : "day" in data ? doneDay(day, today) : finishedDay(day, today);
   }
-  const result = await updateTask(task.id, patch, staff.email, { status: `eq.${task.status}` });
+  // The first day of a run of days. It has to come before the last (the due
+  // day, or the day it was finished once done): one that doesn't is dropped,
+  // and the task is a one-day task again.
+  let start = task.start_on;
+  if ("from" in data) {
+    if (data.from === null || data.from === "") start = null;
+    else if (typeof data.from !== "string" || !isDateKey(data.from)) return { ok: false, message: "Pick a valid first day." };
+    else {
+      const problem = dayProblem(data.from, today);
+      if (problem) return { ok: false, message: problem };
+      start = data.from;
+    }
+  }
+  if (start) {
+    const last = status === "done" ? ((patch.done_on as string | null | undefined) ?? task.done_on) : day;
+    if (!last || start >= last) start = null;
+    else {
+      const spanned = spanProblem(start, last);
+      if (spanned) return { ok: false, message: spanned };
+    }
+  }
+  // Written only when it changes, so tasks still save before the date-range migration.
+  if (start !== task.start_on && (start || task.start_on)) {
+    // A done task's run ends on the day it was finished; marking it done early doesn't drop its first day.
+    if (start || "from" in data || status !== "done") patch.start_on = start;
+  }
+  // Only if the status and days checked above are still the task's: someone
+  // else's change in between can't leave its first day after its last.
+  const same = (value: string | null) => (value ? `eq.${value}` : "is.null");
+  const result = await updateTask(task.id, patch, staff.email, {
+    status: `eq.${task.status}`,
+    due_on: same(task.due_on),
+    done_on: same(task.done_on),
+    // Left out when it's empty and stays so, so tasks still save before the date-range migration.
+    ...(task.start_on || "start_on" in patch ? { start_on: same(task.start_on) } : {}),
+  });
   if (!result.ok) return result;
   tellShared(added, staff, [typeof patch.title === "string" ? patch.title : task.title], day);
   refresh();

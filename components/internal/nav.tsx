@@ -10,11 +10,7 @@ import {
 import { useSidebarCollapsed } from "@/components/internal/mobile-nav";
 import { useHiddenSections } from "@/components/internal/sidebar-prefs";
 import { atLeast, type BlogAccess, type Role } from "@/lib/internal/roles";
-import {
-  SECTIONS,
-  SECTION_ORDER,
-  type SectionKey,
-} from "@/lib/internal/sections";
+import { SECTIONS, type SectionKey } from "@/lib/internal/sections";
 import { HoverLink } from "@/components/internal/nav-progress";
 import { SIDEBAR_EASE, SIDEBAR_FADE } from "@/lib/internal/sidebar";
 import { cn } from "@/lib/utils";
@@ -235,9 +231,10 @@ function FoldedRule({ className }: { className: string }) {
 
 /** Each section's icon, on its heading row. */
 const GROUP_ICONS: Record<string, Icon> = {
-  Workspaces: Nav.Layers,
-  Pipelines: Nav.Workflow,
-  Audiences: Nav.Radio,
+  Work: Nav.CalendarClock,
+  Clients: Nav.Briefcase,
+  Marketing: Nav.Radio,
+  Community: Nav.HeartHandshake,
   Team: Nav.Network,
   Settings: Nav.Cog,
 };
@@ -403,7 +400,7 @@ export function InternalNav({
   overview,
 }: {
   awaiting: Partial<Record<SectionKey, number>>;
-  /** Pipelines level; null hides the pipelines (blog-only people). */
+  /** Form sections level (applicants, subscribers); null hides them (blog-only people). */
   role: Role | null;
   blog: BlogAccess | null;
   /** Posts waiting for this person: reviews for reviewers, news for writers. */
@@ -432,7 +429,18 @@ export function InternalNav({
     href === "/"
       ? pathname === href
       : pathname === href || pathname.startsWith(`${href}/`);
-  const groups = ["Pipelines", "Audiences"] as const;
+  // A form section's link (applicants, subscribers, …), for whoever's role opens it.
+  const showSection = (key: SectionKey) => atLeast(role, SECTIONS[key].minRole);
+  const sectionLink = (key: SectionKey) =>
+    showSection(key) ? (
+      <NavLink
+        href={SECTIONS[key].path}
+        label={SECTIONS[key].nav}
+        icon={ICONS[key]}
+        badge={awaiting[key]}
+        active={isActive(SECTIONS[key].path)}
+      />
+    ) : null;
 
   // Community, Clients, Money and Blog open their pages in place, under
   // their link, while you're inside them. Hackathon registrations belong
@@ -472,15 +480,40 @@ export function InternalNav({
           active={isActive("/")}
         />
       ) : null}
-      {clients ||
-      blog ||
-      community ||
-      team.money ||
-      outreach ||
-      influencers ||
-      socials ||
-      jobBoard ? (
-        <NavGroup title="Workspaces">
+      {/* Work: what you're doing today. */}
+      {team.me || team.tasks || team.calls ? (
+        <NavGroup title="Work">
+          {team.me ? (
+            <NavLink
+              href="/me"
+              label="My day"
+              icon={Nav.Sun}
+              active={isActive("/me")}
+            />
+          ) : null}
+          {team.tasks ? (
+            <NavLink
+              href="/tasks"
+              label="Tasks"
+              icon={Nav.SquareCheckBig}
+              badge={team.tasksBadge}
+              badgeTitle={`${team.tasksBadge} late task${team.tasksBadge === 1 ? "" : "s"} or report${team.tasksBadge === 1 ? "" : "s"} to see to`}
+              active={isActive("/tasks")}
+            />
+          ) : null}
+          {team.calls ? (
+            <NavLink
+              href="/calls"
+              label="Calls"
+              icon={Nav.Phone}
+              active={isActive("/calls")}
+            />
+          ) : null}
+        </NavGroup>
+      ) : null}
+      {/* Clients: winning and delivering paid work. */}
+      {clients || outreach ? (
+        <NavGroup title="Clients">
           {clients ? (
             <>
               <NavLink
@@ -544,30 +577,11 @@ export function InternalNav({
               active={isActive("/outreach")}
             />
           ) : null}
-          {influencers ? (
-            <NavLink
-              href="/influencers"
-              label="Influencers"
-              icon={Nav.Megaphone}
-              active={isActive("/influencers")}
-            />
-          ) : null}
-          {socials ? (
-            <NavLink
-              href="/socials"
-              label="Social growth"
-              icon={Nav.TrendingUp}
-              active={isActive("/socials")}
-            />
-          ) : null}
-          {jobBoard ? (
-            <NavLink
-              href="/job-board"
-              label="DevRel jobs"
-              icon={Nav.BriefcaseBusiness}
-              active={isActive("/job-board")}
-            />
-          ) : null}
+        </NavGroup>
+      ) : null}
+      {/* Marketing: Studio1's own brand. */}
+      {blog || socials || influencers || showSection("subscribers") ? (
+        <NavGroup title="Marketing">
           {blog ? (
             <>
               <NavLink
@@ -627,6 +641,31 @@ export function InternalNav({
               </SubNav>
             </>
           ) : null}
+          {socials ? (
+            <NavLink
+              href="/socials"
+              label="Social growth"
+              icon={Nav.TrendingUp}
+              active={isActive("/socials")}
+            />
+          ) : null}
+          {influencers ? (
+            <NavLink
+              href="/influencers"
+              label="Influencers"
+              icon={Nav.Megaphone}
+              active={isActive("/influencers")}
+            />
+          ) : null}
+          {sectionLink("subscribers")}
+        </NavGroup>
+      ) : null}
+      {/* Community: our programs and the people in them. */}
+      {community ||
+      showSection("cohort") ||
+      showSection("partner-pool") ||
+      jobBoard ? (
+        <NavGroup title="Community">
           {community ? (
             <>
               <NavLink
@@ -710,19 +749,35 @@ export function InternalNav({
                   icon={Nav.ChartColumn}
                   active={isActive("/community/analytics")}
                 />
-                {/* Managers email hackathon registrants; without a hiring
-                  role they have no Settings group to find this under. */}
-                {community.access === "manager" ? (
-                  <NavLink
-                    href="/templates"
-                    label="Email templates"
-                    icon={Nav.MailOpen}
-                    active={isActive("/templates")}
-                  />
-                ) : null}
               </SubNav>
             </>
           ) : null}
+          {sectionLink("cohort")}
+          {sectionLink("partner-pool")}
+          {jobBoard ? (
+            <NavLink
+              href="/job-board"
+              label="DevRel jobs"
+              icon={Nav.BriefcaseBusiness}
+              active={isActive("/job-board")}
+            />
+          ) : null}
+        </NavGroup>
+      ) : null}
+      {/* Team: who works here, who wants to, and how they're paid. */}
+      {team.people || showSection("jobs") || team.money ? (
+        <NavGroup title="Team">
+          {team.people ? (
+            <NavLink
+              href="/people"
+              label="People"
+              icon={Nav.Contact}
+              badge={admin ? requests : undefined}
+              badgeTitle={`${requests} waiting for access`}
+              active={isActive("/people")}
+            />
+          ) : null}
+          {sectionLink("jobs")}
           {team.money ? (
             <>
               <NavLink
@@ -769,82 +824,24 @@ export function InternalNav({
           ) : null}
         </NavGroup>
       ) : null}
-      {groups
-        .filter((group) =>
-          SECTION_ORDER.some(
-            (key) =>
-              SECTIONS[key].group === group &&
-              atLeast(role, SECTIONS[key].minRole),
-          ),
-        )
-        .map((group) => (
-          <NavGroup key={group} title={group}>
-            {SECTION_ORDER.filter(
-              (key) =>
-                SECTIONS[key].group === group &&
-                atLeast(role, SECTIONS[key].minRole),
-            ).map((key) => (
-              <NavLink
-                key={key}
-                href={SECTIONS[key].path}
-                label={SECTIONS[key].nav}
-                icon={ICONS[key]}
-                badge={awaiting[key]}
-                active={isActive(SECTIONS[key].path)}
-              />
-            ))}
-          </NavGroup>
-        ))}
-      {team.me || team.people || team.tasks || team.calls ? (
-        <NavGroup title="Team">
-          {team.me ? (
-            <NavLink
-              href="/me"
-              label="My day"
-              icon={Nav.Sun}
-              active={isActive("/me")}
-            />
-          ) : null}
-          {team.tasks ? (
-            <NavLink
-              href="/tasks"
-              label="Tasks"
-              icon={Nav.SquareCheckBig}
-              badge={team.tasksBadge}
-              badgeTitle={`${team.tasksBadge} late task${team.tasksBadge === 1 ? "" : "s"} or report${team.tasksBadge === 1 ? "" : "s"} to see to`}
-              active={isActive("/tasks")}
-            />
-          ) : null}
-          {team.calls ? (
-            <NavLink
-              href="/calls"
-              label="Calls"
-              icon={Nav.Phone}
-              active={isActive("/calls")}
-            />
-          ) : null}
-          {team.people ? (
-            <NavLink
-              href="/people"
-              label="People"
-              icon={Nav.Contact}
-              badge={admin ? requests : undefined}
-              badgeTitle={`${requests} waiting for access`}
-              active={isActive("/people")}
-            />
-          ) : null}
-        </NavGroup>
-      ) : null}
-      {role ? (
-        <NavGroup title="Settings">
+      {/* Settings: everyone has Connections; Email templates is for the
+          hiring roles and community managers (who email registrants). */}
+      <NavGroup title="Settings">
+        {role || community?.access === "manager" ? (
           <NavLink
             href="/templates"
             label="Email templates"
             icon={Nav.MailOpen}
             active={isActive("/templates")}
           />
-        </NavGroup>
-      ) : null}
+        ) : null}
+        <NavLink
+          href="/connections"
+          label="Connections"
+          icon={Nav.Plug}
+          active={isActive("/connections")}
+        />
+      </NavGroup>
     </nav>
   );
 }

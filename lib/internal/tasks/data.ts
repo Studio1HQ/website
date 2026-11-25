@@ -10,6 +10,7 @@ import {
   DEFAULT_PRIORITY,
   PEOPLE_MIGRATION_HINT,
   PRIORITY_MIGRATION_HINT,
+  RANGE_MIGRATION_HINT,
   TASKS_MIGRATION_HINT,
   isTaskArea,
   isTaskPriority,
@@ -86,6 +87,7 @@ function toTask(row: Record<string, unknown>): Task | null {
     area: isTaskArea(row.area) ? row.area : "other",
     engagement_id: textOrNull(row.engagement_id),
     deliverable_id: textOrNull(row.deliverable_id),
+    start_on: day(row.start_on),
     due_on: day(row.due_on),
     done_on: day(row.done_on),
     blocked: row.blocked === true,
@@ -194,24 +196,47 @@ export async function dueTaskCounts(email: string, today: string): Promise<{ tod
 /**
  * The tasks on these people's lists (their own and the ones shared with
  * them): every open one, plus the ones done between `from` and `to` (both
- * days included; leave both out for every done one).
+ * days included; leave both out for every done one). With `spans` (the
+ * Week view), also done ones whose run of days reaches into the range:
+ * started by `to`, finished after it.
  */
-export async function listTasks(options: { emails: readonly string[]; from?: string; to?: string }): Promise<Loaded<Task>> {
+export async function listTasks(options: {
+  emails: readonly string[];
+  from?: string;
+  to?: string;
+  spans?: boolean;
+}): Promise<Loaded<Task>> {
   const emails = emailsOk(options.emails);
   if (!emails.length) return { ok: true, rows: [] };
+  const { from, to } = options;
   // Open ones, and the ones done in the range.
-  const range = options.from && options.to ? `status.neq.done,and(done_on.gte.${options.from},done_on.lte.${options.to})` : null;
-  const query = (shared: boolean) => {
+  const range = (spans: boolean) =>
+    from && to
+      ? `status.neq.done,and(done_on.gte.${from},${spans ? `or(done_on.lte.${to},start_on.lte.${to})` : `done_on.lte.${to}`})`
+      : null;
+  const query = (shared: boolean, spans: boolean) => {
     const params = new URLSearchParams({ select: "*", order: "due_on.asc.nullslast,created_at.asc", limit: "3000" });
-    if (shared) params.set("and", `(or(${whose(emails)})${range ? `,or(${range})` : ""})`);
+    const wanted = range(spans);
+    if (shared) params.set("and", `(or(${whose(emails)})${wanted ? `,or(${wanted})` : ""})`);
     else {
       params.set("email", inList(emails));
-      if (range) params.set("or", `(${range})`);
+      if (wanted) params.set("or", `(${wanted})`);
     }
     return params;
   };
-  let result = await selectRows(TABLES.tasks, query(sharingReady()));
-  if (!result.ok && beforeSharing(result.message)) result = await selectRows(TABLES.tasks, query(false));
+  let shared = sharingReady();
+  let spans = Boolean(options.spans);
+  let result = await selectRows(TABLES.tasks, query(shared, spans));
+  // Before their migrations there's no with_emails (sharing) or start_on
+  // (20261125120000_task_date_range.sql: no task has several days yet).
+  // PostgREST names one missing column at a time, so after each retry the
+  // new error is checked again, whichever column it names.
+  for (let retries = 0; !result.ok && retries < 2; retries += 1) {
+    if (spans && /start_on/.test(result.message)) spans = false;
+    else if (shared && beforeSharing(result.message)) shared = false;
+    else break;
+    result = await selectRows(TABLES.tasks, query(shared, spans));
+  }
   if (!result.ok) return failed(TABLES.tasks, result.message, "tasks");
   return { ok: true, rows: mapRows(result.rows, toTask) };
 }
@@ -256,6 +281,7 @@ export async function getTask(id: string): Promise<Task | null | "error"> {
 function writeFailed(table: string, message: string): TaskResult {
   if (/PGRST204/.test(message) && message.includes("priority")) return { ok: false, message: PRIORITY_MIGRATION_HINT };
   if (/PGRST204/.test(message) && message.includes("with_emails")) return { ok: false, message: PEOPLE_MIGRATION_HINT };
+  if (/PGRST204/.test(message) && message.includes("start_on")) return { ok: false, message: RANGE_MIGRATION_HINT };
   if (MISSING.test(message)) return { ok: false, message: TASKS_MIGRATION_HINT };
   // Before 20261116120000_tasks_optional_time.sql runs, every line needs a time.
   if (/null value in column \\?"minutes\\?"/.test(message))

@@ -84,7 +84,7 @@ export default async function InfluencerRatesPage({
 
   const header = (
     <PageHeader
-      eyebrow="Workspaces"
+      eyebrow="Marketing"
       title="Influencers"
       description="Everyone's prices side by side. Pick a platform and a format to see who charges what, and who gives the most views for the money."
     />

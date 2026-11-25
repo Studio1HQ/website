@@ -1,6 +1,6 @@
 /**
  * The numbers behind the social growth chart: round tick values for its
- * y axis and how they read. Pure; components/internal/socials/overview.tsx
+ * y axis and how they read. Pure; components/internal/socials/growth-chart.tsx
  * draws with them.
  */
 

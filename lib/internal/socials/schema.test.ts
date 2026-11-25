@@ -3,6 +3,7 @@ import {
   audienceOf,
   growthSeries,
   isPlatform,
+  monthSummaries,
   overviewOf,
   shareOf,
   signed,
@@ -21,8 +22,10 @@ const row = (
   month,
   followers,
   impressions: null,
+  engagements: null,
   posts: null,
   notes: "",
+  insights: {},
   updated_at: "",
   updated_by: null,
 });
@@ -141,5 +144,54 @@ describe("social growth", () => {
     const alone = overviewOf(person, audienceOf(person.platforms));
     expect(alone.map((item) => item.key)).toEqual(["x"]);
     expect(alone[0].href).toBeNull();
+  });
+});
+
+describe("a month in detail", () => {
+  const withNumbers = (
+    base: SocialMetric,
+    impressions: number | null,
+    engagements: number | null,
+    posts: number | null = null,
+  ): SocialMetric => ({ ...base, impressions, engagements, posts });
+
+  it("adds the platforms up and compares on the ones logged both months", () => {
+    const series = growthSeries([
+      withNumbers(row("Studio1", "linkedin", "2026-09", 400), 1000, 50),
+      withNumbers(row("Studio1", "linkedin", "2026-10", 480), 1500, 60, 4),
+      withNumbers(row("Studio1", "x", "2026-09", 250), null, null),
+      withNumbers(row("Studio1", "x", "2026-10", 271), 3000, 90, 10),
+    ]);
+    const studio = series[0];
+    const [october, september] = monthSummaries(
+      studio,
+      audienceOf(studio.platforms),
+    );
+    expect(october.month).toBe("2026-10");
+    expect(october).toMatchObject({
+      impressions: 4500,
+      engagements: 150,
+      posts: 14,
+      rate: 3.3,
+      // Only LinkedIn had impressions in September: 1000 → 1500.
+      impressionsChange: 50,
+      engagementsChange: 20,
+    });
+    expect(october.audience?.total).toBe(751);
+    expect(
+      october.platforms.map((item) => [
+        item.platform,
+        item.rate,
+        item.impressionsChange,
+      ]),
+    ).toEqual([
+      ["linkedin", 4, 50],
+      ["x", 3, null],
+    ]);
+    expect(september).toMatchObject({
+      impressions: 1000,
+      impressionsChange: null,
+      posts: null,
+    });
   });
 });

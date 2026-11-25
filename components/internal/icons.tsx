@@ -111,6 +111,7 @@ export const Butterfly = make("Butterfly", L.AtSign);
 export const CalendarBlank = make("CalendarBlank", L.Calendar);
 export const CalendarCheck = make("CalendarCheck", L.CalendarCheck);
 export const CalendarPlus = make("CalendarPlus", L.CalendarPlus);
+export const CalendarRange = make("CalendarRange", L.CalendarRange);
 export const CalendarStar = make("CalendarStar", L.CalendarHeart);
 export const Camera = make("Camera", L.Camera);
 export const CaretDown = make("CaretDown", L.ChevronDown);
@@ -224,9 +225,11 @@ export const XCircle = make("XCircle", L.CircleX);
  * cohort, …), kept apart so a page's icons can change without touching it.
  */
 export const Nav = {
-  Layers: make("NavLayers", L.Layers3),
-  Workflow: make("NavWorkflow", L.Workflow),
+  // The groups' own icons, on their heading rows.
+  CalendarClock: make("NavCalendarClock", L.CalendarClock),
+  Briefcase: make("NavBriefcase", L.Briefcase),
   Radio: make("NavRadio", L.Radio),
+  HeartHandshake: make("NavHeartHandshake", L.HeartHandshake),
   Network: make("NavNetwork", L.Network),
   Cog: make("NavCog", L.Cog),
   LayoutDashboard: make("NavLayoutDashboard", L.LayoutDashboard),
@@ -265,4 +268,5 @@ export const Nav = {
   GraduationCap: make("NavGraduationCap", L.GraduationCap),
   Mail: make("NavMail", L.Mail),
   Handshake: make("NavHandshake", L.Handshake),
+  Plug: make("NavPlug", L.Plug),
 } as const;

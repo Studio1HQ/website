@@ -119,7 +119,7 @@ export default async function OutreachPage({
 
   const header = (
     <PageHeader
-      eyebrow="Workspaces"
+      eyebrow="Clients"
       title="Outreach"
       description="Every company and creator you're talking to about working together: stage, contacts, what was said and when to follow up."
       actionsClassName="max-sm:w-full"

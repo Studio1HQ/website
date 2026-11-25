@@ -30,7 +30,8 @@ export function PersonPicker({
         label: person.email === me ? `${displayName(person)} (you)` : displayName(person),
         textValue: displayName(person),
       }))}
-      className="w-[13rem]"
+      // On a phone it takes what Search and Reports leave, so all three fit one row.
+      className="w-[13rem] max-sm:w-auto max-sm:min-w-0 max-sm:flex-1"
     />
   );
 }

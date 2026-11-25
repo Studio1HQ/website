@@ -122,7 +122,8 @@ export const teammates = cache(async (): Promise<Teammate[]> => {
  */
 const weekRows = cache(async (email: string, week: string) => {
   const [tasks, deliverables, reviewing, community, engagements] = await Promise.all([
-    listTasks({ emails: [email], from: week, to: addDaysKey(week, 6) }),
+    // spans: a finished task that ran over several days shows on each of them.
+    listTasks({ emails: [email], from: week, to: addDaysKey(week, 6), spans: true }),
     ownedDeliverables(email, week),
     reviewingDeliverables(email),
     ownedCommunityTasks(email, week),

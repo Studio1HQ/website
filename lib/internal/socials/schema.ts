@@ -1,3 +1,5 @@
+import type { SocialInsights } from "@/lib/internal/socials/insights";
+
 /**
  * Social growth: the platforms, a month's numbers for one account, and the
  * month-by-month series the page shows. Pure; lib/internal/socials/data.ts
@@ -56,8 +58,12 @@ export type SocialMetric = {
   month: string;
   followers: number;
   impressions: number | null;
+  /** Reactions, comments, reposts, clicks… in the month. */
+  engagements: number | null;
   posts: number | null;
   notes: string;
+  /** From an imported analytics export (lib/internal/socials/insights.ts); {} when typed in. */
+  insights: SocialInsights;
   updated_at: string;
   updated_by: string | null;
 };
@@ -67,6 +73,9 @@ export type SocialResult =
 
 export const SOCIALS_MIGRATION_HINT =
   "Run the social growth migration (supabase/migrations/20261118110000_social_metrics.sql) in Supabase first.";
+
+export const INSIGHTS_MIGRATION_HINT =
+  "Importing needs the latest database update (supabase/migrations/20261125150000_social_insights.sql). Logging a month by hand works now.";
 
 /** A month in a platform's series, with the change since the month logged before it. */
 export type SeriesMonth = SocialMetric & {
@@ -314,4 +323,138 @@ export function overviewOf(
     };
   });
   return audience.platforms > 1 ? [total, ...platforms] : platforms;
+}
+
+/** One platform's month, for the month view. */
+export type PlatformMonth = {
+  platform: Platform;
+  followers: number;
+  gained: number | null;
+  percent: number | null;
+  impressions: number | null;
+  engagements: number | null;
+  posts: number | null;
+  /** Engagements per impression, in percent (one decimal). */
+  rate: number | null;
+  /** Impressions and engagements against the month before, in percent. */
+  impressionsChange: number | null;
+  engagementsChange: number | null;
+  notes: string;
+  insights: SocialInsights;
+};
+
+/** A month across an account's platforms. */
+export type MonthSummary = {
+  month: string;
+  platforms: PlatformMonth[];
+  /** The total audience that month (followers and subscribers). */
+  audience: AudienceMonth | null;
+  impressions: number | null;
+  engagements: number | null;
+  posts: number | null;
+  rate: number | null;
+  /** Against the month before, on the platforms logged in both. */
+  impressionsChange: number | null;
+  engagementsChange: number | null;
+};
+
+function rateOf(engagements: number | null, impressions: number | null) {
+  return engagements !== null && impressions
+    ? Math.round((engagements / impressions) * 1000) / 10
+    : null;
+}
+
+function changeOf(now: number | null, before: number | null) {
+  return now !== null && before
+    ? Math.round(((now - before) / before) * 1000) / 10
+    : null;
+}
+
+function sumOf(values: (number | null)[]) {
+  const known = values.filter((value): value is number => value !== null);
+  return known.length ? known.reduce((sum, value) => sum + value, 0) : null;
+}
+
+/**
+ * Every month logged for an account, newest first (up to 24): each
+ * platform's numbers and insights, and the totals across them.
+ */
+export function monthSummaries(
+  account: AccountSeries,
+  audience: Audience,
+): MonthSummary[] {
+  const months = [
+    ...new Set(
+      account.platforms.flatMap((item) =>
+        item.months.map((entry) => entry.month),
+      ),
+    ),
+  ]
+    .sort()
+    .reverse()
+    .slice(0, 24);
+  const totals = new Map(audience.byMonth.map((entry) => [entry.month, entry]));
+  return months.map((month) => {
+    const pairs = account.platforms.flatMap((item) => {
+      const index = item.months.findIndex((entry) => entry.month === month);
+      if (index < 0) return [];
+      const entry = item.months[index];
+      // The month logged before this one (months are newest first).
+      const before = item.months[index + 1] ?? null;
+      return [{ entry, before }];
+    });
+    const platforms = pairs.map(({ entry, before }): PlatformMonth => ({
+      platform: entry.platform,
+      followers: entry.followers,
+      gained: entry.gained,
+      percent: entry.percent,
+      impressions: entry.impressions,
+      engagements: entry.engagements,
+      posts: entry.posts,
+      rate: rateOf(entry.engagements, entry.impressions),
+      impressionsChange: changeOf(
+        entry.impressions,
+        before?.impressions ?? null,
+      ),
+      engagementsChange: changeOf(
+        entry.engagements,
+        before?.engagements ?? null,
+      ),
+      notes: entry.notes,
+      insights: entry.insights,
+    }));
+    const impressions = sumOf(platforms.map((item) => item.impressions));
+    const engagements = sumOf(platforms.map((item) => item.engagements));
+    const both = (key: "impressions" | "engagements") => {
+      const matched = pairs.filter(
+        ({ entry, before }) => entry[key] !== null && before?.[key] != null,
+      );
+      return changeOf(
+        sumOf(matched.map(({ entry }) => entry[key])),
+        sumOf(matched.map(({ before }) => before?.[key] ?? null)),
+      );
+    };
+    return {
+      month,
+      platforms,
+      audience: totals.get(month) ?? null,
+      impressions,
+      engagements,
+      posts: sumOf(platforms.map((item) => item.posts)),
+      rate: rateOf(
+        sumOf(
+          platforms
+            .filter((item) => item.impressions !== null)
+            .map((item) => item.engagements),
+        ),
+        sumOf(
+          platforms
+            .filter((item) => item.engagements !== null)
+            .map((item) => item.impressions),
+        ),
+      ),
+      impressionsChange: both("impressions"),
+      engagementsChange: both("engagements"),
+    };
+  });
 }

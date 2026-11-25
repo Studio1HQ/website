@@ -55,7 +55,7 @@ export function MonthlyLog({
   return (
     <Card className="overflow-hidden">
       <CardTitle>
-        Month by month
+        Followers by month
         <span className="font-normal text-[var(--i-faint)] max-sm:hidden">
           {" "}
           · click a number to change it

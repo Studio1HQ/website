@@ -81,8 +81,8 @@ export type Section = {
   title: string;
   /** Sidebar label. */
   nav: string;
-  /** Sidebar group (Community sections sit in the Community sidebar). */
-  group: "Pipelines" | "Audiences" | "Community";
+  /** Sidebar group. Hackathons sit inside Community's own pages. */
+  group: "Marketing" | "Community" | "Team";
   description: string;
   path: string;
   table: string;
@@ -128,8 +128,8 @@ export const SECTIONS: Record<SectionKey, Section> = {
   jobs: {
     key: "jobs",
     title: "Job applications",
-    nav: "Jobs",
-    group: "Pipelines",
+    nav: "Job applicants",
+    group: "Team",
     description: "Everyone who applied through the careers pages.",
     path: "/jobs",
     table: "job_applications",
@@ -224,7 +224,7 @@ export const SECTIONS: Record<SectionKey, Section> = {
     key: "cohort",
     title: "DevRel Cohort applications",
     nav: "DevRel Cohort",
-    group: "Pipelines",
+    group: "Community",
     description: "Everyone who applied to the DevRel Cohort.",
     path: "/cohort",
     table: "devrel_cohort_applications",
@@ -270,7 +270,7 @@ export const SECTIONS: Record<SectionKey, Section> = {
     key: "subscribers",
     title: "Email subscribers",
     nav: "Subscribers",
-    group: "Audiences",
+    group: "Marketing",
     description:
       "Everyone who opted in to emails about future roles, cohorts and events, one row per address.",
     path: "/subscribers",
@@ -309,7 +309,7 @@ export const SECTIONS: Record<SectionKey, Section> = {
     key: "partner-pool",
     title: "Partner referral pool",
     nav: "Partner pool",
-    group: "Audiences",
+    group: "Community",
     description:
       "Cohort applicants and hackathon registrants who agreed that Studio1 can refer them to partner companies.",
     path: "/partner-pool",

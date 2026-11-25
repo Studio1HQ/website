@@ -529,3 +529,1275 @@ body:not(.as-popup) #connect form {
 body:not(.as-popup) .made {
   margin-top: 0;
 }
+
+/* Signed in: the welcome header */
+.welcome {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 2px 0 14px;
+}
+.avatar {
+  position: relative;
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 18%, var(--panel));
+  color: var(--accent);
+  font-size: 15px;
+  font-weight: 500;
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--line);
+}
+.avatar img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.welcome-text {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+.welcome-hi {
+  color: var(--muted);
+  font-size: 12px;
+}
+.welcome-name {
+  overflow: hidden;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.welcome-role {
+  overflow: hidden;
+  color: var(--faint);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The week ahead, a chip a day */
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  padding: 0 10px 8px;
+}
+.day-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 5px 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+}
+.day-chip:hover {
+  background: var(--hover);
+  color: var(--ink);
+}
+.day-chip.on {
+  background: var(--ink);
+  color: var(--bg);
+}
+.day-chip-name {
+  font-size: 10.5px;
+  letter-spacing: 0.01em;
+}
+.day-chip-date {
+  font-size: 13px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Add a task on the day that's showing */
+.add {
+  display: flex;
+  gap: 6px;
+  margin: 0;
+  padding: 8px 10px 10px;
+  border-top: 1px solid var(--line);
+}
+.add input {
+  height: 34px;
+  font-size: 13px;
+}
+.add-button {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 10px;
+  background: var(--hover);
+  color: var(--ink);
+  font-size: 18px;
+  line-height: 1;
+}
+.add-button:hover {
+  background: var(--line);
+}
+.add-button:disabled {
+  opacity: 0.5;
+}
+
+/* "Notifications 3" */
+.unread-count {
+  margin-left: 4px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: var(--accent);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  line-height: 17px;
+}
+
+/* The side panel scrolls as one page: lists grow instead of scrolling
+   inside it (no second scrollbar), and the panel's own bar is thin and
+   quiet. The small dropdown keeps its capped lists. */
+body:not(.as-popup) .list {
+  max-height: none;
+  overflow: visible;
+}
+html {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--muted) 45%, transparent) transparent;
+}
+
+/* Refresh turns while it fetches */
+.icon-button.spinning svg {
+  animation: spin 800ms linear infinite;
+}
+.icon-button:disabled {
+  cursor: default;
+}
+
+/* Side panel, signed in: refresh and sign out sit in the welcome row's
+   top right instead of a row of their own. */
+body:not(.as-popup) {
+  position: relative;
+}
+body:not(.as-popup) .top {
+  position: absolute;
+  top: 18px;
+  right: 14px;
+  z-index: 1;
+  margin: 0;
+}
+body:not(.as-popup) .welcome {
+  margin-top: 4px;
+  padding-right: 72px;
+}
+
+/* A task's progress: a coloured pill (the dashboard's colours) that opens
+   a small menu of the four statuses. */
+.item {
+  position: relative;
+}
+.item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin-top: 4px;
+}
+.item-meta .item-sub {
+  display: inline;
+}
+.status-button {
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+}
+.status-button:hover .status {
+  filter: brightness(1.15);
+}
+.status {
+  display: inline-flex;
+  height: 20px;
+  align-items: center;
+  gap: 5px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+}
+.status-todo {
+  background: rgba(161, 161, 161, 0.16);
+  color: var(--ink-2);
+}
+.status-todo .status-dot {
+  background: #a8a29e;
+}
+.status-doing {
+  background: rgba(14, 165, 233, 0.18);
+  color: #7dd3fc;
+}
+.status-review {
+  background: rgba(139, 92, 246, 0.2);
+  color: #c4b5fd;
+}
+.status-done {
+  background: rgba(16, 185, 129, 0.18);
+  color: #6ee7b7;
+}
+@media (prefers-color-scheme: light) {
+  .status-doing { color: #075985; }
+  .status-review { color: #5b21b6; }
+  .status-done { color: #065f46; }
+}
+.status-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 10;
+  display: flex;
+  min-width: 150px;
+  flex-direction: column;
+  gap: 2px;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  box-shadow: 0 12px 28px -10px rgba(0, 0, 0, 0.45);
+}
+.status-option {
+  display: flex;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  text-align: left;
+}
+.status-option:hover,
+.status-option.on {
+  background: var(--hover);
+}
+.list li.is-done .item-title {
+  color: var(--muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--faint);
+}
+.check.done::after {
+  content: "";
+  display: block;
+  width: 5px;
+  height: 9px;
+  margin: 1px auto 0;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* The day strip scrolls sideways: two weeks back, two ahead. */
+.days {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  padding: 0 10px 10px;
+  mask-image: linear-gradient(to right, transparent, #000 16px, #000 calc(100% - 16px), transparent);
+}
+.days::-webkit-scrollbar {
+  display: none;
+}
+.day-chip {
+  width: 46px;
+  flex: none;
+  scroll-snap-align: center;
+}
+.day-chip.past:not(.on) {
+  opacity: 0.6;
+}
+.day-chip.today:not(.on) {
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--ink);
+}
+
+/* One inset for everything inside a card (16px), one gap between cards
+   (12px), so every left edge lines up: headings, the day strip, ticks,
+   the add box and the empty lines. */
+.card {
+  margin-bottom: 12px;
+  border-radius: 16px;
+}
+.card-head {
+  padding: 14px 16px 10px;
+  font-size: 13.5px;
+}
+.day {
+  padding: 14px 16px;
+}
+.list {
+  padding: 0 8px 8px;
+}
+.list li {
+  gap: 12px;
+  padding: 8px;
+}
+.list li.empty {
+  padding: 4px 8px 10px;
+}
+.add {
+  padding: 12px 16px 14px;
+}
+.welcome {
+  margin: 4px 0 16px;
+}
+
+/* Seven whole days in view (no half-cut chips), sliding a day at a time. */
+.days {
+  gap: 4px;
+  padding: 0 16px 12px;
+  scroll-padding: 0 16px;
+  mask-image: none;
+}
+.day-chip {
+  width: auto;
+  flex: 0 0 calc((100% - 24px) / 7);
+  min-width: 0;
+}
+#open-dashboard {
+  margin-top: 4px;
+}
+
+/* "A product of Studio1" sits at the foot of the side panel, however
+   little is above it. */
+body:not(.as-popup) .made {
+  margin-top: auto;
+  padding-top: 20px;
+}
+
+/* ---- Sleeker pass ---- */
+
+/* The strip: exactly seven days wide (its margin sits outside the scroll
+   area, so no neighbouring day peeks in), a soft highlight for the chosen
+   day and an orange dot under today. */
+.days {
+  margin: 0 16px 10px;
+  padding: 0;
+  scroll-padding: 0;
+}
+.day-chip {
+  position: relative;
+  padding: 6px 0 8px;
+  border-radius: 12px;
+}
+.day-chip.on {
+  background: var(--hover);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.day-chip.today:not(.on) {
+  box-shadow: none;
+}
+.day-chip.today::after {
+  content: "";
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border-radius: 999px;
+  background: var(--accent);
+}
+.day-chip-name {
+  font-size: 10.5px;
+  color: var(--muted);
+}
+.day-chip.on .day-chip-name {
+  color: var(--ink-2);
+}
+.day-chip-date {
+  font-size: 14px;
+}
+
+/* Add a task: one quiet line, "+" inside, Enter adds. */
+.add {
+  position: relative;
+  align-items: center;
+  padding: 4px 16px 14px;
+  border-top: 0;
+}
+.add-plus {
+  position: absolute;
+  left: 28px;
+  color: var(--faint);
+  font-size: 16px;
+  line-height: 1;
+  pointer-events: none;
+}
+.add input {
+  height: 36px;
+  padding-left: 32px;
+  border-color: transparent;
+  background: var(--hover);
+}
+.add input:focus {
+  border-color: var(--line);
+  background: var(--panel);
+}
+.add-button {
+  width: auto;
+  height: 36px;
+  padding: 0 12px;
+  font-size: 12.5px;
+  font-weight: 500;
+}
+.add:not(:focus-within) .add-button {
+  display: none;
+}
+
+/* Open dashboard: a quiet link, not a big button. */
+#open-dashboard {
+  height: 34px;
+  margin-top: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+#open-dashboard:hover {
+  background: var(--hover);
+  color: var(--ink);
+}
+
+/* ---- Sections and the dock ---- */
+body[data-view="main"] {
+  padding-bottom: 84px;
+}
+body[data-view="main"] > .made {
+  display: none;
+}
+.pane {
+  animation: rise 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.dock {
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  left: 12px;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  box-shadow: 0 14px 30px -14px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(10px);
+}
+body.as-popup .dock {
+  position: sticky;
+  margin-top: 8px;
+}
+.dock-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 7px 0 6px;
+  border: 0;
+  border-radius: 13px;
+  background: transparent;
+  color: var(--faint);
+  font-size: 10.5px;
+  font-weight: 500;
+  transition: background-color 150ms, color 150ms;
+}
+.dock-item:hover {
+  color: var(--ink-2);
+}
+.dock-item.on {
+  background: var(--hover);
+  color: var(--ink);
+}
+.dock-item svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.dock-icon {
+  position: relative;
+  display: inline-flex;
+}
+.dock-badge {
+  position: absolute;
+  top: -5px;
+  right: -9px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 9.5px;
+  line-height: 15px;
+  text-align: center;
+}
+
+/* ---- Profile ---- */
+.profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 22px 16px 18px;
+  text-align: center;
+}
+.avatar-lg {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 10px;
+  font-size: 22px;
+}
+.profile-name {
+  font-size: 16px;
+  font-weight: 500;
+}
+.profile-email {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+.profile-role {
+  margin-top: 2px;
+  color: var(--faint);
+  font-size: 12px;
+}
+.profile-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.14);
+  color: var(--ok);
+  font-size: 11.5px;
+  font-weight: 500;
+}
+.menu-list {
+  padding: 6px;
+}
+.menu-row,
+#open-dashboard.menu-row {
+  display: flex;
+  width: 100%;
+  height: 42px;
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 13px;
+  text-align: left;
+}
+.menu-row:hover,
+#open-dashboard.menu-row:hover {
+  background: var(--hover);
+  color: var(--ink);
+}
+.menu-row svg {
+  width: 17px;
+  height: 17px;
+  flex: none;
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.menu-arrow {
+  color: var(--faint);
+}
+.menu-row.danger,
+.menu-row.danger svg {
+  color: #fb7185;
+  stroke: #fb7185;
+}
+.made-inline {
+  margin-top: 18px !important;
+  padding-top: 0 !important;
+}
+.add input:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+/* The dock lives outside the sections (their slide-in would pin it to
+   them); it shows only when signed in. */
+body:not([data-view="main"]) .dock {
+  display: none;
+}
+
+/* ---- Profile, in the dashboard's style ---- */
+.profile {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  text-align: left;
+}
+.profile .avatar {
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  font-size: 15px;
+}
+.profile-text {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+.profile-name {
+  overflow: hidden;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.profile-email {
+  overflow: hidden;
+  margin: 1px 0 0;
+  font-size: 12.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.profile-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: -4px 4px 16px;
+  color: var(--faint);
+  font-size: 11.5px;
+}
+.profile-dot {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-radius: 999px;
+  background: var(--ok);
+}
+.group-label {
+  margin: 0 4px 6px;
+  color: var(--faint);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.menu-list {
+  padding: 0;
+}
+.menu-list .menu-row + .menu-row {
+  border-top: 1px solid var(--line);
+}
+.menu-row,
+#open-dashboard.menu-row {
+  height: 46px;
+  gap: 12px;
+  padding: 0 14px 0 12px;
+  border-radius: 0;
+  font-size: 13px;
+}
+.menu-icon {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--hover);
+}
+.menu-icon svg {
+  width: 15px;
+  height: 15px;
+}
+.menu-label {
+  flex: 1;
+}
+.menu-arrow {
+  color: var(--faint);
+  font-size: 17px;
+  line-height: 1;
+}
+.menu-row.signout,
+.menu-row.signout svg {
+  color: var(--ink-2);
+  stroke: var(--muted);
+}
+.menu-row.signout:hover,
+.menu-row.signout:hover svg {
+  color: #fb7185;
+  stroke: #fb7185;
+}
+
+/* ---- Less crowded ---- */
+.card {
+  margin-bottom: 14px;
+}
+/* The day clock: one slim row. */
+.day {
+  padding: 10px 12px 10px 16px;
+}
+.day-text b {
+  font-size: 13px;
+}
+.day-text span {
+  font-size: 12px;
+}
+.pill {
+  height: 30px;
+  padding: 0 14px;
+  font-size: 12.5px;
+}
+/* A task on one line: tick, title, its status on the right; "Late" under. */
+.list li {
+  align-items: center;
+  padding: 9px 8px;
+}
+.item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 10px;
+}
+.item-title {
+  grid-column: 1;
+  grid-row: 1;
+  font-size: 13.5px;
+}
+.item-meta {
+  display: contents;
+}
+.item-meta .status-button {
+  grid-column: 2;
+  grid-row: 1;
+}
+.item-meta .item-sub {
+  grid-column: 1;
+  grid-row: 2;
+  margin-top: 2px;
+  font-size: 11.5px;
+}
+.status-menu {
+  right: 0;
+  left: auto;
+}
+.add {
+  padding-top: 8px;
+}
+
+/* Profile: icon tiles keep their size; the welcome header steps aside
+   there (the profile card says who). */
+.menu-row .menu-icon {
+  flex: none;
+}
+body[data-pane="me"] .welcome {
+  display: none;
+}
+/* Nothing to refresh on Profile; the arrow would sit on its card. */
+body[data-pane="me"] .top {
+  display: none;
+}
+
+/* ---- Sleek: the Tasks section without boxes ---- */
+#pane-tasks .card {
+  margin-bottom: 0;
+  border-radius: 0;
+  background: transparent;
+}
+#pane-tasks #day-card {
+  margin-bottom: 20px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+#pane-tasks .day {
+  padding: 9px 8px 9px 14px;
+}
+#pane-tasks .pill {
+  height: 28px;
+  padding: 0 12px;
+  background: var(--hover);
+  color: var(--ink);
+}
+#pane-tasks .card-head {
+  padding: 0 2px 10px;
+  font-size: 13px;
+}
+#pane-tasks .days {
+  margin: 0 0 8px;
+}
+#pane-tasks .list {
+  padding: 0;
+}
+#pane-tasks .list li {
+  padding: 11px 2px;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+}
+#pane-tasks .list li:hover {
+  background: transparent;
+}
+#pane-tasks .list li.empty {
+  padding: 14px 2px;
+  border-top: 1px solid var(--line);
+}
+/* Whole titles, up to two lines. */
+#pane-tasks .item-title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  white-space: normal;
+  line-height: 1.35;
+}
+#pane-tasks .add {
+  padding: 12px 0 0;
+  border-top: 1px solid var(--line);
+}
+#pane-tasks .add input {
+  border: 1px dashed var(--line);
+  background: transparent;
+}
+#pane-tasks .add input:focus {
+  border-style: solid;
+  border-color: var(--faint);
+}
+#pane-tasks .add-plus {
+  left: 12px;
+}
+
+/* A small floating dock, centred. */
+.dock {
+  right: auto;
+  left: 50%;
+  width: 240px;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 16px;
+  transform: translateX(-50%);
+}
+.dock-item {
+  gap: 2px;
+  padding: 6px 0 5px;
+  border-radius: 12px;
+  font-size: 10px;
+}
+.dock-item svg {
+  width: 17px;
+  height: 17px;
+}
+body[data-view="main"] {
+  padding-bottom: 76px;
+}
+/* The section you're on: white, like the dashboard's selected tab. */
+.dock-item.on {
+  background: var(--ink);
+  color: var(--bg);
+}
+.dock-item.on:hover {
+  color: var(--bg);
+}
+.days {
+  scroll-snap-type: none;
+}
+
+/* White for what matters: the clock's button and the chosen day. */
+#pane-tasks .pill,
+.pill {
+  background: var(--ink);
+  color: var(--bg);
+}
+#pane-tasks .pill.stop,
+.pill.stop {
+  background: var(--ink);
+  color: var(--bg);
+}
+.pill:hover {
+  opacity: 0.9;
+}
+.day-chip.on {
+  background: var(--ink);
+  color: var(--bg);
+  box-shadow: none;
+}
+.day-chip.on .day-chip-name {
+  color: var(--bg);
+  opacity: 0.75;
+}
+.day-chip.on.today::after {
+  background: var(--accent);
+}
+
+/* One week, no scrolling; ‹ › beside the title. */
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  overflow: visible;
+}
+.day-chip {
+  width: auto;
+}
+.head-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.head-right .count {
+  margin-right: 6px;
+}
+.week-arrow {
+  display: inline-flex;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1;
+}
+.week-arrow:hover {
+  background: var(--hover);
+  color: var(--ink);
+}
+
+/* Profile, flat like Tasks: no boxes, thin lines. */
+.profile {
+  padding: 4px 2px 14px;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+}
+.profile .avatar {
+  width: 48px;
+  height: 48px;
+}
+.profile-name {
+  font-size: 15px;
+}
+.profile-status {
+  margin: 12px 2px 22px;
+}
+.group-label {
+  margin: 0 2px 4px;
+}
+.menu-list {
+  margin-bottom: 20px;
+  background: transparent;
+}
+.menu-row,
+#open-dashboard.menu-row {
+  height: 44px;
+  padding: 0 2px;
+  border-radius: 0;
+}
+.menu-list .menu-row + .menu-row {
+  border-top: 1px solid var(--line);
+}
+.menu-row:hover,
+#open-dashboard.menu-row:hover {
+  background: transparent;
+}
+.menu-row:hover .menu-label {
+  color: var(--ink);
+}
+.menu-icon {
+  width: auto;
+  height: auto;
+  background: transparent;
+}
+.menu-icon svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* Type exactly as the dashboard sets it: Studio1 Sans, regular and medium
+   only (it has no bold), same smoothing. */
+html,
+body,
+button,
+input {
+  font-family: "Studio1 Sans", Inter, Arial, sans-serif;
+}
+b,
+strong,
+h1,
+.welcome-name,
+.profile-name,
+.day-text b {
+  font-weight: 500;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pane {
+    animation: none;
+  }
+}
+
+/* The clock's dot: small and clean; while it runs, a soft ring pulses out. */
+.dot {
+  position: relative;
+  width: 7px;
+  height: 7px;
+}
+.dot.on {
+  box-shadow: none;
+}
+.dot.on::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: var(--ok);
+  animation: live 2s ease-out infinite;
+}
+@keyframes live {
+  from {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2.8);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dot.on::after {
+    animation: none;
+  }
+}
+
+/* ---- Finishing touches ---- */
+#tasks-title {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  min-width: 0;
+}
+.title-main {
+  font-size: 14px;
+  font-weight: 500;
+}
+.title-date {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.head-right .count {
+  padding: 0;
+  background: transparent;
+  color: var(--faint);
+  font-size: 11.5px;
+  font-weight: 400;
+}
+/* Round ticks. */
+.check {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border-width: 1.5px;
+}
+.check.done::after {
+  width: 4px;
+  height: 8px;
+  margin-top: 2px;
+}
+/* Smaller status pills. */
+#pane-tasks .status {
+  height: 19px;
+  padding: 0 7px;
+  font-size: 11px;
+}
+/* Add a task: a quiet line until clicked. */
+#pane-tasks .add {
+  padding-top: 6px;
+  border-top: 0;
+}
+#pane-tasks .add input {
+  border: 1px solid transparent;
+  background: transparent;
+}
+#pane-tasks .add input:hover:not(:disabled) {
+  background: var(--hover);
+}
+#pane-tasks .add input:focus {
+  border-color: var(--line);
+  background: var(--panel);
+}
+#pane-tasks .add-plus {
+  left: 10px;
+}
+#pane-tasks .add input {
+  padding-left: 30px;
+}
+
+/* Profile: today's three numbers */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 0 0 22px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 11px 12px;
+}
+.stat + .stat {
+  border-left: 1px solid var(--line);
+}
+.stat-value {
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+.stat-label {
+  color: var(--faint);
+  font-size: 11px;
+}
+
+/* Profile rows as grey buttons, like the dashboard's secondary buttons. */
+.menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.menu-list .menu-row + .menu-row {
+  border-top: 0;
+}
+.menu-row,
+#open-dashboard.menu-row {
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  background: var(--hover);
+}
+.menu-row:hover,
+#open-dashboard.menu-row:hover {
+  background: var(--line);
+}
+.menu-row.signout:hover {
+  background: rgba(251, 113, 133, 0.12);
+}
+
+/* Today's numbers as grey tiles, matching the grey buttons below. */
+.stats {
+  gap: 6px;
+  border: 0;
+}
+.stat {
+  padding: 11px 12px;
+  border-radius: 12px;
+  background: var(--hover);
+}
+.stat + .stat {
+  border-left: 0;
+}
+
+/* The day clock's mark: a timer in a small tile, green while the day runs. */
+.dot,
+.dot.on {
+  display: inline-flex;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background: var(--hover);
+  color: var(--faint);
+  box-shadow: none;
+}
+.dot.on {
+  background: rgba(16, 185, 129, 0.14);
+  color: var(--ok);
+}
+.dot.on::after {
+  content: none;
+}
+.dot svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+#pane-tasks .day {
+  gap: 12px;
+  padding: 10px 10px 10px 12px;
+}
+
+/* "Signed in on this browser" as a grey tag, like the buttons below. */
+.profile {
+  border-bottom: 0;
+  padding-bottom: 10px;
+}
+.profile-status {
+  display: inline-flex;
+  width: fit-content;
+  height: 30px;
+  margin: 0 0 18px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--hover);
+  color: var(--ink-2);
+  font-size: 12px;
+}
+
+/* The status menu can reach outside the task card. */
+.card,
+#pane-tasks .card,
+.list,
+.list li,
+.item {
+  overflow: visible;
+}
+.status-menu {
+  z-index: 20;
+}
+.status-menu.up {
+  top: auto;
+  bottom: calc(100% + 4px);
+}

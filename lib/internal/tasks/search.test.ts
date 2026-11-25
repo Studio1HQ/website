@@ -16,6 +16,7 @@ const task = (id: string, patch: Partial<Task>) =>
     area: "content",
     engagement_id: null,
     deliverable_id: null,
+    start_on: null,
     due_on: null,
     done_on: null,
     blocked: false,

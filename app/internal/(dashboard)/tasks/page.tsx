@@ -110,23 +110,6 @@ export default async function TasksPage({
                 ? `What ${person.name || person.email} is working on. Add a task on a day to give it to them; it shows on their bell.`
                 : `What ${person.name || person.email} worked on.`
         }
-        actions={
-          <>
-            {/* Search, whose tasks, and Reports: one row. */}
-            <TaskSearch query={searching ? query : ""} base={searchBase} />
-            {others && view !== "team" ? (
-              <PersonPicker
-                people={people.map((item) => ({ email: item.email, name: item.name }))}
-                value={person.email}
-                me={staff.email}
-                view={view}
-              />
-            ) : null}
-            <Link href="/tasks/reports" className={buttonClass("secondary")}>
-              Reports
-            </Link>
-          </>
-        }
       />
       {failed ? (
         <div className="mb-4">
@@ -138,9 +121,24 @@ export default async function TasksPage({
           <Notice tone="warning">That needs more access than you have.</Notice>
         </div>
       ) : null}
-      {/* The views. While searching no tab is on: picking one leaves the search. */}
-      <div className="mb-5 [&>nav]:mb-0">
+      {/* The views on the left; search, whose tasks and Reports on the right of
+          the same row. While searching no tab is on: picking one leaves the search. */}
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3 [&>nav]:mb-0">
         <LinkTabs items={tabs} active={searching ? "" : view} />
+        <div className="flex flex-wrap items-center gap-2 max-sm:w-full">
+          <TaskSearch query={searching ? query : ""} base={searchBase} />
+          {others && view !== "team" ? (
+            <PersonPicker
+              people={people.map((item) => ({ email: item.email, name: item.name }))}
+              value={person.email}
+              me={staff.email}
+              view={view}
+            />
+          ) : null}
+          <Link href="/tasks/reports" className={buttonClass("secondary")}>
+            Reports
+          </Link>
+        </div>
       </div>
       {searching ? (
         <SearchView {...props} query={query} />
