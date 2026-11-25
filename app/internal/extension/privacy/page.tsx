@@ -6,14 +6,16 @@ export const metadata: Metadata = { title: "Studio1 Connect privacy policy" };
 
 /**
  * The privacy policy for Studio1 Connect, the team's browser extension
- * (extension/connect), at dashboard.studio1hq.com/connect/privacy: the link
- * its Chrome Web Store listing gives. Kept apart from the public site's
- * /privacy, which covers clients and visitors; this covers the internal
- * tool only. Open without signing in (proxy.ts) so the store's reviewers
- * can read it; like the rest of the dashboard host, never indexed.
+ * (extension/connect), at www.studio1hq.com/internal/extension/privacy: the
+ * link its Chrome Web Store listing gives. Kept apart from the site's
+ * /privacy, which covers clients and visitors; this covers the internal tool
+ * only. The one /internal page the public site serves (proxy.ts), so anyone
+ * can read it without signing in; never indexed (next.config.ts headers),
+ * linked from nowhere on the site. On the dashboard host the same path stays
+ * behind sign-in like every other page there.
  */
 export default async function ConnectPrivacyPage() {
-  // Rendered per request, so the dashboard's CSP nonce reaches its scripts.
+  // Rendered per request, so a dashboard-host visit gets its CSP nonce on the scripts.
   await connection();
 
   return (

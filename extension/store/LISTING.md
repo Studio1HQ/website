@@ -82,7 +82,7 @@ Studio1 Connect shows a Studio1 team member their own tasks, day clock and notif
 
 Then tick all three statements: the data isn't sold or transferred to third parties, isn't used for anything unrelated to the single purpose, and isn't used for creditworthiness or lending.
 
-**Privacy policy URL:** https://dashboard.studio1hq.com/connect/privacy. It's the extension's own policy (app/internal/connect/privacy), kept apart from the business site's /privacy. It opens without signing in so reviewers can read it, and like the rest of the dashboard host it's never indexed. If the extension starts handling anything new, update that page in the same change.
+**Privacy policy URL:** https://www.studio1hq.com/internal/extension/privacy. It's the extension's own policy (app/internal/extension/privacy), kept apart from the business site's /privacy. It's public so reviewers can read it, but it's never indexed and nothing on the site links to it. The dashboard still needs sign-in for everything. If the extension starts handling anything new, update that page in the same change.
 
 ## Distribution
 

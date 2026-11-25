@@ -80,6 +80,8 @@ const DASHBOARD_ROBOTS = [
 ].join("\n");
 
 const NOINDEX = "noindex, nofollow";
+/** app/internal/extension/privacy, served on the public site (see proxy below). */
+const EXTENSION_PRIVACY_PATH = "/internal/extension/privacy";
 const LOGO_POLICY = "default-src 'none'; style-src 'unsafe-inline'; sandbox";
 
 function dashboardPolicy(nonce: string) {
@@ -116,9 +118,7 @@ function dashboardPolicy(nonce: string) {
 async function internalGate(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const route = toInternalPath(pathname);
-  // Open without signing in: sign-in itself, and the Connect extension's
-  // privacy policy (its Chrome Web Store listing links there).
-  const open = route === "/internal/login" || route.startsWith("/internal/auth/") || route === "/internal/connect/privacy";
+  const open = route === "/internal/login" || route.startsWith("/internal/auth/");
   const nonce = btoa(crypto.randomUUID());
   const logo = LOGO_PATH.test(route);
   // Logos, photos and draft images keep the caching their routes set.
@@ -235,6 +235,11 @@ export async function proxy(request: NextRequest) {
   const { pathname } = nextUrl;
 
   if (isDashboardHost(request.headers.get("host"))) return dashboardHost(request);
+
+  // The Connect extension's privacy policy is the one /internal page served
+  // here, in the open: its Chrome Web Store listing links to it, while the
+  // dashboard itself stays behind sign-in on its own host.
+  if (pathname === EXTENSION_PRIVACY_PATH) return noindex(NextResponse.next());
 
   if (pathname === "/internal" || pathname.startsWith("/internal/")) {
     return toDashboard(request);
