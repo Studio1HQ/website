@@ -1719,3 +1719,17 @@ h1,
 .menu-row.signout:hover {
   background: rgba(251, 113, 133, 0.12);
 }
+
+/* Today's numbers as grey tiles, matching the grey buttons below. */
+.stats {
+  gap: 6px;
+  border: 0;
+}
+.stat {
+  padding: 11px 12px;
+  border-radius: 12px;
+  background: var(--hover);
+}
+.stat + .stat {
+  border-left: 0;
+}
