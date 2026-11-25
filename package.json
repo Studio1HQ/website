@@ -18,7 +18,8 @@
     "test:content": "node scripts/verify-content.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
-    "extension:zip": "node scripts/build-extension.mjs"
+    "extension:zip": "node scripts/build-extension.mjs",
+    "extension:store": "node scripts/build-extension.mjs --store"
   },
   "dependencies": {
     "@dnd-kit/core": "6.3.1",

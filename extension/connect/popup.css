@@ -1311,6 +1311,19 @@ body:not([data-view="main"]) .dock {
   margin-top: 2px;
   font-size: 11.5px;
 }
+/* A notification isn't a task row: its title on top, what and when under it
+   (in the grid above, the detail line took the right column and squeezed the
+   title to a letter). */
+#notifications li {
+  align-items: flex-start;
+}
+#notifications .item {
+  display: block;
+}
+#notifications .item-sub {
+  margin-top: 2px;
+  font-size: 11.5px;
+}
 .status-menu {
   right: 0;
   left: auto;
