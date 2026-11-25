@@ -350,33 +350,48 @@ const shortDate = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "sho
 const weekday = new Intl.DateTimeFormat("en-GB", { weekday: "short", timeZone: "UTC" });
 const longDay = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "short", timeZone: "UTC" });
 
-/** Today and the six days after it, as a strip of chips. */
+const monthShort = new Intl.DateTimeFormat("en-GB", { month: "short", timeZone: "UTC" });
+
+/** Two weeks back to two weeks ahead, a chip a day, scrolling sideways; the chosen day in view. */
 function renderDays() {
   const today = summary.today;
   const current = summary.shown || today;
-  $("days").replaceChildren(
-    ...Array.from({ length: 7 }, (_, index) => {
-      const day = addDays(today, index);
+  const strip = $("days");
+  strip.replaceChildren(
+    ...Array.from({ length: 29 }, (_, index) => {
+      const day = addDays(today, index - 14);
       const date = new Date(`${day}T00:00:00Z`);
+      const first = date.getUTCDate() === 1 || index === 0;
       return el(
         "button",
         {
           type: "button",
           role: "tab",
           "aria-selected": String(day === current),
-          class: day === current ? "day-chip on" : "day-chip",
+          "data-day": day,
+          class: ["day-chip", day === current ? "on" : "", day === today ? "today" : "", day < today ? "past" : ""].join(" ").trim(),
           onclick: () => {
             shownDay = day === today ? "" : day;
             load();
           },
         },
-        el("span", { class: "day-chip-name" }, index === 0 ? "Today" : weekday.format(date)),
+        el("span", { class: "day-chip-name" }, day === today ? "Today" : first ? monthShort.format(date) : weekday.format(date)),
         el("span", { class: "day-chip-date" }, String(date.getUTCDate())),
       );
     }),
   );
-  $("tasks-title").textContent = current === today ? "Today" : longDay.format(new Date(`${current}T00:00:00Z`));
-  $("add-input").placeholder = current === today ? "Add a task for today" : `Add a task for ${longDay.format(new Date(`${current}T00:00:00Z`))}`;
+  // Keep the chosen day in the middle of the strip.
+  // After the view is on screen (a hidden strip has no width to scroll in).
+  requestAnimationFrame(() => {
+    const chosen = strip.querySelector(".day-chip.on");
+    if (!chosen) return;
+    strip.style.scrollBehavior = "auto";
+    strip.scrollLeft = chosen.offsetLeft - strip.offsetLeft - strip.clientWidth / 2 + chosen.offsetWidth / 2;
+    strip.style.scrollBehavior = "";
+  });
+  const label = longDay.format(new Date(`${current}T00:00:00Z`));
+  $("tasks-title").textContent = current === today ? `Today · ${label}` : label;
+  $("add-input").placeholder = current === today ? "Add a task for today" : `Add a task for ${label}`;
 }
 
 function render() {
@@ -407,6 +422,12 @@ async function load() {
   error("main-error", "");
   try {
     summary = await call(`/api/extension/summary${shownDay ? `?day=${shownDay}` : ""}`, settings);
+    // An older dashboard sends today's late and undated tasks too, and ignores
+    // the day asked for: keep just the tasks dated the day showing.
+    if (!summary.shown) {
+      summary.shown = shownDay || summary.today;
+      summary.tasks = summary.tasks.filter((task) => task.due_on === summary.shown);
+    }
     render();
   } catch (problem) {
     if (problem.status === 401) {
