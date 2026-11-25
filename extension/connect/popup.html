@@ -78,8 +78,9 @@
         <div class="days" id="days" role="tablist" aria-label="Day"></div>
         <ul class="list" id="tasks"></ul>
         <form class="add" id="add-form">
-          <input id="add-input" autocomplete="off" maxlength="200" placeholder="Add a task for today" />
-          <button type="submit" class="add-button" id="add-button" aria-label="Add task">+</button>
+          <span class="add-plus" aria-hidden="true">+</span>
+          <input id="add-input" autocomplete="off" maxlength="200" placeholder="Add a task for today" aria-label="New task" />
+          <button type="submit" class="add-button" id="add-button">Add</button>
         </form>
       </div>
 
