@@ -3,6 +3,7 @@ import { recordInboundMail } from "@/lib/internal/inbound/data";
 import { headerValue } from "@/lib/internal/inbound/rules";
 import {
   addressedToIntake,
+  dmarcPassed,
   htmlToText,
   parseFrom,
   readReceivedEmail,
@@ -76,6 +77,9 @@ export async function handleLeadsEmail(
     subject: typeof email.subject === "string" ? email.subject : meta.subject,
     headers: email.headers,
     bodyText: body,
+    // Only Resend's own DMARC verdict counts. Without the full email (no key,
+    // no access) there is no verdict, so this is false.
+    senderVerified: dmarcPassed(email.authentication),
   });
   if (!saved.ok) return { ok: false, retry: true, message: saved.message };
   return saved.skipped ? { ok: true, skipped: saved.skipped } : { ok: true };

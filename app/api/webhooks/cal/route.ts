@@ -23,11 +23,20 @@ export const maxDuration = 30;
  *
  *   BOOKING_CREATED, BOOKING_RESCHEDULED  the booker becomes a lead
  *     (lib/internal/inbound/data.ts, upsertLeadFromBooking)
+ *     A booking that names a company already on file and not inbound changes
+ *     nothing there: the founders get a bell notice instead.
  *   MEETING_ENDED  the founders get a bell notice asking for call notes
  *   anything else  acknowledged and ignored
  *
  * Nothing from the request is ever echoed back.
  */
+
+/** Plain text for a notice: the attendee typed these, so they are one short line. */
+const oneLine = (value: string) =>
+  value
+    .replace(/[\u0000-\u001f\u007f]+/g, " ")
+    .trim()
+    .slice(0, 120);
 
 const OK = () => NextResponse.json({ ok: true });
 
@@ -65,6 +74,16 @@ export async function POST(request: Request) {
     if (!result.ok) {
       console.error(`[cal webhook] saving a booking failed: ${result.message}`);
       return new Response(null, { status: 500 });
+    }
+    if (result.needsPerson) {
+      // The booker's email is unverified and the company is not an inbound
+      // lead, so nothing was changed. Without this a person never hears of it.
+      await notify([...OWNERS], "webhook:cal", {
+        kind: "call",
+        title: "A booking names a company that is already on file",
+        body: `${result.needsPerson.orgName}. Booked by ${oneLine(booking.attendeeName)} (${oneLine(booking.attendeeEmail)}). Nothing was changed. Please confirm who this is.`,
+        href: `/outreach/${result.needsPerson.orgId}`,
+      });
     }
     return OK();
   }

@@ -33,6 +33,7 @@ import {
   canQueue,
   cleanMail,
   companyDomainFromEmail,
+  isInboundSource,
   nameFromDomain,
   oneLineText,
   stageAfter,
@@ -488,31 +489,54 @@ export function findOrgForBooking(booking: Pick<CalBooking, "attendeeEmail">) {
 }
 
 export type BookingResult =
-  | { ok: true; orgId: string; created: boolean; queued: boolean }
+  | {
+      ok: true;
+      orgId: string;
+      created: boolean;
+      queued: boolean;
+      /**
+       * Set when the booking names a company that is not an inbound lead.
+       * Nothing was written for it: the caller tells the founders, and a
+       * person confirms whose booking it is.
+       */
+      needsPerson?: { orgId: string; orgName: string };
+    }
   | { ok: false; message: string };
 
 /**
- * Turns a new or moved Cal.com booking into a lead. The company is matched
- * by the attendee's company domain, else by a contact with the same email;
- * a free-mail attendee (gmail and the like) never makes a domain, so their
- * company is named from the booking's company answer, else from their own
- * name. The lead goes to "call booked" (a proposal, win or loss stays) with
- * source inbound_call, the attendee is added as a contact, and lead_created
- * is queued once per lead, only while auto_start.booking is on. Call from
- * the verified webhook only.
+ * Turns a new or moved Cal.com booking into a lead. The attendee's email is
+ * typed by whoever books and nobody has proved it, so a booking is trusted
+ * to make a NEW company and to nudge a company that is already inbound, and
+ * to do nothing else:
+ *   - no company matches (by the attendee's company domain, else by a
+ *     contact with the same email): a new org is made with source
+ *     inbound_call at "call booked", the attendee is its contact. A
+ *     free-mail attendee (gmail and the like) never makes a domain, so the
+ *     company is named from the booking's company answer, else from their
+ *     own name.
+ *   - the match is already inbound: it may move to "call booked" (only from
+ *     the early stages) and queue lead_created once. Its source is never
+ *     changed and no contact is added, so a booking cannot widen who is on
+ *     the company.
+ *   - the match is anything else (an outreach prospect, a client): this
+ *     stops anyone booking with an address at a prospect's domain to
+ *     rewrite that company. Nothing is written and no event is queued; the
+ *     result says a person is needed, and the webhook tells the founders.
+ * lead_created is queued only while auto_start.booking is on. Call from the
+ * verified webhook only.
  */
 export async function upsertLeadFromBooking(
   booking: CalBooking,
 ): Promise<BookingResult> {
   const domain = companyDomainFromEmail(booking.attendeeEmail);
   const by = "webhook:cal";
-  const found = await findOrgForPerson(booking.attendeeEmail, domain);
-  if (found === "error")
+  let existing = await findOrgForPerson(booking.attendeeEmail, domain);
+  if (existing === "error")
     return { ok: false, message: "Couldn't look the company up" };
 
-  let orgId = found?.id ?? "";
+  let orgId = existing?.id ?? "";
   let created = false;
-  if (!found) {
+  if (!existing) {
     const name = oneLineText(
       booking.companyName ||
         (domain ? nameFromDomain(domain) : "") ||
@@ -534,63 +558,60 @@ export async function upsertLeadFromBooking(
     });
     if (inserted.ok) {
       created = true;
+      // The attendee is the new company's first contact.
+      const added = await insertRow(TABLES.contacts, {
+        id: crypto.randomUUID(),
+        org_id: orgId,
+        name: booking.attendeeName || booking.attendeeEmail,
+        email: booking.attendeeEmail,
+        is_primary: true,
+        created_by: by,
+        updated_by: by,
+      });
+      if (!added.ok)
+        return {
+          ok: false,
+          message: writeFailed("a booking's contact", added.message).message,
+        };
     } else if (inserted.duplicate && domain) {
-      // Two bookings at once for the same company: the other one won.
+      // Two bookings at once for the same company: the other one won, and
+      // this one is handled as a booking for an existing company.
       const again = await findOrgForPerson("", domain);
       if (!again || again === "error")
         return { ok: false, message: "Couldn't save the company" };
+      existing = again;
       orgId = again.id;
     } else {
       const failed = writeFailed("a booking's company", inserted.message);
       return { ok: false, message: failed.message };
     }
-  } else if (bookingMovesStage(found.stage)) {
-    const moved = await updateRows(
-      TABLES.orgs,
-      new URLSearchParams({ id: `eq.${orgId}` }),
-      {
-        stage: "call_booked",
-        source: "inbound_call",
-        updated_by: by,
-        updated_at: new Date().toISOString(),
-      },
-    );
-    if (!moved.ok)
-      return {
-        ok: false,
-        message: writeFailed("a booking's stage", moved.message).message,
-      };
   }
 
-  // The attendee as a contact, once.
-  const people = await selectRows<{ id: string; email: string | null }>(
-    TABLES.contacts,
-    new URLSearchParams({
-      select: "id,email",
-      org_id: `eq.${orgId}`,
-      limit: "200",
-    }),
-  );
-  if (!people.ok)
-    return {
-      ok: false,
-      message: writeFailed("a booking's contact", people.message).message,
-    };
-  if (!people.rows.some((person) => person.email === booking.attendeeEmail)) {
-    const added = await insertRow(TABLES.contacts, {
-      id: crypto.randomUUID(),
-      org_id: orgId,
-      name: booking.attendeeName || booking.attendeeEmail,
-      email: booking.attendeeEmail,
-      is_primary: people.rows.length === 0,
-      created_by: by,
-      updated_by: by,
-    });
-    if (!added.ok)
+  if (existing) {
+    if (!isInboundSource(existing.source))
       return {
-        ok: false,
-        message: writeFailed("a booking's contact", added.message).message,
+        ok: true,
+        orgId,
+        created: false,
+        queued: false,
+        needsPerson: { orgId, orgName: existing.name },
       };
+    if (bookingMovesStage(existing.stage)) {
+      const moved = await updateRows(
+        TABLES.orgs,
+        new URLSearchParams({ id: `eq.${orgId}` }),
+        {
+          stage: "call_booked",
+          updated_by: by,
+          updated_at: new Date().toISOString(),
+        },
+      );
+      if (!moved.ok)
+        return {
+          ok: false,
+          message: writeFailed("a booking's stage", moved.message).message,
+        };
+    }
   }
 
   // lead_created once per lead, and only while bookings start the agent.
@@ -651,6 +672,7 @@ export async function recordInboundMail(
         headers: clean.headers,
         body_text: clean.bodyText,
         excerpt: clean.excerpt,
+        sender_verified: clean.senderVerified,
         status: "new",
       },
     ],

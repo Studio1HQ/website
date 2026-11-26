@@ -87,11 +87,16 @@ create table if not exists public.inbound_mail (
   from_address text not null,
   from_name text not null default '',
   subject text not null default '',
-  -- Only: authentication-results, auto-submitted, precedence,
-  -- list-unsubscribe, list-id, return-path, x-autoreply,
-  -- x-auto-response-suppress, reply-to (lowercased keys). The app keeps to
-  -- that list; the worker never reads other headers.
+  -- Only: auto-submitted, precedence, list-unsubscribe, list-id,
+  -- return-path, x-autoreply, x-auto-response-suppress, reply-to
+  -- (lowercased keys). The app keeps to that list; the worker never reads
+  -- other headers. Authentication-Results is never stored: the sender can
+  -- write one, so it proves nothing (see sender_verified).
   headers jsonb not null default '{}'::jsonb,
+  -- The website's own answer, from the receiving provider's DMARC verdict.
+  -- The worker trusts this and nothing in the headers; it can read it and
+  -- never write it.
+  sender_verified boolean not null default false,
   -- The worker sets it to null as soon as the mail is sorted.
   body_text text,
   excerpt text not null default '' check (char_length(excerpt) <= 300),
@@ -179,7 +184,8 @@ grant select on public.agent_files to agent_worker;
 grant insert (id, org_id, event_id, name, storage_path, content_type, bytes, kind)
   on public.agent_files to agent_worker;
 
--- inbound_mail: read, and write the sorting result.
+-- inbound_mail: read (sender_verified included), and write the sorting
+-- result. sender_verified is not in the update list: only the site sets it.
 revoke all on public.inbound_mail from agent_worker;
 grant select on public.inbound_mail to agent_worker;
 grant update (status, label, decided_by, reason, confidence, held, org_id, body_text, excerpt, claimed_at, attempts)
@@ -190,15 +196,20 @@ revoke all on public.agent_settings from agent_worker;
 grant select on public.agent_settings to agent_worker;
 
 -- outreach_orgs: never est_value, currency, notes, owner or anything about money.
+-- The worker may read orgs (it must see whether any org already owns a
+-- domain) and create leads from mail. It may only edit the research fields of
+-- an inbound lead: name, website, domain, kind, stage and source are in the
+-- insert grant and not the update grant, so a compromised worker cannot
+-- rewrite a client or an outreach prospect, or move a lead.
 revoke all on public.outreach_orgs from agent_worker;
 grant select (id, name, website, domain, kind, stage, source, interest, about, funding, why_fit, conflict, client_id)
   on public.outreach_orgs to agent_worker;
 grant insert (name, website, domain, kind, stage, source, interest, about, funding, why_fit, conflict, created_by, updated_by)
   on public.outreach_orgs to agent_worker;
-grant update (name, website, domain, kind, stage, source, interest, about, funding, why_fit, conflict, created_by, updated_by)
+grant update (interest, about, funding, why_fit, conflict, updated_by)
   on public.outreach_orgs to agent_worker;
 
--- outreach_contacts
+-- outreach_contacts: only the contacts of inbound leads (see the policies).
 revoke all on public.outreach_contacts from agent_worker;
 grant select (id, org_id, name, title, email) on public.outreach_contacts to agent_worker;
 grant insert (org_id, name, title, email, is_primary, created_by) on public.outreach_contacts to agent_worker;
@@ -214,11 +225,12 @@ begin
       ('agent_files', 'select'), ('agent_files', 'insert'),
       ('inbound_mail', 'select'), ('inbound_mail', 'update'),
       ('agent_settings', 'select'),
-      ('outreach_orgs', 'select'), ('outreach_orgs', 'insert'), ('outreach_orgs', 'update'),
-      ('outreach_contacts', 'select'), ('outreach_contacts', 'insert')
+      ('outreach_orgs', 'select')
     ) as r (tbl, cmd)
   loop
     execute format('drop policy if exists %I on public.%I', 'agent_worker_' || rule.cmd, rule.tbl);
+    -- Open to the worker: the column grants are the limit. Inserting and
+    -- editing orgs and reading and adding contacts get row limits below.
     if rule.cmd = 'select' then
       execute format('create policy %I on public.%I for select to agent_worker using (true)', 'agent_worker_' || rule.cmd, rule.tbl);
     elsif rule.cmd = 'insert' then
@@ -228,6 +240,36 @@ begin
     end if;
   end loop;
 end $$;
+
+-- Row limits for the two company tables. The worker reads every org (to see
+-- whether a domain is taken), creates only leads that came from mail, and
+-- edits only inbound leads. Its contacts are those of inbound leads.
+drop policy if exists agent_worker_insert on public.outreach_orgs;
+create policy agent_worker_insert on public.outreach_orgs
+  for insert to agent_worker
+  with check (source = 'inbound_email' and stage = 'lead');
+
+drop policy if exists agent_worker_update on public.outreach_orgs;
+create policy agent_worker_update on public.outreach_orgs
+  for update to agent_worker
+  using (source in ('inbound_call', 'inbound_email'))
+  with check (source in ('inbound_call', 'inbound_email'));
+
+drop policy if exists agent_worker_select on public.outreach_contacts;
+create policy agent_worker_select on public.outreach_contacts
+  for select to agent_worker
+  using (exists (
+    select 1 from public.outreach_orgs o
+    where o.id = org_id and o.source in ('inbound_call', 'inbound_email')
+  ));
+
+drop policy if exists agent_worker_insert on public.outreach_contacts;
+create policy agent_worker_insert on public.outreach_contacts
+  for insert to agent_worker
+  with check (exists (
+    select 1 from public.outreach_orgs o
+    where o.id = org_id and o.source in ('inbound_call', 'inbound_email')
+  ));
 
 -- Files: a private bucket ------------------------------------------------------
 

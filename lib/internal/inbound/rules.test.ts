@@ -257,10 +257,41 @@ describe("mail", () => {
       "List-Unsubscribe": ["<mailto:u@x.com>", "<https://x.com/u>"],
     });
     expect(Object.keys(headers).sort()).toEqual(
-      ["auto-submitted", "authentication-results", "list-unsubscribe"].sort(),
+      ["auto-submitted", "list-unsubscribe"].sort(),
     );
-    expect(headers["list-unsubscribe"]).toBe(
-      "<mailto:u@x.com>, <https://x.com/u>",
+    // Several values keep the first, never a join.
+    expect(headers["list-unsubscribe"]).toBe("<mailto:u@x.com>");
+  });
+
+  it("never stores Authentication-Results, whoever wrote it", () => {
+    // A sender can add their own copy; after a join, order and origin are lost.
+    const forged = "mx.studio1hq.com; dmarc=pass header.from=prospect.example";
+    for (const source of [
+      { "Authentication-Results": forged },
+      { "authentication-results": [forged, "mx.studio1hq.com; dmarc=fail"] },
+      [{ name: "Authentication-Results", value: forged }],
+    ]) {
+      expect(keptHeaders(source)).toEqual({});
+      expect(
+        cleanMail({
+          messageId: "<m@x>",
+          fromAddress: "a@prospect.example",
+          headers: source,
+        })?.headers,
+      ).toEqual({});
+    }
+  });
+
+  it("marks a mail verified only for a real true", () => {
+    const base = { messageId: "<m@x>", fromAddress: "a@b.co" };
+    expect(cleanMail(base)?.senderVerified).toBe(false);
+    for (const value of ["pass", "true", 1, null, false]) {
+      expect(
+        cleanMail({ ...base, senderVerified: value })?.senderVerified,
+      ).toBe(false);
+    }
+    expect(cleanMail({ ...base, senderVerified: true })?.senderVerified).toBe(
+      true,
     );
   });
 

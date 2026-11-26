@@ -79,6 +79,35 @@ describe("Cal.com webhook", () => {
     expect(upsertLeadFromBooking).toHaveBeenCalledTimes(2);
   });
 
+  it("tells the founders when a booking names a company that is not inbound", async () => {
+    vi.mocked(upsertLeadFromBooking).mockResolvedValueOnce({
+      ok: true,
+      orgId: "22222222-2222-4222-8222-222222222222",
+      created: false,
+      queued: false,
+      needsPerson: {
+        orgId: "22222222-2222-4222-8222-222222222222",
+        orgName: "Acme",
+      },
+    });
+    expect((await POST(request(booking("BOOKING_CREATED")))).status).toBe(200);
+    expect(notify).toHaveBeenCalledTimes(1);
+    const [to, actor, notice] = vi.mocked(notify).mock.calls[0];
+    expect([...to].length).toBeGreaterThan(0);
+    expect(actor).toBe("webhook:cal");
+    expect(notice.kind).toBe("call");
+    expect(notice.href).toBe("/outreach/22222222-2222-4222-8222-222222222222");
+    expect(notice.body).toContain("Acme");
+    expect(notice.body).toContain("Priya");
+    expect(notice.body).toContain("priya@acme.dev");
+    expect(`${notice.title} ${notice.body}`).not.toMatch(/[\u2013\u2014!]/);
+  });
+
+  it("stays quiet for a booking that was saved as a lead", async () => {
+    expect((await POST(request(booking("BOOKING_CREATED")))).status).toBe(200);
+    expect(notify).not.toHaveBeenCalled();
+  });
+
   it("asks the founders for call notes when a meeting ends", async () => {
     expect((await POST(request(booking("MEETING_ENDED")))).status).toBe(200);
     expect(notify).toHaveBeenCalledTimes(1);

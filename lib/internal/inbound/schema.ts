@@ -94,7 +94,6 @@ export const MAIL_DECIDERS = ["rules", "model", "person"] as const;
 
 /** The only headers kept from a received mail (lowercased keys). */
 export const KEPT_HEADERS = [
-  "authentication-results",
   "auto-submitted",
   "precedence",
   "list-unsubscribe",

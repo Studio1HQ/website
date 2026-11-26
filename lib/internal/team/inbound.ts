@@ -365,6 +365,17 @@ function verdict(value: unknown): string | null {
   return null;
 }
 
+/**
+ * Whether the receiving provider itself says the From domain passed DMARC:
+ * the only proof of who sent a mail, since a sender controls every header in
+ * it. False when the verdict is missing or anything but "pass". Used by
+ * invoice intake and by the leads mailbox (lib/internal/inbound/mail.ts).
+ */
+export function dmarcPassed(authentication: unknown): boolean {
+  if (!authentication || typeof authentication !== "object") return false;
+  return verdict((authentication as Record<string, unknown>).dmarc) === "pass";
+}
+
 function isPdf(item: ReceivedAttachment) {
   return item.content_type === "application/pdf" || (typeof item.filename === "string" && /\.pdf$/i.test(item.filename));
 }
@@ -612,8 +623,7 @@ export async function handleReceivedEmail(data: unknown): Promise<IntakeResult> 
   // added) gets "none", which counts as unverified.
   const spf = verdict(email.authentication?.spf);
   const dkim = verdict(email.authentication?.dkim);
-  const dmarc = verdict(email.authentication?.dmarc);
-  const verified = dmarc === "pass";
+  const verified = dmarcPassed(email.authentication);
   if (spf === "fail" && dkim === "fail") flags.push("Failed the sender checks (SPF and DKIM): it may not be from them");
   else if (!verified) flags.push("Couldn't verify the sender (no DMARC pass): check it's really from them");
 

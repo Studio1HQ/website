@@ -329,7 +329,9 @@ export function excerptOf(body: unknown, max = 300) {
 
 /**
  * Only the header names the sorter uses (KEPT_HEADERS), lowercased, each
- * value one capped line. Takes a header object or the list of
+ * value one capped line. Authentication-Results is not kept at all: the
+ * sender writes headers too, so no stored copy can prove who sent the mail
+ * (sender_verified, from the receiving provider's own verdict, does). Takes a header object or the list of
  * { name, value } pairs a mail API may send.
  */
 export function keptHeaders(source: unknown): Record<string, string> {
@@ -354,13 +356,13 @@ export function keptHeaders(source: unknown): Record<string, string> {
     const key = name.trim().toLowerCase();
     if (!(KEPT_HEADERS as readonly string[]).includes(key) || key in kept)
       continue;
+    // A header that comes several times keeps its first value, never a
+    // join: a sender can add copies of a header, and a joined string would
+    // hide which one came from where.
     const value = Array.isArray(raw)
-      ? raw.filter((part) => typeof part === "string").join(", ")
+      ? raw.find((part) => typeof part === "string")
       : raw;
-    const line = oneLineText(
-      value,
-      key === "authentication-results" ? 1000 : 500,
-    );
+    const line = oneLineText(value, 500);
     if (line) kept[key] = line;
   }
   return kept;
@@ -409,6 +411,8 @@ export type CleanMail = {
   headers: Record<string, string>;
   bodyText: string;
   excerpt: string;
+  /** True only for a real `true`: anything else is unverified. */
+  senderVerified: boolean;
 };
 
 /** Mail bodies are kept to this many characters; the rest is cut. */
@@ -426,6 +430,7 @@ export function cleanMail(input: {
   subject?: unknown;
   headers?: unknown;
   bodyText?: unknown;
+  senderVerified?: unknown;
 }): CleanMail | null {
   const fromAddress = normalizeEmail(input.fromAddress);
   const messageId = oneLineText(input.messageId, 300);
@@ -439,6 +444,7 @@ export function cleanMail(input: {
     headers: keptHeaders(input.headers),
     bodyText,
     excerpt: excerptOf(bodyText),
+    senderVerified: input.senderVerified === true,
   };
 }
 
