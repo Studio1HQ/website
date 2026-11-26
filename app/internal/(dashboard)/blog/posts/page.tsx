@@ -7,7 +7,10 @@ import {
   PencilSimple,
   Plus,
 } from "@/components/internal/icons";
-import { BlogStatusBadge } from "@/components/internal/blog/status";
+import {
+  BlogStatusBadge,
+  LiveChangesBadge,
+} from "@/components/internal/blog/status";
 import { DeleteDraftButton } from "@/components/internal/blog/delete-draft";
 import {
   DraftCheckbox,
@@ -186,7 +189,7 @@ function PostRow({
   );
 }
 
-/** A live post published from here: its numbers, and links to the site, its stats and the editor. */
+/** A live post opened here: its numbers, any edits not on the site yet, and links to the site, its stats and the editor. */
 function LiveRow({
   post,
   numbers,
@@ -213,9 +216,16 @@ function LiveRow({
           />
           <span className="truncate">
             {nameFromEmail(post.created_by)} · /blog/{post.slug}
+            {post.published_at ? (
+              <span title={formatDate(post.published_at)}>
+                {" "}
+                · published {relativeDate(post.published_at)}
+              </span>
+            ) : null}
           </span>
         </p>
       </div>
+      <LiveChangesBadge status={post.status} />
       {hasNumbers(numbers) ? (
         <NumbersCell views={numbers.views} numbers={numbers.search} />
       ) : null}
@@ -331,10 +341,14 @@ export default async function BlogPostsPage({ searchParams }: Props) {
           Number(b.reviewers.includes(staff.email)) -
           Number(a.reviewers.includes(staff.email)),
       ),
+    // Drafts are posts that were never on the site. A live post stays under
+    // Live while it's edited, with its unpublished changes marked there.
     drafts: posts.filter(
-      (post) => post.status === "draft" || post.status === "changes_requested",
+      (post) =>
+        !post.source_path &&
+        (post.status === "draft" || post.status === "changes_requested"),
     ),
-    live: posts.filter((post) => post.status === "published"),
+    live: posts.filter((post) => post.source_path),
   };
   const counts: Record<TabKey, number> = {
     review: groups.review.length,

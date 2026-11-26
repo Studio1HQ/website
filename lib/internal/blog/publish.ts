@@ -7,21 +7,23 @@ import { addEvent, getPost, markPublished, sitePosts, takenSlugs } from "@/lib/i
 import { blobSha, commitFiles, isGithubConfigured, repoFileSha, repoFileUrl } from "@/lib/internal/blog/github";
 import { draftImages, readImage, removePostImages } from "@/lib/internal/blog/media";
 import { findUnsafeMdx, remarkSafeMdx } from "@/lib/internal/blog/safe-mdx";
-import { MEDIA_PREFIX, postChecks, todayIst, toMdx, type BlogPostRow, type Check } from "@/lib/internal/blog/shared";
+import { MEDIA_PREFIX, UPDATE_MARK, postChecks, todayIst, toMdx, type BlogPostRow, type Check } from "@/lib/internal/blog/shared";
 import type { Staff } from "@/lib/internal/session";
 
 export type PublishResult =
-  | { ok: true; url: string; commitUrl: string; warning?: string }
+  /** `update`: the post was live already, so this put edits live. */
+  | { ok: true; url: string; commitUrl: string; update: boolean; warning?: string }
   | { ok: false; message: string; conflict?: boolean; checks?: Check[] };
 
 /**
- * Who may put this post live now: it has to be approved, unless it's the
- * publisher's own post (a reviewer's own writing, or a live post they opened
- * to edit). A post that's live with nothing changed has nothing to publish.
+ * Who may put this post live now. A new post has to be approved, unless
+ * it's the publisher's own. A live post was approved once already: a
+ * reviewer can put edits to it live straight away, whoever wrote it. A
+ * post that's live with nothing changed has nothing to publish.
  */
-export function publishBlocker(post: Pick<BlogPostRow, "status" | "created_by">, publisher: string): string | null {
+export function publishBlocker(post: Pick<BlogPostRow, "status" | "created_by" | "source_path">, publisher: string): string | null {
   if (post.status === "published") return "This post is already live. Edit something to publish again.";
-  if (post.status === "approved" || post.created_by === publisher) return null;
+  if (post.source_path || post.status === "approved" || post.created_by === publisher) return null;
   return "Approve this post before publishing it.";
 }
 
@@ -177,7 +179,9 @@ export async function publishPost(
       message: "The post is on its way to the site, but the dashboard couldn't record that. Press Publish again in a minute.",
     };
   }
-  await addEvent(post.id, staff.email, "published", commitUrl);
+  // The history tells a first publish from an update by this second line.
+  const update = Boolean(post.source_path);
+  await addEvent(post.id, staff.email, "published", update ? `${commitUrl}\n${UPDATE_MARK}` : commitUrl);
   const url = `${baseUrl}/blog/${post.slug}`;
   if (recorded === "edited") {
     // Their text still points at the draft's images: keep those.
@@ -185,10 +189,11 @@ export async function publishPost(
       ok: true,
       url,
       commitUrl,
+      update,
       warning: "Published. Someone saved an edit while it was publishing: that edit isn't live yet.",
     };
   }
   // The images are in the repo now; the draft's copies (used or not) can go.
   await removePostImages(post.id, files);
-  return { ok: true, url, commitUrl };
+  return { ok: true, url, commitUrl, update };
 }

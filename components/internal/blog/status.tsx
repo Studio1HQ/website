@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { STATUS_INFO, type BlogStatus } from "@/lib/internal/blog/shared";
+import { LIVE_CHANGES, STATUS_INFO, type BlogStatus } from "@/lib/internal/blog/shared";
 
 const TONES = {
   neutral: "bg-stone-100 text-stone-700 ring-stone-200 dark:bg-white/[0.06] dark:text-stone-300 dark:ring-white/10",
@@ -17,19 +17,37 @@ const DOTS = {
   live: "bg-sky-500",
 } as const;
 
-/** A post's stage. A live post with unsaved-to-site edits reads "Live · edited". */
-export function BlogStatusBadge({ status, live = false }: { status: BlogStatus; live?: boolean }) {
-  const info = STATUS_INFO[status];
-  const label = live && status !== "published" ? `Live · ${info.label.toLowerCase()}` : info.label;
+function Pill({ tone, label }: { tone: keyof typeof TONES; label: string }) {
   return (
     <span
       className={cn(
         "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-0.5 text-[12px] font-medium ring-1 ring-inset",
-        TONES[info.tone],
+        TONES[tone],
       )}
     >
-      <span aria-hidden className={cn("size-1.5 rounded-full", DOTS[info.tone])} />
+      <span aria-hidden className={cn("size-1.5 rounded-full", DOTS[tone])} />
       {label}
+    </span>
+  );
+}
+
+/** Where a live post's edits are, or nothing when the site has them all. */
+export function LiveChangesBadge({ status }: { status: BlogStatus }) {
+  if (status === "published") return null;
+  const info = LIVE_CHANGES[status];
+  return <Pill tone={info.tone} label={info.label} />;
+}
+
+/**
+ * A post's stage. A live post always reads "Live"; edits to it that aren't
+ * on the site yet show beside that ("Unpublished changes").
+ */
+export function BlogStatusBadge({ status, live = false }: { status: BlogStatus; live?: boolean }) {
+  if (!live) return <Pill tone={STATUS_INFO[status].tone} label={STATUS_INFO[status].label} />;
+  return (
+    <span className="inline-flex flex-wrap items-center gap-1.5">
+      <Pill tone="live" label={STATUS_INFO.published.label} />
+      <LiveChangesBadge status={status} />
     </span>
   );
 }

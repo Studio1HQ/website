@@ -53,11 +53,10 @@ export default async function PostStatsPage({ params, searchParams }: Props) {
     isDevStatsConfigured() ? devOrgPost(slug) : null,
     !isDevStatsConfigured() && isDevConfigured() ? devArticles() : null,
   ]);
-  // Published from the editor: its draft opens there; a post only on the site opens through Edit.
+  // Opened in the editor already (edits pending or not): it opens there; a post only on the site opens through Edit.
   const tracked = listed.ok
-    ? (listed.posts.find(
-        (post) => post.slug === slug && post.status === "published",
-      ) ?? null)
+    ? (listed.posts.find((post) => post.slug === slug && post.source_path) ??
+      null)
     : null;
   return (
     <PostStatsView

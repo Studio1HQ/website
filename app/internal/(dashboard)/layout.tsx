@@ -241,9 +241,10 @@ export default async function DashboardLayout({
               (24px, 32px from lg, 40px from 2xl), and its content centred in it
               (1280px at most). Reload and the bell sit in the card's top-right
               corner, level with the page title (headers keep clear of them), and
-              scroll away with the page. Phones have both in the top bar. */}
+              scroll away with the page (z-40: over the blog editor's sticky bar).
+              Phones have both in the top bar. */}
           <main className="min-w-0 flex-1 px-4 pb-12 pt-5 sm:px-6 sm:pt-6 md:my-2 md:mr-2 md:min-h-[calc(100vh-16px)] md:rounded-[14px] md:border md:border-[var(--i-line)] md:bg-[var(--i-bg)] md:relative md:px-6 md:pt-6 md:shadow-[0_12px_32px_-20px_rgba(28,25,23,0.22)] lg:px-8 lg:pt-7 2xl:px-10 print:m-0 print:border-0 print:p-0 print:shadow-none">
-            <div className="pointer-events-none absolute right-4 top-4 z-30 hidden items-center gap-2 md:flex print:hidden">
+            <div className="pointer-events-none absolute right-4 top-4 z-40 hidden items-center gap-2 md:flex print:hidden">
               <RefreshButton className="pointer-events-auto size-9 rounded-full bg-[var(--i-panel)] shadow-[var(--i-shadow-sm)] ring-1 ring-[var(--i-line)] hover:bg-[var(--i-hover)]" />
               <Suspense fallback={<span className="size-9" />}>
                 <BellFor email={staff.email} side="bottom" className="pointer-events-auto size-9 rounded-full bg-[var(--i-panel)] shadow-[var(--i-shadow-sm)] ring-1 ring-[var(--i-line)] hover:bg-[var(--i-hover)]" />
