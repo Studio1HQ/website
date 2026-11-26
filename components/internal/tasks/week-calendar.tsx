@@ -1,6 +1,17 @@
 "use client";
 
-import { startTransition, useMemo, useOptimistic, useRef, useState, useTransition, type ClipboardEvent, type KeyboardEvent, type ReactNode } from "react";
+import {
+  startTransition,
+  useMemo,
+  useOptimistic,
+  useRef,
+  useState,
+  useTransition,
+  type ClipboardEvent,
+  type CSSProperties,
+  type KeyboardEvent,
+  type ReactNode,
+} from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { DndContext, DragOverlay, useDraggable, useDroppable, type DragEndEvent } from "@dnd-kit/core";
@@ -23,7 +34,18 @@ import { TaskNote } from "@/components/internal/tasks/task-note";
 import { PriorityMark, PriorityPicker } from "@/components/internal/tasks/priority";
 import { WithPicker } from "@/components/internal/tasks/with-picker";
 import { cardAnnouncements, dragHandlers, underPointer, useCardSensors } from "@/components/internal/tasks/drag";
-import { addDays, daysApart, earliestCardDay, movedSpan, spanLabel, type CalendarCard, type Span } from "@/lib/internal/tasks/calendar";
+import {
+  addDays,
+  cardOrder,
+  daysApart,
+  doneSpan,
+  earliestCardDay,
+  movedSpan,
+  onDay,
+  spanLabel,
+  type CalendarCard,
+  type Span,
+} from "@/lib/internal/tasks/calendar";
 import {
   DEFAULT_PRIORITY,
   MAX_RANGE_DAYS,
@@ -49,8 +71,9 @@ const setDeliverableDay = guarded(setDeliverableDayAction);
    tracker looked. Your own cards: "+ New" on a day, click the pill to
    change the status, click the card to edit, drag it to another day (it
    lands there at once; the save follows). A task that runs over several
-   days sits on each of them, and dragging any of its copies moves the
-   whole run. Your open client deliverables drag too: the day they land on
+   days is one card across them, in a strip under the dates (above the
+   days, on narrower screens); dragging it moves the whole run by as many
+   days as it's dragged. Your open client deliverables drag too: the day they land on
    becomes their due date. On someone else's week, the same for whoever may
    give them tasks and change their cards (lib/internal/tasks/access.ts). */
 
@@ -108,29 +131,47 @@ export function WeekCalendar({
   const [lifted, setLifted] = useState<CalendarCard | null>(null);
   /** The "No day yet" strip, folded away or open. */
   const [trayOpen, setTrayOpen] = useState(true);
-  /** Cards dropped on another day and still saving (their new days): they show there already; a failed save puts them back. */
-  const [moved, move] = useOptimistic<Record<string, Moved>, { key: string; to: Moved }>({}, (state, next) => ({
+  /**
+   * Cards changed here and still saving: dropped on other days, or given a
+   * status (Done can move a card too: to the day it was finished). They show
+   * so at once; a failed save puts them back.
+   */
+  const [changed, change] = useOptimistic<Record<string, Change>, { key: string; change: Change }>({}, (state, next) => ({
     ...state,
-    [next.key]: next.to,
+    [next.key]: { ...state[next.key], ...next.change },
   }));
+  /** The day a task over several days was picked up on, while it's dragged. */
+  const picked = useRef<string | null>(null);
   const earliest = earliestCardDay(today);
-  const all = [...cards, ...tray];
-  const movable = all.some((card) => canMove(card, own));
-  const isMoved = (card: CalendarCard) => keyOf(card) in moved;
-  // A moved card goes on each of its new days in this week (one, unless it runs over several).
-  const placed = [
-    ...cards.filter((card) => !isMoved(card)),
-    ...all
-      .filter((card, index) => isMoved(card) && all.findIndex((other) => keyOf(other) === keyOf(card)) === index)
-      .flatMap((card) => {
-        const { from, to } = moved[keyOf(card)];
-        const range = from ? { from, to } : null;
-        return days
-          .filter((day) => day >= (from ?? to) && day <= to)
-          .map((day): CalendarCard => (card.kind === "task" ? { ...card, day, range } : { ...card, day }));
-      }),
-  ];
-  const waiting = tray.filter((card) => !isMoved(card));
+  const first = days[0];
+  const last = days[days.length - 1];
+  const movable = [...cards, ...tray].some((card) => canMove(card, own));
+  const isMoved = (card: CalendarCard) => Boolean(changed[keyOf(card)]?.days);
+
+  /** A card as it is with its unsaved changes: a task over several days sits on its first day in the week. */
+  const current = (card: CalendarCard): CalendarCard => {
+    const { days: to, status } = changed[keyOf(card)] ?? {};
+    let next = card;
+    if (status && next.kind === "task") next = { ...next, status };
+    if (to) {
+      const start = to.from ?? to.to;
+      next =
+        next.kind === "task"
+          ? { ...next, range: to.from ? { from: to.from, to: to.to } : null, day: start < first ? first : start }
+          : { ...next, day: to.to };
+    }
+    return next;
+  };
+  const inWeek = (card: CalendarCard) =>
+    card.kind === "task" && card.range
+      ? card.range.from <= last && card.range.to >= first
+      : !!card.day && card.day >= first && card.day <= last;
+  // A tray card moved onto a day (or ticked Done) leaves the tray for the week.
+  const shown = [...cards, ...tray.filter(isMoved)].map(current).filter(inWeek).sort(cardOrder);
+  const waiting = tray.filter((card) => !isMoved(card)).map(current);
+  /** Tasks over several days: one card across their days, in the strip. */
+  const runs = shown.filter((card) => card.kind === "task" && card.range);
+  const single = shown.filter((card) => !(card.kind === "task" && card.range));
 
   /** Where a card's days go when it's dropped on `day` (a run of days keeps its length). */
   const landing = (card: CalendarCard, day: string): Moved =>
@@ -143,14 +184,32 @@ export function WeekCalendar({
     return (from ?? to) >= earliest && !(card.kind === "task" && card.status === "done" && to > today);
   };
 
+  /**
+   * The day a card is picked up on: for a task across several days side by
+   * side, the day under the pointer (so it moves by as many days as it's
+   * dragged); else its own day.
+   */
+  const pickedDay = (card: CalendarCard, event: Event | null) => {
+    if (card.kind !== "task" || !card.range || !card.day || !event) return card.day;
+    const point = "touches" in event ? (event as TouchEvent).touches[0] : (event as MouseEvent);
+    if (!point) return card.day;
+    const under = days.find((day) => {
+      const rect = document.querySelector(`[data-day="${day}"]`)?.getBoundingClientRect();
+      return rect && point.clientX >= rect.left && point.clientX <= rect.right && point.clientY >= rect.top && point.clientY <= rect.bottom;
+    });
+    return under && under >= card.day && under <= card.range.to ? under : card.day;
+  };
+
   const drop = ({ active, over }: DragEndEvent) => {
     setLifted(null);
-    const card = active.data.current?.card as CalendarCard | undefined;
+    const dragged = active.data.current?.card as CalendarCard | undefined;
+    const card = dragged?.kind === "task" ? { ...dragged, day: picked.current ?? dragged.day } : dragged;
+    picked.current = null;
     const day = typeof over?.id === "string" ? over.id : null;
     if (!card || !day || !fits(card, day)) return;
     const to = landing(card, day);
     run(() => {
-      move({ key: keyOf(card), to });
+      change({ key: keyOf(card), change: { days: to } });
       // A deliverable's day is its due date; a task's is the day it's on (its last, with its first, when it runs over several).
       return card.kind === "deliverable"
         ? setDeliverableDay(card.id, day, card.day ?? "")
@@ -161,16 +220,48 @@ export function WeekCalendar({
     });
   };
 
-  const titleOf = (id: string | number) => all.find((card) => dragId(card) === id)?.title;
+  /** A status picked on a card shows at once; Done also puts it on the day it was finished, as the save will. */
+  const setStatus = (card: CalendarCard, status: TaskStatus) => {
+    if (card.kind !== "task") return;
+    const finishing = status === "done" && card.status !== "done";
+    run(() => {
+      change({ key: keyOf(card), change: { status, ...(finishing ? { days: doneSpan(card.range, card.day, today) } : {}) } });
+      return editTask(card.id, { status });
+    });
+  };
+
+  const titleOf = (id: string | number) => [...shown, ...waiting].find((card) => dragId(card) === id)?.title;
   const announcements = cardAnnouncements(titleOf, (id) => (typeof id === "string" ? fullFormat.format(at(id)) : undefined));
+
+  const card = (item: CalendarCard, showDay = false) => (
+    <Card
+      card={item}
+      own={own}
+      who={who}
+      team={team}
+      options={options}
+      today={today}
+      showDay={showDay}
+      movable
+      lifted={lifted}
+      onStatus={(status) => setStatus(item, status)}
+    />
+  );
 
   return (
     <DndContext
       sensors={sensors}
       collisionDetection={underPointer}
       accessibility={{ announcements }}
-      onDragStart={({ active }) => setLifted((active.data.current?.card as CalendarCard | undefined) ?? null)}
-      onDragCancel={() => setLifted(null)}
+      onDragStart={({ active, activatorEvent }) => {
+        const dragged = (active.data.current?.card as CalendarCard | undefined) ?? null;
+        picked.current = dragged && pickedDay(dragged, activatorEvent);
+        setLifted(dragged?.kind === "task" ? { ...dragged, day: picked.current } : dragged);
+      }}
+      onDragCancel={() => {
+        picked.current = null;
+        setLifted(null);
+      }}
       onDragEnd={drop}
     >
       <div className="space-y-3">
@@ -192,9 +283,9 @@ export function WeekCalendar({
             {trayOpen ? (
               // One row that scrolls sideways, so the week stays near the top.
               <ul className="flex gap-2 overflow-x-auto px-2 pb-2">
-                {waiting.map((card) => (
-                  <li key={`${card.kind}:${card.id}`} className="w-[250px] shrink-0">
-                    <Card card={card} own={own} who={who} team={team} options={options} today={today} showDay movable lifted={lifted} />
+                {waiting.map((item) => (
+                  <li key={keyOf(item)} className="w-[250px] shrink-0">
+                    {card(item, true)}
                   </li>
                 ))}
               </ul>
@@ -202,26 +293,60 @@ export function WeekCalendar({
           </section>
         ) : null}
 
-        {/* One panel for the week. Wide screens: seven columns. Narrower: a row
-            per day (the columns would be too thin to read), never sideways scrolling. */}
+        {/* One panel for the week. Wide screens: seven columns, with the tasks
+            over several days in a strip under the dates, each across its days.
+            Narrower: a row per day (the columns would be too thin to read) and
+            that strip as a row above them, never sideways scrolling. */}
         <div className="overflow-hidden rounded-xl bg-[var(--i-sunken)] ring-1 ring-[var(--i-line)]">
-          <div className="divide-y divide-[var(--i-line)] xl:grid xl:grid-cols-7 xl:divide-x xl:divide-y-0">
-            {days.map((day) => {
-              const list = placed.filter((card) => card.day === day);
+          <div className="xl:grid xl:grid-cols-7 xl:grid-rows-[auto_auto_1fr]">
+            {runs.length ? (
+              <section
+                aria-label="Over several days"
+                className="flex min-w-0 flex-col gap-1.5 p-2 sm:flex-row sm:gap-3 xl:relative xl:z-10 xl:col-[1/-1] xl:row-start-2 xl:block xl:p-0 xl:pb-1.5"
+              >
+                <h3 className="px-1.5 pt-1 text-[12px] text-[var(--i-muted)] sm:w-20 sm:shrink-0 xl:hidden">Several days</h3>
+                <ul className="grid min-w-0 flex-1 gap-1.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-flow-row-dense xl:grid-cols-7 xl:gap-x-0">
+                  {runs.map((item) => {
+                    const range = item.kind === "task" ? item.range : null;
+                    const from = days.indexOf(item.day ?? first);
+                    const to = range && range.to < last ? days.indexOf(range.to) : days.length - 1;
+                    return (
+                      <li
+                        key={keyOf(item)}
+                        style={{ "--start": from + 1, "--span": to - from + 1 } as CSSProperties}
+                        className="min-w-0 xl:mx-1.5 xl:[grid-column:var(--start)/span_var(--span)]"
+                      >
+                        {card(item)}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            ) : null}
+            {days.map((day, index) => {
+              const list = single.filter((item) => item.day === day);
               const canAdd = mayAdd && day >= earliest;
               return (
-                <DayColumn key={day} day={day} today={today} lifted={lifted} fits={fits(lifted, day)}>
+                <DayColumn
+                  key={day}
+                  day={day}
+                  index={index}
+                  below={runs.length > 0}
+                  today={today}
+                  lifted={lifted}
+                  fits={fits(lifted, day)}
+                >
                   {list.length ? (
                     <ul className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-1">
-                      {list.map((card) => (
-                        <li key={dragId(card)}>
-                          <Card card={card} own={own} who={who} team={team} options={options} today={today} movable lifted={lifted} />
-                        </li>
+                      {list.map((item) => (
+                        <li key={dragId(item)}>{card(item)}</li>
                       ))}
                     </ul>
                   ) : null}
                   {canAdd ? <AddCard day={day} today={today} options={options} person={person} who={who} team={team} /> : null}
-                  {!list.length && !canAdd ? <p className="px-1.5 py-1 text-[12px] text-[var(--i-faint)]">Nothing.</p> : null}
+                  {!list.length && !canAdd && !runs.some((item) => onDay(item, day)) ? (
+                    <p className="px-1.5 py-1 text-[12px] text-[var(--i-faint)]">Nothing.</p>
+                  ) : null}
                 </DayColumn>
               );
             })}
@@ -235,15 +360,25 @@ export function WeekCalendar({
   );
 }
 
-/** A day of the week, and a place to drop cards while one is dragged. */
+/**
+ * A day of the week, and a place to drop cards while one is dragged. On wide
+ * screens it's a column whose three rows line up with the others': the date,
+ * the strip of tasks over several days (drawn across the columns), its cards.
+ */
 function DayColumn({
   day,
+  index,
+  below,
   today,
   lifted,
   fits,
   children,
 }: {
   day: string;
+  /** Its place in the week, from 0 (Monday). */
+  index: number;
+  /** The strip of tasks over several days sits above it, on narrower screens. */
+  below: boolean;
   today: string;
   lifted: CalendarCard | null;
   /** The dragged card may land here. */
@@ -256,17 +391,22 @@ function DayColumn({
   return (
     <section
       ref={setNodeRef}
+      data-day={day}
       aria-label={fullFormat.format(at(day))}
       aria-current={isToday ? "date" : undefined}
+      style={{ "--column": index + 1 } as CSSProperties}
       className={cn(
-        "flex min-w-0 flex-col gap-1.5 p-2 transition-[background-color,opacity,box-shadow] duration-150 sm:flex-row sm:gap-3 xl:min-h-[18rem] xl:flex-col xl:gap-1.5 xl:p-1.5",
+        "flex min-w-0 flex-col gap-1.5 border-[var(--i-line)] p-2 transition-[background-color,opacity,box-shadow] duration-150 sm:flex-row sm:gap-3",
+        "xl:row-[1/4] xl:grid xl:min-h-[18rem] xl:gap-0 xl:p-0 xl:[grid-column:var(--column)] xl:[grid-template-rows:subgrid]",
+        (index > 0 || below) && "border-t xl:border-t-0",
+        index > 0 && "xl:border-l",
         isToday && !target && "bg-orange-50/60 dark:bg-orange-500/[0.05]",
         target && "bg-[var(--i-accent-soft)] shadow-[inset_0_0_0_1px_var(--i-accent)]",
         // While a card is dragged, days it can't go on step back.
         lifted && !fits && lifted.day !== day && "opacity-45",
       )}
     >
-      <h3 className="flex items-center gap-2 px-1.5 pt-1 sm:w-20 sm:shrink-0 sm:self-start xl:w-auto xl:self-auto xl:justify-between">
+      <h3 className="flex items-center gap-2 px-1.5 pt-1 sm:w-20 sm:shrink-0 sm:self-start xl:w-auto xl:self-auto xl:justify-between xl:px-3 xl:pb-1.5 xl:pt-2.5">
         <span className={cn("text-[12px]", isToday ? "font-medium text-[var(--i-accent-text)]" : "text-[var(--i-muted)]")}>
           {weekdayFormat.format(at(day))}
         </span>
@@ -280,7 +420,9 @@ function DayColumn({
           {dateFormat.format(at(day))}
         </span>
       </h3>
-      <div className="min-w-0 flex-1 space-y-1.5">{children}</div>
+      {/* Wide screens: as tall as the strip of tasks over several days, which is drawn over it. */}
+      <div aria-hidden className="hidden xl:block" />
+      <div className="min-w-0 flex-1 space-y-1.5 xl:px-1.5 xl:pb-1.5">{children}</div>
     </section>
   );
 }
@@ -752,6 +894,9 @@ function dragId(card: CalendarCard) {
 /** A card's days after a move: its last (`to`), and its first when it runs over several. */
 type Moved = { from: string | null; to: string };
 
+/** A card's unsaved change on the week: new days, a new status, or both. */
+type Change = { days?: Moved; status?: TaskStatus };
+
 /** Whether the viewer may edit, move or delete a card: the page says, else your own week's tasks. */
 function canEdit(card: CalendarCard, own: boolean) {
   return card.kind === "task" && (card.editable ?? own);
@@ -856,6 +1001,7 @@ function Card({
   showDay = false,
   movable = false,
   lifted = null,
+  onStatus,
 }: {
   card: CalendarCard;
   own: boolean;
@@ -869,6 +1015,8 @@ function Card({
   movable?: boolean;
   /** The card being dragged: every copy of a task over several days fades with it. */
   lifted?: CalendarCard | null;
+  /** A status picked on the card, when the page shows it (the week: Done can move the card); else the card shows it itself. */
+  onStatus?: (status: TaskStatus) => void;
 }) {
   const { run } = useTeamAction();
   /** A status picked on the card shows at once, while it saves. */
@@ -930,10 +1078,12 @@ function Card({
         done={done}
         editable={editable}
         onStatus={(status) =>
-          run(() => {
-            showStatus(status);
-            return editTask(card.id, { status });
-          })
+          onStatus
+            ? onStatus(status)
+            : run(() => {
+                showStatus(status);
+                return editTask(card.id, { status });
+              })
         }
       />
       {/* One quiet line: the days it runs over, the day it was for, who gave it, who else is on it. */}

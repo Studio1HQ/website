@@ -6,9 +6,9 @@
  *                       when that's in the week; open with no day, or a day
  *                       before the week → the "No day yet" tray (this week
  *                       and later only); a day after the week → left out.
- *                       One that runs over several days (start_on) sits on
- *                       each of them: start_on to due_on, or to the day it
- *                       was done once it's done (taskSpan)
+ *                       One that runs over several days (start_on) is one
+ *                       card across them: start_on to due_on, or to the day
+ *                       it was done once it's done (taskSpan)
  *   client deliverables you own: open → their due day in the week;
  *                       published → the day they went live in the week
  *   community tasks     yours: open → their due day; done → the day done
@@ -38,7 +38,7 @@ export type CalendarCard =
       title: string;
       /** Context for whoever checks it; "" when there's none. */
       notes: string;
-      /** The day this copy of the card sits on (one per day for a task that runs over several). */
+      /** The day the card sits on; for a task over several days, its first day in the week shown. */
       day: string | null;
       /**
        * A task that runs over several days: its first and last day (the day
@@ -133,11 +133,28 @@ export function spanLabel({ from, to }: Span) {
     : `${spanMonth.format(first)} – ${spanMonth.format(last)}`;
 }
 
+/** Whether a card is on a day: its own day, or one of the days a task over several runs over. */
+export function onDay(card: CalendarCard, day: string) {
+  return card.kind === "task" && card.range ? card.range.from <= day && day <= card.range.to : card.day === day;
+}
+
+/**
+ * A task's days once it's marked Done from its card (editTask's rule): it
+ * was finished on its last day when that's this week and not still ahead,
+ * else today (finishedDay); one over several days ends then, and is one
+ * day again if that's not after its first.
+ */
+export function doneSpan(range: Span | null, day: string | null, today: string): { from: string | null; to: string } {
+  const to = finishedDay(range?.to ?? day, today);
+  return { from: range && range.from < to ? range.from : null, to };
+}
+
 /**
  * Where a task goes when it's dragged onto `target`: a one-day task to
  * that day; one with several days keeps its length and moves by as many
- * days as the copy that was dragged (`day`, on the week shown). From the
- * tray (`day` isn't on the week) its run starts on `target`.
+ * days as lie between the day it was picked up on (`day`, on the week
+ * shown) and `target`. From the tray (`day` isn't on the week) its run
+ * starts on `target`.
  */
 export function movedSpan(range: Span | null, day: string | null, target: string, onWeek: boolean): { from: string | null; to: string } {
   if (!range) return { from: null, to: target };
@@ -246,8 +263,8 @@ export function placeCards(input: {
     const range = from && to ? { from, to } : null;
     const first = from ?? to;
     if (first && to && first <= end && to >= week) {
-      // On each of its days in this week: one card for a one-day task.
-      for (let day = first < week ? week : first; day <= to && day <= end; day = addDays(day, 1)) cards.push({ ...card, range, day });
+      // One card, even over several days: the week draws it across them.
+      cards.push({ ...card, range, day: first < week ? week : first });
     } else if (task.status !== "done" && current && (to === null || to < week)) tray.push({ ...card, range, day: to });
   }
 
@@ -314,19 +331,24 @@ export function placeCards(input: {
     });
   }
 
-  // Within a day: open first, then done; each by priority (Top first; client
-  // and community cards count as Medium), blocked on top of its priority, then by title.
-  const rank = (card: CalendarCard) => (card.kind === "task" ? (card.status === "done" ? 1 : 0) : card.done ? 1 : 0);
-  const priority = (card: CalendarCard) => priorityRank(card.kind === "task" ? card.priority : undefined);
-  const blocked = (card: CalendarCard) => (card.kind === "task" && card.blocked ? 0 : 1);
-  cards.sort(
-    (a, b) => rank(a) - rank(b) || priority(a) - priority(b) || blocked(a) - blocked(b) || a.title.localeCompare(b.title),
-  );
+  cards.sort(cardOrder);
   tray.sort((a, b) => (a.day ?? "9999").localeCompare(b.day ?? "9999") || a.title.localeCompare(b.title));
   return { cards, tray };
 }
 
-/** Counts for the week's header: done, in progress / in review, not started. A task on several days counts once. */
+/**
+ * The order of cards within a day: open first, then done; each by priority
+ * (Top first; client and community cards count as Medium), blocked on top
+ * of its priority, then by title.
+ */
+export function cardOrder(a: CalendarCard, b: CalendarCard) {
+  const rank = (card: CalendarCard) => (card.kind === "task" ? (card.status === "done" ? 1 : 0) : card.done ? 1 : 0);
+  const priority = (card: CalendarCard) => priorityRank(card.kind === "task" ? card.priority : undefined);
+  const blocked = (card: CalendarCard) => (card.kind === "task" && card.blocked ? 0 : 1);
+  return rank(a) - rank(b) || priority(a) - priority(b) || blocked(a) - blocked(b) || a.title.localeCompare(b.title);
+}
+
+/** Counts for the week's header: done, in progress / in review, not started. Each card counts once. */
 export function weekTally(cards: readonly CalendarCard[]) {
   let done = 0;
   let doing = 0;
