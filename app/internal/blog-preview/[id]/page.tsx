@@ -23,7 +23,7 @@ import { DEFAULT_LOCALE } from "@/lib/i18n";
 import { getMessages } from "@/lib/i18n-messages";
 import { getPost } from "@/lib/internal/blog/data";
 import { remarkSafeMdx } from "@/lib/internal/blog/safe-mdx";
-import { STATUS_INFO, todayIst } from "@/lib/internal/blog/shared";
+import { stageLabel, todayIst } from "@/lib/internal/blog/shared";
 import { requireBlog } from "@/lib/internal/session";
 import { baseUrl } from "@/lib/site";
 
@@ -86,8 +86,8 @@ export default async function BlogPreviewPage({ params }: Props) {
             <ArrowLeft size={14} /> Back to the editor
           </Link>
           <span className="inline-flex items-center gap-1.5 text-white/70">
-            <Eye size={14} /> Preview · {STATUS_INFO[post.status].label} · not
-            public
+            <Eye size={14} /> Preview ·{" "}
+            {stageLabel(post.status, Boolean(post.source_path))} · not public
           </span>
           <span className="ml-auto hidden text-white/50 sm:inline">{`${baseUrl.replace("https://", "")}/blog/${slug}`}</span>
         </div>

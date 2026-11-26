@@ -5,7 +5,9 @@ import {
   locateQuote,
   nameFromEmail,
   postChecks,
+  publishHistory,
   slugify,
+  stageLabel,
   toMdx,
   type BlogEvent,
   type BlogFields,
@@ -139,6 +141,38 @@ describe("comment threads", () => {
     expect(cleanQuote("  two\n\nlines  ")).toBe("two lines");
     expect(cleanQuote("x".repeat(400))).toHaveLength(300);
     expect(cleanQuote(42)).toBe("");
+  });
+});
+
+describe("publish history", () => {
+  const published = (id: string, body: string): BlogEvent => ({
+    id,
+    post_id: "p",
+    created_at: "2026-11-20T10:00:00Z",
+    actor: "a@studio1hq.com",
+    kind: "published",
+    body,
+  });
+
+  it("tells a first publish from later ones, marked or not", () => {
+    const history = publishHistory([
+      published("first", "https://github.com/c/1"),
+      published("old-update", "https://github.com/c/2"),
+      published("new-update", "https://github.com/c/3\nupdate"),
+    ]);
+    expect(history.get("first")).toEqual({ link: "https://github.com/c/1", update: false });
+    expect(history.get("old-update")).toEqual({ link: "https://github.com/c/2", update: true });
+    expect(history.get("new-update")).toEqual({ link: "https://github.com/c/3", update: true });
+  });
+
+  it("counts the first publish of a post opened from the site as an update", () => {
+    expect(publishHistory([published("only", "https://github.com/c/1\nupdate")]).get("only")?.update).toBe(true);
+  });
+
+  it("reads a live post's edits as changes, not a draft", () => {
+    expect(stageLabel("draft", true)).toBe("Live, unpublished changes");
+    expect(stageLabel("draft", false)).toBe("Draft");
+    expect(stageLabel("published", true)).toBe("Live");
   });
 });
 

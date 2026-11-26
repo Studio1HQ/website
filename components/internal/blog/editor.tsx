@@ -45,6 +45,7 @@ import {
   nameFromEmail,
   normalizeTag,
   postChecks,
+  publishHistory,
   slugify,
   type BlogEvent,
   type BlogFields,
@@ -254,7 +255,7 @@ function ChipInput({
   );
 }
 
-function eventLine(event: BlogEvent) {
+function eventLine(event: BlogEvent, published?: { link: string; update: boolean }) {
   const who = nameFromEmail(event.actor);
   switch (event.kind) {
     case "review_requested": {
@@ -267,7 +268,12 @@ function eventLine(event: BlogEvent) {
     case "approved":
       return { icon: <CheckCircle size={13} className="text-emerald-600" />, text: `${who} approved`, note: event.body };
     case "published":
-      return { icon: <RocketLaunch size={13} className="text-sky-600" />, text: `${who} published`, note: "", link: event.body };
+      return {
+        icon: <RocketLaunch size={13} className="text-sky-600" />,
+        text: published?.update ? `${who} published changes` : `${who} published`,
+        note: "",
+        link: published?.link ?? event.body,
+      };
     default:
       return { icon: <PaperPlaneTilt size={13} />, text: who, note: event.body };
   }
@@ -284,7 +290,8 @@ const PANEL_TABS: { key: PanelTab; label: string }[] = [
 export type EditorProps = {
   post: BlogPostRow;
   events: BlogEvent[];
-  me: { email: string; blog: BlogAccess };
+  /** `admin`: may publish any post, approved or not. */
+  me: { email: string; blog: BlogAccess; admin: boolean };
   reviewers: { email: string; name: string }[];
   takenSlugs: string[];
   /** The URL a live post already has; it can't change. */
@@ -322,6 +329,7 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
   const composerRef = useRef<HTMLTextAreaElement | null>(null);
   const threads = useMemo(() => commentThreads(events), [events]);
   const timeline = useMemo(() => events.filter((event) => event.kind !== "comment"), [events]);
+  const publishes = useMemo(() => publishHistory(events), [events]);
   const { missing, reveal } = useQuoteHighlights(writingRef, threads, activeThread, version);
 
   const fieldsRef = useRef(fields);
@@ -501,9 +509,13 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
   const isOwner = post.created_by === me.email;
   // A live post with nothing changed has nothing to review or publish.
   const canRequest = status !== "published";
-  // Publishing needs an approval, except for the reviewer's own post.
-  const canPublish = status === "approved" || (isOwner && status !== "published");
+  // Admins publish any post. For a reviewer a new post needs an approval,
+  // except their own; edits to a live post (approved once already) they can
+  // publish straight away.
+  const canPublish = status !== "published" && (status === "approved" || isOwner || isLive || me.admin);
   const liveUrl = `${SITE}/blog/${liveSlug ?? fields.slug}`;
+  // The publish just done here, until the post is edited again.
+  const justPublished = status === "published" ? published : null;
 
   const setTitle = (title: string) => {
     const previous = fieldsRef.current;
@@ -560,7 +572,7 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
       setConfirmForce(null);
       setPublished({ url: result.url, commitUrl: result.commitUrl });
       if (result.warning) toast("error", result.warning);
-      else toast("success", "Published. It goes live in a few minutes.");
+      else toast("success", result.update ? "Changes published. They're live in a few minutes." : "Published. It goes live in a few minutes.");
     } else if ("conflict" in result && result.conflict) {
       setConfirmForce(result.message);
     } else {
@@ -627,8 +639,11 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
 
   return (
     <div className="pb-10">
-      {/* Top bar: sticky from md; on phones the dashboard's own top bar is the sticky one. */}
-      <div className="-mx-4 -mt-5 mb-5 flex flex-wrap items-center gap-2 border-b border-[var(--i-line)] bg-[var(--i-bg)]/95 px-4 py-2.5 backdrop-blur sm:-mx-6 sm:-mt-0 sm:px-6 md:sticky md:top-0 md:z-30 lg:-mx-10 lg:px-10">
+      {/* Top bar: sticky from md; on phones the dashboard's own top bar is the sticky one.
+          From md it runs edge to edge of the page card, its buttons level with the
+          card's Refresh and bell (layout.tsx, 16px from the top, z-40) and
+          stopping short of them. */}
+      <div className="-mx-4 -mt-5 mb-5 flex flex-wrap items-center gap-2 border-b border-[var(--i-line)] bg-[var(--i-bg)]/95 px-4 py-2.5 backdrop-blur sm:-mx-6 sm:-mt-0 sm:px-6 md:sticky md:top-0 md:z-30 md:-mt-4 md:pr-[6.5rem] lg:-mx-8 lg:-mt-5 lg:pl-8 2xl:-mx-10 2xl:pl-10">
         <Link href="/blog/posts" className={buttonClass("ghost", "sm")}>
           <ArrowLeft size={14} /> Posts
         </Link>
@@ -688,7 +703,9 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
                         ? "Already live. Edit something to publish again."
                         : !canPublish
                           ? "Approve this post first (Review), then publish it."
-                          : "Commit the post to the site. It goes live in a few minutes."
+                          : isLive
+                            ? "Put your changes on the site. They're live in a few minutes."
+                            : "Commit the post to the site. It goes live in a few minutes."
                 }
                 onClick={() => void doPublish()}
                 className={buttonClass("accent", "sm")}
@@ -731,17 +748,33 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
         </div>
       ) : null}
 
-      {published || (status === "published" && isLive) ? (
-        <div className="mb-4 flex flex-wrap items-center gap-3 rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 text-[13px] text-sky-900 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-100">
+      {/* A live post says where it's live and when it was last published;
+          edits since then say they aren't on the site yet. */}
+      {justPublished || isLive ? (
+        <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 text-[13px] text-sky-900 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-100">
           <RocketLaunch size={16} />
-          {published ? "Published. The site redeploys in a few minutes, then it's live at" : "Live at"}
-          <a href={published?.url ?? liveUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-medium underline">
-            {(published?.url ?? liveUrl).replace("https://", "")} <ArrowSquareOut size={12} />
+          {justPublished ? "Published. The site redeploys in a few minutes, then it's live at" : "Live at"}
+          <a href={justPublished?.url ?? liveUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-medium underline">
+            {(justPublished?.url ?? liveUrl).replace("https://", "")} <ArrowSquareOut size={12} />
           </a>
-          {published ? (
-            <a href={published.commitUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sky-700 underline dark:text-sky-300">
+          {justPublished ? (
+            <a href={justPublished.commitUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sky-700 underline dark:text-sky-300">
               <GitCommit size={13} /> Commit
             </a>
+          ) : post.published_at ? (
+            <span className="text-sky-800/80 dark:text-sky-200/80">
+              Last published{" "}
+              <span title={formatDate(post.published_at)} suppressHydrationWarning>
+                {relativeDate(post.published_at)}
+              </span>
+              {post.published_by ? ` by ${nameFromEmail(post.published_by)}` : ""}
+            </span>
+          ) : null}
+          {status !== "published" ? (
+            <span className="basis-full pl-7 text-sky-800/80 dark:text-sky-200/80">
+              Your edits are saved here, not on the site yet.{" "}
+              {isReviewer ? "Press Publish changes to put them live." : "Ask for a review; a reviewer publishes them."}
+            </span>
           ) : null}
         </div>
       ) : null}
@@ -1176,7 +1209,7 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
                     </span>
                   </li>
                   {timeline.map((event) => {
-                    const line = eventLine(event);
+                    const line = eventLine(event, publishes.get(event.id));
                     return (
                       <li key={event.id} className="flex gap-2 text-[12.5px]">
                         <TeamAvatar name={nameFromEmail(event.actor)} email={event.actor} size={24} />

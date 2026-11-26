@@ -77,12 +77,30 @@ beforeEach(() => {
 });
 
 describe("publishBlocker", () => {
-  it("needs an approval, except for the publisher's own post", () => {
-    expect(publishBlocker({ status: "approved", created_by: "a@x.com" }, "r@x.com")).toBeNull();
-    expect(publishBlocker({ status: "in_review", created_by: "a@x.com" }, "r@x.com")).toMatch(/Approve/);
-    expect(publishBlocker({ status: "draft", created_by: "a@x.com" }, "r@x.com")).toMatch(/Approve/);
-    expect(publishBlocker({ status: "draft", created_by: "r@x.com" }, "r@x.com")).toBeNull();
-    expect(publishBlocker({ status: "published", created_by: "r@x.com" }, "r@x.com")).toMatch(/already live/);
+  const fresh = { source_path: null };
+  const live = { source_path: "content/blog/a.mdx" };
+
+  it("needs an approval for a new post, except the publisher's own", () => {
+    expect(publishBlocker({ ...fresh, status: "approved", created_by: "a@x.com" }, "r@x.com")).toBeNull();
+    expect(publishBlocker({ ...fresh, status: "in_review", created_by: "a@x.com" }, "r@x.com")).toMatch(/Approve/);
+    expect(publishBlocker({ ...fresh, status: "draft", created_by: "a@x.com" }, "r@x.com")).toMatch(/Approve/);
+    expect(publishBlocker({ ...fresh, status: "draft", created_by: "r@x.com" }, "r@x.com")).toBeNull();
+  });
+
+  it("lets a reviewer put edits to someone else's live post live", () => {
+    expect(publishBlocker({ ...live, status: "draft", created_by: "a@x.com" }, "r@x.com")).toBeNull();
+    expect(publishBlocker({ ...live, status: "in_review", created_by: "a@x.com" }, "r@x.com")).toBeNull();
+    expect(publishBlocker({ ...live, status: "changes_requested", created_by: "a@x.com" }, "r@x.com")).toBeNull();
+  });
+
+  it("lets an admin publish any post, approved or not", () => {
+    expect(publishBlocker({ ...fresh, status: "draft", created_by: "a@x.com" }, "r@x.com", true)).toBeNull();
+    expect(publishBlocker({ ...fresh, status: "in_review", created_by: "a@x.com" }, "r@x.com", true)).toBeNull();
+    expect(publishBlocker({ ...live, status: "published", created_by: "a@x.com" }, "r@x.com", true)).toMatch(/already live/);
+  });
+
+  it("has nothing to publish on a live post with no edits", () => {
+    expect(publishBlocker({ ...live, status: "published", created_by: "r@x.com" }, "r@x.com")).toMatch(/already live/);
   });
 });
 
@@ -107,10 +125,32 @@ describe("publishPost", () => {
     expect(github.commitFiles).not.toHaveBeenCalled();
   });
 
+  it("publishes edits to a live post and records them as an update", async () => {
+    const path = "content/blog/launch-a-developer-tool.mdx";
+    data.getPost.mockResolvedValue(row({ status: "draft", source_path: path, source_sha: "old" }));
+    data.sitePosts.mockReturnValue([{ slug: "launch-a-developer-tool", title: "", date: "", unlisted: false, path }]);
+    github.repoFileSha.mockResolvedValue("old");
+    const result = await publishPost(reviewer, row().id, { base });
+    expect(result).toMatchObject({ ok: true, update: true });
+    expect(data.addEvent).toHaveBeenCalledWith(row().id, reviewer.email, "published", "https://github.com/x/y/commit/abc\nupdate");
+  });
+
+  it("records a first publish as a publish", async () => {
+    expect(await publishPost(reviewer, row().id, { base })).toMatchObject({ ok: true, update: false });
+    expect(data.addEvent).toHaveBeenCalledWith(row().id, reviewer.email, "published", "https://github.com/x/y/commit/abc");
+  });
+
   it("refuses a post nobody approved", async () => {
     data.getPost.mockResolvedValue(row({ status: "in_review" }));
     expect(await publishPost(reviewer, row().id, { base })).toMatchObject({ ok: false, message: expect.stringMatching(/Approve/) });
     expect(github.commitFiles).not.toHaveBeenCalled();
+  });
+
+  it("lets an admin publish a post nobody approved", async () => {
+    data.getPost.mockResolvedValue(row({ status: "in_review" }));
+    const admin = { ...reviewer, roles: ["admin" as const] };
+    expect(await publishPost(admin, row().id, { base })).toMatchObject({ ok: true });
+    expect(github.commitFiles).toHaveBeenCalledTimes(1);
   });
 
   it.each([

@@ -16,6 +16,24 @@ export const STATUS_INFO: Record<BlogStatus, { label: string; tone: "neutral" | 
   published: { label: "Live", tone: "live" },
 };
 
+/**
+ * A live post stays live while someone edits it: its status then says where
+ * the edits are, not where the post is. "Draft" on a live post means edits
+ * that aren't on the site yet.
+ */
+export const LIVE_CHANGES: Record<Exclude<BlogStatus, "published">, { label: string; tone: "neutral" | "accent" | "warning" | "success" }> = {
+  draft: { label: "Unpublished changes", tone: "neutral" },
+  in_review: { label: "Changes in review", tone: "accent" },
+  changes_requested: { label: "Changes requested", tone: "warning" },
+  approved: { label: "Changes approved", tone: "success" },
+};
+
+/** How a post's stage reads in one line, e.g. for the preview's bar. */
+export function stageLabel(status: BlogStatus, live: boolean) {
+  if (status === "published") return STATUS_INFO.published.label;
+  return live ? `Live, ${LIVE_CHANGES[status].label.toLowerCase()}` : STATUS_INFO[status].label;
+}
+
 /** What the editor changes. Everything else on a post is workflow. */
 export type BlogFields = {
   title: string;
@@ -83,6 +101,25 @@ export type BlogEvent = {
   resolved_at?: string | null;
   resolved_by?: string | null;
 };
+
+/** The second line of a "published" event that put edits to a live post live. */
+export const UPDATE_MARK = "update";
+
+/**
+ * Each "published" event in a post's history (oldest first): its commit
+ * link, and whether it put edits live rather than the post itself. Events
+ * from before the mark existed count as updates when an earlier publish is
+ * in the history.
+ */
+export function publishHistory(events: readonly BlogEvent[]) {
+  const out = new Map<string, { link: string; update: boolean }>();
+  for (const event of events) {
+    if (event.kind !== "published") continue;
+    const [link, mark] = event.body.split("\n");
+    out.set(event.id, { link: link.trim(), update: mark?.trim() === UPDATE_MARK || out.size > 0 });
+  }
+  return out;
+}
 
 /** A comment and its replies, oldest first. */
 export type CommentThread = { root: BlogEvent; replies: BlogEvent[] };

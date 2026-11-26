@@ -7,21 +7,28 @@ import { addEvent, getPost, markPublished, sitePosts, takenSlugs } from "@/lib/i
 import { blobSha, commitFiles, isGithubConfigured, repoFileSha, repoFileUrl } from "@/lib/internal/blog/github";
 import { draftImages, readImage, removePostImages } from "@/lib/internal/blog/media";
 import { findUnsafeMdx, remarkSafeMdx } from "@/lib/internal/blog/safe-mdx";
-import { MEDIA_PREFIX, postChecks, todayIst, toMdx, type BlogPostRow, type Check } from "@/lib/internal/blog/shared";
+import { MEDIA_PREFIX, UPDATE_MARK, postChecks, todayIst, toMdx, type BlogPostRow, type Check } from "@/lib/internal/blog/shared";
 import type { Staff } from "@/lib/internal/session";
 
 export type PublishResult =
-  | { ok: true; url: string; commitUrl: string; warning?: string }
+  /** `update`: the post was live already, so this put edits live. */
+  | { ok: true; url: string; commitUrl: string; update: boolean; warning?: string }
   | { ok: false; message: string; conflict?: boolean; checks?: Check[] };
 
 /**
- * Who may put this post live now: it has to be approved, unless it's the
- * publisher's own post (a reviewer's own writing, or a live post they opened
- * to edit). A post that's live with nothing changed has nothing to publish.
+ * Who may put this post live now. Admins can publish any post. For a blog
+ * reviewer, a new post has to be approved unless it's their own; a live
+ * post was approved once already, so they can put edits to it live
+ * straight away, whoever wrote it. A post that's live with nothing changed
+ * has nothing to publish.
  */
-export function publishBlocker(post: Pick<BlogPostRow, "status" | "created_by">, publisher: string): string | null {
+export function publishBlocker(
+  post: Pick<BlogPostRow, "status" | "created_by" | "source_path">,
+  publisher: string,
+  admin = false,
+): string | null {
   if (post.status === "published") return "This post is already live. Edit something to publish again.";
-  if (post.status === "approved" || post.created_by === publisher) return null;
+  if (admin || post.source_path || post.status === "approved" || post.created_by === publisher) return null;
   return "Approve this post before publishing it.";
 }
 
@@ -41,7 +48,7 @@ export function publishBlocker(post: Pick<BlogPostRow, "status" | "created_by">,
  * counts as published.
  */
 export async function publishPost(
-  staff: Pick<Staff, "email" | "blog">,
+  staff: Pick<Staff, "email" | "blog"> & Partial<Pick<Staff, "roles">>,
   id: string,
   options: { base: string; force?: boolean },
 ): Promise<PublishResult> {
@@ -54,7 +61,7 @@ export async function publishPost(
   if (Date.parse(post.updated_at) !== Date.parse(options.base)) {
     return { ok: false, message: "This post changed since you opened it. Reload, read the changes, then publish." };
   }
-  const blocked = publishBlocker(post, staff.email);
+  const blocked = publishBlocker(post, staff.email, Boolean(staff.roles?.includes("admin")));
   if (blocked) return { ok: false, message: blocked };
 
   // The checks, with the post parsed the way the site parses it: no HTML,
@@ -177,7 +184,9 @@ export async function publishPost(
       message: "The post is on its way to the site, but the dashboard couldn't record that. Press Publish again in a minute.",
     };
   }
-  await addEvent(post.id, staff.email, "published", commitUrl);
+  // The history tells a first publish from an update by this second line.
+  const update = Boolean(post.source_path);
+  await addEvent(post.id, staff.email, "published", update ? `${commitUrl}\n${UPDATE_MARK}` : commitUrl);
   const url = `${baseUrl}/blog/${post.slug}`;
   if (recorded === "edited") {
     // Their text still points at the draft's images: keep those.
@@ -185,10 +194,11 @@ export async function publishPost(
       ok: true,
       url,
       commitUrl,
+      update,
       warning: "Published. Someone saved an edit while it was publishing: that edit isn't live yet.",
     };
   }
   // The images are in the repo now; the draft's copies (used or not) can go.
   await removePostImages(post.id, files);
-  return { ok: true, url, commitUrl };
+  return { ok: true, url, commitUrl, update };
 }

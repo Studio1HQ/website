@@ -209,8 +209,10 @@ export async function publish(id: unknown, base: unknown, force: unknown): Promi
     if (post) {
       const current = await currentReviewers();
       await notifyPeople([post.created_by, ...post.reviewers.filter((email) => current.has(email))], staff.email, post.id, {
-        subject: `Published: ${titleOf(post.title)}`,
-        text: `${nameFromEmail(staff.email)} published ${quoted(post.title)}. It goes live at ${result.url} in a few minutes, once the site redeploys.`,
+        subject: `${result.update ? "Changes published" : "Published"}: ${titleOf(post.title)}`,
+        text: result.update
+          ? `${nameFromEmail(staff.email)} published changes to ${quoted(post.title)}. They're live at ${result.url} in a few minutes, once the site redeploys.`
+          : `${nameFromEmail(staff.email)} published ${quoted(post.title)}. It goes live at ${result.url} in a few minutes, once the site redeploys.`,
       });
     }
     refresh(id);

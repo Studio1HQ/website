@@ -5,7 +5,7 @@ import { getPost, listEvents, sitePosts, takenSlugs } from "@/lib/internal/blog/
 import { isGithubConfigured } from "@/lib/internal/blog/github";
 import { nameFromEmail } from "@/lib/internal/blog/shared";
 import { membersWith } from "@/lib/internal/members";
-import { requireBlog } from "@/lib/internal/session";
+import { isAdmin, requireBlog } from "@/lib/internal/session";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -33,7 +33,7 @@ export default async function BlogPostPage({ params }: Props) {
     <BlogEditor
       post={post}
       events={events}
-      me={{ email: staff.email, blog: staff.blog }}
+      me={{ email: staff.email, blog: staff.blog, admin: isAdmin(staff) }}
       reviewers={reviewerEmails
         .filter((email) => email !== staff.email)
         .map((email) => ({ email, name: nameFromEmail(email) }))}

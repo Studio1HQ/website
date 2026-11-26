@@ -272,10 +272,19 @@ export function BlogOverview({
   ).length;
   const inReview = list.filter((post) => post.status === "in_review").length;
   const approved = list.filter((post) => post.status === "approved").length;
+  // A live post being edited isn't a draft: it's counted on its own and
+  // listed under Live.
   const changes = list.filter(
-    (post) => post.status === "changes_requested",
+    (post) => !post.source_path && post.status === "changes_requested",
   ).length;
-  const drafts = list.filter((post) => post.status === "draft").length;
+  const drafts = list.filter(
+    (post) => !post.source_path && post.status === "draft",
+  ).length;
+  const liveEdits = list.filter(
+    (post) =>
+      post.source_path &&
+      (post.status === "draft" || post.status === "changes_requested"),
+  ).length;
 
   return (
     <>
@@ -509,6 +518,11 @@ export function BlogOverview({
                 label="Drafts"
                 value={drafts}
                 href="/blog/posts?tab=drafts"
+              />
+              <Stage
+                label="Live posts with unpublished changes"
+                value={liveEdits}
+                href="/blog/posts?tab=live"
               />
             </ul>
           ) : (
