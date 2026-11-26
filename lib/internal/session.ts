@@ -142,6 +142,11 @@ export function canSeeInfluencers(staff: Pick<Staff, "roles">) {
   return can(staff.roles, "influencers", "manage");
 }
 
+/** Inbound: leads that booked a call or emailed, and what the design agent made for them. */
+export function canSeeInbound(staff: Pick<Staff, "roles">) {
+  return can(staff.roles, "inbound", "manage");
+}
+
 /** Social growth: Studio1's accounts and their numbers. */
 export function canSeeSocials(staff: Pick<Staff, "roles">) {
   return can(staff.roles, "socials", "manage");
@@ -215,6 +220,7 @@ export function areasFor(staff: Staff) {
     | "outreach"
     | "influencers"
     | "socials"
+    | "inbound"
     | "jobboard"
     | "team"
     | "money"
@@ -226,6 +232,7 @@ export function areasFor(staff: Staff) {
   if (canSeeOutreach(staff)) areas.push("outreach");
   if (canSeeInfluencers(staff)) areas.push("influencers");
   if (canSeeSocials(staff)) areas.push("socials");
+  if (canSeeInbound(staff)) areas.push("inbound");
   if (canEditJobBoard(staff)) areas.push("jobboard");
   if (staff.person || staff.interns.length || isAdmin(staff) || can(staff.roles, "tasks", "view")) areas.push("team");
   if (canSeeMoney(staff)) areas.push("money");
@@ -248,6 +255,7 @@ export function homeFor(staff: Staff) {
   if (canSeeOutreach(staff)) return "/outreach";
   if (canSeeInfluencers(staff)) return "/influencers";
   if (canSeeSocials(staff)) return "/socials";
+  if (canSeeInbound(staff)) return "/inbound";
   if (canEditJobBoard(staff)) return "/job-board";
   if (staff.person) return "/me";
   if (staff.interns.length) return "/people";
@@ -282,6 +290,7 @@ const DENIED: Record<AreaKey, string> = {
   outreach: "/?denied=1",
   influencers: "/?denied=1",
   socials: "/?denied=1",
+  inbound: "/?denied=1",
   jobboard: "/?denied=1",
 };
 

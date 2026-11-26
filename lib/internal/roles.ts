@@ -32,10 +32,11 @@
  *   outreach_manager    the outreach pipeline: organisations, deals, follow-ups
  *   influencer_manager  the influencer roster, rates and results
  *   socials_manager     Social growth: the accounts and their numbers
+ *   inbound_manager     Inbound: leads that booked a call or emailed, and what the design agent made for them
  *   job_board_editor the public DevRel jobs board (studio1hq.com/devrel-jobs):
  *                    add, change, hide and remove listings
  *
- * Those last three are given one by one (GRANTED_ONLY): Admin doesn't open
+ * Outreach, Influencers, Social growth and Inbound are given one by one (GRANTED_ONLY): Admin doesn't open
  * them. The founders always have them (OWNER_ROLES); anyone else, admins
  * included, needs a founder to give them.
  *
@@ -74,6 +75,7 @@ export const ROLE_KEYS = [
   "outreach_manager",
   "influencer_manager",
   "socials_manager",
+  "inbound_manager",
   "job_board_editor",
 ] as const;
 export type RoleKey = (typeof ROLE_KEYS)[number];
@@ -82,7 +84,7 @@ export const ROLE_INFO: Record<
   RoleKey,
   {
     label: string;
-    area: "All" | "Hiring" | "Blog" | "Community" | "Clients" | "Team tasks" | "Outreach" | "Influencers" | "Social growth" | "DevRel jobs";
+    area: "All" | "Hiring" | "Blog" | "Community" | "Clients" | "Team tasks" | "Outreach" | "Influencers" | "Social growth" | "Inbound" | "DevRel jobs";
     description: string;
   }
 > = {
@@ -157,6 +159,12 @@ export const ROLE_INFO: Record<
     area: "Social growth",
     description: "Track Studio1's social accounts: add accounts and log their numbers.",
   },
+  inbound_manager: {
+    label: "Inbound",
+    area: "Inbound",
+    description:
+      "Work inbound leads: who booked a call or emailed, call notes, answers for the design agent, and the briefs and decks it makes.",
+  },
   job_board_editor: {
     label: "DevRel jobs",
     area: "DevRel jobs",
@@ -168,7 +176,7 @@ export const ROLE_INFO: Record<
  * The founders' roles: Admin, plus the areas Admin alone doesn't open. Any
  * code that treats someone as a founder gives them these.
  */
-export const OWNER_ROLES: readonly RoleKey[] = ["admin", "outreach_manager", "influencer_manager", "socials_manager"];
+export const OWNER_ROLES: readonly RoleKey[] = ["admin", "outreach_manager", "influencer_manager", "socials_manager", "inbound_manager"];
 
 /** The only role someone outside @studio1hq.com can have. */
 export const OUTSIDE_ROLES: readonly RoleKey[] = ["blog_writer"];
@@ -199,9 +207,9 @@ export function atLeast(role: Role | null | undefined, minimum: Role) {
  *   clients    Own work = client_member    Manage = client_manager
  *   tasks      View = tasks_viewer (one level: everyone sees their own
  *              tasks without it; the founders see everyone's)
- *   outreach, influencers, socials
+ *   outreach, influencers, socials, inbound
  *              Manage = outreach_manager / influencer_manager /
- *              socials_manager (one level each; GRANTED_ONLY: Admin
+ *              socials_manager / inbound_manager (one level each; GRANTED_ONLY: Admin
  *              doesn't open them)
  *   jobboard   Manage = job_board_editor (one level: whoever has it edits
  *              the public DevRel jobs board; Admin counts)
@@ -215,6 +223,7 @@ export const AREA_KEYS = [
   "outreach",
   "influencers",
   "socials",
+  "inbound",
   "jobboard",
 ] as const;
 export type AreaKey = (typeof AREA_KEYS)[number];
@@ -229,6 +238,7 @@ export type AreaLevels = {
   outreach: "manage";
   influencers: "manage";
   socials: "manage";
+  inbound: "manage";
   jobboard: "manage";
 };
 export type AreaLevel<A extends AreaKey = AreaKey> = AreaLevels[A];
@@ -301,6 +311,11 @@ export const AREAS: { [A in AreaKey]: AreaInfo<A> } = {
     label: "Social growth",
     levels: [level<"socials">("manage", "socials_manager")],
   },
+  inbound: {
+    key: "inbound",
+    label: "Inbound",
+    levels: [level<"inbound">("manage", "inbound_manager")],
+  },
   jobboard: {
     key: "jobboard",
     label: "DevRel jobs",
@@ -314,7 +329,7 @@ export const AREAS: { [A in AreaKey]: AreaInfo<A> } = {
  * them (OWNER_ROLES); anyone else, admins included, is given each one, and
  * only by a founder (roleChangeProblem).
  */
-export const GRANTED_ONLY: readonly AreaKey[] = ["outreach", "influencers", "socials"];
+export const GRANTED_ONLY: readonly AreaKey[] = ["outreach", "influencers", "socials", "inbound"];
 
 export function isGrantedOnly(area: AreaKey) {
   return GRANTED_ONLY.includes(area);
@@ -332,6 +347,7 @@ export const EMPTY_GRID: AccessGrid = {
   outreach: null,
   influencers: null,
   socials: null,
+  inbound: null,
   jobboard: null,
 };
 
@@ -359,6 +375,7 @@ export function gridFromRoles(roles: readonly RoleKey[]): AccessGrid {
     outreach: heldLevel(roles, "outreach"),
     influencers: heldLevel(roles, "influencers"),
     socials: heldLevel(roles, "socials"),
+    inbound: heldLevel(roles, "inbound"),
     jobboard: heldLevel(roles, "jobboard"),
   };
 }

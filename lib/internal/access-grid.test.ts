@@ -122,8 +122,8 @@ describe("the access grid", () => {
     expect(gridFromRoles(["admin"])).toEqual(EMPTY_GRID);
   });
 
-  it("opens Outreach, Influencers and Social growth only with their own role, Admin or not", () => {
-    expect([...GRANTED_ONLY]).toEqual(["outreach", "influencers", "socials"]);
+  it("opens Outreach, Influencers, Social growth and Inbound only with their own role, Admin or not", () => {
+    expect([...GRANTED_ONLY]).toEqual(["outreach", "influencers", "socials", "inbound"]);
     for (const area of GRANTED_ONLY) {
       const role = AREAS[area].levels[0].role;
       expect(areaAccess(["admin"], area)).toBeNull();
@@ -189,7 +189,7 @@ describe("the access grid", () => {
   it("holds outside addresses to Blog: own work", () => {
     const outside = "writer@example.com";
     expect(allowedLevels(outside, "blog")).toEqual(["own"]);
-    for (const area of ["hiring", "community", "clients", "outreach", "influencers", "socials", "jobboard"] as const) {
+    for (const area of ["hiring", "community", "clients", "outreach", "influencers", "socials", "inbound", "jobboard"] as const) {
       expect(allowedLevels(outside, area)).toEqual([]);
     }
     expect(allowedLevels("someone@studio1hq.com", "hiring")).toEqual(["view", "manage"]);
@@ -202,6 +202,7 @@ describe("the access grid", () => {
       outreach: "manage",
       influencers: "manage",
       socials: "manage",
+      inbound: "manage",
       jobboard: "manage",
     };
     const clean = cleanRoles(outside, rolesFromGrid(everything, true));

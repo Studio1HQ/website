@@ -341,6 +341,19 @@ async function resendGet<T>(path: string): Promise<ApiResult<T>> {
   }
 }
 
+/**
+ * One received email as Resend's Receiving API has it (headers, text, html,
+ * message id), for the leads mailbox (lib/internal/inbound/mail.ts). The
+ * answer is untrusted text; `retry` says whether asking again could help.
+ */
+export async function readReceivedEmail(
+  emailId: string,
+): Promise<{ ok: true; email: Record<string, unknown> } | { ok: false; status: number; retry: boolean }> {
+  const full = await resendGet<Record<string, unknown>>(`/emails/receiving/${encodeURIComponent(emailId)}`);
+  if (!full.ok) return full;
+  return { ok: true, email: full.json && typeof full.json === "object" ? full.json : {} };
+}
+
 /** SPF or DKIM verdict as a word ("pass", "fail"…), whatever shape it comes in. */
 function verdict(value: unknown): string | null {
   if (typeof value === "string") return value.toLowerCase();

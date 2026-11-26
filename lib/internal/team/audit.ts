@@ -16,7 +16,8 @@ import { isMissingTable } from "@/lib/internal/team/shared";
 const TABLE = "team_audit";
 
 // "influencers" is let in by supabase/migrations/20261118130000_influencers.sql,
-// "job_board" by 20261121100000_devrel_jobs.sql.
+// "job_board" by 20261121100000_devrel_jobs.sql, "inbound" by
+// 20261127100000_agent_inbound.sql.
 export type AuditArea =
   | "payments"
   | "payroll"
@@ -25,7 +26,8 @@ export type AuditArea =
   | "people"
   | "intake"
   | "influencers"
-  | "job_board";
+  | "job_board"
+  | "inbound";
 
 export type AuditEntry = {
   /** Who did it: a staff email, or the sender's address for intake emails. */
