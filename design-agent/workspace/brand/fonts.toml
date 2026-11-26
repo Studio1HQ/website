@@ -1,0 +1,21 @@
+# Studio1 Sans is Inter renamed for Studio1 (same glyphs, spacing and kerning), SIL OFL 1.1.
+# Source: public/brand/design-system/fonts/ in the website repo; its LICENSE.txt is in fonts/licenses/.
+# Only Regular (400) and Medium (500) are brand weights.
+
+[[fonts]]
+family = "Studio1 Sans"
+weight = "400"
+style = "normal"
+file = "fonts/Studio1Sans-Regular.ttf"
+sha256 = "4167194227e0f962c2fe9a80750a7cdca2a7fe8d94e92e53291584e5a4958668"
+required = true
+license = "OFL-1.1"
+
+[[fonts]]
+family = "Studio1 Sans"
+weight = "500"
+style = "normal"
+file = "fonts/Studio1Sans-Medium.ttf"
+sha256 = "9de50825b131c0794a875355830d3d711161a902d702cbf7d564d70f6f4b2903"
+required = true
+license = "OFL-1.1"

@@ -12,6 +12,12 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "install.sh"
 
+# The installer clones this folder as a repository. In Studio1's repo the agent is a folder of a
+# larger repository, so there is nothing here to clone.
+pytestmark = pytest.mark.skipif(
+    not (ROOT / ".git").exists(), reason="this folder is not the root of a git repository"
+)
+
 
 def _run(tmp_path: Path) -> subprocess.CompletedProcess[str]:
     bin_dir = tmp_path / "bin"

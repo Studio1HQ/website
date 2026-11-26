@@ -61,5 +61,7 @@ export default defineConfig([
     "archive/**",
     "claude-audit/**",
     "brand/**",
+    // The design agent: a Python project with its own checks (see design-agent/STUDIO1.md).
+    "design-agent/**",
   ]),
 ]);

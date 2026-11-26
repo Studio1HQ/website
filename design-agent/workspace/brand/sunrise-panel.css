@@ -1,0 +1,43 @@
+/* The Studio1 sunrise panel, from PANEL and Panel in app/blog-cover/cover.tsx (website repo).
+   Blog covers and share cards only, full bleed, never a flat orange fill. The reds and peaches here
+   are declared under officialAssetColors in tokens.json, not palette colours.
+   Use: <div class="s1-sunrise">...</div>. The element sets its own stacking context. */
+.s1-sunrise {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-color: #fb8a1e;
+  background-image:
+    radial-gradient(circle at 0% 0%, #ff3a00 0%, rgba(255, 58, 0, 0) 55%),
+    radial-gradient(circle at 100% 0%, #ff3a00 0%, rgba(255, 58, 0, 0) 55%),
+    linear-gradient(180deg, #fb8a1e 0%, #f7a54a 40%, #eeb795 75%, #f2b38a 100%);
+}
+
+/* The horizon: a soft cream arc rising from the bottom edge. Cover size 1600x900: an ellipse
+   centred 420px below the bottom, rx = 72% of the width, ry = 680px, at 90% opacity. */
+.s1-sunrise::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: calc(100% - 260px);
+  width: max(144%, 1240px);
+  height: 1360px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  opacity: 0.9;
+  background: radial-gradient(
+    closest-side,
+    #fb8a1e 0%,
+    #f9a53f 55%,
+    #f6c78a 92%,
+    rgba(255, 240, 215, 0.9) 97%,
+    rgba(255, 240, 215, 0) 100%
+  );
+}
+
+/* A white card floating on the panel takes this shadow. */
+.s1-sunrise .s1-card-float {
+  background: #ffffff;
+  box-shadow: 0 30px 60px -30px rgba(90, 30, 0, 0.55);
+}

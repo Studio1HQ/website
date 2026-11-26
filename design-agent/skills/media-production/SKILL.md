@@ -22,6 +22,8 @@ Pick the pipeline from what the person will receive, then open its skill.
 | Voice, music or sound | host audio tools, then the mixer | `sound` |
 | A teardown of a reference film | cuts, timing and audio measured, then compared | `film-breakdown` |
 | What to learn from a film someone shares | a frame-by-frame study written to `workspace/references/` | `reference-study` |
+| A research brief on a named company | parallel helpers, sourced `research/brief.md` and a PDF | `studio1-company-research` |
+| A pitch or intro deck for a named company | research brief, slide outline, static deck rendered to PDF | `studio1-company-research`, then `studio1-pitch-deck` |
 
 If the ask is vague, use `content-brief` first: at most two questions, each with its reason;
 otherwise decide and say what you decided.

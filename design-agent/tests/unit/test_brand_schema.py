@@ -105,3 +105,29 @@ def test_unknown_keys_are_rejected(pack_copy: Path) -> None:
     _mutate(pack_copy, lambda d: d["design"].update(sparkle=True))
     with pytest.raises(BrandPackError, match="sparkle"):
         load_brand_pack(pack_copy, project_root=ROOT)
+
+
+def test_contrast_exceptions_validate_and_default_to_none(pack_copy: Path) -> None:
+    assert load_brand_pack(pack_copy, project_root=ROOT).tokens.design.contrast_exceptions == ()
+    rule = {"ink": "#FFF", "ground": "#f97316", "minFontPx": 11, "reason": "Layer tag"}
+    _mutate(pack_copy, lambda d: d["design"].update(contrastExceptions=[rule]))
+    (found,) = load_brand_pack(pack_copy, project_root=ROOT).tokens.design.contrast_exceptions
+    assert (found.min_font_px, found.reason) == (11, "Layer tag")
+
+
+@pytest.mark.parametrize(
+    ("change", "match"),
+    [
+        ({"ink": "white"}, "ink"),
+        ({"ground": "#12345"}, "ground"),
+        ({"reason": ""}, "reason"),
+        ({"minFontPx": None}, "minFontPx"),
+    ],
+)
+def test_bad_contrast_exceptions_are_refused(
+    pack_copy: Path, change: dict[str, object], match: str
+) -> None:
+    rule = {"ink": "#ffffff", "ground": "#f97316", "minFontPx": 11, "reason": "Layer tag"} | change
+    _mutate(pack_copy, lambda d: d["design"].update(contrastExceptions=[rule]))
+    with pytest.raises(BrandPackError, match=match):
+        load_brand_pack(pack_copy, project_root=ROOT)

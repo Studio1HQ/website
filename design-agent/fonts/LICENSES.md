@@ -13,6 +13,7 @@ Geist and Fragment Mono, the sample brand's faces, are staged into each sandbox 
 | `Fraunces-Variable.ttf`, `Fraunces-Italic-Variable.ttf` | Fraunces | The Fraunces Project Authors | [OFL-1.1](licenses/Fraunces-OFL.txt) |
 | `Geist-Variable.ttf`, `Geist-Italic-Variable.ttf` | Geist | The Geist Project Authors | [OFL-1.1](licenses/Geist-OFL.txt) |
 | `FragmentMono-Regular.ttf`, `FragmentMono-Italic.ttf` | Fragment Mono | The Fragment-Mono Project Authors | [OFL-1.1](licenses/FragmentMono-OFL.txt) |
+| `Studio1Sans-Regular.ttf`, `Studio1Sans-Medium.ttf` | Studio1 Sans (Inter renamed, no Reserved Font Name) | The Inter Project Authors | [OFL-1.1](licenses/Studio1Sans-OFL.txt) |
 
 Licensed fonts are never committed. Put them in the Git-ignored `private-fonts/` folder and declare
 them in your brand pack's `fonts.toml`; see [docs/customization.md](../docs/customization.md#brand).

@@ -64,6 +64,8 @@ slack = ["slack-bolt>=1.30,<2", "slack-sdk>=3.45,<4", "aiohttp>=3.9,<4"]
 google = ["langchain-google-genai>=4,<5"]
 groq = ["langchain-groq>=1,<2"]
 mistral = ["langchain-mistralai>=1,<2"]
+# Studio1: the editable PowerPoint export built from a deck outline.
+studio1 = ["python-pptx>=1.0,<2"]
 
 [dependency-groups]
 dev = [

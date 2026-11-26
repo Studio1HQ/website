@@ -117,6 +117,16 @@ class ColorRoles(_Strict):
         return single + [(f"series[{i}]", token) for i, token in enumerate(self.series)]
 
 
+class ContrastException(_Strict):
+    """One deliberate pair that may fall below WCAG contrast; the lint reports it as a warning."""
+
+    ink: HexColor
+    ground: HexColor
+    min_font_px: float = Field(gt=0, alias="minFontPx")
+    """The smallest font size, in px, at which this pair is allowed."""
+    reason: str = Field(min_length=1)
+
+
 class DesignTokens(_Strict):
     allowed_colors: tuple[HexColor, ...] = Field(min_length=2, alias="allowedColors")
     extended_palette: NotedColors = Field(default_factory=NotedColors, alias="extendedPalette")
@@ -142,6 +152,10 @@ class DesignTokens(_Strict):
     """CSS custom properties written to tokens.css. Colors must come from the palette."""
     roles: Mapping[Literal["light", "dark"], ColorRoles] = Field(default_factory=dict)
     """Optional colour roles per mode (charts and diagrams); see `ColorRoles`."""
+    contrast_exceptions: tuple[ContrastException, ...] = Field(
+        default=(), alias="contrastExceptions"
+    )
+    """Pairs that may fail WCAG contrast on purpose, from a minimum size; see `ContrastException`."""
     rules: tuple[str, ...] = ()
 
     @model_validator(mode="after")

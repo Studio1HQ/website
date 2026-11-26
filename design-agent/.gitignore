@@ -7,10 +7,8 @@ config/*.toml
 !config/prices.toml
 !config/vendored-skills.toml
 
-# Brand, fonts and references supplied by the operator
+# Fonts and references supplied by the operator (workspace/brand/ is tracked in this private fork)
 private-fonts/
-workspace/brand/*
-!workspace/brand/README.md
 workspace/references/*
 !workspace/references/README.md
 workspace/projects/*

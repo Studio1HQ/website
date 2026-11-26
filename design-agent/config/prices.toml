@@ -110,3 +110,42 @@ output = 30.00
 cache_write_5m = 10.00
 cache_write_1h = 10.00
 cache_read = 0.80
+
+# Nebius Token Factory, the open models behind the Studio1 setup (config/studio1.env.example). They
+# are served from a base URL and written `openai:<vendor>/<model>`, so they sit under the openai
+# table, the only other provider label the price tests accept. The meter ignores the provider table
+# and looks a model up by its id, or by the last part of it after the slash: `Kimi-K3.1-Pro` here
+# prices `openai:moonshotai/Kimi-K3.1-Pro`. Dots in an id need the quotes.
+#
+# Nebius's list gives input and output prices only, and this file requires all five. Cached-token
+# prices are unknown, so cache_write is the input price (no surcharge) and cache_read is one cent
+# under the input price (the table's checks need a read price below the input price): in practice no
+# cache discount is assumed. If Nebius bills cached tokens for less, a run's real cost is a little
+# under this estimate. Replace these with Nebius's cached prices when it publishes them.
+
+[openai.models."Kimi-K3.1-Pro"]
+source = "https://tokenfactory.nebius.com/api/public/models_info"
+date = 2026-11-26
+input = 2.00
+output = 10.00
+cache_write_5m = 2.00
+cache_write_1h = 2.00
+cache_read = 1.99
+
+[openai.models."Qwen3.8-27B"]
+source = "https://tokenfactory.nebius.com/api/public/models_info"
+date = 2026-11-26
+input = 0.45
+output = 3.00
+cache_write_5m = 0.45
+cache_write_1h = 0.45
+cache_read = 0.44
+
+[openai.models."GLM-5.3-Flash"]
+source = "https://tokenfactory.nebius.com/api/public/models_info"
+date = 2026-11-26
+input = 0.15
+output = 0.50
+cache_write_5m = 0.15
+cache_write_1h = 0.15
+cache_read = 0.14

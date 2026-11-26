@@ -232,6 +232,50 @@ def test_brand_lint_reads_every_fact_from_the_tokens(tmp_path: Path) -> None:
         assert (code, report["findings"]) == (0, []), fixture
 
 
+def _contrast_page(tmp_path: Path, size: str) -> Path:
+    page = tmp_path / "page.html"
+    page.write_text(
+        "<!doctype html>\n<html lang=en>\n<head><style>\n"
+        "body { margin: 0; background: #f6f1e7; font-family: var(--brand-font-text); }\n"
+        f".tag {{ background: #8bb8e8; color: #ffffff; font-size: {size}; }}\n"
+        '</style></head>\n<body><p class="tag">Layer tag</p></body>\n</html>\n'
+    )
+    return page
+
+
+def _with_exception(tmp_path: Path, ink: str = "#FFFFFF") -> Path:
+    tokens = json.loads(TOKENS.read_text())
+    tokens["design"]["contrastExceptions"] = [
+        {"ink": ink, "ground": "#8BB8E8", "minFontPx": 11, "reason": "Tag label"}
+    ]
+    other = tmp_path / "tokens.json"
+    other.write_text(json.dumps(tokens))
+    return other
+
+
+def test_brand_lint_contrast_exception_warns_instead_of_failing(tmp_path: Path) -> None:
+    page = _contrast_page(tmp_path, "11px")
+    code, report = lint(page.name, root=tmp_path)
+    assert (code, rules(report)) == (1, {"contrast.wcag"})
+    code, report = lint(page.name, root=tmp_path, tokens=_with_exception(tmp_path))
+    (finding,) = report["findings"]
+    assert (code, finding["severity"], finding["rule"]) == (0, "WARN", "contrast.wcag")
+    assert "Tag label" in finding["message"]
+
+
+def test_brand_lint_contrast_exception_holds_only_from_its_size(tmp_path: Path) -> None:
+    tokens = _with_exception(tmp_path)
+    for size in ("10px", "clamp(10px, 2vw, 11px)"):
+        code, report = lint(_contrast_page(tmp_path, size).name, root=tmp_path, tokens=tokens)
+        assert (code, {f["severity"] for f in report["findings"]}) == (1, {"ERROR"}), size
+
+
+def test_brand_lint_contrast_exception_needs_the_same_pair(tmp_path: Path) -> None:
+    tokens = _with_exception(tmp_path, ink="#fefefe")
+    code, report = lint(_contrast_page(tmp_path, "11px").name, root=tmp_path, tokens=tokens)
+    assert (code, {f["severity"] for f in report["findings"]}) == (1, {"ERROR"})
+
+
 def test_brand_lint_lints_linked_stylesheets_in_their_own_file(tmp_path: Path) -> None:
     (tmp_path / "base.css").write_text(".a { margin: 0; }\n.b { color: #ff0000; }\n")
     (tmp_path / "page.html").write_text(

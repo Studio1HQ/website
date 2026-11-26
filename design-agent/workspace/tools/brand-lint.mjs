@@ -169,6 +169,8 @@ const bannedDecorativeMarkerClasses =
 const bannedGenericMotifClasses = new Set(
   creativeType.bannedGenericMotifClasses || ["dot-grid", "dot-field", "node-cloud", "node-network", "network-lattice"],
 );
+// Pairs the brand allows below WCAG contrast from a minimum size; reported as a warning, not an error.
+const contrastExceptions = (design.contrastExceptions || []).map((e) => ({ ...e, ink: normHex(e.ink), ground: normHex(e.ground) }));
 const diagramSpec = design.diagramConstruction || {};
 const connectorTags = new Set(diagramSpec.connectorElements || ["path", "line", "polyline"]);
 const strokeToken = (diagramSpec.strokeTokens || ["--brand-stroke"])[0];
@@ -872,6 +874,14 @@ function lintTextContrast() {
     const large = size === null || size >= LARGE_PX || (size >= LARGE_BOLD_PX && fontWeightAt(index) >= BOLD_WEIGHT);
     const floor = large ? WCAG_LARGE : WCAG_NORMAL;
     if (ratio >= floor) return;
+    // A known size only: a responsive size is judged as large above, and never earns an exception.
+    const exception =
+      size !== null &&
+      contrastExceptions.find((e) => e.ink === normHex(hexOf(ink)) && e.ground === normHex(hexOf(background)) && size >= e.minFontPx);
+    if (exception) {
+      add("WARN", node.line, `text "${text.slice(0, 40)}" reads ${ratio.toFixed(2)}:1 at ${size}px, allowed by the brand: ${exception.reason}`, "contrast.wcag");
+      return;
+    }
     add(
       "ERROR",
       node.line,
