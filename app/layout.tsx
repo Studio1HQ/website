@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { preload } from "react-dom";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { baseUrl } from "@/lib/site";
@@ -10,17 +11,14 @@ import {
   organizationJsonLd,
 } from "@/lib/seo";
 import { cn } from "@/lib/utils";
-import localFont from "next/font/local";
 
-const studio1Sans = localFont({
-  src: [
-    { path: "./fonts/Studio1Sans-Regular.woff2", weight: "400", style: "normal" },
-    { path: "./fonts/Studio1Sans-Medium.woff2", weight: "500", style: "normal" },
-  ],
-  variable: "--font-studio1-sans",
-  display: "swap",
-  fallback: ["Inter", "Arial", "sans-serif"],
-});
+/*
+ * The core files of Studio1 Sans (the @font-face rules in globals.css),
+ * preloaded so the first paint is already in the brand font. They're ~23 KB
+ * each: the full fonts (226 KB) competed with the stylesheet on phones and
+ * held the first paint back by about a second (issue #66).
+ */
+const FONT_FILES = ["/fonts/studio1-sans-regular-core-v1.woff2", "/fonts/studio1-sans-medium-core-v1.woff2"];
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
@@ -81,13 +79,11 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  for (const href of FONT_FILES) {
+    preload(href, { as: "font", type: "font/woff2", crossOrigin: "anonymous" });
+  }
   return (
-    <html
-      lang="en"
-      className={studio1Sans.variable}
-      data-scroll-behavior="smooth"
-      suppressHydrationWarning
-    >
+    <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
       <body
         className={cn(
           "antialiased font-secondary",

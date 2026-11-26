@@ -8,6 +8,7 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -61,8 +62,8 @@ import {
   type MotionValue,
 } from "motion/react";
 import AsciiHands from "@/components/home/ascii-hands";
+import { CountryFlag } from "./country-flag";
 import { preloadLocators } from "./country-locator";
-import { CountryFlag, WorldReachMap } from "./world-reach-map";
 import {
   Cursor,
   GRAIN,
@@ -2554,10 +2555,79 @@ const COUNTRIES = [
   "Australia",
 ];
 
+/** The world map's shape (data/world-reach.json is 320 × 161). */
+const REACH_MAP_RATIO = "320 / 161";
+
+function ReachMapSpace() {
+  return <div aria-hidden style={{ aspectRatio: REACH_MAP_RATIO }} />;
+}
+
+// The dotted map is heavy (about 17,600 dots, drawn from a 245 KB data file),
+// and server-rendered it made up most of the homepage's HTML, which slowed
+// phones' first paint. So it isn't in the HTML: ReachMapSlot loads it.
+const WorldReachMap = dynamic(
+  () => import("./world-reach-map").then((module) => module.WorldReachMap),
+  { ssr: false, loading: ReachMapSpace },
+);
+
+/**
+ * Where the world map goes. On desktop it loads straight after the page, as
+ * it always appeared; on phones only once it's about to scroll into view.
+ * The space is held at the map's own shape meanwhile, so nothing shifts.
+ */
+function ReachMapSlot({
+  hq,
+  highlight,
+  onHighlight,
+  className,
+}: {
+  hq: string;
+  highlight: string | null;
+  onHighlight: (country: string | null) => void;
+  className?: string;
+}) {
+  const slot = useRef<HTMLDivElement>(null);
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    if (window.matchMedia("(min-width: 768px)").matches) {
+      const frame = requestAnimationFrame(() => setShow(true));
+      return () => cancelAnimationFrame(frame);
+    }
+    const node = slot.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        setShow(true);
+        observer.disconnect();
+      },
+      { rootMargin: "600px 0px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  // The hover cards' regional maps (1 MB) load ahead only where there's a
+  // mouse to hover with; a tap on a phone still loads them when needed.
+  useEffect(() => {
+    if (show && window.matchMedia("(hover: hover)").matches) preloadLocators();
+  }, [show]);
+
+  return (
+    <div ref={slot} className={className}>
+      {show ? (
+        <WorldReachMap hq={hq} highlight={highlight} onHighlight={onHighlight} />
+      ) : (
+        <ReachMapSpace />
+      )}
+    </div>
+  );
+}
+
 export function PaperReach() {
   const t = useTranslations("GlobalReach");
   const [hovered, setHovered] = useState<string | null>(null);
-  useEffect(() => preloadLocators(), []);
   return (
     <PaperSection id="global-reach" tone="paper">
       <Container>
@@ -2575,7 +2645,7 @@ export function PaperReach() {
           description={t("description")}
         />
         <div className={cn("mt-10 px-5 pb-6 pt-8 md:px-10 md:pt-10", CELL)}>
-          <WorldReachMap
+          <ReachMapSlot
             hq={COUNTRIES[0]}
             highlight={hovered}
             onHighlight={setHovered}

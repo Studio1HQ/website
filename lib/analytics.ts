@@ -62,7 +62,10 @@ export function readConsent(
 /**
  * The inline script that starts GA. Order matters: consent defaults, then the
  * visitor's saved choice, then config, and only then gtag.js, so no hit is
- * ever sent before consent is known.
+ * ever sent before consent is known. On phones gtag.js (about 180 KB) waits
+ * until the page has loaded and the browser is idle, so it doesn't compete
+ * with the page's own scripts (issue #66); the page view queued in dataLayer
+ * is sent when it arrives. Tablets and desktops load it straight away.
  */
 export function gaInitScript(measurementId: string) {
   const id = JSON.stringify(measurementId);
@@ -77,5 +80,6 @@ gtag("consent","default",Object.assign({analytics_storage:"granted"},ads));
 try{var c=localStorage.getItem(${key});if(c==="granted"||c==="denied")gtag("consent","update",{analytics_storage:c});}catch(e){}
 gtag("js",new Date());
 gtag("config",${id});
-var s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id="+encodeURIComponent(${id});document.head.appendChild(s);`;
+function load(){var s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id="+encodeURIComponent(${id});document.head.appendChild(s);}
+if(window.matchMedia&&matchMedia("(max-width: 767px)").matches){var later=function(){if(window.requestIdleCallback)requestIdleCallback(load,{timeout:3000});else setTimeout(load,1);};if(document.readyState==="complete")later();else addEventListener("load",later,{once:true});}else load();`;
 }
