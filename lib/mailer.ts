@@ -59,6 +59,8 @@ export type MailMessage = {
   html: string;
   text: string;
   replyTo?: string;
+  /** A person's name to show as the sender ("Arindam at Studio1"); the address stays the stream's. */
+  fromName?: string;
   headers?: Record<string, string>;
   /** Files to attach, e.g. a payslip PDF. Not for batches. */
   attachments?: { filename: string; content: Uint8Array | Buffer; contentType?: string }[];
@@ -76,8 +78,10 @@ export type SendOptions = {
 
 function toResend(message: MailMessage, from: string, stream?: MailStream, options: SendOptions = {}) {
   const replyTo = message.replyTo || (stream ? STREAMS[stream].replyTo : undefined);
+  const name = message.fromName?.replace(/[<>"\\\r\n]/g, "").trim().slice(0, 60);
+  const address = from.match(/<([^>]+)>/)?.[1] ?? from;
   return {
-    from,
+    from: name ? `${name} <${address}>` : from,
     to: [message.to],
     subject: message.subject,
     html: message.html,
