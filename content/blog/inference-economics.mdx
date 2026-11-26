@@ -1,0 +1,339 @@
+---
+title: "Why Every Second Matters in a Multi-Step AI Agent: FP8, NVFP4, and Inference Economics"
+seoTitle: "FP8 and NVFP4: Why Every Second Matters in AI Agents"
+slug: "inference-economics"
+description: "FP8 vs NVFP4 explained: how 8-bit and 4-bit formats shrink LLMs and speed up inference, and where the time and money really go in an AI agent loop."
+tldrSummary: "Every model call in an agent loop comes with its own wait, so latency is paid on every turn. FP8 and NVFP4 shrink model weights so tokens come out faster, but on a fast FP8 endpoint, the biggest cost in time turned out to be the one-second wait before each reply, paid 17 times."
+tldrBullets:
+  - "On DeepSeek-V4.1-Flash-1017-fast, an FP8 endpoint, the agent fixed 3 bugs across a billing service in 17 turns, taking the tests from 7 failing to all 16 passing."
+  - "Writing was fast at about 900 tokens per second. Even the biggest reasoning turn, 2,286 tokens, took only 2.5 seconds to write."
+  - "The wait before each reply held at about one second while the prompt grew 14x, but over 17 turns it added up to 17.4 of the model's 27 seconds."
+  - "Output tokens were 74% of the $0.028 run. NVFP4 cuts the bytes behind that writing, about 1.8x less memory than FP8, but it can't shorten the wait before each reply."
+date: 2026-11-26
+updatedDate: 2026-11-26
+draft: false
+unlisted: true
+authors:
+  - "Shivam"
+tags:
+  - "llm-inference"
+  - "fp8"
+  - "nvfp4"
+  - "quantization"
+  - "ai-agents"
+bannerImage: "/blog/uploads/inference-economics/cover-every-second-matters-3f705e.webp"
+bannerImageAlt: "Latency chart of a 17-turn AI coding agent on an FP8 endpoint: each turn waits about 1 second for its first token, adding up to 17.4 of 27 seconds."
+---
+When you chat with a model, you ask once and wait once.
+
+Agents don't work like that.
+
+An agent fixing a bug reads a file, thinks, runs the tests, thinks again, edits the code, and runs the tests once more. Each of those steps is a new call to the model, and each call makes you wait.
+
+So a model that takes one extra second per reply doesn't cost you one second. In a 17-turn task, it costs you seventeen.
+
+That's why model speed matters far more in agents than in chat. It's also why formats like FP8(8-bit Floating Point) and NVFP4(NVIDIA 4-Bit Floating Point) are worth understanding. They make models smaller so they can reply faster.
+
+Most writing about these formats stays at the chip level: bits, blocks, and [petaFLOPS](<https://www.ionos.com/digitalguide/server/know-how/pflops/#:~:text=One petaFLOPS (PFLOPS) is equal to 1015 FLOPS or one quadrillion floating point op­er­a­tions per second. The unit is used to measure the power of high-per­for­mance computers>). Very little of it shows what happens inside a real agent loop.
+
+So today we'll do both.
+
+First, we'll learn what FP8 and NVFP4 actually are. Then we'll build a small coding agent on DeepSeek-V4.1-Flash-1017-fast from [Nebius Token Factory](https://nebius.com/services/token-factory), give it a real bug hunt across several files, and time every turn.
+
+I picked this model because [Nebius lists it](https://tokenfactory.nebius.com/models/catalog/image2text/deepseek-ai/DeepSeek-V4.1-Flash-1017-fast) as served in FP8, one of the two formats this article is about. So the numbers come from a real FP8 endpoint, not a lab setup.
+
+We won't race FP8 against NVFP4 here. Instead, we'll measure where a real agent's time and money go, because that tells you how much a faster format can actually matter.
+
+Finally, we'll connect the two and see which part of the loop a smaller format would speed up.
+
+## Step 1: See why an agent pays for latency again and again
+
+A chat request is a straight line. You send a prompt, the model replies, and you're done.
+
+An agent is a loop:
+
+1. The model decides what to do next.
+2. It calls a tool, like reading a file or running tests.
+3. The tool's output is added to the conversation.
+4. The whole conversation goes back to the model, and the loop starts again.
+
+That last step is the one people miss.
+
+The model doesn't remember the previous turn. Every turn, the agent sends the full history again: the system prompt, the task, every file it has read, and every test result so far.
+
+So the prompt keeps growing. In the run we'll look at later, it started at 737 tokens on turn 1 and reached 10,938 tokens by turn 18.
+
+Researchers at UC San Diego saw the same pattern when they timed computer-use agents in [OSWorld-Human](https://arxiv.org/abs/2506.16042). They found that "the prompt sent to the LLM includes the history of all previous steps", and that "each successive step can take 3x longer than steps at the beginning of a task."
+
+They also found where the time goes: model calls for planning, reflection, and judging "account for most of the overall latency." The tools weren't the bottleneck. The model was.
+
+In an agent, latency isn't paid once. It's paid on every turn.
+
+![Single-turn chat call vs. a 17-turn agent loop with growing prompt history.](/blog/uploads/inference-economics/image-bfd953.webp "Single-turn chat call vs. a 17-turn agent loop with growing prompt history.")
+
+That's the frame for the rest of this article. Any second we save on a single model call gets saved again on every turn of the loop.
+
+## Step 2: Understand what the model is doing while you wait
+
+Every model reply happens in two phases.
+
+1. **Prefill** is the model reading your prompt. It processes all the input tokens together, in parallel, so it's mostly a lot of math. The time you spend waiting for this is roughly the time to first token (TTFT).
+2. **Decode** is the model writing its reply. It produces one token, then the next, then the next. It can't skip ahead because each token depends on the one before it.
+
+The two phases hit different limits.
+
+Prefill is limited by how fast the GPU can do math. Decode is limited by how fast the GPU can read from its own memory. To write each new token, the GPU has to pull the model's weights out of memory again, and there's very little math to do per token. So most of the time goes to moving bytes, not computing.
+
+The [authors of the PMPD paper](https://arxiv.org/abs/2410.13461) put it in one line: "*the prefill phase is known to be compute-bound, while the decoding stage is memory-bound.*" They also note that inference latency "*is typically dominated by the decoding phase.*"
+
+Here's a preview from our run. On the agent's heaviest turn, the model started replying after 1.05 seconds, then spent 2.50 seconds writing 2,286 tokens.
+
+![Prefill vs. decode breakdown of a single agent turn.](/blog/uploads/inference-economics/image-026285.webp "Prefill vs. decode breakdown of a single agent turn.")
+
+That leads to the key idea behind this whole article:
+
+Smaller weights mean fewer bytes to read per token, and fewer bytes mean faster tokens.
+
+That's exactly what FP8 and NVFP4 do.
+
+## Step 3: Learn what FP8 and NVFP4 actually change
+
+A model is billions of numbers called weights. The question is how many bits each one gets.
+
+Models are usually trained in 16-bit formats, which means 2 bytes per weight. A model with 100 billion weights needs about 200 GB just to hold them.
+
+**FP8** cuts that in half. Each weight gets 8 bits, so 1 byte.
+
+But what do those 8 bits actually hold?
+
+A floating-point number works like scientific notation. Take 6.02 × 10²³. The 6.02 carries the precision, and the 23 carries the size. Computers store numbers the same way, in binary:
+
+* 1 sign bit: plus or minus.
+* Exponent bits: how big or small the number is. This is the 23.
+* Mantissa bits: how precise it is. This is the 6.02.
+
+With only 8 bits, you have to choose how to split them between size and precision.
+
+A [joint paper](https://arxiv.org/abs/2209.05433) from NVIDIA, Arm, and Intel defined the two splits that became the FP8 standard:
+
+* E4M3: 4 exponent bits and 3 mantissa bits. More precision, smaller range.
+* E5M2: 5 exponent bits and 2 mantissa bits. More range, less precision.
+
+For running models, the paper recommends "E4M3 for weight and activation tensors". E5M2 is mainly for training.
+
+Keep E4M3 in mind, because it shows up again in a moment.
+
+![Bit-level layout of FP8 (E4M3, E5M2) and FP4 (E2M1) formats. Each box is the same width, so the FP4 row is visibly half as long as the FP8 rows.](/blog/uploads/inference-economics/image-4d20e1.webp "Bit-level layout of FP8 (E4M3, E5M2) and FP4 (E2M1) formats. Each box is the same width, so the FP4 row is visibly half as long as the FP8 rows.")
+
+FP4 halves it again. The [Microscaling (MX)](https://arxiv.org/abs/2310.10537) standard's 4-bit format is E2M1: 1 sign bit, 2 exponent bits and 1 mantissa bit.
+
+That gives only 16 possible bit patterns, which is far too few to represent real weights directly.
+
+The fix is called block scaling.
+
+You split the weights into small blocks and give each block its own scale factor. The 4-bit values store the shape of the numbers inside the block, and the scale stretches them back to their real size.
+
+Think of it as giving every small group of numbers its own zoom level.
+
+The open MX standard does this with blocks of 32 values. Each block shares one scale, and that scale can only be a power of two.
+
+[**NVFP4**](https://developer.nvidia.com/blog/introducing-nvfp4-for-efficient-and-accurate-low-precision-inference/) is NVIDIA's version, and it changes two things:
+
+1. Smaller blocks. Each block has 16 values instead of 32. If one weight in a block is unusually large, it distorts 15 neighbors instead of 31.
+2. Finer scales. Each block's scale is stored in FP8 (E4M3), so it isn't limited to powers of two and can match the block more closely. On top of that, one FP32 scale covers the whole tensor.
+
+The cost of all those scales is small. NVIDIA describes it as "one 4-bit value plus minor overhead of one FP8 scale per 16 values (4.5 bits per value)."
+
+That's 4 bits for the value plus 8 ÷ 16 \= 0.5 bits for its share of the scale.
+
+The result, according to NVIDIA: memory drops "approximately 3.5x relative to FP16, and approximately 1.8x compared to FP8."
+
+That's the format-level number. On a real model, some layers stay in higher precision. NVIDIA's NVFP4 release of DeepSeek-R1-0528 reports about 1.6x less disk and GPU memory than FP8.
+
+![Memory footprint comparison between FP8 and NVFP4 block scaling.](/blog/uploads/inference-economics/image-31e908.webp "Memory footprint comparison between FP8 and NVFP4 block scaling.")
+
+Remember Step 2: decode is limited by how many bytes the GPU reads per token. Fewer bytes per weight attacks that limit directly.
+
+## Step 4: Check whether a 4-bit model still gets the answer right
+
+Smaller weights are only useful if the model stays smart.
+
+[NVIDIA published](https://huggingface.co/nvidia/DeepSeek-R1-0528-NVFP4) an NVFP4 version of DeepSeek-R1-0528 with scores next to the FP8 reference. Here are three from the model card:
+
+| Benchmark                    | FP8 | NVFP4 |
+| ---------------------------- | --- | ----- |
+| LiveCodeBench (coding)       | 77  | 76.3  |
+| MMLU Pro (knowledge)         | 85  | 84.2  |
+| AIME 2024 (competition math) | 89  | 91.3  |
+
+The coding score dropped by less than one point. On AIME it even went up a little.
+
+NVIDIA's own summary is "1% or less accuracy degradation on key language modeling tasks."
+
+Now for speed, memory is one half of the story, and the other half is the hardware that does the math.
+
+[NVIDIA's Blackwell Ultra](https://developer.nvidia.com/blog/inside-nvidia-blackwell-ultra-the-chip-powering-the-ai-factory-era/) spec table lists 15 petaFLOPS of dense NVFP4 compute against 5 petaFLOPS for FP8. That's 3x on paper.
+
+These are peak numbers, and peak numbers only show up when the serving stack actually runs 4-bit kernels.
+
+The format alone does nothing. Two things decide whether you ever see the speedup:
+
+* the GPU the model runs on
+* the inference engine serving it
+
+The model in our benchmark is a real case of this. We know its format is FP8, so our numbers come from an FP8 model in production, not from a spec sheet. What we can't see from outside is which GPU and engine sit behind it.
+
+So the question for an agent builder isn't "is NVFP4 faster?" It's "where does my agent actually spend its time?"
+
+That's what we'll measure next.
+
+## Step 5: Build a real multi-step task for the agent
+
+To see where an agent's time goes, it needs a task that actually takes many steps.
+
+So I built a small async billing service: 6 Python modules, a log file, a changelog, and 16 tests. Then I planted 3 bugs that cross file boundaries:
+
+1. A race condition in the rate limiter. Two requests read the counter at the same time, so a client allowed 10 requests got 25 through.
+2. Rounding in the wrong place. Each event was rounded to the cent instead of only the invoice total, so tiny events were billed as $0.00.
+3. A schema change that broke old clients. A field that should be optional became required, so events from the older SDK were rejected.
+
+The suite starts at 7 failing and 9 passing. The agent gets a short incident report, like the one a teammate would file, and doesn't know where the bugs are. It also can't edit the tests.
+
+It gets five tools: `list_files`, `read_file`, `search_code`, `run_pytest` and `apply_patch`.
+
+The agent itself is a short loop. Call the model, run the tools it asks for, add the results to the history, and go again:
+
+```python
+messages = [{"role": "system", "content": SYSTEM_PROMPT},
+{"role": "user", "content": TASK}]
+
+for turn in range(1, MAX_TURNS + 1):
+reply, tool_calls, timing, usage = stream_turn(client, messages)
+messages.append(reply)
+
+if not tool_calls:          # no more tools needed: final answer
+    break
+
+for call in tool_calls:
+    output = workspace.call(call["name"], json.loads(call["arguments"]))
+    messages.append({"role": "tool", "tool_call_id": call["id"],  #<------ messages
+                     "content": output})
+
+```
+
+Notice that messages only ever grows. That's the history from Step 1, sent again on every turn.
+
+The agent talks to the model through an OpenAI-compatible API, so the standard OpenAI Python client works as is.
+
+Every call is streamed, so each turn can be split into the two phases from Step 2. Here is the timing core:
+
+```python
+t_start = time.perf_counter()
+t_first = None
+
+stream = client.chat.completions.create(
+model=MODEL_ID, messages=messages, tools=TOOLS,
+stream=True, stream_options={"include_usage": True},
+)
+for chunk in stream:
+if chunk.usage:
+usage = chunk.usage          # arrives in the last chunk
+if not chunk.choices:
+continue
+delta = chunk.choices[0].delta
+if t_first is None and (delta.content or delta.tool_calls or reasoning_in(delta)):
+t_first = time.perf_counter()  # first real token
+...
+
+t_end = time.perf_counter()
+ttft   = t_first - t_start   # queue + prefill
+decode = t_end - t_first     # writing tokens
+cached = usage.prompt_tokens_details.cached_tokens
+
+```
+
+Two details matter here.
+
+First, the TTFT clock stops on the first real token, which includes reasoning tokens. Otherwise, a model that thinks quietly before answering would look slow to start.
+
+Second, `include_usage` gives exact token counts per turn, including how many input tokens were served from cache.
+
+The model and prices are environment variables, so anyone can rerun the same task on another endpoint:
+
+```bash
+MODEL_ID=deepseek-ai/DeepSeek-V4.1-Flash-1017-fast PRICE_INPUT=0.60 PRICE_CACHE=0.012 PRICE_OUTPUT=2.40 \
+python run_benchmark.py
+
+```
+
+Every turn is saved to `benchmark_results.json`: tools called, TTFT, decode time, tokens, cache hits, and cost.
+
+## Step 6: Run it and time every turn
+
+The agent solved it.
+
+It took 17 turns to go from 7 failing tests to all 16 passing. It found all three bugs, fixed each one in the right file, and reran the tests to confirm.
+
+Here are six of the 17 turns:
+
+| Turn   | What it did      | TTFT   | Decode | Model total | Prompt tokens | Output tokens |
+| ------ | ---------------- | ------ | ------ | ----------- | ------------- | ------------- |
+| 1      | list files       | 1.15s  | 0.01s  | 1.16s       | 737           | 31            |
+| 6      | run tests        | 0.94s  | 0.70s  | 1.64s       | 5,518         | 637           |
+| 7      | plan + first fix | 1.05s  | 2.50s  | 3.56s       | 6,903         | 2,286         |
+| 12     | patch            | 0.98s  | 1.84s  | 2.81s       | 8,479         | 1,486         |
+| 16     | run tests x2     | 1.19s  | 0.85s  | 2.04s       | 10,136        | 745           |
+| 17     | final answer     | 1.06s  | 0.95s  | 2.00s       | 10,259        | 863           |
+| All 17 |                  | 17.41s | 9.59s  | 27.00s      | 110,412       | 8,685         |
+
+The data shows three things.
+
+1. Writing was fast. The model wrote at about 900 tokens per second. On turn 7, it reasoned through all three bugs at once and wrote 2,286 tokens, and that took 2.5 seconds. Across the whole run, all the writing added up to under 10 seconds.
+2. The wait before each reply was the bigger cost. The prompt grew 14x, from 737 to 10,259 tokens, but time to first token stayed at about one second per turn, because 90.7% of the input was served from cache. That one second never went away, though. Paid on 17 turns, it came to 17.4 seconds, which is 64% of the model's time.
+3. The tools were quick. The test runs took 24.8 seconds on my laptop, but most of that was Windows starting Python. The tests themselves ran in about 2.5 seconds in total. On a normal machine, the model is most of the wait.
+
+![Turn-by-turn breakdown of TTFT, decode, and tool execution across all 18 agent turns.](/blog/uploads/inference-economics/image-c656ca.webp "Turn-by-turn breakdown of TTFT, decode, and tool execution across all 18 agent turns.")
+
+Remember PMPD's claim from Step 2, that latency is usually dominated by decode? On this endpoint, it wasn't. Decode is still the memory-bound phase. It's just fast enough here that the fixed cost of each turn now outweighs it.
+
+The slow part of this agent wasn't writing. It was how many times it had to ask.
+
+I ran the same task again, and the agent finished in 14 turns and 45.5 seconds. Same bugs, same model, three fewer turns. In an agent, the number of turns is part of the latency.
+
+## Step 7: Connect the numbers back to FP8 and NVFP4
+
+Put the run next to Step 2, and the pattern is clear.
+
+This endpoint is already FP8, and its decode is fast. Writing took 9.59 of the 27 seconds spent on the model, which is 36%. The other 64% was the one-second wait before each reply, and caching had already kept the prefill part of that small.
+
+Money is a different story. Output tokens cost $0.0208 of the run's $0.0282 total, which is 74%. So even when writing is fast, it's still where most of the money goes.
+
+![Time and cost breakdown across prefill, decode, and tool execution.](/blog/uploads/inference-economics/image-025e68.webp "Time and cost breakdown across prefill, decode, and tool execution.")
+
+Now put the two ideas from earlier together:
+
+* From Step 2: smaller weights mean fewer bytes per token, and fewer bytes mean faster tokens.
+* From Step 1: any second saved on one model call is saved again on every turn of the loop.
+
+A smaller format like NVFP4 works on the writing part. On this run, that's 36% of the model's time and 74% of the cost, paid on every turn.
+
+But it can't help with the one-second wait before each reply. Most of that second is the request traveling to the server and waiting its turn, and a smaller format doesn't change either. The only way to cut that wait is to make fewer calls.
+
+So a smaller format saves time on the writing, 17 times over. Once writing is this fast, though, the biggest second left is the one you wait before every reply.
+
+## Wrap-up
+
+A single request hides all of this. You only see it when you time the loop.
+
+If you're picking a model or an endpoint for an agent, measure four things in your own task:
+
+* how many turns it takes
+* how long you wait for the first token on each turn, compared with how long the writing takes
+* your cache hit rate
+* the one big reasoning turn
+
+Then rerun the same task when you change something, whether that's the model, the precision or the provider.
+
+I ran everything here on [Nebius Token Factory](https://nebius.com/services/token-factory), so that's an easy place to start if you want to reproduce these numbers. The benchmark works with any OpenAI-compatible endpoint, though, so point `MODEL_ID` at whichever model you're curious about and compare.
+
+Time the loop, not the request.
