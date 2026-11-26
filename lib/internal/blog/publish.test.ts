@@ -93,6 +93,12 @@ describe("publishBlocker", () => {
     expect(publishBlocker({ ...live, status: "changes_requested", created_by: "a@x.com" }, "r@x.com")).toBeNull();
   });
 
+  it("lets an admin publish any post, approved or not", () => {
+    expect(publishBlocker({ ...fresh, status: "draft", created_by: "a@x.com" }, "r@x.com", true)).toBeNull();
+    expect(publishBlocker({ ...fresh, status: "in_review", created_by: "a@x.com" }, "r@x.com", true)).toBeNull();
+    expect(publishBlocker({ ...live, status: "published", created_by: "a@x.com" }, "r@x.com", true)).toMatch(/already live/);
+  });
+
   it("has nothing to publish on a live post with no edits", () => {
     expect(publishBlocker({ ...live, status: "published", created_by: "r@x.com" }, "r@x.com")).toMatch(/already live/);
   });
@@ -138,6 +144,13 @@ describe("publishPost", () => {
     data.getPost.mockResolvedValue(row({ status: "in_review" }));
     expect(await publishPost(reviewer, row().id, { base })).toMatchObject({ ok: false, message: expect.stringMatching(/Approve/) });
     expect(github.commitFiles).not.toHaveBeenCalled();
+  });
+
+  it("lets an admin publish a post nobody approved", async () => {
+    data.getPost.mockResolvedValue(row({ status: "in_review" }));
+    const admin = { ...reviewer, roles: ["admin" as const] };
+    expect(await publishPost(admin, row().id, { base })).toMatchObject({ ok: true });
+    expect(github.commitFiles).toHaveBeenCalledTimes(1);
   });
 
   it.each([

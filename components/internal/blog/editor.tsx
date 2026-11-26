@@ -290,7 +290,8 @@ const PANEL_TABS: { key: PanelTab; label: string }[] = [
 export type EditorProps = {
   post: BlogPostRow;
   events: BlogEvent[];
-  me: { email: string; blog: BlogAccess };
+  /** `admin`: may publish any post, approved or not. */
+  me: { email: string; blog: BlogAccess; admin: boolean };
   reviewers: { email: string; name: string }[];
   takenSlugs: string[];
   /** The URL a live post already has; it can't change. */
@@ -508,9 +509,10 @@ export function BlogEditor({ post, events, me, reviewers, takenSlugs, liveSlug, 
   const isOwner = post.created_by === me.email;
   // A live post with nothing changed has nothing to review or publish.
   const canRequest = status !== "published";
-  // A new post needs an approval, except the reviewer's own. Edits to a live
-  // post (approved once already) a reviewer can publish straight away.
-  const canPublish = status === "approved" || ((isOwner || isLive) && status !== "published");
+  // Admins publish any post. For a reviewer a new post needs an approval,
+  // except their own; edits to a live post (approved once already) they can
+  // publish straight away.
+  const canPublish = status !== "published" && (status === "approved" || isOwner || isLive || me.admin);
   const liveUrl = `${SITE}/blog/${liveSlug ?? fields.slug}`;
   // The publish just done here, until the post is edited again.
   const justPublished = status === "published" ? published : null;

@@ -16,14 +16,19 @@ export type PublishResult =
   | { ok: false; message: string; conflict?: boolean; checks?: Check[] };
 
 /**
- * Who may put this post live now. A new post has to be approved, unless
- * it's the publisher's own. A live post was approved once already: a
- * reviewer can put edits to it live straight away, whoever wrote it. A
- * post that's live with nothing changed has nothing to publish.
+ * Who may put this post live now. Admins can publish any post. For a blog
+ * reviewer, a new post has to be approved unless it's their own; a live
+ * post was approved once already, so they can put edits to it live
+ * straight away, whoever wrote it. A post that's live with nothing changed
+ * has nothing to publish.
  */
-export function publishBlocker(post: Pick<BlogPostRow, "status" | "created_by" | "source_path">, publisher: string): string | null {
+export function publishBlocker(
+  post: Pick<BlogPostRow, "status" | "created_by" | "source_path">,
+  publisher: string,
+  admin = false,
+): string | null {
   if (post.status === "published") return "This post is already live. Edit something to publish again.";
-  if (post.source_path || post.status === "approved" || post.created_by === publisher) return null;
+  if (admin || post.source_path || post.status === "approved" || post.created_by === publisher) return null;
   return "Approve this post before publishing it.";
 }
 
@@ -43,7 +48,7 @@ export function publishBlocker(post: Pick<BlogPostRow, "status" | "created_by" |
  * counts as published.
  */
 export async function publishPost(
-  staff: Pick<Staff, "email" | "blog">,
+  staff: Pick<Staff, "email" | "blog"> & Partial<Pick<Staff, "roles">>,
   id: string,
   options: { base: string; force?: boolean },
 ): Promise<PublishResult> {
@@ -56,7 +61,7 @@ export async function publishPost(
   if (Date.parse(post.updated_at) !== Date.parse(options.base)) {
     return { ok: false, message: "This post changed since you opened it. Reload, read the changes, then publish." };
   }
-  const blocked = publishBlocker(post, staff.email);
+  const blocked = publishBlocker(post, staff.email, Boolean(staff.roles?.includes("admin")));
   if (blocked) return { ok: false, message: blocked };
 
   // The checks, with the post parsed the way the site parses it: no HTML,
