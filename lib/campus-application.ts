@@ -15,6 +15,9 @@ import {
 import { isEmailAddress, nameError } from "@/lib/form-checks";
 import { normalizeUrl } from "@/lib/devrel-cohort-application";
 
+/** The program's name, as the automatic emails say it. */
+export const CAMPUS_PROGRAM = "Studio1 Across the Campus";
+
 /** How many people usually come to their events. */
 export const TURNOUTS = ["Under 50", "50–150", "150–500", "500+"] as const;
 

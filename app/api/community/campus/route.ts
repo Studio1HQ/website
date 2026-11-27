@@ -1,7 +1,11 @@
 import { randomUUID } from "crypto";
 import { NextResponse, after } from "next/server";
 import { sendConfirmation } from "@/lib/confirmation-email";
-import { validateCampusApplication } from "@/lib/campus-application";
+import {
+  CAMPUS_PROGRAM,
+  validateCampusApplication,
+} from "@/lib/campus-application";
+import { looksLikeLink } from "@/lib/form-checks";
 import { looksAutomated } from "@/lib/form-guard";
 import { sectionsChanged } from "@/lib/internal/section-cache";
 import { alertNewEntry } from "@/lib/internal/slack";
@@ -103,8 +107,11 @@ export async function POST(request: Request) {
       id,
       name: values.name,
       email: values.email,
-      // Matches programOf in lib/internal/program.ts, as the dashboard emails say it.
-      program: values.communityName,
+      // Never the community name they typed: this email goes to an address
+      // nobody has checked yet, so it carries no applicant text but the
+      // first name (which can't hold a link). Emails sent by hand after
+      // review name the community (programOf in lib/internal/program.ts).
+      program: CAMPUS_PROGRAM,
     }),
   );
   after(() =>
@@ -113,8 +120,19 @@ export async function POST(request: Request) {
       id,
       name: values.name,
       points: [
-        ["Community", values.communityName],
-        ["College", values.college || undefined],
+        // Slack links bare domains: a name that looks like one is left out.
+        [
+          "Community",
+          looksLikeLink(values.communityName)
+            ? undefined
+            : values.communityName,
+        ],
+        [
+          "College",
+          values.college && !looksLikeLink(values.college)
+            ? values.college
+            : undefined,
+        ],
         [
           "Committee",
           `${values.coreTeamSize} people, ${values.eventTurnout} at events`,

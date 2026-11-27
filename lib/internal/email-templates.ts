@@ -365,7 +365,9 @@ export const CONFIRMATION_EMAILS: Record<FormKey, { subject: string; body: strin
   },
   campus: {
     subject: "We've received your Studio1 Across the Campus application",
-    body: `Hi {first_name},\n\nThanks for reaching out about {program}. Our community team reads every application and will be in touch soon to learn more.\n\nGood to know: we usually support events with people and resources, like talks, mentors, swag, promotion and introductions to devtool teams. Financial support is something we can offer only now and then.\n\n${WHILE_YOU_WAIT.campus}\n\nIf you have a question before then, reply to this email.\n\nThe Studio1 team`,
+    // No {program}: it would be the community name the applicant typed, and
+    // this goes out before anyone has checked the address or the entry.
+    body: `Hi {first_name},\n\nThanks for applying to Studio1 Across the Campus. Our community team reads every application and will be in touch soon to learn more.\n\nGood to know: we usually support events with people and resources, like talks, mentors, swag, promotion and introductions to devtool teams. Financial support is something we can offer only now and then.\n\n${WHILE_YOU_WAIT.campus}\n\nIf you have a question before then, reply to this email.\n\nThe Studio1 team`,
   },
 };
 
@@ -440,7 +442,8 @@ export function unfilledParts(text: string) {
 
 /** The footer line saying why someone got the email. */
 export function reasonFor(form: string, program: string) {
-  if (form === "campus") return `You're getting this because you applied for Studio1's support for ${program}.`;
+  // Fixed wording: a campus entry's program is text the applicant typed.
+  if (form === "campus") return "You're getting this because you applied to Studio1 Across the Campus.";
   return `You're getting this because you ${form === "hackathons" ? "registered for" : "applied for"} ${program} at Studio1.`;
 }
 
