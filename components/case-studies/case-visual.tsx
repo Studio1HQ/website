@@ -72,7 +72,6 @@ export function CaseVisual({
               alt=""
               width={44}
               height={44}
-              unoptimized
               className="size-[40px] md:size-[46px]"
             />
           </span>

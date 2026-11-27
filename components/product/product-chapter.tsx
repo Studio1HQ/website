@@ -14,6 +14,7 @@ import {
 } from "@/components/paper/paper-sections";
 import type { Product } from "@/constants/products";
 import { INK, PRINT } from "@/lib/paper";
+import { imageUrl } from "@/lib/image-url";
 import { cn } from "@/lib/utils";
 
 /*
@@ -60,7 +61,7 @@ export function ProductLogo({
         src={product.logo}
         alt=""
         fill
-        unoptimized
+        sizes="64px"
         className="object-cover"
       />
     </span>
@@ -173,7 +174,7 @@ export function BrowserFrame({ product }: { product: Product }) {
           <video
             className="absolute inset-0 h-full w-full object-cover object-top"
             src={media.src}
-            poster={media.poster}
+            poster={imageUrl({ src: media.poster, width: 1280 })}
             autoPlay
             loop
             muted

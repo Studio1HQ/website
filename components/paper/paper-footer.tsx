@@ -2,10 +2,17 @@
 
 import { MachineToggle } from "@/components/paper/machine-view";
 import { CookieSettingsButton } from "@/components/analytics/analytics";
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { SocialBubble } from "@/components/ui/social-bubble";
+import { imageUrl } from "@/lib/image-url";
 import { cn } from "@/lib/utils";
 import {
   motion,
@@ -67,7 +74,14 @@ const OPEN_SOURCE_LINKS = [
     // The site's own icon, from awesomellmbenchmarks.com
     logo: (
       // eslint-disable-next-line @next/next/no-img-element
-      <img src="/assets/logos/oss/awesome-llm-benchmarks.png" alt="" className="size-3.5 object-contain" />
+      <img
+        src={imageUrl({
+          src: "/assets/logos/oss/awesome-llm-benchmarks.png",
+          width: 96,
+        })}
+        alt=""
+        className="size-3.5 object-contain"
+      />
     ),
   },
 ];
@@ -93,10 +107,22 @@ const LINK_GROUPS: { title: string; links: GroupLink[] }[][] = [
     {
       title: "Content",
       links: [
-        { key: "technicalContent", scope: "nav", href: "/technical-content-marketing" },
+        {
+          key: "technicalContent",
+          scope: "nav",
+          href: "/technical-content-marketing",
+        },
         { key: "video", scope: "nav", href: "/developer-video-production" },
-        { key: "docs", scope: "nav", href: "/developer-documentation-dx-audit" },
-        { key: "distribution", scope: "nav", href: "/developer-content-distribution" },
+        {
+          key: "docs",
+          scope: "nav",
+          href: "/developer-documentation-dx-audit",
+        },
+        {
+          key: "distribution",
+          scope: "nav",
+          href: "/developer-content-distribution",
+        },
       ],
     },
     {
@@ -114,12 +140,24 @@ const LINK_GROUPS: { title: string; links: GroupLink[] }[][] = [
     {
       title: "Growth",
       links: [
-        { key: "devrel", scope: "nav", href: "/developer-relations-growth-campaigns" },
+        {
+          key: "devrel",
+          scope: "nav",
+          href: "/developer-relations-growth-campaigns",
+        },
         { key: "githubGrowth", scope: "nav", href: "/github-growth-agency" },
         { key: "productLaunch", scope: "nav", href: "/product-launch-service" },
         { key: "aeo", scope: "nav", href: "/aeo-agency" },
-        { key: "redditMarketing", scope: "nav", href: "/reddit-marketing-agency" },
-        { key: "influencer", scope: "nav", href: "/influencer-marketing-agency" },
+        {
+          key: "redditMarketing",
+          scope: "nav",
+          href: "/reddit-marketing-agency",
+        },
+        {
+          key: "influencer",
+          scope: "nav",
+          href: "/influencer-marketing-agency",
+        },
       ],
     },
   ],
@@ -145,14 +183,25 @@ const LINK_GROUPS: { title: string; links: GroupLink[] }[][] = [
         { label: "Events", href: "/events" },
         { label: "Calendar", href: "/calendar", badge: "New" },
         { key: "openSource", scope: "footer", href: "/oss", badge: "New" },
-        { key: "brandAssets", scope: "footer", href: "/brand", native: true, badge: "New" },
+        {
+          key: "brandAssets",
+          scope: "footer",
+          href: "/brand",
+          native: true,
+          badge: "New",
+        },
       ],
     },
     {
       title: "Careers",
       links: [
         { key: "careers", scope: "footer", href: "/careers", badge: "New" },
-        { key: "devrelJobs", scope: "footer", href: "/devrel-jobs", badge: "New" },
+        {
+          key: "devrelJobs",
+          scope: "footer",
+          href: "/devrel-jobs",
+          badge: "New",
+        },
         // DevRel Cohort is hidden from the footer for now; restore this line to show it.
         // { key: "devrelCohort", scope: "footer", href: "/devrel-cohort" },
       ],
@@ -415,7 +464,10 @@ export default function PaperFooter() {
             <p className="-mt-2 max-w-[300px] text-[14px] leading-[1.6] text-[#141414]/60">
               {t("description")}
             </p>
-            <ul aria-label="Follow us" className="mt-1 flex flex-nowrap items-center gap-1">
+            <ul
+              aria-label="Follow us"
+              className="mt-1 flex flex-nowrap items-center gap-1"
+            >
               {SOCIAL_LINKS.map(({ href, label, icon: SocialIcon }) => (
                 <li key={label}>
                   <SocialBubble href={href} label={label} size="sm">
@@ -486,10 +538,16 @@ export default function PaperFooter() {
           </p>
           <MachineToggle />
           <div className="flex items-center gap-6 md:justify-self-end">
-            <Link href="/terms" className="text-[13px] text-[#141414]/55 hover:text-[#141414]">
+            <Link
+              href="/terms"
+              className="text-[13px] text-[#141414]/55 hover:text-[#141414]"
+            >
               {t("legal.terms")}
             </Link>
-            <Link href="/privacy" className="text-[13px] text-[#141414]/55 hover:text-[#141414]">
+            <Link
+              href="/privacy"
+              className="text-[13px] text-[#141414]/55 hover:text-[#141414]"
+            >
               {t("legal.privacy")}
             </Link>
             <CookieSettingsButton className="cursor-pointer text-[13px] text-[#141414]/55 hover:text-[#141414]" />
