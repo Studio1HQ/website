@@ -15,6 +15,7 @@ const {
   createInboundLead,
   getInboundFile,
   heldMailCount,
+  queueEvent,
   resolveHeldMail,
   setFileApproval,
   upsertLeadFromBooking,
@@ -471,5 +472,40 @@ describe("a person's decision on sorted mail", () => {
     db.add("inbound_mail", { ...held, held: false, status: "new" });
     expect((await resolveHeldMail(MAIL, "lead", PERSON)).ok).toBe(false);
     expect(db.rows("outreach_orgs")).toEqual([]);
+  });
+});
+
+describe("a person asking the agent for something", () => {
+  const add = (source: string, stage = "call_booked") =>
+    db.add("outreach_orgs", { id: ORG, name: "Acme", stage, source });
+
+  for (const source of ["outbound", "referral", ""]) {
+    it(`refuses a company that is not an inbound lead (source "${source}") and writes nothing`, async () => {
+      add(source);
+      const before = everything();
+      for (const kind of ["lead_created", "proposal_sent", "lost"] as const) {
+        const result = await queueEvent(
+          ORG,
+          kind,
+          kind === "lost" ? { reason: "no budget" } : {},
+          "sam@studio1hq.com",
+        );
+        expect(result.ok).toBe(false);
+      }
+      expect(everything()).toEqual(before);
+    });
+  }
+
+  it("queues the event for an inbound lead and moves its stage", async () => {
+    add("inbound_call");
+    const result = await queueEvent(
+      ORG,
+      "proposal_sent",
+      {},
+      "sam@studio1hq.com",
+    );
+    expect(result.ok).toBe(true);
+    expect(db.rows("agent_events")).toHaveLength(1);
+    expect(db.rows("outreach_orgs")[0]).toMatchObject({ stage: "proposal" });
   });
 });

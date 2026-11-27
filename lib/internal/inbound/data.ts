@@ -376,12 +376,18 @@ export async function queueEvent(
 
   let stage = "";
   if (person) {
-    const org = await selectRows<{ stage: string }>(
+    const org = await selectRows<{ stage: string; source: string }>(
       TABLES.orgs,
-      new URLSearchParams({ select: "stage", id: `eq.${orgId}`, limit: "1" }),
+      new URLSearchParams({
+        select: "stage,source",
+        id: `eq.${orgId}`,
+        limit: "1",
+      }),
     );
     if (!org.ok) return writeFailed("an event", org.message);
-    if (!org.rows[0]) return GONE;
+    // Only an inbound lead: Inbound access must never reach an outreach
+    // prospect or a client, which share this table.
+    if (!org.rows[0] || !isInboundSource(org.rows[0].source)) return GONE;
     stage = org.rows[0].stage;
     if (!canQueue(stage, kind))
       return {
@@ -415,7 +421,10 @@ export async function queueEvent(
     if (moveTo === "lost") patch.lost_reason = checked.payload.reason ?? "";
     const moved = await updateRows(
       TABLES.orgs,
-      new URLSearchParams({ id: `eq.${orgId}` }),
+      new URLSearchParams({
+        id: `eq.${orgId}`,
+        source: inList([...INBOUND_SOURCES]),
+      }),
       patch,
     );
     if (!moved.ok)
