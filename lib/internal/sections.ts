@@ -37,10 +37,21 @@ export const COHORT_STATUSES = [
   "rejected",
 ] as const;
 
+/** Studio1 Across the Campus applications (/community/campus). */
+export const CAMPUS_STATUSES = [
+  "new",
+  "reviewing",
+  "in_talks",
+  "accepted",
+  "on_hold",
+  "rejected",
+] as const;
+
 export type SectionKey =
   | "jobs"
   | "hackathons"
   | "cohort"
+  | "campus"
   | "subscribers"
   | "partner-pool";
 
@@ -123,6 +134,17 @@ export const OVERDUE_DAYS = 5;
 export const TAG_PRESETS = ["Strong fit", "Maybe", "Not a fit", "Follow up"];
 
 const YES_NO = { yes: "Yes", no: "No" };
+
+/** Short names for what a campus application asks for (keys from lib/campus-application.ts). */
+const CAMPUS_SUPPORT_LABELS = {
+  speaker: "Speaker",
+  mentors: "Mentors",
+  swag: "Swag",
+  promotion: "Promotion",
+  sponsors: "Sponsor intros",
+  planning: "Planning",
+  cash: "Funding",
+};
 
 export const SECTIONS: Record<SectionKey, Section> = {
   jobs: {
@@ -266,6 +288,51 @@ export const SECTIONS: Record<SectionKey, Section> = {
     area: "hiring",
     minRole: "viewer",
   },
+  campus: {
+    key: "campus",
+    title: "Campus applications",
+    nav: "Campus applications",
+    group: "Community",
+    description:
+      "Clubs and communities asking Studio1 to support an event, from the Studio1 Across the Campus page. Reach out to learn the rest and suggest what we can do.",
+    path: "/community/applications",
+    table: "campus_applications",
+    idColumn: "id",
+    detail: true,
+    dateColumn: "created_at",
+    search: ["name", "email", "community_name", "college"],
+    facets: [
+      { key: "turnout", column: "event_turnout", label: "Average turnout", type: "value" },
+      {
+        key: "support",
+        column: "support",
+        label: "Asks for",
+        type: "array",
+        labels: CAMPUS_SUPPORT_LABELS,
+      },
+    ],
+    columns: [
+      { key: "name", label: "Applicant", kind: "person" },
+      { key: "community_name", label: "Community", kind: "text" },
+      { key: "college", label: "College", kind: "text", wide: true },
+      { key: "core_team_size", label: "Committee", kind: "text", wide: true },
+      { key: "event_turnout", label: "Turnout", kind: "text", wide: true },
+      { key: "tags", label: "Tags", kind: "tags" },
+      { key: "review_status", label: "Status", kind: "status" },
+      { key: "created_at", label: "Applied", kind: "date" },
+    ],
+    statuses: CAMPUS_STATUSES,
+    repeatLabel: "community_name",
+    quick: { positive: "in_talks", negative: "rejected" },
+    tags: true,
+    tagPresets: [...TAG_PRESETS, "Asks for funding"],
+    listSelect: [
+      "id", "created_at", "updated_at", "name", "email", "community_name", "college",
+      "core_team_size", "event_turnout", "support", "review_status",
+    ],
+    area: "community",
+    minRole: "viewer",
+  },
   subscribers: {
     key: "subscribers",
     title: "Email subscribers",
@@ -285,7 +352,7 @@ export const SECTIONS: Record<SectionKey, Section> = {
         column: "forms",
         label: "Signed up on",
         type: "array",
-        labels: { job: "Careers", hackathon: "Hackathons", devrel_cohort: "DevRel Cohort", community: "Community" },
+        labels: { job: "Careers", hackathon: "Hackathons", devrel_cohort: "DevRel Cohort", community: "Community", campus: "Campus" },
       },
     ],
     columns: [
@@ -294,7 +361,7 @@ export const SECTIONS: Record<SectionKey, Section> = {
         key: "forms",
         label: "Signed up on",
         kind: "list",
-        labels: { job: "Careers", hackathon: "Hackathons", devrel_cohort: "DevRel Cohort", community: "Community" },
+        labels: { job: "Careers", hackathon: "Hackathons", devrel_cohort: "DevRel Cohort", community: "Community", campus: "Campus" },
       },
       { key: "first_opted_in", label: "First opted in", kind: "date", wide: true },
       { key: "last_seen", label: "Last seen", kind: "date" },
@@ -355,11 +422,12 @@ export const SECTION_ORDER: SectionKey[] = [
   "jobs",
   "hackathons",
   "cohort",
+  "campus",
   "subscribers",
   "partner-pool",
 ];
 
-export const PIPELINES: SectionKey[] = ["jobs", "hackathons", "cohort"];
+export const PIPELINES: SectionKey[] = ["jobs", "hackathons", "cohort", "campus"];
 
 export function sectionFor(key: unknown): Section | null {
   return typeof key === "string" && Object.hasOwn(SECTIONS, key)
@@ -402,6 +470,7 @@ export const FORM_SECTION: Record<string, SectionKey> = {
   job: "jobs",
   hackathon: "hackathons",
   devrel_cohort: "cohort",
+  campus: "campus",
 };
 
 export const PAGE_SIZE = 50;

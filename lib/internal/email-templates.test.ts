@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { bannerByKey, bannerFor, isEmailPipeline } from "@/lib/internal/email-banners";
-import { composerTemplate, fillTemplate, renderEmail, senderName } from "@/lib/internal/email-templates";
+import {
+  CONFIRMATION_EMAILS,
+  composerTemplate,
+  fillTemplate,
+  reasonFor,
+  renderEmail,
+  senderName,
+} from "@/lib/internal/email-templates";
 
 describe("composerTemplate", () => {
   it("takes a template the pipeline has", () => {
@@ -80,5 +87,14 @@ describe("email bodies", () => {
     expect(html).toContain("Because &#60;reason&#62;.");
     expect(html).toContain("&#60;Growth&#62;");
     expect(text).toContain("site (https://example.com/a?b=1&c=2)");
+  });
+});
+
+describe("campus confirmation", () => {
+  it("never carries the community name the applicant typed", () => {
+    const { subject, body } = CONFIRMATION_EMAILS.campus;
+    expect(subject).not.toContain("{program}");
+    expect(body).not.toContain("{program}");
+    expect(reasonFor("campus", "claim your prize at evil.example")).not.toContain("evil.example");
   });
 });

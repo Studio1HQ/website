@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Buildings, Plus } from "@/components/internal/icons";
 import { requireCommunity } from "@/lib/internal/session";
+import { campusOverview } from "@/lib/internal/data";
 import {
   incomplete,
   loadEvents,
@@ -20,6 +21,7 @@ import { matches, one, phaseOf } from "@/lib/internal/community/stats";
 import {
   Card,
   EmptyState,
+  Notice,
   PageHeader,
   buttonClass,
 } from "@/components/internal/ui";
@@ -47,11 +49,12 @@ export default async function CampusPage({
 }) {
   const [staff, params] = await Promise.all([requireCommunity(), searchParams]);
   const canEdit = staff.community === "manager";
-  const [partners, events, refs, owners] = await Promise.all([
+  const [partners, events, refs, owners, applications] = await Promise.all([
     loadPartners(),
     loadEvents(staff.community),
     canEdit ? refOptions(["partner"]) : Promise.resolve({}),
     canEdit ? ownerChoices() : Promise.resolve([]),
+    campusOverview(0),
   ]);
   const today = todayKey();
   const kind =
@@ -153,6 +156,22 @@ export default async function CampusPage({
     <>
       {header}
       <LoadNotice show={incomplete(partners, events)} />
+      {/* New clubs asking for support often become partners: point to them. */}
+      {applications.ok && applications.fresh ? (
+        <div className="mb-4">
+          <Notice>
+            {applications.fresh} new{" "}
+            {applications.fresh === 1 ? "application" : "applications"} from the
+            Studio1 Across the Campus page.{" "}
+            <Link
+              href="/community/applications?status=new"
+              className="font-medium text-[var(--i-ink)] underline underline-offset-2"
+            >
+              Review {applications.fresh === 1 ? "it" : "them"}
+            </Link>
+          </Notice>
+        </div>
+      ) : null}
       <LinkTabs
         active={kind}
         items={[

@@ -6,7 +6,8 @@ import {
   CheckCircle,
 } from "@/components/internal/icons";
 import { requireCommunity } from "@/lib/internal/session";
-import { hackathonBreakdown } from "@/lib/internal/data";
+import { campusOverview, hackathonBreakdown } from "@/lib/internal/data";
+import { baseUrl } from "@/lib/site";
 import { hackathonListHref } from "@/components/internal/hackathon-tabs";
 import {
   incomplete,
@@ -51,6 +52,8 @@ import {
   EmptyState,
   Notice,
   PageHeader,
+  StatusDot,
+  relativeDate,
 } from "@/components/internal/ui";
 import { cn } from "@/lib/utils";
 import { TaskList } from "@/components/internal/community/lists";
@@ -99,6 +102,7 @@ export default async function CommunityOverview({
     refs,
     owners,
     registrations,
+    campus,
   ] = await Promise.all([
     loadEvents(staff.community),
     loadGuestCounts(),
@@ -113,6 +117,7 @@ export default async function CommunityOverview({
     refOptions(["event", "sponsor", "partner"]),
     ownerChoices(),
     hackathonBreakdown(),
+    campusOverview(),
   ]);
 
   const header = (
@@ -161,6 +166,7 @@ export default async function CommunityOverview({
   const partial =
     people === null ||
     !registrations.ok ||
+    !campus.ok ||
     incomplete(
       events,
       guestCounts,
@@ -288,6 +294,18 @@ export default async function CommunityOverview({
         day: hackathon.overdue ? addDays(today, -5) : today,
       });
     }
+  }
+  // New applications from the Studio1 Across the Campus page: read them and reach out.
+  if (canEdit && campus.ok && campus.fresh) {
+    attention.push({
+      key: "campus",
+      href: "/community/applications?status=new",
+      title: `${campus.fresh} new campus ${campus.fresh === 1 ? "application" : "applications"}`,
+      detail: campus.overdue
+        ? `${campus.overdue} waiting over 5 days`
+        : "Read them and reach out",
+      day: campus.overdue ? addDays(today, -5) : today,
+    });
   }
   attention.sort((a, b) => (a.day ?? "").localeCompare(b.day ?? ""));
 
@@ -541,6 +559,81 @@ export default async function CommunityOverview({
             owners={owners}
             defaults={{ owner: staff.email }}
           />
+          <Card>
+            <CardTitle
+              action={
+                <Link
+                  href="/community/applications"
+                  className="inline-flex items-center gap-1 text-[12.5px] text-[var(--i-muted)] hover:text-[var(--i-ink)]"
+                >
+                  All <ArrowRight size={12} />
+                </Link>
+              }
+            >
+              Campus applications{" "}
+              {campus.ok && campus.fresh ? (
+                <span className="font-normal text-[var(--i-faint)]">
+                  {campus.fresh} new
+                </span>
+              ) : null}
+            </CardTitle>
+            {campus.ok && campus.latest.length ? (
+              <ul className="divide-y divide-[var(--i-line)]">
+                {campus.latest.map((entry) => (
+                  <li key={entry.id}>
+                    <Link
+                      href={`/community/applications/${entry.id}`}
+                      className="flex items-center gap-3 px-5 py-2.5 text-[13px] hover:bg-[var(--i-hover)]"
+                    >
+                      <StatusDot status={entry.status} />
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate font-medium">
+                          {entry.community}
+                        </span>
+                        <span className="block truncate text-[12px] text-[var(--i-muted)]">
+                          {[
+                            entry.college,
+                            entry.committee
+                              ? `${entry.committee} on the committee`
+                              : "",
+                            entry.turnout ? `${entry.turnout} at events` : "",
+                            entry.asksFunding ? "asks for funding" : "",
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </span>
+                      </span>
+                      <span
+                        className="shrink-0 text-[12px] text-[var(--i-faint)]"
+                        suppressHydrationWarning
+                      >
+                        {relativeDate(entry.createdAt)}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="px-5 py-5 text-[13px] text-[var(--i-muted)]">
+                {campus.ok ? (
+                  <>
+                    Clubs and communities that apply on{" "}
+                    <a
+                      href={`${baseUrl}/community/campus`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline underline-offset-2"
+                    >
+                      Studio1 Across the Campus
+                    </a>{" "}
+                    show up here.
+                  </>
+                ) : (
+                  "Couldn't load the campus applications. Reload in a minute."
+                )}
+              </p>
+            )}
+          </Card>
           <Card className="flex flex-col lg:flex-1">
             <CardTitle>Latest outreach and notes</CardTitle>
             {recent.ok && recent.rows.length ? (

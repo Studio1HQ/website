@@ -47,6 +47,7 @@ const PAPER_PATHS = new Set([
   "/careers",
   "/events",
   "/community",
+  "/community/campus",
   "/terms",
   "/privacy",
   "/about-us",

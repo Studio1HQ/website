@@ -16,6 +16,7 @@ const TABLES: Record<FormKey, string> = {
   jobs: "job_applications",
   hackathons: "hackathon_registrations",
   cohort: "devrel_cohort_applications",
+  campus: "campus_applications",
 };
 
 /**

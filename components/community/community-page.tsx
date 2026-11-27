@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRef } from "react";
 import { motion, useInView, useReducedMotion } from "motion/react";
 import {
@@ -47,7 +48,8 @@ const LANDMARK_ART: Record<string, string> = {
 };
 
 const CONTACT = "mailto:contact@studio1hq.com";
-const HOST = `${CONTACT}?subject=${encodeURIComponent("Host a Studio1 meetup")}`;
+/** Studio1 Across the Campus: clubs and communities apply for support for their event. */
+const APPLY = "/community/campus";
 const PARTNER = `${CONTACT}?subject=${encodeURIComponent("Partner on a Studio1 hackathon")}`;
 
 const COUNTRY: Record<string, string> = {
@@ -85,13 +87,13 @@ function YourCity({ cities }: { cities: string[] }) {
             <h2 className="max-w-[720px] text-balance text-[36px] font-medium leading-[1.04] tracking-[-0.045em] md:text-[56px]">
               Bring Studio1 to <span style={{ color: PRINT }}>your city</span>
             </h2>
-            <p className="mt-5 max-w-[500px] text-[16px] leading-[1.6] text-[#141414]/60 md:text-[17px]">
-              Run a college club, a community or a devtool company? Host a meetup with us, or partner on a hackathon.
+            <p className="mt-5 max-w-[540px] text-[16px] leading-[1.6] text-[#141414]/60 md:text-[17px]">
+              Run a college club or a developer community? Apply for speakers, mentors, swag and reach for your next event. Devtool company? Partner on a hackathon.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-2">
-              <a href={HOST} className="inline-flex h-12 items-center gap-2 rounded-full bg-[#141414] px-6 text-[14.5px] font-medium text-white transition-colors hover:bg-[#f97316]">
-                Host a meetup <ArrowUpRight weight="bold" className="size-4" />
-              </a>
+              <Link href={APPLY} className="inline-flex h-12 items-center gap-2 rounded-full bg-[#141414] px-6 text-[14.5px] font-medium text-white transition-colors hover:bg-[#f97316]">
+                Bring Studio1 to your campus <ArrowUpRight weight="bold" className="size-4" />
+              </Link>
               <a href={PARTNER} className="inline-flex h-12 items-center rounded-full bg-white px-6 text-[14.5px] font-medium ring-1 ring-inset ring-[#141414]/15 transition-colors hover:bg-[#f4efe7]">
                 Partner on a hackathon
               </a>
@@ -182,7 +184,7 @@ export function CommunityPage({ data }: { data: CommunityData }) {
               empty={
                 <>
                   <p className="text-[16px] text-[#141414]/60">Nothing on the calendar this week. Want one in your city?</p>
-                  <a href={HOST} className={pill}>Host a meetup</a>
+                  <Link href={APPLY} className={pill}>Host a meetup</Link>
                 </>
               }
             />

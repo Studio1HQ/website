@@ -254,6 +254,7 @@ export const Nav = {
   Trophy: make("NavTrophy", L.Trophy),
   HandCoins: make("NavHandCoins", L.HandCoins),
   School: make("NavSchool", L.School),
+  ClipboardList: make("NavClipboardList", L.ClipboardList),
   PiggyBank: make("NavPiggyBank", L.PiggyBank),
   ListChecks: make("NavListChecks", L.ListChecks),
   MailOpen: make("NavMailOpen", L.MailOpen),
