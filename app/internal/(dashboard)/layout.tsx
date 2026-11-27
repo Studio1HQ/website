@@ -22,6 +22,7 @@ import { pendingCount } from "@/lib/internal/members";
 import { isStaffEmail, rolesLabel } from "@/lib/internal/roles";
 import {
   canEditJobBoard,
+  canSeeInbound,
   canSeeInfluencers,
   canSeeMoney,
   canSeeOutreach,
@@ -38,6 +39,7 @@ import { teamBadges } from "@/lib/internal/team/badges";
 import { canSeeOthers } from "@/lib/internal/tasks/access";
 import { canSeeCalls } from "@/lib/internal/calls/access";
 import { taskNeeds } from "@/lib/internal/tasks/needs";
+import { heldMailCount } from "@/lib/internal/inbound/data";
 import { outreachDue } from "@/lib/internal/outreach/data";
 import { teamPhotos } from "@/lib/internal/team/photos";
 import { PERSON_KINDS, photoUrl } from "@/lib/internal/team/shared";
@@ -52,6 +54,8 @@ type Counts = {
   clients: { late: number; toReview: number };
   /** My outreach follow-ups due (people given Outreach). */
   outreach: number;
+  /** Held mail waiting for a decision (people given Inbound). */
+  inbound: number;
   /** Reports due (yours) plus reports to read (founders). */
   tasks: number;
 };
@@ -64,6 +68,7 @@ const NO_COUNTS: Counts = {
   community: { tasks: 0, sponsors: 0, partners: 0 },
   clients: { late: 0, toReview: 0 },
   outreach: 0,
+  inbound: 0,
   tasks: 0,
 };
 
@@ -97,6 +102,7 @@ function Sidebar({ staff, counts }: { staff: Staff; counts: Counts }) {
       community={staff.community ? { access: staff.community, ...counts.community } : null}
       clients={staff.clients ? { access: staff.clients, ...counts.clients } : null}
       outreach={canSeeOutreach(staff) ? { due: counts.outreach } : null}
+      inbound={canSeeInbound(staff) ? { held: counts.inbound, settings: canSeeMoney(staff) } : null}
       influencers={canSeeInfluencers(staff)}
       socials={canSeeSocials(staff)}
       jobBoard={canEditJobBoard(staff)}
@@ -108,7 +114,7 @@ function Sidebar({ staff, counts }: { staff: Staff; counts: Counts }) {
 
 /** Reads the counts (only the ones this person's sidebar shows). */
 async function SidebarWithCounts({ staff }: { staff: Staff }) {
-  const [awaiting, requests, blog, money, community, clients, tasks, outreach] = await Promise.all([
+  const [awaiting, requests, blog, money, community, clients, tasks, outreach, inbound] = await Promise.all([
     staff.role || staff.community ? awaitingCounts() : Promise.resolve(NO_COUNTS.awaiting),
     isAdmin(staff) ? pendingCount() : Promise.resolve(0),
     staff.blog ? blogBadge(staff) : Promise.resolve(0),
@@ -117,6 +123,7 @@ async function SidebarWithCounts({ staff }: { staff: Staff }) {
     staff.clients ? clientNeeds(staff.email, staff.clientScope) : Promise.resolve(NO_COUNTS.clients),
     seesTasks(staff) ? taskNeeds(staff) : Promise.resolve(null),
     canSeeOutreach(staff) ? outreachDue(staff.email) : Promise.resolve(0),
+    canSeeInbound(staff) ? heldMailCount() : Promise.resolve(0),
   ]);
   return (
     <Sidebar
@@ -129,6 +136,7 @@ async function SidebarWithCounts({ staff }: { staff: Staff }) {
         community,
         clients: { late: clients.late, toReview: clients.toReview },
         outreach,
+        inbound,
         // Late tasks badge; ones due today are an ordinary day and don't.
         tasks: tasks ? tasks.reportsDue.length + tasks.reportsToRead + tasks.tasksLate : 0,
       }}

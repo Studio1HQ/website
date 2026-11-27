@@ -69,6 +69,8 @@ function test(row: Row, column: string, filter: string): boolean {
   const cell = row[column];
   const text = cell === null || cell === undefined ? null : String(cell);
   if (filter === "is.null") return text === null;
+  if (filter === "is.true") return cell === true;
+  if (filter === "is.false") return cell === false;
   // Array columns: cs.{a,b} holds all of them; not.cs.{…} doesn't.
   const contains = /^(not\.)?cs\.\{(.*)\}$/.exec(filter);
   if (contains) {

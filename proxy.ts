@@ -51,12 +51,13 @@ const THEME_SCRIPT = "'sha256-a/T6WihUdllNvOaPlAwIT5TdeEcYmobkkshLrN/KCkc='";
 /**
  * A client's, an outreach organisation's or a newsletter's logo
  * (app/internal/(dashboard)/clients/[slug]/logo, outreach/[id]/logo,
+ * inbound/[id]/logo,
  * influencers/channels/[id]/logo): another site's icon, so it gets a
  * policy that runs and loads nothing, and keeps the route's own
  * month-long Cache-Control instead of no-store.
  */
 const LOGO_PATH =
-  /^\/internal\/(?:clients\/[a-z0-9-]+|outreach\/[0-9a-f-]{36}|influencers\/channels\/[0-9a-f-]{36})\/logo$/;
+  /^\/internal\/(?:clients\/[a-z0-9-]+|outreach\/[0-9a-f-]{36}|inbound\/[0-9a-f-]{36}|influencers\/channels\/[0-9a-f-]{36})\/logo$/;
 
 /** A path whose last part looks like a file name ("x.webp", "a@b.com"). */
 const FILE_LIKE = /\.[^/]*$/;

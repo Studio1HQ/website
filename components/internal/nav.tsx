@@ -394,6 +394,7 @@ export function InternalNav({
   community,
   clients = null,
   outreach = null,
+  inbound = null,
   influencers = false,
   socials = false,
   jobBoard = false,
@@ -414,6 +415,8 @@ export function InternalNav({
   clients?: ClientsNav | null;
   /** Outreach, with my follow-ups due; null without access (given one by one, Admin alone isn't enough). */
   outreach?: { due: number } | null;
+  /** Inbound, with the held mail waiting for a decision; null without access. Settings is for the founders. */
+  inbound?: { held: number; settings: boolean } | null;
   /** Influencers: given one by one, like Outreach. */
   influencers?: boolean;
   /** Social growth: given one by one, like Outreach. */
@@ -451,11 +454,13 @@ export function InternalNav({
       ? "community"
       : isActive("/clients") && clients
         ? "clients"
-        : isActive("/money") && team.money
-          ? "money"
-          : isActive("/blog") && blog
-            ? "blog"
-            : null;
+        : isActive("/inbound") && inbound
+          ? "inbound"
+          : isActive("/money") && team.money
+            ? "money"
+            : isActive("/blog") && blog
+              ? "blog"
+              : null;
   const moneyBadge = team.payrollBadge + team.paymentsBadge;
   const clientsBadge = clients ? clients.late + clients.toReview : 0;
   // A project's month (/clients/<company>/<YYYY-MM>) is under Projects;
@@ -514,7 +519,7 @@ export function InternalNav({
         </NavGroup>
       ) : null}
       {/* Clients: winning and delivering paid work. */}
-      {clients || outreach ? (
+      {clients || outreach || inbound ? (
         <NavGroup title="Clients">
           {clients ? (
             <>
@@ -578,6 +583,52 @@ export function InternalNav({
               badgeTitle={`${outreach.due} of your follow-ups due`}
               active={isActive("/outreach")}
             />
+          ) : null}
+          {inbound ? (
+            <>
+              <NavLink
+                href="/inbound"
+                label="Inbound"
+                icon={Nav.MailOpen}
+                badge={inbound.held}
+                badgeTitle={`${inbound.held} mail${inbound.held === 1 ? "" : "s"} waiting for a decision`}
+                active={false}
+                open={section === "inbound"}
+              />
+              <SubNav open={section === "inbound"}>
+                <NavLink
+                  href="/inbound"
+                  label="Board"
+                  icon={Nav.FolderKanban}
+                  active={
+                    isActive("/inbound") &&
+                    !["/inbound/review", "/inbound/stats", "/inbound/settings"].some(isActive)
+                  }
+                />
+                <NavLink
+                  href="/inbound/review"
+                  label="Review"
+                  icon={Nav.ListChecks}
+                  badge={inbound.held}
+                  badgeTitle={`${inbound.held} mail${inbound.held === 1 ? "" : "s"} waiting for a decision`}
+                  active={isActive("/inbound/review")}
+                />
+                <NavLink
+                  href="/inbound/stats"
+                  label="Stats"
+                  icon={Nav.ChartColumn}
+                  active={isActive("/inbound/stats")}
+                />
+                {inbound.settings ? (
+                  <NavLink
+                    href="/inbound/settings"
+                    label="Settings"
+                    icon={Nav.Cog}
+                    active={isActive("/inbound/settings")}
+                  />
+                ) : null}
+              </SubNav>
+            </>
           ) : null}
         </NavGroup>
       ) : null}

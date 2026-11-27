@@ -35,13 +35,16 @@ import {
   companyDomainFromEmail,
   isInboundSource,
   nameFromDomain,
+  normalizeEmail,
   oneLineText,
+  plainText,
   stageAfter,
   threadIdFor,
   validatePayload,
   validateSetting,
 } from "@/lib/internal/inbound/rules";
 import type { CalBooking } from "@/lib/internal/inbound/webhooks";
+import { domainOf } from "@/lib/internal/outreach/rules";
 import { isOwner } from "@/lib/internal/roles";
 import { audit } from "@/lib/internal/team/audit";
 import {
@@ -153,7 +156,7 @@ export const listInboundLeads = cache(
     const events = await selectRows<Record<string, unknown>>(
       TABLES.events,
       new URLSearchParams({
-        select: "id,org_id,kind,status,created_at",
+        select: "id,org_id,kind,status,created_at,error,waiting_items",
         order: "created_at.desc",
         limit: "5000",
       }),
@@ -161,7 +164,13 @@ export const listInboundLeads = cache(
     if (!events.ok) return readFailed("events", events.message);
     const byOrg = new Map<
       string,
-      { kind: EventKind; status: AgentEvent["status"]; created_at: string }[]
+      {
+        kind: EventKind;
+        status: AgentEvent["status"];
+        created_at: string;
+        error: string;
+        waiting: number;
+      }[]
     >();
     for (const row of events.rows) {
       const event = toAgentEvent(row);
@@ -170,6 +179,8 @@ export const listInboundLeads = cache(
         kind: event.kind,
         status: event.status,
         created_at: event.created_at,
+        error: event.error,
+        waiting: event.waiting_items.length,
       });
       byOrg.set(event.org_id, list);
     }
@@ -220,7 +231,7 @@ export const listInboundLeads = cache(
  * agent made. Null when there's no such inbound lead; "error" when it
  * couldn't be read. Call after requireInbound().
  */
-export async function getInboundLead(
+async function readInboundLead(
   id: string,
 ): Promise<LeadDetail | null | "error"> {
   if (!isUuid(id)) return null;
@@ -286,6 +297,12 @@ export async function getInboundLead(
     files: files.rows.map(toAgentFile),
   };
 }
+
+/**
+ * One lead (see readInboundLead), read once per request: the lead page's
+ * title and its body both ask for it.
+ */
+export const getInboundLead = cache(readInboundLead);
 
 /** The mail the sorter held back for a person to decide, newest first. Call after requireInbound(). */
 export async function listHeldMail(): Promise<InboundLoad<InboundMail[]>> {
@@ -681,10 +698,119 @@ export async function recordInboundMail(
   return saved.ok ? { ok: true } : { ok: false, message: saved.message };
 }
 
+type MailForDecision = {
+  id: string;
+  from_address: string;
+  from_name: string;
+  subject: string;
+  excerpt: string;
+  sender_verified: boolean;
+  status: string;
+  held: boolean;
+  org_id: string | null;
+  correction: string;
+};
+
 /**
- * A person's decision on mail the sorter held: it was a lead, or it wasn't.
- * The worker acts on the correction. Call after requireInbound(); `staff`
- * is the signed-in person. Writes an audit entry.
+ * The lead a mail becomes once a person says it is one. The sender's domain
+ * is kept as the company's identity only when the receiving provider
+ * verified the sender (sender_verified); a mail that only claims a domain
+ * gets a lead with a name and a contact, never the domain. A sender who
+ * already belongs to an inbound lead is linked to it and nothing about that
+ * lead changes; one who belongs to an outreach prospect or a client is
+ * refused, for a person to follow up there.
+ */
+async function leadFromMail(
+  mail: MailForDecision,
+  staff: { email: string },
+): Promise<
+  | { ok: true; orgId: string; created: boolean; note: string }
+  | { ok: false; message: string }
+> {
+  const email = normalizeEmail(mail.from_address);
+  const domain = mail.sender_verified ? companyDomainFromEmail(email) : null;
+  const existing = await findOrgForPerson(email ?? "", domain);
+  if (existing === "error") return TRY_AGAIN;
+  if (existing) {
+    if (!isInboundSource(existing.source))
+      return {
+        ok: false,
+        message: `${existing.name} is already in Outreach or Clients. Mark this as not a lead and follow it up there.`,
+      };
+    return {
+      ok: true,
+      orgId: existing.id,
+      created: false,
+      note: `Added to ${existing.name}, which is already a lead.`,
+    };
+  }
+
+  const contactName = oneLineText(mail.from_name, 120);
+  const name =
+    (domain ? nameFromDomain(domain) : "") ||
+    contactName ||
+    oneLineText(email ?? mail.from_address, 140);
+  if (!name)
+    return {
+      ok: false,
+      message: "That mail has no sender to name the lead after.",
+    };
+  const message = plainText(
+    [mail.subject, mail.excerpt].filter(Boolean).join("\n\n"),
+    1000,
+  );
+  const by = staff.email.toLowerCase();
+  const id = crypto.randomUUID();
+  const inserted = await insertRow(TABLES.orgs, {
+    id,
+    name,
+    website: domain ? `https://${domain}` : null,
+    domain,
+    kind: "client",
+    stage: "lead",
+    source: "inbound_email",
+    interest: message,
+    created_by: by,
+    updated_by: by,
+  });
+  if (!inserted.ok) {
+    if (inserted.duplicate)
+      return {
+        ok: false,
+        message: "A company with that website already exists.",
+      };
+    return writeFailed("a lead from mail", inserted.message);
+  }
+  let note = "";
+  if (email) {
+    const added = await insertRow(TABLES.contacts, {
+      id: crypto.randomUUID(),
+      org_id: id,
+      name: contactName || email,
+      email,
+      is_primary: true,
+      created_by: by,
+      updated_by: by,
+    });
+    if (!added.ok) note = "The lead was added, but its contact wasn't saved.";
+  }
+  await audit({
+    actor: staff.email,
+    area: "inbound",
+    action: "added lead",
+    subject: id,
+    detail: { name, source: "inbound_email", from: "mail" },
+  });
+  return { ok: true, orgId: id, created: true, note };
+}
+
+/**
+ * A person's decision on a sorted mail: it was a lead, or it wasn't. Mail
+ * the sorter held takes either answer. Mail it skipped can only be turned
+ * into a lead ("this was a lead"). Saying lead makes the lead here, at once
+ * (leadFromMail), ties the mail to it and, when the founders have switched
+ * on starting the agent for mail, queues its research. Call after
+ * requireInbound(); `staff` is the signed-in person. Writes an audit entry.
  */
 export async function resolveHeldMail(
   id: string,
@@ -694,26 +820,82 @@ export async function resolveHeldMail(
   if (!isUuid(id)) return GONE;
   if (decision !== "lead" && decision !== "not_lead")
     return { ok: false, message: "Choose lead or not a lead." };
+  const found = await selectRows<MailForDecision>(
+    TABLES.mail,
+    new URLSearchParams({
+      select:
+        "id,from_address,from_name,subject,excerpt,sender_verified,status,held,org_id,correction",
+      id: `eq.${id}`,
+      limit: "1",
+    }),
+  );
+  if (!found.ok) return writeFailed("a mail decision", found.message);
+  const mail = found.rows[0];
+  if (!mail) return GONE;
+  if (mail.org_id)
+    return { ok: false, message: "That mail already belongs to a lead." };
+  if (!mail.held) {
+    if (mail.status !== "sorted") return GONE;
+    if (decision !== "lead" || mail.correction === "lead")
+      return { ok: false, message: "That mail was already decided." };
+  }
+
+  let orgId: string | null = null;
+  let created = false;
+  let note = "";
+  if (decision === "lead") {
+    const lead = await leadFromMail(mail, staff);
+    if (!lead.ok) return lead;
+    ({ orgId, created, note } = lead);
+  }
+
   const result = await updateRows(
     TABLES.mail,
-    new URLSearchParams({ id: `eq.${id}`, held: "is.true" }),
+    new URLSearchParams({
+      id: `eq.${id}`,
+      org_id: "is.null",
+      held: mail.held ? "is.true" : "is.false",
+    }),
     {
       correction: decision,
       held: false,
+      org_id: orgId,
       resolved_by: staff.email.toLowerCase(),
       resolved_at: new Date().toISOString(),
     },
   );
-  if (!result.ok) return writeFailed("a held mail", result.message);
+  if (!result.ok) return writeFailed("a mail decision", result.message);
   if (!result.count) return GONE;
   await audit({
     actor: staff.email,
     area: "inbound",
     action: "resolved mail",
     subject: id,
-    detail: { decision },
+    detail: { decision, org_id: orgId, was_held: mail.held },
   });
-  return { ok: true, id };
+
+  if (orgId && created) {
+    const settings = await getAgentSettings();
+    if (settings.auto_start.mail) {
+      const queued = await queueEvent(
+        orgId,
+        "lead_created",
+        {
+          contact_name: oneLineText(mail.from_name, 120),
+          message: plainText(
+            [mail.subject, mail.excerpt].filter(Boolean).join("\n\n"),
+            1000,
+          ),
+          source: "inbound_email",
+        },
+        staff.email.toLowerCase(),
+      );
+      if (!queued.ok)
+        note = `${note} The agent wasn't started: ${queued.message}`.trim();
+    }
+  }
+  const base = { ok: true as const, id: orgId ?? id };
+  return note ? { ...base, message: note } : base;
 }
 
 /**
@@ -751,4 +933,254 @@ export async function setAgentSetting(
     detail: { value: checked.value },
   });
   return { ok: true };
+}
+
+/* ----------------------------------------------- counts, files and new leads */
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * How many agent events were queued, are running or failed in the last 7
+ * days, for the board's status line. Call after requireInbound().
+ */
+export async function agentActivity(
+  now = new Date(),
+): Promise<InboundLoad<{ queued: number; running: number; failed: number }>> {
+  const result = await selectRows<{ status: string }>(
+    TABLES.events,
+    new URLSearchParams({
+      select: "status",
+      status: "in.(queued,running,failed)",
+      created_at: `gte.${new Date(now.getTime() - 7 * DAY_MS).toISOString()}`,
+      limit: "5000",
+    }),
+  );
+  if (!result.ok) return readFailed("agent activity", result.message);
+  const count = (status: string) =>
+    result.rows.filter((row) => row.status === status).length;
+  return {
+    ok: true,
+    value: {
+      queued: count("queued"),
+      running: count("running"),
+      failed: count("failed"),
+    },
+  };
+}
+
+/** How many held mails wait for a decision (the sidebar badge); 0 if it can't be read. */
+export async function heldMailCount(): Promise<number> {
+  const result = await selectRows<{ id: string }>(
+    TABLES.mail,
+    new URLSearchParams({
+      select: "id",
+      held: "is.true",
+      correction: "eq.",
+      limit: "200",
+    }),
+  );
+  return result.ok ? result.rows.length : 0;
+}
+
+/**
+ * One file of an inbound lead, for a download. Null when there is no such
+ * file or its lead isn't an inbound one; "error" when it couldn't be read.
+ * Call after checking canSeeInbound.
+ */
+export async function getInboundFile(
+  id: string,
+): Promise<AgentFile | null | "error"> {
+  if (!isUuid(id)) return null;
+  const file = await selectRows<Record<string, unknown>>(
+    TABLES.files,
+    new URLSearchParams({ select: "*", id: `eq.${id}`, limit: "1" }),
+  );
+  if (!file.ok) {
+    readFailed("a file", file.message);
+    return "error";
+  }
+  const row = file.rows[0];
+  if (!row) return null;
+  const found = toAgentFile(row);
+  const org = await selectRows<{ source: string }>(
+    TABLES.orgs,
+    new URLSearchParams({
+      select: "source",
+      id: `eq.${found.org_id}`,
+      limit: "1",
+    }),
+  );
+  if (!org.ok) {
+    readFailed("a file's lead", org.message);
+    return "error";
+  }
+  const source = org.rows[0]?.source;
+  return source && isInboundSource(source) ? found : null;
+}
+
+/**
+ * Marks a file approved to send, or takes that back. Only the founders may:
+ * this checks that itself, on top of the caller's own check. Writes an
+ * audit entry.
+ */
+export async function setFileApproval(
+  fileId: string,
+  approved: boolean,
+  staff: { email: string },
+): Promise<InboundResult> {
+  if (!isOwner(staff.email))
+    return { ok: false, message: "Only the founders can approve a file." };
+  const file = await getInboundFile(fileId);
+  if (file === "error") return TRY_AGAIN;
+  if (!file) return GONE;
+  const by = staff.email.toLowerCase();
+  const result = await updateRows(
+    TABLES.files,
+    new URLSearchParams({ id: `eq.${file.id}` }),
+    approved
+      ? {
+          approved_to_send: true,
+          approved_by: by,
+          approved_at: new Date().toISOString(),
+        }
+      : { approved_to_send: false, approved_by: null, approved_at: null },
+  );
+  if (!result.ok) return writeFailed("a file approval", result.message);
+  if (!result.count) return GONE;
+  await audit({
+    actor: staff.email,
+    area: "inbound",
+    action: approved ? "approved file" : "withdrew approval",
+    subject: file.org_id,
+    detail: { file_id: file.id, name: file.name },
+  });
+  return { ok: true, id: file.id };
+}
+
+export type NewLead = {
+  name: unknown;
+  website: unknown;
+  source: unknown;
+  contactName: unknown;
+  contactEmail: unknown;
+  message: unknown;
+  startAgent: unknown;
+};
+
+/**
+ * Adds a lead by hand: the company, its first contact and, if asked, a
+ * lead_created event for the agent. Refuses a website whose domain already
+ * belongs to an organisation of any source (an outreach prospect or a
+ * client too), and says which. Call after requireInbound(); `staff` is the
+ * signed-in person. Writes an audit entry.
+ */
+export async function createInboundLead(
+  input: NewLead,
+  staff: { email: string },
+): Promise<InboundResult> {
+  const name = oneLineText(input.name, 140);
+  if (!name) return { ok: false, message: "Add the company's name." };
+  if (!isInboundSource(typeof input.source === "string" ? input.source : ""))
+    return { ok: false, message: "Say how they reached us: call or mail." };
+  const source = input.source as string;
+
+  const websiteText = oneLineText(input.website, 300);
+  const scheme = /^([a-z][a-z0-9+.-]*):\/\//i
+    .exec(websiteText)?.[1]
+    ?.toLowerCase();
+  const domain = websiteText ? domainOf(websiteText) : null;
+  if (
+    websiteText &&
+    (!domain ||
+      (scheme !== undefined && scheme !== "http" && scheme !== "https"))
+  )
+    return { ok: false, message: "That website doesn't look right." };
+  const website = domain
+    ? scheme
+      ? websiteText
+      : `https://${websiteText}`
+    : null;
+
+  const emailText = oneLineText(input.contactEmail, 254);
+  const email = emailText ? normalizeEmail(emailText) : null;
+  if (emailText && !email)
+    return { ok: false, message: "That email address doesn't look right." };
+  const contactName = oneLineText(input.contactName, 120);
+  const message = plainText(input.message, 2000);
+
+  if (domain) {
+    const existing = await findOrgForPerson("", domain);
+    if (existing === "error") return TRY_AGAIN;
+    if (existing) {
+      const where = isInboundSource(existing.source)
+        ? "Inbound"
+        : "Outreach or Clients";
+      return {
+        ok: false,
+        message: `${existing.name} already uses ${domain} (it is in ${where}).`,
+      };
+    }
+  }
+
+  const by = staff.email.toLowerCase();
+  const id = crypto.randomUUID();
+  const inserted = await insertRow(TABLES.orgs, {
+    id,
+    name,
+    website,
+    domain,
+    kind: "client",
+    stage: "lead",
+    source,
+    interest: message.slice(0, 1000),
+    created_by: by,
+    updated_by: by,
+  });
+  if (!inserted.ok) {
+    if (inserted.duplicate)
+      return {
+        ok: false,
+        message: "A company with that website already exists.",
+      };
+    return writeFailed("a lead", inserted.message);
+  }
+
+  let warning = "";
+  if (contactName || email) {
+    const added = await insertRow(TABLES.contacts, {
+      id: crypto.randomUUID(),
+      org_id: id,
+      name: contactName || email || name,
+      email,
+      is_primary: true,
+      created_by: by,
+      updated_by: by,
+    });
+    if (!added.ok)
+      warning = "The lead was added, but its contact wasn't saved.";
+  }
+
+  await audit({
+    actor: staff.email,
+    area: "inbound",
+    action: "added lead",
+    subject: id,
+    detail: { name, source },
+  });
+
+  if (input.startAgent === true) {
+    const queued = await queueEvent(
+      id,
+      "lead_created",
+      {
+        contact_name: contactName,
+        message,
+        source,
+      },
+      staff.email,
+    );
+    if (!queued.ok)
+      warning = `${warning} The agent wasn't started: ${queued.message}`.trim();
+  }
+  return warning ? { ok: true, id, message: warning } : { ok: true, id };
 }

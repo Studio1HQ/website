@@ -234,7 +234,15 @@ export type LeadCard = {
   column: BoardColumn;
   primaryContact: { name: string; email: string | null } | null;
   /** The newest event, for a status line; null when none. */
-  latest: { kind: EventKind; status: EventStatus; created_at: string } | null;
+  latest: {
+    kind: EventKind;
+    status: EventStatus;
+    created_at: string;
+    /** What went wrong, for a failed event; empty otherwise. */
+    error: string;
+    /** How many things the agent says it is waiting on a person for. */
+    waiting: number;
+  } | null;
 };
 
 export type LeadDetail = {
