@@ -21,6 +21,8 @@ export const COMPANY_MARKS: Record<string, string> = {
   "Pieces.app": "/assets/logos/pieces.webp",
   Latitude: "/assets/logos/latitude.webp",
   "Novita AI": "/assets/logos/novita-ai-mark-green.webp",
+  Arcjet: "/assets/logos/arcjet.webp",
+  "SearchApi.io": "/assets/logos/searchapi.webp",
 };
 
 /** "CEO & Founder Opire" / "COO, Tolgee" -> the company name. */
