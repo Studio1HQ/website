@@ -7,8 +7,11 @@ import {
   shortError,
   statusLine,
 } from "@/lib/internal/inbound/wording";
+import { googleDocsUrl, toAgentFile } from "@/lib/internal/inbound/schema";
 
-const latest = (over: Partial<NonNullable<Parameters<typeof statusLine>[0]>>) => ({
+const latest = (
+  over: Partial<NonNullable<Parameters<typeof statusLine>[0]>>,
+) => ({
   kind: "lead_created" as const,
   status: "done" as const,
   created_at: "2026-11-27T10:00:00Z",
@@ -19,15 +22,21 @@ const latest = (over: Partial<NonNullable<Parameters<typeof statusLine>[0]>>) =>
 
 describe("the status line on a card", () => {
   it("says the agent is working or waiting", () => {
-    expect(statusLine(latest({ status: "running" }), "lead")).toBe("Agent is working");
-    expect(statusLine(latest({ status: "queued" }), "lead")).toBe("Waiting for the agent");
+    expect(statusLine(latest({ status: "running" }), "lead")).toBe(
+      "Agent is working",
+    );
+    expect(statusLine(latest({ status: "queued" }), "lead")).toBe(
+      "Waiting for the agent",
+    );
   });
   it("says brief ready, or waiting on you when the agent asked something", () => {
     expect(statusLine(latest({}), "lead")).toBe("Brief ready");
     expect(statusLine(latest({ waiting: 2 }), "lead")).toBe("Waiting on you");
   });
   it("shows a short error for a failed event", () => {
-    expect(statusLine(latest({ status: "failed", error: "Timed out" }), "lead")).toBe("Failed: Timed out");
+    expect(
+      statusLine(latest({ status: "failed", error: "Timed out" }), "lead"),
+    ).toBe("Failed: Timed out");
     expect(statusLine(latest({ status: "failed" }), "lead")).toBe("Failed");
     expect(shortError("x".repeat(200)).length).toBe(80);
   });
@@ -63,8 +72,14 @@ describe("the fit label", () => {
       reasons: "builds dev tools",
     });
     expect(fitOf("Fit: Weak")).toEqual({ level: "weak", reasons: "" });
-    expect(fitOf("Fit: Good - a - b")).toEqual({ level: "good", reasons: "a - b" });
-    expect(fitOf("Fit: Unclear\r\nrest")).toEqual({ level: "unclear", reasons: "" });
+    expect(fitOf("Fit: Good - a - b")).toEqual({
+      level: "good",
+      reasons: "a - b",
+    });
+    expect(fitOf("Fit: Unclear\r\nrest")).toEqual({
+      level: "unclear",
+      reasons: "",
+    });
   });
 
   it("is null for anything else", () => {
@@ -74,5 +89,31 @@ describe("the fit label", () => {
     expect(fitOf("Fit: Great")).toBeNull();
     expect(fitOf("Fit: Strongish")).toBeNull();
     expect(fitOf("Intro line\nFit: Strong")).toBeNull();
+  });
+});
+
+describe("a file's link to its editable copy", () => {
+  it("keeps a Google Docs address", () => {
+    const link =
+      "https://docs.google.com/presentation/d/abc123/edit?usp=drivesdk";
+    expect(googleDocsUrl(link)).toBe(link);
+    expect(toAgentFile({ open_url: link }).open_url).toBe(link);
+  });
+
+  it("drops anything else, and a row without the column", () => {
+    for (const value of [
+      "http://docs.google.com/presentation/d/abc",
+      "https://docs.google.com.evil.example/x",
+      "https://evil.example/docs.google.com",
+      "https://user:pass@docs.google.com/x",
+      "https://docs.google.com:8443/x",
+      "javascript:alert(1)",
+      "",
+      null,
+      undefined,
+      42,
+    ])
+      expect(googleDocsUrl(value)).toBeNull();
+    expect(toAgentFile({}).open_url).toBeNull();
   });
 });

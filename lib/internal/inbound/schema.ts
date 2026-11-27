@@ -200,6 +200,8 @@ export type AgentFile = {
   content_type: string;
   bytes: number;
   kind: FileKind;
+  /** The editable copy in Google Slides, when the worker uploaded one. */
+  open_url: string | null;
   approved_to_send: boolean;
   approved_by: string | null;
   approved_at: string | null;
@@ -343,6 +345,27 @@ export function toAgentEvent(row: Record<string, unknown>): AgentEvent {
   };
 }
 
+/**
+ * A link to a file in Google Docs, Slides or Sheets, and nothing else: the
+ * column is written by the worker, so the page checks it again before
+ * making it a link. Null before the column exists, too.
+ */
+export function googleDocsUrl(value: unknown): string | null {
+  if (typeof value !== "string" || value.length > 400) return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" &&
+      url.hostname === "docs.google.com" &&
+      !url.username &&
+      !url.password &&
+      !url.port
+      ? url.toString()
+      : null;
+  } catch {
+    return null;
+  }
+}
+
 export function toAgentFile(row: Record<string, unknown>): AgentFile {
   return {
     id: text(row.id),
@@ -355,6 +378,7 @@ export function toAgentFile(row: Record<string, unknown>): AgentFile {
     // Postgres sends bigint as a number or text, by size.
     bytes: Number(row.bytes) || 0,
     kind: oneOf(FILE_KINDS, row.kind, "other"),
+    open_url: googleDocsUrl(row.open_url),
     approved_to_send: row.approved_to_send === true,
     approved_by: textOrNull(row.approved_by),
     approved_at: textOrNull(row.approved_at),

@@ -307,6 +307,19 @@ function FileRow({
         <p className="text-[12px] text-[var(--i-muted)]">
           {fileKindLabel(file.kind)} · {fileSize(file.bytes)} ·{" "}
           {relativeDate(file.created_at)}
+          {file.open_url ? (
+            <>
+              {" · "}
+              <a
+                href={file.open_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[var(--i-ink)] underline decoration-[var(--i-line-strong)] underline-offset-[3px] hover:decoration-[var(--i-accent)]"
+              >
+                Open in Google Slides
+              </a>
+            </>
+          ) : null}
         </p>
       </div>
       {isFounder ? (

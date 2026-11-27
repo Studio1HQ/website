@@ -37,6 +37,7 @@ const file = (over: Partial<AgentFile>): AgentFile => ({
   content_type: "application/pdf",
   bytes: 1,
   kind: "deck_pdf",
+  open_url: null,
   approved_to_send: false,
   approved_by: null,
   approved_at: null,
