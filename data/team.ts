@@ -69,15 +69,6 @@ export const TEAM: TeamTier[] = [
         },
       },
       {
-        name: "Nancy Garg",
-        role: "Founder's Associate",
-        portrait: "/assets/team/nancy-garg.webp?v=13",
-        links: {
-          x: "https://x.com/nanseedotai",
-          linkedin: "https://www.linkedin.com/in/nancygarg0609/",
-        },
-      },
-      {
         name: "Kathank Raithatha",
         role: "Developer Advocate",
         portrait: "/assets/team/kathank-raithatha.webp?v=11",
@@ -86,11 +77,6 @@ export const TEAM: TeamTier[] = [
           linkedin: "https://www.linkedin.com/in/kathank/",
           instagram: "https://www.instagram.com/kathank_raithatha/",
         },
-      },
-      {
-        name: "Bhavya Bhardwaj",
-        role: "Social Media",
-        portrait: "/assets/team/bhavya-bhardwaj.webp?v=11",
       },
       {
         name: "Souradeep Pradhan",

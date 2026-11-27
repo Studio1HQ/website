@@ -340,6 +340,17 @@ const FACES = TEAM.flatMap((tier) => tier.members).filter(
   (m): m is typeof m & { portrait: string; name: string } => Boolean(m.portrait && m.name && !m.open),
 );
 
+/**
+ * The "And you?" seat fills the rest of the last row, whatever the team's
+ * size: the grid has 4 columns on phones and desktop, 6 on tablets. Written
+ * out in full so Tailwind sees every class.
+ */
+const SPAN = ["", "col-span-1", "col-span-2", "col-span-3", "col-span-4"];
+const SM_SPAN = ["", "sm:col-span-1", "sm:col-span-2", "sm:col-span-3", "sm:col-span-4", "sm:col-span-5", "sm:col-span-6"];
+const LG_SPAN = ["", "lg:col-span-1", "lg:col-span-2", "lg:col-span-3", "lg:col-span-4"];
+const restOfRow = (columns: number) => columns - (FACES.length % columns);
+const OPEN_SEAT_SPAN = cn(SPAN[restOfRow(4)], SM_SPAN[restOfRow(6)], LG_SPAN[restOfRow(4)]);
+
 /** Each community's real mark: SVGs tinted in their brand colour, PNGs as they are. */
 const PARTNERS: { name: string; file: string; brand?: string }[] = [
   { name: "CNCF", file: "cncf.svg", brand: "#0086FF" },
@@ -416,7 +427,7 @@ export function CommunityBento({ data, index }: { data: CommunityData; index: nu
               ))}
               {/* The seat still open */}
               <motion.div
-                className="col-span-2"
+                className={OPEN_SEAT_SPAN}
                 initial={reduce ? false : { opacity: 0, y: 12 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -428,7 +439,7 @@ export function CommunityBento({ data, index }: { data: CommunityData; index: nu
                   style={{ background: "linear-gradient(180deg, #e6e3de 0%, #d8d4ce 100%)" }}
                 >
                   {/* The open seat, as on the team page, in our orange */}
-                  <span aria-hidden className="absolute inset-y-0 right-0 w-1/2 [&>svg]:!inset-x-[6%] [&>svg]:!w-[88%]">
+                  <span aria-hidden className="absolute inset-y-0 right-0 w-1/2 max-w-[150px] [&>svg]:!inset-x-[6%] [&>svg]:!w-[88%]">
                     <DotSilhouette coarse fill={PRINT} opacity={0.9} />
                   </span>
                   <span className="relative text-[17px] font-medium tracking-[-0.03em]">And you?</span>
