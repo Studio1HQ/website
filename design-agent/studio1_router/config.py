@@ -18,12 +18,15 @@ TOOL_CAPABILITY = {
     "read_page": "read",
     "extract_fields": "extract",
     "lookup_company": "lookup",
+    # Called in-process by the worker's enrichment step; the MCP server does not offer it.
+    "company_profile": "company",
 }
 DEFAULT_ORDER = {
     "web_search": ("brightdata", "olostep"),
     "read_page": ("olostep", "brightdata"),
     "extract_fields": ("scrapegraph", "olostep"),
     "lookup_company": ("github",),
+    "company_profile": ("brightdata",),
 }
 DEFAULT_MAX_CHARS = 20_000
 #: Whatever the config says, a page is never returned longer than this.

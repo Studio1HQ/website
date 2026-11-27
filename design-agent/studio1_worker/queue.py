@@ -10,6 +10,7 @@ import logging
 import os
 import re
 from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 from urllib.parse import quote, urlparse
@@ -24,6 +25,8 @@ _LOGGER = logging.getLogger(__name__)
 BUCKET = "agent-files"
 INBOUND_SOURCES = ("inbound_call", "inbound_email")
 MAX_ERROR_LENGTH = 500
+#: The lead fields the enrichment step may write. Never interest or conflict.
+RESEARCH_FIELDS = ("about", "funding", "why_fit")
 _UUID = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
 _ENV_URL, _ENV_KEY, _ENV_JWT = (
     "STUDIO1_SUPABASE_URL",
@@ -68,6 +71,12 @@ class Supabase:
             timeout=httpx.Timeout(timeout, connect=10.0),
             transport=transport,
         )
+
+    @staticmethod
+    def configured(env: Mapping[str, str] | None = None) -> bool:
+        """True when all three settings are present (not whether they work)."""
+        env = os.environ if env is None else env
+        return all((env.get(n) or "").strip() for n in (_ENV_URL, _ENV_KEY, _ENV_JWT))
 
     @classmethod
     def from_env(
@@ -268,22 +277,37 @@ class Supabase:
         content_type: str,
         bytes: int,
         kind: str,
+        open_url: str | None = None,
     ) -> None:
-        self._send(
-            "POST",
-            "rest/v1/agent_files",
-            json={
-                "org_id": _uuid(org_id),
-                "event_id": _uuid(event_id),
-                "name": name,
-                "storage_path": storage_path,
-                "content_type": content_type,
-                "bytes": bytes,
-                "kind": kind,
-            },
-            headers={"Prefer": "return=minimal"},
-            allow=(409,),  # the path is unique: an earlier attempt already recorded it
-        )
+        """Record one stored file. `open_url` is the link to its editable copy in Google Slides.
+
+        The link's column arrives with a later migration than the table. Where the database does
+        not take it yet, the file is recorded without the link, never dropped.
+        """
+        body = {
+            "org_id": _uuid(org_id),
+            "event_id": _uuid(event_id),
+            "name": name,
+            "storage_path": storage_path,
+            "content_type": content_type,
+            "bytes": bytes,
+            "kind": kind,
+        }
+        headers = {"Prefer": "return=minimal"}
+        # The path is unique, so a 409 means an earlier attempt already recorded it.
+        if open_url:
+            try:
+                self._send(
+                    "POST",
+                    "rest/v1/agent_files",
+                    json={**body, "open_url": open_url},
+                    headers=headers,
+                    allow=(409,),
+                )
+                return
+            except QueueError as error:
+                _LOGGER.warning("file link not saved, recording the file without it: %s", error)
+        self._send("POST", "rest/v1/agent_files", json=body, headers=headers, allow=(409,))
 
     # ---------- mail ----------
 
@@ -334,6 +358,56 @@ class Supabase:
     def get_settings(self) -> dict[str, Any]:
         rows = self._select("agent_settings", {"select": "key,value"})
         return {str(r["key"]): r.get("value") for r in rows if "key" in r}
+
+    def get_lead_research(self, org_id: str) -> LeadResearch | None:
+        """The lead's source and its three research fields, or None when there is no such org."""
+        rows = self._select(
+            "outreach_orgs",
+            {
+                "select": "id,source,about,funding,why_fit",
+                "id": f"eq.{_uuid(org_id)}",
+                "limit": "1",
+            },
+        )
+        if not rows:
+            return None
+        row = rows[0]
+        return LeadResearch(
+            org_id=_uuid(str(row.get("id") or "")),
+            source=str(row.get("source") or ""),
+            about=str(row.get("about") or ""),
+            funding=str(row.get("funding") or ""),
+            why_fit=str(row.get("why_fit") or ""),
+        )
+
+    def save_lead_research(
+        self, org_id: str, fields: Mapping[str, str], *, only_empty: bool = True
+    ) -> list[str]:
+        """Write research fields of an inbound lead; returns the names actually written.
+
+        Only `about`, `funding` and `why_fit` are accepted. With `only_empty` (the default) each
+        field is written in its own call filtered on that field still being empty, so text a
+        person typed in the meantime is never overwritten. The worker's row policy only lets
+        inbound leads change, so a row of another source is left alone and is not counted.
+        """
+        written: list[str] = []
+        for name, value in fields.items():
+            if name not in RESEARCH_FIELDS:
+                raise QueueError(f"{name} is not a research field the worker may write")
+            params = {"id": f"eq.{_uuid(org_id)}", "select": "id"}
+            if only_empty:
+                params[name] = "eq."
+            response = self._send(
+                "PATCH",
+                "rest/v1/outreach_orgs",
+                params=params,
+                json={name: value, "updated_by": "agent"},
+                headers={"Prefer": "return=representation"},
+            )
+            rows = response.json() if response.content else []
+            if isinstance(rows, list) and rows:
+                written.append(name)
+        return written
 
     def find_org_by_domain(
         self, domain: str, sources: Sequence[str] | None = INBOUND_SOURCES
@@ -422,6 +496,29 @@ class Supabase:
                 headers={"Prefer": "return=minimal"},
             )
         return org_id
+
+
+@dataclass(frozen=True)
+class LeadResearch:
+    """What the lead page already says about the company. Text a person may have typed."""
+
+    org_id: str
+    source: str
+    about: str = ""
+    funding: str = ""
+    why_fit: str = ""
+
+    @property
+    def inbound(self) -> bool:
+        return self.source in INBOUND_SOURCES
+
+    @property
+    def filled(self) -> bool:
+        """About and the fit are both written. Funding is not needed: only Bright Data gives it."""
+        return bool(self.about.strip() and self.why_fit.strip())
+
+    def empty(self, name: str) -> bool:
+        return not str(getattr(self, name)).strip()
 
 
 def lead_slug_for(name: str, org_id: str) -> str:

@@ -73,6 +73,19 @@ class Router:
     def _key(self, provider: Provider) -> str:
         return (self._env.get(provider.key_env) or "").strip()
 
+    def plan(self, tool: str) -> list[tuple[str, str | None]]:
+        """Each provider in the tool's order, with the reason it would be skipped or None. Reads
+        the config and the usage log only; calls nothing."""
+        log = self.usage
+        return [
+            (name, self._skip_reason(tool, name, partial(self._used, log, name)))
+            for name in self.config.order[tool]
+        ]
+
+    def available(self, tool: str) -> bool:
+        """True when at least one provider would be tried for the tool."""
+        return any(reason is None for _, reason in self.plan(tool))
+
     async def dispatch(
         self,
         tool: str,
@@ -97,6 +110,11 @@ class Router:
                 try:
                     async with asyncio.timeout(settings.timeout + 1):
                         result = await invoke(provider, call)
+                except asyncio.CancelledError:
+                    # The caller gave up (the worker's enrichment time limit, say). The call may
+                    # still have been charged, so it is logged and counts against the cap.
+                    self._record(log, tool, name, "Cancelled", started, context, subject)
+                    raise
                 except Exception as exc:  # noqa: BLE001 - any provider failure means try the next
                     error = type(exc).__name__
                     detail = str(exc) if error == "ProviderError" else error

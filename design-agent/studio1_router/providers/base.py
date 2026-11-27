@@ -63,7 +63,12 @@ class Provider:
     async def extract(self, call: Call, url: str, fields: Mapping[str, str]) -> dict[str, Any]:
         raise NotImplementedError
 
-    async def lookup(self, call: Call, name: str, github: str | None) -> dict[str, Any]:
+    async def lookup(
+        self, call: Call, name: str, github: str | None, website: str | None = None
+    ) -> dict[str, Any]:
+        raise NotImplementedError
+
+    async def company(self, call: Call, url: str) -> dict[str, Any]:
         raise NotImplementedError
 
 
@@ -73,7 +78,7 @@ async def request(
     url: str,
     *,
     headers: Mapping[str, str],
-    json_body: Mapping[str, Any] | None = None,
+    json_body: Any = None,
     params: Mapping[str, str | int] | None = None,
 ) -> bytes:
     """One request with the call's timeout, no redirects and a hard cap on the body size."""

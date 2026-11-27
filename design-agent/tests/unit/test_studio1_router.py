@@ -13,7 +13,7 @@ import httpx
 import pytest
 
 from studio1_router import safety
-from studio1_router.config import ConfigFile, parse
+from studio1_router.config import TOOL_CAPABILITY, ConfigFile, parse
 from studio1_router.providers import brightdata, github, olostep, scrapegraph
 from studio1_router.providers.base import Call, Provider, ProviderError
 from studio1_router.router import AllProvidersFailed, Router
@@ -386,15 +386,20 @@ def test_the_shipped_example_config_parses_and_disables_unverified_capabilities(
     assert config.order["web_search"] == ("brightdata", "olostep")
     assert config.order["read_page"] == ("olostep", "brightdata")
     assert config.order["extract_fields"] == ("scrapegraph", "olostep")
+    assert config.order["company_profile"] == ("brightdata",)
+    tool = {capability: name for name, capability in TOOL_CAPABILITY.items()}
     for provider, module in (
         ("olostep", olostep),
         ("brightdata", brightdata),
         ("scrapegraph", scrapegraph),
+        ("github", github),
     ):
-        tool = {"search": "web_search", "read": "read_page", "extract": "extract_fields"}
         for capability, verified in module.PROVIDER.VERIFIED.items():
             off = tool[capability] in config.provider(provider).disabled_tools
             assert off == (not verified), (provider, capability)
+    assert brightdata.PROVIDER.VERIFIED["company"] is False
+    # With no config at all, an unverified capability is off too.
+    assert "company_profile" in parse({}).provider("brightdata").disabled_tools
 
 
 # safety -----------------------------------------------------------------------------------

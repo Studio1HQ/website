@@ -80,6 +80,8 @@ class FakeSupabase:
             )
         if path == "rest/v1/outreach_orgs" and request.method == "GET":
             return httpx.Response(200, json=self._orgs(query))
+        if path == "rest/v1/outreach_orgs" and request.method == "PATCH":
+            return httpx.Response(200, json=self._patch_orgs(query, body))
         if path == "rest/v1/outreach_orgs":
             self.orgs.append({"id": ORG, "name": body["name"], "domain": body.get("domain")})
             return httpx.Response(201, json=[{"id": ORG}])
@@ -89,7 +91,24 @@ class FakeSupabase:
             self.uploads.append(path.removeprefix("storage/v1/object/agent-files/"))
         return httpx.Response(204)
 
+    def _patch_orgs(self, query: dict[str, str], body: dict[str, Any]) -> list[dict[str, Any]]:
+        """Filters as PostgREST would, plus the worker's row policy: inbound leads only."""
+        changed = []
+        for org in self.orgs:
+            if query.get("id") != f"eq.{org.get('id')}":
+                continue
+            if org.get("source", "inbound_email") not in ("inbound_call", "inbound_email"):
+                continue
+            filters = {k: v for k, v in query.items() if k not in ("id", "select")}
+            if any(f"eq.{org.get(k) or ''}" != v for k, v in filters.items()):
+                continue
+            org.update(body)
+            changed.append({"id": org["id"]})
+        return changed
+
     def _orgs(self, query: dict[str, str]) -> list[dict[str, Any]]:
+        if "id" in query:
+            return [o for o in self.orgs if query["id"] == f"eq.{o.get('id')}"]
         if query.get("domain", "").startswith("like.*"):
             suffix = query["domain"].removeprefix("like.*")
             return [o for o in self.orgs if str(o.get("domain") or "").endswith(suffix)]

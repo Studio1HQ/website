@@ -19,6 +19,7 @@ The website's lint, type check, formatter and Vercel build all skip this folder.
 | Research skill | `skills/studio1-company-research/` | A sourced brief on a named company |
 | Pitch deck skill | `skills/studio1-pitch-deck/` | An intro or proposal deck built from the brief and the context pack |
 | Lead events | `studio1_worker/` | Turns a lead event (created, call notes, founder answers and so on) into one agent turn on that lead's own thread |
+| Enrichment | `studio1_worker/enrich.py` | Looks a new lead's company up and writes a short profile and a fit line to the lead before the agent starts, with no model |
 | Model setup | `config/studio1.env.example` | Claude Opus 5.5 leads; open models on Nebius Token Factory take the helper roles |
 | Search setup | `config/mcp.studio1.example.toml` | Web search servers for the research skill |
 | Contrast exceptions | `design.contrastExceptions` in `tokens.json` | Lets the brand pack declare the two Studio1 elements that fail the WCAG check on purpose |
@@ -78,12 +79,17 @@ The agent sees these tools (the server name is `router`, so each is prefixed):
   final URL and a `truncated` flag.
 - `router_extract_fields(url, fields)` returns the named fields from a page. `fields` maps each name
   to a short description of what to extract.
-- `router_lookup_company(name, github)` returns public GitHub facts for an org or `owner/repo`:
-  stars, forks, open issues, last push, latest release and top repositories. Without `github` it
-  returns candidates from GitHub search with their scores, never a confirmed match.
+- `router_lookup_company(name, github, website)` returns public GitHub facts for an org or
+  `owner/repo`: stars, forks, open issues, last push, latest release, top repositories and the
+  org's own description and website. Without `github` it returns candidates from GitHub search
+  with their scores, never a confirmed match, unless `website` is given and one org's GitHub
+  profile names that same website: then that org's facts come back.
 
 Each tool also takes an optional `context` (a lead slug, for example) that is only written to the
 usage log.
+
+The router has one more tool, `company_profile` (a LinkedIn company record through Bright Data).
+The agent does not see it: only the worker's enrichment step calls it, and it ships switched off.
 
 The config file is `config/router.toml` (or `--config`, or `STUDIO1_ROUTER_CONFIG`). It sets the
 provider order per tool, each provider's `enabled` and `monthly_cap`, the page text length and the
@@ -205,6 +211,24 @@ The file is a second build of the same outline, laid out by hand-written rules a
 pages, so it matches the PDF closely, not exactly. Treat the PDF as the one to send and the
 PowerPoint as the one to edit.
 
+### Open in Google Slides
+
+The worker can also send each PowerPoint deck to a Google Drive folder, where Google turns it into
+Slides, and keep the link beside the file so the lead page shows "Open in Google Slides". It is
+off until Drive is set up and one Google account has signed in once. The steps are in
+[docs/studio1-drive.md](docs/studio1-drive.md).
+
+```bash
+uv run python -m studio1_worker.drive login     # once, in a browser
+uv run python -m studio1_worker.drive status
+```
+
+`serve` says at start whether decks go to Drive. Every upload is a new file with the time in its
+name: the worker never changes or deletes a file in Drive, because a founder may have edited it.
+If Drive fails, or the database does not have the link column yet (migration
+`20261128100000_agent_file_open_url.sql` in the website's `supabase/migrations`), the deck is still
+stored as a download and only the link is missing.
+
 ## Running from the dashboard queue
 
 `serve` lets the dashboard drive the worker instead of a person typing commands. It reads events
@@ -277,6 +301,85 @@ precision for `lead`, the true leads that were neither labelled `lead` nor held 
 leads), and the mails that are not leads but would have started the agent. The exit code is 1 if
 any true lead was skipped outright. Treat that list as the one to read first.
 
+## Enrichment
+
+When `serve` claims a `lead_created` event, it looks the company up before the agent starts, so
+the lead page shows who they are within seconds and the agent starts from facts. No model is
+involved. Two sources:
+
+- GitHub, free. An org from GitHub's search counts as the company only when the website on its
+  GitHub profile is the lead's website.
+- LinkedIn through Bright Data, paid. A web search finds the company's LinkedIn page and Bright
+  Data returns its record (team size, industry, funding). The record counts only when it names the
+  lead's website. This ships switched off, because the shape of the funding data is not in Bright
+  Data's docs (the router example config says how to switch it on). While it is off nothing is
+  spent.
+
+Both go through the router's own code inside the worker, so the router config, the caps and the
+usage log apply exactly as they do to the agent. Run `serve` from this folder with the same
+`config/router.toml` (or `STUDIO1_ROUTER_CONFIG`) and the same keys as the router. Set
+`GITHUB_TOKEN` too: one lookup makes up to six GitHub requests, and GitHub allows 60 an hour
+without a token.
+
+It writes three fields on the lead: `about` (what they do and the team size), `funding`, and
+`why_fit`, whose first line is the fit, which the dashboard reads:
+
+```text
+Fit: Strong - developer-facing (api, sdk), 1.2K GitHub stars, active on GitHub 2026-11-01, 11-50 employees
+```
+
+The fit comes from three plain rules (`fit_of` in `studio1_worker/enrich.py`):
+
+| Fit | When |
+| --- | --- |
+| Strong | Developer-facing (its own words name APIs, SDKs, a CLI, open source and the like, or a repository has 100 or more stars) with a live product (a push or a release in the last year, or a team of 11 or more) |
+| Good | Developer-facing, with no sign of a live product |
+| Weak | It says what it does, and nothing in it is developer-facing |
+| Unclear | Too little public data, or the lookups failed |
+
+Stage and team size are shown as reasons and never lower the fit: Studio1 works with DevTools
+companies at every stage.
+
+Only an empty field is filled. Text a person typed is never overwritten, even when they type it
+while the lookup runs. A lead whose `about` and `why_fit` are both filled is not looked up again,
+and what is there goes to the agent instead. An event whose payload has `"refresh_profile": true`
+overwrites the three fields. `interest` and `conflict` are never touched. A lookup that failed and
+found nothing writes nothing.
+
+Everything fetched is cleaned to plain text (no HTML, no control characters, capped lengths, email
+addresses and phone numbers removed) and reaches the agent inside the same outside-text block as
+the lead's own message. No person is looked up: a search result that is a person's page is
+skipped.
+
+It never stops an event. Both lookups share a 60 second limit, any error or timeout leaves one
+log line with ids, and the event goes on without a profile. It queues no event, so it never counts
+against the daily cap. `serve --no-enrich` switches it off.
+
+To try it by hand (it prints the profile, the fit line and the fields, and saves nothing):
+
+```bash
+uv run python -m studio1_worker enrich --company "Acme Cloud" --url https://acme.example --dry-run
+uv run python -m studio1_worker enrich --company "Acme Cloud" --url https://acme.example --github acme
+```
+
+`--dry-run` prints which providers would be tried and calls nothing. `--linkedin <company page>`
+skips the search for the LinkedIn page.
+
+## House rules
+
+The founders keep a list of one-line house rules on the dashboard (the `agent_settings` row
+`house_rules`, `{"rules": [...]}`). The worker reads it at the start of every event, so a change
+reaches the next event, and puts the rules in the prompt after its own fixed rules, as Studio1's
+house rules written by the founders. They sit outside every outside-text block: they are
+instructions to follow, not lead material. Where one conflicts with a fixed rule (no prices
+without founder answers, send nothing, the three closing lists), the fixed rule wins.
+
+The worker does not trust the row. Anything but a list of strings gives no rules, an entry that is
+not a string is dropped, control characters and line breaks go, each rule is cut to 300
+characters, and only the first 30 count, the same limits the dashboard sets. An empty list adds
+nothing to the prompt. The hand-run commands read the rules too when the three
+`STUDIO1_SUPABASE_*` settings are set, and `--dry-run` says how many it read.
+
 ## Checks
 
 ```bash
@@ -286,6 +389,8 @@ uv run pytest -q -m render tests/render/test_gates_render.py   # gates inside th
 
 ## Not built yet
 
-The dashboard pages that show all this (the Inbound section), the Google Drive upload for the
-editable deck, enrichment beyond the GitHub lookup, and hosting. The queue reader is built but has
-only been tested against a stand-in database.
+Hosting. Bright Data's LinkedIn company record is built but switched off until one real record has
+been checked with a key, and Crunchbase is not used (its funding data is not documented either).
+The queue reader, the enrichment's writes and the Drive upload are built but have only been tested
+against stand-ins: nothing here has run with real keys, a real Google sign-in or the live database
+yet. The dashboard's Inbound section is built, in the website code on this same branch.

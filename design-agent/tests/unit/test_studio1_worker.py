@@ -38,6 +38,14 @@ Next:
 """
 
 
+@pytest.fixture(autouse=True)
+def no_dashboard(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The hand-run commands read house rules from the dashboard when its settings are set; these
+    tests never reach a real database."""
+    for name in ("STUDIO1_SUPABASE_URL", "STUDIO1_SUPABASE_APIKEY", "STUDIO1_SUPABASE_WORKER_JWT"):
+        monkeypatch.delenv(name, raising=False)
+
+
 def make_event(kind: EventKind = EventKind.LEAD_CREATED, **fields: str) -> LeadEvent:
     base = {
         "kind": kind,

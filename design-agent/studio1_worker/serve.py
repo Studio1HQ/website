@@ -16,7 +16,8 @@ from pathlib import Path
 from typing import Any
 
 from studio1_worker.directory import FREE_MAIL, host_of
-from studio1_worker.events import NOTES_FILENAME, EventKind, prompt_for
+from studio1_worker.enrich import Enricher, enrich_lead
+from studio1_worker.events import NOTES_FILENAME, EventKind, house_rules_from, prompt_for
 from studio1_worker.queue import (
     DbDirectory,
     QueuedEvent,
@@ -42,6 +43,40 @@ STATE_ROOT = REPO_ROOT / "workspace" / "state" / "queue"
 MAX_FILE_BYTES = 100 * 1024 * 1024
 DEFAULT_DAILY_CAP = 6
 CAP_ERROR = "daily cap reached for this lead"
+
+#: Uploads an editable deck and answers with its link, or None. Given the file and a title.
+DeckLink = Callable[[Path, str], str | None]
+# The same shape the database accepts for agent_files.open_url.
+_SLIDES_LINK = re.compile(r"https://docs\.google\.com/[A-Za-z0-9/_?=&.%#-]{1,300}")
+
+
+def drive_deck_link() -> DeckLink | None:
+    """The uploader for editable decks, or None when Drive is not set up or not signed in."""
+    from studio1_worker import drive
+
+    if not (drive.configured() and drive.signed_in()):
+        return None
+
+    def link(path: Path, title: str) -> str | None:
+        return drive.upload_deck(path, title).get("url")
+
+    return link
+
+
+def _slides_link(deck_link: DeckLink, path: Path, title: str, thread: str) -> str | None:
+    """The deck's Google Slides link, or None. A failure never stops the file being stored."""
+    try:
+        url = deck_link(path, title)
+    except Exception as error:  # noqa: BLE001 - Drive is an extra; the deck is still stored
+        _LOGGER.warning("deck on %s not sent to Drive (%s)", thread, type(error).__name__)
+        return None
+    if not isinstance(url, str) or not _SLIDES_LINK.fullmatch(url):
+        if url:
+            _LOGGER.warning("deck on %s: Drive answered with a link that is not Google's", thread)
+        return None
+    return url
+
+
 # The only headers the website stores; a row with others is read as if it had none of them.
 # Authentication-Results is not one: a sender can write their own copy, so the website no longer
 # stores it and the worker ignores it even if a row carries one. Whether the sender is proven
@@ -99,8 +134,12 @@ def upload_new_files(
     *,
     out_root: Path = OUT_ROOT,
     state_root: Path = STATE_ROOT,
+    deck_link: DeckLink | None = None,
 ) -> int:
     """Upload what is new or changed in `out/<thread>/` since this thread's last event.
+
+    With `deck_link`, a PowerPoint deck also goes to Google Drive, and the link to its editable
+    copy is recorded beside the file.
 
     The manifest holds name, size and sha256 per file. An entry is written only after its file
     is stored and recorded, so a failed upload is tried again after the next event.
@@ -132,10 +171,21 @@ def upload_new_files(
             continue
         path = f"{event.org_id}/{event.id}/{name}"
         content_type = mimetypes.guess_type(name)[0] or "application/octet-stream"
+        open_url = None
+        if deck_link is not None and name.lower().endswith(".pptx"):
+            title = f"{event.org_name} {entry.stem}".strip()
+            open_url = _slides_link(deck_link, entry, title, thread)
         try:
             db.upload_file(path, data, content_type)
             db.record_file(
-                event.org_id, event.id, name, path, content_type, len(data), file_kind(name)
+                event.org_id,
+                event.id,
+                name,
+                path,
+                content_type,
+                len(data),
+                file_kind(name),
+                open_url=open_url,
             )
         except QueueError as error:
             _LOGGER.warning("file %s on %s not stored: %s", name, thread, error)
@@ -193,6 +243,10 @@ class Worker:
     client: ModelClient
     out_root: Path = OUT_ROOT
     state_root: Path = STATE_ROOT
+    #: Looks a new lead's company up before its first turn; None switches that off.
+    enricher: Enricher | None = None
+    #: Sends each editable deck to Google Drive; None when Drive is not set up.
+    deck_link: DeckLink | None = None
 
     # -- mail --
 
@@ -315,8 +369,8 @@ class Worker:
 
     # -- events --
 
-    def daily_cap(self) -> int:
-        value = self.db.get_settings().get("caps")
+    def daily_cap(self, settings: dict[str, Any] | None = None) -> int:
+        value = (self.db.get_settings() if settings is None else settings).get("caps")
         cap = value.get("events_per_lead_per_day") if isinstance(value, dict) else None
         return (
             cap
@@ -351,8 +405,13 @@ class Worker:
         return True
 
     def _run(self, event: QueuedEvent) -> None:
-        if self.db.count_events_today(event.org_id, CAP_ERROR) > self.daily_cap():
+        # Read once per event, so a change on the dashboard reaches the next event.
+        settings = self.db.get_settings()
+        if self.db.count_events_today(event.org_id, CAP_ERROR) > self.daily_cap(settings):
             raise _Refused(CAP_ERROR)
+        house_rules = house_rules_from(settings)
+        if house_rules:
+            _LOGGER.info("event %s: %s house rules", event.id, len(house_rules))
         lead_event = event.to_lead_event()
         thread = event.thread
         attachments: list[Path] = []
@@ -365,10 +424,11 @@ class Worker:
             path = folder / NOTES_FILENAME
             path.write_text(notes)
             attachments.append(path)
+        profile = self._profile(event)
         outcome = run_turn(
             self.runner,
             thread,
-            prompt_for(lead_event),
+            prompt_for(lead_event, profile=profile, house_rules=house_rules),
             attachments,
             build_deck=self.runner_name == "cli",
             out_root=self.out_root,
@@ -376,7 +436,12 @@ class Worker:
         if outcome.deck_problem:
             _LOGGER.info("event %s: deck not built (%s)", event.id, outcome.deck_problem)
         stored = upload_new_files(
-            self.db, event, thread, out_root=self.out_root, state_root=self.state_root
+            self.db,
+            event,
+            thread,
+            out_root=self.out_root,
+            state_root=self.state_root,
+            deck_link=self.deck_link,
         )
         lists = parse_report(outcome.result.reply)
         self.db.finish_event(
@@ -387,6 +452,20 @@ class Worker:
             lists["Next"],
         )
         _LOGGER.info("event %s: done, %s files stored", event.id, stored)
+
+    def _profile(self, event: QueuedEvent) -> str | None:
+        """For a new lead: look the company up and save the profile before the turn. Fails soft:
+        any error leaves one line with ids and the event goes on without a profile. It queues no
+        event, so it never counts against the daily cap, and its lookups have a time limit."""
+        if self.enricher is None or event.kind is not EventKind.LEAD_CREATED:
+            return None
+        try:
+            return enrich_lead(self.db, self.enricher, event)
+        except Exception as error:  # noqa: BLE001 - the profile is a help, never a blocker
+            _LOGGER.warning(
+                "event %s: no profile for org %s (%s)", event.id, event.org_id, type(error).__name__
+            )
+            return None
 
     # -- loop --
 

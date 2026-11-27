@@ -12,6 +12,20 @@ search: url is a Google search URL with brd_json=1 (a query parameter, per the d
   documented preview uses `results` with `url`, so both names are read.
 read: format "raw" plus data_format "markdown". Only the SERP page documents data_format; the
   Web Unlocker page does not, so read is unverified and the example config ships it disabled.
+
+company (the worker's enrichment step only; not an MCP tool). Docs used, 2026-11-27:
+  https://docs.brightdata.com/api-reference/scrapers/synchronous-requests.md
+  https://docs.brightdata.com/products/scrapers/linkedin/send-first-request.md
+  https://docs.brightdata.com/scrapers/gd_l1vikfnt1wgvvqz95w.json  (the scraper's fields)
+POST https://api.brightdata.com/datasets/v3/scrape?dataset_id=gd_l1vikfnt1wgvvqz95w&format=json
+with the body [{"url": "<LinkedIn company page>"}]. Confirmed: the endpoint, the body, the JSON
+array of records, the one minute limit (after it the answer is HTTP 202 with a snapshot_id, read
+here as a failure) and the top-level fields name, about, company_size (text such as
+"11-50 employees"), employees_in_linkedin, industries, organization_type, founded, headquarters,
+website and website_simplified. Not confirmed: `funding` is typed object and `investors` array,
+with no sub-fields documented and none in the example record, so the capability is unverified and
+the example config ships company_profile disabled. Check one real record, then switch it on.
+Crunchbase (gd_l1vijqt9jfj7olije) is left out: its funding fields are undocumented objects too.
 """
 
 from __future__ import annotations
@@ -33,12 +47,31 @@ from studio1_router.providers.base import (
 )
 
 ENDPOINT = "https://api.brightdata.com/request"
+SCRAPE = "https://api.brightdata.com/datasets/v3/scrape"
+#: "LinkedIn company information", collect by URL. Public, not a secret; the option
+#: `company_dataset` overrides it.
+LINKEDIN_COMPANY = "gd_l1vikfnt1wgvvqz95w"
+COMPANY_FIELDS = (
+    "name",
+    "url",
+    "about",
+    "company_size",
+    "employees_in_linkedin",
+    "industries",
+    "organization_type",
+    "founded",
+    "headquarters",
+    "website",
+    "website_simplified",
+    "funding",
+    "investors",
+)
 
 
 class BrightData(Provider):
     name = "brightdata"
     key_env = "BRIGHTDATA_API_TOKEN"
-    VERIFIED = {"search": True, "read": False}
+    VERIFIED = {"search": True, "read": False, "company": False}
 
     def _headers(self, call: Call) -> dict[str, str]:
         return {"Authorization": f"Bearer {call.key}", "Content-Type": "application/json"}
@@ -99,6 +132,28 @@ class BrightData(Provider):
             else:
                 raise ProviderError("JSON response where markdown was expected")
         return Page(url, text)
+
+    async def company(self, call: Call, url: str) -> dict[str, Any]:
+        body = await request(
+            call,
+            "POST",
+            SCRAPE,
+            headers=self._headers(call),
+            params={
+                "dataset_id": call.options.get("company_dataset") or LINKEDIN_COMPANY,
+                "format": "json",
+            },
+            json_body=[{"url": url}],
+        )
+        data = parse_json(body)
+        if isinstance(data, dict) and data.get("snapshot_id"):
+            raise ProviderError("not ready within the one minute limit")
+        if not isinstance(data, list):
+            raise ProviderError("unexpected response shape")
+        record = next((r for r in data if isinstance(r, dict) and r.get("name")), None)
+        if record is None:
+            raise ProviderError("no company record for that page")
+        return {field: record.get(field) for field in COMPANY_FIELDS}
 
 
 PROVIDER = BrightData()

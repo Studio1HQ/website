@@ -9,17 +9,29 @@ from typing import Any
 
 import click
 
+from studio1_router.config import ConfigError
+from studio1_router.providers.github import REF as GITHUB_REF
+from studio1_router.router import Router, default_config_path
+from studio1_router.tools import linkedin_company_url
+from studio1_worker.enrich import (
+    Enricher,
+    Target,
+    fit_of,
+    lead_fields,
+    profile_text,
+)
 from studio1_worker.events import (
     NOTES_FILENAME,
     EventKind,
     LeadEvent,
+    house_rules_from,
     prompt_for,
     slugify,
     thread_id_for,
 )
 from studio1_worker.queue import QueueError, Supabase
 from studio1_worker.runners import ApiRunner, CliRunner, Runner, RunnerError
-from studio1_worker.serve import Worker, make_stop_event
+from studio1_worker.serve import Worker, drive_deck_link, make_stop_event
 from studio1_worker.sort_eval import collect as collect_eval_items
 from studio1_worker.sort_eval import count_model_calls, evaluate, format_report
 from studio1_worker.sorter import (
@@ -53,7 +65,10 @@ def _common[F: Callable[..., Any]](func: F) -> F:
     return click.option(
         "--dry-run",
         is_flag=True,
-        help="Print the thread id and the full prompt. Record nothing and call nothing.",
+        help=(
+            "Print the thread id and the full prompt. Record nothing and call no model or "
+            "provider. The house rules are read from the dashboard when its settings are set."
+        ),
     )(func)
 
 
@@ -82,19 +97,34 @@ def _runner(name: str) -> Runner:
         raise click.ClickException(str(error)) from None
 
 
+def _house_rules() -> tuple[tuple[str, ...], str]:
+    """The founders' house rules from the dashboard, and one line saying where they came from.
+    A read of the settings rows only; no model, no provider."""
+    if not Supabase.configured():
+        return (), "house rules: not read (the dashboard database settings are not set)"
+    try:
+        rules = house_rules_from(Supabase.from_env().get_settings())
+    except QueueError as error:
+        return (), f"house rules: not read ({error})"
+    return rules, f"house rules: {len(rules)} from the dashboard"
+
+
 def _execute(
     event: LeadEvent, runner_name: str, dry_run: bool, notes_text: str | None = None
 ) -> None:
     thread = thread_id_for(event)
-    prompt = prompt_for(event)
+    rules, where = _house_rules()
+    prompt = prompt_for(event, house_rules=rules)
     if dry_run:
         click.echo(f"thread: {thread}")
         if notes_text is not None:
             click.echo(f"attachment: {NOTES_FILENAME} ({len(notes_text)} characters)")
+        click.echo(where)
         click.echo("--- prompt ---")
         click.echo(prompt)
         return
     runner = _runner(runner_name)
+    click.echo(where, err=True)
     store = _store()
     store.upsert_lead(event, thread)
     number = store.queue(event)
@@ -467,6 +497,48 @@ def sort_log(days: int) -> None:
         click.echo(f"  {row['subject']}")
 
 
+def _enricher() -> Enricher:
+    """The router's own config, keys from this shell, its usage log and caps."""
+    return Enricher(Router(default_config_path(None)))
+
+
+@cli.command("enrich")
+@click.option("--company", required=True, help="Company name.")
+@click.option("--url", required=True, help="Company website.")
+@click.option("--github", default=None, help="The company's GitHub org or owner/repo, if known.")
+@click.option("--linkedin", default=None, help="The company's LinkedIn page, if known.")
+@click.option("--dry-run", is_flag=True, help="Print what would be looked up. Call nothing.")
+def enrich(company: str, url: str, github: str | None, linkedin: str | None, dry_run: bool) -> None:
+    """Look a company up (GitHub, and LinkedIn through Bright Data when that is on) and print
+    its profile and fit line. No model. Saves nothing: `serve` saves for new leads."""
+    from datetime import UTC, datetime
+
+    if github is not None and not GITHUB_REF.fullmatch(
+        github.strip().removeprefix("https://github.com/").strip("/")
+    ):
+        raise click.UsageError("--github must be an org or owner/repo, like acme or acme/core.")
+    if linkedin is not None and linkedin_company_url(linkedin) is None:
+        raise click.UsageError(
+            "--linkedin must be a page like https://www.linkedin.com/company/acme."
+        )
+    target = Target(company.strip(), url.strip(), github, linkedin)
+    enricher = _enricher()
+    try:
+        if dry_run:
+            for line in enricher.plan(target):
+                click.echo(line)
+            return
+        profile = enricher.run(target, context=f"enrich-{slugify(company)[:40] or 'company'}")
+    except ConfigError as error:
+        raise click.ClickException(f"Router config: {error}") from None
+    today = datetime.now(UTC).date()
+    fit = fit_of(profile, today)
+    click.echo(profile_text(profile, fit))
+    click.echo("\n--- would be saved on a new lead (empty fields only) ---")
+    for name, value in lead_fields(profile, fit, today).items():
+        click.echo(f"{name}:\n{value}")
+
+
 @cli.command("serve")
 @click.option("--once", is_flag=True, help="Do one tick and exit (for tests and cron).")
 @click.option(
@@ -484,7 +556,12 @@ def sort_log(days: int) -> None:
     show_default=True,
     help="Run each turn through the local CLI or the self-hosted HTTP API.",
 )
-def serve(once: bool, poll_seconds: float, runner_name: str) -> None:
+@click.option(
+    "--no-enrich",
+    is_flag=True,
+    help="Do not look a new lead's company up before its first turn.",
+)
+def serve(once: bool, poll_seconds: float, runner_name: str, no_enrich: bool) -> None:
     """Work from the dashboard's queue: sort waiting mail, then run one event, then sleep.
 
     Needs STUDIO1_SUPABASE_URL, STUDIO1_SUPABASE_APIKEY and STUDIO1_SUPABASE_WORKER_JWT. On
@@ -499,7 +576,19 @@ def serve(once: bool, poll_seconds: float, runner_name: str) -> None:
         raise click.ClickException(str(error)) from None
     settings = _sorter_settings()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
-    worker = Worker(db, _runner(runner_name), runner_name, settings, _LazyClient(settings))
+    worker = Worker(
+        db,
+        _runner(runner_name),
+        runner_name,
+        settings,
+        _LazyClient(settings),
+        enricher=None if no_enrich else _enricher(),
+        deck_link=drive_deck_link(),
+    )
+    logging.getLogger(__name__).info(
+        "editable decks: %s",
+        "sent to Google Drive" if worker.deck_link else "Drive is not set up, stored as files only",
+    )
     stop = make_stop_event(signal.signal)
     try:
         worker.serve(once=once, poll_seconds=poll_seconds, stop=stop)

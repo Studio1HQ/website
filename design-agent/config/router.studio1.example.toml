@@ -25,6 +25,11 @@ providers = ["scrapegraph", "olostep"]
 [tools.lookup_company]
 providers = ["github"]
 
+# Used only by the worker's enrichment step (a LinkedIn company record for a new lead); the agent
+# does not see this tool. It is shipped off below, under brightdata.
+[tools.company_profile]
+providers = ["brightdata"]
+
 # monthly_cap counts calls in the calendar month (UTC), errors included, from the usage log.
 # Leave it out for no cap. Caps below are placeholders: set them from each plan's credits.
 
@@ -39,12 +44,20 @@ enabled = true
 monthly_cap = 1000
 # Read is shipped off: data_format = "markdown" is documented for the SERP API but not for
 # Web Unlocker. Check it with a real key, then remove "read_page" from this list.
-disabled_tools = ["read_page"]
+# Company profile is shipped off: the LinkedIn company scraper's request and its top-level fields
+# (about, company_size, industries, website) are documented, but `funding` and `investors` have no
+# documented sub-fields. Run `python -m studio1_worker enrich` on one company with a real key,
+# check the funding line, then remove "company_profile" from this list. Each new lead then costs
+# one web_search and one company_profile call. A record can take up to a minute; raise `timeout`
+# here if records time out (it applies to Bright Data's search too).
+disabled_tools = ["read_page", "company_profile"]
 
 [providers.brightdata.options]
 # Zone names from your Bright Data account (SERP API zone, Web Unlocker zone). Not secrets.
 serp_zone = "studio1_serp"
 unlocker_zone = "studio1_unlocker"
+# The scraper for LinkedIn company pages. Public, the same for every account.
+company_dataset = "gd_l1vikfnt1wgvvqz95w"
 
 [providers.scrapegraph]
 enabled = true
