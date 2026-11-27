@@ -19,6 +19,7 @@ const ICONS: Record<SectionKey, Icon> = {
   jobs: Nav.UserSearch,
   hackathons: Nav.Trophy,
   cohort: Nav.GraduationCap,
+  campus: Nav.ClipboardList,
   subscribers: Nav.Mail,
   "partner-pool": Nav.Handshake,
 };
@@ -466,8 +467,9 @@ export function InternalNav({
       ? "projects"
       : "companies";
   const hackathonsNew = community ? (awaiting.hackathons ?? 0) : 0;
+  const campusNew = community ? (awaiting.campus ?? 0) : 0;
   const communityBadge = community
-    ? community.tasks + community.sponsors + community.partners + hackathonsNew
+    ? community.tasks + community.sponsors + community.partners + hackathonsNew + campusNew
     : 0;
 
   return (
@@ -683,6 +685,9 @@ export function InternalNav({
                   hackathonsNew
                     ? `${hackathonsNew} new hackathon ${hackathonsNew === 1 ? "registration" : "registrations"}`
                     : null,
+                  campusNew
+                    ? `${campusNew} new campus ${campusNew === 1 ? "application" : "applications"}`
+                    : null,
                 ]
                   .filter(Boolean)
                   .join(" · ")}
@@ -717,6 +722,14 @@ export function InternalNav({
                   badge={community.sponsors}
                   badgeTitle={`${community.sponsors} ${community.sponsors === 1 ? "follow-up" : "follow-ups"} due`}
                   active={isActive("/community/sponsors")}
+                />
+                <NavLink
+                  href={SECTIONS.campus.path}
+                  label={SECTIONS.campus.nav}
+                  icon={ICONS.campus}
+                  badge={awaiting.campus}
+                  badgeTitle={`${awaiting.campus ?? 0} new ${awaiting.campus === 1 ? "application" : "applications"} to review`}
+                  active={isActive(SECTIONS.campus.path)}
                 />
                 <NavLink
                   href="/community/campus"

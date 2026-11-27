@@ -5,7 +5,7 @@
  * the image URLs are fixed and cache forever.
  */
 
-export type EmailPipeline = "jobs" | "cohort" | "hackathons";
+export type EmailPipeline = "jobs" | "cohort" | "hackathons" | "campus";
 
 export type Banner = { kicker: string; title: string; label: string };
 
@@ -13,6 +13,7 @@ export const EMAIL_SECTION_NAMES: Record<EmailPipeline, string> = {
   jobs: "Careers",
   cohort: "DevRel Cohort",
   hackathons: "Hackathons",
+  campus: "Studio1 Across the Campus",
 };
 
 const NOTE = (section: string): Banner => ({ kicker: section, title: "A note from Studio1.", label: "note.fig" });
@@ -54,6 +55,16 @@ const BANNERS: Record<EmailPipeline, Record<string, Banner>> = {
     decline: { kicker: "Hackathons · Update", title: "An update on your registration.", label: "update.fig" },
     custom: NOTE("Hackathons"),
   },
+  campus: {
+    confirmation: { kicker: "Studio1 Across the Campus · Application received", title: "Thanks for reaching out.", label: "received.fig" },
+    call: { kicker: "Studio1 Across the Campus · Next step", title: "Let's talk.", label: "call.fig" },
+    "in-kind": { kicker: "Studio1 Across the Campus · Our offer", title: "Here's how we can help.", label: "offer.fig" },
+    "more-info": { kicker: "Studio1 Across the Campus · Follow-up", title: "A few quick questions.", label: "questions.fig" },
+    accept: { kicker: "Studio1 Across the Campus · Confirmed", title: "We're in.", label: "confirmed.fig" },
+    "not-now": { kicker: "Studio1 Across the Campus · Update", title: "Not this time.", label: "update.fig" },
+    decline: { kicker: "Studio1 Across the Campus · Update", title: "An update on your application.", label: "update.fig" },
+    custom: NOTE("Studio1 Across the Campus"),
+  },
 };
 
 /** Bump to redraw every header (the images cache for a year). */
@@ -75,7 +86,7 @@ export function bannerFor(pipeline: EmailPipeline, template: string): { key: str
 
 /** For the image route: the banner a key names, or null. */
 export function bannerByKey(key: string): Banner | null {
-  const match = /^(jobs|cohort|hackathons)-([a-z-]+)$/.exec(key);
+  const match = /^(jobs|cohort|hackathons|campus)-([a-z-]+)$/.exec(key);
   if (!match) return null;
   const banners = BANNERS[match[1] as EmailPipeline];
   return Object.hasOwn(banners, match[2]) ? banners[match[2]] : null;

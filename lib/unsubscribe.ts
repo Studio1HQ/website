@@ -13,6 +13,7 @@ const FORM_TABLES = [
   "job_applications",
   "hackathon_registrations",
   "devrel_cohort_applications",
+  "campus_applications",
 ] as const;
 
 const encoder = new TextEncoder();

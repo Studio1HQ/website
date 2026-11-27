@@ -1012,3 +1012,50 @@ export async function entryExtras(section: Section, record: Row, emails?: Return
       : [],
   };
 }
+
+export type CampusEntry = {
+  id: string;
+  name: string;
+  community: string;
+  college: string;
+  committee: string;
+  turnout: string;
+  status: string;
+  createdAt: string;
+  /** Picked "Financial support" on the form. */
+  asksFunding: boolean;
+};
+
+/**
+ * Campus applications for the Community overview: the newest few, and how
+ * many still wait for a first look. Reads the same kept rows as the list.
+ */
+export async function campusOverview(
+  limit = 4,
+): Promise<
+  | { ok: true; total: number; fresh: number; overdue: number; latest: CampusEntry[] }
+  | { ok: false; message: string }
+> {
+  const section = SECTIONS.campus;
+  await requireSection(section);
+  const result = await loadSection(section);
+  if (!result.ok) return { ok: false, message: "Couldn't load the campus applications." };
+  const rows = [...result.rows].sort((a, b) => String(b.created_at ?? "").localeCompare(String(a.created_at ?? "")));
+  return {
+    ok: true,
+    total: rows.length,
+    fresh: rows.filter((row) => row.review_status === "new").length,
+    overdue: rows.filter((row) => isOverdue(row, section)).length,
+    latest: rows.slice(0, limit).map((row) => ({
+      id: String(row.id),
+      name: String(row.name ?? ""),
+      community: String(row.community_name ?? ""),
+      college: String(row.college ?? ""),
+      committee: row.core_team_size === null || row.core_team_size === undefined ? "" : String(row.core_team_size),
+      turnout: String(row.event_turnout ?? ""),
+      status: String(row.review_status ?? "new"),
+      createdAt: String(row.created_at ?? ""),
+      asksFunding: Array.isArray(row.support) && row.support.includes("cash"),
+    })),
+  };
+}

@@ -22,7 +22,7 @@ import { Card, PageHeader, StatusBadge } from "@/components/internal/ui";
 
 export const metadata: Metadata = { title: "Email templates" };
 
-const PIPELINES: FormKey[] = ["jobs", "cohort", "hackathons"];
+const PIPELINES: FormKey[] = ["jobs", "cohort", "hackathons", "campus"];
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> };
 

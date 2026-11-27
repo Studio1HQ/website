@@ -13,13 +13,13 @@ import "server-only";
  *
  * Env: RESEND_API_KEY. Optional overrides: EMAIL_FROM (the fallback sender,
  * default "Studio1 <contact@studio1hq.com>") and EMAIL_FROM_JOBS,
- * EMAIL_FROM_HACKATHONS, EMAIL_FROM_COHORT. With no key,
+ * EMAIL_FROM_HACKATHONS, EMAIL_FROM_COHORT, EMAIL_FROM_CAMPUS. With no key,
  * isMailerConfigured() is false: the composer offers "Open in mail app" and
  * confirmations are skipped.
  */
 
 /** The program an email is about; each can send from its own domain. */
-export type MailStream = "jobs" | "hackathons" | "cohort";
+export type MailStream = "jobs" | "hackathons" | "cohort" | "campus";
 
 const DEFAULT_FROM = "Studio1 <contact@studio1hq.com>";
 
@@ -37,6 +37,8 @@ const STREAMS: Record<MailStream, { env: string; from?: string; replyTo: string 
   // No subdomain of its own (the Resend plan holds 3 domains): sends from
   // studio1hq.com.
   cohort: { env: "EMAIL_FROM_COHORT", replyTo: "contact@studio1hq.com" },
+  // Studio1 Across the Campus: the same, from studio1hq.com.
+  campus: { env: "EMAIL_FROM_CAMPUS", replyTo: "contact@studio1hq.com" },
 };
 
 function fallbackFrom() {

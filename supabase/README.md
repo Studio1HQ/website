@@ -9,6 +9,7 @@ key can't read or write anything here.
 | Hackathon registration | `/hackathons/[slug]` | `hackathon_registrations` | `app/api/hackathons/register` |
 | Job application (hiring) | `/careers/[id]` | `job_applications` (+ résumé PDFs in the private `job-applications` bucket) | `app/api/careers/apply` |
 | DevRel Cohort application | `/devrel-cohort` | `devrel_cohort_applications` | `app/api/devrel-cohort/apply` |
+| Studio1 Across the Campus application (community support) | `/community/campus` | `campus_applications` | `app/api/community/campus` |
 
 The other "contact us" points on the site are `mailto:` links and store nothing.
 
@@ -80,12 +81,12 @@ The review fields, views and saved queries the team uses are documented in the t
 
 ### Slack alerts
 
-Each new job application, hackathon registration and DevRel Cohort
-application posts to Slack: what they applied for, the city or country they
+Each new job application, hackathon registration, DevRel Cohort
+application and campus application posts to Slack: what they applied for, the city or country they
 gave and a link into the dashboard. Never their name, email or answers. Make an incoming webhook (Slack
 → Apps → Incoming Webhooks → Add to a channel) and set `SLACK_WEBHOOK_URL`;
-`SLACK_WEBHOOK_URL_JOBS`, `_HACKATHONS` and `_COHORT` send a form to its own
-channel.
+`SLACK_WEBHOOK_URL_JOBS`, `_HACKATHONS`, `_COHORT` and `_CAMPUS` send a form to
+its own channel.
 
 ### Blog numbers
 

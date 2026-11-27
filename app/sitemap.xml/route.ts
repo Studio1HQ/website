@@ -45,6 +45,7 @@ const PAGE_LAST_MODIFIED: Record<string, string> = {
   "/team": "2026-11-08",
   "/events": "2026-11-07",
   "/community": "2026-11-20",
+  "/community/campus": "2026-11-27",
   "/calendar": "2026-11-07",
   "/brand": "2026-11-07",
 };
@@ -182,6 +183,7 @@ export async function GET() {
     { path: "/team", lastModified: lastModified("/team"), priority: 0.7 },
     { path: "/events", lastModified: lastModified("/events"), priority: 0.7 },
     { path: "/community", lastModified: lastModified("/community"), priority: 0.7 },
+    { path: "/community/campus", lastModified: lastModified("/community/campus"), priority: 0.6 },
     {
       path: "/calendar",
       lastModified: lastModified("/calendar"),

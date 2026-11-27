@@ -16,6 +16,13 @@ describe("section access", () => {
     expect(sectionAccess(viewer("blog_writer"), SECTIONS.hackathons)).toBeNull();
   });
 
+  it("puts campus applications with the community team, not hiring", () => {
+    expect(sectionAccess(viewer("community_manager"), SECTIONS.campus)).toBe("edit");
+    expect(sectionAccess(viewer("community_viewer"), SECTIONS.campus)).toBe("read");
+    expect(sectionAccess(viewer("hiring_reviewer"), SECTIONS.campus)).toBeNull();
+    expect(canExportSection(viewer("community_manager"), SECTIONS.campus)).toBe(true);
+  });
+
   it("keeps the hiring pipelines away from community staff", () => {
     for (const key of ["jobs", "cohort"] as const) {
       expect(sectionAccess(viewer("community_manager"), SECTIONS[key])).toBeNull();
@@ -25,10 +32,10 @@ describe("section access", () => {
   });
 
   it("lets admins into everything, and only admins into the audiences", () => {
-    expect(readableSections(viewer("admin"))).toEqual(["jobs", "hackathons", "cohort", "subscribers", "partner-pool"]);
+    expect(readableSections(viewer("admin"))).toEqual(["jobs", "hackathons", "cohort", "campus", "subscribers", "partner-pool"]);
     expect(readableSections(viewer("hiring_reviewer"))).toEqual(["jobs", "cohort"]);
-    expect(readableSections(viewer("community_manager"))).toEqual(["hackathons"]);
-    expect(readableSections(viewer("community_viewer", "hiring_viewer"))).toEqual(["jobs", "hackathons", "cohort"]);
+    expect(readableSections(viewer("community_manager"))).toEqual(["hackathons", "campus"]);
+    expect(readableSections(viewer("community_viewer", "hiring_viewer"))).toEqual(["jobs", "hackathons", "cohort", "campus"]);
     expect(sectionAccess(viewer("hiring_reviewer"), SECTIONS.subscribers)).toBeNull();
   });
 
