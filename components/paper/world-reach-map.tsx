@@ -4,9 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import world from "@/data/world-reach.json";
 import { EASE } from "@/components/home/ui";
 import Logo from "@/components/ui/svgs/logo";
-import { LocaleFlag } from "@/components/localization/locale-flag";
-import { MAP_FLAGS } from "@/components/ui/map-flags";
-import { cn } from "@/lib/utils";
+import { CountryFlag } from "./country-flag";
 import { CountryLocator, dotsPath } from "./country-locator";
 import { INK, PRINT } from "./paper-hero";
 
@@ -45,37 +43,13 @@ const LIT_PATHS = Object.fromEntries(
   ]),
 );
 
-/** Round flag for a reach country (India comes from the locale flags). */
-export function CountryFlag({
-  country,
-  className,
-}: {
-  country: string;
-  className?: string;
-}) {
-  if (country === "India")
-    return <LocaleFlag locale="hi" className={cn("size-4", className)} />;
-  const flag = MAP_FLAGS[country];
-  if (!flag) return null;
-  return (
-    <svg
-      viewBox="0 0 10 10"
-      aria-hidden
-      className={cn(
-        "size-4 shrink-0 rounded-full ring-1 ring-black/10",
-        className,
-      )}
-    >
-      {flag}
-    </svg>
-  );
-}
-
 /**
  * Dotted world map with every country Studio1 works with lit in orange
  * (precomputed from dotted-map's country outlines into data/world-reach.json).
  * Hovering a country, on the map or in the list, dims the rest and opens a
- * card with that country's own regional map.
+ * card with that country's own regional map. Heavy (about 17,600 dots), so
+ * the homepage loads it lazily (ReachMapSlot in paper-sections.tsx); keep
+ * its shape (MAP.width × MAP.height) in step with REACH_MAP_RATIO there.
  */
 export function WorldReachMap({
   hq,

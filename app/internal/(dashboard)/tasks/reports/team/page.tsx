@@ -88,6 +88,9 @@ export default async function TeamReportPage({
       description="How everyone's week or month went, from attendance, Tasks and client work. Only the founders see this."
       actions={
         <>
+          <Link href="/tasks/reports/review" className={buttonClass("secondary")}>
+            Monthly review
+          </Link>
           <span
             role="tablist"
             aria-label="Period"

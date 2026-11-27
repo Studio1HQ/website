@@ -2,6 +2,7 @@ import { readdirSync } from "node:fs";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import imageLoader, { imageWidth } from "./image-loader";
+import { imageUrl } from "./image-url";
 import { IMAGE_FOLDERS } from "./image-config.mjs";
 import {
   importedImages,
@@ -45,6 +46,34 @@ describe("imageLoader", () => {
     ).toBe("/_img/96/_media/nathan.webp");
   });
 
+  it("sends SVGs, unchanged, to /_img/as-is", () => {
+    expect(
+      imageLoader({ src: "/assets/site/studio1-logo.svg", width: 640 }),
+    ).toBe("/_img/as-is/assets/site/studio1-logo.svg");
+    expect(
+      imageLoader({
+        src: "/_next/static/media/Crawlee-full.0a1b2c3d.svg",
+        width: 256,
+      }),
+    ).toBe("/_img/as-is/_media/Crawlee-full.svg");
+    expect(imageLoader({ src: "/brand/logo.svg", width: 640 })).toBe(
+      "/brand/logo.svg",
+    );
+  });
+
+  it("leaves relative paths alone, even ones that look like a site folder", () => {
+    expect(imageUrl({ src: "docs/assets/demo.png", width: 640 })).toBe(
+      "docs/assets/demo.png",
+    );
+    expect(imageUrl({ src: "assets/x.png", width: 640 })).toBe("assets/x.png");
+  });
+
+  it("sizes AVIFs like the other photos", () => {
+    expect(
+      imageLoader({ src: "/products/raah-poster.avif", width: 1000 }),
+    ).toBe("/_img/1280/products/raah-poster.webp");
+  });
+
   it("serves blog covers as their WebP, keeping the version", () => {
     expect(
       imageLoader({ src: "/blog-cover/aeo-guide?v=5-2026-11-18", width: 3840 }),
@@ -84,6 +113,9 @@ describe("imageLoader", () => {
         width: 256,
       }),
     ).toBe("https://cdn.studio1hq.com/_img/256/_media/jozu.webp");
+    expect(imageUrl({ src: "/assets/site/studio1-logo.svg", width: 96 })).toBe(
+      "https://cdn.studio1hq.com/_img/as-is/assets/site/studio1-logo.svg",
+    );
     expect(imageLoader({ src: "/blog-cover/aeo-guide?v=5", width: 640 })).toBe(
       "https://cdn.studio1hq.com/blog-cover/aeo-guide/cover.webp?v=5",
     );
@@ -164,6 +196,17 @@ describe("image-variants script", () => {
         { file: "/p/assets/x.webp", name: "assets/x.webp" },
       ]),
     ).toThrow(/would both be/);
+  });
+
+  it("copies SVGs as they are and never renames them to .webp", async () => {
+    const files = sizedFiles([
+      ...(await publicImages()),
+      ...(await importedImages()),
+    ]);
+    const targets = files.map(({ target }) => target);
+    expect(targets).toContain("assets/site/studio1-logo.svg");
+    expect(targets).toContain("_media/Crawlee-full.svg");
+    expect(targets).toContain("products/raah-poster.webp");
   });
 
   it("finds the images imported in code, each with its own file name", async () => {

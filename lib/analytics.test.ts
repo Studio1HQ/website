@@ -64,6 +64,14 @@ describe("gaInitScript", () => {
     expect(config).toBeLessThan(load);
   });
 
+  it("loads gtag.js straight away on wider screens, after the page on phones", () => {
+    const phones = script.indexOf('matchMedia("(max-width: 767px)")');
+    const afterLoad = script.indexOf('addEventListener("load"');
+    expect(phones).toBeGreaterThan(script.indexOf('gtag("config"'));
+    expect(afterLoad).toBeGreaterThan(phones);
+    expect(script).toMatch(/\}else load\(\);$/);
+  });
+
   it("denies ad storage everywhere and lists every consent region", () => {
     expect(script).toContain('ad_storage:"denied"');
     expect(script).toContain('ad_user_data:"denied"');

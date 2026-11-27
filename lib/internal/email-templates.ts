@@ -270,19 +270,80 @@ export const EMAIL_TEMPLATES: Partial<Record<SectionKey, EmailTemplate[]>> = {
     },
     CUSTOM,
   ],
+  // Studio1 Across the Campus (/community/campus): communities asking for support.
+  // We support mostly with people and resources; "Support without funding"
+  // answers funding requests kindly.
+  campus: [
+    {
+      key: "call",
+      label: "Set up a call",
+      group: "Move forward",
+      subject: "Studio1 Across the Campus: let's talk about {program}",
+      body: `Hi {first_name},\n\nThanks for telling us about {program} and the event you're planning. We'd like to hear more.\n\nCould you pick a time for a short call with our community team, using the button below? We'd love to hear more about your community and the event, and share how we could help.\n\n${SIGN_OFF}`,
+      call: true,
+      status: "in_talks",
+    },
+    {
+      key: "in-kind",
+      label: "Support without funding",
+      group: "Move forward",
+      subject: "How Studio1 can help {program}",
+      body: `Hi {first_name},\n\nThanks for applying with {program}. We usually support events with people and resources rather than funding, and we'd love to help with yours. Here's what we can bring:\n\n- [what Studio1 can give: speaker, mentors, swag, promotion, sponsor intros]\n\nIf that sounds good, reply to this email and we'll plan the details together.\n\n${SIGN_OFF}`,
+      call: false,
+      status: "in_talks",
+    },
+    {
+      key: "accept",
+      label: "Support confirmed",
+      group: "Move forward",
+      subject: "Studio1 is supporting {program}",
+      body: `Hi {first_name},\n\nGood news: Studio1 will support your event. Here's what we'll bring:\n\n- [what Studio1 will provide]\n\nAnd how we'll partner, as we discussed:\n\n- [what you agreed: a talk slot, partner logo, a post, a recap]\n\nNext steps: [dates, who to contact, what to send us]. Reply to this email with any questions.\n\n${SIGN_OFF}`,
+      call: false,
+      status: "accepted",
+    },
+    {
+      key: "more-info",
+      label: "Need more details",
+      group: "Follow up",
+      subject: "A few questions about {program}",
+      body: `Hi {first_name},\n\nThanks for applying with {program}. Before we decide, could you tell us a little more?\n\n- [your question]\n\nReply to this email and we'll pick it up from there.\n\n${SIGN_OFF}`,
+      call: false,
+      status: "reviewing",
+    },
+    {
+      key: "not-now",
+      label: "Not this time",
+      group: "Close out",
+      subject: "Your Studio1 Across the Campus application",
+      body: `Hi {first_name},\n\nThanks for applying with {program}. We can't support this event: [the reason, e.g. the dates clash with another event we're running].\n\nWe'd still like to work with your community. Apply again for your next event, and we'll take another look.\n\n${SIGN_OFF}`,
+      call: false,
+      status: "on_hold",
+    },
+    {
+      key: "decline",
+      label: "Rejected",
+      group: "Close out",
+      subject: "Your Studio1 Across the Campus application",
+      body: `Hi {first_name},\n\nThanks for applying with {program}. After reading it, we can't support this event. We get more requests than we can take on, so we pick the ones where our help fits best.\n\nYou're welcome to apply again for a future event.\n\n${SIGN_OFF}`,
+      call: false,
+      status: "rejected",
+    },
+    CUSTOM,
+  ],
 };
 
 /** The forms that send an automatic confirmation when someone submits. */
-export type FormKey = "jobs" | "hackathons" | "cohort";
+export type FormKey = "jobs" | "hackathons" | "cohort" | "campus";
 
 /** `sent_by` in internal_email_log for emails nobody sent by hand. */
 export const AUTOMATIC_SENDER = "automatic";
 
 /** One light "while you wait" line per form: applicants, not clients. */
-const WHILE_YOU_WAIT: Record<"jobs" | "cohort" | "hackathons", string> = {
+const WHILE_YOU_WAIT: Record<FormKey, string> = {
   jobs: `While you wait, have a read of [our blog](${baseUrl}/blog), or see our other [open roles](${baseUrl}/careers).`,
   cohort: `While you wait, have a read of [our blog](${baseUrl}/blog), or pick up an issue in [our open-source projects](${baseUrl}/oss).`,
   hackathons: `While you wait, you could warm up on [our open-source projects](${baseUrl}/oss).`,
+  campus: `While you wait, see the [meetups and hackathons we've been part of](${baseUrl}/community).`,
 };
 
 /**
@@ -302,6 +363,12 @@ export const CONFIRMATION_EMAILS: Record<FormKey, { subject: string; body: strin
     subject: "We've received your registration for {program}",
     body: `Hi {first_name},\n\nThanks a lot for registering for {program}. One of our team members will review your registration shortly, and we'll email you to confirm your spot. The schedule, the brief and the joining details follow before the start.\n\n${WHILE_YOU_WAIT.hackathons}\n\nIf you have a question before then, reply to this email.\n\nThe Studio1 team`,
   },
+  campus: {
+    subject: "We've received your Studio1 Across the Campus application",
+    // No {program}: it would be the community name the applicant typed, and
+    // this goes out before anyone has checked the address or the entry.
+    body: `Hi {first_name},\n\nThanks for applying to Studio1 Across the Campus. Our community team reads every application and will be in touch soon to learn more.\n\nGood to know: we usually support events with people and resources, like talks, mentors, swag, promotion and introductions to devtool teams. Financial support is something we can offer only now and then.\n\n${WHILE_YOU_WAIT.campus}\n\nIf you have a question before then, reply to this email.\n\nThe Studio1 team`,
+  },
 };
 
 export type EmailVars = { first_name: string; program: string; sender: string };
@@ -311,6 +378,7 @@ export const SAMPLE_VARS: Record<FormKey, { first_name: string; program: string 
   jobs: { first_name: "Priya", program: "Growth Lead" },
   cohort: { first_name: "Priya", program: "DevRel Cohort 01" },
   hackathons: { first_name: "Priya", program: "the Studio1 Hackathon" },
+  campus: { first_name: "Priya", program: "GDG on Campus JU" },
 };
 
 /** A pipeline's emails as the templates page lists them: the automatic confirmation first. */
@@ -374,6 +442,8 @@ export function unfilledParts(text: string) {
 
 /** The footer line saying why someone got the email. */
 export function reasonFor(form: string, program: string) {
+  // Fixed wording: a campus entry's program is text the applicant typed.
+  if (form === "campus") return "You're getting this because you applied to Studio1 Across the Campus.";
   return `You're getting this because you ${form === "hackathons" ? "registered for" : "applied for"} ${program} at Studio1.`;
 }
 

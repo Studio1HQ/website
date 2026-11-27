@@ -2,6 +2,7 @@ import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { CaseStudyQuote } from "@/components/case-studies/case-study-quote";
 import { TweetEmbed } from "@/components/case-studies/tweet-embed";
 import { resolveCaseStudyImageAlt } from "@/lib/case-studies";
+import { LARGEST_WIDTH, imageUrl } from "@/lib/image-url";
 import { mdxComponents } from "@/mdx-components";
 
 function slugify(text: string): string {
@@ -70,7 +71,12 @@ function CaseStudyImage({
     // eslint-disable-next-line @next/next/no-img-element
     <img
       {...props}
-      src={resolvedSrc}
+      // The CDN's WebP, at the image's own size up to 1920px (see BlogImage).
+      src={
+        resolvedSrc
+          ? imageUrl({ src: resolvedSrc, width: LARGEST_WIDTH })
+          : undefined
+      }
       alt={resolvedAlt}
       title={title ?? undefined}
       loading="lazy"

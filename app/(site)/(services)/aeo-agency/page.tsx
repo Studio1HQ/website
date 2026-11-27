@@ -193,7 +193,7 @@ const aeoCaseStudyProofs: CaseStudyResultData[] = [
       { value: "55.6K", label: "from Google" },
     ],
     // DEV's traffic sources for the post, with chatgpt.com and perplexity.ai
-    art: "https://mintcdn.com/studio1/NFIzOkeC-xlQv6Ju/images/webcrumbs-traffic.png?fit=max&auto=format&n=NFIzOkeC-xlQv6Ju&q=85&s=1d5c1a660ff0cd432809c1c54f62d463",
+    art: "/case-studies/webcrumbs/webcrumbs-traffic.webp",
   },
 ];
 

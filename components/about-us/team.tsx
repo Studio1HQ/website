@@ -15,6 +15,7 @@ import {
   XLogo,
 } from "@phosphor-icons/react/dist/ssr";
 import { teamMembers } from "@/constants/data";
+import { imageUrl } from "@/lib/image-url";
 import { PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 import { PixelPortrait } from "@/components/about-us/pixel-portrait";
@@ -174,8 +175,8 @@ function TeamPanel() {
             }}
             style={{
               background: PRINT,
-              maskImage: `url(/assets/site/hand-${side}.png)`,
-              WebkitMaskImage: `url(/assets/site/hand-${side}.png)`,
+              maskImage: `url(${imageUrl({ src: `/assets/site/hand-${side}.png`, width: 640 })})`,
+              WebkitMaskImage: `url(${imageUrl({ src: `/assets/site/hand-${side}.png`, width: 640 })})`,
               maskSize: "contain",
               WebkitMaskSize: "contain",
               maskRepeat: "no-repeat",

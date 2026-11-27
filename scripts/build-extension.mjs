@@ -1,20 +1,17 @@
-// Packs the Studio1 Connect browser extension (extension/connect).
+// Packs the Studio1 Connect browser extension (extension/connect) for the
+// Chrome Web Store, where the team installs it (lib/internal/extension/store.ts).
 //
-//   pnpm extension:zip    public/downloads/studio1-connect.zip, the file the
-//                         dashboard's Connections page offers. Everything sits
-//                         in one studio1-connect/ folder, so it unzips tidily
-//                         for "Load unpacked" (Chrome, Edge, Brave, Arc).
 //   pnpm extension:store  extension/dist/studio1-connect-<version>-store.zip,
-//                         the file to upload to the Chrome Web Store:
-//                         manifest.json at the top of the zip (the store
-//                         refuses it in a folder), and without the local dev
-//                         addresses (localhost, dashboard.localhost), so the
-//                         store build asks for the live dashboard only.
+//                         the file to upload: manifest.json at the top of the
+//                         zip (the store refuses it in a folder), and without
+//                         the local dev addresses (localhost,
+//                         dashboard.localhost), so the store build asks for the
+//                         live dashboard only.
 //
-// Run the first after changing the extension. Before each store upload, raise
-// "version" in extension/connect/manifest.json: the store needs it higher
-// than the last one it accepted. A plain zip (stored, not compressed): no
-// dependencies, and the files are small.
+// Before each upload, raise "version" in extension/connect/manifest.json: the
+// store needs it higher than the last one it accepted. To try a change
+// locally, use Load unpacked on extension/connect itself. A plain zip
+// (stored, not compressed): no dependencies, and the files are small.
 
 import { mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { join, relative, sep } from "node:path";
@@ -22,7 +19,6 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const SOURCE = join(ROOT, "extension", "connect");
-const STORE = process.argv.includes("--store");
 
 const CRC_TABLE = Array.from({ length: 256 }, (_, n) => {
   let c = n;
@@ -104,17 +100,16 @@ function zip(entries) {
 }
 
 const version = JSON.parse(readFileSync(join(SOURCE, "manifest.json"), "utf8")).version;
-const folder = STORE ? "" : "studio1-connect/";
 const entries = files(SOURCE)
   .sort()
   .map((path) => {
     const name = relative(SOURCE, path).split(sep).join("/");
     const data = readFileSync(path);
-    return { name: `${folder}${name}`, data: STORE && name === "manifest.json" ? storeManifest(data.toString("utf8")) : data };
+    return { name, data: name === "manifest.json" ? storeManifest(data.toString("utf8")) : data };
   });
 
-const outDir = STORE ? join(ROOT, "extension", "dist") : join(ROOT, "public", "downloads");
-const out = join(outDir, STORE ? `studio1-connect-${version}-store.zip` : "studio1-connect.zip");
+const outDir = join(ROOT, "extension", "dist");
+const out = join(outDir, `studio1-connect-${version}-store.zip`);
 mkdirSync(outDir, { recursive: true });
 writeFileSync(out, zip(entries));
 console.log(`${relative(ROOT, out)}: ${entries.length} files, version ${version}`);

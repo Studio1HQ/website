@@ -1,6 +1,7 @@
 import { isValidElement } from "react";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { mdxComponents } from "@/mdx-components";
+import { LARGEST_WIDTH, imageUrl } from "@/lib/image-url";
 import { CodeBlock } from "@/components/blog/code-block";
 import { withNumericText } from "@/components/ui/num";
 
@@ -199,7 +200,9 @@ function BlogImage({
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           {...props}
-          src={src}
+          // The CDN's WebP, at the image's own size up to 1920px: no srcset,
+          // which would change the size these natural-size images show at.
+          src={imageUrl({ src, width: LARGEST_WIDTH })}
           alt={alt ?? ""}
           title={title ?? undefined}
           loading="lazy"
@@ -275,7 +278,11 @@ function BlogPre({ children }: ComponentPropsWithoutRef<"pre">) {
 
 function YouTubeEmbed({ url }: { url?: string }) {
   // Only ever a YouTube embed, whatever the post says.
-  if (!url || !/^https:\/\/www\.youtube\.com\/embed\/[A-Za-z0-9_-]{6,}$/.test(url)) return null;
+  if (
+    !url ||
+    !/^https:\/\/www\.youtube\.com\/embed\/[A-Za-z0-9_-]{6,}$/.test(url)
+  )
+    return null;
   return (
     <figure className="not-prose mx-auto my-12 w-full overflow-hidden rounded-[6px] bg-white p-2 shadow-[0_1px_0_rgba(27,23,20,0.06)] ring-1 ring-inset ring-[#141414]/[0.08]">
       <div className="aspect-video w-full overflow-hidden rounded-[6px] bg-[#141414]">

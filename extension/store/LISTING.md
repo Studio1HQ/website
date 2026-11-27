@@ -2,6 +2,8 @@
 
 Everything the store's developer dashboard asks for, in the order of its tabs. Studio1 Connect is **Unlisted**: only people with the link can install it, and only Studio1 team members (and invited writers) can sign in.
 
+**Live since 27 Nov 2026:** https://chromewebstore.google.com/detail/studio1-connect/cipaggikjejojcnopjmebcpdpklbpfcl (item ID `cipaggikjejojcnopjmebcpdpklbpfcl`, kept in `lib/internal/extension/store.ts`). The dashboard's Connections page links there with **Add to your browser**; there's no zip download any more.
+
 Dashboard: https://chrome.google.com/webstore/devconsole
 
 ## One time: the developer account
@@ -18,7 +20,7 @@ pnpm extension:store
 
 Upload `extension/dist/studio1-connect-<version>-store.zip`. It has `manifest.json` at the top (the store refuses a zip with it in a folder), and leaves out the local dev addresses, so it asks for `dashboard.studio1hq.com` only.
 
-**For every later update:** raise `version` in `extension/connect/manifest.json`, then run `pnpm extension:store` and `pnpm extension:zip`. Upload the new zip under **Package** and submit it for review. Once it's approved, everyone's copy updates on its own.
+**For every later update:** raise `version` in `extension/connect/manifest.json`, then run `pnpm extension:store`. Upload the new zip under **Package** and submit it for review. Once it's approved, everyone's copy updates on its own.
 
 ## Store listing
 
@@ -100,10 +102,9 @@ Without an account, the extension shows its sign-in screen. An address outside t
 The screenshots show the signed-in views (tasks, notifications, profile) with sample data. If you need to see them live, reply to this email and we will set up a reviewer account for you.
 ```
 
-## After approval
+## Moving off the old zip
 
-- Share the listing link (`https://chromewebstore.google.com/detail/<id>`) with the team, and put it on the dashboard's Connections page in place of the zip download.
-- Anyone who loaded the zip with "Load unpacked" should remove that copy and install from the store. The store copy has its own ID, so they sign in once more.
+Anyone who loaded the old zip with "Load unpacked" should remove that copy in `chrome://extensions` and add Connect from the store link. The store copy has its own ID, so they sign in once more; with both installed there are two toolbar icons.
 
 ## Remaking the images
 

@@ -129,6 +129,12 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      // Studio1 Sans for the site (public/fonts, `pnpm fonts:web`): the file
+      // names carry a version, so they can be cached for good.
+      {
+        source: "/fonts/:file(.+\\.woff2)",
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      },
       // The dashboard and the CMS can't be put in a frame on another site.
       // proxy.ts adds the dashboard's full script policy; this also covers
       // the paths the proxy doesn't see (file-like URLs).

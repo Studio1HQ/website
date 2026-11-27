@@ -65,11 +65,8 @@ const FILE_LIKE = /\.[^/]*$/;
  * keyed by email, draft images end in .webp. They keep their own caching.
  */
 const DASHBOARD_FILE_ROUTES = new Set(["team-file", "blog-media"]);
-/**
- * The public site's files a dashboard page loads (fonts, icons, pictures),
- * and the Connect extension's zip its Connections page offers.
- */
-const STATIC_FILE = /\.(?:png|jpe?g|webp|avif|gif|svg|ico|woff2?|ttf|otf|css|js|mjs|map|webmanifest|zip)$/i;
+/** The public site's files a dashboard page loads (fonts, icons, pictures). */
+const STATIC_FILE = /\.(?:png|jpe?g|webp|avif|gif|svg|ico|woff2?|ttf|otf|css|js|mjs|map|webmanifest)$/i;
 /** Public routes a dashboard page loads: the email header images in previews. */
 const PUBLIC_ROUTES = new Set(["og"]);
 

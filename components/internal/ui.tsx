@@ -151,6 +151,8 @@ const STATUS_TONE: Record<string, keyof typeof STATUS_TONES> = {
   confirmed: "sky",
   shortlisted: "violet",
   interviewing: "violet",
+  in_talks: "violet",
+  on_hold: "amber",
   offer: "amber",
   waitlisted: "amber",
   accepted: "emerald",

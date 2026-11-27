@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { MDXRemote } from "next-mdx-remote/rsc";
+import { remarkCdnImages } from "@/lib/remark-cdn-images";
 import remarkGfm from "remark-gfm";
 import { JobDetailPage } from "@/components/careers/job-detail-page";
 import { getJobById, getJobIds, getJobOpenings } from "@/lib/careers";
@@ -77,7 +78,9 @@ export default async function CareerJobPage({ params }: Props) {
       >
         <MDXRemote
           source={job.content}
-          options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
+          options={{
+            mdxOptions: { remarkPlugins: [remarkGfm, remarkCdnImages] },
+          }}
         />
       </JobDetailPage>
     </>

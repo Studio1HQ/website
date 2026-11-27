@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "motion/react";
+import { LARGEST_WIDTH, imageUrl } from "@/lib/image-url";
 import { cn } from "@/lib/utils";
 
 /** Size of each moving block, in CSS pixels. */
@@ -24,7 +25,7 @@ function noise(i: number, j: number) {
  * like the pixels are shifting, then settle back when the pointer leaves.
  */
 export function PixelPortrait({
-  src,
+  src: source,
   alt,
   className,
   trackCardPointer = false,
@@ -34,6 +35,10 @@ export function PixelPortrait({
   className?: string;
   trackCardPointer?: boolean;
 }) {
+  // The CDN copy at the largest width, which for these (dithered, under
+  // 1920px) is the file itself: a resize would blur the dots. The <Image> and
+  // the canvas draw the same file, so nothing shifts when they swap.
+  const src = imageUrl({ src: source, width: LARGEST_WIDTH });
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const reduceMotion = useReducedMotion();

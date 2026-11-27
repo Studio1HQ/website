@@ -4,6 +4,7 @@ import { useSyncExternalStore } from "react";
 import * as L from "lucide-react";
 import { ConnectMark } from "@/components/internal/connections/brand-logos";
 import { buttonClass } from "@/components/internal/ui";
+import { CONNECT_STORE_URL } from "@/lib/internal/extension/store";
 import { cn } from "@/lib/utils";
 
 type ConnectState = "missing" | "installed" | "signed-in";
@@ -79,23 +80,33 @@ export function ConnectApp() {
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <a
-            href="/downloads/studio1-connect.zip"
-            download
-            className={cn(buttonClass(state === "missing" ? "primary" : "ghost"), state !== "missing" && "text-[var(--i-muted)]")}
-          >
-            <L.Download strokeWidth={2} className="size-4" /> {state === "missing" ? "Download" : "Download again"}
-          </a>
+          {/* From the Chrome Web Store, so every copy updates on its own. */}
+          {state === "missing" ? (
+            <a href={CONNECT_STORE_URL} target="_blank" rel="noopener noreferrer" className={buttonClass("primary")}>
+              <L.Plus strokeWidth={2} className="size-4" /> Add to your browser
+            </a>
+          ) : (
+            <a
+              href={CONNECT_STORE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(buttonClass("ghost"), "text-[var(--i-muted)]")}
+            >
+              View in Chrome Web Store <L.ArrowUpRight strokeWidth={2} className="size-4" />
+            </a>
+          )}
         </div>
       </div>
 
       {/* The install steps, only until Connect is in this browser. */}
       {state === "missing" ? (
-        <ol className="mt-4 grid gap-3 rounded-2xl border border-dashed border-[var(--i-line-strong)] p-5 text-[13px] sm:grid-cols-3">
+        <ol className="mt-4 grid gap-3 rounded-2xl border border-dashed border-[var(--i-line-strong)] p-5 text-[13px] sm:grid-cols-2">
           {[
-            ["Download", "Get the zip above and unzip it."],
-            ["Add to your browser", "Extensions → turn on Developer mode → Load unpacked → pick the folder."],
-            ["Sign in", "Click Connect in the toolbar and sign in with your Studio1 email."],
+            [
+              "Add to your browser",
+              "Click the button above, then Add to Chrome in the store. Edge asks once to allow extensions from other stores.",
+            ],
+            ["Sign in", "Open Connect from the toolbar's puzzle-piece menu, pin it, and sign in with your Studio1 email."],
           ].map(([title, body], index) => (
             <li key={title} className="flex gap-3">
               <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[var(--i-sunken)] text-[12px] font-medium tabular-nums text-[var(--i-muted)] ring-1 ring-[var(--i-line)]">

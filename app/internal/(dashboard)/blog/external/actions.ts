@@ -57,7 +57,13 @@ export async function sendToDev(slug: unknown) {
 
   let source: string;
   try {
-    source = fs.readFileSync(path.join(process.cwd(), post.path), "utf8");
+    // Every site post is content/blog/<file>. Reading from that folder (not
+    // any path) keeps the build from tracing the whole project, public/
+    // images included, into this function: that went over Vercel's 250 MB.
+    source = fs.readFileSync(
+      path.join(process.cwd(), "content", "blog", path.basename(post.path)),
+      "utf8",
+    );
   } catch {
     back({ error: "Couldn't read that post's file. Try again in a minute." });
   }

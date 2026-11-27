@@ -10,6 +10,7 @@ import ProductChapter, {
   FeatureTile,
 } from "@/components/product/product-chapter";
 import { getProduct } from "@/constants/products";
+import { imageUrl } from "@/lib/image-url";
 import { NIGHT, PRINT } from "@/lib/paper";
 import { cn } from "@/lib/utils";
 
@@ -339,7 +340,10 @@ function NetworkWidget() {
                 <span className="flex min-w-0 items-center gap-1.5 text-[#141414]/65">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={`https://flagcdn.com/${route.country}.svg`}
+                    src={imageUrl({
+                      src: `/products/flags/${route.country}.svg`,
+                      width: 96,
+                    })}
                     alt=""
                     width={16}
                     height={12}

@@ -278,7 +278,6 @@ export function LogoCloud({ logos }: { logos: CloudLogo[] }) {
                 alt=""
                 width={16}
                 height={16}
-                unoptimized
                 className="size-4"
               />
             </motion.span>

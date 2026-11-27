@@ -9,6 +9,7 @@ import type { FormKey } from "@/lib/internal/email-templates";
  *   SLACK_WEBHOOK_URL_JOBS       optional: job applications go here instead
  *   SLACK_WEBHOOK_URL_HACKATHONS optional: hackathon registrations
  *   SLACK_WEBHOOK_URL_COHORT     optional: DevRel Cohort applications
+ *   SLACK_WEBHOOK_URL_CAMPUS     optional: Studio1 Across the Campus applications
  *
  * A title with the person's name, up to three short points about them and a
  * button into the dashboard, which asks for sign-in. No email address, links
@@ -39,6 +40,12 @@ const FORMS: Record<FormKey, { label: string; emoji: string; path: string; env: 
     env: "SLACK_WEBHOOK_URL_HACKATHONS",
   },
   cohort: { label: "New DevRel Cohort application", emoji: ":mortar_board:", path: "/cohort", env: "SLACK_WEBHOOK_URL_COHORT" },
+  campus: {
+    label: "New campus application",
+    emoji: ":school:",
+    path: "/community/applications",
+    env: "SLACK_WEBHOOK_URL_CAMPUS",
+  },
 };
 
 /** Slack reads <, > and & as markup; everything a visitor typed is escaped. */

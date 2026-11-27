@@ -14,7 +14,8 @@ import { PRINT } from "@/lib/paper";
 import type { CommunityData } from "@/lib/community";
 import { cn } from "@/lib/utils";
 
-const HOST = `mailto:contact@studio1hq.com?subject=${encodeURIComponent("Host a Studio1 meetup")}`;
+/** Studio1 Across the Campus: clubs and communities apply to host one with us. */
+const HOST = "/community/campus";
 const P = (p: string) => `/assets/events/${p}.webp`;
 
 /** The card's photo, still. */
@@ -159,9 +160,9 @@ export function WaysIn({ data, index }: { data: CommunityData; index: number }) 
             title={<>Meetups in <span style={{ color: PRINT }}>{totals.cities} cities</span></>}
             body="Evening talks and live demos, from Kolkata to Taipei. Real projects, honest questions, and food after. Run a club or a community? Bring one to your city."
             action={
-              <a href={HOST} className={primary}>
+              <Link href={HOST} className={primary}>
                 Host a meetup {arrow}
-              </a>
+              </Link>
             }
           />
           <Way

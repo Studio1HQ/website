@@ -15,7 +15,7 @@ import { requireMember } from "@/lib/internal/session";
 import { isMailerConfigured, sendMail } from "@/lib/mailer";
 import { unsubscribeUrl } from "@/lib/unsubscribe";
 
-const PIPELINES: FormKey[] = ["jobs", "cohort", "hackathons"];
+const PIPELINES: FormKey[] = ["jobs", "cohort", "hackathons", "campus"];
 
 export type TestSendResult = { ok: true; to: string } | { ok: false; message: string };
 
