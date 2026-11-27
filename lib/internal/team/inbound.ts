@@ -341,6 +341,19 @@ async function resendGet<T>(path: string): Promise<ApiResult<T>> {
   }
 }
 
+/**
+ * One received email as Resend's Receiving API has it (headers, text, html,
+ * message id), for the leads mailbox (lib/internal/inbound/mail.ts). The
+ * answer is untrusted text; `retry` says whether asking again could help.
+ */
+export async function readReceivedEmail(
+  emailId: string,
+): Promise<{ ok: true; email: Record<string, unknown> } | { ok: false; status: number; retry: boolean }> {
+  const full = await resendGet<Record<string, unknown>>(`/emails/receiving/${encodeURIComponent(emailId)}`);
+  if (!full.ok) return full;
+  return { ok: true, email: full.json && typeof full.json === "object" ? full.json : {} };
+}
+
 /** SPF or DKIM verdict as a word ("pass", "fail"…), whatever shape it comes in. */
 function verdict(value: unknown): string | null {
   if (typeof value === "string") return value.toLowerCase();
@@ -350,6 +363,17 @@ function verdict(value: unknown): string | null {
     return typeof inner === "string" ? inner.toLowerCase() : null;
   }
   return null;
+}
+
+/**
+ * Whether the receiving provider itself says the From domain passed DMARC:
+ * the only proof of who sent a mail, since a sender controls every header in
+ * it. False when the verdict is missing or anything but "pass". Used by
+ * invoice intake and by the leads mailbox (lib/internal/inbound/mail.ts).
+ */
+export function dmarcPassed(authentication: unknown): boolean {
+  if (!authentication || typeof authentication !== "object") return false;
+  return verdict((authentication as Record<string, unknown>).dmarc) === "pass";
 }
 
 function isPdf(item: ReceivedAttachment) {
@@ -599,8 +623,7 @@ export async function handleReceivedEmail(data: unknown): Promise<IntakeResult> 
   // added) gets "none", which counts as unverified.
   const spf = verdict(email.authentication?.spf);
   const dkim = verdict(email.authentication?.dkim);
-  const dmarc = verdict(email.authentication?.dmarc);
-  const verified = dmarc === "pass";
+  const verified = dmarcPassed(email.authentication);
   if (spf === "fail" && dkim === "fail") flags.push("Failed the sender checks (SPF and DKIM): it may not be from them");
   else if (!verified) flags.push("Couldn't verify the sender (no DMARC pass): check it's really from them");
 

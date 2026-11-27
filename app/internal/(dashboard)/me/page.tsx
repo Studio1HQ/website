@@ -12,7 +12,8 @@ import { isIn, occurrences } from "@/lib/internal/calls/shared";
 import { cardChoices, loadWeekCards, teammates } from "@/lib/internal/tasks/load";
 import { isDateKey, weekStart } from "@/lib/internal/clients/schema";
 import { earliestCardDay, onDay } from "@/lib/internal/tasks/calendar";
-import { isAdmin, requireMember } from "@/lib/internal/session";
+import { waitingLeads } from "@/lib/internal/inbound/my-day";
+import { canSeeInbound, isAdmin, requireMember } from "@/lib/internal/session";
 import { listDays } from "@/lib/internal/team/attendance";
 import { listPayslips } from "@/lib/internal/team/payroll";
 import { listReimbursements } from "@/lib/internal/team/reimbursements";
@@ -110,7 +111,7 @@ export default async function MyDayPage({
   // a past month, or the 1st, needs a read of its own.
   const yesterday = shiftDay(now.date, -1);
   const inMonth = month === current && monthOf(yesterday) === current;
-  const [monthDays, recentDays, payslips, claims, work, options, calls, team] = await Promise.all([
+  const [monthDays, recentDays, payslips, claims, work, options, calls, team, leads] = await Promise.all([
     listDays({ from: `${month}-01`, to: `${month}-${String(daysInMonth(month)).padStart(2, "0")}`, emails: [person.email] }),
     inMonth ? null : listDays({ from: yesterday, to: now.date, emails: [person.email] }),
     listPayslips({ email: person.email, status: "sent" }),
@@ -121,6 +122,8 @@ export default async function MyDayPage({
     cardChoices(staff, weekStart(taskDay)),
     todaysCalls(staff, now),
     teammates(),
+    // Leads waiting on this person; nothing when they can't see Inbound or the read fails.
+    canSeeInbound(staff) ? waitingLeads() : null,
   ]);
 
   const recent = recentDays ?? monthDays;
@@ -152,6 +155,7 @@ export default async function MyDayPage({
         days={monthDays.ok ? monthDays.days : []}
         payslips={payslips.ok ? payslips.slips : []}
         claims={claims.ok ? claims.items : []}
+        leads={leads}
         inboundAddress={process.env.INBOUND_EMAIL_ADDRESS?.trim() || null}
         calls={
           calls ? (

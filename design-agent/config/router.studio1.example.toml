@@ -1,0 +1,71 @@
+# Search router settings. Copy to config/router.toml (Git-ignored). The router re-reads this file
+# when it changes, so reordering or disabling a provider needs no restart.
+# Keys come from the environment of the shell that starts the router, never from this file:
+#   OLOSTEP_API_KEY, BRIGHTDATA_API_TOKEN, SGAI_API_KEY, GITHUB_TOKEN (optional)
+# A provider with no key is skipped, not an error.
+
+# Usage log and caps are counted here (usage.jsonl). Already Git-ignored.
+state_dir = "workspace/state/router"
+
+[defaults]
+timeout = 30          # seconds per provider call
+
+# Providers are tried in the order listed. A provider is skipped when disabled, keyless, out of
+# monthly calls, or switched off for that tool in `disabled_tools`.
+[tools.web_search]
+providers = ["brightdata", "olostep"]
+
+[tools.read_page]
+providers = ["olostep", "brightdata"]
+max_chars = 20000     # page text is cut to this many characters (hard ceiling 200000)
+
+[tools.extract_fields]
+providers = ["scrapegraph", "olostep"]
+
+[tools.lookup_company]
+providers = ["github"]
+
+# Used only by the worker's enrichment step (a LinkedIn company record for a new lead); the agent
+# does not see this tool. It is shipped off below, under brightdata.
+[tools.company_profile]
+providers = ["brightdata"]
+
+# monthly_cap counts calls in the calendar month (UTC), errors included, from the usage log.
+# Leave it out for no cap. Caps below are placeholders: set them from each plan's credits.
+
+[providers.olostep]
+enabled = true
+monthly_cap = 1000
+# Extract is shipped off: Olostep's docs do not say where llm_extract output comes back.
+disabled_tools = ["extract_fields"]
+
+[providers.brightdata]
+enabled = true
+monthly_cap = 1000
+# Read is shipped off: data_format = "markdown" is documented for the SERP API but not for
+# Web Unlocker. Check it with a real key, then remove "read_page" from this list.
+# Company profile is shipped off: the LinkedIn company scraper's request and its top-level fields
+# (about, company_size, industries, website) are documented, but `funding` and `investors` have no
+# documented sub-fields. Run `python -m studio1_worker enrich` on one company with a real key,
+# check the funding line, then remove "company_profile" from this list. Each new lead then costs
+# one web_search and one company_profile call. A record can take up to a minute; raise `timeout`
+# here if records time out (it applies to Bright Data's search too).
+disabled_tools = ["read_page", "company_profile"]
+
+[providers.brightdata.options]
+# Zone names from your Bright Data account (SERP API zone, Web Unlocker zone). Not secrets.
+serp_zone = "studio1_serp"
+unlocker_zone = "studio1_unlocker"
+# The scraper for LinkedIn company pages. Public, the same for every account.
+company_dataset = "gd_l1vikfnt1wgvvqz95w"
+
+[providers.scrapegraph]
+enabled = true
+monthly_cap = 500
+# Search is shipped off: v2's search response shape is not shown in the docs. The router does
+# not use it for web_search anyway.
+disabled_tools = ["web_search"]
+
+[providers.github]
+enabled = true
+# GitHub allows 60 unauthenticated requests an hour; set GITHUB_TOKEN for 5000.

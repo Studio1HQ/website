@@ -4,6 +4,7 @@ import { useRef, useState, type ReactNode } from "react";
 import { DateField } from "@/components/internal/pickers";
 import {
   AirplaneTilt,
+  ArrowRight,
   ArrowSquareOut,
   Camera,
   Copy,
@@ -32,6 +33,8 @@ import {
 import { cn } from "@/lib/utils";
 import { Select } from "@/components/internal/select";
 import { useToast } from "@/components/internal/toast";
+import Link from "next/link";
+import type { WaitingLeads } from "@/lib/internal/inbound/my-day";
 import { Avatar, Card, CardTitle, buttonClass, inputClass } from "@/components/internal/ui";
 import { ClaimChip, IdChip, dayText, dayTone, type Tone } from "@/components/internal/team/chips";
 import { DayDialog, LeaveDialog } from "@/components/internal/team/day-dialogs";
@@ -251,11 +254,14 @@ export function MyDay({
   admin,
   tasks,
   calls,
+  leads = null,
 }: {
   /** Today's tasks card, under the clock (left out before Tasks is set up). */
   tasks?: ReactNode;
   /** Today's calls card, under the tasks (left out when the person has none). */
   calls?: ReactNode;
+  /** Leads waiting on this person (Inbound people only); left out when none. */
+  leads?: WaitingLeads | null;
   person: TeamPerson;
   /** Admins can set their own employee ID. */
   admin: boolean;
@@ -451,6 +457,39 @@ export function MyDay({
           </Card>
           {tasks}
           {calls}
+          {leads ? (
+            <Card className="flex max-h-40 min-h-0 shrink-0 flex-col">
+              <CardTitle
+                action={
+                  <Link href="/inbound" className="inline-flex items-center gap-1 text-[12.5px] text-[var(--i-muted)] hover:text-[var(--i-ink)]">
+                    Inbound <ArrowRight size={12} />
+                  </Link>
+                }
+              >
+                Leads waiting on you
+                <span className="ml-2 font-normal tabular-nums text-[var(--i-muted)]">{leads.items.length + leads.more}</span>
+              </CardTitle>
+              <ul className="min-h-0 flex-1 overflow-y-auto pb-2">
+                {leads.items.map((lead) => (
+                  <li key={lead.id}>
+                    <Link href={`/inbound/${lead.id}`} className="flex items-center gap-2.5 px-4 py-1.5 hover:bg-[var(--i-hover)]">
+                      <span className="min-w-0 flex-1 truncate text-[13px] font-medium">{lead.name}</span>
+                      <span className="text-[12.5px] tabular-nums text-[var(--i-muted)]">
+                        {lead.waiting === 1 ? "1 thing" : `${lead.waiting} things`}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+                {leads.more ? (
+                  <li>
+                    <Link href="/inbound" className="block px-4 py-1.5 text-[12.5px] text-[var(--i-muted)] hover:text-[var(--i-ink)]">
+                      and {leads.more} more
+                    </Link>
+                  </li>
+                ) : null}
+              </ul>
+            </Card>
+          ) : null}
         </div>
 
         {/* The month and the money */}

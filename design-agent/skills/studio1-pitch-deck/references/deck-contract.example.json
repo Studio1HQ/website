@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "job_kind": "net-new",
+  "output": {
+    "format": "png",
+    "width": 1920,
+    "height": 1080,
+    "mode": "light",
+    "path": "projects/<slug>/deck/renders/slide-01-1920x1080.png"
+  },
+  "source": {
+    "kind": "copy",
+    "inventory": [
+      {
+        "id": "outline",
+        "type": "copy",
+        "value": "deck/outline.md: every headline and body line, verbatim, one entry per slide."
+      },
+      {
+        "id": "proof",
+        "type": "copy",
+        "value": "Each case-study number, with the case study named, as written in studio1-context."
+      }
+    ],
+    "allowed_additions": [],
+    "allowed_removals": [],
+    "allowed_changes": []
+  },
+  "requirements": [
+    {
+      "id": "r1",
+      "request": "Seven slides in the default order: cover, noticed, gap, plan, proof, how we work, next step.",
+      "status": "pending",
+      "evidence": "",
+      "superseded_by": "",
+      "waiver": ""
+    },
+    {
+      "id": "r2",
+      "request": "No price, rate, discount or deal value unless a founder typed it in the thread.",
+      "status": "pending",
+      "evidence": "",
+      "superseded_by": "",
+      "waiver": ""
+    }
+  ],
+  "assets": [
+    {
+      "id": "slide-01",
+      "path": "projects/<slug>/deck/renders/slide-01-1920x1080.png",
+      "role": "cover",
+      "required": false
+    },
+    {
+      "id": "slide-07",
+      "path": "projects/<slug>/deck/renders/slide-07-1920x1080.png",
+      "role": "next step",
+      "required": false
+    },
+    {
+      "id": "deck-pdf",
+      "path": "projects/<slug>/deck/deck.pdf",
+      "role": "the deck as a paged PDF",
+      "required": false
+    }
+  ]
+}

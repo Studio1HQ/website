@@ -1,5 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { recordDelivery, type DeliveryStatus } from "@/lib/email-delivery";
+import { addressedToLeads, handleLeadsEmail } from "@/lib/internal/inbound/mail";
 import { handleReceivedEmail, readCapped } from "@/lib/internal/team/inbound";
 import { unsubscribe } from "@/lib/unsubscribe";
 
@@ -110,6 +111,23 @@ export async function POST(request: Request) {
     return new Response("Bad JSON", { status: 400 });
   }
   if (event.type === "email.received") {
+    // Mail to the leads address (INBOUND_LEADS_ADDRESS) is only stored; the
+    // worker sorts it later. Everything else is the invoice intake.
+    if (addressedToLeads((event.data ?? {}) as Record<string, unknown>)) {
+      try {
+        const stored = await handleLeadsEmail(event.data);
+        if (!stored.ok) {
+          console.error(`[resend webhook] leads mail failed: ${stored.message}`);
+          if (stored.retry) return new Response("Couldn't store the email yet", { status: 500 });
+        } else if (stored.skipped) {
+          console.info(`[resend webhook] leads mail skipped: ${stored.skipped}`);
+        }
+        return done(id);
+      } catch (error) {
+        console.error("[resend webhook] leads mail failed", error);
+        return new Response("Couldn't store the email", { status: 500 });
+      }
+    }
     try {
       const result = await handleReceivedEmail(event.data);
       if (!result.ok) {

@@ -1,0 +1,47 @@
+# Web search MCP servers for the Studio1 setup. Copy to config/mcp.toml (Git-ignored); do not
+# commit your copy. The format is the one in config/mcp.example.toml.
+#
+# Studio1's search router: one local MCP server in front of Olostep, Bright Data and ScrapeGraphAI.
+# Start it before the agent (`uv run python -m studio1_router`, see STUDIO1.md). Its provider keys
+# are read by the router from its own shell, so no provider key is declared here. The router also
+# refuses callers without a shared secret: export the same STUDIO1_ROUTER_AUTHORIZATION
+# ("Bearer <token>", see STUDIO1.md) in the shell that starts the router and the shell that starts
+# the agent, because the loader reads the environment, not .env. It is a local
+# HTTP server: on Managed Deep Agents a loopback address is not reachable, so research there needs
+# a hosted router.
+# Tools are named `{server}_{tool}`: router_web_search, router_read_page, router_extract_fields,
+# router_lookup_company.
+[servers.router]
+url = "http://127.0.0.1:8765/mcp"
+transport = "http"
+headers_env = { Authorization = "STUDIO1_ROUTER_AUTHORIZATION" }
+timeout = 90
+
+# The direct Olostep server is replaced by the router (Olostep is its second search provider and
+# its first read provider). Enable this only to bypass the router; export
+#   OLOSTEP_MCP_AUTHORIZATION="Bearer <your Olostep key>"
+# in the shell that starts the agent, because the loader reads the environment, not .env.
+# [servers.olostep]
+# url = "https://mcp.olostep.com/mcp"
+# transport = "http"
+# headers_env = { Authorization = "OLOSTEP_MCP_AUTHORIZATION" }
+# timeout = 60
+
+# Bright Data. Check its hosted address, auth method and tool names against Bright Data's current
+# documentation before enabling. It documents a hosted URL that takes the token as a query
+# parameter, and a local `npx @brightdata/mcp` stdio server that reads API_TOKEN. This loader sends
+# headers only (so a query-parameter token has to be written into the url below, in the Git-ignored
+# copy), and starts a stdio server without your environment (so API_TOKEN would not reach it).
+# [servers.brightdata]
+# url = "https://<Bright Data hosted address>?token=<your token>"
+# transport = "http"
+# timeout = 60
+
+# ScrapeGraphAI. Check its hosted address, auth header and tool names against ScrapeGraphAI's
+# current documentation before enabling: it documents an X-API-Key header and is moving its hosted
+# address, so the url below is a placeholder.
+# [servers.scrapegraphai]
+# url = "https://<scrapegraphai hosted mcp address>"
+# transport = "http"
+# headers_env = { "X-API-Key" = "SCRAPEGRAPHAI_API_KEY" }
+# timeout = 60

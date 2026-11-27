@@ -6,7 +6,7 @@ const bar = "rounded-md bg-[var(--i-track)]";
 const panel = "rounded-xl border border-[var(--i-line)] bg-[var(--i-panel)]";
 
 /** Pages that are a filterable list of rows. */
-const LISTS = /^\/(jobs|hackathons|cohort|subscribers|partner-pool|blog|team|people|templates)$/;
+const LISTS = /^\/(jobs|hackathons|cohort|subscribers|partner-pool|blog|team|people|templates|inbound\/review)$/;
 /** One entry: /jobs/<id> and the like, but not the community pages. */
 const ENTRY = /^\/(jobs|hackathons|cohort)\/[^/]+$/;
 

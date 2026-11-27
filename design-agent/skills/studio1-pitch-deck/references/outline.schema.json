@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Studio1 deck outline",
+  "description": "deck/outline.json: the source of truth for a pitch deck. The PDF and the editable PowerPoint are both built from it.",
+  "type": "object",
+  "required": ["company", "deck_title", "slides"],
+  "additionalProperties": false,
+  "properties": {
+    "company": { "type": "string", "minLength": 1, "description": "The company the deck is for." },
+    "deck_title": { "type": "string", "minLength": 1, "description": "The title on the cover." },
+    "date": { "type": "string", "description": "Shown on the cover, for example 27 November 2026." },
+    "slides": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["n", "kind", "headline"],
+        "additionalProperties": false,
+        "properties": {
+          "n": { "type": "string", "pattern": "^[0-9]{2}$", "description": "Slide number, 01 and up." },
+          "kind": {
+            "enum": ["cover", "observations", "gap", "plan", "proof", "how", "next", "section", "generic"],
+            "description": "Picks the layout. cover is the sunrise panel, proof is up to three cards, section is a dark divider."
+          },
+          "purpose": { "type": "string", "description": "Why the slide exists, in one line." },
+          "headline": { "type": "string", "minLength": 1, "description": "The sentence on the slide, final words." },
+          "body": { "type": "array", "items": { "type": "string" }, "description": "The few lines under the headline, verbatim." },
+          "proof": {
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+              "type": "object",
+              "required": ["claim", "source"],
+              "additionalProperties": false,
+              "properties": {
+                "claim": { "type": "string", "minLength": 1 },
+                "source": { "type": "string", "minLength": 1, "description": "Brief section or studio1-context file that backs the claim." }
+              }
+            },
+            "description": "Claims with their sources. A proof slide shows each as a card."
+          },
+          "visual": { "type": "string", "description": "What the eye sees: screenshot, diagram, number, quote." },
+          "notes": { "type": "string", "description": "Speaker notes." }
+        }
+      }
+    }
+  }
+}

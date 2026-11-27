@@ -1,0 +1,120 @@
+# Studio1: technical content and DevRel agency for DevTools companies. Built from the Studio1 brand kit
+# (brand/AI-SYSTEM-PROMPT.md, brand/README.md and public/brand/design-system/ in the website repo).
+name = "Studio1"
+description = "A developer marketing and DevRel agency for DevTools companies at every stage: technical content, docs, video, launches and community programs. Its look is a designer's working sheet on warm paper."
+voice = "An engineer explaining to engineers: plain, specific, short sentences. Numbers and names over adjectives. We is Studio1, you is the reader. No hype words, no emoji, no exclamation marks."
+license = "Proprietary"
+
+[[formats]]
+slug = "linkedin-portrait"
+width = 1080
+height = 1350
+label = "LinkedIn and X feed post (4:5), 60px margin"
+
+[[formats]]
+slug = "square"
+width = 1080
+height = 1080
+label = "Square post, 60px margin"
+
+[[formats]]
+slug = "landscape"
+width = 1200
+height = 675
+label = "Social post (16:9)"
+
+[[formats]]
+slug = "link-preview"
+width = 1200
+height = 630
+label = "Link preview and OG image, text inside the centre 1000x500"
+
+[[formats]]
+slug = "blog-cover"
+width = 1600
+height = 900
+label = "Blog cover on the sunrise panel, no title text"
+
+[[formats]]
+slug = "x-header"
+width = 1500
+height = 500
+label = "X header, bottom-left 400x170 stays empty"
+
+[[formats]]
+slug = "linkedin-cover"
+width = 1128
+height = 191
+label = "LinkedIn cover, left 200px of the bottom half stays empty, text centred"
+
+[[formats]]
+slug = "readme-banner"
+width = 3000
+height = 1000
+label = "GitHub banner"
+
+[[formats]]
+slug = "thumbnail"
+width = 1280
+height = 720
+label = "Video thumbnail"
+
+[[formats]]
+slug = "slide"
+width = 1920
+height = 1080
+label = "Slide and video frame, 80px margin"
+
+[[formats]]
+slug = "story"
+width = 1080
+height = 1920
+label = "Shorts, Reels and TikTok"
+
+[[formats]]
+slug = "avatar"
+width = 400
+height = 400
+label = "Profile picture, mark at about 52% of the tile width"
+
+[[logos]]
+file = "logos/studio1-logo-on-light.svg"
+use = "Main logo, the default. Paper and white grounds: orange mark with the black wordmark."
+min_width_px = 67
+clear_space = "A quarter of the mark's width on every side."
+
+[[logos]]
+file = "logos/studio1-logo-on-dark.svg"
+use = "Dark-mode logo. Night and other dark grounds only: orange mark with white cut-outs, white wordmark."
+min_width_px = 67
+clear_space = "A quarter of the mark's width on every side."
+
+[[logos]]
+file = "logos/studio1-mark-gradient.svg"
+use = "The main mark on its own, light grounds. Favicon. Never on orange."
+min_width_px = 16
+clear_space = "A quarter of the mark's width on every side."
+
+[[logos]]
+file = "logos/studio1-mark-dark.svg"
+use = "The mark on its own for dark grounds: orange mark with white cut-outs."
+min_width_px = 16
+clear_space = "A quarter of the mark's width on every side."
+
+[[logos]]
+file = "logos/studio1-mark-orange-tile.svg"
+use = "Profile pictures, stickers and app icons: the mark on an orange tile."
+min_width_px = 16
+clear_space = "Keep the mark at about 52% of the tile width so a circle crop stays clean."
+
+[[logos]]
+file = "logos/studio1-mark-black.svg"
+use = "One colour, black: print, embossing, watermarks on light grounds."
+min_width_px = 16
+clear_space = "A quarter of the mark's width on every side."
+
+[[logos]]
+file = "logos/studio1-mark-white.svg"
+use = "One colour, white: on photos and dark grounds where colour cannot be used."
+min_width_px = 16
+clear_space = "A quarter of the mark's width on every side."
