@@ -11,7 +11,7 @@ import { callPeople, listCalls, listChanges } from "@/lib/internal/calls/data";
 import { isIn, occurrences } from "@/lib/internal/calls/shared";
 import { cardChoices, loadWeekCards, teammates } from "@/lib/internal/tasks/load";
 import { isDateKey, weekStart } from "@/lib/internal/clients/schema";
-import { earliestCardDay } from "@/lib/internal/tasks/calendar";
+import { earliestCardDay, onDay } from "@/lib/internal/tasks/calendar";
 import { isAdmin, requireMember } from "@/lib/internal/session";
 import { listDays } from "@/lib/internal/team/attendance";
 import { listPayslips } from "@/lib/internal/team/payroll";
@@ -164,7 +164,7 @@ export default async function MyDayPage({
         tasks={
           work.missing ? null : (
             <TodayWork
-              cards={work.cards.filter((card) => card.day === taskDay)}
+              cards={work.cards.filter((card) => onDay(card, taskDay))}
               day={taskDay}
               today={now.date}
               ended={Boolean(today && today.kind !== "leave" && today.slots.length && !openSlot(today.slots))}

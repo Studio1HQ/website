@@ -13,6 +13,7 @@ import PaulImg from "@/public/assets/people/Paul.webp";
 import DylanImg from "@/public/assets/people/Dylan.webp";
 import SakshiImg from "@/public/assets/people/sakshi-sen.webp";
 import TanmayImg from "@/public/assets/people/Tanmay.webp";
+import SamImg from "@/public/assets/people/sam-gale.webp";
 import NovitaAiMarkGreen from "@/public/assets/logos/novita-ai-mark-green.webp";
 import {
   ChartBar,
@@ -326,6 +327,21 @@ I can't recommend enough to work with Arindam and I'm looking forward to our nex
       "professional",
       "reliable",
       "ownership",
+    ],
+  },
+  {
+    name: "Sam Gale",
+    role: "Growth Engineer, SearchApi.io",
+    avatar: SamImg.src,
+    content: `Arindam worked on a series of open-source projects and technical articles to promote SearchApi to a developer audience. He was great to work with and proactive with editorial reviews, adjusting projects to meet our needs. Together, we produced some solid work and great projects.`,
+    highlights: [
+      "Arindam",
+      "open-source projects",
+      "technical articles",
+      "developer audience",
+      "proactive",
+      "editorial reviews",
+      "solid work",
     ],
   },
 ];

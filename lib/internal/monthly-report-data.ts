@@ -9,6 +9,8 @@ import { listDays } from "@/lib/internal/team/attendance";
 import { listPeople } from "@/lib/internal/team/people";
 import { displayName } from "@/lib/internal/team/shared";
 import { peopleOn } from "@/lib/internal/tasks/shared";
+import { reviewLine } from "@/lib/internal/team/review";
+import { loadReview } from "@/lib/internal/team/review-data";
 
 /**
  * The numbers for one month's report (lib/internal/monthly-report.ts).
@@ -31,7 +33,7 @@ export async function loadMonthlyReport(month: string): Promise<MonthlyReport> {
   const until = istMidnight(firstDay(shiftMonth(month, 1)));
   const within = (column: string) => ({ and: `(${column}.gte.${since},${column}.lt.${until})` });
 
-  const [work, team, blogPublished, jobs, cohort, hackathons, added, won] = await Promise.all([
+  const [work, team, blogPublished, jobs, cohort, hackathons, added, won, review] = await Promise.all([
     loadClientWork(month),
     listPeople({ activeOnly: true }),
     count("blog_posts", { status: "eq.published", ...within("published_at") }),
@@ -40,6 +42,7 @@ export async function loadMonthlyReport(month: string): Promise<MonthlyReport> {
     count("hackathon_registrations", within("created_at")),
     count("outreach_orgs", within("created_at")),
     count("outreach_orgs", { stage: "eq.won", and: `(closed_on.gte.${from},closed_on.lte.${to})` }),
+    loadReview(month).catch((error: unknown) => ({ error: String(error) })),
   ]);
 
   const clients = work.ok
@@ -109,5 +112,11 @@ export async function loadMonthlyReport(month: string): Promise<MonthlyReport> {
     blogPublished,
     applications: { jobs, cohort, hackathons },
     outreach: added !== null && won !== null ? { added, won } : null,
+    review:
+      "error" in review
+        ? null
+        : review.reviews
+            .filter((item) => item.status !== "on_track")
+            .map((item) => ({ name: item.name, status: item.status as "follow_up" | "watch", reasons: reviewLine(item) })),
   };
 }

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { MDXRemote } from "next-mdx-remote/rsc";
+import { remarkCdnImages } from "@/lib/remark-cdn-images";
 import remarkGfm from "remark-gfm";
 import {
   countBlogWords,
@@ -157,7 +158,11 @@ export default async function BlogPostPage({ params }: Props) {
           // dropped, except the FAQ and YouTube components the blog writes itself.
           options={{
             mdxOptions: {
-              remarkPlugins: [remarkGfm, [remarkSafeMdx, { generated: true }]],
+              remarkPlugins: [
+                remarkGfm,
+                [remarkSafeMdx, { generated: true }],
+                remarkCdnImages,
+              ],
             },
           }}
         />

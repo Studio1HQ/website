@@ -171,6 +171,13 @@ export type Task = {
   done_on: string | null;
   blocked: boolean;
   block_reason: string;
+  /**
+   * Times its day was pushed later once that day had come, and the first
+   * day it missed (20261126120000_task_slips.sql sets both; 0 and null
+   * before it has run).
+   */
+  slips?: number;
+  missed_on?: string | null;
 };
 
 export type WorkLog = {

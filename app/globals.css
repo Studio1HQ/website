@@ -2,8 +2,83 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Studio1 Sans, served by the site itself (public/fonts, made by
+ * `pnpm fonts:web`; issue #66, mobile LCP). Each weight is two files: a ~23 KB
+ * core that nearly every page needs, preloaded (app/layout.tsx) so it arrives
+ * with the stylesheet even on a slow phone, and the rest of the site's
+ * characters, which the browser fetches only when a page uses one. Keep the
+ * unicode ranges in step with CORE and EXTRA in scripts/subset-web-fonts.sh.
+ */
+@font-face {
+  font-family: "Studio1 Sans Web";
+  src: url("/fonts/studio1-sans-regular-core-v1.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+2000-206F, U+20AC, U+20B9, U+2122, U+2190-2199, U+2212, U+2215, U+FEFF,
+    U+FFFD;
+}
+@font-face {
+  font-family: "Studio1 Sans Web";
+  src: url("/fonts/studio1-sans-regular-extra-v1.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0100-0130, U+0132-0151, U+0154-02BA, U+02BD-02C5, U+02C7-02D9,
+    U+02DB, U+02DD-03FF, U+1E00-1EFF, U+2070-20AB, U+20AD-20B8, U+20BA-2121,
+    U+2123-218F, U+219A-2211, U+2213-2214, U+2216-23FF, U+25A0-27BF;
+}
+@font-face {
+  font-family: "Studio1 Sans Web";
+  src: url("/fonts/studio1-sans-medium-core-v1.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+2000-206F, U+20AC, U+20B9, U+2122, U+2190-2199, U+2212, U+2215, U+FEFF,
+    U+FFFD;
+}
+@font-face {
+  font-family: "Studio1 Sans Web";
+  src: url("/fonts/studio1-sans-medium-extra-v1.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0100-0130, U+0132-0151, U+0154-02BA, U+02BD-02C5, U+02C7-02D9,
+    U+02DB, U+02DD-03FF, U+1E00-1EFF, U+2070-20AB, U+20AD-20B8, U+20BA-2121,
+    U+2123-218F, U+219A-2211, U+2213-2214, U+2216-23FF, U+25A0-27BF;
+}
+/*
+ * If the font is ever late, text shows in Arial sized to Studio1 Sans,
+ * measured on the site's own copy (Studio1 Sans runs 6.2% wider than Arial
+ * in Regular, 5.5-7.2% in Medium). Medium is set to the narrowest, so the
+ * homepage headline, sized to fit its line, never wraps in the fallback.
+ */
+@font-face {
+  font-family: "Studio1 Sans Fallback";
+  src: local("Arial");
+  font-weight: 400;
+  ascent-override: 91.22%;
+  descent-override: 22.71%;
+  line-gap-override: 0%;
+  size-adjust: 106.2%;
+}
+@font-face {
+  font-family: "Studio1 Sans Fallback";
+  src: local("Arial");
+  font-weight: 500;
+  ascent-override: 91.82%;
+  descent-override: 22.86%;
+  line-gap-override: 0%;
+  size-adjust: 105.5%;
+}
+
 @layer base {
   :root {
+    --font-studio1-sans: "Studio1 Sans Web", "Studio1 Sans Fallback", Inter,
+      Arial, sans-serif;
     /* Studio1 Sans is the only brand font; every role maps to it. */
     --font-syne: var(--font-studio1-sans), "Inter", Arial, sans-serif;
     --font-dm-sans: var(--font-studio1-sans), "Inter", Arial, sans-serif;
@@ -741,6 +816,14 @@ svg {
 
 html.s1-preloaded .s1-preloader {
   display: none;
+}
+
+/* Phones skip the intro (components/preloader.tsx): never shown, even
+   before its script runs. */
+@media (max-width: 767px) {
+  .s1-preloader {
+    display: none;
+  }
 }
 
 .s1-pre-glow {

@@ -36,6 +36,12 @@ export type MonthlyReport = {
         perDay?: number | null;
       }[]
     | null;
+  /**
+   * From the monthly review (lib/internal/team/review.ts): the people to
+   * follow up with or watch, and why. Null when it couldn't be read; left
+   * out of older callers.
+   */
+  review?: { name: string; status: "follow_up" | "watch"; reasons: string }[] | null;
   /** Posts published on the Studio1 blog; null when unread. */
   blogPublished: number | null;
   applications: { jobs: number | null; cohort: number | null; hackathons: number | null };
@@ -108,6 +114,22 @@ export function monthlyBody(report: MonthlyReport, firstName: string) {
         )
         .join("\n"),
     );
+
+  if (report.review !== undefined) {
+    blocks.push("## Worth a follow-up");
+    if (report.review === null) blocks.push("The monthly review couldn't be read this time.");
+    else if (!report.review.length) blocks.push("Nobody stood out: everyone was on track.");
+    else
+      blocks.push(
+        report.review
+          .map(
+            (person) =>
+              `- ${plain(person.name)}, ${person.status === "follow_up" ? "follow up" : "watch"}: ${person.reasons.replace(/[\[\]]/g, " ")}`,
+          )
+          .join("\n"),
+        "The Monthly review page (Tasks, Reports) has each person's month, and a follow-up email ready to edit and send.",
+      );
+  }
 
   const rest: string[] = [];
   if (report.blogPublished !== null) rest.push(`- Blog: ${plural(report.blogPublished, "post")} published`);

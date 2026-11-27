@@ -128,9 +128,14 @@ export default async function ReportsPage() {
         }
         actions={
           founder ? (
-            <Link href="/tasks/reports/team" className={buttonClass("secondary")}>
-              Team report
-            </Link>
+            <>
+              <Link href="/tasks/reports/review" className={buttonClass("secondary")}>
+                Monthly review
+              </Link>
+              <Link href="/tasks/reports/team" className={buttonClass("secondary")}>
+                Team report
+              </Link>
+            </>
           ) : undefined
         }
       />

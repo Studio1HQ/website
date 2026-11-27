@@ -252,7 +252,6 @@ export function TableOfContents({
                   alt=""
                   width={18}
                   height={18}
-                  unoptimized
                   className="size-[18px]"
                 />
               </span>

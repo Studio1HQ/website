@@ -43,7 +43,6 @@ function RelatedCard({ study }: { study: CaseStudyMeta }) {
                 alt=""
                 width={30}
                 height={30}
-                unoptimized
                 className="size-[30px]"
               />
             </span>

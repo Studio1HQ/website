@@ -92,6 +92,8 @@ function toTask(row: Record<string, unknown>): Task | null {
     done_on: day(row.done_on),
     blocked: row.blocked === true,
     block_reason: text(row.block_reason),
+    slips: typeof row.slips === "number" ? row.slips : 0,
+    missed_on: day(row.missed_on),
   };
 }
 

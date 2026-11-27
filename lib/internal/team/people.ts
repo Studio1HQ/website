@@ -35,7 +35,7 @@ const TABLE = "team_people";
  * Everything but the salary lines. Reads that aren't for the Money pages ask
  * for these columns only, so pay never leaves the database for them.
  */
-const PUBLIC_COLUMNS = "email,name,employee_code,photo_path,kind,designation,joined_on,reviewer,active,updated_at";
+const PUBLIC_COLUMNS = "email,name,employee_code,photo_path,kind,designation,joined_on,reviewer,active,updated_at,created_at";
 
 function toPerson(row: Record<string, unknown>): TeamPerson | null {
   if (typeof row.email !== "string") return null;
@@ -50,6 +50,7 @@ function toPerson(row: Record<string, unknown>): TeamPerson | null {
     reviewer: typeof row.reviewer === "string" && row.reviewer ? row.reviewer : null,
     active: row.active !== false,
     updated_at: String(row.updated_at ?? ""),
+    created_at: typeof row.created_at === "string" ? row.created_at : undefined,
   };
 }
 

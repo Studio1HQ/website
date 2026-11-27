@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { MDXRemote } from "next-mdx-remote/rsc";
+import { remarkCdnImages } from "@/lib/remark-cdn-images";
 import remarkGfm from "remark-gfm";
 import {
   getCaseStudyBySlug,
@@ -115,7 +116,9 @@ export default async function CaseStudyPage({ params }: Props) {
         <MDXRemote
           source={study.content}
           components={caseStudyMdxComponents}
-          options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
+          options={{
+            mdxOptions: { remarkPlugins: [remarkGfm, remarkCdnImages] },
+          }}
         />
       </CaseStudyLayout>
     </>

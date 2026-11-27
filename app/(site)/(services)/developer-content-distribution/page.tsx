@@ -197,7 +197,7 @@ const distributionCaseStudyProofs: CaseStudyResultData[] = [
       { value: "750+", label: "from AI assistants" },
     ],
     // DEV's traffic sources for the post
-    art: "https://mintcdn.com/studio1/NFIzOkeC-xlQv6Ju/images/webcrumbs-traffic.png?fit=max&auto=format&n=NFIzOkeC-xlQv6Ju&q=85&s=1d5c1a660ff0cd432809c1c54f62d463",
+    art: "/case-studies/webcrumbs/webcrumbs-traffic.webp",
   },
 ];
 

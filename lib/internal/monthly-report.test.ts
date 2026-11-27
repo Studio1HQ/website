@@ -50,6 +50,25 @@ describe("monthly report", () => {
     expect(empty).not.toContain("Outreach");
   });
 
+  it("names who's worth a follow-up, and says so when nobody is", () => {
+    const body = monthlyBody(
+      {
+        ...report,
+        review: [
+          { name: "Dev", status: "follow_up", reasons: "No sign of work on 4 working days (19, 20, 23 and 24 Oct)" },
+          { name: "Priya", status: "watch", reasons: "Monthly report not [sent](https://evil.example)" },
+        ],
+      },
+      "Arindam",
+    );
+    expect(body).toContain("## Worth a follow-up");
+    expect(body).toContain("- Dev, follow up: No sign of work on 4 working days (19, 20, 23 and 24 Oct)\n- Priya, watch:");
+    expect(body).not.toContain("](");
+    expect(monthlyBody({ ...report, review: [] }, "")).toContain("Nobody stood out: everyone was on track.");
+    expect(monthlyBody({ ...report, review: null }, "")).toContain("The monthly review couldn't be read this time.");
+    expect(monthlyBody(report, "")).not.toContain("Worth a follow-up");
+  });
+
   it("renders headings in the paper layout", () => {
     const { html, text } = renderEmail({ body: monthlyBody(report, "Arindam"), reason: "x", section: "Monthly report", hideBanner: true });
     expect(html).toContain(">Client work</p>");

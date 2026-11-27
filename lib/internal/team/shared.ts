@@ -31,6 +31,8 @@ export type TeamPerson = {
   reviewer: string | null;
   active: boolean;
   updated_at: string;
+  /** When they were put on the team list. */
+  created_at?: string;
 };
 
 /**

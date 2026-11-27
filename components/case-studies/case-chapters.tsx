@@ -394,7 +394,6 @@ export function CaseChapters({ acts }: { acts: Act[] }) {
                 alt=""
                 width={20}
                 height={20}
-                unoptimized
                 className="size-5"
               />
             </span>

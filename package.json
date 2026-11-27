@@ -19,7 +19,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "extension:zip": "node scripts/build-extension.mjs",
-    "extension:store": "node scripts/build-extension.mjs --store"
+    "extension:store": "node scripts/build-extension.mjs --store",
+    "fonts:web": "sh scripts/subset-web-fonts.sh"
   },
   "dependencies": {
     "@dnd-kit/core": "6.3.1",

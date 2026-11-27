@@ -8,6 +8,8 @@
  *   public images         public/_img/<width>/<path in public, as .webp>
  *   images imported       public/_img/<width>/_media/<name>.webp
  *   in code (from public/)
+ *   SVGs (not resized)    public/_img/as-is/<path in public>
+ *                         public/_img/as-is/_media/<name>.svg
  *
  * The extension is swapped, not added (logos/x.png → logos/x.webp), so two
  * images that differ only by extension would clash; the script stops if so.
@@ -39,22 +41,25 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import sharp from "sharp";
 import {
+  AS_IS_DIR,
+  AS_IS_IMAGE,
   IMAGE_FOLDERS,
   IMAGE_WIDTHS,
   MEDIA_DIR,
+  SIZED_IMAGE,
   webpName,
 } from "../lib/image-config.mjs";
 
 const QUALITY = 75;
 /** Part of every cache file name: bump it to drop sizes an older version made. */
 const CACHE_VERSION = "v2";
-const IMAGE = /\.(?:webp|png|jpe?g)$/i;
+const IMAGE = /\.(?:webp|png|jpe?g|avif|svg)$/i;
 /** Where code may import images from public/. */
 const CODE_DIRS = ["app", "components", "constants", "data", "lib", "content"];
 const CODE = /\.(?:[cm]?[jt]sx?|mdx)$/;
 /** `from "@/public/x.webp"`, `from "../public/x.webp"` and the like. */
 const PUBLIC_IMPORT =
-  /from\s+["'](?:@\/|(?:\.\.?\/)+)public\/([^"']+\.(?:webp|png|jpe?g))["']/gi;
+  /from\s+["'](?:@\/|(?:\.\.?\/)+)public\/([^"']+\.(?:webp|png|jpe?g|avif|svg))["']/gi;
 
 const root = process.cwd();
 const publicDir = path.join(root, "public");
@@ -154,7 +159,17 @@ async function exists(file) {
   }
 }
 
+/** An SVG: one copy, unchanged, under /_img/as-is. */
+async function copyAsIs({ file, target: name }, stats) {
+  const target = path.join(out, AS_IS_DIR, name);
+  await mkdir(path.dirname(target), { recursive: true });
+  await copyFile(file, target);
+  stats.copied += 1;
+}
+
 async function makeOne({ file, target: name }, stats) {
+  if (AS_IS_IMAGE.test(name)) return copyAsIs({ file, target: name }, stats);
+  if (!SIZED_IMAGE.test(name)) return;
   const input = await readFile(file);
   const targets = IMAGE_WIDTHS.map((width) =>
     path.join(out, String(width), name),
@@ -232,7 +247,7 @@ export async function main() {
     ...(await publicImages()),
     ...(await importedImages()),
   ]);
-  const stats = { made: 0, cached: 0, failed: [], animated: [] };
+  const stats = { made: 0, cached: 0, copied: 0, failed: [], animated: [] };
   const queue = [...sources];
   const workers = Array.from(
     { length: Math.max(2, Math.min(8, os.availableParallelism?.() ?? 4)) },
@@ -244,7 +259,7 @@ export async function main() {
   await Promise.all(workers);
   const seconds = ((Date.now() - started) / 1000).toFixed(1);
   console.log(
-    `[image-variants] ${sources.length} images → ${stats.made} sizes made, ${stats.cached} from cache, in ${seconds}s`,
+    `[image-variants] ${sources.length} images → ${stats.made} sizes made, ${stats.cached} from cache, ${stats.copied} SVGs copied, in ${seconds}s`,
   );
   for (const line of stats.failed)
     console.warn(`[image-variants] couldn't read, original used: ${line}`);
