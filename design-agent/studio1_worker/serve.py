@@ -46,8 +46,16 @@ CAP_ERROR = "daily cap reached for this lead"
 
 #: Uploads an editable deck and answers with its link, or None. Given the file and a title.
 DeckLink = Callable[[Path, str], str | None]
-# The same shape the database accepts for agent_files.open_url.
-_SLIDES_LINK = re.compile(r"https://docs\.google\.com/[A-Za-z0-9/_?=&.%#-]{1,300}")
+# The one shape the database accepts for agent_files.open_url: a Slides deck, by its file id.
+_DRIVE_FILE_ID = re.compile(r"[A-Za-z0-9_-]{10,100}")
+_SLIDES_LINK = re.compile(r"https://docs\.google\.com/presentation/d/[A-Za-z0-9_-]{10,100}/edit")
+
+
+def slides_link_for(file_id: object) -> str | None:
+    """The link to a Slides deck, built from its Drive file id. None for anything else."""
+    if not isinstance(file_id, str) or not _DRIVE_FILE_ID.fullmatch(file_id):
+        return None
+    return f"https://docs.google.com/presentation/d/{file_id}/edit"
 
 
 def drive_deck_link() -> DeckLink | None:
@@ -58,7 +66,8 @@ def drive_deck_link() -> DeckLink | None:
         return None
 
     def link(path: Path, title: str) -> str | None:
-        return drive.upload_deck(path, title).get("url")
+        # Built from the file's id: the address Google answers with is never stored.
+        return slides_link_for(drive.upload_deck(path, title).get("id"))
 
     return link
 

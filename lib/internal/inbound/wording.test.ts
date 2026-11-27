@@ -7,7 +7,7 @@ import {
   shortError,
   statusLine,
 } from "@/lib/internal/inbound/wording";
-import { googleDocsUrl, toAgentFile } from "@/lib/internal/inbound/schema";
+import { slidesUrl, toAgentFile } from "@/lib/internal/inbound/schema";
 
 const latest = (
   over: Partial<NonNullable<Parameters<typeof statusLine>[0]>>,
@@ -93,27 +93,34 @@ describe("the fit label", () => {
 });
 
 describe("a file's link to its editable copy", () => {
-  it("keeps a Google Docs address", () => {
-    const link =
-      "https://docs.google.com/presentation/d/abc123/edit?usp=drivesdk";
-    expect(googleDocsUrl(link)).toBe(link);
+  const link = "https://docs.google.com/presentation/d/1AbC_dEf-123456/edit";
+
+  it("keeps a Google Slides deck link", () => {
+    expect(slidesUrl(link)).toBe(link);
     expect(toAgentFile({ open_url: link }).open_url).toBe(link);
   });
 
   it("drops anything else, and a row without the column", () => {
     for (const value of [
-      "http://docs.google.com/presentation/d/abc",
-      "https://docs.google.com.evil.example/x",
-      "https://evil.example/docs.google.com",
-      "https://user:pass@docs.google.com/x",
-      "https://docs.google.com:8443/x",
+      "https://docs.google.com/forms/d/e/1AbC_dEf-123456/viewform",
+      "https://docs.google.com/document/d/1AbC_dEf-123456/edit",
+      "https://docs.google.com/presentation/d/1AbC_dEf-123456/pub",
+      "https://docs.google.com/presentation/d/1AbC_dEf-123456/edit?usp=sharing",
+      "https://docs.google.com/presentation/d/1AbC_dEf-123456/edit#slide=id.p",
+      "https://docs.google.com/presentation/d/../../forms/d/x/edit",
+      "https://docs.google.com/url?q=https://evil.example",
+      "http://docs.google.com/presentation/d/1AbC_dEf-123456/edit",
+      "https://docs.google.com.evil.example/presentation/d/1AbC_dEf-123456/edit",
+      "https://user:pass@docs.google.com/presentation/d/1AbC_dEf-123456/edit",
+      "https://docs.google.com:8443/presentation/d/1AbC_dEf-123456/edit",
+      `${link}\nhttps://evil.example`,
       "javascript:alert(1)",
       "",
       null,
       undefined,
       42,
     ])
-      expect(googleDocsUrl(value)).toBeNull();
+      expect(slidesUrl(value)).toBeNull();
     expect(toAgentFile({}).open_url).toBeNull();
   });
 });

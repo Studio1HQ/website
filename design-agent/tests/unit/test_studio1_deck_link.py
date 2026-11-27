@@ -9,10 +9,11 @@ import httpx
 import pytest
 
 from studio1_worker import drive
-from studio1_worker.serve import drive_deck_link, upload_new_files
+from studio1_worker.serve import drive_deck_link, slides_link_for, upload_new_files
 from tests.unit.test_studio1_queue import EVENT, ORG, FakeSupabase, db_for, event_row
 
-LINK = "https://docs.google.com/presentation/d/abc_123-XYZ/edit?usp=drivesdk"
+FILE_ID = "1AbC_dEf-123456"
+LINK = f"https://docs.google.com/presentation/d/{FILE_ID}/edit"
 
 
 def claimed_event(fake: FakeSupabase) -> Any:
@@ -71,9 +72,12 @@ def test_without_drive_nothing_changes(tmp_path: Path) -> None:
     "answer",
     [
         "https://evil.example/presentation",
-        "http://docs.google.com/presentation/d/abc",
-        "https://docs.google.com.evil.example/x",
-        "https://docs.google.com/x y",
+        "http://docs.google.com/presentation/d/1AbC_dEf-123456/edit",
+        "https://docs.google.com.evil.example/presentation/d/1AbC_dEf-123456/edit",
+        "https://docs.google.com/forms/d/e/1AbC_dEf-123456/viewform",
+        "https://docs.google.com/presentation/d/1AbC_dEf-123456/edit?usp=sharing",
+        "https://docs.google.com/presentation/d/1AbC_dEf-123456/edit\nhttps://evil.example",
+        "https://docs.google.com/url?q=https://evil.example",
         "javascript:alert(1)",
         "",
         None,
@@ -153,7 +157,17 @@ def test_drive_is_used_only_when_set_up_and_signed_in(
     monkeypatch.setattr(drive, "signed_in", lambda *_a, **_k: False)
     assert drive_deck_link() is None
     monkeypatch.setattr(drive, "signed_in", lambda *_a, **_k: True)
-    monkeypatch.setattr(drive, "upload_deck", lambda path, title: {"id": "1", "url": LINK})
+    answer = {"id": FILE_ID, "url": "https://evil.example/whatever-google-said"}
+    monkeypatch.setattr(drive, "upload_deck", lambda path, title: answer)
     link = drive_deck_link()
     assert link is not None
+    # The link is built from the file id; the address in the answer is never used.
     assert link(tmp_path / "deck.pptx", "Acme deck") == LINK
+    answer["id"] = "../../forms/d/x"
+    assert link(tmp_path / "deck.pptx", "Acme deck") is None
+
+
+def test_the_link_is_built_only_from_a_plain_file_id() -> None:
+    assert slides_link_for(FILE_ID) == LINK
+    for bad in ["", "short", "a/b/c/d/e/f/g/h", "x" * 101, "abc def ghi jkl", None, 42]:
+        assert slides_link_for(bad) is None
